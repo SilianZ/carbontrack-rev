@@ -16,7 +16,7 @@ export function DataInputForm({
   calculationResult, 
   isSubmitting 
 }) {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   // 选中的本地文件（未立即上传）
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadError, setUploadError] = useState('');
@@ -165,11 +165,17 @@ export function DataInputForm({
   }
 
   const getActivityName = (activity) => {
-    return activity.name_zh || activity.name_en || activity.name;
+    const isEn = (currentLanguage || '').toLowerCase().startsWith('en');
+    return isEn
+      ? (activity.name_en || activity.name_zh || activity.name)
+      : (activity.name_zh || activity.name_en || activity.name);
   };
 
   const getActivityDescription = (activity) => {
-    return activity.description_zh || activity.description_en || activity.description;
+    const isEn = (currentLanguage || '').toLowerCase().startsWith('en');
+    return isEn
+      ? (activity.description_en || activity.description_zh || activity.description)
+      : (activity.description_zh || activity.description_en || activity.description);
   };
 
   const calculationCard = (showCalculation && calculationResult) ? (
@@ -421,4 +427,3 @@ export function DataInputForm({
   </div>  /* END grid container */
   );
 }
-
