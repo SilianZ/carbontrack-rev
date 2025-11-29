@@ -9,6 +9,7 @@ import { Button } from '../ui/Button';
 import { Alert, AlertDescription } from '../ui/Alert';
 import { Badge } from '../ui/badge';
 import Turnstile from '../common/Turnstile';
+import { RegionSelector } from '../common/RegionSelector';
 
 const FALLBACK = '—';
 
@@ -46,6 +47,10 @@ export function ProfileForm({ user }) {
   const [isSaving, setIsSaving] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error', message: string }
+  
+  // Region state
+  const [countryCode, setCountryCode] = useState(user?.country_code || '');
+  const [stateCode, setStateCode] = useState(user?.state_code || '');
 
   const debouncedQuery = useDebouncedValue(inputValue.trim(), 350);
 
@@ -55,6 +60,11 @@ export function ProfileForm({ user }) {
   useEffect(() => {
     setSelectedSchool(currentSchoolId ? { id: currentSchoolId, name: currentSchoolName } : null);
   }, [currentSchoolId, currentSchoolName]);
+
+  useEffect(() => {
+    setCountryCode(user?.country_code || '');
+    setStateCode(user?.state_code || '');
+  }, [user?.country_code, user?.state_code]);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,14 +96,29 @@ export function ProfileForm({ user }) {
 
   const pendingPayload = useMemo(() => {
     if (!user) return null;
+    const payload = {};
+    let hasChanges = false;
+
     if (selectedSchool && selectedSchool.id !== currentSchoolId) {
-      return { school_id: selectedSchool.id };
+      payload.school_id = selectedSchool.id;
+      hasChanges = true;
     }
     if (!selectedSchool && trimmedInput && trimmedInput !== currentSchoolName) {
-      return { new_school_name: trimmedInput };
+      payload.new_school_name = trimmedInput;
+      hasChanges = true;
     }
-    return null;
-  }, [currentSchoolId, currentSchoolName, selectedSchool, trimmedInput, user]);
+
+    // Region changes
+    if (countryCode !== (user.country_code || '') || stateCode !== (user.state_code || '')) {
+        if (countryCode && stateCode) {
+             payload.country_code = countryCode;
+             payload.state_code = stateCode;
+             hasChanges = true;
+        }
+    }
+
+    return hasChanges ? payload : null;
+  }, [currentSchoolId, currentSchoolName, selectedSchool, trimmedInput, user, countryCode, stateCode]);
 
   const requiresVerification = Boolean(pendingPayload);
   const submitDisabled = !pendingPayload || isSaving || (requiresVerification && !turnstileToken);
@@ -136,6 +161,10 @@ export function ProfileForm({ user }) {
       value: user?.email || FALLBACK,
     },
     {
+      label: t('profile.region', 'Region'),
+      value: user?.region_label || FALLBACK,
+    },
+    {
       label: t('profile.school'),
       value: currentSchoolName || t('profile.schoolUnset', 'Not set'),
     },
@@ -166,6 +195,8 @@ export function ProfileForm({ user }) {
   const handleReset = () => {
     setSelectedSchool(currentSchoolId ? { id: currentSchoolId, name: currentSchoolName } : null);
     setInputValue('');
+    setCountryCode(user?.country_code || '');
+    setStateCode(user?.state_code || '');
     setFeedback(null);
     setTurnstileToken('');
     turnstileRef.current?.reset?.();
@@ -176,7 +207,7 @@ export function ProfileForm({ user }) {
     if (!pendingPayload) {
       setFeedback({
         type: 'error',
-        message: t('profile.schoolNoChanges', 'No changes detected.'),
+        message: t('profile.noChanges', 'No changes detected.'),
       });
       return;
     }
@@ -203,18 +234,20 @@ export function ProfileForm({ user }) {
             ? { id: updatedUser.school_id, name: updatedUser.school_name || '' }
             : null
         );
+        setCountryCode(updatedUser.country_code || '');
+        setStateCode(updatedUser.state_code || '');
       }
 
       setInputValue('');
       setFeedback({
         type: 'success',
-        message: t('profile.schoolUpdateSuccess', 'School updated successfully.'),
+        message: t('profile.updateSuccess', 'Profile updated successfully.'),
       });
     } catch (error) {
       const message =
         error.response?.data?.message ||
         error.message ||
-        t('profile.schoolUpdateFailed', 'Unable to update school information.');
+        t('profile.updateFailed', 'Unable to update profile.');
       setFeedback({ type: 'error', message });
     } finally {
       setIsSaving(false);
@@ -239,86 +272,97 @@ export function ProfileForm({ user }) {
       </div>
 
       <section className="rounded-lg border p-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
           <div>
             <h3 className="text-base font-semibold text-gray-900">
-              {t('profile.schoolSectionTitle', 'School information')}
+              {t('profile.editProfile', 'Edit Profile')}
             </h3>
             <p className="text-sm text-muted-foreground">
               {t(
-                'profile.schoolEditDescription',
-                'Select an existing school or type a new one. New entries will be reviewed and saved after verification.'
+                'profile.editDescription',
+                'Update your region and school information.'
               )}
             </p>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {t('profile.schoolCurrentLabel', 'Current:')}{' '}
-            <Badge variant="secondary">
-              {currentSchoolName || t('profile.schoolUnset', 'Not set')}
-            </Badge>
           </div>
         </div>
 
-        <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="schoolSearch" className="block text-sm font-medium text-gray-700">
-              {t('auth.school', 'School')}
-            </label>
-            <Input
-              id="schoolSearch"
-              className="mt-2"
-              placeholder={t(
-                'profile.schoolSearchPlaceholder',
-                'Search for a school or enter a new name'
-              )}
-              value={inputValue}
-              onChange={handleInputChange}
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t(
-                'profile.schoolInputHint',
-                'Selecting an existing school keeps data consistent. Typing a new school name will create it after verification.'
-              )}
-            </p>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          
+          <div className="space-y-4">
+             <h4 className="text-sm font-medium text-gray-900 border-b pb-2">{t('profile.regionSettings', 'Region Settings')}</h4>
+             <RegionSelector
+                countryCode={countryCode}
+                stateCode={stateCode}
+                onCountryChange={setCountryCode}
+                onStateChange={setStateCode}
+             />
           </div>
 
-          <div className="rounded-md border bg-white">
-            <div className="flex items-center justify-between border-b px-3 py-2">
-              <span className="text-sm font-medium text-muted-foreground">
-                {t('profile.schoolSuggestions', 'Suggestions')}
-              </span>
-              <Button type="button" variant="ghost" size="sm" onClick={handleClearSelection}>
-                {t('profile.clearSelection', 'Clear selection')}
-              </Button>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h4 className="text-sm font-medium text-gray-900 border-b pb-2 w-full">{t('profile.schoolSettings', 'School Settings')}</h4>
             </div>
-            <div className="max-h-48 overflow-y-auto">
-              {loadingSuggestions ? (
-                <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t('profile.loadingSchools', 'Loading schools...')}
+            
+            <div>
+                <label htmlFor="schoolSearch" className="block text-sm font-medium text-gray-700">
+                {t('auth.school', 'School')}
+                </label>
+                <Input
+                id="schoolSearch"
+                className="mt-2"
+                placeholder={t(
+                    'profile.schoolSearchPlaceholder',
+                    'Search for a school or enter a new name'
+                )}
+                value={inputValue}
+                onChange={handleInputChange}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                {t(
+                    'profile.schoolInputHint',
+                    'Selecting an existing school keeps data consistent. Typing a new school name will create it after verification.'
+                )}
+                </p>
+            </div>
+
+            <div className="rounded-md border bg-white">
+                <div className="flex items-center justify-between border-b px-3 py-2">
+                <span className="text-sm font-medium text-muted-foreground">
+                    {t('profile.schoolSuggestions', 'Suggestions')}
+                </span>
+                <Button type="button" variant="ghost" size="sm" onClick={handleClearSelection}>
+                    {t('profile.clearSelection', 'Clear selection')}
+                </Button>
                 </div>
-              ) : suggestions.length > 0 ? (
-                suggestions.map((school) => {
-                  const isActive = selectedSchool?.id === school.id;
-                  return (
-                    <button
-                      type="button"
-                      key={school.id}
-                      onClick={() => handleSelectSchool(school)}
-                      className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted ${
-                        isActive ? 'bg-green-50 text-green-700' : ''
-                      }`}
-                    >
-                      <span>{school.name}</span>
-                      {isActive && <Badge variant="outline">{t('profile.selected', 'Selected')}</Badge>}
-                    </button>
-                  );
-                })
-              ) : (
-                <div className="px-3 py-3 text-sm text-muted-foreground">
-                  {t('profile.schoolNoResults', 'No matching schools. Enter a new name above.')}
+                <div className="max-h-48 overflow-y-auto">
+                {loadingSuggestions ? (
+                    <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t('profile.loadingSchools', 'Loading schools...')}
+                    </div>
+                ) : suggestions.length > 0 ? (
+                    suggestions.map((school) => {
+                    const isActive = selectedSchool?.id === school.id;
+                    return (
+                        <button
+                        type="button"
+                        key={school.id}
+                        onClick={() => handleSelectSchool(school)}
+                        className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted ${
+                            isActive ? 'bg-green-50 text-green-700' : ''
+                        }`}
+                        >
+                        <span>{school.name}</span>
+                        {isActive && <Badge variant="outline">{t('profile.selected', 'Selected')}</Badge>}
+                        </button>
+                    );
+                    })
+                ) : (
+                    <div className="px-3 py-3 text-sm text-muted-foreground">
+                    {t('profile.schoolNoResults', 'No matching schools. Enter a new name above.')}
+                    </div>
+                )}
                 </div>
-              )}
             </div>
           </div>
 
@@ -347,10 +391,10 @@ export function ProfileForm({ user }) {
 
           <div className="flex flex-wrap gap-3">
             <Button type="submit" className="flex-1" loading={isSaving} disabled={submitDisabled}>
-              {t('profile.saveSchool', 'Save school')}
+              {t('profile.saveChanges', 'Save Changes')}
             </Button>
             <Button type="button" variant="outline" className="flex-1" onClick={handleReset}>
-              {t('profile.resetSchool', 'Reset')}
+              {t('profile.reset', 'Reset')}
             </Button>
           </div>
         </form>

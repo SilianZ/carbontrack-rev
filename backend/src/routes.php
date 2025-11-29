@@ -287,7 +287,6 @@ return function (App $app) {
     $registerLeaderboardRoutes = function (RouteCollectorProxy $group) {
         $group->get('/leaderboard/trigger', [LeaderboardController::class, 'triggerRefresh']);
     };
-    };
 
     // Health check
     $registerHealthCheck($app);

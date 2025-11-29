@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import { useTranslation } from '../../hooks/useTranslation';
 import { authAPI, getValidationRules } from '../../lib/auth';
 import { schoolAPI } from '../../lib/api';
+import { RegionSelector } from '../common/RegionSelector';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
@@ -29,11 +30,19 @@ export function RegisterForm() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors }
   } = useForm();
   const validationRules = getValidationRules();
 
   const password = watch('password');
+  const countryCode = watch('country_code');
+  const stateCode = watch('state_code');
+
+  useEffect(() => {
+    register('country_code', { required: t('auth.countryRequired', 'Country is required') });
+    register('state_code', { required: t('auth.stateRequired', 'State is required') });
+  }, [register, t]);
 
   // 获取学校列表
   useEffect(() => {
@@ -63,6 +72,8 @@ export function RegisterForm() {
         email: data.email,
         password: data.password,
         confirm_password: data.confirmPassword,
+        country_code: data.country_code,
+        state_code: data.state_code,
   // real_name 已废弃，不再发送
         cf_turnstile_response: turnstileToken || undefined
       };
@@ -190,6 +201,17 @@ export function RegisterForm() {
                 </div>
 
                 {/* real_name 字段已移除 */}
+
+                <RegionSelector
+                  countryCode={countryCode}
+                  stateCode={stateCode}
+                  onCountryChange={(val) => setValue('country_code', val, { shouldValidate: true })}
+                  onStateChange={(val) => setValue('state_code', val, { shouldValidate: true })}
+                  errors={{
+                    country: errors.country_code,
+                    state: errors.state_code
+                  }}
+                />
 
                 {/* 学校（可选，可选择或自定义新学校） */}
                 <div>
