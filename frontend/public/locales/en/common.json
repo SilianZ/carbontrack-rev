@@ -14,6 +14,11 @@
       "rewards": "Eco-friendly Rewards"
     }
   },
+  "common": {
+    "uploading": "Uploading...",
+    "back": "Back",
+    "reset": "Reset"
+  },
   "nav": {
     "home": "Home",
     "about": "About Us",
@@ -558,7 +563,10 @@
       "activityDate": "Activity Date",
       "dateRequired": "Activity date is required",
       "uploadImage": "Upload Image",
-      "uploadHint": "Optional: Upload a photo as proof of your activity",
+      "uploadHint": "Supports JPG, PNG (Max 5MB)",
+      "maxFilesReached": "Maximum 5 files allowed",
+      "dropHere": "Drop files here to upload",
+      "clickOrDrag": "Click or drag to upload images",
       "imageRequired": "Please upload at least one image as proof",
       "fileTooLarge": "File is too large (max 5MB)",
       "calculating": "Calculating...",

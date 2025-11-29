@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Calculator, Calendar, FileText, Upload, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
 import { batchUpload } from '../../lib/r2Upload';
 import { useTranslation } from '../../hooks/useTranslation';
+import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
@@ -25,6 +26,8 @@ export function DataInputForm({
   const [previewUrls, setPreviewUrls] = useState([]);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [showCalculation, setShowCalculation] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   const {
     register,
@@ -127,30 +130,77 @@ export function DataInputForm({
     onSubmit(payload);
   };
 
-  const handleFileSelect = (e) => {
+  const processFiles = (files) => {
     setUploadError('');
-    const files = Array.from(e.target.files || []);
-    // 限制 5 张，单个 5MB
     const MAX = 5;
     const MAX_SIZE = 5 * 1024 * 1024;
-    const filtered = [];
-    const previews = [];
+    
+    const currentFiles = [...selectedFiles];
+    const currentPreviews = [...previewUrls];
+    
+    if (currentFiles.length + files.length > MAX) {
+      setUploadError(t('activities.form.maxFilesReached') || '最多只能上传 5 张图片');
+      return;
+    }
+
+    const newFiles = [];
+    const newPreviews = [];
+
     for (const f of files) {
       if (f.size > MAX_SIZE) {
         setUploadError(t('activities.form.fileTooLarge') || '文件过大');
         continue;
       }
-      filtered.push(f);
-      previews.push(URL.createObjectURL(f));
-      if (filtered.length >= MAX) break;
+      // 简单去重：同名同大小
+      if (currentFiles.some(existing => existing.name === f.name && existing.size === f.size)) {
+        continue;
+      }
+      newFiles.push(f);
+      newPreviews.push(URL.createObjectURL(f));
     }
-    setSelectedFiles(filtered);
-    setPreviewUrls(previews);
+
+    setSelectedFiles([...currentFiles, ...newFiles]);
+    setPreviewUrls([...currentPreviews, ...newPreviews]);
+  };
+
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    processFiles(files);
+    e.target.value = null; // 重置 input，允许重复选择同一文件
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files || []);
+    processFiles(files);
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   const removeFile = (idx) => {
     setSelectedFiles(prev => prev.filter((_,i)=>i!==idx));
-    setPreviewUrls(prev => prev.filter((_,i)=>i!==idx));
+    setPreviewUrls(prev => {
+      const newUrls = prev.filter((_,i)=>i!==idx);
+      // 释放被删除的 URL 对象
+      if (prev[idx]) URL.revokeObjectURL(prev[idx]);
+      return newUrls;
+    });
   };
 
   if (!activity) {
@@ -337,36 +387,78 @@ export function DataInputForm({
                 <Upload className="inline h-4 w-4 mr-1" />
                 {t('activities.form.uploadImage')}
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col gap-3">
+              
+              <div 
+                className={cn(
+                  "border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-3 transition-all duration-200 cursor-pointer",
+                  isDragging ? "border-green-500 bg-green-50 scale-[1.02]" : "border-gray-300 hover:border-green-400 hover:bg-gray-50",
+                  uploadError ? "border-red-300 bg-red-50" : ""
+                )}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={triggerFileInput}
+              >
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={handleFileSelect}
-                  className="text-sm"
+                  className="hidden"
                 />
+                
+                <div className={cn("p-3 rounded-full transition-colors", isDragging ? "bg-green-100" : "bg-gray-100")}>
+                  <Upload className={cn("h-6 w-6", isDragging ? "text-green-600" : "text-gray-500")} />
+                </div>
+                
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-700">
+                    {isDragging ? (t('activities.form.dropHere') || '释放以上传') : (t('activities.form.clickOrDrag') || '点击或拖拽上传图片')}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t('activities.form.uploadHint') || '支持 JPG, PNG (最大 5MB)'}
+                  </p>
+                </div>
+              </div>
+
+              {/* File List & Status */}
+              <div className="mt-4 space-y-3">
                 {selectedFiles.length > 0 && (
                   <ul className="space-y-2 text-sm">
                     {selectedFiles.map((f,i)=>(
-                      <li key={i} className="flex items-center justify-between bg-gray-50 px-2 py-1 rounded border">
-                        <div className="flex items-center gap-2 min-w-0">
-                          {previewUrls[i] && <img src={previewUrls[i]} alt={f.name} className="h-10 w-10 object-cover rounded border" />}
-                          <span className="truncate flex items-center gap-2"><ImageIcon className="h-4 w-4 text-gray-500" />{f.name}</span>
+                      <li key={i} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md border border-gray-200 hover:border-gray-300 transition-colors">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {previewUrls[i] && <img src={previewUrls[i]} alt={f.name} className="h-10 w-10 object-cover rounded border border-gray-200" />}
+                          <div className="flex flex-col min-w-0">
+                            <span className="truncate font-medium text-gray-700">{f.name}</span>
+                            <span className="text-xs text-gray-500">{(f.size / 1024).toFixed(1)} KB</span>
+                          </div>
                         </div>
-                        <button type="button" onClick={()=>removeFile(i)} className="text-gray-400 hover:text-red-500">
+                        <button 
+                          type="button" 
+                          onClick={(e)=>{ e.stopPropagation(); removeFile(i); }} 
+                          className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                        >
                           <X className="h-4 w-4" />
                         </button>
                       </li>
                     ))}
                   </ul>
                 )}
-                {uploading && progress.total > 0 && (
-                  <p className="text-xs text-blue-600">{t('common.uploading') || '正在上传...'} {progress.done}/{progress.total}</p>
+                
+                {uploading && (
+                  <div className="text-xs text-blue-600 flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-blue-600 border-t-transparent"></div>
+                    {t('common.uploading') || '正在上传...'} {progress.total > 0 ? `${progress.done}/${progress.total}` : ''}
+                  </div>
                 )}
-                {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
-                {uploading && <p className="text-xs text-blue-600">{t('common.uploading') || '正在上传...'}</p>}
-                {!selectedFiles.length && !uploadError && (
-                  <p className="text-xs text-gray-500">{t('activities.form.uploadHint')}</p>
+                
+                {uploadError && (
+                  <p className="text-xs text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {uploadError}
+                  </p>
                 )}
               </div>
             </div>

@@ -14,6 +14,11 @@
       "rewards": "环保奖励"
     }
   },
+  "common": {
+    "uploading": "正在上传...",
+    "back": "返回",
+    "reset": "重置"
+  },
   "nav": {
     "home": "首页",
     "dashboard": "仪表盘",
@@ -596,7 +601,10 @@
       "notes": "备注说明",
       "notesPlaceholder": "请描述您的具体活动情况（可选）",
       "uploadImage": "上传图片",
-      "uploadHint": "可上传最多3张图片作为活动证明，每张不超过5MB",
+      "uploadHint": "支持 JPG, PNG (最大 5MB)",
+      "maxFilesReached": "最多只能上传 5 张图片",
+      "dropHere": "释放以上传",
+      "clickOrDrag": "点击或拖拽上传图片",
       "imageRequired": "请至少选择一张图片作为证明",
       "fileTooLarge": "文件过大（最大 5MB）",
       "calculating": "计算中...",
