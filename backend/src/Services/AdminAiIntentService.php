@@ -39,7 +39,7 @@ class AdminAiIntentService
         array $config = [],
         ?array $commandConfig = null
     ) {
-        $this->model = (string)($config['model'] ?? 'gemini-2.5-flash-lite');
+        $this->model = (string)($config['model'] ?? 'google/gemini-2.5-flash-lite');
         $this->temperature = isset($config['temperature']) ? (float)$config['temperature'] : 0.2;
         $this->maxTokens = isset($config['max_tokens']) ? (int)$config['max_tokens'] : 800;
         $this->enabled = $client !== null;
@@ -445,17 +445,20 @@ class AdminAiIntentService
     {
         $navDescriptions = [];
         foreach ($this->navigationTargets as $id => $target) {
-            $navDescriptions[] = "- {$id}: {$target['description']} (Keywords: " . implode(', ', $target['keywords'] ?? []) . ")";
+            $desc = $target['description'] ?? '';
+            $navDescriptions[] = "- {$id}: {$desc} (Keywords: " . implode(', ', $target['keywords'] ?? []) . ")";
         }
         
         $shortcutDescriptions = [];
         foreach ($this->quickActions as $id => $action) {
-            $shortcutDescriptions[] = "- {$id}: {$action['description']} (Keywords: " . implode(', ', $action['keywords'] ?? []) . ")";
+            $desc = $action['description'] ?? '';
+            $shortcutDescriptions[] = "- {$id}: {$desc} (Keywords: " . implode(', ', $action['keywords'] ?? []) . ")";
         }
         
         $actionDescriptions = [];
         foreach ($this->actionDefinitions as $name => $def) {
-            $actionDescriptions[] = "- {$name}: {$def['description']} (Requires: " . implode(', ', $def['requires'] ?? []) . ")";
+            $desc = $def['description'] ?? '';
+            $actionDescriptions[] = "- {$name}: {$desc} (Requires: " . implode(', ', $def['requires'] ?? []) . ")";
         }
 
         $prompt = "You are CarbonTrack's admin AI command planner. Convert administrator natural language into precise instructions using the provided tools.\n\n";
@@ -497,8 +500,47 @@ class AdminAiIntentService
         $choice = $rawResponse['choices'][0] ?? [];
         $message = $choice['message'] ?? [];
         $toolCalls = $message['tool_calls'] ?? [];
+        $content = $message['content'] ?? null;
 
         if (empty($toolCalls)) {
+            // Try to parse JSON from content if tool_calls is empty
+            if (is_string($content) && $content !== '') {
+                $jsonContent = null;
+                if (preg_match('/```(?:json)?\s*(\{.*?\})\s*```/s', $content, $matches)) {
+                    $jsonContent = $matches[1];
+                } elseif (preg_match('/^\s*\{.*\}\s*$/s', $content) || stripos($content, '{') !== false) {
+                    $start = strpos($content, '{');
+                    $end = strrpos($content, '}');
+                    if ($start !== false && $end !== false && $end > $start) {
+                        $jsonContent = substr($content, $start, $end - $start + 1);
+                    }
+                }
+
+                if ($jsonContent !== null) {
+                    try {
+                        $data = json_decode($jsonContent, true, 512, JSON_THROW_ON_ERROR);
+                        if (is_array($data) && isset($data['function'], $data['parameters'])) {
+                            $func = $data['function'];
+                            $args = $data['parameters'];
+                            $intent = null;
+                            if ($func === 'navigate') $intent = $this->createNavigationIntent($args);
+                            elseif ($func === 'execute_shortcut') $intent = $this->createShortcutIntent($args);
+                            elseif ($func === 'manage_records') $intent = $this->createManagementIntent($args);
+
+                            if ($intent) {
+                                return [
+                                    'intent' => $intent,
+                                    'alternatives' => [],
+                                    'metadata' => $this->extractMetadata($rawResponse),
+                                ];
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        // ignore json parse error
+                    }
+                }
+            }
+
             // Fallback to heuristic if no tool called
             $heuristic = $this->guessNavigationIntent($originalQuery);
             if ($heuristic) {
