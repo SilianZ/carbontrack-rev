@@ -78,20 +78,19 @@ export function QuickActions({ userStats = {}, onActionClick }) {
           {t('dashboard.quickActions.description')}
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent>
-  {/* 固定最多两列：避免在右侧 1/3 宽容器内出现三列导致过窄/错位 */}
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* 固定最多两列：避免在右侧 1/3 宽容器内出现三列导致过窄/错位 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {actions.map((action) => {
             const Icon = action.icon;
-            
+
             return (
               <Button
                 key={action.id}
                 variant={action.primary ? "default" : "outline"}
-                className={`h-auto w-full p-4 flex flex-col items-start justify-start text-left gap-3 relative ${
-                  action.primary ? action.color : 'hover:bg-gray-50'
-                }`}
+                className={`h-auto w-full p-4 flex flex-col items-start justify-start text-left gap-3 relative whitespace-normal ${action.primary ? action.color : 'hover:bg-gray-50'
+                  }`}
                 onClick={() => handleActionClick(action)}
               >
                 {action.badge && (
@@ -99,10 +98,10 @@ export function QuickActions({ userStats = {}, onActionClick }) {
                     {action.badge > 99 ? '99+' : action.badge}
                   </div>
                 )}
-                
-                <div className="flex items-center gap-3">
-                  <Icon className={`h-6 w-6 ${action.primary ? 'text-white' : 'text-gray-700'}`} />
-                  <span className={`text-lg font-semibold ${action.primary ? 'text-white' : 'text-gray-800'}`}>
+
+                <div className="flex items-start gap-3 w-full">
+                  <Icon className={`h-6 w-6 mt-1 flex-shrink-0 ${action.primary ? 'text-white' : 'text-gray-700'}`} />
+                  <span className={`text-lg font-semibold flex-1 ${action.primary ? 'text-white' : 'text-gray-800'}`}>
                     {action.title}
                   </span>
                 </div>
@@ -113,7 +112,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
             );
           })}
         </div>
-        
+
         {/* 特殊提示 */}
         {userStats.points_balance !== undefined && userStats.points_balance < 100 && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -124,14 +123,14 @@ export function QuickActions({ userStats = {}, onActionClick }) {
               </span>
             </div>
             <p className="text-xs text-blue-600 mt-1">
-              {t('dashboard.quickActions.pointsHintDesc', { 
+              {t('dashboard.quickActions.pointsHintDesc', {
                 current: userStats.points_balance || 0,
                 needed: 100 - (userStats.points_balance || 0)
               })}
             </p>
           </div>
         )}
-        
+
         {userStats.pending_reviews > 0 && (
           <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="flex items-center gap-2 text-orange-800">
@@ -141,8 +140,8 @@ export function QuickActions({ userStats = {}, onActionClick }) {
               </span>
             </div>
             <p className="text-xs text-orange-600 mt-1">
-              {t('dashboard.quickActions.pendingReviewsDesc', { 
-                count: userStats.pending_reviews 
+              {t('dashboard.quickActions.pendingReviewsDesc', {
+                count: userStats.pending_reviews
               })}
             </p>
           </div>

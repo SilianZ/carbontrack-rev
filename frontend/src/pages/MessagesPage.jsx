@@ -10,6 +10,16 @@ import { Alert, AlertDescription, AlertTitle } from '../components/ui/Alert';
 import { AlertCircle, Loader2, MailOpen, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { toast } from 'react-hot-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 
 export default function MessagesPage() {
   const { t } = useTranslation();
@@ -24,6 +34,11 @@ export default function MessagesPage() {
     limit: 10
   });
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    type: null, // 'delete', 'deleteAll', 'markAllRead'
+    data: null,
+  });
 
   const { data, isLoading, error, isFetching } = useQuery(
     ['messages', filters],
@@ -100,13 +115,44 @@ export default function MessagesPage() {
   };
 
   const handleDelete = (messageId) => {
-    if (window.confirm(t('messages.confirmDelete')))
-    deleteMutation.mutate(messageId);
+    setConfirmDialog({
+      open: true,
+      type: 'delete',
+      data: messageId
+    });
   };
 
   const handleMarkAllRead = () => {
-    if (window.confirm(t('messages.confirmMarkAllRead')))
-    markAllReadMutation.mutate();
+    setConfirmDialog({
+      open: true,
+      type: 'markAllRead',
+      data: null
+    });
+  };
+
+  const handleDeleteAll = () => {
+    setConfirmDialog({
+      open: true,
+      type: 'deleteAll',
+      data: null
+    });
+  };
+
+  const handleConfirmAction = () => {
+    const { type, data } = confirmDialog;
+    if (type === 'delete') {
+      deleteMutation.mutate(data);
+    } else if (type === 'markAllRead') {
+      markAllReadMutation.mutate();
+    } else if (type === 'deleteAll') {
+      // Implement delete all logic or call a new mutation
+      toast.error(t('messages.deleteAllNotImplemented'));
+    }
+    closeConfirmDialog();
+  };
+
+  const closeConfirmDialog = () => {
+    setConfirmDialog({ open: false, type: null, data: null });
   };
 
   const messages = data?.data?.data || [];
@@ -129,11 +175,7 @@ export default function MessagesPage() {
           </Button>
           <Button
             variant="destructive"
-            onClick={() => {
-              if (window.confirm(t('messages.confirmDeleteAll')))
-              // Implement delete all logic or call a new mutation
-              toast.error(t('messages.deleteAllNotImplemented'));
-            }}
+            onClick={handleDeleteAll}
             disabled={messages.length === 0}
           >
             <Trash2 className="h-4 w-4 mr-2" /> {t('messages.deleteAll')}
@@ -186,6 +228,27 @@ export default function MessagesPage() {
         onClose={closeModal}
         onMarkRead={handleMarkRead}
       />
+
+      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => !open && closeConfirmDialog()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmDialog.type === 'delete' && t('messages.confirmDeleteTitle', 'Confirm Delete')}
+              {confirmDialog.type === 'deleteAll' && t('messages.confirmDeleteAllTitle', 'Confirm Delete All')}
+              {confirmDialog.type === 'markAllRead' && t('messages.confirmMarkAllReadTitle', 'Confirm Mark All Read')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog.type === 'delete' && t('messages.confirmDelete', 'Are you sure you want to delete this message?')}
+              {confirmDialog.type === 'deleteAll' && t('messages.confirmDeleteAll', 'Are you sure you want to delete all messages?')}
+              {confirmDialog.type === 'markAllRead' && t('messages.confirmMarkAllRead', 'Are you sure you want to mark all messages as read?')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeConfirmDialog}>{t('common.cancel', 'Cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAction}>{t('common.confirm', 'Confirm')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
