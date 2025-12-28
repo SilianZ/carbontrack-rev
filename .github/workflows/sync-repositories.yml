@@ -2,7 +2,7 @@ name: Sync Monorepo to Individual Repositories
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, test/auto-merge-verify ]
   pull_request:
     branches: [ main ]
     types: [ closed ]
@@ -185,6 +185,17 @@ jobs:
         labels: sync
         draft: false
 
+    - name: Enable Auto-merge for frontend
+      if: steps.frontend-changes.outputs.changed == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.FRONTEND_REPO_TOKEN }}
+      run: |
+        echo "Enabling auto-merge for frontend PR..."
+        # 使用你创建 PR 时用的同一个分支名
+        BRANCH="sync/monorepo-${{ github.sha }}"
+        # 调用 GitHub CLI 开启自动合并
+        gh pr merge "$BRANCH" --repo "carbon-track/frontend" --auto --merge
+
     - name: Create bootstrap PR for frontend
       if: always()
       uses: peter-evans/create-pull-request@v5
@@ -343,6 +354,15 @@ jobs:
           Automated sync from monorepo `backend/` folder.
         labels: sync
         draft: false
+
+    - name: Enable Auto-merge for backend
+      if: steps.backend-changes.outputs.changed == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.BACKEND_REPO_TOKEN }}
+      run: |
+        echo "Enabling auto-merge for backend PR..."
+        BRANCH="sync/monorepo-${{ github.sha }}"
+        gh pr merge "$BRANCH" --repo "carbon-track/backend" --auto --merge
 
     - name: Create bootstrap PR for backend
       if: always()
