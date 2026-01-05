@@ -21,6 +21,10 @@ const OnboardingPage = React.lazy(() => import('../pages/OnboardingPage'));
 const AchievementsPage = React.lazy(() => import('../pages/AchievementsPage'));
 const NotificationSettingsPage = React.lazy(() => import('../pages/NotificationSettingsPage'));
 const AboutUsPage = React.lazy(() => import('../pages/AboutUsPage'));
+const PrivacyPolicyPage = React.lazy(() => import('../pages/PrivacyPolicyPage'));
+const TermsOfServicePage = React.lazy(() => import('../pages/TermsOfServicePage'));
+const CookiePolicyPage = React.lazy(() => import('../pages/CookiePolicyPage'));
+const SecurityPage = React.lazy(() => import('../pages/SecurityPage'));
 // Admin pages
 const AdminDashboardPage = React.lazy(() => import('../pages/admin/Dashboard'));
 const AdminUsersPage = React.lazy(() => import('../pages/admin/Users'));
@@ -47,6 +51,10 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <React.Suspense fallback={<LoadingSpinner />}><HomePage /></React.Suspense> },
       { path: 'about-us', element: <React.Suspense fallback={<LoadingSpinner />}><AboutUsPage /></React.Suspense> },
+      { path: 'privacy', element: <React.Suspense fallback={<LoadingSpinner />}><PrivacyPolicyPage /></React.Suspense> },
+      { path: 'terms', element: <React.Suspense fallback={<LoadingSpinner />}><TermsOfServicePage /></React.Suspense> },
+      { path: 'cookies', element: <React.Suspense fallback={<LoadingSpinner />}><CookiePolicyPage /></React.Suspense> },
+      { path: 'security', element: <React.Suspense fallback={<LoadingSpinner />}><SecurityPage /></React.Suspense> },
       { path: 'dashboard', element: <ProtectedRoute requireAuth><React.Suspense fallback={<LoadingSpinner />}><DashboardPage /></React.Suspense></ProtectedRoute> },
       { path: 'calculate', element: <ProtectedRoute requireAuth><React.Suspense fallback={<LoadingSpinner />}><CalculatePage /></React.Suspense></ProtectedRoute> },
       { path: 'activities', element: <ProtectedRoute requireAuth><React.Suspense fallback={<LoadingSpinner />}><ActivitiesPage /></React.Suspense></ProtectedRoute> },

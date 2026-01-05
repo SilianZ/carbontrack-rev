@@ -88,7 +88,7 @@ export function Footer() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-gray-300">
                 <Mail className="h-4 w-4" />
-                <span>contact@carbontrack.com</span>
+                <span>{import.meta.env.VITE_SUPPORT_EMAIL}</span>
               </div>
               <div className="flex items-center gap-2 text-gray-300">
                 <Phone className="h-4 w-4" />

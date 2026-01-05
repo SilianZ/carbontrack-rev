@@ -294,7 +294,7 @@ const AboutUsPage = () => {
     }
   );
   const hero = t('about.hero', { returnObjects: true }) || {};
-  const contactLinks = t('about.contactLinks', { returnObjects: true }) || [];
+  const contactLinks = t('about.contactLinks', { returnObjects: true, email: import.meta.env.VITE_SUPPORT_EMAIL }) || [];
   const team = t('about.team', { returnObjects: true }) || {};
   const mission = t('about.mission', { returnObjects: true }) || {};
   const achievements = t('about.achievements', { returnObjects: true }) || {};
