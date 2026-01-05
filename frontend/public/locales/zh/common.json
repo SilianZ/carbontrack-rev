@@ -2529,7 +2529,9 @@
         {
           "name": "Zining (Jeffery) Lyu",
           "role": "联合创始人 & 全栈工程师",
-          "bio": "Jeffery 是核心技术负责人，负责 CarbonTrack 网站的架构、开发与维护。"
+          "bio": "Jeffery 是核心技术负责人，负责 CarbonTrack 网站的架构、开发与维护。",
+          "link": "https://github.com/Jeffery2008",
+          "linkLabel": "GitHub"
         },
         {
           "name": "Minghan (Loren) Li",

@@ -103,7 +103,9 @@
         {
           "name": "Zining (Jeffery) Lyu",
           "role": "Co-founder & Full-stack Engineer",
-          "bio": "Jeffery is our core technology partner and full-stack engineer. He is responsible for the architecture, development, and maintenance of the CarbonTrack web experience."
+          "bio": "Jeffery is our core technology partner and full-stack engineer. He is responsible for the architecture, development, and maintenance of the CarbonTrack web experience.",
+          "link": "https://github.com/Jeffery2008",
+          "linkLabel": "GitHub"
         },
         {
           "name": "Minghan (Loren) Li",
