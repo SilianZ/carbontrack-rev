@@ -2,9 +2,35 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Github, Twitter, Facebook } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useQuery } from 'react-query';
+import { statsAPI } from '../../lib/api';
+
+const numberFormatter = new Intl.NumberFormat();
+const carbonFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
+
+const formatNumber = (value) => numberFormatter.format(Math.max(0, Math.round(value || 0)));
+const formatCarbon = (value, t) => {
+  const numericValue = Number(value || 0);
+  if (numericValue >= 1000) {
+    return `${carbonFormatter.format(numericValue / 1000)} ${t('units.t')}`;
+  }
+  return `${carbonFormatter.format(numericValue)} ${t('units.kg')}`;
+};
 
 export function Footer() {
   const { t } = useTranslation();
+  const { data: summaryData } = useQuery(
+    ['public-stats-summary'],
+    async () => {
+      const response = await statsAPI.getPublicSummary();
+      return response.data?.data ?? null;
+    },
+    {
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+    }
+  );
+
   const currentYear = new Date().getFullYear();
   const appVersion = useMemo(() => {
     const version = import.meta.env?.VITE_APP_VERSION;
@@ -57,7 +83,7 @@ export function Footer() {
             <p className="text-gray-300 mb-6 text-sm leading-relaxed">
               {t('footer.description')}
             </p>
-            
+
             {/* 联系信息 */}
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-gray-300">
@@ -155,15 +181,21 @@ export function Footer() {
             {/* 平台统计 */}
             <div className="flex items-center gap-6 text-sm text-gray-300">
               <div className="text-center">
-                <div className="font-semibold text-white">10,000+</div>
+                <div className="font-semibold text-white">
+                  {summaryData ? formatNumber(summaryData.total_users ?? 0) : '...'}
+                </div>
                 <div>{t('footer.users')}</div>
               </div>
               <div className="text-center">
-                <div className="font-semibold text-white">50,000+</div>
+                <div className="font-semibold text-white">
+                  {summaryData ? formatNumber(summaryData.total_records ?? 0) : '...'}
+                </div>
                 <div>{t('footer.activities')}</div>
               </div>
               <div className="text-center">
-                <div className="font-semibold text-white">100t+</div>
+                <div className="font-semibold text-white">
+                  {summaryData ? formatCarbon(summaryData.total_carbon_saved ?? 0, t) : '...'}
+                </div>
                 <div>{t('footer.carbonSaved')}</div>
               </div>
             </div>
