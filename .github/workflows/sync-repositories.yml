@@ -2,7 +2,7 @@ name: Sync Monorepo to Individual Repositories
 
 on:
   push:
-    branches: [ main, test/auto-merge-verify ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
     types: [ closed ]
