@@ -19,6 +19,7 @@ use CarbonTrack\Controllers\BadgeController;
 use CarbonTrack\Controllers\AdminBadgeController;
 use CarbonTrack\Controllers\SystemLogController;
 use CarbonTrack\Controllers\AdminAiController;
+use CarbonTrack\Controllers\UserAiController;
 use CarbonTrack\Controllers\LogSearchController;
 use CarbonTrack\Controllers\StatsController;
 use CarbonTrack\Middleware\AuthMiddleware;
@@ -335,6 +336,10 @@ return function (App $app) {
         // Backward-compatible aliases for activities listing and categories
         $group->get('/activities', [CarbonTrackController::class, 'getUserRecords'])->add(AuthMiddleware::class);
         $group->get('/activities/categories', [CarbonActivityController::class, 'getActivities']);
+
+        // AI Assistant
+        $group->post('/ai/suggest-activity', [UserAiController::class, 'suggestActivity'])
+              ->add(AuthMiddleware::class);
     });
 
     // Backward-compatible alias group for clients calling /api/auth/* (without version prefix)

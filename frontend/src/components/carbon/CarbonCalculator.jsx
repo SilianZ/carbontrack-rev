@@ -7,16 +7,66 @@ import { DataInputForm } from './DataInputForm';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import { Alert, AlertDescription } from '../ui/Alert';
+import { SmartActivityInput } from './SmartActivityInput';
 
 export function CarbonCalculator() {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
+  const [activities, setActivities] = useState([]); // Store fetched activities
+  const [loadingActivities, setLoadingActivities] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
+  const [smartData, setSmartData] = useState(null); // Data from AI
   const [calculationResult, setCalculationResult] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null);
   const [error, setError] = useState('');
+
+  // Fetch activities on mount to support Smart matching
+  React.useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        setLoadingActivities(true);
+        const response = await carbonAPI.getActivities();
+        if (response?.data?.success) {
+          const payload = response?.data?.data;
+          const raw = Array.isArray(payload?.activities) ? payload.activities : (Array.isArray(payload) ? payload : []);
+          setActivities(raw); // Store raw for now, or processed if needed
+        }
+      } catch (err) {
+        console.error("Failed to fetch activities for smart matching", err);
+      } finally {
+        setLoadingActivities(false);
+      }
+    };
+    fetchActivities();
+  }, []);
+
+  const handleSmartSuggestion = (prediction) => {
+    if (!prediction || !prediction.activity_name) return;
+
+    // Find matching activity
+    // We try exact match first on name_en or name_zh
+    const name = prediction.activity_name.toLowerCase();
+    const match = activities.find(a =>
+      (a.name_en && a.name_en.toLowerCase() === name) ||
+      (a.name_zh && a.name_zh.toLowerCase() === name) ||
+      (a.name && a.name.toLowerCase() === name)
+    );
+
+    if (match) {
+      setSelectedActivity(match);
+      setSmartData({
+        amount: prediction.amount,
+        description: prediction.description // if AI returns it (currently doesn't, but good for future)
+      });
+      setCurrentStep(2);
+      setError('');
+    } else {
+      // Fallback: Show error or try fuzzy match (omitted for now)
+      setError(t('activities.smartAdd.notFound') || `Could not find activity type: ${prediction.activity_name}`);
+    }
+  };
 
   const steps = [
     { id: 1, title: t('activities.form.selectActivity'), description: t('activities.form.selectActivityDesc') },
@@ -41,8 +91,8 @@ export function CarbonCalculator() {
     setError('');
 
     try {
-  const activityId = selectedActivity.id || selectedActivity.uuid;
-  const response = await carbonAPI.calculate(activityId, data);
+      const activityId = selectedActivity.id || selectedActivity.uuid;
+      const response = await carbonAPI.calculate(activityId, data);
 
       if (response.data.success) {
         setCalculationResult(response.data.data);
@@ -127,22 +177,20 @@ export function CarbonCalculator() {
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                currentStep >= step.id 
-                  ? 'bg-green-600 border-green-600 text-white' 
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${currentStep >= step.id
+                  ? 'bg-green-600 border-green-600 text-white'
                   : 'border-gray-300 text-gray-500'
-              }`}>
+                }`}>
                 {currentStep > step.id ? (
                   <CheckCircle className="w-6 h-6" />
                 ) : (
                   <span className="text-sm font-medium">{step.id}</span>
                 )}
               </div>
-              
+
               <div className="ml-3 hidden sm:block">
-                <div className={`text-sm font-medium ${
-                  currentStep >= step.id ? 'text-green-600' : 'text-gray-500'
-                }`}>
+                <div className={`text-sm font-medium ${currentStep >= step.id ? 'text-green-600' : 'text-gray-500'
+                  }`}>
                   {step.title}
                 </div>
                 <div className="text-xs text-gray-500">
@@ -151,9 +199,8 @@ export function CarbonCalculator() {
               </div>
 
               {index < steps.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-4 ${
-                  currentStep > step.id ? 'bg-green-600' : 'bg-gray-300'
-                }`} />
+                <div className={`flex-1 h-0.5 mx-4 ${currentStep > step.id ? 'bg-green-600' : 'bg-gray-300'
+                  }`} />
               )}
             </div>
           ))}
@@ -171,10 +218,13 @@ export function CarbonCalculator() {
       <div className="space-y-6">
         {/* 步骤1: 选择活动 */}
         {currentStep === 1 && (
-          <ActivitySelector
-            onActivitySelect={handleActivitySelect}
-            selectedActivity={selectedActivity}
-          />
+          <>
+            <SmartActivityInput onSuggestion={handleSmartSuggestion} />
+            <ActivitySelector
+              onActivitySelect={handleActivitySelect}
+              selectedActivity={selectedActivity}
+            />
+          </>
         )}
 
         {/* 步骤2: 输入数据 */}
@@ -201,6 +251,7 @@ export function CarbonCalculator() {
               calculationResult={calculationResult}
               isCalculating={isCalculating}
               isSubmitting={isSubmitting}
+              initialData={smartData}
             />
           </div>
         )}
@@ -219,7 +270,7 @@ export function CarbonCalculator() {
                 {t('activities.form.submitSuccessDesc')}
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white rounded-lg p-4 text-center">
@@ -234,7 +285,7 @@ export function CarbonCalculator() {
                     {t('activities.carbonSaved')} (kg CO₂)
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-blue-600">
                     {submitResult.points_earned || 0}
@@ -243,7 +294,7 @@ export function CarbonCalculator() {
                     {t('activities.pointsEarned')}
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-orange-600">
                     {t('activities.status.pending')}
@@ -258,12 +309,12 @@ export function CarbonCalculator() {
                 <p className="text-sm text-gray-600">
                   {t('activities.form.reviewNotice')}
                 </p>
-                
+
                 <div className="flex gap-4 justify-center">
                   <Button onClick={handleRestart}>
                     {t('activities.form.recordAnother')}
                   </Button>
-                  
+
                   <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
                     {t('activities.form.goToDashboard')}
                   </Button>

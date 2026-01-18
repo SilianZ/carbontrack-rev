@@ -47,7 +47,9 @@ use CarbonTrack\Middleware\RequestLoggingMiddleware;
 use CarbonTrack\Controllers\StatsController;
 use CarbonTrack\Services\Ai\OpenAiClientAdapter;
 use CarbonTrack\Controllers\AdminAiController;
+use CarbonTrack\Controllers\UserAiController;
 use CarbonTrack\Services\AdminAiCommandRepository;
+use CarbonTrack\Services\UserAiService;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -343,6 +345,24 @@ $__deps_initializer = function (Container $container) {
         );
     });
 
+    $container->set(UserAiService::class, function (ContainerInterface $c) {
+        /** @var \CarbonTrack\Services\Ai\LlmClientInterface|null $llmClient */
+        $llmClient = $c->get('ai.llmClient');
+
+        $config = [
+            'model' => $_ENV['LLM_API_MODEL'] ?? null,
+            'temperature' => $_ENV['LLM_API_TEMPERATURE'] ?? null,
+            'max_tokens' => $_ENV['LLM_API_MAX_TOKENS'] ?? null,
+        ];
+
+        return new UserAiService(
+            $llmClient,
+            $c->get(LoggerInterface::class),
+            $config
+        );
+    });
+
+
     // Email Service
     $container->set(EmailService::class, function (ContainerInterface $c) {
         $frontendUrl = $_ENV['FRONTEND_URL'] ?? ($_ENV['APP_URL'] ?? '');
@@ -517,64 +537,6 @@ $__deps_initializer = function (Container $container) {
         return new LeaderboardController(
             $c->get(LeaderboardService::class),
             $c->get(Logger::class)
-        );
-    });
-
-    $container->set(MessageController::class, function (ContainerInterface $c) {
-        $db = $c->get(DatabaseService::class)->getConnection()->getPdo();
-        return new MessageController(
-            $db,
-            $c->get(MessageService::class),
-            $c->get(AuditLogService::class),
-            $c->get(AuthService::class),
-            $c->get(EmailService::class),
-            $c->get(ErrorLogService::class)
-        );
-    });
-
-    $container->set(SchoolController::class, function (ContainerInterface $c) {
-        // Create a mock container with the required services
-        $mockContainer = new class($c) {
-            private $container;
-            
-            public function __construct($container) {
-                $this->container = $container;
-            }
-            
-            public function get($service) {
-                return $this->container->get($service);
-            }
-        };
-        
-        return new SchoolController($mockContainer);
-    });
-
-    $container->set(AdminController::class, function (ContainerInterface $c) {
-        $db = $c->get(DatabaseService::class)->getConnection()->getPdo();
-        return new AdminController(
-            $db,
-            $c->get(AuthService::class),
-            $c->get(AuditLogService::class),
-            $c->get(BadgeService::class),
-            $c->get(StatisticsService::class),
-            $c->get(ErrorLogService::class),
-            $c->get(CloudflareR2Service::class)
-        );
-    });
-
-    $container->set(AdminAiController::class, function (ContainerInterface $c) {
-        return new AdminAiController(
-            $c->get(AuthService::class),
-            $c->get(AdminAiIntentService::class),
-            $c->get(AdminAiCommandRepository::class),
-            $c->get(ErrorLogService::class),
-            $c->get(LoggerInterface::class)
-        );
-    });
-
-    $container->set(StatsController::class, function (ContainerInterface $c) {
-        return new StatsController(
-            $c->get(StatisticsService::class)
         );
     });
 

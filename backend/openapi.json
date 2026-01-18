@@ -672,6 +672,75 @@
         }
       }
     },
+    "/ai/suggest-activity": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Suggest Carbon Activity from Natural Language",
+        "description": "Uses AI to assist users in logging activities by extracting structured data from text.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "query"
+                ],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "I took a 5km bus ride",
+                    "description": "User's natural language description"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful suggestion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "prediction": {
+                      "type": "object",
+                      "properties": {
+                        "activity_name": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users/me": {
       "get": {
         "tags": [
