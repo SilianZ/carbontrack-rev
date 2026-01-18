@@ -998,7 +998,22 @@
                       "inactive",
                       "suspended"
                     ],
-                    "description": "用户状态"
+                    "description": "User status"
+                  },
+                  "group_id": {
+                    "type": "integer",
+                    "nullable": true,
+                    "description": "User Group ID"
+                  },
+                  "quota_override": {
+                    "type": "object",
+                    "nullable": true,
+                    "description": "Individual quota configuration override"
+                  },
+                  "admin_notes": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Administrative notes"
                   }
                 }
               }
@@ -1127,6 +1142,150 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users/groups": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "List User Groups",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of user groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserGroup"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Create User Group",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserGroupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User group created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserGroup"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users/groups/{id}": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Update User Group",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserGroupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User group updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserGroup"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Delete User Group",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User group deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -10406,6 +10565,98 @@
               "null"
             ],
             "description": "Resolved state/province name from locales/states.json."
+          },
+          "group_id": {
+            "type": "integer",
+            "nullable": true,
+            "description": "User Group ID"
+          },
+          "group_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "User Group Name"
+          },
+          "quota_override": {
+            "type": "object",
+            "nullable": true,
+            "description": "Individual quota configuration override"
+          },
+          "admin_notes": {
+            "type": "string",
+            "nullable": true,
+            "description": "Administrative notes"
+          }
+        }
+      },
+      "UserGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "config": {
+            "type": "object",
+            "nullable": true,
+            "description": "Quota configuration (JSON)"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateUserGroupRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "config": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateUserGroupRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "config": {
+            "type": "object",
+            "nullable": true
           }
         }
       },

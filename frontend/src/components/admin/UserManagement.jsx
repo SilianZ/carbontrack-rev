@@ -20,6 +20,7 @@ import {
   ClipboardList,
   CalendarDays,
   Award,
+  Edit,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -69,22 +70,14 @@ const normalizeUser = (user = {}) => {
   return {
     ...user,
     is_admin: user.is_admin === true || user.is_admin === 1 || user.is_admin === '1',
-    points: toNumber(user.points),
-    total_transactions: toNumber(user.total_transactions),
-    earned_points: toNumber(user.earned_points),
-    total_carbon_saved: toNumber(user.total_carbon_saved),
-    badges_awarded: toNumber(user.badges_awarded),
-    badges_revoked: toNumber(user.badges_revoked),
-    active_badges: toNumber(user.active_badges),
-    days_since_registration: toNumber(user.days_since_registration),
   };
 };
 
-const normalizeUserBadgeEntry = (entry = {}) => {
-  const badge = entry.badge ? { ...entry.badge } : null;
-  const userBadge = entry.user_badge ? { ...entry.user_badge } : {};
-  return { badge, user_badge: userBadge };
-};
+const normalizeUserBadgeEntry = (entry = {}) => ({
+  ...entry,
+  id: entry.id,
+  badge: entry.badge || {},
+});
 
 const normalizeRecentBadge = (entry = {}) => normalizeUserBadgeEntry(entry);
 
@@ -130,6 +123,11 @@ export function UserManagement() {
   const [bulkDialog, setBulkDialog] = useState({ open: false, presetUsers: [] });
   const [detailState, setDetailState] = useState({ open: false, userId: null });
   const [showRevokedBadges, setShowRevokedBadges] = useState(false);
+  const [editDialog, setEditDialog] = useState({ open: false, user: null, configJson: '', notes: '', groupId: '' });
+
+  const { data: groups } = useQuery('adminUserGroups', () =>
+    adminAPI.getUserGroups().then(res => res.data?.data || [])
+  );
 
   const apiFilterParams = useMemo(() => {
     const base = {
@@ -451,6 +449,45 @@ export function UserManagement() {
     );
   };
 
+  const openDetailedEdit = (user) => {
+    setEditDialog({
+      open: true,
+      user,
+      groupId: user.group_id || '',
+      notes: user.admin_notes || '',
+      configJson: user.quota_override ? JSON.stringify(user.quota_override, null, 2) : ''
+    });
+  };
+
+  const closeDetailedEdit = () => {
+    setEditDialog({ open: false, user: null, configJson: '', notes: '', groupId: '' });
+  };
+
+  const handleSubmitDetailedEdit = (e) => {
+    e.preventDefault();
+    if (!editDialog.user) return;
+    try {
+      const payload = {
+        group_id: editDialog.groupId || '', // Send empty string to clear? Or null. AdminController handles null if empty string passed? Backend expects null or int.
+        admin_notes: editDialog.notes,
+        quota_override: editDialog.configJson ? JSON.parse(editDialog.configJson) : null
+      };
+      // Fix empty string group_id to null if needed, or let backend handle (backend casts to int or null)
+
+      updateUserMutation.mutate(
+        { id: editDialog.user.id, data: payload },
+        {
+          onSuccess: () => {
+            closeDetailedEdit();
+            toast.success(t('admin.users.updateSuccess'));
+          }
+        }
+      );
+    } catch (err) {
+      toast.error(t('admin.groups.invalidJson', 'JSON 格式错误'));
+    }
+  };
+
   const openBulkBadgeDialog = (usersList) => {
     if (!usersList || usersList.length === 0) {
       toast.error(t('admin.users.selectUserHint', '请先选择用户'));
@@ -625,6 +662,7 @@ export function UserManagement() {
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.username')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.email')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.groups.title', '用户组')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.role')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.status')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.badges', '徽章')}</th>
@@ -647,6 +685,7 @@ export function UserManagement() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.username}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.group_name || '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{renderRoleBadge(user)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{renderStatusBadge(user)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -672,11 +711,17 @@ export function UserManagement() {
                           <Button variant="ghost" size="sm" onClick={() => openUserDetail(user)} title={t('admin.users.viewDetailsButton', '查看详情')}>
                             <Eye className="h-4 w-4" />
                           </Button>
+                          <Button variant="ghost" size="sm" onClick={() => openDetailedEdit(user)} title={t('admin.users.editUser', '编辑配置')}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)} title={t('admin.users.toggleAdminButton', '切换管理员权限')}>
                             <Shield className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => openBulkBadgeDialog([user])} title={t('admin.users.awardBadgeButton', '授予徽章')} disabled={badgeOptions.length === 0}>
                             <Sparkles className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => openDetailedEdit(user)} title={t('admin.users.editDetailedButton', '编辑详细配置')}>
+                            <Settings className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user)} className="text-red-600 hover:text-red-800" title={t('admin.users.deleteButton', '删除用户')}>
                             <Trash2 className="h-4 w-4" />
@@ -771,6 +816,49 @@ export function UserManagement() {
               {t('common.confirm', '确认')}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editDialog.open} onOpenChange={(open) => (!open ? closeDetailedEdit() : null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t('admin.users.editUser', '编辑用户配置')}</DialogTitle>
+            <DialogDescription>{editDialog.user?.username}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmitDetailedEdit} className="space-y-4">
+            <div>
+              <Label>{t('admin.groups.title', '用户组')}</Label>
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={editDialog.groupId}
+                onChange={(e) => setEditDialog({ ...editDialog, groupId: e.target.value })}
+              >
+                <option value="">{t('common.none', '无')}</option>
+                {groups?.map(g => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label>{t('admin.groups.config', '配额重写 (JSON)')}</Label>
+              <Textarea
+                className="font-mono h-32"
+                value={editDialog.configJson}
+                onChange={e => setEditDialog({ ...editDialog, configJson: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>{t('admin.groups.notes', '备注')}</Label>
+              <Textarea
+                value={editDialog.notes}
+                onChange={e => setEditDialog({ ...editDialog, notes: e.target.value })}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={closeDetailedEdit}>{t('common.cancel')}</Button>
+              <Button type="submit" disabled={updateUserMutation.isLoading}>{t('common.save')}</Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

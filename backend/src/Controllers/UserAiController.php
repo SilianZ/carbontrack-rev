@@ -6,6 +6,7 @@ namespace CarbonTrack\Controllers;
 
 use CarbonTrack\Services\UserAiService;
 use CarbonTrack\Services\CarbonCalculatorService;
+use CarbonTrack\Services\QuotaService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -15,7 +16,9 @@ class UserAiController
     public function __construct(
         private UserAiService $aiService,
         private CarbonCalculatorService $calculatorService,
-        private LoggerInterface $logger
+        private QuotaService $quotaService,
+        private LoggerInterface $logger,
+        private \CarbonTrack\Services\AuthService $authService
     ) {}
 
     public function suggestActivity(Request $request, Response $response): Response
@@ -29,6 +32,21 @@ class UserAiController
 
         if (mb_strlen($query) > 500) {
              return $this->json($response, ['success' => false, 'error' => 'Query too long'], 400);
+        }
+
+        // Quota Check
+        $userModel = $this->authService->getCurrentUserModel($request);
+        if ($userModel) {
+            // 'llm' is the resource key
+            if (!$this->quotaService->checkAndConsume($userModel, 'llm', 1)) {
+                // Return i18n friendly error
+                return $this->json($response, [
+                    'success' => false, 
+                    'error' => 'Daily limit or rate limit exceeded',
+                    'code' => 'QUOTA_EXCEEDED', // Frontend can map this to error.quota.exceeded
+                    'translation_key' => 'error.quota.exceeded'
+                ], 429);
+            }
         }
 
         // Get activities for context

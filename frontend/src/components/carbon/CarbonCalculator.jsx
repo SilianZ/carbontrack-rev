@@ -3,7 +3,7 @@ import { CheckCircle, ArrowLeft, Leaf } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { carbonAPI } from '../../lib/api';
 import { ActivitySelector } from './ActivitySelector';
-import { DataInputForm } from './DataInputForm';
+import DataInputForm from './DataInputForm';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import { Alert, AlertDescription } from '../ui/Alert';
@@ -178,8 +178,8 @@ export function CarbonCalculator() {
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${currentStep >= step.id
-                  ? 'bg-green-600 border-green-600 text-white'
-                  : 'border-gray-300 text-gray-500'
+                ? 'bg-green-600 border-green-600 text-white'
+                : 'border-gray-300 text-gray-500'
                 }`}>
                 {currentStep > step.id ? (
                   <CheckCircle className="w-6 h-6" />

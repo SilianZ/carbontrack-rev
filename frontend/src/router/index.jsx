@@ -28,6 +28,7 @@ const SecurityPage = React.lazy(() => import('../pages/SecurityPage'));
 // Admin pages
 const AdminDashboardPage = React.lazy(() => import('../pages/admin/Dashboard'));
 const AdminUsersPage = React.lazy(() => import('../pages/admin/Users'));
+const AdminUserGroupsPage = React.lazy(() => import('../pages/admin/UserGroups'));
 const AdminActivitiesPage = React.lazy(() => import('../pages/admin/Activities'));
 const AdminBadgesPage = React.lazy(() => import('../pages/admin/Badges'));
 const AdminAvatarsPage = React.lazy(() => import('../pages/admin/Avatars'));
@@ -95,6 +96,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: 'dashboard', element: <React.Suspense fallback={<LoadingSpinner />}><AdminDashboardPage /></React.Suspense> },
       { path: 'users', element: <React.Suspense fallback={<LoadingSpinner />}><AdminUsersPage /></React.Suspense> },
+      { path: 'users/groups', element: <React.Suspense fallback={<LoadingSpinner />}><AdminUserGroupsPage /></React.Suspense> },
       { path: 'activities', element: <React.Suspense fallback={<LoadingSpinner />}><AdminActivitiesPage /></React.Suspense> },
       { path: 'badges', element: <React.Suspense fallback={<LoadingSpinner />}><AdminBadgesPage /></React.Suspense> },
       { path: 'avatars', element: <React.Suspense fallback={<LoadingSpinner />}><AdminAvatarsPage /></React.Suspense> },

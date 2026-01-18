@@ -272,6 +272,12 @@ export const adminAPI = {
   getUserBadges: (id, params = {}) => api.get(`/admin/users/${id}/badges`, { params }),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
 
+  // User Groups
+  getUserGroups: () => api.get('/admin/users/groups'),
+  createUserGroup: (data) => api.post('/admin/users/groups', data),
+  updateUserGroup: (id, data) => api.put(`/admin/users/groups/${id}`, data),
+  deleteUserGroup: (id) => api.delete(`/admin/users/groups/${id}`),
+
   // 调整用户积分
   adjustUserPoints: (id, data) => api.post('/admin/users/' + id + '/points/adjust', data),
 

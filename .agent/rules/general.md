@@ -69,7 +69,7 @@ The frontend is a modern SPA.
 ## Git Commit Guidelines
 
 - **Language Style**: All git commit messages MUST be written in **Classical Chinese (Simplified forms)** (简体中文文言文).
-    - Ensure the tone is concise and adheres to classical grammatical structures where appropriate, but remains understandable.
+    - Ensure the tone is concise and adheres to classical grammatical structures where appropriate, but remains understandable. You can refer to previous Chinese commits.
     - **Examples**:
         - Feature: `初创此项，以此为基` (Initial commit / Add feature)
         - Defect: `修复漏洞，不仅其微` (Fix bug)

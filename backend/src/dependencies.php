@@ -50,6 +50,9 @@ use CarbonTrack\Controllers\AdminAiController;
 use CarbonTrack\Controllers\UserAiController;
 use CarbonTrack\Services\AdminAiCommandRepository;
 use CarbonTrack\Services\UserAiService;
+use CarbonTrack\Services\QuotaService;
+use CarbonTrack\Services\UserGroupService;
+use CarbonTrack\Controllers\AdminUserGroupController;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -405,6 +408,32 @@ $__deps_initializer = function (Container $container) {
         return new ErrorLogService(
             $c->get(PDO::class),
             $c->get(Logger::class)
+        );
+    });
+
+
+
+    $container->set(QuotaService::class, function (ContainerInterface $c) {
+        return new QuotaService();
+    });
+
+    $container->set(UserAiController::class, function (ContainerInterface $c) {
+        return new UserAiController(
+            $c->get(UserAiService::class),
+            $c->get(CarbonCalculatorService::class),
+            $c->get(QuotaService::class),
+            $c->get(LoggerInterface::class),
+            $c->get(AuthService::class)
+        );
+    });
+
+    $container->set(UserGroupService::class, function (ContainerInterface $c) {
+        return new UserGroupService();
+    });
+
+    $container->set(AdminUserGroupController::class, function (ContainerInterface $c) {
+        return new AdminUserGroupController(
+            $c->get(UserGroupService::class)
         );
     });
 

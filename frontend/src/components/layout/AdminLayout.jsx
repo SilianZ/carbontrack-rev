@@ -34,24 +34,21 @@ import {
   Award,
   PackageCheck,
   UserCircle2,
+  UserCog,
   Repeat2,
   Radio,
   ScrollText,
   Stethoscope,
-  Sparkles,
-  ShieldCheck,
-  Bot,
-  Loader2,
 } from 'lucide-react';
-import api, { adminAPI } from '../../lib/api';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
+import api from '../../lib/api';
 
-const COMMAND_MIN_LENGTH = 2;
-const MAX_SESSIONS = 8;
+const COMMAND_MIN_LENGTH = 3;
 
 const NAV_LINKS = [
   { key: 'dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
   { key: 'users', to: '/admin/users', icon: Users },
+  { key: 'groups', to: '/admin/users/groups', icon: UserCog },
   { key: 'activities', to: '/admin/activities', icon: Leaf },
   { key: 'products', to: '/admin/products', icon: PackageCheck },
   { key: 'badges', to: '/admin/badges', icon: Award },
@@ -77,6 +74,7 @@ export default function AdminLayout() {
     const fallbackLabels = {
       dashboard: '管理总览',
       users: '用户管理',
+      groups: '用户组管理',
       activities: '碳活动管理',
       products: '兑换商品',
       badges: '徽章管理',
@@ -311,14 +309,14 @@ export default function AdminLayout() {
         prev.map((session) =>
           session.id === sessionId
             ? {
-                ...session,
-                intent: resolvedIntent,
-                alternatives,
-                metadata: data.metadata ?? null,
-                capabilities: data.capabilities ?? null,
-                status: 'resolved',
-                timestamp: Date.now(),
-              }
+              ...session,
+              intent: resolvedIntent,
+              alternatives,
+              metadata: data.metadata ?? null,
+              capabilities: data.capabilities ?? null,
+              status: 'resolved',
+              timestamp: Date.now(),
+            }
             : session
         )
       );
@@ -341,12 +339,12 @@ export default function AdminLayout() {
         prev.map((session) =>
           session.id === sessionId
             ? {
-                ...session,
-                error: message,
-                errorCode: apiError?.code ?? null,
-                status: 'error',
-                timestamp: Date.now(),
-              }
+              ...session,
+              error: message,
+              errorCode: apiError?.code ?? null,
+              status: 'error',
+              timestamp: Date.now(),
+            }
             : session
         )
       );
@@ -497,21 +495,21 @@ export default function AdminLayout() {
                                   {(session.metadata?.model ||
                                     session.metadata?.usage?.total_tokens ||
                                     session.capabilities?.fingerprint) && (
-                                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-emerald-800/80">
-                                      {session.metadata?.model && <span>{session.metadata.model}</span>}
-                                      {session.metadata?.mode && <span>{session.metadata.mode}</span>}
-                                      {session.metadata?.usage?.total_tokens && (
-                                        <span>
-                                          {t('admin.command.aiTokens', 'Tokens')}：{session.metadata.usage.total_tokens}
-                                        </span>
-                                      )}
-                                      {session.capabilities?.fingerprint && (
-                                        <span className="uppercase tracking-wide">
-                                          KB {session.capabilities.fingerprint.slice(0, 8)}
-                                        </span>
-                                      )}
-                                    </div>
-                                  )}
+                                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-emerald-800/80">
+                                        {session.metadata?.model && <span>{session.metadata.model}</span>}
+                                        {session.metadata?.mode && <span>{session.metadata.mode}</span>}
+                                        {session.metadata?.usage?.total_tokens && (
+                                          <span>
+                                            {t('admin.command.aiTokens', 'Tokens')}：{session.metadata.usage.total_tokens}
+                                          </span>
+                                        )}
+                                        {session.capabilities?.fingerprint && (
+                                          <span className="uppercase tracking-wide">
+                                            KB {session.capabilities.fingerprint.slice(0, 8)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
                                   <span className="self-start rounded-full bg-emerald-200 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
                                     {getTapHint(session.intent.type)}
                                   </span>

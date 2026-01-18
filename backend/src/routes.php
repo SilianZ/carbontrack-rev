@@ -20,6 +20,7 @@ use CarbonTrack\Controllers\AdminBadgeController;
 use CarbonTrack\Controllers\SystemLogController;
 use CarbonTrack\Controllers\AdminAiController;
 use CarbonTrack\Controllers\UserAiController;
+use CarbonTrack\Controllers\AdminUserGroupController;
 use CarbonTrack\Controllers\LogSearchController;
 use CarbonTrack\Controllers\StatsController;
 use CarbonTrack\Middleware\AuthMiddleware;
@@ -196,6 +197,11 @@ return function (App $app) {
     $registerAdminRoutes = function (RouteCollectorProxy $group) {
         $group->group('/admin', function (RouteCollectorProxy $admin) {
             $admin->get(PATH_USERS, [AdminController::class, 'getUsers']);
+            $admin->get(PATH_USERS . '/groups', [AdminUserGroupController::class, 'list']);
+            $admin->post(PATH_USERS . '/groups', [AdminUserGroupController::class, 'create']);
+            $admin->put(PATH_USERS . '/groups/{id:[0-9]+}', [AdminUserGroupController::class, 'update']);
+            $admin->delete(PATH_USERS . '/groups/{id:[0-9]+}', [AdminUserGroupController::class, 'delete']);
+
             $admin->get(PATH_USERS . PATTERN_ID_NUMERIC . '/badges', [AdminController::class, 'getUserBadges']);
             $admin->get(PATH_USERS . PATTERN_ID_NUMERIC . '/overview', [AdminController::class, 'getUserOverview']);
             // 用户管理
