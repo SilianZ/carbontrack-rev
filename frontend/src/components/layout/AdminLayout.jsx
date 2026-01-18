@@ -28,22 +28,27 @@ import {
 } from '../ui/command';
 import { cn } from '../../lib/utils';
 import {
-  LayoutDashboard,
-  Users,
-  Leaf,
   Award,
+  Bot,
+  LayoutDashboard,
+  Leaf,
+  Loader2,
   PackageCheck,
+  Radio,
+  Repeat2,
+  ScrollText,
+  ShieldCheck,
+  Sparkles,
+  Stethoscope,
   UserCircle2,
   UserCog,
-  Repeat2,
-  Radio,
-  ScrollText,
-  Stethoscope,
+  Users,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import api from '../../lib/api';
+import api, { adminAPI } from '../../lib/api';
 
 const COMMAND_MIN_LENGTH = 3;
+const MAX_SESSIONS = 6;
 
 const NAV_LINKS = [
   { key: 'dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
