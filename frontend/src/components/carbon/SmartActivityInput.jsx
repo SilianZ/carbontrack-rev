@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles, ArrowRight, Loader2 } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Button } from '../ui/Button';
-import { Textarea } from '../ui/Textarea';
+import { Textarea } from '../ui/textarea';
 import { Card, CardContent } from '../ui/Card';
 import { Alert, AlertDescription } from '../ui/Alert';
 import { carbonAPI } from '../../lib/api';
