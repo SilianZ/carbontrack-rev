@@ -9,6 +9,11 @@
 /.tmp_backup/
 /.clinerules/
 
+# AI Agent Instructions (not to be committed)
+/AGENTS.md
+/.agent/rules/general.md
+/.github/copilot-instructions.md
+
 # Backend ignores
 /backend/vendor/
 /backend/.phpunit.cache/
