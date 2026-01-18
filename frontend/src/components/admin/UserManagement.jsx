@@ -21,6 +21,7 @@ import {
   CalendarDays,
   Award,
   Edit,
+  Settings,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
