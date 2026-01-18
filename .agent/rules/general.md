@@ -75,3 +75,4 @@ The frontend is a modern SPA.
         - Defect: `修复漏洞，不仅其微` (Fix bug)
         - Refactor: `重构代码，去芜存菁` (Refactor code)
         - Docs: `修订文档，文以载道` (Update documentation)
+    - **Format**: Use the conventional `<type>(<scope>): <文言文主题>` pattern as in `fix(admin): 修复管理布局引用，兼修规约`; keep scope concise (e.g., `frontend`, `backend`, `ci`, `i18n`, `admin`, etc.).
