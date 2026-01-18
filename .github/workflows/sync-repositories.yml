@@ -173,6 +173,7 @@ jobs:
         FRONTEND_TOKEN: ${{ secrets.FRONTEND_REPO_TOKEN }}
       run: |
         echo "Bootstrapping frontend CI in target repo (if different)"
+        rm -rf frontend-repo-boot
         git clone https://x-access-token:${FRONTEND_TOKEN}@github.com/carbon-track/frontend.git frontend-repo-boot
         cd frontend-repo-boot
         git fetch origin main --depth=1
@@ -223,7 +224,6 @@ jobs:
         gh pr merge "$BRANCH" --repo "carbon-track/frontend" --auto --merge
 
     - name: Create bootstrap PR for frontend
-      if: always()
       uses: peter-evans/create-pull-request@v5
       with:
         token: ${{ secrets.FRONTEND_REPO_TOKEN }}
@@ -348,6 +348,7 @@ jobs:
         BACKEND_TOKEN: ${{ secrets.BACKEND_REPO_TOKEN }}
       run: |
         echo "Bootstrapping backend CI in target repo (if different)"
+        rm -rf backend-repo-boot
         git clone https://x-access-token:${BACKEND_TOKEN}@github.com/carbon-track/backend.git backend-repo-boot
         cd backend-repo-boot
         git fetch origin main --depth=1
@@ -391,7 +392,6 @@ jobs:
         gh pr merge "$BRANCH" --repo "carbon-track/backend" --auto --merge
 
     - name: Create bootstrap PR for backend
-      if: always()
       uses: peter-evans/create-pull-request@v5
       with:
         token: ${{ secrets.BACKEND_REPO_TOKEN }}
