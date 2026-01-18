@@ -40,13 +40,17 @@ jobs:
         # 判断是否为 Push 事件
         if [ "${{ github.event_name }}" = "push" ]; then
           
-          # 【关键修复】如果是新分支 (Before 是 000...)，则改用 HEAD~1 对比 HEAD
+          # 【关键修复】如果是新分支 (Before 是 000...) 或 Before 不再存在（例如 force-push），则改用 HEAD~1 对比 HEAD
           if [ "$BEFORE" = "$ZERO_SHA" ]; then
             echo "New branch detected. Comparing HEAD~1 to HEAD..."
-            DIFF_CMD="git diff --name-only HEAD~1 HEAD"
+            DIFF_RANGE="HEAD~1 HEAD"
+          elif git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            DIFF_RANGE="$BEFORE..$AFTER"
           else
-            DIFF_CMD="git diff --name-only $BEFORE..$AFTER"
+            echo "Before commit not found (likely force-push). Falling back to HEAD~1..HEAD"
+            DIFF_RANGE="HEAD~1 HEAD"
           fi
+          DIFF_CMD="git diff --name-only $DIFF_RANGE"
           
           # 执行检查
           if $DIFF_CMD | grep -q "^frontend/"; then
@@ -79,10 +83,14 @@ jobs:
           
           if [ "$BEFORE" = "$ZERO_SHA" ]; then
             echo "New branch detected. Comparing HEAD~1 to HEAD..."
-            DIFF_CMD="git diff --name-only HEAD~1 HEAD"
+            DIFF_RANGE="HEAD~1 HEAD"
+          elif git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            DIFF_RANGE="$BEFORE..$AFTER"
           else
-            DIFF_CMD="git diff --name-only $BEFORE..$AFTER"
+            echo "Before commit not found (likely force-push). Falling back to HEAD~1..HEAD"
+            DIFF_RANGE="HEAD~1 HEAD"
           fi
+          DIFF_CMD="git diff --name-only $DIFF_RANGE"
 
           if $DIFF_CMD | grep -q "^backend/"; then
             echo "changed=true" >> $GITHUB_OUTPUT
