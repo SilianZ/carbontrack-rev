@@ -556,6 +556,12 @@
     "pointsEarned": "Points Earned",
     "unknownActivity": "Unknown Activity",
     "currentStatus": "Current Status",
+    "smartAdd": {
+      "title": "Smart Add Activity",
+      "placeholder": "Describe your activity, e.g., 'I took a 5km bus ride'",
+      "button": "Magic Fill",
+      "notFound": "Could not find activity type."
+    },
     "searchPlaceholder": "Search activities...",
     "noActivitiesFound": "No activities found",
     "tryDifferentSearch": "Try different search terms or filters",

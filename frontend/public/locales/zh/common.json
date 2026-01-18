@@ -551,6 +551,12 @@
     "pointsEarned": "获得积分",
     "currentStatus": "当前状态",
     "unknownActivity": "未知活动",
+    "smartAdd": {
+      "title": "智能添加活动",
+      "placeholder": "描述您的活动，例如“乘坐公交 5 公里”",
+      "button": "智能填充",
+      "notFound": "未找到匹配的活动类型。"
+    },
     "categories": {
       "all": "全部",
       "daily": "日常生活",
