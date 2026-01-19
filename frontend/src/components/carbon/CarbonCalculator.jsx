@@ -71,7 +71,8 @@ export function CarbonCalculator() {
       setSmartData({
         amount: prediction.amount,
         unit: prediction.unit,
-        description: prediction.notes || prediction.description // if AI returns it (currently doesn't, but good for future)
+        description: prediction.notes || prediction.description, // if AI returns it
+        activity_date: prediction.activity_date || null,
       });
       setCurrentStep(2);
       setError('');

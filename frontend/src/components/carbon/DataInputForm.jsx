@@ -50,6 +50,9 @@ export default function DataInputForm({
       if (initialData.description) {
         setValue('description', initialData.description);
       }
+      if (initialData.activity_date) {
+        setValue('activity_date', initialData.activity_date);
+      }
       // Trigger calculation if needed, but the existing useEffect watches 'watchedData' which will update when we setValue
     }
   }, [initialData, setValue]);
