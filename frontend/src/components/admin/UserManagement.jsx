@@ -124,7 +124,13 @@ export function UserManagement() {
   const [bulkDialog, setBulkDialog] = useState({ open: false, presetUsers: [] });
   const [detailState, setDetailState] = useState({ open: false, userId: null });
   const [showRevokedBadges, setShowRevokedBadges] = useState(false);
-  const [editDialog, setEditDialog] = useState({ open: false, user: null, configJson: '', notes: '', groupId: '' });
+  const [editDialog, setEditDialog] = useState({
+    open: false,
+    user: null,
+    notes: '',
+    groupId: '',
+    quotaFlat: {}
+  });
 
   const { data: groups } = useQuery('adminUserGroups', () =>
     adminAPI.getUserGroups().then(res => res.data?.data || [])
@@ -456,37 +462,43 @@ export function UserManagement() {
       user,
       groupId: user.group_id || '',
       notes: user.admin_notes || '',
-      configJson: user.quota_override ? JSON.stringify(user.quota_override, null, 2) : ''
+      quotaFlat: user.quota_flat || {}
     });
   };
 
   const closeDetailedEdit = () => {
-    setEditDialog({ open: false, user: null, configJson: '', notes: '', groupId: '' });
+    setEditDialog({ open: false, user: null, notes: '', groupId: '', quotaFlat: {} });
+  };
+
+  const handleQuotaChange = (key, value) => {
+    setEditDialog(prev => ({
+      ...prev,
+      quotaFlat: {
+        ...prev.quotaFlat,
+        [key]: value
+      }
+    }));
   };
 
   const handleSubmitDetailedEdit = (e) => {
     e.preventDefault();
     if (!editDialog.user) return;
-    try {
-      const payload = {
-        group_id: editDialog.groupId || '', // Send empty string to clear? Or null. AdminController handles null if empty string passed? Backend expects null or int.
-        admin_notes: editDialog.notes,
-        quota_override: editDialog.configJson ? JSON.parse(editDialog.configJson) : null
-      };
-      // Fix empty string group_id to null if needed, or let backend handle (backend casts to int or null)
 
-      updateUserMutation.mutate(
-        { id: editDialog.user.id, data: payload },
-        {
-          onSuccess: () => {
-            closeDetailedEdit();
-            toast.success(t('admin.users.updateSuccess'));
-          }
+    const payload = {
+      group_id: editDialog.groupId || '',
+      admin_notes: editDialog.notes,
+      quota_flat: editDialog.quotaFlat
+    };
+
+    updateUserMutation.mutate(
+      { id: editDialog.user.id, data: payload },
+      {
+        onSuccess: () => {
+          closeDetailedEdit();
+          toast.success(t('admin.users.updateSuccess'));
         }
-      );
-    } catch (err) {
-      toast.error(t('admin.groups.invalidJson', 'JSON 格式错误'));
-    }
+      }
+    );
   };
 
   const openBulkBadgeDialog = (usersList) => {
@@ -713,16 +725,13 @@ export function UserManagement() {
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => openDetailedEdit(user)} title={t('admin.users.editUser', '编辑配置')}>
-                            <Edit className="h-4 w-4" />
+                            <Settings className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)} title={t('admin.users.toggleAdminButton', '切换管理员权限')}>
                             <Shield className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => openBulkBadgeDialog([user])} title={t('admin.users.awardBadgeButton', '授予徽章')} disabled={badgeOptions.length === 0}>
                             <Sparkles className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openDetailedEdit(user)} title={t('admin.users.editDetailedButton', '编辑详细配置')}>
-                            <Settings className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user)} className="text-red-600 hover:text-red-800" title={t('admin.users.deleteButton', '删除用户')}>
                             <Trash2 className="h-4 w-4" />
@@ -840,13 +849,25 @@ export function UserManagement() {
                 ))}
               </select>
             </div>
-            <div>
-              <Label>{t('admin.groups.config', '配额重写 (JSON)')}</Label>
-              <Textarea
-                className="font-mono h-32"
-                value={editDialog.configJson}
-                onChange={e => setEditDialog({ ...editDialog, configJson: e.target.value })}
-              />
+
+            {/* Dynamic Quota Usage Inputs - Render inputs for each flattened quota key */}
+            <div className="space-y-3 border-t pt-3 border-b pb-3">
+              <Label className="text-base font-semibold">{t('admin.groups.quotaOverride', '配额单独设置')}</Label>
+              {Object.keys(editDialog.quotaFlat || {}).length > 0 ? (
+                Object.entries(editDialog.quotaFlat).map(([key, value]) => (
+                  <div key={key}>
+                    <Label className="capitalize">{key.replace('.', ' ')}</Label>
+                    <Input
+                      type="number"
+                      value={value ?? ''}
+                      onChange={e => handleQuotaChange(key, e.target.value)}
+                      placeholder={t('common.default', '默认')}
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">{t('admin.groups.noQuotasAvailable', '暂无可配置的配额项目')}</p>
+              )}
             </div>
             <div>
               <Label>{t('admin.groups.notes', '备注')}</Label>
