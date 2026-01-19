@@ -21,7 +21,11 @@ export function SmartActivityInput({ onSuggestion }) {
         setError('');
 
         try {
-            const response = await carbonAPI.suggestActivity(query);
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const response = await carbonAPI.suggestActivity(query, {
+                client_time: new Date().toISOString(),
+                client_timezone: timezone
+            });
             if (response.data.success) {
                 onSuggestion(response.data.prediction);
                 setQuery(''); // Clear input on success

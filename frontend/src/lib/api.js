@@ -166,7 +166,7 @@ export const carbonAPI = {
   getRecentActivities: (params = {}) => api.get('/users/me/activities', { params }),
 
   // Smart Activity Suggestion
-  suggestActivity: (query) => api.post('/ai/suggest-activity', { query }),
+  suggestActivity: (query, meta = {}) => api.post('/ai/suggest-activity', { query, ...meta }),
 };
 
 export const productAPI = {
