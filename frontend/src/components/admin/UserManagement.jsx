@@ -856,7 +856,7 @@ export function UserManagement() {
               {Object.keys(editDialog.quotaFlat || {}).length > 0 ? (
                 Object.entries(editDialog.quotaFlat).map(([key, value]) => (
                   <div key={key}>
-                    <Label className="capitalize">{key.replace('.', ' ')}</Label>
+                    <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
                     <Input
                       type="number"
                       value={value ?? ''}
