@@ -43,22 +43,35 @@ export function CarbonCalculator() {
   }, []);
 
   const handleSmartSuggestion = (prediction) => {
-    if (!prediction || !prediction.activity_name) return;
+    if (!prediction) return;
 
-    // Find matching activity
-    // We try exact match first on name_en or name_zh
-    const name = prediction.activity_name.toLowerCase();
-    const match = activities.find(a =>
-      (a.name_en && a.name_en.toLowerCase() === name) ||
-      (a.name_zh && a.name_zh.toLowerCase() === name) ||
-      (a.name && a.name.toLowerCase() === name)
-    );
+    // Prefer UUID match
+    let match = null;
+    if (prediction.activity_uuid) {
+      match = activities.find(
+        (a) =>
+          String(a.id) === String(prediction.activity_uuid) ||
+          String(a.uuid || '') === String(prediction.activity_uuid)
+      );
+    }
+
+    // Fallback to name matching
+    if (!match && prediction.activity_name) {
+      const name = prediction.activity_name.toLowerCase();
+      match = activities.find(
+        (a) =>
+          (a.name_en && a.name_en.toLowerCase() === name) ||
+          (a.name_zh && a.name_zh.toLowerCase() === name) ||
+          (a.name && a.name.toLowerCase() === name)
+      );
+    }
 
     if (match) {
       setSelectedActivity(match);
       setSmartData({
         amount: prediction.amount,
-        description: prediction.description // if AI returns it (currently doesn't, but good for future)
+        unit: prediction.unit,
+        description: prediction.notes || prediction.description // if AI returns it (currently doesn't, but good for future)
       });
       setCurrentStep(2);
       setError('');
