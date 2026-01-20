@@ -42,8 +42,18 @@ export async function searchLogs(params = {}) {
 // Related logs by request_id (system + audit + error + llm)
 export async function fetchRelatedLogs(requestId) {
   if (!requestId) return { system: [], audit: [], error: [], llm: [] };
-  const res = await api.get(`/admin/logs/related?request_id=${encodeURIComponent(requestId)}`);
-  return res.data;
+  const query = new URLSearchParams();
+  query.append('request_id', requestId);
+  query.append('types', 'system,audit,error,llm');
+  query.append('limit_per_type', '200');
+  const res = await api.get(`/admin/logs/search?${query.toString()}`);
+  const payload = res.data?.data || res.data || {};
+  return {
+    system: payload.system?.items || payload.system || [],
+    audit: payload.audit?.items || payload.audit || [],
+    error: payload.error?.items || payload.error || [],
+    llm: payload.llm?.items || payload.llm || []
+  };
 }
 
 // Export logs (CSV or NDJSON) using same query structure as searchLogs.

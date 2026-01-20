@@ -844,7 +844,17 @@ export default function AdminLlmUsagePage() {
                       <td className="px-4 py-2 text-right">{log.total_tokens ?? '-'}</td>
                       <td className="px-4 py-2 text-right">{log.latency_ms ?? '-'}</td>
                       <td className="px-4 py-2 font-mono text-[11px] truncate max-w-[140px]" title={log.request_id}>
-                        {log.request_id || '-'}
+                        {log.request_id ? (
+                          <button
+                            type="button"
+                            className="text-blue-600 hover:underline"
+                            onClick={() => openRelated(log.request_id)}
+                          >
+                            {log.request_id}
+                          </button>
+                        ) : (
+                          '-'
+                        )}
                       </td>
                       <td className="px-4 py-2 max-w-[220px] truncate font-mono text-[11px]" title={log.prompt}>
                         {log.prompt ? String(log.prompt).slice(0, 120) : '-'}
