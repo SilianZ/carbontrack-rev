@@ -237,6 +237,7 @@ export function RequestIdRelatedDrawer({
                     toneClass="bg-rose-50/60"
                     summary={(
                       <>
+                        <KV label={columnLabel('request_id')} value={log.request_id || requestId} />
                         <KV label={columnLabel('error_type')} value={log.error_type} />
                         <KV label={columnLabel('error_file')} value={log.error_file} />
                         <KV label={columnLabel('error_line')} value={log.error_line} />
@@ -249,6 +250,7 @@ export function RequestIdRelatedDrawer({
                       <div className="space-y-3 text-xs">
                         <DetailGrid
                           items={[
+                            { label: columnLabel('request_id'), value: log.request_id || requestId },
                             { label: columnLabel('error_type'), value: log.error_type },
                             { label: columnLabel('error_file'), value: log.error_file },
                             { label: columnLabel('error_line'), value: log.error_line },

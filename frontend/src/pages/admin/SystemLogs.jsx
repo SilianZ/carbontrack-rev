@@ -27,7 +27,7 @@ import { cn } from '../../lib/utils';
 
 const SYSTEM_COLUMNS = ['id', 'method', 'path', 'status_code', 'user_id', 'duration_ms', 'created_at', 'ops'];
 const AUDIT_COLUMNS = ['id', 'actor_type', 'action', 'operation_category', 'status', 'user_id', 'ip_address', 'created_at', 'ops'];
-const ERROR_COLUMNS = ['id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time', 'ops'];
+const ERROR_COLUMNS = ['id', 'request_id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time', 'ops'];
 const LLM_COLUMNS = ['id', 'actor_type', 'actor_id', 'source', 'model', 'llm_status', 'total_tokens', 'latency_ms', 'created_at', 'ops'];
 
 const COLUMN_STORAGE_KEYS = {
@@ -627,13 +627,25 @@ export default function SystemLogsPage() {
                 title={t('admin.systemLogs.sections.error')}
                 items={errorLogs}
                 emptyText={t('admin.systemLogs.empty.error')}
-                headers={['id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time']}
+                headers={['id', 'request_id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time']}
                 columnLabel={columnLabel}
                 renderItem={(log) => (
                   <ExpandableRow
                     key={`error-${log.id}`}
                     summaryCells={[
                       log.id,
+                      log.request_id ? (
+                        <Button
+                          key="request"
+                          variant="link"
+                          className="h-auto p-0 text-[11px] font-mono text-indigo-600"
+                          onClick={() => openRelated(log.request_id)}
+                        >
+                          {log.request_id}
+                        </Button>
+                      ) : (
+                        '-'
+                      ),
                       log.error_type,
                       <span
                         key="message"
@@ -646,7 +658,7 @@ export default function SystemLogsPage() {
                       log.error_line,
                       log.error_time
                     ]}
-                    detail={<ErrorDetail log={log} columnLabel={columnLabel} />}
+                    detail={<ErrorDetail log={log} columnLabel={columnLabel} onRelated={openRelated} t={t} />}
                     t={t}
                   />
                 )}
@@ -1090,10 +1102,18 @@ function AuditDetail({ log, columnLabel }) {
   );
 }
 
-function ErrorDetail({ log, columnLabel }) {
+function ErrorDetail({ log, columnLabel, onRelated, t }) {
   return (
     <div className="space-y-2 text-xs">
       <KeyVal label={columnLabel('id')} value={log.id} />
+      <div className="flex flex-wrap items-center gap-2">
+        <KeyVal label={columnLabel('request_id')} value={log.request_id || '-'} />
+        {log.request_id && (
+          <Button variant="link" className="h-auto p-0 text-xs" onClick={() => onRelated?.(log.request_id)}>
+            {t('admin.systemLogs.related')}
+          </Button>
+        )}
+      </div>
       <KeyVal label={columnLabel('error_type')} value={log.error_type} />
       <KeyVal label={columnLabel('error_file')} value={log.error_file} />
       <KeyVal label={columnLabel('error_line')} value={log.error_line} />
