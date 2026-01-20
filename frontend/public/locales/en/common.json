@@ -994,6 +994,8 @@
       "aiActionSuccess": "Command executed",
       "aiActionFailed": "Command failed",
       "aiNoMatch": "Can't interpret this command yet",
+      "aiFallbackTitle": "Command not understood",
+      "aiFallbackReason": "We couldn't extract a clear admin intent. Try a keyword search or be more specific.",
       "navigation": "Navigation",
       "quickActions": "Quick actions",
       "searchUsers": "Search users",

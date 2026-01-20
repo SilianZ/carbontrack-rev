@@ -986,6 +986,8 @@
       "aiActionSuccess": "指令已执行",
       "aiActionFailed": "指令执行失败",
       "aiNoMatch": "暂时无法理解该指令",
+      "aiFallbackTitle": "未能理解的指令",
+      "aiFallbackReason": "无法从输入中提取明确的管理指令，请改用关键字搜索或再具体一些。",
       "navigation": "界面导航",
       "quickActions": "快捷操作",
       "searchUsers": "搜索用户",

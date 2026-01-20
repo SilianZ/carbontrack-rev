@@ -485,25 +485,50 @@ export default function AdminLayout() {
                           </CommandItem>
                         ) : (
                           <React.Fragment>
-                            {session.intent && (
+                            {session.intent && (() => {
+                              const isFallback = session.intent.type === 'fallback';
+                              const intentLabel = isFallback
+                                ? t('admin.command.aiFallbackTitle', '未能理解的指令')
+                                : (session.intent.label || t('admin.command.aiSuggestionFallback', '智能建议'));
+                              const intentReasoning = isFallback
+                                ? t('admin.command.aiFallbackReason', '无法从输入中提取明确的管理指令，请改用关键字搜索或再具体一些。')
+                                : session.intent.reasoning;
+                              const intentTagClass = isFallback
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-emerald-100 text-emerald-700';
+                              const intentCardClass = isFallback
+                                ? 'border-amber-200 bg-amber-50 text-amber-900'
+                                : 'border-emerald-100 bg-emerald-50 text-emerald-900';
+                              const intentReasonClass = isFallback
+                                ? 'text-amber-700'
+                                : 'text-emerald-700';
+                              const intentHintClass = isFallback
+                                ? 'bg-amber-200 text-amber-900'
+                                : 'bg-emerald-200 text-emerald-800';
+                              return (
                               <CommandItem
                                 value={`ai-intent-${session.id}`}
-                                onSelect={() => handleAiIntentSelect(session.intent)}
-                                disabled={isExecutingAiAction && session.intent.type === 'action'}
+                                onSelect={isFallback ? undefined : () => handleAiIntentSelect(session.intent)}
+                                disabled={isFallback || (isExecutingAiAction && session.intent.type === 'action')}
                                 className="items-start gap-3 rounded-2xl bg-transparent px-0 py-0"
                               >
-                                <span className="mt-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                                <span
+                                  className={cn(
+                                    'mt-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+                                    intentTagClass
+                                  )}
+                                >
                                   {t('admin.command.aiLabel', '助手')}
                                 </span>
-                                <div className="flex w-full flex-col gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 shadow-sm">
-                                  <span className="font-medium">{session.intent.label || t('admin.command.aiSuggestionFallback', '智能建议')}</span>
-                                  {session.intent.reasoning && (
-                                    <span className="text-xs text-emerald-700">{session.intent.reasoning}</span>
+                                <div className={cn('flex w-full flex-col gap-2 rounded-2xl border px-3 py-2 text-sm shadow-sm', intentCardClass)}>
+                                  <span className="font-medium">{intentLabel}</span>
+                                  {intentReasoning && (
+                                    <span className={cn('text-xs', intentReasonClass)}>{intentReasoning}</span>
                                   )}
                                   {(session.metadata?.model ||
                                     session.metadata?.usage?.total_tokens ||
                                     session.capabilities?.fingerprint) && (
-                                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-emerald-800/80">
+                                      <div className={cn('flex flex-wrap items-center gap-2 text-[11px]', isFallback ? 'text-amber-800/80' : 'text-emerald-800/80')}>
                                         {session.metadata?.model && <span>{session.metadata.model}</span>}
                                         {session.metadata?.mode && <span>{session.metadata.mode}</span>}
                                         {session.metadata?.usage?.total_tokens && (
@@ -518,12 +543,15 @@ export default function AdminLayout() {
                                         )}
                                       </div>
                                     )}
-                                  <span className="self-start rounded-full bg-emerald-200 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
-                                    {getTapHint(session.intent.type)}
-                                  </span>
+                                  {!isFallback && (
+                                    <span className={cn('self-start rounded-full px-2 py-0.5 text-[11px] font-medium', intentHintClass)}>
+                                      {getTapHint(session.intent.type)}
+                                    </span>
+                                  )}
                                 </div>
                               </CommandItem>
-                            )}
+                              );
+                            })()}
                             {session.alternatives.map((alt, index) => (
                               <CommandItem
                                 key={`ai-alt-${session.id}-${index}`}
