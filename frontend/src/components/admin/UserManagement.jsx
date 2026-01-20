@@ -22,6 +22,8 @@ import {
   Award,
   Edit,
   Settings,
+  Flame,
+  RefreshCcw,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -71,6 +73,8 @@ const normalizeUser = (user = {}) => {
   return {
     ...user,
     is_admin: user.is_admin === true || user.is_admin === 1 || user.is_admin === '1',
+    checkin_days: toNumber(user.checkin_days),
+    makeup_checkins: toNumber(user.makeup_checkins),
   };
 };
 
@@ -313,6 +317,7 @@ export function UserManagement() {
     [overviewData]
   );
   const detailUser = selectedUser ?? overviewUser;
+  const checkinStats = overviewData?.checkin_stats || {};
   const metricsCards = useMemo(() => {
     if (!overviewData && !detailUser) {
       return [];
@@ -326,6 +331,18 @@ export function UserManagement() {
       { key: 'days', label: t('admin.users.detail.daysSinceRegistration', '注册天数'), value: detailUser?.days_since_registration ?? metrics.days_since_registration ?? 0, icon: CalendarDays },
     ];
   }, [overviewData, detailUser, t]);
+
+  const checkinCards = useMemo(() => {
+    if (!overviewData && !detailUser) {
+      return [];
+    }
+    return [
+      { key: 'current', label: t('admin.users.checkins.currentStreak', '当前连击'), value: checkinStats.current_streak ?? 0, icon: Flame },
+      { key: 'longest', label: t('admin.users.checkins.longestStreak', '历史最长'), value: checkinStats.longest_streak ?? 0, icon: Flame },
+      { key: 'total', label: t('admin.users.checkins.totalDays', '累计打卡'), value: checkinStats.total_days ?? detailUser?.checkin_days ?? 0, icon: CalendarDays },
+      { key: 'makeup', label: t('admin.users.checkins.makeupDays', '补打卡'), value: checkinStats.makeup_days ?? detailUser?.makeup_checkins ?? 0, icon: RefreshCcw },
+    ];
+  }, [overviewData, detailUser, checkinStats, t]);
 
   const selectedUsers = useMemo(() => Array.from(selectedUsersMap.values()), [selectedUsersMap]);
   const badgeOptions = useMemo(() => {
@@ -679,6 +696,7 @@ export function UserManagement() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.role')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.status')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.badges', '徽章')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.checkins', '打卡')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.carbon', '碳减排')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.points')}</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.actions')}</th>
@@ -707,6 +725,19 @@ export function UserManagement() {
                             <span className="text-xs text-muted-foreground">
                               {t('admin.users.activeBadgesCount', '激活 {{count}}', { count: user.active_badges || 0 })}
                             </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex flex-col">
+                            <span>{t('admin.users.checkins.totalDaysLabel', '累计 {{count}} 天', { count: user.checkin_days || 0 })}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {t('admin.users.checkins.makeupDaysLabel', '补打卡 {{count}}', { count: user.makeup_checkins || 0 })}
+                            </span>
+                            {user.last_checkin_date && (
+                              <span className="text-xs text-muted-foreground">
+                                {t('admin.users.checkins.lastDate', '最近 {{date}}', { date: user.last_checkin_date })}
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -946,6 +977,39 @@ export function UserManagement() {
                   );
                 })}
               </div>
+
+              {checkinCards.length > 0 && (
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-base font-semibold">{t('admin.users.checkins.title', '打卡概况')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('admin.users.checkins.subtitle', '查看用户连击与补打卡情况')}</p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {checkinCards.map((card) => {
+                      const Icon = card.icon;
+                      return (
+                        <div key={card.key} className="rounded-lg border bg-white p-4 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{card.label}</p>
+                            <Icon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <p className="mt-2 text-xl font-semibold">
+                            {Number(card.value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {checkinStats.active_today
+                      ? t('admin.users.checkins.activeToday', '今日已打卡')
+                      : t('admin.users.checkins.inactiveToday', '今日未打卡')}
+                    {checkinStats.last_checkin_date || detailUser?.last_checkin_date ? (
+                      <> · {t('admin.users.checkins.lastDateLong', '最近打卡 {{date}}', { date: checkinStats.last_checkin_date || detailUser?.last_checkin_date })}</>
+                    ) : null}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

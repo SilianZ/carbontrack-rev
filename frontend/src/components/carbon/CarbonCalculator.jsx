@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CheckCircle, ArrowLeft, Leaf } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { carbonAPI } from '../../lib/api';
@@ -11,6 +12,7 @@ import { SmartActivityInput } from './SmartActivityInput';
 
 export function CarbonCalculator() {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [activities, setActivities] = useState([]); // Store fetched activities
   const [loadingActivities, setLoadingActivities] = useState(false);
@@ -21,6 +23,21 @@ export function CarbonCalculator() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null);
   const [error, setError] = useState('');
+
+  const checkinDate = useMemo(() => {
+    const raw = searchParams.get('checkin_date');
+    if (!raw) {
+      return null;
+    }
+    const trimmed = String(raw).trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : null;
+  }, [searchParams]);
+
+  const clearCheckinDate = useCallback(() => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('checkin_date');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   // Fetch activities on mount to support Smart matching
   React.useEffect(() => {
@@ -228,6 +245,17 @@ export function CarbonCalculator() {
         </Alert>
       )}
 
+      {checkinDate && (
+        <Alert className="mb-6 border-emerald-200 bg-emerald-50 text-emerald-800">
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>{t('activities.checkin.makeupNotice', '补打卡日期：{{date}}，提交记录后将计入该日', { date: checkinDate })}</span>
+            <Button variant="ghost" size="sm" onClick={clearCheckinDate}>
+              {t('activities.checkin.clear', '取消补打卡')}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* 步骤内容 */}
       <div className="space-y-6">
         {/* 步骤1: 选择活动 */}
@@ -266,6 +294,7 @@ export function CarbonCalculator() {
               isCalculating={isCalculating}
               isSubmitting={isSubmitting}
               initialData={smartData}
+              checkinDate={checkinDate}
             />
           </div>
         )}

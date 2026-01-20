@@ -16,7 +16,8 @@ export default function DataInputForm({
   onSubmit,
   calculationResult,
   isSubmitting,
-  initialData
+  initialData,
+  checkinDate
 }) {
   const { t, currentLanguage } = useTranslation();
   // 选中的本地文件（未立即上传）
@@ -143,6 +144,9 @@ export default function DataInputForm({
       description: data.description,
       images: (finalImages || []).map(i => ({ url: i.url, file_path: i.file_path, original_name: i.original_name, mime_type: i.mime_type, size: i.size }))
     };
+    if (checkinDate) {
+      payload.checkin_date = checkinDate;
+    }
     onSubmit(payload);
   };
 
@@ -373,6 +377,11 @@ export default function DataInputForm({
                 {errors.activity_date && (
                   <p className="mt-1 text-sm text-red-600">
                     {errors.activity_date.message}
+                  </p>
+                )}
+                {checkinDate && (
+                  <p className="mt-2 text-xs text-emerald-600">
+                    {t('activities.checkin.makeupHelper', '补打卡日期：{{date}}（不影响活动发生时间）', { date: checkinDate })}
                   </p>
                 )}
               </div>

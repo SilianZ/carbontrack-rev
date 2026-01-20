@@ -165,6 +165,12 @@ export const carbonAPI = {
   // 获取最近活动
   getRecentActivities: (params = {}) => api.get('/users/me/activities', { params }),
 
+  // 获取用户打卡日历
+  getCheckins: (params = {}) => api.get('/users/me/checkins', { params }),
+
+  // 补打卡
+  makeupCheckin: (data) => api.post('/users/me/checkins/makeup', data),
+
   // Smart Activity Suggestion
   suggestActivity: (query, meta = {}) => api.post('/ai/suggest-activity', { query, ...meta }),
 };

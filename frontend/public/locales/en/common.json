@@ -448,6 +448,11 @@
     "activityTrendDesc": "Your activity trends over the past 30 days",
     "monthlyAchievements": "Monthly Achievements",
     "leaderboard": "Leaderboard",
+    "streakLeaderboard": "Streak Leaderboard",
+    "streakMine": "My streak",
+    "streakRank": "Rank",
+    "streakDays": "days",
+    "streakEmpty": "No streak data yet",
     "loadError": "Failed to load dashboard data",
     "notLoggedIn": "Please log in to access the dashboard",
     "noDataAvailable": "No data available yet",
@@ -498,7 +503,46 @@
     "monthlyRecords": "{{count}} records",
     "previousMonths": "Previous months",
     "monthlyCarbonSummary": "{{carbon}} kg saved · {{records}} records",
-    "monthlyPointsShort": "+{{points}} pts"
+    "monthlyPointsShort": "+{{points}} pts",
+    "leaderboardScopes": {
+      "global": "Global",
+      "region": "Region",
+      "school": "School"
+    },
+    "checkin": {
+      "calendarTitle": "Activity Calendar",
+      "calendarDescription": "Log at least one carbon record each day to light it up.",
+      "makeupRemaining": "Makeup remaining {{count}}",
+      "currentStreak": "Current streak",
+      "todayChecked": "Checked in today",
+      "todayMissing": "No check-in today",
+      "longestStreak": "Longest streak",
+      "totalDays": "{{count}} total days",
+      "makeupQuota": "Makeup quota",
+      "monthlyReset": "Resets monthly",
+      "legendActive": "Active day",
+      "legendMakeup": "Makeup check-in",
+      "selectedDate": "Selected {{date}}",
+      "selectHint": "Select a date to view status",
+      "statusChecked": "Checked in",
+      "statusMakeup": "Makeup check-in",
+      "statusRecord": "Record submission",
+      "statusFuture": "Future dates cannot be checked in",
+      "statusMissing": "No check-in",
+      "selectHelper": "Pick a date to fill missed check-ins.",
+      "makeupButton": "Makeup check-in",
+      "makeupAction": "Go to makeup",
+      "makeupHint": "You will be redirected to submit an activity",
+      "makeupQuotaUsed": "Monthly makeup quota used",
+      "makeupDialogTitle": "Makeup check-in",
+      "makeupDialogDescription": "Log a missed active day in the past.",
+      "makeupDateLabel": "Check-in date",
+      "makeupNoteLabel": "Note (optional)",
+      "makeupNotePlaceholder": "Add context if needed",
+      "makeupConfirm": "Confirm makeup",
+      "makeupSuccess": "Makeup check-in saved",
+      "makeupFailed": "Makeup check-in failed"
+    }
   },
   "achievements": {
     "title": "My Achievements",
@@ -578,6 +622,11 @@
       "travel": "Green Travel",
       "unknown": "Unknown Category"
     },
+    "checkin": {
+      "makeupNotice": "Makeup date: {{date}}. This submission will count for that day.",
+      "clear": "Clear makeup",
+      "makeupHelper": "Makeup date: {{date}} (does not change activity date)"
+    },
     "form": {
       "selectActivity": "Select Activity",
       "selectActivityDesc": "Choose the environmental activity you performed",
@@ -619,6 +668,11 @@
       "submitFailed": "Failed to submit activity",
       "inputDescription": "Enter the activity data to calculate carbon savings and points.",
       "previewAutoUpdate": "Updates in real time as you edit."
+    },
+    "checkin": {
+      "makeupNotice": "Makeup date: {{date}}. This submission will count toward that day.",
+      "makeupHelper": "Makeup date: {{date}} (does not change activity date)",
+      "clear": "Cancel makeup"
     },
     "status": {
       "pending": "Pending",
@@ -1481,7 +1535,22 @@
         "points": "Points",
         "actions": "Actions",
         "badges": "Badges",
-        "carbon": "Carbon saved (kg)"
+        "carbon": "Carbon saved (kg)",
+        "checkins": "Check-ins"
+      },
+      "checkins": {
+        "title": "Check-in overview",
+        "subtitle": "Streaks and makeup usage for this user",
+        "currentStreak": "Current streak",
+        "longestStreak": "Longest streak",
+        "totalDays": "Total check-ins",
+        "makeupDays": "Makeup check-ins",
+        "totalDaysLabel": "{{count}} days",
+        "makeupDaysLabel": "{{count}} makeup",
+        "lastDate": "Last {{date}}",
+        "lastDateLong": "Last check-in {{date}}",
+        "activeToday": "Checked in today",
+        "inactiveToday": "Not checked in today"
       },
       "selectUserHint": "Select at least one user first",
       "selectedCount": "Selected {{count}} users",

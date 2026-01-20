@@ -440,6 +440,11 @@
     "activityTrendDesc": "过去30天的碳减排趋势",
     "monthlyAchievements": "本月成就",
     "leaderboard": "排行榜",
+    "streakLeaderboard": "连击排行榜",
+    "streakMine": "我的连击",
+    "streakRank": "排名",
+    "streakDays": "天",
+    "streakEmpty": "暂无连击数据",
     "loadError": "加载仪表板数据失败",
     "notLoggedIn": "请先登录以查看仪表板",
     "noDataAvailable": "暂无数据",
@@ -490,7 +495,46 @@
     "monthlyRecords": "{{count}} 条",
     "previousMonths": "历史月份",
     "monthlyCarbonSummary": "{{carbon}} 千克减排 · {{records}} 条记录",
-    "monthlyPointsShort": "+{{points}} 积分"
+    "monthlyPointsShort": "+{{points}} 积分",
+    "leaderboardScopes": {
+      "global": "全服",
+      "region": "地区",
+      "school": "学校"
+    },
+    "checkin": {
+      "calendarTitle": "活动日历",
+      "calendarDescription": "每天提交一次碳减排记录即可点亮当日。",
+      "makeupRemaining": "补打卡剩余 {{count}}",
+      "currentStreak": "当前连击",
+      "todayChecked": "今日已打卡",
+      "todayMissing": "今天还未打卡",
+      "longestStreak": "历史最长",
+      "totalDays": "累计打卡 {{count}} 天",
+      "makeupQuota": "补打卡额度",
+      "monthlyReset": "每月重置",
+      "legendActive": "提交日活跃",
+      "legendMakeup": "补打卡",
+      "selectedDate": "已选择 {{date}}",
+      "selectHint": "选择日期以查看状态",
+      "statusChecked": "已打卡",
+      "statusMakeup": "补打卡",
+      "statusRecord": "提交记录",
+      "statusFuture": "未来日期不可补打卡",
+      "statusMissing": "未打卡",
+      "selectHelper": "点击日历上的日期后，可补打卡缺失的日子。",
+      "makeupButton": "补打卡",
+      "makeupAction": "去补打卡",
+      "makeupHint": "将跳转到提交活动页面完成补打卡",
+      "makeupQuotaUsed": "本月补打卡额度已用完",
+      "makeupDialogTitle": "补打卡",
+      "makeupDialogDescription": "为过去的日期补录一次活动日活跃记录。",
+      "makeupDateLabel": "补打卡日期",
+      "makeupNoteLabel": "备注（可选）",
+      "makeupNotePlaceholder": "说明原因或补充说明",
+      "makeupConfirm": "确认补打卡",
+      "makeupSuccess": "补打卡成功",
+      "makeupFailed": "补打卡失败"
+    }
   },
   "achievements": {
     "title": "我的成就",
@@ -570,6 +614,11 @@
       "travel": "绿色出行",
       "unknown": "未知分类"
     },
+    "checkin": {
+      "makeupNotice": "补打卡日期：{{date}}，提交记录后将计入该日",
+      "clear": "取消补打卡",
+      "makeupHelper": "补打卡日期：{{date}}（不影响活动发生时间）"
+    },
     "form": {
       "selectActivity": "选择活动",
       "selectActivityDesc": "从可用的碳减排活动中选择一个",
@@ -611,6 +660,11 @@
       "calculationFailed": "计算失败，请稍后重试",
       "submitFailed": "提交失败，请稍后重试",
       "previewAutoUpdate": "输入后实时更新预览。"
+    },
+    "checkin": {
+      "makeupNotice": "补打卡日期：{{date}}，提交记录后将计入该日",
+      "makeupHelper": "补打卡日期：{{date}}（不影响活动发生时间）",
+      "clear": "取消补打卡"
     },
     "status": {
       "pending": "待审核",
@@ -1469,7 +1523,22 @@
         "points": "积分",
         "actions": "操作",
         "badges": "徽章",
-        "carbon": "累计减排 (kg)"
+        "carbon": "累计减排 (kg)",
+        "checkins": "打卡"
+      },
+      "checkins": {
+        "title": "打卡概况",
+        "subtitle": "查看用户连击与补打卡情况",
+        "currentStreak": "当前连击",
+        "longestStreak": "历史最长",
+        "totalDays": "累计打卡",
+        "makeupDays": "补打卡",
+        "totalDaysLabel": "累计 {{count}} 天",
+        "makeupDaysLabel": "补打卡 {{count}}",
+        "lastDate": "最近 {{date}}",
+        "lastDateLong": "最近打卡 {{date}}",
+        "activeToday": "今日已打卡",
+        "inactiveToday": "今日未打卡"
       },
       "selectUserHint": "请先选择用户",
       "selectedCount": "已选择 {{count}} 位用户",

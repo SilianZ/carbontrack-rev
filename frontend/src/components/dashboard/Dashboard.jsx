@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Leaf, Award, TrendingUp, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { Leaf, Award, TrendingUp, Users, Flame } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { carbonAPI, badgeAPI } from '../../lib/api';
 import { checkAuthStatus } from '../../lib/auth';
@@ -8,7 +10,9 @@ import { ActivityChart } from './ActivityChart';
 import { RecentActivities } from './RecentActivities';
 import { QuickActions } from './QuickActions';
 import AchievementBadges from './AchievementBadges';
+import { CheckinCalendar } from './CheckinCalendar';
 import { Alert, AlertDescription } from '../ui/Alert';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import { toast } from 'react-hot-toast';
 import R2Image from '../common/R2Image';
 
@@ -20,10 +24,18 @@ export function Dashboard() {
   const [recentActivities, setRecentActivities] = useState([]);
   const [badges, setBadges] = useState([]);
   const [userBadges, setUserBadges] = useState([]);
+  const [checkins, setCheckins] = useState([]);
+  const [checkinStats, setCheckinStats] = useState({});
+  const [checkinQuota, setCheckinQuota] = useState({});
+  const [checkinMeta, setCheckinMeta] = useState({});
+  const [checkinMonth, setCheckinMonth] = useState(new Date());
+  const [checkinLoading, setCheckinLoading] = useState(false);
+  const [streakScope, setStreakScope] = useState('global');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const didFetchRef = useRef(false);
   const isAdmin = Boolean(user?.is_admin);
+  const navigate = useNavigate();
 
   const getInitial = (value) => {
     if (!value) return 'C';
@@ -66,12 +78,13 @@ export function Dashboard() {
     try {
       setLoading(true);
 
-      const [statsResponse, chartResponse, activitiesResponse, badgesResponse, userBadgesResponse] = await Promise.all([
+      const [statsResponse, chartResponse, activitiesResponse, badgesResponse, userBadgesResponse, checkinsResponse] = await Promise.all([
         carbonAPI.getUserStats(),
         carbonAPI.getChartData({ period: 30 }),
         carbonAPI.getRecentActivities({ limit: 10 }),
         badgeAPI.list(),
         badgeAPI.myBadges(),
+        carbonAPI.getCheckins({ month: format(new Date(), 'yyyy-MM') }),
       ]);
 
       if (statsResponse.data.success) {
@@ -93,6 +106,14 @@ export function Dashboard() {
       if (userBadgesResponse.data.success) {
         setUserBadges(userBadgesResponse.data.data || []);
       }
+
+      if (checkinsResponse.data.success) {
+        const payload = checkinsResponse.data.data || {};
+        setCheckins(Array.isArray(payload.checkins) ? payload.checkins : []);
+        setCheckinStats(payload.stats || {});
+        setCheckinQuota(payload.makeup_quota || {});
+        setCheckinMeta(payload.meta || {});
+      }
     } catch (err) {
       setError(err.message || t('dashboard.loadError'));
     } finally {
@@ -100,22 +121,51 @@ export function Dashboard() {
     }
   }, [t]);
 
-;
-
   useEffect(() => {
     // 防止在开发模式下 StrictMode 导致的重复执行
     if (didFetchRef.current) return;
     didFetchRef.current = true;
 
     const { user: currentUser } = checkAuthStatus();
-    if (currentUser) {
-      setUser(currentUser);
-      fetchDashboardData();
+      if (currentUser) {
+        setUser(currentUser);
+        fetchDashboardData();
     } else {
       setError(t('dashboard.notLoggedIn'));
       setLoading(false);
     }
   }, [t, fetchDashboardData]);
+
+  const fetchCheckins = useCallback(async (targetMonth) => {
+    try {
+      setCheckinLoading(true);
+      const monthKey = format(targetMonth, 'yyyy-MM');
+      const response = await carbonAPI.getCheckins({ month: monthKey });
+      if (response.data.success) {
+        const payload = response.data.data || {};
+        setCheckins(Array.isArray(payload.checkins) ? payload.checkins : []);
+        setCheckinStats(payload.stats || {});
+        setCheckinQuota(payload.makeup_quota || {});
+        setCheckinMeta(payload.meta || {});
+      }
+    } catch (err) {
+      toast.error(err.message || t('dashboard.loadError'));
+    } finally {
+      setCheckinLoading(false);
+    }
+  }, [t]);
+
+  const handleMonthChange = (nextMonth) => {
+    setCheckinMonth(nextMonth);
+    fetchCheckins(nextMonth);
+  };
+
+  const handleMakeupCheckin = useCallback(({ date }) => {
+    if (!date) {
+      return;
+    }
+    navigate(`/calculate?checkin_date=${encodeURIComponent(date)}`);
+  }, [navigate]);
 
 
   const handleQuickAction = (action) => {
@@ -165,6 +215,18 @@ export function Dashboard() {
       toast.error(t('dashboard.badgeAutoTriggerFailed', '触发自动授予失败'));
     }
   };
+
+  const streakLeaderboards = stats?.streak_leaderboards || {};
+  const streakStats = stats?.streak_stats || {};
+  const availableScopes = useMemo(() => {
+    const scopes = ['global'];
+    if (streakLeaderboards.region?.entries?.length) scopes.push('region');
+    if (streakLeaderboards.school?.entries?.length) scopes.push('school');
+    return scopes;
+  }, [streakLeaderboards]);
+
+  const activeStreakScope = availableScopes.includes(streakScope) ? streakScope : 'global';
+  const activeStreakBoard = streakLeaderboards[activeStreakScope] || { entries: [] };
 
   if (error) {
     return (
@@ -272,13 +334,25 @@ export function Dashboard() {
 
       {/* 最近活动 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentActivities
-          activities={recentActivities}
-          loading={loading}
-          onViewAll={handleViewAllActivities}
-        />
-        
-                {/* 成就徽章与排行榜 */}
+        <div className="space-y-6">
+          <CheckinCalendar
+            checkins={checkins}
+            stats={checkinStats}
+            quota={checkinQuota}
+            meta={checkinMeta}
+            month={checkinMonth}
+            loading={checkinLoading}
+            onMonthChange={handleMonthChange}
+            onMakeup={handleMakeupCheckin}
+          />
+          <RecentActivities
+            activities={recentActivities}
+            loading={loading}
+            onViewAll={handleViewAllActivities}
+          />
+        </div>
+
+        {/* 成就徽章与排行榜 */}
         <div className="space-y-6">
           <AchievementBadges
             badges={badges}
@@ -411,6 +485,62 @@ export function Dashboard() {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {stats.streak_leaderboards && (
+            <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 border border-amber-200 rounded-lg p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h3 className="text-lg font-semibold text-amber-800 flex items-center gap-2">
+                  <Flame className="h-5 w-5" />
+                  {t('dashboard.streakLeaderboard', '连击排行榜')}
+                </h3>
+                <div className="text-xs text-amber-700">
+                  {t('dashboard.streakMine', '我的连击')} {streakStats.current_streak ?? 0} · {t('dashboard.streakRank', '排名')} {streakStats.ranks?.[activeStreakScope] ?? '--'}
+                </div>
+              </div>
+
+              <Tabs value={activeStreakScope} onValueChange={setStreakScope} className="space-y-3">
+                <TabsList className="border-amber-200 bg-amber-50/60">
+                  {availableScopes.includes('global') && (
+                    <TabsTrigger value="global">{t('dashboard.leaderboardScopes.global', '全服')}</TabsTrigger>
+                  )}
+                  {availableScopes.includes('region') && (
+                    <TabsTrigger value="region">{t('dashboard.leaderboardScopes.region', '地区')}</TabsTrigger>
+                  )}
+                  {availableScopes.includes('school') && (
+                    <TabsTrigger value="school">{t('dashboard.leaderboardScopes.school', '学校')}</TabsTrigger>
+                  )}
+                </TabsList>
+
+                {availableScopes.map((scope) => (
+                  <TabsContent key={scope} value={scope}>
+                    {streakLeaderboards?.[scope]?.entries?.length ? (
+                      <div className="space-y-3">
+                        {streakLeaderboards[scope].entries.slice(0, 10).map((entry, index) => (
+                          <div key={entry.id ?? `${scope}-${index}`} className="flex items-center gap-3 text-sm text-amber-800">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                              index === 0 ? 'bg-yellow-500 text-white' :
+                              index === 1 ? 'bg-gray-400 text-white' :
+                              index === 2 ? 'bg-orange-500 text-white' :
+                              'bg-amber-200 text-amber-800'
+                            }`}>
+                              {index + 1}
+                            </div>
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              {renderLeaderboardAvatar(entry, 'h-7 w-7')}
+                              <span className="truncate">{entry.username || entry.name || '-'}</span>
+                            </div>
+                            <span className="text-xs font-semibold">{entry.current_streak ?? 0} {t('dashboard.streakDays', '天')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-amber-700">{t('dashboard.streakEmpty', '暂无连击数据')}</p>
+                    )}
+                  </TabsContent>
+                ))}
+              </Tabs>
             </div>
           )}
         </div>
