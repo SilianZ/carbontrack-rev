@@ -956,6 +956,7 @@
       "avatars": "头像管理",
       "exchanges": "积分兑换",
       "broadcast": "公告广播",
+      "llmUsage": "LLM 使用额度",
       "systemLogs": "系统日志",
       "diagnostics": "API 诊断"
     },
@@ -1827,7 +1828,8 @@
       "types": {
         "system": "系统日志",
         "audit": "审计日志",
-        "error": "错误日志"
+        "error": "错误日志",
+        "llm": "LLM 调用"
       },
       "filtersGroup": "过滤",
       "filtersTitle": "筛选条件",
@@ -1842,7 +1844,11 @@
         "durationMax": "耗时 ≤",
         "auditAction": "审计操作",
         "auditStatus": "审计状态",
-        "errorType": "错误类型"
+        "errorType": "错误类型",
+        "model": "模型",
+        "source": "来源",
+        "actorType": "调用方类型",
+        "llmStatus": "LLM 状态"
       },
       "placeholders": {
         "method": "GET",
@@ -1853,7 +1859,11 @@
         "duration": "毫秒",
         "auditAction": "CREATE",
         "auditStatus": "SUCCESS",
-        "errorType": "RuntimeError"
+        "errorType": "RuntimeError",
+        "model": "gpt-4o",
+        "source": "smart-activity",
+        "actorType": "admin",
+        "llmStatus": "success"
       },
       "perTypeLimit": "每类限制",
       "columnSettings": "列显示",
@@ -1878,12 +1888,14 @@
       "sections": {
         "system": "系统日志",
         "audit": "审计日志",
-        "error": "错误日志"
+        "error": "错误日志",
+        "llm": "LLM 调用"
       },
       "empty": {
         "system": "暂无系统日志",
         "audit": "暂无审计日志",
-        "error": "暂无错误日志"
+        "error": "暂无错误日志",
+        "llm": "暂无 LLM 调用"
       },
       "recordCount": "共 {{count}} 条",
       "actions": {
@@ -1918,17 +1930,156 @@
         "error_message": "错误信息",
         "error_file": "文件",
         "error_line": "行号",
-        "error_time": "时间"
+        "error_time": "时间",
+        "actor_id": "调用者 ID",
+        "source": "来源",
+        "model": "模型",
+        "llm_status": "LLM 状态",
+        "total_tokens": "Tokens",
+        "latency_ms": "耗时 (ms)",
+        "response_id": "响应 ID"
       },
       "drawer": {
         "title": "请求 ID：{{id}}",
         "refresh": "刷新",
         "loading": "正在加载关联日志...",
+        "systemTitle": "系统（{{count}}）",
         "auditTitle": "审计（{{count}}）",
-        "errorsTitle": "错误（{{count}}）"
+        "errorsTitle": "错误（{{count}}）",
+        "llmTitle": "LLM（{{count}}）"
       },
       "dateFrom": "起始日期",
       "dateTo": "结束日期"
+    },
+    "llmUsage": {
+      "title": "LLM 使用额度",
+      "subtitle": "汇总配额消耗、调用趋势与审计日志。",
+      "refresh": "刷新",
+      "noData": "暂无数据",
+      "other": "其他",
+      "actorAdmin": "管理员",
+      "actorUser": "用户",
+      "summary": {
+        "calls24h": "近 24 小时调用",
+        "calls24hHint": "最近一天",
+        "calls7d": "近 7 天调用",
+        "calls7dHint": "最近一周",
+        "calls30d": "近 30 天调用",
+        "calls30dHint": "最近一月",
+        "tokens30d": "30 天 Tokens",
+        "tokens30dHint": "累计 token 用量",
+        "adminCalls": "管理员调用",
+        "adminCallsHint": "30 天内",
+        "userCalls": "用户调用",
+        "userCallsHint": "30 天内"
+      },
+      "charts": {
+        "title": "趋势与图表",
+        "subtitle": "展示每日调用趋势、成功率和分布情况。",
+        "range": "近 {{days}} 天",
+        "callsTokens": "调用与 Tokens",
+        "callsTokensHint": "每日调用次数与 token 用量",
+        "successLatency": "成功率与延迟",
+        "successLatencyHint": "成功/失败次数与平均延迟",
+        "modelShare": "模型占比",
+        "modelShareHint": "按模型统计调用分布",
+        "sourceShare": "来源排行",
+        "sourceShareHint": "常用入口来源",
+        "actorShare": "调用方占比",
+        "actorShareHint": "管理员与用户使用分布",
+        "calls": "调用",
+        "tokens": "Tokens",
+        "success": "成功",
+        "failed": "失败",
+        "latency": "延迟"
+      },
+      "insights": {
+        "title": "使用洞察",
+        "subtitle": "基于近期调用情况的摘要。",
+        "successRate": "成功率",
+        "successRateHint": "共 {{total}} 次调用",
+        "avgLatency": "平均延迟",
+        "avgLatencyHint": "平均响应时间",
+        "p95Latency": "P95 延迟",
+        "p95LatencyHint": "95 分位延迟",
+        "avgTokens": "平均 Tokens/次",
+        "avgTokensHint": "单次平均 token",
+        "callsDelta": "调用变化（7天）",
+        "callsDeltaHint": "近 7 天 {{recent}} 次调用",
+        "tokensDelta": "Tokens 变化（7天）",
+        "tokensDeltaHint": "近 7 天 {{recent}} Tokens",
+        "topModel": "最常用模型",
+        "topModelHint": "区间内使用最多的模型",
+        "topSource": "主要来源",
+        "topSourceHint": "最常见的入口",
+        "adminShare": "管理员占比",
+        "adminShareHint": "管理员调用占比"
+      },
+      "recent": {
+        "title": "最近对话",
+        "subtitle": "展示最新的提示词、响应与关联信息。",
+        "empty": "暂无对话记录",
+        "source": "来源",
+        "model": "模型",
+        "path": "请求路径",
+        "clientTime": "客户端时间",
+        "prompt": "提示词",
+        "response": "响应",
+        "tokens": "Tokens",
+        "latency": "延迟 (ms)",
+        "requestId": "请求 ID",
+        "responseId": "响应 ID",
+        "relatedCounts": "关联：系统 {{system}} / 审计 {{audit}} / 错误 {{error}}",
+        "related": "关联日志",
+        "viewDetail": "查看详情"
+      },
+      "users": {
+        "title": "用户配额",
+        "subtitle": "查看用户 LLM 当日消耗与配额上限。",
+        "searchPlaceholder": "搜索用户名或邮箱",
+        "columns": {
+          "user": "用户",
+          "role": "角色",
+          "group": "用户组",
+          "dailyUsed": "今日已用",
+          "dailyLimit": "每日额度",
+          "remaining": "剩余额度",
+          "rateLimit": "每分钟上限",
+          "resetAt": "重置时间",
+          "lastUsed": "最近调用"
+        },
+        "admin": "管理员",
+        "user": "用户",
+        "unlimited": "不限额",
+        "empty": "暂无用户数据",
+        "pagination": "第 {{page}} / {{total}} 页",
+        "prev": "上一页",
+        "next": "下一页"
+      },
+      "logs": {
+        "title": "LLM 调用日志",
+        "subtitle": "记录提示词、模型响应与请求 ID。",
+        "searchPlaceholder": "按 prompt / model / source 搜索",
+        "columns": {
+          "time": "时间",
+          "actor": "调用方",
+          "source": "来源",
+          "model": "模型",
+          "status": "状态",
+          "tokens": "Tokens",
+          "latency": "耗时 (ms)",
+          "requestId": "请求 ID",
+          "prompt": "提示词",
+          "actions": "操作",
+          "responseId": "响应 ID"
+        },
+        "view": "查看",
+        "empty": "暂无调用记录",
+        "detailTitle": "LLM 日志 #{{id}}",
+        "prompt": "提示词",
+        "response": "原始响应",
+        "error": "错误信息"
+      }
     },
     "badges": {
       "listTitle": "成就徽章列表",

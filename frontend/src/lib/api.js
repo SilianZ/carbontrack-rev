@@ -289,6 +289,10 @@ export const adminAPI = {
 
   // 获取日志
   getLogs: (params = {}) => api.get('/admin/logs', { params }),
+  // LLM 使用统计
+  getLlmUsage: (params = {}) => api.get('/admin/llm-usage', { params }),
+  getLlmUsageAnalytics: (params = {}) => api.get('/admin/llm-usage/analytics', { params }),
+  getLlmLogDetail: (id) => api.get(`/admin/llm-usage/logs/${id}`),
 
   // AI指挥助手
   analyzeCommand: (data) => api.post('/admin/ai/intents', data),

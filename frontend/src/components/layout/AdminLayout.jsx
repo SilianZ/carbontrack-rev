@@ -60,6 +60,7 @@ const NAV_LINKS = [
   { key: 'avatars', to: '/admin/avatars', icon: UserCircle2 },
   { key: 'exchanges', to: '/admin/exchanges', icon: Repeat2 },
   { key: 'broadcast', to: '/admin/broadcast', icon: Radio },
+  { key: 'llmUsage', to: '/admin/llm-usage', icon: Sparkles },
   { key: 'systemLogs', to: '/admin/system-logs', icon: ScrollText },
   { key: 'diagnostics', to: '/admin/diagnostics', icon: Stethoscope },
 ];
@@ -86,6 +87,7 @@ export default function AdminLayout() {
       avatars: '头像管理',
       exchanges: '积分兑换',
       broadcast: '公告广播',
+      llmUsage: 'LLM 使用额度',
       systemLogs: '系统日志',
       diagnostics: 'AI 诊断',
     };
@@ -305,6 +307,7 @@ export default function AdminLayout() {
         query: trimmed,
         context: aiContext,
         mode: 'suggest',
+        source: aiContext.activeRoute ? `admin:${aiContext.activeRoute}` : 'admin-command'
       });
       const data = response.data ?? {};
       const resolvedIntent = data.intent ?? null;

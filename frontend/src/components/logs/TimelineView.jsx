@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-export function TimelineView({ system = [], audit = [], error = [], onSelectRequest, emptyLabel = 'No events' }) {
+export function TimelineView({ system = [], audit = [], error = [], llm = [], onSelectRequest, emptyLabel = 'No events' }) {
   // unify into events with timestamp
   const items = useMemo(() => {
     const mapTs = (v, type) => {
@@ -11,9 +11,10 @@ export function TimelineView({ system = [], audit = [], error = [], onSelectRequ
     return [
       ...system.map(r => mapTs(r,'system')),
       ...audit.map(r => mapTs(r,'audit')),
-      ...error.map(r => mapTs(r,'error'))
+      ...error.map(r => mapTs(r,'error')),
+      ...llm.map(r => mapTs(r,'llm'))
     ].sort((a,b)=> b.__ts - a.__ts).slice(0,500);
-  }, [system,audit,error]);
+  }, [system,audit,error,llm]);
 
   return (
     <div className="space-y-3">
@@ -29,9 +30,17 @@ export function TimelineView({ system = [], audit = [], error = [], onSelectRequ
               {it.duration_ms !== undefined && <Badge tone={durationTone(it.duration_ms)}>{it.duration_ms}ms</Badge>}
               {it.error_type && <Badge tone="red">{it.error_type}</Badge>}
               {it.action && <Badge>{it.action}</Badge>}
+              {it.model && <Badge tone="blue">{it.model}</Badge>}
+              {it.status && it.__type === 'llm' && <Badge tone={it.status === 'failed' ? 'red' : 'green'}>{it.status}</Badge>}
+              {it.total_tokens !== undefined && it.__type === 'llm' && <Badge tone="orange">{it.total_tokens}</Badge>}
             </div>
             {it.path && <div className="font-mono text-[10px] mt-1 break-all text-gray-600">{it.path}</div>}
             {it.error_message && <div className="font-mono text-[10px] mt-1 text-rose-600 break-all" title={it.error_message}>{it.error_message.slice(0,180)}</div>}
+            {it.prompt && it.__type === 'llm' && (
+              <div className="font-mono text-[10px] mt-1 text-gray-600 break-all" title={it.prompt}>
+                {String(it.prompt).slice(0, 180)}
+              </div>
+            )}
             <div className="text-[10px] text-gray-400 mt-1">{it.created_at || it.error_time}</div>
           </div>
         </div>
@@ -81,6 +90,7 @@ function color(type){
     case 'system': return 'text-green-600';
     case 'audit': return 'text-blue-600';
     case 'error': return 'text-red-600';
+    case 'llm': return 'text-indigo-600';
     default: return 'text-gray-500';
   }
 }
@@ -90,6 +100,7 @@ TimelineView.propTypes = {
   system: PropTypes.array,
   audit: PropTypes.array,
   error: PropTypes.array,
+  llm: PropTypes.array,
   onSelectRequest: PropTypes.func,
   emptyLabel: PropTypes.string
 };

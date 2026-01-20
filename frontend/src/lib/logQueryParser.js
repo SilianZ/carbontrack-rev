@@ -29,7 +29,16 @@ const KEY_MAP = {
   astatus: 'audit_status',
   audit_status: 'audit_status',
   etype: 'error_type',
-  error_type: 'error_type'
+  error_type: 'error_type',
+  model: 'model',
+  source: 'source',
+  actor: 'actor_type',
+  atype: 'actor_type',
+  actor_type: 'actor_type',
+  actor_id: 'actor_id',
+  aid: 'actor_id',
+  lstatus: 'llm_status',
+  llm_status: 'llm_status'
 };
 
 const RANGE_KEYS = new Set(['duration_ms','status_code']);

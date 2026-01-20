@@ -2,12 +2,26 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from '../../hooks/useTranslation';
 
-export function RequestIdRelatedDrawer({ open, onClose, requestId, data, loading, onRefresh }) {
+export function RequestIdRelatedDrawer({
+  open,
+  onClose,
+  requestId,
+  data,
+  loading,
+  onRefresh,
+  system,
+  audit,
+  error,
+  llm
+}) {
   const { t } = useTranslation();
   if (!open) return null;
 
-  const auditLogs = data?.audit || [];
-  const errorLogs = data?.error || [];
+  const resolved = data ?? { system, audit, error, llm };
+  const systemLogs = resolved?.system || [];
+  const auditLogs = resolved?.audit || [];
+  const errorLogs = resolved?.error || [];
+  const llmLogs = resolved?.llm || [];
 
   const renderEmpty = () => (
     <div className="text-xs text-muted-foreground">{t('common.none')}</div>
@@ -34,6 +48,20 @@ export function RequestIdRelatedDrawer({ open, onClose, requestId, data, loading
           {loading && <div>{t('admin.systemLogs.drawer.loading')}</div>}
           {!loading && (
             <>
+              <Section title={t('admin.systemLogs.drawer.systemTitle', { count: systemLogs.length })}>
+                {systemLogs.length === 0 && renderEmpty()}
+                {systemLogs.map((log) => (
+                  <div key={log.id} className="border rounded p-2 mb-2 bg-gray-50">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">
+                      <KV label={t('admin.systemLogs.columns.method')} value={log.method} />
+                      <KV label={t('admin.systemLogs.columns.path')} value={log.path} />
+                      <KV label={t('admin.systemLogs.columns.status_code')} value={log.status_code} />
+                      <KV label={t('admin.systemLogs.columns.duration_ms')} value={log.duration_ms} />
+                    </div>
+                  </div>
+                ))}
+              </Section>
+
               <Section title={t('admin.systemLogs.drawer.auditTitle', { count: auditLogs.length })}>
                 {auditLogs.length === 0 && renderEmpty()}
                 {auditLogs.map((log) => (
@@ -61,6 +89,27 @@ export function RequestIdRelatedDrawer({ open, onClose, requestId, data, loading
                     {log.error_message && (
                       <div className="font-mono text-[11px] break-all mt-1 text-muted-foreground">
                         {log.error_message}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </Section>
+
+              <Section title={t('admin.systemLogs.drawer.llmTitle', { count: llmLogs.length })}>
+                {llmLogs.length === 0 && renderEmpty()}
+                {llmLogs.map((log) => (
+                  <div key={log.id} className="border rounded p-2 mb-2 bg-indigo-50/60">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">
+                      <KV label={t('admin.systemLogs.columns.actor_type')} value={log.actor_type} />
+                      <KV label={t('admin.systemLogs.columns.actor_id')} value={log.actor_id} />
+                      <KV label={t('admin.systemLogs.columns.model')} value={log.model} />
+                      <KV label={t('admin.systemLogs.columns.llm_status')} value={log.status} />
+                      <KV label={t('admin.systemLogs.columns.total_tokens')} value={log.total_tokens} />
+                      <KV label={t('admin.systemLogs.columns.latency_ms')} value={log.latency_ms} />
+                    </div>
+                    {log.prompt && (
+                      <div className="font-mono text-[11px] break-all mt-1 text-muted-foreground">
+                        {(typeof log.prompt === 'string' ? log.prompt : JSON.stringify(log.prompt)).slice(0, 240)}
                       </div>
                     )}
                   </div>
@@ -98,7 +147,11 @@ RequestIdRelatedDrawer.propTypes = {
   requestId: PropTypes.string,
   data: PropTypes.object,
   loading: PropTypes.bool,
-  onRefresh: PropTypes.func
+  onRefresh: PropTypes.func,
+  system: PropTypes.array,
+  audit: PropTypes.array,
+  error: PropTypes.array,
+  llm: PropTypes.array
 };
 
 Section.propTypes = {

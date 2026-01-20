@@ -964,6 +964,7 @@
       "avatars": "Avatars",
       "exchanges": "Exchanges",
       "broadcast": "Broadcast Center",
+      "llmUsage": "LLM Usage",
       "systemLogs": "System Logs",
       "diagnostics": "API Diagnostics"
     },
@@ -1835,7 +1836,8 @@
       "types": {
         "system": "System Logs",
         "audit": "Audit Logs",
-        "error": "Error Logs"
+        "error": "Error Logs",
+        "llm": "LLM Calls"
       },
       "filtersGroup": "Filters",
       "filtersTitle": "Filters",
@@ -1846,11 +1848,15 @@
         "userId": "User ID",
         "requestId": "Request ID",
         "path": "Path contains",
-        "durationMin": "Duration ≥",
-        "durationMax": "Duration ≤",
+        "durationMin": "Duration >=",
+        "durationMax": "Duration <=",
         "auditAction": "Audit action",
         "auditStatus": "Audit status",
-        "errorType": "Error type"
+        "errorType": "Error type",
+        "model": "Model",
+        "source": "Source",
+        "actorType": "Actor type",
+        "llmStatus": "LLM status"
       },
       "placeholders": {
         "method": "GET",
@@ -1861,7 +1867,11 @@
         "duration": "ms",
         "auditAction": "CREATE",
         "auditStatus": "SUCCESS",
-        "errorType": "RuntimeError"
+        "errorType": "RuntimeError",
+        "model": "gpt-4o",
+        "source": "smart-activity",
+        "actorType": "admin",
+        "llmStatus": "success"
       },
       "perTypeLimit": "Limit / Type",
       "columnSettings": "Columns",
@@ -1886,12 +1896,14 @@
       "sections": {
         "system": "System Logs",
         "audit": "Audit Logs",
-        "error": "Error Logs"
+        "error": "Error Logs",
+        "llm": "LLM Calls"
       },
       "empty": {
         "system": "No system logs",
         "audit": "No audit logs",
-        "error": "No error logs"
+        "error": "No error logs",
+        "llm": "No LLM calls"
       },
       "recordCount": "{{count}} records",
       "actions": {
@@ -1926,17 +1938,156 @@
         "error_message": "Error message",
         "error_file": "File",
         "error_line": "Line",
-        "error_time": "Time"
+        "error_time": "Time",
+        "actor_id": "Actor ID",
+        "source": "Source",
+        "model": "Model",
+        "llm_status": "LLM status",
+        "total_tokens": "Tokens",
+        "latency_ms": "Latency (ms)",
+        "response_id": "Response ID"
       },
       "drawer": {
         "title": "Request ID: {{id}}",
         "refresh": "Refresh",
         "loading": "Loading related logs...",
+        "systemTitle": "System ({{count}})",
         "auditTitle": "Audit ({{count}})",
-        "errorsTitle": "Errors ({{count}})"
+        "errorsTitle": "Errors ({{count}})",
+        "llmTitle": "LLM ({{count}})"
       },
       "dateFrom": "Date from",
       "dateTo": "Date to"
+    },
+    "llmUsage": {
+      "title": "LLM Usage",
+      "subtitle": "Track quota consumption, call trends, and audit trails.",
+      "refresh": "Refresh",
+      "noData": "No data available",
+      "other": "Other",
+      "actorAdmin": "Admin",
+      "actorUser": "User",
+      "summary": {
+        "calls24h": "Calls (24h)",
+        "calls24hHint": "Last 24 hours",
+        "calls7d": "Calls (7d)",
+        "calls7dHint": "Last 7 days",
+        "calls30d": "Calls (30d)",
+        "calls30dHint": "Last 30 days",
+        "tokens30d": "Tokens (30d)",
+        "tokens30dHint": "Total token usage",
+        "adminCalls": "Admin calls",
+        "adminCallsHint": "Last 30 days",
+        "userCalls": "User calls",
+        "userCallsHint": "Last 30 days"
+      },
+      "charts": {
+        "title": "Trends & Charts",
+        "subtitle": "Daily usage trends, success rates, and distribution insights.",
+        "range": "Last {{days}} days",
+        "callsTokens": "Calls vs Tokens",
+        "callsTokensHint": "Daily LLM calls with token usage",
+        "successLatency": "Success vs Latency",
+        "successLatencyHint": "Success/failure counts with average latency",
+        "modelShare": "Model Share",
+        "modelShareHint": "Call distribution by model",
+        "sourceShare": "Top Sources",
+        "sourceShareHint": "Most common entry points",
+        "actorShare": "Actor Share",
+        "actorShareHint": "Admin vs user usage distribution",
+        "calls": "Calls",
+        "tokens": "Tokens",
+        "success": "Success",
+        "failed": "Failed",
+        "latency": "Latency"
+      },
+      "insights": {
+        "title": "Usage Insights",
+        "subtitle": "Highlights based on recent LLM activity.",
+        "successRate": "Success rate",
+        "successRateHint": "{{total}} total calls",
+        "avgLatency": "Avg latency",
+        "avgLatencyHint": "Average response time",
+        "p95Latency": "P95 latency",
+        "p95LatencyHint": "95th percentile latency",
+        "avgTokens": "Avg tokens/call",
+        "avgTokensHint": "Average total tokens per call",
+        "callsDelta": "Calls delta (7d)",
+        "callsDeltaHint": "{{recent}} calls in last 7 days",
+        "tokensDelta": "Tokens delta (7d)",
+        "tokensDeltaHint": "{{recent}} tokens in last 7 days",
+        "topModel": "Top model",
+        "topModelHint": "Most used model in range",
+        "topSource": "Top source",
+        "topSourceHint": "Most common entry point",
+        "adminShare": "Admin share",
+        "adminShareHint": "Share of admin calls"
+      },
+      "recent": {
+        "title": "Recent Conversations",
+        "subtitle": "Latest prompts and responses with related request context.",
+        "empty": "No recent conversations",
+        "source": "Source",
+        "model": "Model",
+        "path": "Request path",
+        "clientTime": "Client time",
+        "prompt": "Prompt",
+        "response": "Response",
+        "tokens": "Tokens",
+        "latency": "Latency (ms)",
+        "requestId": "Request ID",
+        "responseId": "Response ID",
+        "relatedCounts": "Related: system {{system}}, audit {{audit}}, error {{error}}",
+        "related": "Related logs",
+        "viewDetail": "View detail"
+      },
+      "users": {
+        "title": "User Quotas",
+        "subtitle": "Review daily LLM usage and limits per user.",
+        "searchPlaceholder": "Search username or email",
+        "columns": {
+          "user": "User",
+          "role": "Role",
+          "group": "Group",
+          "dailyUsed": "Daily used",
+          "dailyLimit": "Daily limit",
+          "remaining": "Remaining",
+          "rateLimit": "Rate limit",
+          "resetAt": "Reset at",
+          "lastUsed": "Last used"
+        },
+        "admin": "Admin",
+        "user": "User",
+        "unlimited": "Unlimited",
+        "empty": "No user data",
+        "pagination": "Page {{page}} / {{total}}",
+        "prev": "Previous",
+        "next": "Next"
+      },
+      "logs": {
+        "title": "LLM Call Logs",
+        "subtitle": "Inspect prompts, raw responses, and request IDs.",
+        "searchPlaceholder": "Search prompt / model / source",
+        "columns": {
+          "time": "Time",
+          "actor": "Actor",
+          "source": "Source",
+          "model": "Model",
+          "status": "Status",
+          "tokens": "Tokens",
+          "latency": "Latency (ms)",
+          "requestId": "Request ID",
+          "prompt": "Prompt",
+          "actions": "Actions",
+          "responseId": "Response ID"
+        },
+        "view": "View",
+        "empty": "No log entries",
+        "detailTitle": "LLM Log #{{id}}",
+        "prompt": "Prompt",
+        "response": "Raw Response",
+        "error": "Error"
+      }
     },
     "badges": {
       "listTitle": "Achievement Badges",

@@ -15,6 +15,7 @@ export default function RawView({
   system = [],
   audit = [],
   error = [],
+  llm = [],
   onExportCsv,
   onExportNdjson,
   labels = {}
@@ -23,7 +24,8 @@ export default function RawView({
     [
       ...system.map((record) => ({ ...record, __type: 'system' })),
       ...audit.map((record) => ({ ...record, __type: 'audit' })),
-      ...error.map((record) => ({ ...record, __type: 'error' }))
+      ...error.map((record) => ({ ...record, __type: 'error' })),
+      ...llm.map((record) => ({ ...record, __type: 'llm' }))
     ]
       .sort((a, b) => {
         const ta = Date.parse(a.created_at || a.error_time || a.time || a.timestamp || 0) || 0;
@@ -31,7 +33,7 @@ export default function RawView({
         return tb - ta;
       })
       .slice(0, 1000)
-  ), [system, audit, error]);
+  ), [system, audit, error, llm]);
 
   const labelSet = { ...DEFAULT_LABELS, ...labels };
   const ndjson = useMemo(() => merged.map((item) => JSON.stringify(item)).join('\n'), [merged]);
@@ -68,6 +70,7 @@ RawView.propTypes = {
   system: PropTypes.array,
   audit: PropTypes.array,
   error: PropTypes.array,
+  llm: PropTypes.array,
   onExportCsv: PropTypes.func,
   onExportNdjson: PropTypes.func,
   labels: PropTypes.object

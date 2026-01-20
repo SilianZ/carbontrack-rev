@@ -28,11 +28,13 @@ import { cn } from '../../lib/utils';
 const SYSTEM_COLUMNS = ['id', 'method', 'path', 'status_code', 'user_id', 'duration_ms', 'created_at', 'ops'];
 const AUDIT_COLUMNS = ['id', 'actor_type', 'action', 'operation_category', 'status', 'user_id', 'ip_address', 'created_at', 'ops'];
 const ERROR_COLUMNS = ['id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time', 'ops'];
+const LLM_COLUMNS = ['id', 'actor_type', 'actor_id', 'source', 'model', 'llm_status', 'total_tokens', 'latency_ms', 'created_at', 'ops'];
 
 const COLUMN_STORAGE_KEYS = {
   system: 'logCols_system',
   audit: 'logCols_audit',
-  error: 'logCols_error'
+  error: 'logCols_error',
+  llm: 'logCols_llm'
 };
 
 function loadStoredColumns(key, fallback) {
@@ -52,19 +54,20 @@ export default function SystemLogsPage() {
   const [q, setQ] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [activeTypes, setActiveTypes] = useState(['system', 'audit', 'error']);
+  const [activeTypes, setActiveTypes] = useState(['system', 'audit', 'error', 'llm']);
   const [limitPerType, setLimitPerType] = useState(50);
   const [selectedSystemId, setSelectedSystemId] = useState(null);
   const [view, setView] = useState('table');
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [requestDrawerId, setRequestDrawerId] = useState(null);
-  const [related, setRelated] = useState({ system: [], audit: [], error: [] });
+  const [related, setRelated] = useState({ system: [], audit: [], error: [], llm: [] });
   const [loadingRelated, setLoadingRelated] = useState(false);
   const [exporting, setExporting] = useState(false);
 
   const [systemCols, setSystemCols] = useState(() => loadStoredColumns(COLUMN_STORAGE_KEYS.system, SYSTEM_COLUMNS));
   const [auditCols, setAuditCols] = useState(() => loadStoredColumns(COLUMN_STORAGE_KEYS.audit, AUDIT_COLUMNS));
   const [errorCols, setErrorCols] = useState(() => loadStoredColumns(COLUMN_STORAGE_KEYS.error, ERROR_COLUMNS));
+  const [llmCols, setLlmCols] = useState(() => loadStoredColumns(COLUMN_STORAGE_KEYS.llm, LLM_COLUMNS));
 
   const prevMaxSystemId = useRef(0);
   const [highlightIds, setHighlightIds] = useState(new Set());
@@ -75,7 +78,7 @@ export default function SystemLogsPage() {
     const params = {};
     const tokens = parsedQuery.tokens || {};
 
-    ['method', 'status_code', 'user_id', 'request_id', 'path', 'action', 'audit_status', 'error_type'].forEach((key) => {
+    ['method', 'status_code', 'user_id', 'request_id', 'path', 'action', 'audit_status', 'error_type', 'model', 'source', 'actor_type', 'actor_id', 'llm_status'].forEach((key) => {
       if (tokens[key]) params[key] = tokens[key];
     });
 
@@ -127,6 +130,7 @@ export default function SystemLogsPage() {
   const systemLogs = data?.data?.system?.items || [];
   const auditLogs = data?.data?.audit?.items || [];
   const errorLogs = data?.data?.error?.items || [];
+  const llmLogs = data?.data?.llm?.items || [];
 
   useEffect(() => {
     if (!systemLogs.length) return;
@@ -178,6 +182,12 @@ export default function SystemLogsPage() {
         saveColumns(COLUMN_STORAGE_KEYS.error, next);
         return next;
       });
+    } else if (type === 'llm') {
+      setLlmCols((current) => {
+        const next = current.includes(column) ? current.filter((col) => col !== column) : [...current, column];
+        saveColumns(COLUMN_STORAGE_KEYS.llm, next);
+        return next;
+      });
     }
   }, [saveColumns]);
 
@@ -186,7 +196,7 @@ export default function SystemLogsPage() {
     setLoadingRelated(true);
     try {
       const response = await fetchRelatedLogs(requestId);
-      setRelated(response?.data || response || { system: [], audit: [], error: [] });
+      setRelated(response?.data || response || { system: [], audit: [], error: [], llm: [] });
     } finally {
       setLoadingRelated(false);
     }
@@ -217,7 +227,7 @@ export default function SystemLogsPage() {
     }
   }, [q, dateFrom, dateTo, activeTypes, limitPerType, extraParams]);
 
-  const hasResults = systemLogs.length + auditLogs.length + errorLogs.length > 0;
+  const hasResults = systemLogs.length + auditLogs.length + errorLogs.length + llmLogs.length > 0;
   const activeFilterEntries = Object.entries(parsedQuery.tokens || {}).filter(([, value]) => value && typeof value !== 'object');
   const hasActiveFilters = activeFilterEntries.length > 0 || Boolean(parsedQuery.free);
 
@@ -225,6 +235,8 @@ export default function SystemLogsPage() {
     (key) => t(`admin.systemLogs.columns.${key}`, { defaultValue: key }),
     [t]
   );
+
+  const llmHeaders = useMemo(() => llmCols.filter((col) => col !== 'ops'), [llmCols]);
 
   return (
     <div className="space-y-6">
@@ -278,6 +290,7 @@ export default function SystemLogsPage() {
                 systemCols={systemCols}
                 auditCols={auditCols}
                 errorCols={errorCols}
+                llmCols={llmCols}
                 onToggle={toggleColumn}
                 columnLabel={columnLabel}
                 t={t}
@@ -321,6 +334,7 @@ export default function SystemLogsPage() {
               <ToggleGroupItem value="system">{t('admin.systemLogs.types.system')}</ToggleGroupItem>
               <ToggleGroupItem value="audit">{t('admin.systemLogs.types.audit')}</ToggleGroupItem>
               <ToggleGroupItem value="error">{t('admin.systemLogs.types.error')}</ToggleGroupItem>
+              <ToggleGroupItem value="llm">{t('admin.systemLogs.types.llm')}</ToggleGroupItem>
             </ToggleGroup>
           </div>
         </CardHeader>
@@ -449,6 +463,54 @@ export default function SystemLogsPage() {
                 className="font-mono"
               />
             </FilterField>
+            <FilterField label={t('admin.systemLogs.filters.model')} htmlFor="log-model">
+              <Input
+                id="log-model"
+                value={extraParams.model || ''}
+                onChange={(event) => {
+                  const v = event.target.value;
+                  setQ((prev) => mergeToken(prev, 'model', v));
+                }}
+                placeholder={t('admin.systemLogs.placeholders.model')}
+                className="font-mono"
+              />
+            </FilterField>
+            <FilterField label={t('admin.systemLogs.filters.source')} htmlFor="log-source">
+              <Input
+                id="log-source"
+                value={extraParams.source || ''}
+                onChange={(event) => {
+                  const v = event.target.value;
+                  setQ((prev) => mergeToken(prev, 'source', v));
+                }}
+                placeholder={t('admin.systemLogs.placeholders.source')}
+                className="font-mono"
+              />
+            </FilterField>
+            <FilterField label={t('admin.systemLogs.filters.actorType')} htmlFor="log-actor-type">
+              <Input
+                id="log-actor-type"
+                value={extraParams.actor_type || ''}
+                onChange={(event) => {
+                  const v = event.target.value;
+                  setQ((prev) => mergeToken(prev, 'actor', v));
+                }}
+                placeholder={t('admin.systemLogs.placeholders.actorType')}
+                className="font-mono"
+              />
+            </FilterField>
+            <FilterField label={t('admin.systemLogs.filters.llmStatus')} htmlFor="log-llm-status">
+              <Input
+                id="log-llm-status"
+                value={extraParams.llm_status || ''}
+                onChange={(event) => {
+                  const v = event.target.value;
+                  setQ((prev) => mergeToken(prev, 'lstatus', v));
+                }}
+                placeholder={t('admin.systemLogs.placeholders.llmStatus')}
+                className="font-mono"
+              />
+            </FilterField>
             <FilterField label={t('admin.systemLogs.dateFrom')} htmlFor="log-date-from">
               <Input
                 id="log-date-from"
@@ -509,6 +571,22 @@ export default function SystemLogsPage() {
                 onRelated={openRelated}
                 columnLabel={columnLabel}
                 t={t}
+              />
+
+              <LogSection
+                title={t('admin.systemLogs.sections.llm')}
+                items={llmLogs}
+                emptyText={t('admin.systemLogs.empty.llm')}
+                headers={llmHeaders}
+                columnLabel={columnLabel}
+                renderItem={(log) => (
+                  <ExpandableRow
+                    key={`llm-${log.id}`}
+                    summaryCells={llmHeaders.map((column) => llmCell(log, column))}
+                    detail={<LlmDetail log={log} columnLabel={columnLabel} onRelated={openRelated} t={t} />}
+                    t={t}
+                  />
+                )}
               />
 
               <LogSection
@@ -595,6 +673,7 @@ export default function SystemLogsPage() {
                   system={systemLogs}
                   audit={auditLogs}
                   error={errorLogs}
+                  llm={llmLogs}
                   onSelectRequest={openRelated}
                   emptyLabel={t('admin.systemLogs.noEvents')}
                 />
@@ -613,6 +692,7 @@ export default function SystemLogsPage() {
                   system={systemLogs}
                   audit={auditLogs}
                   error={errorLogs}
+                  llm={llmLogs}
                   onExportCsv={() => doExport('csv')}
                   onExportNdjson={() => doExport('ndjson')}
                   labels={{
@@ -690,9 +770,8 @@ export default function SystemLogsPage() {
         requestId={requestDrawerId}
         onClose={() => setRequestDrawerId(null)}
         loading={loadingRelated}
-        system={related.system}
-        audit={related.audit}
-        error={related.error}
+        data={related}
+        onRefresh={() => requestDrawerId && openRelated(requestDrawerId)}
       />
     </div>
   );
@@ -708,7 +787,7 @@ function FilterField({ label, htmlFor, children }) {
     </div>
   );
 }
-function ColumnSelector({ systemCols, auditCols, errorCols, onToggle, columnLabel, t }) {
+function ColumnSelector({ systemCols, auditCols, errorCols, llmCols, onToggle, columnLabel, t }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -737,6 +816,13 @@ function ColumnSelector({ systemCols, auditCols, errorCols, onToggle, columnLabe
           columns={ERROR_COLUMNS}
           active={errorCols}
           onToggle={(column) => onToggle('error', column)}
+          columnLabel={columnLabel}
+        />
+        <ColumnGroup
+          title={t('admin.systemLogs.types.llm')}
+          columns={LLM_COLUMNS}
+          active={llmCols}
+          onToggle={(column) => onToggle('llm', column)}
           columnLabel={columnLabel}
         />
       </PopoverContent>
@@ -1022,6 +1108,31 @@ function ErrorDetail({ log, columnLabel }) {
   );
 }
 
+function LlmDetail({ log, columnLabel, onRelated, t }) {
+  return (
+    <div className="space-y-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2">
+        <KeyVal label={columnLabel('request_id')} value={log.request_id || '-'} />
+        {log.request_id && (
+          <Button variant="link" className="h-auto p-0 text-xs" onClick={() => onRelated?.(log.request_id)}>
+            {t('admin.systemLogs.related')}
+          </Button>
+        )}
+      </div>
+      <KeyVal label={columnLabel('actor_type')} value={log.actor_type} />
+      <KeyVal label={columnLabel('actor_id')} value={log.actor_id || '-'} />
+      <KeyVal label={columnLabel('source')} value={log.source || '-'} />
+      <KeyVal label={columnLabel('model')} value={log.model || '-'} />
+      <KeyVal label={columnLabel('llm_status')} value={log.status || '-'} />
+      <KeyVal label={columnLabel('response_id')} value={log.response_id || '-'} />
+      <KeyVal label={columnLabel('total_tokens')} value={log.total_tokens ?? '-'} />
+      <KeyVal label={columnLabel('latency_ms')} value={log.latency_ms ?? '-'} />
+      {log.prompt && <JsonTreeBlock title="prompt" value={safeParse(log.prompt)} />}
+      {log.error_message && <JsonTreeBlock title="error_message" value={safeParse(log.error_message)} />}
+    </div>
+  );
+}
+
 function JsonSection({ title, value, onCopy, copyLabel }) {
   if (!value) return null;
   return (
@@ -1063,6 +1174,31 @@ function safeParse(value) {
     return JSON.parse(value);
   } catch (error) {
     return value;
+  }
+}
+
+function llmCell(log, column) {
+  switch (column) {
+    case 'id':
+      return log.id;
+    case 'actor_type':
+      return log.actor_type;
+    case 'actor_id':
+      return log.actor_id ?? '-';
+    case 'source':
+      return log.source || '-';
+    case 'model':
+      return log.model || '-';
+    case 'llm_status':
+      return log.status || '-';
+    case 'total_tokens':
+      return log.total_tokens ?? '-';
+    case 'latency_ms':
+      return log.latency_ms ?? '-';
+    case 'created_at':
+      return log.created_at;
+    default:
+      return log[column] ?? '-';
   }
 }
 

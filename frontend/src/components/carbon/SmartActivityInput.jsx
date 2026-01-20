@@ -24,7 +24,8 @@ export function SmartActivityInput({ onSuggestion }) {
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             const response = await carbonAPI.suggestActivity(query, {
                 client_time: new Date().toISOString(),
-                client_timezone: timezone
+                client_timezone: timezone,
+                entry: 'smart-activity-input'
             });
             if (response.data.success) {
                 onSuggestion(response.data.prediction);
