@@ -1,5 +1,5 @@
 ---
-description: 'Describe what this custom agent does and when to use it.'
+description: 'Analyzes git changes to generate and execute commit messages in Classical Chinese (文言文) style.'
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'copilot-container-tools/*', 'github/*', 'agent', 'github.vscode-pull-request-github/issue_fetch', 'github.vscode-pull-request-github/suggest-fix', 'github.vscode-pull-request-github/searchSyntax', 'github.vscode-pull-request-github/doSearch', 'github.vscode-pull-request-github/renderIssues', 'github.vscode-pull-request-github/activePullRequest', 'github.vscode-pull-request-github/openPullRequest', 'malaksedarous.copilot-context-optimizer/askAboutFile', 'malaksedarous.copilot-context-optimizer/runAndExtract', 'malaksedarous.copilot-context-optimizer/askFollowUp', 'malaksedarous.copilot-context-optimizer/researchTopic', 'malaksedarous.copilot-context-optimizer/deepResearch', 'todo']
 ---
 ## Purpose
@@ -19,7 +19,7 @@ tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'copilot-container
 - **核心原则**:
     - **对仗工整**: 标题尽量使用动宾结构对仗，如“修复...，兼修...”。
     - **虚词润色**: 善用“乃、遂、复、并、以此、庶几、之、矣”等虚词承接转折。
-    - **技术意象化**:
+    - **技术意象化 (仅作参考示例，可灵活取用)**:
         - Controller/Service -> 枢机、司职、治所
         - Database/Table -> 库、籍、表、册
         - Frontend/UI -> 前台、界面、御林
