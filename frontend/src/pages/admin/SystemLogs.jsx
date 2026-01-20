@@ -99,7 +99,7 @@ export default function SystemLogsPage() {
     refetch,
     isFetching
   } = useLogSearch({
-    q: parsedQuery.free || q,
+    q: parsedQuery.free,
     date_from: dateFrom,
     date_to: dateTo,
     types: activeTypes,
@@ -207,7 +207,7 @@ export default function SystemLogsPage() {
     try {
       const blob = await exportLogs(
         {
-          q,
+          q: parsedQuery.free,
           date_from: dateFrom,
           date_to: dateTo,
           types: activeTypes,
