@@ -2443,6 +2443,9 @@
       "llm": {
         "daily_limit": "LLM Daily Limit",
         "rate_limit": "LLM Rate Limit"
+      },
+      "checkin_makeup": {
+        "monthly_limit": "Check-in makeup monthly limit"
       }
     }
   },
@@ -2613,6 +2616,7 @@
     }
   },
   "common": {
+    "default": "Default",
     "loading": "Loading...",
     "processing": "Processing...",
     "error": "Error",

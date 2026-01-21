@@ -280,6 +280,7 @@ export const adminAPI = {
 
   // User Groups
   getUserGroups: () => api.get('/admin/users/groups'),
+  getUserGroupMeta: () => api.get('/admin/users/groups/meta'),
   createUserGroup: (data) => api.post('/admin/users/groups', data),
   updateUserGroup: (id, data) => api.put(`/admin/users/groups/${id}`, data),
   deleteUserGroup: (id) => api.delete(`/admin/users/groups/${id}`),

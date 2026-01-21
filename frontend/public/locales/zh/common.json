@@ -2435,10 +2435,14 @@
       "llm": {
         "daily_limit": "LLM 每日限额",
         "rate_limit": "LLM 速率限制"
+      },
+      "checkin_makeup": {
+        "monthly_limit": "补打卡月度限额"
       }
     }
   },
   "common": {
+    "default": "默认",
     "loading": "加载中...",
     "processing": "处理中...",
     "error": "错误",

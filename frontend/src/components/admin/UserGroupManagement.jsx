@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { adminAPI } from '../../lib/api';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -38,6 +38,32 @@ export function UserGroupManagement() {
         adminAPI.getUserGroups().then(res => res.data.data)
     );
 
+    const { data: groupMeta } = useQuery('userGroupMeta', () =>
+        adminAPI.getUserGroupMeta().then(res => res.data.data)
+    );
+
+    const quotaKeys = useMemo(() => {
+        const definitions = groupMeta?.quota_definitions;
+        if (Array.isArray(definitions) && definitions.length > 0) {
+            return definitions;
+        }
+        if (Array.isArray(groups) && groups.length > 0) {
+            const template = groups.find(group => group?.quota_flat) || groups[0];
+            return Object.keys(template?.quota_flat || {});
+        }
+        return [];
+    }, [groupMeta, groups]);
+
+    const quotaTemplate = useMemo(() => {
+        if (quotaKeys.length === 0) {
+            return {};
+        }
+        return quotaKeys.reduce((acc, key) => {
+            acc[key] = null;
+            return acc;
+        }, {});
+    }, [quotaKeys]);
+
     const createmutation = useMutation(adminAPI.createUserGroup, {
         onSuccess: () => {
             queryClient.invalidateQueries('userGroups');
@@ -65,7 +91,7 @@ export function UserGroupManagement() {
     const handleEdit = (group) => {
         setEditingGroup({
             ...group,
-            config: JSON.stringify(group.config || {}, null, 2)
+            quotaFlat: group.quota_flat || { ...quotaTemplate }
         });
         setIsDialogOpen(true);
     };
@@ -74,28 +100,27 @@ export function UserGroupManagement() {
         setEditingGroup({
             name: '',
             code: '',
-            config: '{\n  "llm": {\n    "daily_limit": 10,\n    "rate_limit": 60\n  }\n}',
             is_default: false,
-            notes: ''
+            notes: '',
+            quotaFlat: { ...quotaTemplate }
         });
         setIsDialogOpen(true);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        try {
-            const payload = {
-                ...editingGroup,
-                config: JSON.parse(editingGroup.config)
-            };
+        const payload = {
+            name: editingGroup.name,
+            code: editingGroup.code,
+            is_default: editingGroup.is_default,
+            notes: editingGroup.notes,
+            quota_flat: editingGroup.quotaFlat || {}
+        };
 
-            if (editingGroup.id) {
-                updateMutation.mutate({ id: editingGroup.id, data: payload });
-            } else {
-                createmutation.mutate(payload);
-            }
-        } catch (err) {
-            toast.error(t('admin.groups.invalidJson', 'JSON 格式错误'));
+        if (editingGroup.id) {
+            updateMutation.mutate({ id: editingGroup.id, data: payload });
+        } else {
+            createmutation.mutate(payload);
         }
     };
 
@@ -196,14 +221,26 @@ export function UserGroupManagement() {
                             />
                             <Label>{t('admin.groups.setAsDefault', '设为默认用户组')}</Label>
                         </div>
-                        <div>
-                            <Label>{t('admin.groups.config', '配置 (JSON)')}</Label>
-                            <Textarea
-                                value={editingGroup?.config || ''}
-                                onChange={e => setEditingGroup({ ...editingGroup, config: e.target.value })}
-                                className="font-mono h-32"
-                                required
-                            />
+                        <div className="space-y-3 border-t pt-3 border-b pb-3">
+                            <Label className="text-base font-semibold">{t('admin.groups.quotaOverride', '配额单独设置')}</Label>
+                            {Object.keys(editingGroup?.quotaFlat || {}).length > 0 ? (
+                                Object.entries(editingGroup.quotaFlat || {}).map(([key, value]) => (
+                                    <div key={key}>
+                                        <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
+                                        <Input
+                                            type="number"
+                                            value={value ?? ''}
+                                            onChange={e => setEditingGroup({
+                                                ...editingGroup,
+                                                quotaFlat: { ...editingGroup.quotaFlat, [key]: e.target.value }
+                                            })}
+                                            placeholder={t('common.default', '默认')}
+                                        />
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">{t('admin.groups.noQuotasAvailable', '暂无可配置的配额项目')}</p>
+                            )}
                         </div>
                         <div>
                             <Label>{t('admin.groups.notes', '备注')}</Label>
