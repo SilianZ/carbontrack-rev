@@ -57,9 +57,10 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
       return resolveImageCandidate(candidate[0]);
     }
     if (typeof candidate === 'object') {
-      const rawUrl = typeof candidate.url === 'string' && candidate.url ? candidate.url : (typeof candidate.public_url === 'string' ? candidate.public_url : null);
-      const presigned = typeof candidate.presigned_url === 'string' && candidate.presigned_url ? candidate.presigned_url : null;
-      let src = (rawUrl && isHttpUrl(rawUrl) ? rawUrl : null) || presigned;
+      const rawUrl = typeof candidate.public_url === 'string' && candidate.public_url
+        ? candidate.public_url
+        : (typeof candidate.url === 'string' && candidate.url ? candidate.url : null);
+      let src = rawUrl && isHttpUrl(rawUrl) ? rawUrl : null;
       let path = typeof candidate.file_path === 'string' && candidate.file_path !== '' ? candidate.file_path : null;
       if (!path && rawUrl && !isHttpUrl(rawUrl)) {
         path = rawUrl;
@@ -74,7 +75,7 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
 
   const primaryImageCandidate = Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : product.images;
   const candidateMeta = resolveImageCandidate(primaryImageCandidate);
-  const fallbackMeta = resolveImageCandidate(product.image_url || product.image_presigned_url || product.image_path);
+  const fallbackMeta = resolveImageCandidate(product.image_url || product.image_path);
   const imageSrc = candidateMeta.src || fallbackMeta.src;
   const imagePath = candidateMeta.path || fallbackMeta.path;
   const hasImage = Boolean(imageSrc || imagePath);
