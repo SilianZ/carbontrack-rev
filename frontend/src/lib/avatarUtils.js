@@ -1,11 +1,4 @@
-const isHttpUrl = (value) => /^https?:\/\//i.test(value);
-
-const cleanPath = (value) => {
-  if (typeof value !== 'string') return '';
-  const trimmed = value.trim();
-  if (!trimmed) return '';
-  return trimmed.replace(/^\/+/, '');
-};
+import { resolveR2ImageSource } from './r2Image';
 
 const normalizeString = (value) => {
   if (typeof value !== 'string') return '';
@@ -18,46 +11,22 @@ export const resolveAvatarAsset = (input) => {
     return { src: '', filePath: '', alt: '' };
   }
 
-  const urlCandidates = [
-    normalizeString(input.icon_url),
-    normalizeString(input.url),
-    normalizeString(input.avatar_url),
-    normalizeString(input.image_url),
-    normalizeString(input.icon_presigned_url),
-    normalizeString(input.presigned_url),
-    normalizeString(input.avatar_presigned_url),
-  ];
-
-  let src = '';
-  let filePath = '';
-
-  for (const candidate of urlCandidates) {
-    if (!candidate) continue;
-    if (isHttpUrl(candidate) || candidate.startsWith('data:')) {
-      src = candidate;
-      break;
-    }
-    if (!filePath) {
-      filePath = cleanPath(candidate);
-    }
-  }
-
-  if (!src) {
-    const pathCandidates = [
+  const { src, filePath } = resolveR2ImageSource({
+    urlCandidates: [
+      normalizeString(input.icon_url),
+      normalizeString(input.url),
+      normalizeString(input.avatar_url),
+      normalizeString(input.image_url),
+      normalizeString(input.icon_presigned_url),
+      normalizeString(input.presigned_url),
+      normalizeString(input.avatar_presigned_url),
+    ],
+    pathCandidates: [
       normalizeString(input.file_path),
       normalizeString(input.icon_path),
       normalizeString(input.avatar_path),
-    ];
-
-    for (const candidate of pathCandidates) {
-      if (!candidate) continue;
-      const cleaned = cleanPath(candidate);
-      if (cleaned) {
-        filePath = cleaned;
-        break;
-      }
-    }
-  }
+    ],
+  });
 
   return {
     src,

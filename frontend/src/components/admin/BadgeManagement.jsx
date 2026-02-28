@@ -25,6 +25,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { uploadViaPresign } from '@/lib/r2Upload';
+import { resolveR2ImageSource } from '@/lib/r2Image';
 import R2Image from '@/components/common/R2Image';
 import BadgeBulkAwardDialog from './badges/BadgeBulkAwardDialog';
 import BadgeRuleBuilder from './badges/BadgeRuleBuilder';
@@ -84,6 +85,11 @@ const normalizeCriteria = (raw) => {
   }
   return null;
 };
+
+const resolveBadgeImage = (badge = {}) => resolveR2ImageSource({
+  urlCandidates: [badge.icon_url, badge.icon_presigned_url],
+  pathCandidates: [badge.icon_path, badge.icon_thumbnail_path],
+});
 
 export default function BadgeManagement() {
   const { t } = useTranslation();
@@ -323,6 +329,7 @@ export default function BadgeManagement() {
   const formattedBadges = useMemo(() => badges || [], [badges]);
   const activeBadges = useMemo(() => formattedBadges.filter((badge) => badge.is_active), [formattedBadges]);
   const autoBadges = useMemo(() => formattedBadges.filter((badge) => badge.auto_grant_enabled), [formattedBadges]);
+  const previewImage = resolveBadgeImage(formValues);
 
   return (
     <div className="space-y-6">
@@ -440,14 +447,15 @@ export default function BadgeManagement() {
                         ? badge.auto_grant_criteria.length
                         : 0;
                     const stats = badge.stats || DEFAULT_BADGE_STATS;
+                    const badgeImage = resolveBadgeImage(badge);
                     return (
                       <tr key={badge.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3">
                           <div className="w-12 h-12 rounded-full bg-gray-100 border overflow-hidden flex items-center justify-center">
-                            {badge.icon_path ? (
+                            {badgeImage.src || badgeImage.filePath ? (
                               <R2Image
-                                src={badge.icon_url || badge.icon_presigned_url}
-                                filePath={!badge.icon_url && !badge.icon_presigned_url ? badge.icon_path : undefined}
+                                src={badgeImage.src || undefined}
+                                filePath={badgeImage.filePath || undefined}
                                 alt={badge.name_zh || badge.name_en}
                                 className="w-full h-full object-cover"
                               />
@@ -626,10 +634,10 @@ export default function BadgeManagement() {
                   </label>
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-lg border bg-muted overflow-hidden flex items-center justify-center">
-                      {formValues.icon_path ? (
+                      {previewImage.src || previewImage.filePath ? (
                         <R2Image
-                          src={formValues.icon_url || formValues.icon_presigned_url}
-                          filePath={!formValues.icon_url && !formValues.icon_presigned_url ? formValues.icon_path : undefined}
+                          src={previewImage.src || undefined}
+                          filePath={previewImage.filePath || undefined}
                           alt={formValues.name_zh || formValues.name_en}
                           className="w-full h-full object-cover"
                         />

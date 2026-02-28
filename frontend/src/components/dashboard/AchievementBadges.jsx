@@ -3,6 +3,7 @@ import { Award, Lock, RefreshCw } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import R2Image from '../common/R2Image';
 import { Button } from '../ui/Button';
+import { resolveR2ImageSource } from '../../lib/r2Image';
 
 export function AchievementBadges({ badges = [], userBadges = [], loading = false, onTriggerAuto, isAdmin = false }) {
   const { t } = useTranslation();
@@ -69,6 +70,10 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
             {topBadges.map((badge) => {
               const owned = ownedMap.has(badge.id);
               const userBadge = ownedMap.get(badge.id);
+              const badgeImage = resolveR2ImageSource({
+                urlCandidates: [badge.icon_url, badge.icon_presigned_url],
+                pathCandidates: [badge.icon_path],
+              });
               return (
                 <div
                   key={badge.id}
@@ -77,10 +82,10 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                   }`}
                 >
                   <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border">
-                    {badge.icon_url || badge.icon_path ? (
+                    {badgeImage.src || badgeImage.filePath ? (
                       <R2Image
-                        src={badge.icon_url || badge.icon_presigned_url}
-                        filePath={!badge.icon_url && !badge.icon_presigned_url ? badge.icon_path : undefined}
+                        src={badgeImage.src || undefined}
+                        filePath={badgeImage.filePath || undefined}
                         alt={badge.name_zh || badge.name_en}
                         className="w-full h-full object-cover"
                         fallback={<div className="text-gray-400 text-xs">IMG</div>}

@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getPresignedReadUrl, invalidateFileUrl } from '../../lib/fileAccess';
+import { resolveR2ImageSource } from '../../lib/r2Image';
 
 /**
  * 通用私有R2图片组件
  * props:
  *  filePath?: string  (优先: 直接的 file_path)
- *  src?: string       (已是可访问URL则使用，不再签名)
+ *  src?: string       (公网 URL 直接使用；非 URL 字符串会回退为 file_path)
  *  alt?: string
  *  className?: string
  *  expiresIn?: number (秒)
@@ -13,7 +14,14 @@ import { getPresignedReadUrl, invalidateFileUrl } from '../../lib/fileAccess';
  *  onError?: (err)=>void
  */
 export function R2Image({ filePath, src, alt='', className='', expiresIn=600, fallback=null, onError }) {
-  const [resolved, setResolved] = useState(src || '');
+  const normalizedInput = resolveR2ImageSource({
+    urlCandidates: [src],
+    pathCandidates: [filePath],
+  });
+  const directSrc = normalizedInput.src;
+  const resolvedFilePath = normalizedInput.filePath;
+
+  const [resolved, setResolved] = useState(directSrc || '');
   const [err, setErr] = useState(null);
   const retryingRef = useRef(false);
 
@@ -23,10 +31,10 @@ export function R2Image({ filePath, src, alt='', className='', expiresIn=600, fa
     setErr(null);
 
     async function run() {
-      if (src) { setResolved(src); return; }
-      if (!filePath) { setResolved(''); return; }
+      if (directSrc) { setResolved(directSrc); return; }
+      if (!resolvedFilePath) { setResolved(''); return; }
       try {
-        const url = await getPresignedReadUrl(filePath, expiresIn);
+        const url = await getPresignedReadUrl(resolvedFilePath, expiresIn);
         if (!cancelled) {
           setResolved(url);
         }
@@ -40,13 +48,13 @@ export function R2Image({ filePath, src, alt='', className='', expiresIn=600, fa
 
     run();
     return () => { cancelled = true; };
-  }, [filePath, src, expiresIn, onError]);
+  }, [directSrc, resolvedFilePath, expiresIn, onError]);
 
   const errorClassName = ['bg-gray-100', 'text-gray-400', 'text-xs', 'flex', 'items-center', 'justify-center', className].filter(Boolean).join(' ');
   const loadingClassName = ['animate-pulse', 'bg-gray-100', className].filter(Boolean).join(' ');
 
   const handleImageError = useCallback(() => {
-    if (!filePath) {
+    if (!resolvedFilePath) {
       const error = err || new Error('R2Image load failed');
       setErr(error);
       onError && onError(error);
@@ -63,8 +71,8 @@ export function R2Image({ filePath, src, alt='', className='', expiresIn=600, fa
     retryingRef.current = true;
     setResolved('');
     setErr(null);
-    invalidateFileUrl(filePath);
-    getPresignedReadUrl(filePath, expiresIn)
+    invalidateFileUrl(resolvedFilePath);
+    getPresignedReadUrl(resolvedFilePath, expiresIn)
       .then((url) => {
         setResolved(url);
         setErr(null);
@@ -73,7 +81,7 @@ export function R2Image({ filePath, src, alt='', className='', expiresIn=600, fa
         setErr(error);
         onError && onError(error);
       });
-  }, [err, expiresIn, filePath, onError]);
+  }, [err, expiresIn, onError, resolvedFilePath]);
 
   if (err) {
     return fallback || <div className={errorClassName}>ERR</div>;

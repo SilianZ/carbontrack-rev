@@ -21,6 +21,7 @@ import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { Loader2, RefreshCw, Edit, Trash2, RotateCcw, Star, Image as ImageIcon, Upload } from 'lucide-react';
 import { uploadViaPresign } from '@/lib/r2Upload';
+import { resolveR2ImageSource } from '@/lib/r2Image';
 import R2Image from '@/components/common/R2Image';
 
 const DEFAULT_FORM = {
@@ -69,6 +70,11 @@ const normalizeAvatar = (avatar = {}) => {
     url: avatar.url || iconUrl || '',
   };
 };
+
+const resolveAvatarImage = (avatar = {}) => resolveR2ImageSource({
+  urlCandidates: [avatar.icon_url, avatar.icon_presigned_url],
+  pathCandidates: [avatar.file_path],
+});
 
 
 export function AvatarManagement() {
@@ -270,6 +276,7 @@ export function AvatarManagement() {
   };
 
   const formattedAvatars = useMemo(() => avatars || [], [avatars]);
+  const previewImage = resolveAvatarImage(formValues);
 
   return (
     <div className="space-y-6">
@@ -321,14 +328,16 @@ export function AvatarManagement() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {formattedAvatars.map((avatar) => (
-                    <tr key={avatar.id} className="hover:bg-gray-50">
+                  {formattedAvatars.map((avatar) => {
+                    const avatarImage = resolveAvatarImage(avatar);
+                    return (
+                      <tr key={avatar.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div className="w-12 h-12 rounded-full overflow-hidden border bg-gray-100 flex items-center justify-center">
-                          {avatar.file_path ? (
+                          {avatarImage.src || avatarImage.filePath ? (
                             <R2Image
-                              src={avatar.icon_url || avatar.icon_presigned_url}
-                              filePath={!avatar.icon_url && !avatar.icon_presigned_url ? avatar.file_path : undefined}
+                              src={avatarImage.src || undefined}
+                              filePath={avatarImage.filePath || undefined}
                               alt={avatar.name}
                               className="w-full h-full object-cover"
                             />
@@ -384,8 +393,9 @@ export function AvatarManagement() {
                           </Button>
                         )}
                       </td>
-                    </tr>
-                  ))}
+                      </tr>
+                    );
+                  })}
                   {formattedAvatars.length === 0 && !loading && (
                     <tr>
                       <td colSpan={7} className="px-4 py-6 text-center text-sm text-gray-500">
@@ -475,8 +485,8 @@ export function AvatarManagement() {
                 {(formValues.icon_presigned_url || formValues.icon_url || formValues.file_path) && (
                   <div className="mt-2 w-20 h-20 rounded-full overflow-hidden border">
                     <R2Image
-                      src={formValues.icon_url || formValues.icon_presigned_url}
-                      filePath={!formValues.icon_url && !formValues.icon_presigned_url ? formValues.file_path : undefined}
+                      src={previewImage.src || undefined}
+                      filePath={previewImage.filePath || undefined}
                       alt={formValues.name}
                       className="w-full h-full object-cover"
                     />

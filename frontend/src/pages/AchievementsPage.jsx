@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button';
 import { Alert, AlertDescription } from '../components/ui/Alert';
 import { Skeleton } from '../components/ui/skeleton';
 import R2Image from '../components/common/R2Image';
+import { resolveR2ImageSource } from '../lib/r2Image';
 import { formatNumber, formatDateSafe, parseDateFlexible } from '../lib/utils';
 
 const TEN_MINUTES = 600;
@@ -19,7 +20,10 @@ const normalizeBadgeId = (value) => {
   return String(value);
 };
 
-const isHttpUrl = (value) => typeof value === 'string' && /^https?:\/\//i.test(value);
+const resolveBadgeImage = (badge = {}) => resolveR2ImageSource({
+  urlCandidates: [badge.icon_url, badge.icon_presigned_url],
+  pathCandidates: [badge.icon_path, badge.icon_thumbnail_path],
+});
 
 export default function AchievementsPage() {
   const { t } = useTranslation();
@@ -328,20 +332,17 @@ export default function AchievementsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {unlockedBadges.map((item) => {
                 const badge = item.badge || {};
-                const iconSrc = isHttpUrl(badge.icon_url)
-                  ? badge.icon_url
-                  : (isHttpUrl(badge.icon_presigned_url) ? badge.icon_presigned_url : badge.icon_url);
-                const filePath = !iconSrc ? badge.icon_path || badge.icon_thumbnail_path : undefined;
+                const badgeImage = resolveBadgeImage(badge);
                 return (
                   <div
                     key={item.badgeId}
                     className="border rounded-lg p-4 flex gap-4 bg-white hover:shadow-md transition"
                   >
                     <div className="w-16 h-16 rounded-full border bg-white flex items-center justify-center overflow-hidden">
-                      {iconSrc || filePath ? (
+                      {badgeImage.src || badgeImage.filePath ? (
                         <R2Image
-                          src={iconSrc}
-                          filePath={filePath}
+                          src={badgeImage.src || undefined}
+                          filePath={badgeImage.filePath || undefined}
                           alt={badge.name_zh || badge.name_en || badge.name || 'badge-icon'}
                           className="w-full h-full object-cover"
                           expiresIn={TEN_MINUTES}
@@ -405,20 +406,17 @@ export default function AchievementsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {lockedBadges.map((badge) => {
-                const iconSrc = isHttpUrl(badge.icon_url)
-                  ? badge.icon_url
-                  : (isHttpUrl(badge.icon_presigned_url) ? badge.icon_presigned_url : badge.icon_url);
-                const filePath = !iconSrc ? badge.icon_path || badge.icon_thumbnail_path : undefined;
+                const badgeImage = resolveBadgeImage(badge);
                 return (
                   <div key={badge.id || badge.badge_id}
                     className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-14 h-14 rounded-full border border-dashed border-gray-300 bg-white flex items-center justify-center overflow-hidden">
-                        {iconSrc || filePath ? (
+                        {badgeImage.src || badgeImage.filePath ? (
                           <R2Image
-                            src={iconSrc}
-                            filePath={filePath}
+                            src={badgeImage.src || undefined}
+                            filePath={badgeImage.filePath || undefined}
                             alt={badge.name_zh || badge.name_en || badge.name || 'badge-icon'}
                             className="w-full h-full object-cover opacity-60"
                             expiresIn={TEN_MINUTES}
@@ -477,10 +475,7 @@ export default function AchievementsPage() {
             <ol className="relative border-l border-gray-200 pl-6 space-y-6">
               {timeline.map((item) => {
                 const badge = item.badge || {};
-                const iconSrc = isHttpUrl(badge.icon_url)
-                  ? badge.icon_url
-                  : (isHttpUrl(badge.icon_presigned_url) ? badge.icon_presigned_url : badge.icon_url);
-                const filePath = !iconSrc ? badge.icon_path || badge.icon_thumbnail_path : undefined;
+                const badgeImage = resolveBadgeImage(badge);
                 return (
                   <li key={item.id} className="relative">
                     <span className="absolute -left-[11px] top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white border border-green-400">
@@ -489,10 +484,10 @@ export default function AchievementsPage() {
                     <div className="bg-white border rounded-lg p-4 shadow-sm">
                       <div className="flex items-start gap-3">
                         <div className="w-12 h-12 rounded-full overflow-hidden border bg-white flex items-center justify-center">
-                          {iconSrc || filePath ? (
+                          {badgeImage.src || badgeImage.filePath ? (
                             <R2Image
-                              src={iconSrc}
-                              filePath={filePath}
+                              src={badgeImage.src || undefined}
+                              filePath={badgeImage.filePath || undefined}
                               alt={badge.name_zh || badge.name_en || badge.name || 'badge-icon'}
                               className="w-full h-full object-cover"
                               expiresIn={TEN_MINUTES}

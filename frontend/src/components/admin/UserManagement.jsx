@@ -54,6 +54,7 @@ import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
 import BadgeBulkAwardDialog from './badges/BadgeBulkAwardDialog';
 import R2Image from '@/components/common/R2Image';
+import { resolveR2ImageSource } from '@/lib/r2Image';
 import { toast } from 'react-hot-toast';
 
 const DEFAULT_FILTERS = {
@@ -1058,15 +1059,19 @@ export function UserManagement() {
                         {badgeRows.map((entry, index) => {
                           const badge = entry.badge || {};
                           const record = entry.user_badge || {};
+                          const badgeImage = resolveR2ImageSource({
+                            urlCandidates: [badge.icon_url, badge.icon_presigned_url],
+                            pathCandidates: [badge.icon_path],
+                          });
                           return (
                             <tr key={index} className="hover:bg-gray-50">
                               <td className="px-4 py-2">
                                 <div className="flex items-center gap-3">
                                   <div className="h-10 w-10 overflow-hidden rounded-full border bg-muted">
-                                    {badge.icon_url || badge.icon_presigned_url || badge.icon_path ? (
+                                    {badgeImage.src || badgeImage.filePath ? (
                                       <R2Image
-                                        src={badge.icon_url || badge.icon_presigned_url}
-                                        filePath={!badge.icon_url && !badge.icon_presigned_url ? badge.icon_path : undefined}
+                                        src={badgeImage.src || undefined}
+                                        filePath={badgeImage.filePath || undefined}
                                         alt={badge.name_zh || badge.name_en}
                                         className="h-full w-full object-cover"
                                       />
