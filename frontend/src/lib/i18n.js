@@ -63,8 +63,8 @@ i18n
   .use(initReactI18next)
   // 初始化配置
   .init({
-    // 默认语言
-    lng: defaultLanguage,
+    // 默认优先使用设备语言（由 LanguageDetector 按 detection.order 自动检测）
+    // 未命中支持语言时回退到 defaultLanguage
     
     // 回退语言
     fallbackLng: defaultLanguage,
