@@ -38,7 +38,7 @@ export function Footer() {
   }, []);
 
   const buildId = useMemo(() => {
-    const normalized = (process.env?.CF_PAGES_COMMIT_SHA ?? 'dev').toString().trim();
+    const normalized = (import.meta.env?.VITE_BUILD_ID ?? 'dev').toString().trim();
     return normalized.length > 12 ? normalized.slice(0, 12) : normalized;
   }, []);
 
