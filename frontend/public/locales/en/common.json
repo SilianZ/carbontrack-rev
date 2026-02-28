@@ -473,7 +473,7 @@
       "settings": "Settings",
       "settingsDesc": "Manage your account settings",
       "pointsHint": "Points Available",
-      "pointsHintDesc": "You have {{points}} points to use",
+      "pointsHintDesc": "You currently have {{current}} points and need {{needed}} more to redeem a product",
       "pendingReviews": "Pending Reviews",
       "pendingReviewsDesc": "{{count}} activities pending review"
     },

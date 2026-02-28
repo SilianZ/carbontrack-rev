@@ -6,6 +6,13 @@ import { useTranslation } from '../../hooks/useTranslation';
 
 export function QuickActions({ userStats = {}, onActionClick }) {
   const { t } = useTranslation();
+  const pointsBalance = Number(userStats.points_balance ?? 0);
+  const rawMinExchangePoints = userStats.min_exchange_points;
+  const minExchangePoints = rawMinExchangePoints === null || rawMinExchangePoints === undefined
+    ? null
+    : Number(rawMinExchangePoints);
+  const showPointsHint = Number.isFinite(minExchangePoints) && minExchangePoints > 0 && pointsBalance < minExchangePoints;
+  const pointsNeeded = showPointsHint ? Math.max(minExchangePoints - pointsBalance, 0) : 0;
 
   const actions = [
     {
@@ -114,7 +121,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
         </div>
 
         {/* 特殊提示 */}
-        {userStats.points_balance !== undefined && userStats.points_balance < 100 && (
+        {showPointsHint && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center gap-2 text-blue-800">
               <Award className="h-4 w-4" />
@@ -124,8 +131,8 @@ export function QuickActions({ userStats = {}, onActionClick }) {
             </div>
             <p className="text-xs text-blue-600 mt-1">
               {t('dashboard.quickActions.pointsHintDesc', {
-                current: userStats.points_balance || 0,
-                needed: 100 - (userStats.points_balance || 0)
+                current: pointsBalance,
+                needed: pointsNeeded
               })}
             </p>
           </div>
@@ -150,4 +157,3 @@ export function QuickActions({ userStats = {}, onActionClick }) {
     </Card>
   );
 }
-

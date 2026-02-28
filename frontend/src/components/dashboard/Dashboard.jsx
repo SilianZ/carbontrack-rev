@@ -325,6 +325,7 @@ export function Dashboard() {
               unread_messages: stats.unread_messages,
               pending_reviews: stats.pending_reviews,
               available_products: stats.available_products,
+              min_exchange_points: stats.min_exchange_points,
               new_achievements: stats.new_achievements
             }}
             onActionClick={handleQuickAction}
