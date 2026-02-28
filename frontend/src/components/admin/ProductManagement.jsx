@@ -304,11 +304,14 @@ export function ProductManagement() {
           || firstImagePath
           || (typeof product.image_url === 'string' && product.image_url.indexOf('http') !== 0 ? product.image_url : null);
 
-        const hasInlinePresigned =
+        const hasInlineUrl =
+          (typeof product.image_url === 'string' && product.image_url.indexOf('http') === 0 && product.image_url) ||
           (typeof product.image_presigned_url === 'string' && product.image_presigned_url) ||
+          (firstImage && typeof firstImage === 'string' && firstImage.indexOf('http') === 0 && firstImage) ||
+          (firstImage && typeof firstImage === 'object' && firstImage !== null && typeof firstImage.url === 'string' && firstImage.url.indexOf('http') === 0 && firstImage.url) ||
           (firstImage && typeof firstImage === 'object' && firstImage !== null && typeof firstImage.presigned_url === 'string' && firstImage.presigned_url);
 
-        if (!candidateFilePath || hasInlinePresigned) {
+        if (!candidateFilePath || hasInlineUrl) {
           return null;
         }
 
@@ -534,11 +537,11 @@ export function ProductManagement() {
                     : null;
 
                   const httpImageCandidates = [
-                    presignedFromProduct,
-                    presignedFromImage,
                     typeof product.image_url === 'string' && product.image_url.indexOf('http') === 0 ? product.image_url : null,
                     firstImage && typeof firstImage === 'string' && firstImage.indexOf('http') === 0 ? firstImage : null,
                     firstImage && typeof firstImage === 'object' && firstImage !== null && typeof firstImage.url === 'string' && firstImage.url.indexOf('http') === 0 ? firstImage.url : null,
+                    presignedFromProduct,
+                    presignedFromImage,
                   ];
 
                   const resolvedImageSrc = httpImageCandidates.find((value) => typeof value === 'string' && value) || null;
@@ -733,7 +736,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
         entityId: product ? product.id : undefined,
       });
 
-      let previewUrl = result.presigned_url || result.url || result.public_url || '';
+      let previewUrl = result.url || result.public_url || result.presigned_url || '';
       if (!previewUrl && result.file_path) {
         try {
           previewUrl = await getPresignedReadUrl(result.file_path, 600);
@@ -783,7 +786,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
     onSubmit(nextValues);
   };
 
-  const previewSource = formValues.image_presigned_url || formValues.image_url || '';
+  const previewSource = formValues.image_url || formValues.image_presigned_url || '';
   const imagePath = formValues.image_path || (previewSource && previewSource.indexOf('http') !== 0 ? previewSource : '');
   const externalImage = !imagePath && previewSource && previewSource.indexOf('http') === 0 ? previewSource : '';
 

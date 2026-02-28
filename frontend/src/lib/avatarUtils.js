@@ -19,13 +19,13 @@ export const resolveAvatarAsset = (input) => {
   }
 
   const urlCandidates = [
-    normalizeString(input.icon_presigned_url),
-    normalizeString(input.presigned_url),
-    normalizeString(input.avatar_presigned_url),
     normalizeString(input.icon_url),
     normalizeString(input.url),
     normalizeString(input.avatar_url),
     normalizeString(input.image_url),
+    normalizeString(input.icon_presigned_url),
+    normalizeString(input.presigned_url),
+    normalizeString(input.avatar_presigned_url),
   ];
 
   let src = '';

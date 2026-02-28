@@ -328,7 +328,9 @@ export default function AchievementsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {unlockedBadges.map((item) => {
                 const badge = item.badge || {};
-                const iconSrc = isHttpUrl(badge.icon_presigned_url) ? badge.icon_presigned_url : badge.icon_url;
+                const iconSrc = isHttpUrl(badge.icon_url)
+                  ? badge.icon_url
+                  : (isHttpUrl(badge.icon_presigned_url) ? badge.icon_presigned_url : badge.icon_url);
                 const filePath = !iconSrc ? badge.icon_path || badge.icon_thumbnail_path : undefined;
                 return (
                   <div
@@ -403,7 +405,9 @@ export default function AchievementsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {lockedBadges.map((badge) => {
-                const iconSrc = isHttpUrl(badge.icon_presigned_url) ? badge.icon_presigned_url : badge.icon_url;
+                const iconSrc = isHttpUrl(badge.icon_url)
+                  ? badge.icon_url
+                  : (isHttpUrl(badge.icon_presigned_url) ? badge.icon_presigned_url : badge.icon_url);
                 const filePath = !iconSrc ? badge.icon_path || badge.icon_thumbnail_path : undefined;
                 return (
                   <div key={badge.id || badge.badge_id}
@@ -473,7 +477,9 @@ export default function AchievementsPage() {
             <ol className="relative border-l border-gray-200 pl-6 space-y-6">
               {timeline.map((item) => {
                 const badge = item.badge || {};
-                const iconSrc = isHttpUrl(badge.icon_presigned_url) ? badge.icon_presigned_url : badge.icon_url;
+                const iconSrc = isHttpUrl(badge.icon_url)
+                  ? badge.icon_url
+                  : (isHttpUrl(badge.icon_presigned_url) ? badge.icon_presigned_url : badge.icon_url);
                 const filePath = !iconSrc ? badge.icon_path || badge.icon_thumbnail_path : undefined;
                 return (
                   <li key={item.id} className="relative">

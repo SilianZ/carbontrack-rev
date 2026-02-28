@@ -327,8 +327,8 @@ export function AvatarManagement() {
                         <div className="w-12 h-12 rounded-full overflow-hidden border bg-gray-100 flex items-center justify-center">
                           {avatar.file_path ? (
                             <R2Image
-                              src={avatar.icon_presigned_url || avatar.icon_url}
-                              filePath={!avatar.icon_presigned_url && !avatar.icon_url ? avatar.file_path : undefined}
+                              src={avatar.icon_url || avatar.icon_presigned_url}
+                              filePath={!avatar.icon_url && !avatar.icon_presigned_url ? avatar.file_path : undefined}
                               alt={avatar.name}
                               className="w-full h-full object-cover"
                             />
@@ -475,8 +475,8 @@ export function AvatarManagement() {
                 {(formValues.icon_presigned_url || formValues.icon_url || formValues.file_path) && (
                   <div className="mt-2 w-20 h-20 rounded-full overflow-hidden border">
                     <R2Image
-                      src={formValues.icon_presigned_url || formValues.icon_url}
-                      filePath={!formValues.icon_presigned_url && !formValues.icon_url ? formValues.file_path : undefined}
+                      src={formValues.icon_url || formValues.icon_presigned_url}
+                      filePath={!formValues.icon_url && !formValues.icon_presigned_url ? formValues.file_path : undefined}
                       alt={formValues.name}
                       className="w-full h-full object-cover"
                     />

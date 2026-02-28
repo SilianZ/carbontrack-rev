@@ -1065,8 +1065,8 @@ export function UserManagement() {
                                   <div className="h-10 w-10 overflow-hidden rounded-full border bg-muted">
                                     {badge.icon_url || badge.icon_presigned_url || badge.icon_path ? (
                                       <R2Image
-                                        src={badge.icon_presigned_url || badge.icon_url}
-                                        filePath={!badge.icon_presigned_url && !badge.icon_url ? badge.icon_path : undefined}
+                                        src={badge.icon_url || badge.icon_presigned_url}
+                                        filePath={!badge.icon_url && !badge.icon_presigned_url ? badge.icon_path : undefined}
                                         alt={badge.name_zh || badge.name_en}
                                         className="h-full w-full object-cover"
                                       />

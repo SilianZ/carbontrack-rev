@@ -22,7 +22,7 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
     return images
       .map((raw) => {
         const base = typeof raw === 'string' ? { url: raw } : (raw || {});
-        const url = base.url ?? base.public_url ?? null;
+        const url = base.public_url ?? base.url ?? null;
         const filePath = typeof base.file_path === 'string' ? base.file_path : null;
         const presignedUrl = base.presigned_url ?? null;
         return {
@@ -49,7 +49,7 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
   const overflow = normalized.length - toDisplay.length;
 
   const resolveKey = (img, idx) => img.file_path || img.url || `image-${idx}`;
-  const resolveSrc = (img) => (img.presigned_url ? img.presigned_url : (img.url && /^https?:\/\//i.test(img.url) ? img.url : undefined));
+  const resolveSrc = (img) => (img.url && /^https?:\/\//i.test(img.url) ? img.url : img.presigned_url || undefined);
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>

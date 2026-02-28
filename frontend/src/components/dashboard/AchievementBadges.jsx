@@ -79,8 +79,8 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                   <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border">
                     {badge.icon_url || badge.icon_path ? (
                       <R2Image
-                        src={badge.icon_presigned_url || badge.icon_url}
-                        filePath={!badge.icon_presigned_url && !badge.icon_url ? badge.icon_path : undefined}
+                        src={badge.icon_url || badge.icon_presigned_url}
+                        filePath={!badge.icon_url && !badge.icon_presigned_url ? badge.icon_path : undefined}
                         alt={badge.name_zh || badge.name_en}
                         className="w-full h-full object-cover"
                         fallback={<div className="text-gray-400 text-xs">IMG</div>}

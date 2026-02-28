@@ -40,7 +40,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose }) {
     const inferredFilePath = img.file_path || img.path || img.key || (!httpUrl && rawUrl ? rawUrl : null);
 
     return {
-      url: presignedUrl || publicUrl || httpUrl || null,
+      url: publicUrl || httpUrl || presignedUrl || null,
       presigned_url: presignedUrl || null,
       file_path: inferredFilePath || null,
       thumbnail_path: img.thumbnail_path || img.preview_path || null,

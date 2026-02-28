@@ -446,8 +446,8 @@ export default function BadgeManagement() {
                           <div className="w-12 h-12 rounded-full bg-gray-100 border overflow-hidden flex items-center justify-center">
                             {badge.icon_path ? (
                               <R2Image
-                                src={badge.icon_presigned_url || badge.icon_url}
-                                filePath={!badge.icon_presigned_url && !badge.icon_url ? badge.icon_path : undefined}
+                                src={badge.icon_url || badge.icon_presigned_url}
+                                filePath={!badge.icon_url && !badge.icon_presigned_url ? badge.icon_path : undefined}
                                 alt={badge.name_zh || badge.name_en}
                                 className="w-full h-full object-cover"
                               />
@@ -628,8 +628,8 @@ export default function BadgeManagement() {
                     <div className="w-16 h-16 rounded-lg border bg-muted overflow-hidden flex items-center justify-center">
                       {formValues.icon_path ? (
                         <R2Image
-                          src={formValues.icon_presigned_url || formValues.icon_url}
-                          filePath={!formValues.icon_presigned_url && !formValues.icon_url ? formValues.icon_path : undefined}
+                          src={formValues.icon_url || formValues.icon_presigned_url}
+                          filePath={!formValues.icon_url && !formValues.icon_presigned_url ? formValues.icon_path : undefined}
                           alt={formValues.name_zh || formValues.name_en}
                           className="w-full h-full object-cover"
                         />
