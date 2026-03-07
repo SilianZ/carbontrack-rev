@@ -5,6 +5,7 @@ import { Mail, MailOpen, Eye, Trash2 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/badge';
+import { isAnnouncementMessage } from '../../lib/messageAnnouncement';
 
 export function MessageList({ messages, onRowClick, onMarkRead, onDelete }) {
   const { t } = useTranslation();
@@ -16,18 +17,6 @@ export function MessageList({ messages, onRowClick, onMarkRead, onDelete }) {
       return <Mail className="h-4 w-4 text-blue-500" />;
     }
   };
-  // Show priority badge when available.
-  // Announcements (system messages) used to be detected by sender_id === null which is too broad
-  // now use a slightly stricter heuristic: prefer explicit `type === 'system'` if present;
-  // otherwise require sender_id === null AND the title contains announcement keywords.
-  const isAnnouncement = (message) => {
-    if (message.type === 'system') return true;
-    if (message.sender_id !== null) return false;
-    const title = (message.title || '').toLowerCase();
-    // include English 'broadcast' and common misspelling 'boardcast'
-    return /\b(公告|announcement|system|系统|broadcast|boardcast)\b/i.test(title);
-  };
-
   return (
     <div className="overflow-x-auto bg-white rounded-lg shadow-sm border">
       <table className="min-w-full divide-y divide-gray-200">
@@ -82,7 +71,7 @@ export function MessageList({ messages, onRowClick, onMarkRead, onDelete }) {
                       {t(`messages.priority.${message.priority}`)}
                     </Badge>
                   )}
-                  {isAnnouncement(message) && (
+                  {isAnnouncementMessage(message) && (
                     <Badge variant="outline" className="ml-2">
                       {t('messages.labels.announcement')}
                     </Badge>

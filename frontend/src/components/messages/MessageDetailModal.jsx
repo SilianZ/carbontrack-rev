@@ -4,6 +4,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { formatDateSafe } from '../../lib/utils';
 import { AnnouncementContent } from '../content/AnnouncementContent';
 import { contentLooksLikeHtml, normalizeAnnouncementContentFormat } from '../../lib/announcementHtml';
+import { isAnnouncementMessage } from '../../lib/messageAnnouncement';
 import { sanitizeMessageHtml } from '../../lib/sanitizeMessageHtml';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/badge';
@@ -13,13 +14,7 @@ import PropTypes from 'prop-types';
 export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
   const { t } = useTranslation();
   const sanitizedContent = useMemo(() => sanitizeMessageHtml(message?.content), [message?.content]);
-  const isAnnouncement = useMemo(() => {
-    if (!message) return false;
-    if (message.type === 'system' && contentLooksLikeHtml(message.content)) return true;
-    if (message.sender_id != null) return false;
-    const title = (message.title || '').toLowerCase();
-    return /(公告|announcement|system|系统|broadcast|boardcast)/i.test(title);
-  }, [message]);
+  const isAnnouncement = useMemo(() => isAnnouncementMessage(message), [message]);
   const announcementContentFormat = useMemo(
     () => normalizeAnnouncementContentFormat(isAnnouncement && contentLooksLikeHtml(message?.content) ? 'html' : 'text'),
     [isAnnouncement, message?.content]
