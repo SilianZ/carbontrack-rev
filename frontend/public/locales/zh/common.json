@@ -661,11 +661,6 @@
       "submitFailed": "提交失败，请稍后重试",
       "previewAutoUpdate": "输入后实时更新预览。"
     },
-    "checkin": {
-      "makeupNotice": "补打卡日期：{{date}}，提交记录后将计入该日",
-      "makeupHelper": "补打卡日期：{{date}}（不影响活动发生时间）",
-      "clear": "取消补打卡"
-    },
     "status": {
       "pending": "待审核",
       "approved": "已通过",
@@ -1198,11 +1193,135 @@
       "form": {
         "title": "标题",
         "content": "正文",
+        "contentFormat": "内容格式",
+        "contentFormatHtmlHint": "HTML 公告将按安全 profile 清洗，仅保留受控标签、链接与表格结构。",
+        "contentFormatTextHint": "纯文本公告会自动按段落和换行进行排版。",
         "priority": "优先级",
         "scope": "发送范围",
         "targetUsers": "目标用户 ID（逗号分隔）",
         "targetUsersPlaceholder": "例如：1,2,3"
       },
+      "tabs": {
+        "compose": "1. 编辑公告内容",
+        "send": "2. 发送设置与历史"
+      },
+      "nextStep": "下一步：设置发送范围 & 发送 →",
+      "format": {
+        "text": "纯文本",
+        "html": "安全 HTML 公告",
+        "textHint": "推荐用于普通通知；用户侧会保留段落和换行。",
+        "profileHint": "当前 profile：announcement_html_v1（支持标题、段落、列表、代码块、表格与安全链接）。"
+      },
+      "editor": {
+        "title": "HTML 模板编辑器",
+        "description": "使用受控片段和模板来编写公告 HTML，减少手写结构出错的概率。",
+        "placeholder": "在这里编写安全 HTML 公告内容……",
+        "shortcutHint": "已启用 CodeMirror：支持 HTML 高亮、自动闭合括号与多行编辑。",
+        "embeddedAiTitle": "编辑器内 AI 助手",
+        "embeddedAiDescription": "像在代码编辑器里调用 Copilot 一样，直接基于当前标题、内容和补充要求生成或改写草稿。",
+        "embeddedAiRun": "在编辑器中运行 AI",
+        "embeddedAiPlaceholder": "例如：保留现有结构、语气更正式、突出截止时间、补一段 FAQ……",
+        "embeddedAiHint": "AI 会读取当前标题、优先级和编辑器内容；下方区域仍保留系统/用户提示词复制与预览。",
+        "applyTemplate": "应用模板",
+        "themeHint": "💡 已启用 {{theme}} 代码主题。可使用 Ctrl + I 呼出内置 AI Copilot 助手，支持选中文本局部重写。",
+        "tabs": {
+          "code": "代码编辑",
+          "templates": "模板片段"
+        },
+        "snippets": {
+          "heading": "H2",
+          "paragraph": "段落",
+          "link": "按钮链接",
+          "quote": "引用",
+          "code": "代码块",
+          "table": "表格",
+          "divider": "分隔线",
+          "list": "列表"
+        },
+        "snippetContent": {
+          "heading": "<h2>章节标题</h2>",
+          "paragraph": "<p>在这里填写公告正文内容。</p>",
+          "link": "<p><a href=\"https://example.com\">查看详情</a></p>",
+          "quote": "<blockquote>这里可放重点提示或强调说明。</blockquote>",
+          "table": "<table>\n  <thead>\n    <tr><th scope=\"col\">字段</th><th scope=\"col\">内容</th></tr>\n  </thead>\n  <tbody>\n    <tr><td>示例</td><td>值</td></tr>\n  </tbody>\n</table>",
+          "list": "<ul>\n  <li>第一项</li>\n  <li>第二项</li>\n</ul>"
+        },
+        "templates": {
+          "maintenance": {
+            "label": "维护公告",
+            "description": "适合服务窗口、维护计划、停机通知。",
+            "content": "<h2>系统维护公告</h2>\n<p>尊敬的用户，我们将于 <strong>[日期] [时间]</strong> 进行系统升级维护。</p>\n<p>预计影响：[说明影响]</p>"
+          },
+          "release": {
+            "label": "版本更新",
+            "description": "适合功能上线、规则调整、版本发布说明。",
+            "content": "<h2>版本更新通知 (v[版本号])</h2>\n<p>我们发布了最新版本，主要包含以下内容：</p>\n<ul>\n  <li>[新增] 功能A</li>\n  <li>[优化] 功能B</li>\n</ul>"
+          },
+          "event": {
+            "label": "活动招募",
+            "description": "适合活动、报名、节日或倡议通知。",
+            "content": "<h2>[活动名称] 报名开启</h2>\n<p>欢迎参与本次活动！</p>\n<p>活动时间：[时间]</p>\n<p><a href=\"[链接]\">点击此处报名</a></p>"
+          }
+        },
+        "copilot": {
+          "trigger": "Copilot (Ctrl+I)",
+          "actionPlaceholder": "AI 操作",
+          "instructionPlaceholder": "让 Copilot 根据需要修改内容...（按 Enter 提交，Esc 取消）",
+          "selectionHint": "已选中片段 ({{count}} 字符) - 仅重写此片段",
+          "documentHint": "全局模式 - 将生成或重写整篇内容",
+          "documentBadge": "全局",
+          "reviewReady": "AI 已生成内容，请检查并选择是否接受。",
+          "reviewPrompt": "预览并接受更改？",
+          "reject": "放弃",
+          "accept": "接受"
+        }
+      },
+      "llmHelper": {
+        "title": "LLM 辅助公告编辑",
+        "copyPanelTitle": "提示词复制与预览",
+        "copyPanelDescription": "编辑器内 AI 负责即时生成；这里保留系统提示词、用户提示词和完整 Prompt 包，方便粘贴到外部模型。",
+        "builtinLabel": "内置 AI 可直出草稿",
+        "externalLabel": "可复制到外部 AI",
+        "description": "当前内置模型可以先辅助起稿；若要更强模型，可直接复制系统提示词与用户提示词到其他 AI 服务。",
+        "builtinGenerate": "使用内置 AI 生成草稿",
+        "builtinLoading": "内置 AI 生成中...",
+        "builtinSuccess": "内置 AI 已生成公告草稿。",
+        "builtinFailed": "内置 AI 生成失败，请稍后重试。",
+        "builtinInputRequired": "请至少填写标题、正文或补充要求后再生成。",
+        "copySystem": "复制系统提示词",
+        "copyUser": "复制用户提示词",
+        "copyBundle": "复制完整 Prompt 包",
+        "copyFailed": "复制失败，请稍后重试。",
+        "actionLabel": "辅助模式",
+        "actionHint": "切换模式后，复制出的用户提示词会自动结合当前标题、优先级与编辑内容。",
+        "instructionLabel": "补充要求（可选）",
+        "instructionPlaceholder": "例如：强调截止时间、加入 FAQ 小节、语气更正式、面向新注册用户……",
+        "instructionHint": "这段补充要求会同时注入内置 AI 生成和可复制的外部 Prompt。",
+        "previewUser": "查看当前用户提示词预览",
+        "previewSystem": "查看系统提示词预览",
+        "tipTitle": "推荐工作流",
+        "tipStep1": "先选择“生成初稿 / 润色 / 压缩 / 文本转 HTML”模式。",
+        "tipStep2": "复制系统提示词与用户提示词，粘贴到更强的外部模型。",
+        "tipStep3": "将模型返回的 HTML 粘回此编辑器，再用 Web / Email 双预览检查效果。",
+        "actions": {
+          "generate": "生成初稿",
+          "rewrite": "润色重写",
+          "compress": "压缩精简",
+          "convert": "文本转 HTML"
+        },
+        "copied": {
+          "system": "系统提示词已复制",
+          "user": "用户提示词已复制",
+          "bundle": "完整 Prompt 包已复制"
+        }
+      },
+      "livePreview": {
+        "title": "实时双预览",
+        "description": "管理员输入内容后，可同时查看站内消息版与邮件版效果。",
+        "web": "Web / 站内版",
+        "email": "Email / 邮件版"
+      },
+      "previewFallbackTitle": "公告预览",
       "scope": {
         "all": "全部用户",
         "custom": "指定用户"
@@ -1230,6 +1349,7 @@
       "sendFailed": "发送失败",
       "noticeTitle": "提示",
       "noticeDesc": "广播消息将以系统通知形式发送到用户的消息中心。",
+      "noticeHtmlDesc": "HTML 广播会在发送前按统一安全 profile 清洗；站内信预览与历史页复用同一 renderer。",
       "sentBy": "由 {{actor}} 发送（ID: {{id}}）",
       "summary": {
         "broadcasts": "广播次数",
@@ -1279,6 +1399,7 @@
         "title": "广播记录",
         "description": "查看近期广播及投递情况。",
         "empty": "暂无广播记录。",
+        "loadFailed": "加载广播历史失败。",
         "showDetails": "显示接收详情",
         "hideDetails": "收起接收详情",
         "more": "等 {{count}} 位用户",

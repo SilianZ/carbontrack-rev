@@ -92,8 +92,9 @@ export const authAPI = {
     return null;
   },
 
-  async forgotPassword(email) {
-    const response = await api.post('/auth/forgot-password', { email });
+  async forgotPassword(payload) {
+    const body = typeof payload === 'string' ? { email: payload } : payload;
+    const response = await api.post('/auth/forgot-password', body);
     return response.data;
   },
 

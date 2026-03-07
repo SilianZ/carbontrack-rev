@@ -31,7 +31,15 @@ const SANITIZE_OPTIONS = {
   FORBID_TAGS: ['form', 'iframe', 'input', 'meta', 'object', 'script', 'style', 'textarea'],
 };
 
-let hookRegistered = false;
+const MESSAGE_SANITIZE_HOOK_SENTINEL = '__carbontrack_message_sanitize_hook_registered__';
+
+function isMessageHookRegisteredGlobally() {
+  return globalThis[MESSAGE_SANITIZE_HOOK_SENTINEL] === true;
+}
+
+function markMessageHookRegisteredGlobally() {
+  globalThis[MESSAGE_SANITIZE_HOOK_SENTINEL] = true;
+}
 
 function sanitizeLinkAttributes(node) {
   if (node.tagName !== 'A') {
@@ -52,9 +60,9 @@ function sanitizeLinkAttributes(node) {
   }
 }
 
-if (!hookRegistered) {
+if (!isMessageHookRegisteredGlobally()) {
   DOMPurify.addHook('afterSanitizeAttributes', sanitizeLinkAttributes);
-  hookRegistered = true;
+  markMessageHookRegisteredGlobally();
 }
 
 export function sanitizeMessageHtml(content) {

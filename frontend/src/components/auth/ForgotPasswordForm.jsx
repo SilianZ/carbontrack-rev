@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
@@ -8,12 +8,16 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import { Alert, AlertDescription } from '../ui/Alert';
+import Turnstile from '../common/Turnstile';
 
 export function ForgotPasswordForm() {
   const { t } = useTranslation();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const turnstileRef = useRef(null);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const requiresTurnstile = Boolean(import.meta.env?.VITE_TURNSTILE_SITE_KEY);
 
   const {
     register,
@@ -23,12 +27,20 @@ export function ForgotPasswordForm() {
   const validationRules = getValidationRules();
 
   const onSubmit = async (data) => {
+    if (requiresTurnstile && !turnstileToken) {
+      setError(t('auth.verification.turnstileRequired'));
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      const result = await authAPI.forgotPassword(data.email);
+      const result = await authAPI.forgotPassword({
+        email: data.email,
+        cf_turnstile_response: turnstileToken,
+      });
 
       if (result.success) {
         setSuccess(t('auth.resetEmailSent'));
@@ -38,6 +50,8 @@ export function ForgotPasswordForm() {
     } catch (err) {
       setError(err.message || t('auth.resetEmailFailed'));
     } finally {
+      setTurnstileToken('');
+      turnstileRef.current?.reset?.();
       setIsLoading(false);
     }
   };
@@ -59,7 +73,7 @@ export function ForgotPasswordForm() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t('auth.resetPassword.title', { defaultValue: t('auth.resetPassword') })}</CardTitle>
+            <CardTitle>{t('auth.resetPassword.title')}</CardTitle>
             <CardDescription>
               {t('auth.enterEmailForReset')}
             </CardDescription>
@@ -100,11 +114,22 @@ export function ForgotPasswordForm() {
               </div>
 
               <div>
+                <Turnstile
+                  ref={turnstileRef}
+                  className="flex justify-center"
+                  require={requiresTurnstile}
+                  onVerify={(token) => setTurnstileToken(token)}
+                  onExpire={() => setTurnstileToken('')}
+                  onError={() => setTurnstileToken('')}
+                />
+              </div>
+
+              <div>
                 <Button
                   type="submit"
                   className="w-full"
                   loading={isLoading}
-                  disabled={isLoading || success}
+                  disabled={isLoading || success || (requiresTurnstile && !turnstileToken)}
                 >
                   {isLoading ? t('auth.sending') : t('auth.sendResetEmail')}
                 </Button>

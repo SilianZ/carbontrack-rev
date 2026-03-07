@@ -25,8 +25,20 @@ import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
 import { Checkbox } from '../ui/checkbox';
 import { Pagination } from '../ui/Pagination';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/Tabs';
 import { cn } from '../../lib/utils';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card';
+import { AnnouncementContent } from '../content/AnnouncementContent';
+import { AnnouncementEmailPreview } from '../content/AnnouncementEmailPreview';
+import { AnnouncementPromptHelper } from '../content/AnnouncementPromptHelper';
+import { AnnouncementTemplateEditor } from '../content/AnnouncementTemplateEditor';
+import { ANNOUNCEMENT_PROMPT_ACTION_GENERATE } from '../../lib/announcementPrompt';
+import {
+  ANNOUNCEMENT_CONTENT_FORMAT_HTML,
+  ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
+  ANNOUNCEMENT_RENDER_PROFILE_HTML,
+  normalizeAnnouncementContentFormat,
+} from '../../lib/announcementHtml';
 
 const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
 const PRIORITY_COLORS = {
@@ -39,6 +51,7 @@ const PRIORITY_COLORS = {
 const INITIAL_FORM = {
   title: '',
   content: '',
+  content_format: ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
   priority: 'normal',
   scope: 'all',
   target_users_text: ''
@@ -60,6 +73,13 @@ const RECIPIENT_SEARCH_DEFAULT = {
   status: 'any',
   isAdmin: 'any',
   limit: 25,
+};
+
+const RECIPIENT_FIELD_LABEL_KEYS = {
+  email: 'admin.broadcast.recipientSearch.fields.email',
+  school: 'admin.broadcast.recipientSearch.fields.school',
+  location: 'admin.broadcast.recipientSearch.fields.location',
+  username: 'admin.broadcast.recipientSearch.fields.username',
 };
 
 const parseTargetUserIds = (raw) => {
@@ -140,8 +160,8 @@ function UserChips({ users, onViewUser, t }) {
             : statusValue === 'inactive'
               ? t('admin.users.statusInactive')
               : statusValue === 'suspended'
-                ? t('admin.users.statusSuspended', 'Suspended')
-                : statusValue || null;
+                ? t('admin.users.statusSuspended')
+                : null;
         const hasAdminFlag = entry?.is_admin !== undefined && entry?.is_admin !== null && `${entry.is_admin}` !== '';
         const isAdmin =
           entry?.is_admin === true ||
@@ -169,20 +189,20 @@ function UserChips({ users, onViewUser, t }) {
               <HoverCardContent className="w-64 space-y-1 text-xs text-muted-foreground">
                 <div>
                   <span className="font-medium text-gray-700">
-                    {t('admin.broadcast.recipientSearch.hover.userId', '用户ID')}
+                    {t('admin.broadcast.recipientSearch.hover.userId')}
                   </span>{' '}
                   #{id}
                 </div>
                 {email && (
                   <div>
-                    <span className="font-medium text-gray-700">{t('common.email', '邮箱')}</span>{' '}
+                    <span className="font-medium text-gray-700">{t('common.email')}</span>{' '}
                     {email}
                   </div>
                 )}
                 {statusLabel && (
                   <div>
                     <span className="font-medium text-gray-700">
-                      {t('admin.broadcast.recipientSearch.hover.status', '状态')}
+                      {t('admin.broadcast.recipientSearch.hover.status')}
                     </span>{' '}
                     {statusLabel}
                   </div>
@@ -190,7 +210,7 @@ function UserChips({ users, onViewUser, t }) {
                 {hasAdminFlag && (
                   <div>
                     <span className="font-medium text-gray-700">
-                      {t('admin.broadcast.recipientSearch.hover.role', '角色')}
+                      {t('admin.broadcast.recipientSearch.hover.role')}
                     </span>{' '}
                     {isAdmin ? t('admin.users.roleAdmin') : t('admin.users.roleUser')}
                   </div>
@@ -203,7 +223,7 @@ function UserChips({ users, onViewUser, t }) {
               variant="outline"
               onClick={handleNavigate}
             >
-              {t('admin.broadcast.recipientSearch.viewProfile', '查看用户')}
+              {t('admin.broadcast.recipientSearch.viewProfile')}
             </Button>
           </div>
         );
@@ -224,6 +244,7 @@ export function BroadcastCenter() {
     []
   );
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('compose');
   const [form, setForm] = useState(INITIAL_FORM);
   const [preview, setPreview] = useState(null);
   const [result, setResult] = useState(null);
@@ -232,12 +253,13 @@ export function BroadcastCenter() {
   const [historyParams, setHistoryParams] = useState(HISTORY_DEFAULT_PARAMS);
   const [filters, setFilters] = useState(FILTERS_DEFAULT);
   const [recipientForm, setRecipientForm] = useState(RECIPIENT_SEARCH_DEFAULT);
-  const [recipientPage, setRecipientPage] = useState(1);
   const [recipientResults, setRecipientResults] = useState({ items: [], pagination: { page: 1, has_more: false, limit: RECIPIENT_SEARCH_DEFAULT.limit } });
   const [recipientLoading, setRecipientLoading] = useState(false);
   const [recipientError, setRecipientError] = useState(null);
   const [selectedRecipients, setSelectedRecipients] = useState(() => new Map());
   const [appliedFilters, setAppliedFilters] = useState([]);
+  const [announcementAiAction, setAnnouncementAiAction] = useState(ANNOUNCEMENT_PROMPT_ACTION_GENERATE);
+  const [announcementAiInstruction, setAnnouncementAiInstruction] = useState('');
 
   const hasRecipientCriteria = useMemo(() => {
     return Boolean(
@@ -260,6 +282,10 @@ export function BroadcastCenter() {
   const selectedRecipientIds = useMemo(
     () => selectedRecipientList.map((entry) => Number(entry?.id ?? 0)).filter((id) => Number.isInteger(id) && id > 0),
     [selectedRecipientList]
+  );
+  const selectedContentFormat = useMemo(
+    () => normalizeAnnouncementContentFormat(form.content_format),
+    [form.content_format]
   );
 
   const {
@@ -293,7 +319,6 @@ export function BroadcastCenter() {
     }
   );
 
-  const historyItems = historyResponse?.data ?? [];
   const pagination = historyResponse?.pagination ?? {};
   const messageOverview = useMemo(() => {
     const stats = adminStatsData?.messages ?? {};
@@ -365,11 +390,9 @@ export function BroadcastCenter() {
   const messagePriorityChartData = useMemo(
     () =>
       messagePriorityData.map((item) => {
-        const fallback =
-          item.priority.charAt(0).toUpperCase() + item.priority.slice(1);
         return {
           ...item,
-          name: t(`messages.priority.${item.priority}`, fallback),
+          name: t(`messages.priority.${item.priority}`),
           color: PRIORITY_COLORS[item.priority] ?? PRIORITY_COLORS.default,
         };
       }),
@@ -378,7 +401,8 @@ export function BroadcastCenter() {
   const messageStatsInitialLoading = isMessageStatsLoading && !adminStatsData;
 
   const filteredItems = useMemo(() => {
-    if (!Array.isArray(historyItems)) {
+    const historyItems = Array.isArray(historyResponse?.data) ? historyResponse.data : [];
+    if (historyItems.length === 0) {
       return [];
     }
     const search = filters.search.trim().toLowerCase();
@@ -403,7 +427,7 @@ export function BroadcastCenter() {
         .map((value) => String(value).toLowerCase());
       return pooled.some((value) => value.includes(search));
     });
-  }, [historyItems, filters]);
+  }, [historyResponse, filters]);
 
   const summary = useMemo(() => {
     const totals = {
@@ -518,7 +542,7 @@ export function BroadcastCenter() {
   const describeFilter = useCallback(
     (filter) => {
       if (!filter || typeof filter !== 'object') {
-        return t('admin.broadcast.recipientFilters.summary.fallback', 'Custom filter');
+        return t('admin.broadcast.recipientFilters.summary.fallback');
       }
 
       const parts = [];
@@ -531,8 +555,10 @@ export function BroadcastCenter() {
             .filter(Boolean)
             .map((field) => {
               const normalized = field === 'school_name' ? 'school' : field;
-              return t('admin.broadcast.recipientSearch.fields.' + normalized, normalized.replace(/_/g, ' '));
-            });
+              const labelKey = RECIPIENT_FIELD_LABEL_KEYS[normalized];
+              return labelKey ? t(labelKey) : null;
+            })
+            .filter(Boolean);
           if (labels.length > 0) {
             parts.push(t('admin.broadcast.recipientFilters.summary.fields', { fields: labels.join(', ') }));
           }
@@ -545,7 +571,7 @@ export function BroadcastCenter() {
         parts.push(t('admin.broadcast.recipientFilters.summary.emailSuffix', { value: filter.email_suffix }));
       }
       if (filter.status === 'active' || filter.status === 'inactive') {
-        parts.push(t('admin.broadcast.recipientFilters.summary.status.' + filter.status, filter.status));
+        parts.push(t('admin.broadcast.recipientFilters.summary.status.' + filter.status));
       }
       if (
         filter.is_admin === '1' ||
@@ -567,10 +593,10 @@ export function BroadcastCenter() {
       }
 
       if (parts.length === 0) {
-        return t('admin.broadcast.recipientFilters.summary.fallback', 'Custom filter');
+        return t('admin.broadcast.recipientFilters.summary.fallback');
       }
 
-      const joiner = t('admin.broadcast.recipientFilters.summary.joiner', ' • ');
+      const joiner = t('admin.broadcast.recipientFilters.summary.joiner');
       return parts.join(joiner);
     },
     [t]
@@ -590,7 +616,6 @@ export function BroadcastCenter() {
         const limit = pagination.limit ?? params.limit ?? recipientForm.limit ?? 25;
         const hasMore = Boolean(pagination.has_more);
         setRecipientResults({ items: list, pagination: { page, limit, has_more: hasMore } });
-        setRecipientPage(page);
       } catch (error) {
         setRecipientError(error);
         setRecipientResults((prev) => ({ ...prev, items: [] }));
@@ -621,7 +646,6 @@ export function BroadcastCenter() {
   const clearRecipientSearch = () => {
     setRecipientForm(RECIPIENT_SEARCH_DEFAULT);
     setRecipientResults({ items: [], pagination: { page: 1, has_more: false, limit: RECIPIENT_SEARCH_DEFAULT.limit } });
-    setRecipientPage(1);
     setRecipientError(null);
   };
 
@@ -660,12 +684,12 @@ export function BroadcastCenter() {
         event.stopPropagation();
       }
       if (!recipient || recipient.id === undefined || recipient.id === null) {
-        toast.error(t('admin.broadcast.recipientSearch.invalidUser', '无法打开该用户信息'));
+        toast.error(t('admin.broadcast.recipientSearch.invalidUser'));
         return;
       }
       const userId = Number(recipient.id);
       if (!Number.isInteger(userId) || userId <= 0) {
-        toast.error(t('admin.broadcast.recipientSearch.invalidUser', '无法打开该用户信息'));
+        toast.error(t('admin.broadcast.recipientSearch.invalidUser'));
         return;
       }
       navigate(`/admin/users?userId=${userId}`);
@@ -687,7 +711,7 @@ export function BroadcastCenter() {
 
   const addAllRecipientsFromResults = () => {
     if (!recipientResults.items.length) {
-      toast.error(t('admin.broadcast.recipients.emptySelection', 'No recipients in current result set.'));
+      toast.error(t('admin.broadcast.recipients.emptySelection'));
       return;
     }
     ensureCustomScope();
@@ -706,18 +730,18 @@ export function BroadcastCenter() {
       });
       return next;
     });
-    toast.success(t('admin.broadcast.recipients.addedAll', 'Recipients added to selection.'));
+    toast.success(t('admin.broadcast.recipients.addedAll'));
   };
 
   const addFilterGroup = () => {
     if (!hasRecipientCriteria) {
-      toast.error(t('admin.broadcast.recipientFilters.requireCondition', 'Please configure at least one filter condition.'));
+      toast.error(t('admin.broadcast.recipientFilters.requireCondition'));
       return;
     }
     ensureCustomScope();
     const payload = buildFilterPayload();
     setAppliedFilters((prev) => [...prev, payload]);
-    toast.success(t('admin.broadcast.recipientFilters.added', 'Filter added to broadcast payload.'));
+    toast.success(t('admin.broadcast.recipientFilters.added'));
   };
 
   const removeFilterGroup = (index) => {
@@ -741,8 +765,13 @@ export function BroadcastCenter() {
     const payload = {
       title: addAnnouncementMarkers(form.title.trim()),
       content: form.content.trim(),
+      content_format: normalizeAnnouncementContentFormat(form.content_format),
       priority: normalizedPriority
     };
+
+    if (payload.content_format === ANNOUNCEMENT_CONTENT_FORMAT_HTML) {
+      payload.render_profile = ANNOUNCEMENT_RENDER_PROFILE_HTML;
+    }
 
     const nextErrors = {};
 
@@ -852,6 +881,10 @@ export function BroadcastCenter() {
     }
   );
 
+  const announcementDraftMutation = useMutation(
+    (payload) => adminAPI.generateAnnouncementDraft(payload)
+  );
+
   const handlePreview = () => {
     const { payload, isValid, firstError } = validateForm();
     if (!isValid) {
@@ -862,6 +895,8 @@ export function BroadcastCenter() {
     setPreview({
       title: payload.title,
       content: payload.content,
+      contentFormat: payload.content_format,
+      renderProfile: payload.render_profile ?? null,
       priority: payload.priority,
       scope: form.scope,
       targetCount: form.scope === 'custom' ? (payload.target_users?.length ?? 0) : null
@@ -881,6 +916,34 @@ export function BroadcastCenter() {
   const handleFlushBroadcasts = useCallback(() => {
     flushBroadcastMutation.mutate({ limit: 10 });
   }, [flushBroadcastMutation]);
+
+  const handleApplyHtmlTemplate = useCallback((template) => {
+    if (!template || typeof template.content !== 'string') {
+      return;
+    }
+    setField('content', template.content);
+  }, []);
+
+  const handleRunAnnouncementAi = useCallback(async (payload) => {
+    try {
+      const res = await announcementDraftMutation.mutateAsync({
+        action: payload?.action ?? announcementAiAction,
+        title: payload?.title ?? form.title,
+        content: payload?.content ?? form.content,
+        instruction: payload?.instruction ?? announcementAiInstruction,
+        priority: payload?.priority ?? form.priority,
+        content_format: payload?.content_format ?? selectedContentFormat,
+        source: payload?.source ?? 'admin:/admin/broadcast',
+      });
+      const data = res?.data?.data ?? {};
+      toast.success(t('admin.broadcast.llmHelper.builtinSuccess'));
+      return data;
+    } catch (error) {
+      const message = error?.response?.data?.error || error?.message || t('admin.broadcast.llmHelper.builtinFailed');
+      toast.error(message);
+      throw error;
+    }
+  }, [announcementAiAction, announcementAiInstruction, announcementDraftMutation, form.content, form.priority, form.title, selectedContentFormat, t]);
 
   const toggleDetails = (id) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -953,7 +1016,7 @@ export function BroadcastCenter() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       toast.success(t('admin.broadcast.export.success'));
-    } catch (error) {
+    } catch {
       toast.error(t('admin.broadcast.export.error'));
     }
   };
@@ -1002,12 +1065,27 @@ export function BroadcastCenter() {
     }
   }, [emailResult]);
 
+  const livePreview = useMemo(() => ({
+    title: form.title.trim() || t('admin.broadcast.previewFallbackTitle'),
+    content: form.content,
+    contentFormat: selectedContentFormat,
+    priority: form.priority,
+    scope: form.scope,
+  }), [form.content, form.priority, form.scope, form.title, selectedContentFormat, t]);
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold tracking-tight">{t('admin.broadcast.title')}</h2>
       <p className="text-muted-foreground">{t('admin.broadcast.description')}</p>
 
-      <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4 grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="compose">{t('admin.broadcast.tabs.compose')}</TabsTrigger>
+          <TabsTrigger value="send">{t('admin.broadcast.tabs.send')}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="compose" className="mt-0">
+          <div className="rounded-lg border bg-card p-6 shadow-sm space-y-4">
         {Object.keys(errors).length > 0 && (
           <Alert variant="warning">
             <AlertTitle>{t('admin.broadcast.validation.general')}</AlertTitle>
@@ -1015,7 +1093,7 @@ export function BroadcastCenter() {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.broadcast.form.title')}</label>
+          <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.broadcast.form.title')}</label>
           <Input
             value={form.title}
             onChange={(event) => setField('title', event.target.value)}
@@ -1026,24 +1104,78 @@ export function BroadcastCenter() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.broadcast.form.content')}</label>
-          <Textarea
-            value={form.content}
-            onChange={(event) => setField('content', event.target.value)}
-            className={cn(errors.content && 'border-red-500 focus-visible:ring-red-500')}
-            placeholder={t('admin.broadcast.form.content')}
-          />
+          <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.broadcast.form.content')}</label>
+          {selectedContentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML ? (
+            <div className="space-y-3">
+              <AnnouncementTemplateEditor
+                value={form.content}
+                onChange={(value) => setField('content', value)}
+                onApplyTemplate={handleApplyHtmlTemplate}
+                title={form.title}
+                priority={form.priority}
+                contentFormat={selectedContentFormat}
+                action={announcementAiAction}
+                onActionChange={setAnnouncementAiAction}
+                instruction={announcementAiInstruction}
+                onInstructionChange={setAnnouncementAiInstruction}
+                onRunBuiltin={handleRunAnnouncementAi}
+                isBuiltinLoading={announcementDraftMutation.isLoading}
+                onUpdateTitle={(nextTitle) => setField('title', nextTitle)}
+                onUpdateFormat={(nextFormat) => setField('content_format', normalizeAnnouncementContentFormat(nextFormat))}
+                t={t}
+              />
+              <AnnouncementPromptHelper
+                title={form.title}
+                content={form.content}
+                priority={form.priority}
+                contentFormat={selectedContentFormat}
+                action={announcementAiAction}
+                instruction={announcementAiInstruction}
+                t={t}
+              />
+            </div>
+          ) : (
+            <Textarea
+              value={form.content}
+              onChange={(event) => setField('content', event.target.value)}
+              className={cn(errors.content && 'border-red-500 focus-visible:ring-red-500')}
+              placeholder={t('admin.broadcast.form.content')}
+              rows={8}
+            />
+          )}
           {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content}</p>}
+          <p className="mt-1 text-xs text-muted-foreground">
+            {selectedContentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
+              ? t('admin.broadcast.form.contentFormatHtmlHint')
+              : t('admin.broadcast.form.contentFormatTextHint')}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.broadcast.form.priority')}</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.broadcast.form.contentFormat')}</label>
+            <select
+              value={selectedContentFormat}
+              onChange={(event) => setField('content_format', event.target.value)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value={ANNOUNCEMENT_CONTENT_FORMAT_TEXT}>{t('admin.broadcast.format.text')}</option>
+              <option value={ANNOUNCEMENT_CONTENT_FORMAT_HTML}>{t('admin.broadcast.format.html')}</option>
+            </select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {selectedContentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                ? t('admin.broadcast.format.profileHint')
+                : t('admin.broadcast.format.textHint')}
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.broadcast.form.priority')}</label>
             <select
               value={form.priority}
               onChange={(event) => setField('priority', event.target.value)}
               className={cn(
-                'w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent',
+                'w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500',
                 errors.priority && 'border-red-500 focus:ring-red-500'
               )}
             >
@@ -1055,19 +1187,30 @@ export function BroadcastCenter() {
             </select>
             {errors.priority && <p className="mt-1 text-sm text-red-600">{errors.priority}</p>}
           </div>
+        </div>
+        
+        <div className="flex justify-end gap-2 mt-4">
+          <Button type="button" onClick={() => setActiveTab('send')}>
+            {t('admin.broadcast.nextStep')}
+          </Button>
+        </div>
+      </div>
+      </TabsContent>
+
+      <TabsContent value="send" className="space-y-6 mt-0">
+        <div className="rounded-lg border bg-card p-6 shadow-sm space-y-4">
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.broadcast.form.scope')}</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.broadcast.form.scope')}</label>
             <select
               value={form.scope}
               onChange={(event) => setField('scope', event.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               <option value="all">{t('admin.broadcast.scope.all')}</option>
               <option value="custom">{t('admin.broadcast.scope.custom')}</option>
             </select>
           </div>
-        </div>
 
         {form.scope === 'custom' && (
           <div className="space-y-4 rounded-lg border border-dashed bg-slate-50/60 p-4">
@@ -1092,15 +1235,15 @@ export function BroadcastCenter() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium text-gray-700">{t('admin.broadcast.recipients.selected', 'Selected recipients')}</h4>
+                  <h4 className="text-sm font-medium text-gray-700">{t('admin.broadcast.recipients.selected')}</h4>
                   {selectedRecipientIds.length > 0 && (
                     <Button variant="ghost" size="sm" onClick={clearSelectedRecipients}>
-                      {t('common.clear', 'Clear')}
+                      {t('common.clear')}
                     </Button>
                   )}
                 </div>
                 {selectedRecipientIds.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">{t('admin.broadcast.recipients.none', 'No individual recipients selected yet.')}</p>
+                  <p className="text-sm text-muted-foreground">{t('admin.broadcast.recipients.none')}</p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {selectedRecipientList.map((entry) => {
@@ -1112,7 +1255,7 @@ export function BroadcastCenter() {
                             type="button"
                             onClick={() => removeSelectedRecipient(entry.id)}
                             className="text-xs text-muted-foreground hover:text-red-600"
-                            aria-label={t('common.remove', 'Remove')}
+                            aria-label={t('common.remove')}
                           >
                             ×
                           </button>
@@ -1122,7 +1265,7 @@ export function BroadcastCenter() {
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  {t('admin.broadcast.recipients.selectedCount', 'Total selected: {{count}}', {
+                  {t('admin.broadcast.recipients.selectedCount', {
                     count: selectedRecipientIds.length,
                   })}
                 </p>
@@ -1131,15 +1274,15 @@ export function BroadcastCenter() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium text-gray-700">{t('admin.broadcast.recipientFilters.title', 'Applied filter groups')}</h4>
+                <h4 className="text-sm font-medium text-gray-700">{t('admin.broadcast.recipientFilters.title')}</h4>
                 {appliedFilters.length > 0 && (
                   <Button variant="ghost" size="sm" onClick={() => setAppliedFilters([])}>
-                    {t('common.clear', 'Clear')}
+                    {t('common.clear')}
                   </Button>
                 )}
               </div>
               {appliedFilters.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t('admin.broadcast.recipientFilters.none', 'No filter groups added yet.')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.broadcast.recipientFilters.none')}</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {appliedFilters.map((filter, index) => (
@@ -1149,7 +1292,7 @@ export function BroadcastCenter() {
                         type="button"
                         onClick={() => removeFilterGroup(index)}
                         className="text-xs text-muted-foreground hover:text-red-600"
-                        aria-label={t('common.remove', 'Remove')}
+                        aria-label={t('common.remove')}
                       >
                         ×
                       </button>
@@ -1162,68 +1305,68 @@ export function BroadcastCenter() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700">{t('admin.broadcast.recipientSearch.title', 'Advanced recipient search')}</h4>
-                  <p className="text-xs text-muted-foreground">{t('admin.broadcast.recipientSearch.description', 'Filter users by school, email domain or other attributes, then select individuals or add the filter group to this broadcast.')}</p>
+                  <h4 className="text-sm font-medium text-gray-700">{t('admin.broadcast.recipientSearch.title')}</h4>
+                  <p className="text-xs text-muted-foreground">{t('admin.broadcast.recipientSearch.description')}</p>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={addFilterGroup}
                   disabled={!hasRecipientCriteria}
-                  title={!hasRecipientCriteria ? t('admin.broadcast.recipientFilters.hint', 'Set a condition above to enable this button.') : undefined}
+                  title={!hasRecipientCriteria ? t('admin.broadcast.recipientFilters.hint') : undefined}
                 >
-                  {t('admin.broadcast.recipientFilters.add', 'Add filter to broadcast')}
+                  {t('admin.broadcast.recipientFilters.add')}
                 </Button>
               </div>
 
               {!hasRecipientCriteria && (
-                <p className="text-xs text-muted-foreground">{t('admin.broadcast.recipientFilters.hint', 'Set a condition above to enable this button.')}</p>
+                <p className="text-xs text-muted-foreground">{t('admin.broadcast.recipientFilters.hint')}</p>
               )}
 
               <div className="grid gap-3 md:grid-cols-4">
                 <Input
                   value={recipientForm.search}
                   onChange={(event) => setRecipientField('search', event.target.value)}
-                  placeholder={t('admin.broadcast.recipientSearch.searchPlaceholder', 'Search text (name, email, school...)')}
+                  placeholder={t('admin.broadcast.recipientSearch.searchPlaceholder')}
                 />
                 <select
                   value={recipientForm.fields}
                   onChange={(event) => setRecipientField('fields', event.target.value)}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
-                  <option value="username,email,school,location">{t('admin.broadcast.recipientSearch.fields.all', 'All key fields')}</option>
-                  <option value="email">{t('admin.broadcast.recipientSearch.fields.email', 'Email')}</option>
-                  <option value="school,school_name">{t('admin.broadcast.recipientSearch.fields.school', 'School')}</option>
-                  <option value="location">{t('admin.broadcast.recipientSearch.fields.location', 'Location')}</option>
-                  <option value="username">{t('admin.broadcast.recipientSearch.fields.username', 'Username')}</option>
+                  <option value="username,email,school,location">{t('admin.broadcast.recipientSearch.fields.all')}</option>
+                  <option value="email">{t('admin.broadcast.recipientSearch.fields.email')}</option>
+                  <option value="school,school_name">{t('admin.broadcast.recipientSearch.fields.school')}</option>
+                  <option value="location">{t('admin.broadcast.recipientSearch.fields.location')}</option>
+                  <option value="username">{t('admin.broadcast.recipientSearch.fields.username')}</option>
                 </select>
                 <Input
                   value={recipientForm.school}
                   onChange={(event) => setRecipientField('school', event.target.value)}
-                  placeholder={t('admin.broadcast.recipientSearch.schoolPlaceholder', 'School contains...')}
+                  placeholder={t('admin.broadcast.recipientSearch.schoolPlaceholder')}
                 />
                 <Input
                   value={recipientForm.emailSuffix}
                   onChange={(event) => setRecipientField('emailSuffix', event.target.value)}
-                  placeholder={t('admin.broadcast.recipientSearch.emailPlaceholder', 'Email domain e.g. example.com')}
+                  placeholder={t('admin.broadcast.recipientSearch.emailPlaceholder')}
                 />
                 <select
                   value={recipientForm.status}
                   onChange={(event) => setRecipientField('status', event.target.value)}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
-                  <option value="any">{t('admin.broadcast.recipientSearch.status.any', 'Any status')}</option>
-                  <option value="active">{t('admin.broadcast.recipientSearch.status.active', 'Active')}</option>
-                  <option value="inactive">{t('admin.broadcast.recipientSearch.status.inactive', 'Inactive')}</option>
+                  <option value="any">{t('admin.broadcast.recipientSearch.status.any')}</option>
+                  <option value="active">{t('admin.broadcast.recipientSearch.status.active')}</option>
+                  <option value="inactive">{t('admin.broadcast.recipientSearch.status.inactive')}</option>
                 </select>
                 <select
                   value={recipientForm.isAdmin}
                   onChange={(event) => setRecipientField('isAdmin', event.target.value)}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
-                  <option value="any">{t('admin.broadcast.recipientSearch.role.any', 'All roles')}</option>
-                  <option value="1">{t('admin.broadcast.recipientSearch.role.admin', 'Admins')}</option>
-                  <option value="0">{t('admin.broadcast.recipientSearch.role.user', 'Regular users')}</option>
+                  <option value="any">{t('admin.broadcast.recipientSearch.role.any')}</option>
+                  <option value="1">{t('admin.broadcast.recipientSearch.role.admin')}</option>
+                  <option value="0">{t('admin.broadcast.recipientSearch.role.user')}</option>
                 </select>
                 <select
                   value={recipientForm.limit}
@@ -1240,27 +1383,27 @@ export function BroadcastCenter() {
 
               <div className="flex flex-wrap gap-2">
                 <Button type="button" onClick={handleRecipientSearch} disabled={recipientLoading}>
-                  {recipientLoading ? t('common.loading', 'Loading...') : t('common.search', 'Search')}
+                  {recipientLoading ? t('common.loading') : t('common.search')}
                 </Button>
                 <Button type="button" variant="outline" onClick={addAllRecipientsFromResults} disabled={recipientLoading || recipientResults.items.length === 0}>
-                  {t('admin.broadcast.recipientSearch.addAll', 'Add visible recipients')}
+                  {t('admin.broadcast.recipientSearch.addAll')}
                 </Button>
                 <Button type="button" variant="ghost" onClick={clearRecipientSearch} disabled={recipientLoading}>
-                  {t('common.reset', 'Reset')}
+                  {t('common.reset')}
                 </Button>
               </div>
 
               {recipientError && (
                 <Alert variant="destructive">
-                  <AlertTitle>{t('admin.broadcast.recipientSearch.error', 'Search failed')}</AlertTitle>
-                  <AlertDescription>{recipientError.message ?? t('common.retry', 'Please retry later.')}</AlertDescription>
+                  <AlertTitle>{t('admin.broadcast.recipientSearch.error')}</AlertTitle>
+                  <AlertDescription>{recipientError.message ?? t('common.retry')}</AlertDescription>
                 </Alert>
               )}
 
               <div className="space-y-3">
-                {recipientLoading && <p className="text-sm text-muted-foreground">{t('common.loading', 'Loading...')}</p>}
+                {recipientLoading && <p className="text-sm text-muted-foreground">{t('common.loading')}</p>}
                 {!recipientLoading && recipientResults.items.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">{t('admin.broadcast.recipientSearch.noResults', 'No users match the current search conditions.')}</p>
+                  <p className="text-sm text-muted-foreground">{t('admin.broadcast.recipientSearch.noResults')}</p>
                 ) : (
                   <div className="space-y-2">
                     <p className="text-xs text-muted-foreground">
@@ -1275,12 +1418,12 @@ export function BroadcastCenter() {
                       const statusValue = typeof item?.status === 'string' ? item.status.toLowerCase() : '';
                       const statusLabel =
                         statusValue === 'active'
-                          ? t('admin.users.statusActive', '活跃')
+                          ? t('admin.users.statusActive')
                           : statusValue === 'inactive'
-                            ? t('admin.users.statusInactive', '未激活')
+                            ? t('admin.users.statusInactive')
                             : statusValue === 'suspended'
-                              ? t('admin.users.statusSuspended', '已暂停')
-                              : statusValue || '';
+                              ? t('admin.users.statusSuspended')
+                              : '';
                       const rawAdmin = item?.is_admin;
                       const hasAdminFlag = rawAdmin !== undefined && rawAdmin !== null && `${rawAdmin}` !== '';
                       const isAdmin =
@@ -1308,20 +1451,20 @@ export function BroadcastCenter() {
                                     <div className="space-y-1 text-xs text-muted-foreground">
                                       <div>
                                         <span className="font-medium text-gray-700">
-                                          {t('admin.broadcast.recipientSearch.hover.userId', '用户ID')}:
+                                          {t('admin.broadcast.recipientSearch.hover.userId')}:
                                         </span>{' '}
                                         #{id}
                                       </div>
                                       {item.email && (
                                         <div>
-                                          <span className="font-medium text-gray-700">{t('common.email', '邮箱')}:</span>{' '}
+                                          <span className="font-medium text-gray-700">{t('common.email')}:</span>{' '}
                                           {item.email}
                                         </div>
                                       )}
                                       {item.school && (
                                         <div>
                                           <span className="font-medium text-gray-700">
-                                            {t('admin.broadcast.recipientSearch.hover.school', '学校')}:
+                                            {t('admin.broadcast.recipientSearch.hover.school')}:
                                           </span>{' '}
                                           {item.school}
                                         </div>
@@ -1329,7 +1472,7 @@ export function BroadcastCenter() {
                                       {item.location && (
                                         <div>
                                           <span className="font-medium text-gray-700">
-                                            {t('admin.broadcast.recipientSearch.hover.location', '地区')}:
+                                            {t('admin.broadcast.recipientSearch.hover.location')}:
                                           </span>{' '}
                                           {item.location}
                                         </div>
@@ -1351,8 +1494,8 @@ export function BroadcastCenter() {
                                           {hasAdminFlag && (
                                             <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
                                               {isAdmin
-                                                ? t('admin.users.roleAdmin', '管理员')
-                                                : t('admin.users.roleUser', '用户')}
+                                                ? t('admin.users.roleAdmin')
+                                                : t('admin.users.roleUser')}
                                             </span>
                                           )}
                                         </div>
@@ -1367,11 +1510,11 @@ export function BroadcastCenter() {
                                 variant="outline"
                                 onClick={(event) => handleViewUserProfile(event, item)}
                               >
-                                {t('admin.broadcast.recipientSearch.viewProfile', '查看用户')}
+                                {t('admin.broadcast.recipientSearch.viewProfile')}
                               </Button>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {item.email ? item.email : t('admin.broadcast.recipientSearch.noEmail', 'No email on file')}
+                              {item.email ? item.email : t('admin.broadcast.recipientSearch.noEmail')}
                               {item.school ? ` • ${item.school}` : ''}
                             </p>
                             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -1385,7 +1528,7 @@ export function BroadcastCenter() {
                               )}
                               {hasAdminFlag && (
                                 <span className="font-medium text-gray-700">
-                                  {isAdmin ? t('admin.users.roleAdmin', '管理员') : t('admin.users.roleUser', '用户')}
+                                  {isAdmin ? t('admin.users.roleAdmin') : t('admin.users.roleUser')}
                                 </span>
                               )}
                             </div>
@@ -1408,7 +1551,7 @@ export function BroadcastCenter() {
                           onClick={() => handleRecipientPageChange('prev')}
                           disabled={recipientLoading || recipientResults.pagination.page === 1}
                         >
-                          {t('common.previous', 'Previous')}
+                          {t('common.previous')}
                         </Button>
                         <Button
                           type="button"
@@ -1417,7 +1560,7 @@ export function BroadcastCenter() {
                           onClick={() => handleRecipientPageChange('next')}
                           disabled={recipientLoading || !recipientResults.pagination.has_more}
                         >
-                          {t('common.next', 'Next')}
+                          {t('common.next')}
                         </Button>
                       </div>
                     </div>
@@ -1427,6 +1570,48 @@ export function BroadcastCenter() {
             </div>
           </div>
         )}
+
+          <div className="space-y-3 rounded-lg border border-dashed border-slate-300 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+          <div>
+            <h4 className="text-sm font-semibold text-slate-900">{t('admin.broadcast.livePreview.title')}</h4>
+            <p className="text-xs text-muted-foreground">
+              {t('admin.broadcast.livePreview.description')}
+            </p>
+          </div>
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="space-y-2 rounded-lg border bg-card p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-2">
+                <h5 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t('admin.broadcast.livePreview.web')}</h5>
+                <Badge variant="outline">
+                  {livePreview.contentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                    ? t('admin.broadcast.format.html')
+                    : t('admin.broadcast.format.text')}
+                </Badge>
+              </div>
+              <div className="rounded-lg border bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/60">
+                <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{livePreview.title}</h3>
+                <AnnouncementContent
+                  content={livePreview.content}
+                  contentFormat={livePreview.contentFormat}
+                  className="mt-3"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded-lg border bg-card p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-2">
+                <h5 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t('admin.broadcast.livePreview.email')}</h5>
+                <Badge variant="secondary">{t(`messages.priority.${livePreview.priority}`)}</Badge>
+              </div>
+              <AnnouncementEmailPreview
+                title={livePreview.title}
+                content={livePreview.content}
+                contentFormat={livePreview.contentFormat}
+                priority={livePreview.priority}
+              />
+            </div>
+          </div>
+        </div>
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={handlePreview} disabled={isSubmitting}>
@@ -1439,27 +1624,52 @@ export function BroadcastCenter() {
       </div>
 
       {preview && (
-        <div className="bg-white rounded-lg shadow-sm border p-6 space-y-3">
+        <div className="rounded-lg border bg-card p-6 shadow-sm space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-lg font-semibold">{t('admin.broadcast.previewPanel')}</h3>
-            <Badge variant="secondary">{t(`messages.priority.${preview.priority}`)}</Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">{t(`messages.priority.${preview.priority}`)}</Badge>
+              <Badge variant="outline">
+                {preview.contentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                  ? t('admin.broadcast.format.html')
+                  : t('admin.broadcast.format.text')}
+              </Badge>
+            </div>
           </div>
           <div className="space-y-2">
             <div className="text-sm text-muted-foreground">{preview.scope === 'custom'
               ? t('admin.broadcast.previewTargets.custom', { count: preview.targetCount ?? 0 })
               : t('admin.broadcast.previewTargets.all')}</div>
-            <div>
-              <span className="text-sm text-gray-500 mr-2">{t('admin.broadcast.form.title')}:</span>
-              <span className="font-medium">{preview.title}</span>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500 mr-2">{t('admin.broadcast.form.content')}:</span>
-              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">{preview.content}</p>
+            <div className="grid gap-4 xl:grid-cols-2">
+              <div>
+                <div className="mb-2 text-sm text-muted-foreground">{t('admin.broadcast.livePreview.web')}</div>
+                <div className="rounded-md border bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/60">
+                  <div className="font-medium text-slate-900 dark:text-slate-100">{preview.title}</div>
+                  <AnnouncementContent
+                    content={preview.content}
+                    contentFormat={preview.contentFormat}
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="mb-2 text-sm text-muted-foreground">{t('admin.broadcast.livePreview.email')}</div>
+                <AnnouncementEmailPreview
+                  title={preview.title}
+                  content={preview.content}
+                  contentFormat={preview.contentFormat}
+                  priority={preview.priority}
+                />
+              </div>
             </div>
           </div>
           <Alert className="mt-4" variant="info">
             <AlertTitle>{t('admin.broadcast.noticeTitle')}</AlertTitle>
-            <AlertDescription>{t('admin.broadcast.noticeDesc')}</AlertDescription>
+            <AlertDescription>
+              {preview.contentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                ? t('admin.broadcast.noticeHtmlDesc')
+                : t('admin.broadcast.noticeDesc')}
+            </AlertDescription>
           </Alert>
         </div>
       )}
@@ -1572,7 +1782,7 @@ export function BroadcastCenter() {
         {historyError && (
           <Alert variant="destructive">
             <AlertTitle>{t('admin.broadcast.sendFailed')}</AlertTitle>
-            <AlertDescription>{historyError.message ?? 'Failed to load history.'}</AlertDescription>
+            <AlertDescription>{historyError.message ?? t('admin.broadcast.history.loadFailed')}</AlertDescription>
           </Alert>
         )}
 
@@ -1586,8 +1796,8 @@ export function BroadcastCenter() {
 
         {isMessageStatsError && (
           <Alert variant="destructive">
-            <AlertTitle>{t('admin.broadcast.analytics.loadFailedTitle', '无法加载站内信统计')}</AlertTitle>
-            <AlertDescription>{messageStatsError?.message ?? t('common.retry', '请稍后重试')}</AlertDescription>
+            <AlertTitle>{t('admin.broadcast.analytics.loadFailedTitle')}</AlertTitle>
+            <AlertDescription>{messageStatsError?.message ?? t('common.retry')}</AlertDescription>
           </Alert>
         )}
 
@@ -1596,10 +1806,10 @@ export function BroadcastCenter() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {t('admin.broadcast.analytics.trendTitle', '站内信发送趋势')}
+                  {t('admin.broadcast.analytics.trendTitle')}
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  {t('admin.broadcast.analytics.trendSubtitle', '最近30日总发送与未读趋势')}
+                  {t('admin.broadcast.analytics.trendSubtitle')}
                 </p>
               </div>
               <Button
@@ -1610,14 +1820,14 @@ export function BroadcastCenter() {
                 disabled={isMessageStatsFetching}
               >
                 {isMessageStatsFetching
-                  ? t('admin.broadcast.analytics.refreshing', '刷新中...')
-                  : t('common.refresh', '刷新')}
+                  ? t('admin.broadcast.analytics.refreshing')
+                  : t('common.refresh')}
               </Button>
             </div>
             <div className="mt-4 h-72">
               {messageStatsInitialLoading ? (
                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  {t('common.loading', '加载中...')}
+                  {t('common.loading')}
                 </div>
               ) : messageTrendHasData ? (
                 <ResponsiveContainer>
@@ -1649,7 +1859,7 @@ export function BroadcastCenter() {
                       stroke="#2563eb"
                       strokeWidth={2}
                       dot={false}
-                      name={t('admin.broadcast.analytics.totalSeries', '总发送')}
+                      name={t('admin.broadcast.analytics.totalSeries')}
                     />
                     <Line
                       type="monotone"
@@ -1657,13 +1867,13 @@ export function BroadcastCenter() {
                       stroke="#f97316"
                       strokeWidth={2}
                       dot={false}
-                      name={t('admin.broadcast.analytics.unreadSeries', '未读')}
+                      name={t('admin.broadcast.analytics.unreadSeries')}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  {t('admin.broadcast.analytics.trendEmpty', '暂无趋势数据')}
+                  {t('admin.broadcast.analytics.trendEmpty')}
                 </div>
               )}
             </div>
@@ -1672,30 +1882,30 @@ export function BroadcastCenter() {
           <div className="rounded-lg border bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-lg font-semibold text-gray-900">
-                {t('admin.broadcast.analytics.priorityTitle', '优先级分布')}
+                {t('admin.broadcast.analytics.priorityTitle')}
               </h3>
               <span className="text-xs text-muted-foreground">
-                {t('admin.broadcast.analytics.prioritySubtitle', '按消息优先级统计未读情况')}
+                {t('admin.broadcast.analytics.prioritySubtitle')}
               </span>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <ResultStat
-                label={t('admin.broadcast.analytics.totalMessages', '累计消息')}
+                label={t('admin.broadcast.analytics.totalMessages')}
                 value={numberFormatter.format(messageOverview.total)}
               />
               <ResultStat
-                label={t('admin.broadcast.analytics.readMessages', '已读消息')}
+                label={t('admin.broadcast.analytics.readMessages')}
                 value={numberFormatter.format(messageOverview.read)}
                 tone="success"
               />
               <ResultStat
-                label={t('admin.broadcast.analytics.unreadMessages', '未读消息')}
+                label={t('admin.broadcast.analytics.unreadMessages')}
                 value={numberFormatter.format(messageOverview.unread)}
                 tone={messageOverview.unread ? 'warning' : 'default'}
               />
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              {t('admin.broadcast.analytics.unreadRatio', '当前未读率')}{' '}
+              {t('admin.broadcast.analytics.unreadRatio')}{' '}
               <span className="font-semibold text-orange-500">
                 {percentFormatter.format(messageOverview.unreadRatio || 0)}
               </span>
@@ -1703,7 +1913,7 @@ export function BroadcastCenter() {
             <div className="mt-4 h-64">
               {messageStatsInitialLoading ? (
                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  {t('common.loading', '加载中...')}
+                  {t('common.loading')}
                 </div>
               ) : messagePriorityHasData ? (
                 <ResponsiveContainer>
@@ -1715,7 +1925,7 @@ export function BroadcastCenter() {
                     <Legend />
                     <Bar
                       dataKey="total"
-                      name={t('admin.broadcast.analytics.totalSeries', '总发送')}
+                      name={t('admin.broadcast.analytics.totalSeries')}
                       barSize={14}
                     >
                       {messagePriorityChartData.map((item) => (
@@ -1724,7 +1934,7 @@ export function BroadcastCenter() {
                     </Bar>
                     <Bar
                       dataKey="unread"
-                      name={t('admin.broadcast.analytics.unreadSeries', '未读')}
+                      name={t('admin.broadcast.analytics.unreadSeries')}
                       barSize={14}
                       fill="#f97316"
                     />
@@ -1732,7 +1942,7 @@ export function BroadcastCenter() {
                 </ResponsiveContainer>
               ) : (
                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  {t('admin.broadcast.analytics.priorityEmpty', '暂无按优先级统计数据')}
+                  {t('admin.broadcast.analytics.priorityEmpty')}
                 </div>
               )}
             </div>
@@ -1749,7 +1959,7 @@ export function BroadcastCenter() {
                   <div className="flex items-center gap-3">
                     <span>{numberFormatter.format(entry.total)}</span>
                     <span className="text-sky-600">
-                      {t('admin.broadcast.analytics.unreadLabelShort', '未读')}{' '}
+                      {t('admin.broadcast.analytics.unreadLabelShort')}{' '}
                       {numberFormatter.format(entry.unread)}
                     </span>
                   </div>
@@ -1844,11 +2054,20 @@ export function BroadcastCenter() {
                           id: item.actor_user_id ?? t('common.unknown'),
                         })}
                       </p>
-                      <p className="text-sm whitespace-pre-wrap text-muted-foreground">{item.content}</p>
+                      <AnnouncementContent
+                        content={item.content}
+                        contentFormat={normalizeAnnouncementContentFormat(item.content_format)}
+                        className="rounded-md bg-slate-50 p-4"
+                      />
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="outline">{t(`messages.priority.${item.priority}`)}</Badge>
                       <Badge variant="secondary">{t(`admin.broadcast.scope.${item.scope === 'custom' ? 'custom' : 'all'}`)}</Badge>
+                      <Badge variant="outline">
+                        {normalizeAnnouncementContentFormat(item.content_format) === ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                          ? t('admin.broadcast.format.html')
+                          : t('admin.broadcast.format.text')}
+                      </Badge>
                       <Badge variant={emailBadgeVariant}>{t(`admin.broadcast.email.status.${emailStatus}`)}</Badge>
                     </div>
                   </div>
@@ -1970,8 +2189,11 @@ export function BroadcastCenter() {
           className="pt-2"
         />
       </div>
+      </TabsContent>
+      </Tabs>
     </div>
   );
 }
 
 export default BroadcastCenter;
+

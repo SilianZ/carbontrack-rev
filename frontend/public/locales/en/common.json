@@ -669,11 +669,6 @@
       "inputDescription": "Enter the activity data to calculate carbon savings and points.",
       "previewAutoUpdate": "Updates in real time as you edit."
     },
-    "checkin": {
-      "makeupNotice": "Makeup date: {{date}}. This submission will count toward that day.",
-      "makeupHelper": "Makeup date: {{date}} (does not change activity date)",
-      "clear": "Cancel makeup"
-    },
     "status": {
       "pending": "Pending",
       "approved": "Approved",
@@ -1206,11 +1201,135 @@
       "form": {
         "title": "Title",
         "content": "Content",
+        "contentFormat": "Content format",
+        "contentFormatHtmlHint": "HTML announcements are sanitized with the shared safety profile and keep only approved tags, links, and table structures.",
+        "contentFormatTextHint": "Plain-text announcements are automatically rendered into paragraphs and line breaks.",
         "priority": "Priority",
         "scope": "Scope",
         "targetUsers": "Target User IDs (comma-separated)",
         "targetUsersPlaceholder": "e.g., 1,2,3"
       },
+      "tabs": {
+        "compose": "1. Edit announcement content",
+        "send": "2. Send settings & history"
+      },
+      "nextStep": "Next: configure recipients & send →",
+      "format": {
+        "text": "Plain text",
+        "html": "Safe HTML announcement",
+        "textHint": "Recommended for standard notices; the inbox will preserve paragraphs and line breaks.",
+        "profileHint": "Current profile: announcement_html_v1 (supports headings, paragraphs, lists, code blocks, tables, and safe links)."
+      },
+      "editor": {
+        "title": "HTML template editor",
+        "description": "Use curated snippets and templates to author announcement HTML with fewer structural mistakes.",
+        "placeholder": "Write safe HTML announcement content here...",
+        "shortcutHint": "CodeMirror is enabled: HTML highlighting, bracket auto-close, and multi-line editing are available.",
+        "embeddedAiTitle": "Embedded AI assistant",
+        "embeddedAiDescription": "Invoke AI directly from the editor—similar to a Copilot workflow—using the current title, content, and extra instruction.",
+        "embeddedAiRun": "Run AI in editor",
+        "embeddedAiPlaceholder": "For example: keep the current structure, make the tone more formal, emphasize the deadline, or add a short FAQ.",
+        "embeddedAiHint": "The AI reads the current title, priority, and editor content; the panel below still keeps prompt copy and preview tools.",
+        "applyTemplate": "Apply template",
+        "themeHint": "💡 {{theme}} theme is enabled. Press Ctrl + I to open the built-in AI Copilot assistant and rewrite selected fragments inline.",
+        "tabs": {
+          "code": "Code editor",
+          "templates": "Template blocks"
+        },
+        "snippets": {
+          "heading": "H2",
+          "paragraph": "Paragraph",
+          "link": "Link button",
+          "quote": "Quote",
+          "code": "Code block",
+          "table": "Table",
+          "divider": "Divider",
+          "list": "List"
+        },
+        "snippetContent": {
+          "heading": "<h2>Section title</h2>",
+          "paragraph": "<p>Write your announcement body here.</p>",
+          "link": "<p><a href=\"https://example.com\">Read more</a></p>",
+          "quote": "<blockquote>Place a key notice or emphasized message here.</blockquote>",
+          "table": "<table>\n  <thead>\n    <tr><th scope=\"col\">Column</th><th scope=\"col\">Value</th></tr>\n  </thead>\n  <tbody>\n    <tr><td>Example</td><td>Value</td></tr>\n  </tbody>\n</table>",
+          "list": "<ul>\n  <li>First item</li>\n  <li>Second item</li>\n</ul>"
+        },
+        "templates": {
+          "maintenance": {
+            "label": "Maintenance notice",
+            "description": "Best for service windows, maintenance plans, and downtime alerts.",
+            "content": "<h2>Scheduled Maintenance Notice</h2>\n<p>Dear users, we will perform a system upgrade on <strong>[date] [time]</strong>.</p>\n<p>Expected impact: [describe impact]</p>"
+          },
+          "release": {
+            "label": "Release update",
+            "description": "Best for feature launches, rule adjustments, and release notes.",
+            "content": "<h2>Release Update (v[version])</h2>\n<p>We have shipped a new version with the following highlights:</p>\n<ul>\n  <li>[New] Feature A</li>\n  <li>[Improved] Feature B</li>\n</ul>"
+          },
+          "event": {
+            "label": "Event invitation",
+            "description": "Best for campaigns, signups, seasonal events, and community calls to action.",
+            "content": "<h2>[Event name] registration is now open</h2>\n<p>We would love to have you join us.</p>\n<p>Event time: [time]</p>\n<p><a href=\"[link]\">Click here to register</a></p>"
+          }
+        },
+        "copilot": {
+          "trigger": "Copilot (Ctrl+I)",
+          "actionPlaceholder": "AI action",
+          "instructionPlaceholder": "Tell Copilot how to revise the content... (Press Enter to submit, Esc to cancel)",
+          "selectionHint": "Selected fragment ({{count}} chars) - rewrite only this fragment",
+          "documentHint": "Document mode - generate or rewrite the full announcement",
+          "documentBadge": "Document",
+          "reviewReady": "AI content is ready. Review it and decide whether to keep it.",
+          "reviewPrompt": "Preview and accept these changes?",
+          "reject": "Discard",
+          "accept": "Accept"
+        }
+      },
+      "llmHelper": {
+        "title": "LLM-assisted announcement editing",
+        "copyPanelTitle": "Prompt copy and preview",
+        "copyPanelDescription": "The embedded AI handles in-editor drafting; this area keeps the system prompt, user prompt, and full bundle ready for external models.",
+        "builtinLabel": "Built-in AI can draft directly",
+        "externalLabel": "Copy to external AI",
+        "description": "The built-in model can help with quick drafts; for stronger models, copy the system and user prompts into another AI provider.",
+        "builtinGenerate": "Generate draft with built-in AI",
+        "builtinLoading": "Built-in AI is generating...",
+        "builtinSuccess": "Built-in AI generated an announcement draft.",
+        "builtinFailed": "Built-in AI failed to generate a draft. Please try again.",
+        "builtinInputRequired": "Provide a title, content, or extra instruction before generating.",
+        "copySystem": "Copy system prompt",
+        "copyUser": "Copy user prompt",
+        "copyBundle": "Copy full prompt bundle",
+        "copyFailed": "Copy failed. Please try again.",
+        "actionLabel": "Assist mode",
+        "actionHint": "The copied user prompt updates automatically using the current title, priority, and editor content.",
+        "instructionLabel": "Extra instruction (optional)",
+        "instructionPlaceholder": "For example: emphasize the deadline, add an FAQ section, make the tone more formal, or target newly registered users.",
+        "instructionHint": "This extra instruction is injected into both built-in generation and the copyable external prompt.",
+        "previewUser": "Preview current user prompt",
+        "previewSystem": "Preview system prompt",
+        "tipTitle": "Recommended workflow",
+        "tipStep1": "Choose a mode such as draft generation, rewrite, compression, or text-to-HTML conversion.",
+        "tipStep2": "Copy the system prompt and user prompt into a stronger external model.",
+        "tipStep3": "Paste the returned HTML back into this editor, then verify it with the Web and Email previews.",
+        "actions": {
+          "generate": "Generate draft",
+          "rewrite": "Rewrite and polish",
+          "compress": "Compress",
+          "convert": "Convert text to HTML"
+        },
+        "copied": {
+          "system": "System prompt copied",
+          "user": "User prompt copied",
+          "bundle": "Full prompt bundle copied"
+        }
+      },
+      "livePreview": {
+        "title": "Live dual preview",
+        "description": "As the admin edits content, preview both the inbox version and the email version side by side.",
+        "web": "Web / Inbox",
+        "email": "Email preview"
+      },
+      "previewFallbackTitle": "Announcement preview",
       "scope": {
         "all": "All Users",
         "custom": "Selected Users"
@@ -1238,6 +1357,7 @@
       "sendFailed": "Failed to send",
       "noticeTitle": "Notice",
       "noticeDesc": "Broadcast messages will be delivered to users' message center as system notifications.",
+      "noticeHtmlDesc": "HTML broadcasts are sanitized with the shared safety profile before delivery; preview and history reuse the same renderer.",
       "sentBy": "Sent by {{actor}} (ID: {{id}})",
       "summary": {
         "broadcasts": "Broadcasts",
@@ -1287,6 +1407,7 @@
         "title": "Broadcast history",
         "description": "Recent broadcasts and delivery status.",
         "empty": "No broadcasts have been sent yet.",
+        "loadFailed": "Failed to load broadcast history.",
         "showDetails": "Show recipients",
         "hideDetails": "Hide recipients",
         "more": "+{{count}} more",

@@ -95,15 +95,6 @@ export const userAPI = {
   getNotificationPreferences: () => api.get('/users/me/notification-preferences'),
   updateNotificationPreferences: (data) => api.put('/users/me/notification-preferences', data),
   sendNotificationTestEmail: (category) => api.post('/users/me/notification-preferences/test-email', { category }),
-
-  // 获取用户信息
-  getUser: (id) => api.get(`/users/${id}`),
-
-  // 更新用户信息
-  updateUser: (id, data) => api.put(`/users/${id}`, data),
-
-  // 删除用户
-  deleteUser: (id) => api.delete(`/users/${id}`),
 };
 
 export const carbonAPI = {
@@ -303,6 +294,7 @@ export const adminAPI = {
 
   // AI指挥助手
   analyzeCommand: (data) => api.post('/admin/ai/intents', data),
+  generateAnnouncementDraft: (data) => api.post('/admin/ai/announcement-drafts', data),
   getAiDiagnostics: (params = {}) => api.get('/admin/ai/diagnostics', { params }),
 
   // 碳减排活动管理

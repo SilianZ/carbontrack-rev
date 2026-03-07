@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { Mail, MailOpen, MessageSquare, Info } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { formatDateSafe } from '../../lib/utils';
+import { AnnouncementContent } from '../content/AnnouncementContent';
+import { contentLooksLikeHtml, normalizeAnnouncementContentFormat } from '../../lib/announcementHtml';
 import { sanitizeMessageHtml } from '../../lib/sanitizeMessageHtml';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/badge';
@@ -11,6 +13,17 @@ import PropTypes from 'prop-types';
 export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
   const { t } = useTranslation();
   const sanitizedContent = useMemo(() => sanitizeMessageHtml(message?.content), [message?.content]);
+  const isAnnouncement = useMemo(() => {
+    if (!message) return false;
+    if (message.type === 'system' && contentLooksLikeHtml(message.content)) return true;
+    if (message.sender_id !== null) return false;
+    const title = (message.title || '').toLowerCase();
+    return /\b(公告|announcement|system|系统|broadcast|boardcast)\b/i.test(title);
+  }, [message]);
+  const announcementContentFormat = useMemo(
+    () => normalizeAnnouncementContentFormat(isAnnouncement && contentLooksLikeHtml(message?.content) ? 'html' : 'text'),
+    [isAnnouncement, message?.content]
+  );
 
   if (!isOpen || !message) return null;
 
@@ -29,16 +42,6 @@ export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
       );
     }
   };
-  // 显示 priority 徽章与公告标识
-  const isAnnouncement = (message) => {
-    if (!message) return false;
-    if (message.type === 'system') return true;
-    if (message.sender_id !== null) return false;
-    const title = (message.title || '').toLowerCase();
-    // include English 'broadcast' and common misspelling 'boardcast'
-    return /\b(公告|announcement|system|系统|broadcast|boardcast)\b/i.test(title);
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose?.(); }}>
       <DialogContent className="max-w-2xl">
@@ -53,7 +56,7 @@ export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
                 {t(`messages.priority.${message.priority}`)}
               </Badge>
             )}
-            {isAnnouncement(message) && (
+            {isAnnouncement && (
               <Badge variant="outline">{t('messages.labels.announcement')}</Badge>
             )}
           </div>
@@ -82,10 +85,18 @@ export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
             <h4 className="text-md font-semibold text-gray-700 mb-2 flex items-center">
               <Info className="h-4 w-4 mr-2" />{t('messages.content')}
             </h4>
-            <div
-              className="text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap break-words [&_a]:text-blue-600 [&_a]:underline [&_pre]:overflow-x-auto"
-              dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-            ></div>
+            {isAnnouncement ? (
+              <AnnouncementContent
+                content={message.content}
+                contentFormat={announcementContentFormat}
+                className="bg-gray-50 rounded-md p-3"
+              />
+            ) : (
+              <div
+                className="text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap break-words [&_a]:text-blue-600 [&_a]:underline [&_pre]:overflow-x-auto"
+                dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+              ></div>
+            )}
           </div>
 
           {/* 操作按钮 */}

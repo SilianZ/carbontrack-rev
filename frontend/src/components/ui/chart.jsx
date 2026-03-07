@@ -49,6 +49,8 @@ function buildChartCssText(id, config) {
     return ""
   }
 
+  const safeId = sanitizeChartToken(id, "chart")
+
   const colorConfig = Object.entries(config)
     .map(([key, itemConfig]) => {
       const safeKey = sanitizeChartToken(key, "series")
@@ -77,7 +79,7 @@ function buildChartCssText(id, config) {
       }
 
       const selectorPrefix = prefix ? `${prefix} ` : ""
-      const selector = `${selectorPrefix}[data-chart="${id}"]`
+      const selector = `${selectorPrefix}[data-chart="${safeId}"]`
       return `${selector} {\n${declarations}\n}`
     })
     .filter(Boolean)
