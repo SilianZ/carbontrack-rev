@@ -16,9 +16,9 @@ export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
   const isAnnouncement = useMemo(() => {
     if (!message) return false;
     if (message.type === 'system' && contentLooksLikeHtml(message.content)) return true;
-    if (message.sender_id !== null) return false;
+    if (message.sender_id != null) return false;
     const title = (message.title || '').toLowerCase();
-    return /\b(公告|announcement|system|系统|broadcast|boardcast)\b/i.test(title);
+    return /(公告|announcement|system|系统|broadcast|boardcast)/i.test(title);
   }, [message]);
   const announcementContentFormat = useMemo(
     () => normalizeAnnouncementContentFormat(isAnnouncement && contentLooksLikeHtml(message?.content) ? 'html' : 'text'),

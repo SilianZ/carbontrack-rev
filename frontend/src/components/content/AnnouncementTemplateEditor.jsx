@@ -54,6 +54,7 @@ export function AnnouncementTemplateEditor({
   isBuiltinLoading,
   onUpdateTitle,
   onUpdateFormat,
+  editorHeight = '380px',
   t,
 }) {
   const editorViewRef = useRef(null);
@@ -423,7 +424,7 @@ export function AnnouncementTemplateEditor({
 
               <CodeMirror
               value={value}
-              height="380px"
+              height={editorHeight}
               extensions={editorExtensions}
               theme={isDarkMode ? oneDark : 'light'}
               basicSetup={{
@@ -482,5 +483,6 @@ AnnouncementTemplateEditor.propTypes = {
   isBuiltinLoading: PropTypes.bool,
   onUpdateTitle: PropTypes.func,
   onUpdateFormat: PropTypes.func,
+  editorHeight: PropTypes.string,
   t: PropTypes.func.isRequired,
 };

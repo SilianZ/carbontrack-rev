@@ -1506,6 +1506,16 @@
         "unreadRatio": "Current unread rate",
         "priorityEmpty": "No priority statistics available",
         "unreadLabelShort": "Unread"
+      },
+      "pageTabs": {
+        "compose": "Compose & Send",
+        "history": "History & Analytics"
+      },
+      "sections": {
+        "content": "Basic Content",
+        "contentDescription": "Write the announcement and review the inbox/email rendering in the same screen.",
+        "targeting": "Targeting & Sending",
+        "targetingDescription": "Choose the delivery scope and control recipients with user IDs or filter groups."
       }
     },
     "dashboard": {

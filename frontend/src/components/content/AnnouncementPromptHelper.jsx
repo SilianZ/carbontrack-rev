@@ -6,8 +6,12 @@ import { Badge } from '../ui/badge';
 import { Alert, AlertDescription } from '../ui/Alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Textarea } from '../ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import {
+  ANNOUNCEMENT_PROMPT_ACTION_COMPRESS,
+  ANNOUNCEMENT_PROMPT_ACTION_CONVERT,
   ANNOUNCEMENT_PROMPT_ACTION_GENERATE,
+  ANNOUNCEMENT_PROMPT_ACTION_REWRITE,
   buildAnnouncementPromptBundle,
   buildAnnouncementSystemPrompt,
   buildAnnouncementUserPrompt,
@@ -30,10 +34,13 @@ export function AnnouncementPromptHelper({
   contentFormat,
   action: controlledAction,
   instruction: controlledInstruction,
+  onActionChange,
+  onInstructionChange,
   t,
 }) {
   const normalizedAction = normalizeAnnouncementPromptAction(controlledAction ?? ANNOUNCEMENT_PROMPT_ACTION_GENERATE);
   const effectiveInstruction = typeof controlledInstruction === 'string' ? controlledInstruction : '';
+  const isInteractive = typeof onActionChange === 'function' || typeof onInstructionChange === 'function';
 
   const promptOptions = useMemo(
     () => ({
@@ -107,9 +114,31 @@ export function AnnouncementPromptHelper({
           <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
             {t('admin.broadcast.llmHelper.actionLabel')}
           </label>
-          <div className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
-            {t(`admin.broadcast.llmHelper.actions.${normalizedAction}`)}
-          </div>
+          {typeof onActionChange === 'function' ? (
+            <Select value={normalizedAction} onValueChange={onActionChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t('admin.broadcast.llmHelper.actionLabel')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ANNOUNCEMENT_PROMPT_ACTION_GENERATE}>
+                  {t('admin.broadcast.llmHelper.actions.generate')}
+                </SelectItem>
+                <SelectItem value={ANNOUNCEMENT_PROMPT_ACTION_REWRITE}>
+                  {t('admin.broadcast.llmHelper.actions.rewrite')}
+                </SelectItem>
+                <SelectItem value={ANNOUNCEMENT_PROMPT_ACTION_COMPRESS}>
+                  {t('admin.broadcast.llmHelper.actions.compress')}
+                </SelectItem>
+                <SelectItem value={ANNOUNCEMENT_PROMPT_ACTION_CONVERT}>
+                  {t('admin.broadcast.llmHelper.actions.convert')}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
+              {t(`admin.broadcast.llmHelper.actions.${normalizedAction}`)}
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">
             {t('admin.broadcast.llmHelper.actionHint')}
           </p>
@@ -119,10 +148,17 @@ export function AnnouncementPromptHelper({
             </label>
             <Textarea
               value={effectiveInstruction}
-              readOnly
+              onChange={(event) => onInstructionChange?.(event.target.value)}
+              readOnly={typeof onInstructionChange !== 'function'}
               rows={4}
+              placeholder={isInteractive ? t('admin.broadcast.llmHelper.instructionPlaceholder') : undefined}
               className="min-h-[96px] bg-muted/40"
             />
+            {isInteractive && (
+              <p className="text-xs text-muted-foreground">
+                {t('admin.broadcast.llmHelper.instructionHint')}
+              </p>
+            )}
           </div>
         </div>
         <Alert variant="info" className="border-blue-200/80 bg-white/70 dark:bg-slate-950/40">
@@ -173,5 +209,7 @@ AnnouncementPromptHelper.propTypes = {
   contentFormat: PropTypes.string,
   action: PropTypes.string,
   instruction: PropTypes.string,
+  onActionChange: PropTypes.func,
+  onInstructionChange: PropTypes.func,
   t: PropTypes.func.isRequired,
 };

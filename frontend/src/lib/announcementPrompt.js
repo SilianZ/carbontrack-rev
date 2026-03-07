@@ -1,4 +1,4 @@
-import { ANNOUNCEMENT_CONTENT_FORMAT_HTML } from './announcementHtml';
+import { ANNOUNCEMENT_CONTENT_FORMAT_HTML, ALLOWED_ANNOUNCEMENT_TAGS, ANNOUNCEMENT_SANITIZE_OPTIONS } from './announcementHtml';
 
 export const ANNOUNCEMENT_PROMPT_ACTION_GENERATE = 'generate';
 export const ANNOUNCEMENT_PROMPT_ACTION_REWRITE = 'rewrite';
@@ -10,22 +10,6 @@ export const ANNOUNCEMENT_PROMPT_ACTIONS = [
   ANNOUNCEMENT_PROMPT_ACTION_REWRITE,
   ANNOUNCEMENT_PROMPT_ACTION_COMPRESS,
   ANNOUNCEMENT_PROMPT_ACTION_CONVERT,
-];
-
-const ALLOWED_TAGS = [
-  'h1', 'h2', 'h3', 'h4',
-  'p', 'br',
-  'strong', 'em', 'u',
-  'ul', 'ol', 'li',
-  'blockquote',
-  'code', 'pre',
-  'table', 'thead', 'tbody', 'tr', 'th', 'td',
-  'a', 'hr',
-];
-
-const ALLOWED_ATTRIBUTES = [
-  'href', 'title', 'target', 'rel',
-  'scope', 'colspan', 'rowspan', 'align',
 ];
 
 export function normalizeAnnouncementPromptAction(value) {
@@ -53,8 +37,8 @@ export function buildAnnouncementSystemPrompt() {
     'Your task is to produce SAFE, SANITIZED-FRIENDLY announcement HTML that can be rendered in both a web inbox and an email preview.',
     '',
     'Announcement HTML profile:',
-    `- Allowed tags: ${ALLOWED_TAGS.join(', ')}`,
-    `- Allowed attributes: ${ALLOWED_ATTRIBUTES.join(', ')}`,
+    `- Allowed tags: ${ALLOWED_ANNOUNCEMENT_TAGS.join(', ')}`,
+    `- Allowed attributes: ${ANNOUNCEMENT_SANITIZE_OPTIONS.ALLOWED_ATTR.join(', ')}`,
     '- No custom CSS, no <style>, no class attribute, no inline style attribute.',
     '- No JavaScript, no event handlers, no embedded media, no remote assets.',
     '- Tables may be used only for simple announcement data, not for full-page layout hacks.',

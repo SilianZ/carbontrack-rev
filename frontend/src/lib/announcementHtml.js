@@ -7,7 +7,7 @@ export const ANNOUNCEMENT_RENDER_PROFILE_HTML = 'announcement_html_v1';
 const SAFE_URI_PATTERN = /^(?:(?:https?|mailto|tel):|#|\/)/i;
 const SAFE_ALIGN_VALUES = new Set(['left', 'center', 'right']);
 const SAFE_SCOPE_VALUES = new Set(['col', 'row', 'colgroup', 'rowgroup']);
-const ALLOWED_ANNOUNCEMENT_TAGS = [
+export const ALLOWED_ANNOUNCEMENT_TAGS = [
   'a',
   'abbr',
   'b',
@@ -39,7 +39,7 @@ const ALLOWED_ANNOUNCEMENT_TAGS = [
   'u',
   'ul',
 ];
-const ANNOUNCEMENT_SANITIZE_OPTIONS = {
+export const ANNOUNCEMENT_SANITIZE_OPTIONS = {
   ALLOWED_TAGS: ALLOWED_ANNOUNCEMENT_TAGS,
   ALLOWED_ATTR: ['href', 'rel', 'target', 'title', 'colspan', 'rowspan', 'scope', 'align'],
   FORBID_ATTR: ['style'],

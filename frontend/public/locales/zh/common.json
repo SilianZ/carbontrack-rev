@@ -1498,6 +1498,16 @@
         "unreadRatio": "当前未读率",
         "priorityEmpty": "暂无按优先级统计数据",
         "unreadLabelShort": "未读"
+      },
+      "pageTabs": {
+        "compose": "发送与预览",
+        "history": "统计与记录"
+      },
+      "sections": {
+        "content": "基本内容",
+        "contentDescription": "在同一屏内编写公告内容，并实时查看站内信与邮件预览效果。",
+        "targeting": "发送设置",
+        "targetingDescription": "选择发送范围，并按用户 ID 或筛选条件控制收件人。"
       }
     },
     "dashboard": {
