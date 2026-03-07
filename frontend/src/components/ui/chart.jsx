@@ -1,7 +1,18 @@
 import * as React from "react"
+import PropTypes from "prop-types"
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
+
+const SAFE_CHART_TOKEN_PATTERN = /[^a-zA-Z0-9_-]/g
+const BLOCKED_COLOR_PATTERN = /[;{}<>]|(?:@import|expression\s*\(|url\s*\()/i
+const SAFE_COLOR_PATTERNS = [
+  /^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i,
+  /^(?:rgb|hsl)a?\([\d.%\s,+\-/]+\)$/i,
+  /^var\(--[a-z0-9_-]+\)$/i,
+  /^(?:rgb|hsl)a?\(\s*var\(--[a-z0-9_-]+\)(?:\s*\/\s*[\d.%]+)?\s*\)$/i,
+  /^[a-z]+$/i,
+]
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = {
@@ -10,6 +21,68 @@ const THEMES = {
 }
 
 const ChartContext = React.createContext(null)
+
+function sanitizeChartToken(value, fallback = "chart") {
+  const normalized = `${value ?? ""}`
+    .trim()
+    .replaceAll(SAFE_CHART_TOKEN_PATTERN, "-")
+    .replaceAll(/-{2,}/g, "-")
+    .replaceAll(/^-+|-+$/g, "")
+
+  return normalized || fallback
+}
+
+function sanitizeChartColor(value) {
+  const normalized = `${value ?? ""}`.trim()
+
+  if (!normalized || BLOCKED_COLOR_PATTERN.test(normalized)) {
+    return null
+  }
+
+  return SAFE_COLOR_PATTERNS.some((pattern) => pattern.test(normalized))
+    ? normalized
+    : null
+}
+
+function buildChartCssText(id, config) {
+  if (!config || typeof config !== "object") {
+    return ""
+  }
+
+  const colorConfig = Object.entries(config)
+    .map(([key, itemConfig]) => {
+      const safeKey = sanitizeChartToken(key, "series")
+      const safeItemConfig = itemConfig && typeof itemConfig === "object" ? itemConfig : {}
+
+      return [safeKey, safeItemConfig]
+    })
+    .filter(([, itemConfig]) => itemConfig.theme || itemConfig.color)
+
+  if (!colorConfig.length) {
+    return ""
+  }
+
+  return Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const declarations = colorConfig
+        .map(([key, itemConfig]) => {
+          const color = sanitizeChartColor(itemConfig.theme?.[theme] || itemConfig.color)
+          return color ? `  --color-${key}: ${color};` : null
+        })
+        .filter(Boolean)
+        .join("\n")
+
+      if (!declarations) {
+        return null
+      }
+
+      const selectorPrefix = prefix ? `${prefix} ` : ""
+      const selector = `${selectorPrefix}[data-chart="${id}"]`
+      return `${selector} {\n${declarations}\n}`
+    })
+    .filter(Boolean)
+    .join("\n")
+}
 
 function useChart() {
   const context = React.useContext(ChartContext)
@@ -29,10 +102,14 @@ function ChartContainer({
   ...props
 }) {
   const uniqueId = React.useId()
-  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
+  const chartContextValue = React.useMemo(() => ({ config }), [config])
+  const chartId = React.useMemo(
+    () => `chart-${sanitizeChartToken(id || uniqueId.replaceAll(":", ""))}`,
+    [id, uniqueId]
+  )
 
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={chartContextValue}>
       <div
         data-slot="chart"
         data-chart={chartId}
@@ -54,31 +131,13 @@ const ChartStyle = ({
   id,
   config
 }) => {
-  const colorConfig = Object.entries(config).filter(([, config]) => config.theme || config.color)
+  const cssText = React.useMemo(() => buildChartCssText(id, config), [id, config])
 
-  if (!colorConfig.length) {
+  if (!cssText) {
     return null
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-.map(([key, itemConfig]) => {
-const color =
-  itemConfig.theme?.[theme] ||
-  itemConfig.color
-return color ? `  --color-${key}: ${color};` : null
-})
-.join("\n")}
-}
-`)
-          .join("\n"),
-      }} />
-  );
+  return <style>{cssText}</style>
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip
@@ -148,7 +207,7 @@ function ChartTooltipContent({
         "border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
         className
       )}>
-      {!nestLabel ? tooltipLabel : null}
+      {nestLabel ? null : tooltipLabel}
       <div className="grid gap-1.5">
         {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`
@@ -297,6 +356,60 @@ function getPayloadConfigFromPayload(
   return configLabelKey in config
     ? config[configLabelKey]
     : config[key];
+}
+
+const chartConfigItemPropType = PropTypes.shape({
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+  icon: PropTypes.elementType,
+  color: PropTypes.string,
+  theme: PropTypes.objectOf(PropTypes.string),
+})
+
+const chartConfigPropType = PropTypes.objectOf(chartConfigItemPropType)
+
+const chartPayloadItemPropType = PropTypes.shape({
+  color: PropTypes.string,
+  dataKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  fill: PropTypes.string,
+  name: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  payload: PropTypes.object,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+})
+
+ChartContainer.propTypes = {
+  id: PropTypes.string,
+  className: PropTypes.string,
+  children: PropTypes.node,
+  config: chartConfigPropType.isRequired,
+}
+
+ChartStyle.propTypes = {
+  id: PropTypes.string.isRequired,
+  config: chartConfigPropType.isRequired,
+}
+
+ChartTooltipContent.propTypes = {
+  active: PropTypes.bool,
+  payload: PropTypes.arrayOf(chartPayloadItemPropType),
+  className: PropTypes.string,
+  indicator: PropTypes.oneOf(["dot", "line", "dashed"]),
+  hideLabel: PropTypes.bool,
+  hideIndicator: PropTypes.bool,
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.node]),
+  labelFormatter: PropTypes.func,
+  labelClassName: PropTypes.string,
+  formatter: PropTypes.func,
+  color: PropTypes.string,
+  nameKey: PropTypes.string,
+  labelKey: PropTypes.string,
+}
+
+ChartLegendContent.propTypes = {
+  className: PropTypes.string,
+  hideIcon: PropTypes.bool,
+  payload: PropTypes.arrayOf(chartPayloadItemPropType),
+  verticalAlign: PropTypes.oneOf(["top", "bottom", "middle"]),
+  nameKey: PropTypes.string,
 }
 
 export {

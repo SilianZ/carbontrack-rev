@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Mail, MailOpen, MessageSquare, Info } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { formatDateSafe } from '../../lib/utils';
+import { sanitizeMessageHtml } from '../../lib/sanitizeMessageHtml';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
@@ -9,6 +10,7 @@ import PropTypes from 'prop-types';
 
 export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
   const { t } = useTranslation();
+  const sanitizedContent = useMemo(() => sanitizeMessageHtml(message?.content), [message?.content]);
 
   if (!isOpen || !message) return null;
 
@@ -80,7 +82,10 @@ export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
             <h4 className="text-md font-semibold text-gray-700 mb-2 flex items-center">
               <Info className="h-4 w-4 mr-2" />{t('messages.content')}
             </h4>
-            <div className="text-gray-700 bg-gray-50 p-3 rounded-md" dangerouslySetInnerHTML={{ __html: message.content }}></div>
+            <div
+              className="text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap break-words [&_a]:text-blue-600 [&_a]:underline [&_pre]:overflow-x-auto"
+              dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+            ></div>
           </div>
 
           {/* 操作按钮 */}
