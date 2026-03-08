@@ -1,5 +1,9 @@
 name: Sync Monorepo to Individual Repositories
 
+env:
+  FRONTEND_NODE_VERSION: '20'
+  PNPM_VERSION: '10.4.1'
+
 on:
   push:
     branches: [ main ]
@@ -124,6 +128,14 @@ jobs:
         git fetch origin main --depth=1
         git checkout -B main origin/main
 
+    - name: Setup Node for frontend sync
+      if: steps.frontend-changes.outputs.changed == 'true'
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.FRONTEND_NODE_VERSION }}
+        cache: 'pnpm'
+        cache-dependency-path: frontend/pnpm-lock.yaml
+
     - name: Build & test frontend (monorepo)
       if: steps.frontend-changes.outputs.changed == 'true'
       run: |
@@ -131,7 +143,7 @@ jobs:
         cd frontend
         # enable pnpm via corepack
         corepack enable || true
-        corepack prepare pnpm@latest --activate || true
+        corepack prepare pnpm@${PNPM_VERSION} --activate || true
         pnpm install --frozen-lockfile
         pnpm build
         echo "Frontend build succeeded"
