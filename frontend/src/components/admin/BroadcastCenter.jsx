@@ -1279,7 +1279,7 @@ export function BroadcastCenter() {
       </p>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-6 grid w-full max-w-md grid-cols-2 bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-[0.8rem] border border-slate-200 dark:border-slate-800 shadow-inner">
+        <TabsList className="mb-6 inline-flex bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-[0.8rem] border border-slate-200 dark:border-slate-800 shadow-inner">
           <TabsTrigger
             value="compose"
             className="rounded-lg py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow text-sm font-semibold transition-all duration-200"
