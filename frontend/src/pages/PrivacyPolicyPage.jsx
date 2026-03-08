@@ -1,12 +1,17 @@
 import React from 'react';
-import { m, LazyMotion, domAnimation } from 'framer-motion';
+import { m as Motion, LazyMotion, domAnimation } from 'framer-motion';
+import PropTypes from 'prop-types';
 import { Trans } from 'react-i18next';
 import { Card, CardContent } from '../components/ui/Card';
 import { Lock, Globe, Shield, Eye, Database, Server, Mail } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 
+const toItemKey = (prefix, item) => `${prefix}-${String(item).trim()}`;
+
+const toMailtoLink = (email) => `mailto:${String(email || '').trim()}`;
+
 const Section = ({ title, icon: Icon, children }) => (
-    <m.div
+    <Motion.div
         className="mb-8"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -20,8 +25,14 @@ const Section = ({ title, icon: Icon, children }) => (
         <div className="text-gray-600 leading-relaxed space-y-4">
             {children}
         </div>
-    </m.div>
+    </Motion.div>
 );
+
+Section.propTypes = {
+    title: PropTypes.node.isRequired,
+    icon: PropTypes.elementType,
+    children: PropTypes.node,
+};
 
 const PrivacyPolicyPage = () => {
     const { t } = useTranslation();
@@ -36,7 +47,7 @@ const PrivacyPolicyPage = () => {
         <LazyMotion features={domAnimation}>
             <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
-                    <m.div
+                    <Motion.div
                         className="text-center mb-12"
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -49,7 +60,7 @@ const PrivacyPolicyPage = () => {
                         <p className="mt-4 text-gray-500 max-w-2xl mx-auto">
                             <Trans i18nKey="legal.privacy.intro" components={{ strong: <strong /> }} />
                         </p>
-                    </m.div>
+                    </Motion.div>
 
                     <Card className="bg-white/80 backdrop-blur shadow-xl border-none">
                         <CardContent className="p-8 md:p-12">
@@ -66,7 +77,7 @@ const PrivacyPolicyPage = () => {
                                 <p><Trans i18nKey="legal.privacy.sections.collection.intro" components={{ strong: <strong /> }} /></p>
                                 <ul className="list-disc pl-5 space-y-2">
                                     {Array.isArray(collectionItems) && collectionItems.map((item, index) => (
-                                        <li key={index}>
+                                        <li key={toItemKey(`collection-${index}`, item)}>
                                             <Trans defaults={item} components={{ strong: <strong /> }} />
                                         </li>
                                     ))}
@@ -77,7 +88,7 @@ const PrivacyPolicyPage = () => {
                                 <p><Trans i18nKey="legal.privacy.sections.usage.intro" components={{ strong: <strong /> }} /></p>
                                 <ul className="list-disc pl-5 space-y-2">
                                     {Array.isArray(usageItems) && usageItems.map((item, index) => (
-                                        <li key={index}>
+                                        <li key={toItemKey(`usage-${index}`, item)}>
                                             <Trans defaults={item} components={{ strong: <strong /> }} />
                                         </li>
                                     ))}
@@ -96,7 +107,7 @@ const PrivacyPolicyPage = () => {
                                 </p>
                                 <ul className="list-disc pl-5 mt-2">
                                     {Array.isArray(storageItems) && storageItems.map((item, index) => (
-                                        <li key={index}>{item}</li>
+                                        <li key={toItemKey(`storage-${index}`, item)}>{item}</li>
                                     ))}
                                 </ul>
                             </Section>
@@ -105,7 +116,7 @@ const PrivacyPolicyPage = () => {
                                 <p><Trans i18nKey="legal.privacy.sections.rights.intro" components={{ strong: <strong /> }} /></p>
                                 <ul className="list-disc pl-5 space-y-2">
                                     {Array.isArray(rightsItems) && rightsItems.map((item, index) => (
-                                        <li key={index}>
+                                        <li key={toItemKey(`rights-${index}`, item)}>
                                             <Trans defaults={item} components={{ strong: <strong /> }} />
                                         </li>
                                     ))}
@@ -114,7 +125,7 @@ const PrivacyPolicyPage = () => {
                                     <Trans
                                         i18nKey="legal.privacy.sections.rights.contact"
                                         values={{ email: import.meta.env.VITE_PRIVACY_EMAIL }}
-                                        components={{ a: <a className="text-blue-600 hover:underline" /> }}
+                                        components={{ a: <a href={toMailtoLink(import.meta.env.VITE_PRIVACY_EMAIL)} className="text-blue-600 hover:underline" /> }}
                                     />
                                 </p>
                             </Section>
@@ -136,7 +147,7 @@ const PrivacyPolicyPage = () => {
                                     <Trans
                                         i18nKey="legal.privacy.sections.contact.details"
                                         values={{ email: import.meta.env.VITE_PRIVACY_EMAIL }}
-                                        components={{ strong: <strong />, a: <a className="text-blue-600 hover:underline" />, br: <br /> }}
+                                        components={{ strong: <strong />, a: <a href={toMailtoLink(import.meta.env.VITE_PRIVACY_EMAIL)} className="text-blue-600 hover:underline" />, br: <br /> }}
                                     />
                                 </div>
                             </Section>

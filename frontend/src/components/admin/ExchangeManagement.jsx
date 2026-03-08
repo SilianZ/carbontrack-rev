@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useTranslation } from '../../hooks/useTranslation';
 import { formatNumber, formatDateSafe } from '../../lib/utils';
 import { adminAPI } from '../../lib/api';
-import { Loader2, CheckCircle, XCircle, Eye, Search, Filter, Clock } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Eye, Search, Clock } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/textarea';

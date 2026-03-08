@@ -1119,7 +1119,7 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3 pb-6">
                 {recent.pendingTransactions.length ? (
-                  recent.pendingTransactions.map((item, index) => (
+                  recent.pendingTransactions.map((item) => (
                     <div 
                       key={item.id} 
                       className="group rounded-xl border-2 bg-gradient-to-r from-card to-amber-50/30 dark:to-amber-950/10 px-4 py-3 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"

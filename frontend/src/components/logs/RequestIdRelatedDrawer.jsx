@@ -34,7 +34,7 @@ export function RequestIdRelatedDrawer({
 
   const setLoadingFlag = useCallback((type, id, value) => {
     setDetailLoading((prev) => {
-      const nextType = { ...(prev[type] || {}) };
+      const nextType = { ...prev[type] };
       if (value) {
         nextType[id] = true;
       } else {
@@ -46,7 +46,7 @@ export function RequestIdRelatedDrawer({
 
   const setErrorFlag = useCallback((type, id, message) => {
     setDetailErrors((prev) => {
-      const nextType = { ...(prev[type] || {}) };
+      const nextType = { ...prev[type] };
       if (message) {
         nextType[id] = message;
       } else {
@@ -104,7 +104,12 @@ export function RequestIdRelatedDrawer({
 
   return (
     <div className="fixed inset-0 z-50 flex">
-      <div className="flex-1 bg-black/40" onClick={onClose} />
+      <button
+        type="button"
+        className="flex-1 bg-black/40"
+        onClick={onClose}
+        aria-label={t('common.close')}
+      />
       <div className="flex h-full w-full max-w-3xl flex-col bg-white shadow-xl">
         <div className="flex items-center justify-between border-b p-4">
           <h2 className="text-lg font-semibold">
@@ -136,12 +141,12 @@ export function RequestIdRelatedDrawer({
                       toneClass="bg-gray-50"
                       summary={(
                         <>
-                          <KV label={columnLabel('id')} value={log.id} />
-                          <KV label={columnLabel('method')} value={log.method} />
-                          <KV label={columnLabel('path')} value={log.path} />
-                          <KV label={columnLabel('status_code')} value={log.status_code} />
-                          <KV label={columnLabel('duration_ms')} value={log.duration_ms} />
-                          <KV label={columnLabel('created_at')} value={log.created_at} />
+                          <KeyValueItem label={columnLabel('id')} value={log.id} />
+                          <KeyValueItem label={columnLabel('method')} value={log.method} />
+                          <KeyValueItem label={columnLabel('path')} value={log.path} />
+                          <KeyValueItem label={columnLabel('status_code')} value={log.status_code} />
+                          <KeyValueItem label={columnLabel('duration_ms')} value={log.duration_ms} />
+                          <KeyValueItem label={columnLabel('created_at')} value={log.created_at} />
                         </>
                       )}
                       onOpen={() => loadSystemDetail(log.id)}
@@ -193,12 +198,12 @@ export function RequestIdRelatedDrawer({
                     toneClass="bg-gray-50"
                     summary={(
                       <>
-                        <KV label={columnLabel('id')} value={log.id} />
-                        <KV label={columnLabel('action')} value={log.action} />
-                        <KV label={columnLabel('operation_category')} value={log.operation_category} />
-                        <KV label={columnLabel('actor_type')} value={log.actor_type} />
-                        <KV label={columnLabel('status')} value={log.status} />
-                        <KV label={columnLabel('created_at')} value={log.created_at} />
+                        <KeyValueItem label={columnLabel('id')} value={log.id} />
+                        <KeyValueItem label={columnLabel('action')} value={log.action} />
+                        <KeyValueItem label={columnLabel('operation_category')} value={log.operation_category} />
+                        <KeyValueItem label={columnLabel('actor_type')} value={log.actor_type} />
+                        <KeyValueItem label={columnLabel('status')} value={log.status} />
+                        <KeyValueItem label={columnLabel('created_at')} value={log.created_at} />
                       </>
                     )}
                     openLabel={t('admin.systemLogs.actions.expand')}
@@ -237,11 +242,11 @@ export function RequestIdRelatedDrawer({
                     toneClass="bg-rose-50/60"
                     summary={(
                       <>
-                        <KV label={columnLabel('request_id')} value={log.request_id || requestId} />
-                        <KV label={columnLabel('error_type')} value={log.error_type} />
-                        <KV label={columnLabel('error_file')} value={log.error_file} />
-                        <KV label={columnLabel('error_line')} value={log.error_line} />
-                        <KV label={columnLabel('error_time')} value={log.error_time} />
+                        <KeyValueItem label={columnLabel('request_id')} value={log.request_id || requestId} />
+                        <KeyValueItem label={columnLabel('error_type')} value={log.error_type} />
+                        <KeyValueItem label={columnLabel('error_file')} value={log.error_file} />
+                        <KeyValueItem label={columnLabel('error_line')} value={log.error_line} />
+                        <KeyValueItem label={columnLabel('error_time')} value={log.error_time} />
                       </>
                     )}
                     openLabel={t('admin.systemLogs.actions.expand')}
@@ -283,13 +288,13 @@ export function RequestIdRelatedDrawer({
                       toneClass="bg-indigo-50/60"
                       summary={(
                         <>
-                          <KV label={columnLabel('actor_type')} value={log.actor_type} />
-                          <KV label={columnLabel('actor_id')} value={log.actor_id} />
-                          <KV label={columnLabel('model')} value={log.model} />
-                          <KV label={columnLabel('llm_status')} value={log.status} />
-                          <KV label={columnLabel('total_tokens')} value={log.total_tokens} />
-                          <KV label={columnLabel('latency_ms')} value={log.latency_ms} />
-                          <KV label={columnLabel('created_at')} value={log.created_at} />
+                          <KeyValueItem label={columnLabel('actor_type')} value={log.actor_type} />
+                          <KeyValueItem label={columnLabel('actor_id')} value={log.actor_id} />
+                          <KeyValueItem label={columnLabel('model')} value={log.model} />
+                          <KeyValueItem label={columnLabel('llm_status')} value={log.status} />
+                          <KeyValueItem label={columnLabel('total_tokens')} value={log.total_tokens} />
+                          <KeyValueItem label={columnLabel('latency_ms')} value={log.latency_ms} />
+                          <KeyValueItem label={columnLabel('created_at')} value={log.created_at} />
                         </>
                       )}
                       onOpen={() => loadLlmDetail(log.id)}
@@ -398,7 +403,7 @@ function ExpandableItem({ summary, detail, openLabel, closeLabel, onOpen, toneCl
   );
 }
 
-function KV({ label, value }) {
+function KeyValueItem({ label, value }) {
   return (
     <div>
       <span className="mr-1 text-muted-foreground">{label}:</span>
@@ -412,7 +417,7 @@ function DetailGrid({ items }) {
     <div className="grid gap-2 text-[11px] md:grid-cols-2">
       {items.map((item, index) => (
         <div key={`${item.label}-${index}`} className={item.span ? 'md:col-span-2' : ''}>
-          <KV label={item.label} value={item.value} />
+          <KeyValueItem label={item.label} value={item.value} />
         </div>
       ))}
     </div>
@@ -469,7 +474,7 @@ function parseMaybeJson(value) {
   if (typeof value !== 'string') return value;
   try {
     return JSON.parse(value);
-  } catch (error) {
+  } catch {
     return value;
   }
 }
@@ -501,7 +506,7 @@ ExpandableItem.propTypes = {
   toneClass: PropTypes.string
 };
 
-KV.propTypes = {
+KeyValueItem.propTypes = {
   label: PropTypes.node,
   value: PropTypes.any
 };

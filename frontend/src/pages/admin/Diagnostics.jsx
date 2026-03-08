@@ -724,12 +724,13 @@ export default function AdminDiagnosticsPage() {
   );
 }
 
-function StatCard({ icon: Icon, label, value }) {
+function StatCard({ icon, label, value }) {
+  const IconComponent = icon;
   return (
     <Card className="border-slate-200/70 bg-white/90">
       <CardContent className="flex items-center gap-3 p-4">
         <div className="rounded-full bg-slate-100 p-2 text-slate-700">
-          <Icon className="h-5 w-5" />
+          <IconComponent className="h-5 w-5" />
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>

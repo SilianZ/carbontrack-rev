@@ -115,7 +115,7 @@ export function AnnouncementTemplateEditor({
     };
   }, []);
 
-  const handleAiHotkey = useCallback((view) => {
+  const handleAiHotkey = useCallback(() => {
     if (aiMenuState !== 'idle') return false;
     setAiMenuState('composing');
     return true;
@@ -135,9 +135,7 @@ export function AnnouncementTemplateEditor({
     const cmdKeymap = keymap.of([
       {
         key: 'Mod-i',
-        run: (view) => {
-          return handleAiHotkey(view);
-        },
+        run: () => handleAiHotkey(),
         preventDefault: true
       }
     ]);

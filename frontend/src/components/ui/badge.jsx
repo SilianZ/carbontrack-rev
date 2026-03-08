@@ -51,7 +51,7 @@ function Badge({
   );
 }
 
-export { Badge, badgeVariants }
+export { Badge }
 
 Badge.propTypes = {
   className: PropTypes.string,

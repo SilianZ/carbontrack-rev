@@ -378,7 +378,7 @@ export function JsonTreeViewer({ value, collapsed = false, maxHeight = '20rem', 
     try {
       const json = JSON.stringify(data, null, 2);
       copyToClipboard(json);
-    } catch (error) {
+    } catch {
       copyToClipboard(String(data));
     }
   }, [copyToClipboard, data]);

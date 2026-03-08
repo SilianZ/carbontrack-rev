@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';

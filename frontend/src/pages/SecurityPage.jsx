@@ -1,12 +1,17 @@
 import React from 'react';
-import { m, LazyMotion, domAnimation } from 'framer-motion';
+import { m as Motion, LazyMotion, domAnimation } from 'framer-motion';
+import PropTypes from 'prop-types';
 import { Trans } from 'react-i18next';
 import { Card, CardContent } from '../components/ui/Card';
-import { ShieldCheck, Lock, AlertCircle, Bug, Server, FileCheck } from 'lucide-react';
+import { ShieldCheck, Lock, AlertCircle, Bug, Server } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 
+const toItemKey = (prefix, item) => `${prefix}-${String(item).trim()}`;
+
+const toMailtoLink = (email) => `mailto:${String(email || '').trim()}`;
+
 const Section = ({ title, icon: Icon, children }) => (
-    <m.div
+    <Motion.div
         className="mb-8"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -20,8 +25,14 @@ const Section = ({ title, icon: Icon, children }) => (
         <div className="text-gray-600 leading-relaxed space-y-4">
             {children}
         </div>
-    </m.div>
+    </Motion.div>
 );
+
+Section.propTypes = {
+    title: PropTypes.node.isRequired,
+    icon: PropTypes.elementType,
+    children: PropTypes.node,
+};
 
 const SecurityPage = () => {
     const { t } = useTranslation();
@@ -34,7 +45,7 @@ const SecurityPage = () => {
         <LazyMotion features={domAnimation}>
             <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
-                    <m.div
+                    <Motion.div
                         className="text-center mb-12"
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -44,7 +55,7 @@ const SecurityPage = () => {
                         <p className="text-lg text-gray-600">
                             {t('legal.security.subtitle')}
                         </p>
-                    </m.div>
+                    </Motion.div>
                     <Card className="bg-white/80 backdrop-blur shadow-xl border-none">
                         <CardContent className="p-8 md:p-12">
                             <Section title={t('legal.security.sections.commitment.title')} icon={ShieldCheck}>
@@ -59,7 +70,7 @@ const SecurityPage = () => {
                                 </p>
                                 <ul className="list-disc pl-5 mt-2 space-y-2">
                                     {Array.isArray(infraItems) && infraItems.map((item, index) => (
-                                        <li key={index}>
+                                        <li key={toItemKey(`infra-${index}`, item)}>
                                             <Trans defaults={item} components={{ strong: <strong /> }} />
                                         </li>
                                     ))}
@@ -69,7 +80,7 @@ const SecurityPage = () => {
                             <Section title={t('legal.security.sections.app.title')} icon={Lock}>
                                 <ul className="list-disc pl-5 mt-2 space-y-2">
                                     {Array.isArray(appItems) && appItems.map((item, index) => (
-                                        <li key={index}>
+                                        <li key={toItemKey(`app-${index}`, item)}>
                                             <Trans defaults={item} components={{ strong: <strong /> }} />
                                         </li>
                                     ))}
@@ -86,12 +97,12 @@ const SecurityPage = () => {
                                         <Trans
                                             i18nKey="legal.security.sections.vuln.contact"
                                             values={{ email: import.meta.env.VITE_SECURITY_EMAIL }}
-                                            components={{ a: <a className="underline font-semibold" /> }}
+                                            components={{ a: <a href={toMailtoLink(import.meta.env.VITE_SECURITY_EMAIL)} className="underline font-semibold" /> }}
                                         />
                                     </p>
                                     <ul className="list-disc pl-5 text-sm text-blue-800">
                                         {Array.isArray(vulnItems) && vulnItems.map((item, index) => (
-                                            <li key={index}>{item}</li>
+                                            <li key={toItemKey(`vuln-${index}`, item)}>{item}</li>
                                         ))}
                                     </ul>
                                 </div>

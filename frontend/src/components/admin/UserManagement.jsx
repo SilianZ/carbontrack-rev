@@ -20,7 +20,6 @@ import {
   ClipboardList,
   CalendarDays,
   Award,
-  Edit,
   Settings,
   Flame,
   RefreshCcw,

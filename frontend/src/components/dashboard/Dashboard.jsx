@@ -218,15 +218,16 @@ export function Dashboard() {
 
   const streakLeaderboards = stats?.streak_leaderboards || {};
   const streakStats = stats?.streak_stats || {};
+  const regionStreakEntryCount = streakLeaderboards.region?.entries?.length || 0;
+  const schoolStreakEntryCount = streakLeaderboards.school?.entries?.length || 0;
   const availableScopes = useMemo(() => {
     const scopes = ['global'];
-    if (streakLeaderboards.region?.entries?.length) scopes.push('region');
-    if (streakLeaderboards.school?.entries?.length) scopes.push('school');
+    if (regionStreakEntryCount) scopes.push('region');
+    if (schoolStreakEntryCount) scopes.push('school');
     return scopes;
-  }, [streakLeaderboards]);
+  }, [regionStreakEntryCount, schoolStreakEntryCount]);
 
   const activeStreakScope = availableScopes.includes(streakScope) ? streakScope : 'global';
-  const activeStreakBoard = streakLeaderboards[activeStreakScope] || { entries: [] };
 
   if (error) {
     return (

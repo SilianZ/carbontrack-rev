@@ -54,7 +54,7 @@ const parseMaybeJson = (value) => {
   if (typeof value !== 'string') return value;
   try {
     return JSON.parse(value);
-  } catch (error) {
+  } catch {
     return value;
   }
 };
@@ -81,13 +81,14 @@ const buildTopData = (items, key, limit, otherLabel = 'Other') => {
   return [...top, { [key]: otherLabel, ...other }];
 };
 
-function StatCard({ title, value, subtitle, icon: Icon, tone }) {
+function StatCard({ title, value, subtitle, icon, tone }) {
+  const IconComponent = icon;
   return (
     <Card className={cn('border-l-4', tone)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-          <Icon className="h-4 w-4 text-muted-foreground" />
+          <IconComponent className="h-4 w-4 text-muted-foreground" />
         </div>
       </CardHeader>
       <CardContent className="space-y-1">

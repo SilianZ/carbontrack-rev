@@ -762,6 +762,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
       }));
       toast.success(t('admin.products.form.uploadSuccess', '图片上传成功'));
     } catch (error) {
+      console.error('Product image upload failed', error);
       toast.error(t('admin.products.form.uploadFailed', '图片上传失败，请重试'));
     } finally {
       setUploading(false);

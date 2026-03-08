@@ -104,7 +104,7 @@ export default function StatsSection() {
   const renderContent = () => (
     <div className="space-y-12">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-        {metrics.map((metric, index) => (
+        {metrics.map((metric) => (
           <div key={metric.key} className="text-center">
             <div className={`text-3xl font-bold mb-2 ${metric.accent}`}>{metric.value}</div>
             <div className="text-gray-600 text-sm font-medium">{metric.label}</div>

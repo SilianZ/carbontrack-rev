@@ -15,7 +15,6 @@ export function CarbonCalculator() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [activities, setActivities] = useState([]); // Store fetched activities
-  const [loadingActivities, setLoadingActivities] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [smartData, setSmartData] = useState(null); // Data from AI
   const [calculationResult, setCalculationResult] = useState(null);
@@ -43,7 +42,6 @@ export function CarbonCalculator() {
   React.useEffect(() => {
     const fetchActivities = async () => {
       try {
-        setLoadingActivities(true);
         const response = await carbonAPI.getActivities();
         if (response?.data?.success) {
           const payload = response?.data?.data;
@@ -52,8 +50,6 @@ export function CarbonCalculator() {
         }
       } catch (err) {
         console.error("Failed to fetch activities for smart matching", err);
-      } finally {
-        setLoadingActivities(false);
       }
     };
     fetchActivities();

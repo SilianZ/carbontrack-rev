@@ -1,12 +1,12 @@
 import React from 'react';
-import { m, LazyMotion, domAnimation } from 'framer-motion';
+import { m as Motion, LazyMotion, domAnimation } from 'framer-motion';
 import { Trans } from 'react-i18next';
 import { Card, CardContent } from '../components/ui/Card';
 import { Scale, FileText, AlertTriangle, UserCheck, Gavel, ShieldAlert } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 
 const Section = ({ title, icon: Icon, children }) => (
-    <m.div
+    <Motion.div
         className="mb-8"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -20,7 +20,7 @@ const Section = ({ title, icon: Icon, children }) => (
         <div className="text-gray-600 leading-relaxed space-y-4">
             {children}
         </div>
-    </m.div>
+    </Motion.div>
 );
 
 const TermsOfServicePage = () => {
@@ -33,7 +33,7 @@ const TermsOfServicePage = () => {
         <LazyMotion features={domAnimation}>
             <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
-                    <m.div
+                    <Motion.div
                         className="text-center mb-12"
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -46,7 +46,7 @@ const TermsOfServicePage = () => {
                         <p className="mt-4 text-gray-500 max-w-2xl mx-auto">
                             {t('legal.terms.intro')}
                         </p>
-                    </m.div>
+                    </Motion.div>
 
                     <Card className="bg-white/80 backdrop-blur shadow-xl border-none">
                         <CardContent className="p-8 md:p-12">

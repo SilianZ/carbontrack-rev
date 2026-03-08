@@ -4,7 +4,7 @@ import { m, useInView, useScroll, useTransform, useSpring, useReducedMotion, Laz
 const __FM_USED = m;
 import { useQuery } from 'react-query';
 import { useTranslation } from '../hooks/useTranslation';
-import { buttonVariants } from '../components/ui/Button';
+import { buttonVariants } from '../components/ui/button-variants';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
 import { cn } from '../lib/utils';
 import { statsAPI } from '../lib/api';

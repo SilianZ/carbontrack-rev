@@ -1,12 +1,15 @@
 import React from 'react';
-import { m, LazyMotion, domAnimation } from 'framer-motion';
+import { m as Motion, LazyMotion, domAnimation } from 'framer-motion';
+import PropTypes from 'prop-types';
 import { Trans } from 'react-i18next';
 import { Card, CardContent } from '../components/ui/Card';
-import { Cookie, Settings, Shield, Info, Eye, RefreshCw } from 'lucide-react';
+import { Cookie, Settings, Info, Eye } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 
+const toItemKey = (prefix, item) => `${prefix}-${String(item).trim()}`;
+
 const Section = ({ title, icon: Icon, children }) => (
-    <m.div
+    <Motion.div
         className="mb-8"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -20,8 +23,14 @@ const Section = ({ title, icon: Icon, children }) => (
         <div className="text-gray-600 leading-relaxed space-y-4">
             {children}
         </div>
-    </m.div>
+    </Motion.div>
 );
+
+Section.propTypes = {
+    title: PropTypes.node.isRequired,
+    icon: PropTypes.elementType,
+    children: PropTypes.node,
+};
 
 const CookiePolicyPage = () => {
     const { t } = useTranslation();
@@ -33,7 +42,7 @@ const CookiePolicyPage = () => {
         <LazyMotion features={domAnimation}>
             <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
-                    <m.div
+                    <Motion.div
                         className="text-center mb-12"
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -46,7 +55,7 @@ const CookiePolicyPage = () => {
                         <p className="mt-4 text-gray-500 max-w-2xl mx-auto">
                             {t('legal.cookies.intro')}
                         </p>
-                    </m.div>
+                    </Motion.div>
 
                     <Card className="bg-white/80 backdrop-blur shadow-xl border-none">
                         <CardContent className="p-8 md:p-12">
@@ -88,7 +97,7 @@ const CookiePolicyPage = () => {
                                 <p>{t('legal.cookies.sections.thirdParty.intro')}</p>
                                 <ul className="list-disc pl-5">
                                     {Array.isArray(thirdPartyItems) && thirdPartyItems.map((item, index) => (
-                                        <li key={index}>
+                                        <li key={toItemKey(`third-party-${index}`, item)}>
                                             <Trans defaults={item} components={{ strong: <strong /> }} />
                                         </li>
                                     ))}
