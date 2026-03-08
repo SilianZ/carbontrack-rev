@@ -1,8 +1,7 @@
 name: Sync Monorepo to Individual Repositories
 
 env:
-  FRONTEND_NODE_VERSION: '20'
-  PNPM_VERSION: '10.4.1'
+  FRONTEND_NODE_VERSION: '20.9.0'
 
 on:
   push:
@@ -132,7 +131,7 @@ jobs:
       if: steps.frontend-changes.outputs.changed == 'true'
       uses: pnpm/action-setup@v4
       with:
-        version: ${{ env.PNPM_VERSION }}
+        package_json_file: frontend/package.json
 
     - name: Setup Node for frontend sync
       if: steps.frontend-changes.outputs.changed == 'true'

@@ -3,8 +3,7 @@
 name: Frontend CI
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10.4.1'
+  NODE_VERSION: '20.9.0'
 
 on:
   push:
@@ -23,7 +22,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
+          package_json_file: package.json
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -46,7 +45,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
+          package_json_file: package.json
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -69,7 +68,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
+          package_json_file: package.json
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -95,7 +94,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
+          package_json_file: package.json
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -123,5 +122,12 @@ jobs:
 
       - name: Skip unit tests
         if: steps.has-tests.outputs.present != 'true'
-        run: echo "No test script defined in frontend/package.json; skipping unit tests."
+        run: |
+          echo "::warning title=Tests skipped::No test script defined in frontend/package.json; unit tests were skipped."
+          cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          ## Tests skipped
+          - ⚠️ No `test` script found in `frontend/package.json`.
+          - CI remained green for the unit-test job, but no frontend unit tests were executed in this run.
+          - Recommendation: add a real `test` script to restore test coverage gating.
+          EOF
 
