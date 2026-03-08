@@ -128,6 +128,12 @@ jobs:
         git fetch origin main --depth=1
         git checkout -B main origin/main
 
+    - name: Setup pnpm for frontend sync
+      if: steps.frontend-changes.outputs.changed == 'true'
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ env.PNPM_VERSION }}
+
     - name: Setup Node for frontend sync
       if: steps.frontend-changes.outputs.changed == 'true'
       uses: actions/setup-node@v4
@@ -141,9 +147,6 @@ jobs:
       run: |
         echo "Building frontend in monorepo..."
         cd frontend
-        # enable pnpm via corepack
-        corepack enable || true
-        corepack prepare pnpm@${PNPM_VERSION} --activate || true
         pnpm install --frozen-lockfile
         pnpm build
         echo "Frontend build succeeded"

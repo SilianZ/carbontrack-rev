@@ -3,7 +3,7 @@
 name: Frontend CI
 
 env:
-  NODE_VERSION: '20.9.0'
+  NODE_VERSION: '20'
   PNPM_VERSION: '10.4.1'
 
 on:
@@ -20,17 +20,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-
-      - name: Enable pnpm via corepack
-        run: |
-          corepack enable || true
-          corepack prepare pnpm@${PNPM_VERSION} --activate || true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -43,17 +43,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-
-      - name: Enable pnpm
-        run: |
-          corepack enable || true
-          corepack prepare pnpm@${PNPM_VERSION} --activate || true
 
       - name: Run lint
         run: pnpm lint --reporter=github || true
@@ -66,17 +66,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-
-      - name: Enable pnpm
-        run: |
-          corepack enable || true
-          corepack prepare pnpm@${PNPM_VERSION} --activate || true
 
       - name: Install deps (build job)
         run: pnpm install --frozen-lockfile
@@ -92,17 +92,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-
-      - name: Enable pnpm
-        run: |
-          corepack enable || true
-          corepack prepare pnpm@${PNPM_VERSION} --activate || true
 
       - name: Install deps (test job)
         run: pnpm install --frozen-lockfile
@@ -123,10 +123,5 @@ jobs:
 
       - name: Skip unit tests
         if: steps.has-tests.outputs.present != 'true'
-        run: |
-          echo "::warning::No test script defined in frontend/package.json; unit tests were skipped."
-          {
-            echo "## Unit test status"
-            echo "- ⚠️ No \`test\` script found in \`package.json\`; tests were skipped in this run."
-          } >> "$GITHUB_STEP_SUMMARY"
+        run: echo "No test script defined in frontend/package.json; skipping unit tests."
 
