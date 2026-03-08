@@ -160,9 +160,10 @@ jobs:
         # 如果没有变化则退出
         if git diff --quiet --exit-code && git diff --staged --quiet --exit-code; then
           echo "No changes to commit in frontend repository"
-          cd ..
-          rm -rf frontend-repo
-          exit 0
+           # 保留 frontend-repo 目录，后续 create-pull-request 仍会使用该路径
+           # 若工作树为空，action 会安全地判定为无需创建/更新 PR
+           cd ..
+           exit 0
         fi
 
         # 添加并提交变更（允许在无差异时忽略错误）
@@ -335,9 +336,10 @@ jobs:
         # 如果没有变化则退出
         if git diff --quiet --exit-code && git diff --staged --quiet --exit-code; then
           echo "No changes to commit in backend repository"
-          cd ..
-          rm -rf backend-repo
-          exit 0
+           # 保留 backend-repo 目录，后续 create-pull-request 仍会使用该路径
+           # 若工作树为空，action 会安全地判定为无需创建/更新 PR
+           cd ..
+           exit 0
         fi
 
         # 添加并提交变更（允许在无差异时忽略错误）
