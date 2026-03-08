@@ -1,4 +1,4 @@
-const ANNOUNCEMENT_TITLE_PATTERN = /\b(公告|announcement|system|系统|broadcast|boardcast)\b/i;
+const ANNOUNCEMENT_TITLE_PATTERN = /(公告|系统|\b(?:announcement|system|broadcast|boardcast)\b)/i;
 
 export function isAnnouncementMessage(message) {
   if (!message) {
