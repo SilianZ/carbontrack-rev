@@ -41,7 +41,9 @@ export const userManager = {
     }
     
     const existing = this.getUser();
-    const isSameUser = existing && existing.id === user.id;
+    const existingId = existing?.id;
+    const nextUserId = user?.id;
+    const isSameUser = existingId != null && nextUserId != null && String(existingId) === String(nextUserId);
     
     // UUID should only come from the backend database/identity layer.
     // If the new data contains a UUID, use it.
