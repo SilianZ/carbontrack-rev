@@ -1,9 +1,16 @@
 import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { Eye, EyeOff, LogIn, Fingerprint } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 import { authAPI, getReturnUrl, getValidationRules } from '../../lib/auth';
+import { 
+  IS_PASSKEY_ENABLED, 
+  isPasskeySupported, 
+  prepareAuthenticationOptions, 
+  encodeAuthenticationResponse 
+} from '../../lib/passkey';
+import { passkeyAPI } from '../../lib/api/passkey';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
@@ -18,10 +25,16 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const turnstileRef = useRef(null);
   const [turnstileToken, setTurnstileToken] = useState('');
+  const [isPasskeySupportedState, setIsPasskeySupportedState] = useState(false);
+
+  React.useEffect(() => {
+    isPasskeySupported().then(setIsPasskeySupportedState);
+  }, []);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors }
   } = useForm();
   const validationRules = getValidationRules();
@@ -36,6 +49,51 @@ export function LoginForm() {
       return t(`auth.errors.${code}`, { defaultValue: message });
     }
     return message;
+  };
+
+  const onPasskeyLogin = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const identifier = watch('identifier');
+      const optionsRes = await passkeyAPI.getAuthenticationOptions(identifier);
+      const optionsData = optionsRes.data?.data || optionsRes.data;
+      const publicKeyOptions = optionsData.public_key || optionsData;
+
+      const publicKeyCredentialRequestOptions = prepareAuthenticationOptions(publicKeyOptions);
+      const credential = await navigator.credentials.get(publicKeyCredentialRequestOptions);
+      if (!credential) {
+        return;
+      }
+
+      const encodedCredential = encodeAuthenticationResponse(credential);
+      const result = await authAPI.loginWithPasskey({
+        challenge_id: optionsData.challenge_id,
+        credential: encodedCredential
+      });
+
+      if (result.success) {
+        const returnUrl = getReturnUrl();
+        navigate(returnUrl);
+      } else {
+        setError(resolveErrorMessage(result));
+      }
+    } catch (err) {
+      console.error('Passkey login error:', err);
+      if (err.name === 'NotAllowedError') {
+        return;
+      }
+      const status = err.response?.status;
+      if (status === 404 || status === 405) {
+        setError(t('auth.errors.PASSKEY_LOGIN_UNAVAILABLE', { defaultValue: t('auth.loginFailed') + ': 通行密钥登录功能正在开发中' }));
+        return;
+      }
+      const responseData = err.response?.data;
+      const fallbackMessage = err.response ? t('auth.loginFailed') : t('errors.network');
+      setError(resolveErrorMessage(responseData, fallbackMessage));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onSubmit = async (data) => {
@@ -199,6 +257,32 @@ export function LoginForm() {
                   {isLoading ? t('auth.signingIn') : t('auth.signIn')}
                 </Button>
               </div>
+
+              {IS_PASSKEY_ENABLED && isPasskeySupportedState && (
+                <div className="space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-gray-300" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">
+                        {t('auth.orContinueWith', '或使用以下方式继续')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full flex items-center justify-center gap-2"
+                    onClick={onPasskeyLogin}
+                    disabled={isLoading}
+                  >
+                    <Fingerprint className="h-5 w-5 text-green-600" />
+                    {t('auth.signInWithPasskey', '使用通行密钥登录')}
+                  </Button>
+                </div>
+              )}
             </form>
           </CardContent>
         </Card>

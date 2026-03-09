@@ -91,6 +91,18 @@ export const authAPI = {
     return response.data;
   },
 
+  async loginWithPasskey(data) {
+    const response = await api.post('/auth/passkey/login/verify', data);
+    
+    if (response.data.success) {
+      const { token, user } = response.data.data;
+      tokenManager.setToken(token);
+      userManager.setUser(user);
+    }
+    
+    return response.data;
+  },
+
   async register(userData) {
     const response = await api.post('/auth/register', userData);
     

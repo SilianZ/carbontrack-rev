@@ -307,6 +307,8 @@
     "backToLogin": "Back to login",
     "orSignUpPrompt": "Or",
     "orSignInPrompt": "Or",
+    "signInWithPasskey": "Sign in with Passkey",
+    "orContinueWith": "Or continue with",
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
     "signInNow": "Sign in now",
@@ -409,7 +411,8 @@
     },
     "errors": {
       "INVALID_CREDENTIALS": "Incorrect username or password. Please try again.",
-      "LOGIN_FAILED": "Unable to sign in right now. Please try again later."
+      "LOGIN_FAILED": "Unable to sign in right now. Please try again later.",
+      "PASSKEY_LOGIN_UNAVAILABLE": "Login failed: Passkey login is under development"
     },
     "passwordMinLength": "Password must be at least 8 characters."
   },
@@ -987,7 +990,27 @@
     "noUserData": "User profile is not available yet. Please try again later.",
     "points": "Points",
     "userId": "User ID",
-    "uuid": "UUID"
+    "uuid": "UUID",
+    "passkey": {
+      "title": "Passkey",
+      "description": "Securely log in with your fingerprint, face, or device lock.",
+      "add": "Add Passkey",
+      "empty": "No passkeys added yet",
+      "notSupported": "Your browser or device does not support passkeys",
+      "disabled": "Passkey functionality is currently disabled",
+      "registering": "Registering...",
+      "registerSuccess": "Passkey registered successfully",
+      "registerFailed": "Passkey registration failed",
+      "registerCancelled": "Passkey registration was cancelled",
+      "deleteConfirm": "Are you sure you want to delete this passkey?",
+      "deleteSuccess": "Passkey deleted",
+      "deleteFailed": "Failed to delete passkey",
+      "deleteUnavailable": "Passkey deletion is not yet available",
+      "manage": "Manage Passkeys",
+      "lastUsed": "Last used",
+      "createdAt": "Added at",
+      "unnamed": "Unnamed Key"
+    }
   },
   "admin": {
     "title": "Admin Panel",

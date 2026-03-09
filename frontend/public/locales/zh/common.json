@@ -299,6 +299,8 @@
     "backToLogin": "返回登录",
     "orSignUpPrompt": "或者",
     "orSignInPrompt": "或者",
+    "signInWithPasskey": "使用通行密钥登录",
+    "orContinueWith": "或使用以下方式继续",
     "noAccount": "还没有账户？",
     "haveAccount": "已有账户？",
     "signInNow": "立即登录",
@@ -401,7 +403,8 @@
     },
     "errors": {
       "INVALID_CREDENTIALS": "用户名或密码错误，请重试。",
-      "LOGIN_FAILED": "登录失败，请稍后再试。"
+      "LOGIN_FAILED": "登录失败，请稍后再试。",
+      "PASSKEY_LOGIN_UNAVAILABLE": "登录失败：通行密钥登录功能正在开发中"
     },
     "passwordMinLength": "密码长度至少 8 位。"
   },
@@ -979,7 +982,27 @@
     "noUserData": "暂未获取到个人资料，请稍后重试。",
     "points": "积分",
     "userId": "用户 ID",
-    "uuid": "UUID"
+    "uuid": "UUID",
+    "passkey": {
+      "title": "通行密钥 (Passkey)",
+      "description": "使用您的指纹、人脸或设备密码安全登录。",
+      "add": "添加通行密钥",
+      "empty": "尚未添加通行密钥",
+      "notSupported": "您的浏览器或设备不支持通行密钥",
+      "disabled": "当前未启用通行密钥功能",
+      "registering": "正在注册...",
+      "registerSuccess": "通行密钥注册成功",
+      "registerFailed": "通行密钥注册失败",
+      "registerCancelled": "通行密钥注册已取消",
+      "deleteConfirm": "确定要删除此通行密钥吗？",
+      "deleteSuccess": "通行密钥已删除",
+      "deleteFailed": "删除通行密钥失败",
+      "deleteUnavailable": "通行密钥删除功能暂未上线",
+      "manage": "管理通行密钥",
+      "lastUsed": "最后使用",
+      "createdAt": "添加时间",
+      "unnamed": "未命名密钥"
+    }
   },
   "admin": {
     "title": "管理后台",

@@ -7,6 +7,7 @@ import { AvatarSelector } from '../components/profile/AvatarSelector';
 import R2Image from '../components/common/R2Image';
 import { buildAvatarDisplayProps } from '../lib/avatarUtils';
 import { PasswordChangeForm } from '../components/profile/PasswordChangeForm';
+import { PasskeyManagement } from '../components/profile/PasskeyManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/Alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
@@ -128,6 +129,10 @@ export default function ProfilePage() {
             <PasswordChangeForm />
           </CardContent>
         </Card>
+
+        <div className="lg:col-span-2">
+          <PasskeyManagement />
+        </div>
       </div>
     </div>
   );
