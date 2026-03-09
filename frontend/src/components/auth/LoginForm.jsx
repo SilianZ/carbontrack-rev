@@ -52,10 +52,14 @@ export function LoginForm() {
   };
 
   const onPasskeyLogin = async () => {
+    const identifier = watch('identifier');
+    if (!identifier) {
+      setError(t('auth.errors.IDENTIFIER_REQUIRED', { defaultValue: t('auth.usernameOrEmailRequired', '请输入用户名或邮箱') }));
+      return;
+    }
     setIsLoading(true);
     setError('');
     try {
-      const identifier = watch('identifier');
       const optionsRes = await passkeyAPI.getAuthenticationOptions(identifier);
       const optionsData = optionsRes.data?.data || optionsRes.data;
       const publicKeyOptions = optionsData.public_key || optionsData;
