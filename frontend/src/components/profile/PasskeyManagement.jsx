@@ -125,6 +125,23 @@ export function PasskeyManagement() {
     );
   }
 
+  if (supported === null) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Fingerprint className="h-5 w-5 text-gray-400" />
+            {t('profile.passkey.title')}
+          </CardTitle>
+          <CardDescription className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+            {t('common.loading', '正在加载...')}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   if (supported === false) {
     return (
       <Card>
@@ -142,7 +159,7 @@ export function PasskeyManagement() {
     );
   }
 
-  const passkeys = passkeysData?.data?.data?.passkeys || passkeysData?.data?.passkeys || [];
+  const passkeys = passkeysData?.data?.data?.passkeys || [];
 
   return (
     <Card>
