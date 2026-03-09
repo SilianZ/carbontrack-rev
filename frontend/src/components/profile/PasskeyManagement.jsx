@@ -159,7 +159,7 @@ export function PasskeyManagement() {
     );
   }
 
-  const passkeys = passkeysData?.data?.data?.passkeys || passkeysData?.data?.passkeys || [];
+  const passkeys = passkeysData?.data?.data?.passkeys || [];
 
   return (
     <Card>
