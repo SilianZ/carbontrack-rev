@@ -10,6 +10,11 @@ on:
     branches: [ main ]
     types: [ closed ]
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   sync-repositories:
     runs-on: ubuntu-latest
@@ -456,24 +461,33 @@ jobs:
         script: |
           const frontendChanged = '${{ steps.frontend-changes.outputs.changed }}' === 'true';
           const backendChanged = '${{ steps.backend-changes.outputs.changed }}' === 'true';
-          
+
           let message = '🔄 **Repository Sync Summary**\n\n';
-          
+
           if (frontendChanged) {
             message += '✅ Frontend changes synced to `carbon-track/frontend`\n';
           }
-          
+
           if (backendChanged) {
             message += '✅ Backend changes synced to `carbon-track/backend`\n';
           }
-          
+
           if (!frontendChanged && !backendChanged) {
             message += 'ℹ️ No frontend or backend changes detected, no sync needed.\n';
           }
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: message
-          });
+
+          if (!context.issue.number) {
+            core.info('No pull request number available; skipping summary comment.');
+            return;
+          }
+
+          try {
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+          } catch (error) {
+            core.warning(`Failed to create summary comment: ${error.message}`);
+          }
