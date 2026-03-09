@@ -27,10 +27,15 @@ export function base64urlToArrayBuffer(base64url) {
  */
 export function arrayBufferToBase64url(buffer) {
   const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
+  const len = bytes.byteLength;
+  const CHUNK_SIZE = 8192;
+  const chunks = [];
+  
+  for (let i = 0; i < len; i += CHUNK_SIZE) {
+    chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK_SIZE)));
   }
+  
+  const binary = chunks.join('');
   const base64 = window.btoa(binary);
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }

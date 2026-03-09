@@ -14,6 +14,7 @@ class NativeWebauthnProvider implements WebauthnProviderInterface
     private const FLAG_BACKUP_ELIGIBLE = 0x08;
     private const FLAG_BACKUP_STATE = 0x10;
     private const FLAG_ATTESTED_CREDENTIAL_DATA = 0x40;
+    private const FLAG_EXTENSION_DATA = 0x80;
 
     public function isAvailable(): bool
     {
