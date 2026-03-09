@@ -35,7 +35,36 @@ export const userManager = {
   },
 
   setUser(user) {
-    localStorage.setItem('user_info', JSON.stringify(user));
+    if (!user) {
+      this.removeUser();
+      return;
+    }
+    
+    const existing = this.getUser();
+    const existingId = existing?.id;
+    const nextUserId = user?.id;
+    const isSameUser = existingId != null && nextUserId != null && String(existingId) === String(nextUserId);
+    
+    // UUID should only come from the backend database/identity layer.
+    // If the new data contains a UUID, use it.
+    // If not, but it is the same user, preserve the existing one.
+    // Never generate a fake UUID on the client side.
+    const uuid = user.uuid || (isSameUser ? existing.uuid : null);
+
+    const mergedUser = isSameUser ? {
+      ...existing,
+      ...user
+    } : {
+      ...user
+    };
+    
+    if (uuid && uuid !== 'null') {
+      mergedUser.uuid = uuid;
+    } else {
+      delete mergedUser.uuid;
+    }
+    
+    localStorage.setItem('user_info', JSON.stringify(mergedUser));
   },
 
   removeUser() {
@@ -64,6 +93,17 @@ export const authAPI = {
 
   async register(userData) {
     const response = await api.post('/auth/register', userData);
+    
+    if (response.data.success && response.data.data) {
+      const { token, user } = response.data.data;
+      if (token) {
+        tokenManager.setToken(token);
+      }
+      if (user) {
+        userManager.setUser(user);
+      }
+    }
+    
     return response.data;
   },
 
@@ -211,17 +251,6 @@ export const validationRules = {
     required: '密码不能为空',
     minLength: { value: 8, message: '密码至少8个字符' }
     // 已移除强制大小写+数字组合要求
-  },
-  
-  realName: {
-    required: '真实姓名不能为空',
-    minLength: { value: 2, message: '姓名至少2个字符' },
-    maxLength: { value: 10, message: '姓名最多10个字符' }
-  },
-  
-  className: {
-    required: '班级不能为空',
-    maxLength: { value: 20, message: '班级名称最多20个字符' }
   }
 };
 
