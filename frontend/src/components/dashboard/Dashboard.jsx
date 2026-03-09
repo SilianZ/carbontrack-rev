@@ -247,9 +247,16 @@ export function Dashboard() {
           <h1 className="text-3xl font-bold text-gray-900">
             {t('dashboard.welcome')}{user?.username && `, ${user.username}`}！
           </h1>
-          <p className="text-gray-600 mt-1">
-            {t('dashboard.welcomeDesc')}
-          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            <p className="text-gray-600">
+              {t('dashboard.welcomeDesc')}
+            </p>
+            {user?.uuid && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200" title={t('profile.uuid', 'UUID')}>
+                {t('profile.uuid', 'UUID')}: {user.uuid}
+              </span>
+            )}
+          </div>
         </div>
         
         <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
