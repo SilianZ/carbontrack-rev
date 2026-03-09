@@ -35,7 +35,10 @@ export const userManager = {
   },
 
   setUser(user) {
-    if (!user) return;
+    if (!user) {
+      this.removeUser();
+      return;
+    }
     
     const existing = this.getUser();
     const isSameUser = existing && existing.id === user.id;
