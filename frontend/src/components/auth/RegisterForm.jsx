@@ -40,8 +40,8 @@ export function RegisterForm() {
   const stateCode = watch('state_code');
 
   useEffect(() => {
-    register('country_code', { required: t('auth.countryRequired', 'Country is required') });
-    register('state_code', { required: t('auth.stateRequired', 'State is required') });
+    register('country_code', { required: t('auth.countryRequired') });
+    register('state_code', { required: t('auth.stateRequired') });
   }, [register, t]);
 
   // 获取学校列表
@@ -235,13 +235,13 @@ export function RegisterForm() {
                     <div className="relative">
                       <Input
                         type="text"
-                        placeholder={t('auth.schoolPlaceholder', '输入以创建新学校 (可选)')}
+                        placeholder={t('auth.schoolPlaceholder')}
                         value={customSchool}
                         onChange={(e)=>{ setCustomSchool(e.target.value); if(e.target.value) { /* 清空选择 */ } }}
                         disabled={!!watch('schoolId')}
                       />
                       {watch('schoolId') && (
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">{t('common.selected','Selected')}</span>
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">{t('common.selected')}</span>
                       )}
                     </div>
                     <p className="mt-1 text-xs text-gray-500">

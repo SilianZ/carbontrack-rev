@@ -114,7 +114,7 @@ export default function BadgeManagement() {
         setBadges(response.data.data || []);
       }
     } catch {
-      toast.error(t('admin.badges.loadFailed', '加载徽章列表失败'));
+      toast.error(t('admin.badges.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -184,7 +184,7 @@ export default function BadgeManagement() {
         setFormValues((prev) => ({ ...prev, auto_grant_criteria: JSON.stringify(parsed, null, 2) }));
         setCriteriaMode('builder');
       } else {
-        toast.error(t('admin.badges.ruleBuilder.parseFailed', '当前 JSON 无法解析为可视化规则，请检查格式。'));
+        toast.error(t('admin.badges.ruleBuilder.parseFailed'));
       }
     } else {
       setCriteriaMode(next);
@@ -200,7 +200,7 @@ export default function BadgeManagement() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('admin.badges.fileTooLarge', '文件大小不能超过5MB'));
+      toast.error(t('admin.badges.fileTooLarge'));
       event.target.value = '';
       return;
     }
@@ -219,9 +219,9 @@ export default function BadgeManagement() {
         icon_url: info.url || info.public_url || prev.icon_url,
         icon_presigned_url: info.presigned_url || prev.icon_presigned_url,
       }));
-      toast.success(t('admin.badges.uploadSuccess', '徽章图标上传成功'));
+      toast.success(t('admin.badges.uploadSuccess'));
     } catch (err) {
-      toast.error(err?.message || t('admin.badges.uploadFailed', '徽章图标上传失败'));
+      toast.error(err?.message || t('admin.badges.uploadFailed'));
     } finally {
       setUploadingIcon(false);
       if (event.target) {
@@ -255,7 +255,7 @@ export default function BadgeManagement() {
         try {
           payload.auto_grant_criteria = JSON.parse(formValues.auto_grant_criteria);
         } catch {
-          toast.error(t('admin.badges.criteriaParseFailed', '自动授予规则 JSON 解析失败'));
+          toast.error(t('admin.badges.criteriaParseFailed'));
           return;
         }
       } else {
@@ -269,15 +269,15 @@ export default function BadgeManagement() {
       setSaving(true);
       if (formValues.id) {
         await adminAPI.updateBadge(formValues.id, payload);
-        toast.success(t('admin.badges.updateSuccess', '徽章已更新'));
+        toast.success(t('admin.badges.updateSuccess'));
       } else {
         await adminAPI.createBadge(payload);
-        toast.success(t('admin.badges.createSuccess', '徽章已创建'));
+        toast.success(t('admin.badges.createSuccess'));
       }
       resetForm();
       fetchBadges();
     } catch (err) {
-      toast.error(err.response?.data?.message || t('admin.badges.saveFailed', '保存徽章失败'));
+      toast.error(err.response?.data?.message || t('admin.badges.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -317,9 +317,9 @@ export default function BadgeManagement() {
       const awarded = summary && typeof summary.awarded !== 'undefined' ? summary.awarded : 0;
       const users = summary && typeof summary.users !== 'undefined' ? summary.users : 0;
       const extra = summary ? ' (' + awarded + ' / ' + users + ')' : '';
-      toast.success(t('admin.badges.autoTriggered', '已触发自动授予流程') + extra);
+      toast.success(t('admin.badges.autoTriggered') + extra);
     } catch (err) {
-      toast.error(err.response?.data?.message || t('admin.badges.autoTriggerFailed', '触发自动授予失败'));
+      toast.error(err.response?.data?.message || t('admin.badges.autoTriggerFailed'));
     } finally {
       setTriggering(false);
       fetchBadges();
@@ -336,37 +336,37 @@ export default function BadgeManagement() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('admin.badges.metrics.total', '徽章总数')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('admin.badges.metrics.total')}</CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formattedBadges.length}</div>
             <p className="text-xs text-muted-foreground">
-              {t('admin.badges.metrics.totalHint', '已创建的所有成就徽章数量')}
+              {t('admin.badges.metrics.totalHint')}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('admin.badges.metrics.active', '启用中')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('admin.badges.metrics.active')}</CardTitle>
             <ShieldCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{activeBadges.length}</div>
             <p className="text-xs text-muted-foreground">
-              {t('admin.badges.metrics.activeHint', '当前对用户可见并可获得的徽章数量')}
+              {t('admin.badges.metrics.activeHint')}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('admin.badges.metrics.auto', '自动授予')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('admin.badges.metrics.auto')}</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{autoBadges.length}</div>
             <p className="text-xs text-muted-foreground">
-              {t('admin.badges.metrics.autoHint', '开启自动授予规则的徽章数量')}
+              {t('admin.badges.metrics.autoHint')}
             </p>
           </CardContent>
         </Card>
@@ -375,15 +375,15 @@ export default function BadgeManagement() {
       <Card>
         <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0 space-y-1">
-            <CardTitle>{t('admin.badges.listTitle', '成就徽章列表')}</CardTitle>
+            <CardTitle>{t('admin.badges.listTitle')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              {t('admin.badges.listHint', '支持快速授予/收回、刷新与自动规则触发。')}
+              {t('admin.badges.listHint')}
             </p>
           </div>
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <Button className="w-full sm:w-auto" variant="outline" onClick={fetchBadges} disabled={loading}>
               <RefreshCw className={'h-4 w-4 mr-2 ' + (loading ? 'animate-spin' : '')} />
-              {t('common.refresh', '刷新')}
+              {t('common.refresh')}
             </Button>
             <Button className="w-full sm:w-auto" variant="outline" onClick={handleTriggerAuto} disabled={triggering}>
               {triggering ? (
@@ -391,14 +391,14 @@ export default function BadgeManagement() {
               ) : (
                 <Sparkles className="h-4 w-4 mr-2" />
               )}
-              {t('admin.badges.triggerAuto', '触发自动授予')}
+              {t('admin.badges.triggerAuto')}
             </Button>
             <Button className="w-full sm:w-auto" variant="outline" onClick={() => handleAward(null)}>
               <Users className="h-4 w-4 mr-2" />
-              {t('admin.badges.bulkAward', '批量授予')}
+              {t('admin.badges.bulkAward')}
             </Button>
             <Button className="w-full sm:w-auto" onClick={resetForm} variant="secondary">
-              {t('admin.badges.newBadge', '新建徽章')}
+              {t('admin.badges.newBadge')}
             </Button>
           </div>
         </CardHeader>
@@ -406,7 +406,7 @@ export default function BadgeManagement() {
           {loading ? (
             <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              {t('common.loading', '加载中...')}
+              {t('common.loading')}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -414,28 +414,28 @@ export default function BadgeManagement() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.badges.table.icon', '图标')}
+                      {t('admin.badges.table.icon')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.badges.table.name', '名称')}
+                      {t('admin.badges.table.name')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.badges.table.status', '状态')}
+                      {t('admin.badges.table.status')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.badges.table.stats', '授予情况')}
+                      {t('admin.badges.table.stats')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.badges.table.auto', '自动授予')}
+                      {t('admin.badges.table.auto')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.badges.table.sort', '排序')}
+                      {t('admin.badges.table.sort')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.badges.table.updated', '更新时间')}
+                      {t('admin.badges.table.updated')}
                     </th>
                     <th className="px-4 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">
-                      {t('common.actions', '操作')}
+                      {t('common.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -471,19 +471,19 @@ export default function BadgeManagement() {
                         <td className="px-4 py-3">
                           <Badge variant={badge.is_active ? 'success' : 'secondary'}>
                             {badge.is_active
-                              ? t('admin.badges.active', '启用')
-                              : t('admin.badges.inactive', '停用')}
+                              ? t('admin.badges.active')
+                              : t('admin.badges.inactive')}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">
                           <div className="flex flex-col gap-1">
-                            <span>{t('admin.badges.stats.summary', '{{awarded}} / {{total}}', { awarded: stats.awarded_records || 0, total: stats.total_records || 0 })}</span>
+                            <span>{t('admin.badges.stats.summary',  { awarded: stats.awarded_records || 0, total: stats.total_records || 0 })}</span>
                             <span className="text-xs text-muted-foreground">
-                              {t('admin.badges.stats.awardedUsers', '{{count}} 位用户获得', { count: stats.awarded_users || 0 })}
+                              {t('admin.badges.stats.awardedUsers',  { count: stats.awarded_users || 0 })}
                             </span>
                             {stats.last_awarded_at ? (
                               <span className="text-[10px] text-muted-foreground">
-                                {t('admin.badges.stats.lastAwarded', '最近：{{time}}', { time: format(new Date(stats.last_awarded_at), 'yyyy-MM-dd HH:mm') })}
+                                {t('admin.badges.stats.lastAwarded',  { time: format(new Date(stats.last_awarded_at), 'yyyy-MM-dd HH:mm') })}
                               </span>
                             ) : null}
                           </div>
@@ -492,12 +492,12 @@ export default function BadgeManagement() {
                           <div className="flex flex-col gap-1">
                             <Badge variant={badge.auto_grant_enabled ? 'outline' : 'secondary'}>
                               {badge.auto_grant_enabled
-                                ? t('admin.badges.autoEnabled', '已开启')
-                                : t('admin.badges.autoDisabled', '未开启')}
+                                ? t('admin.badges.autoEnabled')
+                                : t('admin.badges.autoDisabled')}
                             </Badge>
                             {badge.auto_grant_enabled && ruleCount > 0 && (
                               <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                                {t('admin.badges.ruleBuilder.ruleCount', '{{count}} 条规则', { count: ruleCount })}
+                                {t('admin.badges.ruleBuilder.ruleCount',  { count: ruleCount })}
                               </span>
                             )}
                           </div>
@@ -512,19 +512,19 @@ export default function BadgeManagement() {
                           <div className="flex flex-wrap justify-end gap-2">
                             <Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => handleEdit(badge)}>
                               <Edit className="h-4 w-4 mr-1" />
-                              {t('common.edit', '编辑')}
+                              {t('common.edit')}
                             </Button>
                             <Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => handleViewRecipients(badge)}>
                               <Eye className="h-4 w-4 mr-1" />
-                              {t('admin.badges.viewRecipients', '获奖用户')}
+                              {t('admin.badges.viewRecipients')}
                             </Button>
                             <Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => handleAward(badge)}>
                               <Sparkles className="h-4 w-4 mr-1" />
-                              {t('admin.badges.award', '授予')}
+                              {t('admin.badges.award')}
                             </Button>
                             <Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => handleRevoke(badge)}>
                               <Trash2 className="h-4 w-4 mr-1" />
-                              {t('admin.badges.revoke', '收回')}
+                              {t('admin.badges.revoke')}
                             </Button>
                           </div>
                         </td>
@@ -534,7 +534,7 @@ export default function BadgeManagement() {
                   {formattedBadges.length === 0 && !loading && (
                     <tr>
                       <td colSpan={8} className="px-4 py-6 text-center text-sm text-gray-500">
-                        {t('admin.badges.empty', '还没有创建任何徽章')}
+                        {t('admin.badges.empty')}
                       </td>
                     </tr>
                   )}
@@ -549,8 +549,8 @@ export default function BadgeManagement() {
         <CardHeader>
           <CardTitle>
             {formValues.id
-              ? t('admin.badges.editTitle', '编辑徽章')
-              : t('admin.badges.createTitle', '创建新徽章')}
+              ? t('admin.badges.editTitle')
+              : t('admin.badges.createTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -559,7 +559,7 @@ export default function BadgeManagement() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t('admin.badges.fields.nameZh', '中文名称')}
+                    {t('admin.badges.fields.nameZh')}
                   </label>
                   <Input
                     name="name_zh"
@@ -570,7 +570,7 @@ export default function BadgeManagement() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t('admin.badges.fields.nameEn', '英文名称')}
+                    {t('admin.badges.fields.nameEn')}
                   </label>
                   <Input
                     name="name_en"
@@ -581,7 +581,7 @@ export default function BadgeManagement() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t('admin.badges.fields.descZh', '中文描述')}
+                    {t('admin.badges.fields.descZh')}
                   </label>
                   <Textarea
                     name="description_zh"
@@ -592,7 +592,7 @@ export default function BadgeManagement() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t('admin.badges.fields.descEn', '英文描述')}
+                    {t('admin.badges.fields.descEn')}
                   </label>
                   <Textarea
                     name="description_en"
@@ -604,7 +604,7 @@ export default function BadgeManagement() {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">
-                      {t('admin.badges.fields.sort', '排序权重')}
+                      {t('admin.badges.fields.sort')}
                     </label>
                     <Input
                       type="number"
@@ -616,10 +616,10 @@ export default function BadgeManagement() {
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
                       <p className="text-sm font-medium text-gray-700">
-                        {t('admin.badges.fields.isActive', '是否启用')}
+                        {t('admin.badges.fields.isActive')}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {t('admin.badges.fields.isActiveHint', '停用后用户将无法再获得该徽章')}
+                        {t('admin.badges.fields.isActiveHint')}
                       </p>
                     </div>
                     <Switch checked={formValues.is_active} onCheckedChange={handleToggle('is_active')} />
@@ -630,7 +630,7 @@ export default function BadgeManagement() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t('admin.badges.fields.icon', '徽章图标')}
+                    {t('admin.badges.fields.icon')}
                   </label>
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-lg border bg-muted overflow-hidden flex items-center justify-center">
@@ -658,7 +658,7 @@ export default function BadgeManagement() {
                         ) : (
                           <Upload className="h-4 w-4" />
                         )}
-                        {t('admin.badges.fields.uploadIcon', '上传图标')}
+                        {t('admin.badges.fields.uploadIcon')}
                       </Button>
                       <input
                         type="file"
@@ -668,7 +668,7 @@ export default function BadgeManagement() {
                         onChange={handleIconFileChange}
                       />
                       <p className="text-xs text-muted-foreground">
-                        {t('admin.badges.fields.iconHint', '建议使用 256x256 PNG / WebP，小于 5MB')}
+                        {t('admin.badges.fields.iconHint')}
                       </p>
                     </div>
                   </div>
@@ -678,10 +678,10 @@ export default function BadgeManagement() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-700">
-                        {t('admin.badges.fields.autoGrantTitle', '自动授予规则')}
+                        {t('admin.badges.fields.autoGrantTitle')}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {t('admin.badges.fields.autoGrantHint', '开启后系统会按照规则定期评估并授予徽章')}
+                        {t('admin.badges.fields.autoGrantHint')}
                       </p>
                     </div>
                     <Switch checked={formValues.auto_grant_enabled} onCheckedChange={handleToggle('auto_grant_enabled')} />
@@ -696,10 +696,10 @@ export default function BadgeManagement() {
                         variant="outline"
                       >
                         <ToggleGroupItem value="builder">
-                          {t('admin.badges.ruleBuilder.toggle.visual', '图形化编辑')}
+                          {t('admin.badges.ruleBuilder.toggle.visual')}
                         </ToggleGroupItem>
                         <ToggleGroupItem value="json">
-                          {t('admin.badges.ruleBuilder.toggle.json', 'JSON 高级模式')}
+                          {t('admin.badges.ruleBuilder.toggle.json')}
                         </ToggleGroupItem>
                       </ToggleGroup>
 
@@ -720,7 +720,7 @@ export default function BadgeManagement() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t('admin.badges.fields.messageTitleZh', '通知标题（中文）')}
+                    {t('admin.badges.fields.messageTitleZh')}
                   </label>
                   <Input
                     name="message_title_zh"
@@ -730,7 +730,7 @@ export default function BadgeManagement() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t('admin.badges.fields.messageTitleEn', '通知标题（英文）')}
+                    {t('admin.badges.fields.messageTitleEn')}
                   </label>
                   <Input
                     name="message_title_en"
@@ -740,7 +740,7 @@ export default function BadgeManagement() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t('admin.badges.fields.messageBodyZh', '通知内容（中文）')}
+                    {t('admin.badges.fields.messageBodyZh')}
                   </label>
                   <Textarea
                     name="message_body_zh"
@@ -751,7 +751,7 @@ export default function BadgeManagement() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    {t('admin.badges.fields.messageBodyEn', '通知内容（英文）')}
+                    {t('admin.badges.fields.messageBodyEn')}
                   </label>
                   <Textarea
                     name="message_body_en"
@@ -765,11 +765,11 @@ export default function BadgeManagement() {
 
             <div className="flex flex-wrap items-center justify-end gap-3">
               <Button className="w-full sm:w-auto" type="button" variant="ghost" onClick={resetForm}>
-                {t('common.reset', '重置')}
+                {t('common.reset')}
               </Button>
               <Button className="w-full sm:w-auto" type="submit" disabled={saving}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {formValues.id ? t('common.saveChanges', '保存修改') : t('common.create', '创建')}
+                {formValues.id ? t('common.saveChanges') : t('common.create')}
               </Button>
             </div>
           </form>

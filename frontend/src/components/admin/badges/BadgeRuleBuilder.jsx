@@ -179,22 +179,22 @@ export function BadgeRuleBuilder({ value, onChange }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold leading-none tracking-tight">
-            {t('admin.badges.ruleBuilder.title', '自动授予规则')} 
+            {t('admin.badges.ruleBuilder.title')} 
             <Badge variant="secondary" className="ml-2">
               {safeValue.all
-                ? t('admin.badges.ruleBuilder.modeAll', '全部条件满足')
-                : t('admin.badges.ruleBuilder.modeAny', '任一条件满足')}
+                ? t('admin.badges.ruleBuilder.modeAll')
+                : t('admin.badges.ruleBuilder.modeAny')}
             </Badge>
           </p>
           <p className="text-xs text-muted-foreground">
-            {t('admin.badges.ruleBuilder.description', '通过可视化条件编辑器定义系统自动授予徽章的触发条件。')}
+            {t('admin.badges.ruleBuilder.description')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
             {safeValue.all
-              ? t('admin.badges.ruleBuilder.requireAllHint', '所有条件都满足时授予')
-              : t('admin.badges.ruleBuilder.requireAnyHint', '满足任意条件即可授予')}
+              ? t('admin.badges.ruleBuilder.requireAllHint')
+              : t('admin.badges.ruleBuilder.requireAnyHint')}
           </span>
           <Switch checked={safeValue.all} onCheckedChange={handleToggleAll} />
         </div>
@@ -203,7 +203,7 @@ export function BadgeRuleBuilder({ value, onChange }) {
       <div className="space-y-3">
         {safeValue.rules.length === 0 && (
           <div className="rounded-md border border-dashed bg-background p-6 text-center text-sm text-muted-foreground">
-            {t('admin.badges.ruleBuilder.empty', '还没有添加条件，点击下方按钮开始创建。')}
+            {t('admin.badges.ruleBuilder.empty')}
           </div>
         )}
         {safeValue.rules.map((rule, index) => {
@@ -213,11 +213,11 @@ export function BadgeRuleBuilder({ value, onChange }) {
               <div className="grid gap-3 md:grid-cols-12">
                 <div className="md:col-span-5 space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">
-                    {t('admin.badges.ruleBuilder.fields.metric', '度量维度')}
+                    {t('admin.badges.ruleBuilder.fields.metric')}
                   </label>
                   <Select value={rule.metric} onValueChange={(val) => handleRuleChange(index, { metric: val })}>
                     <SelectTrigger className="w-full justify-between">
-                      <SelectValue placeholder={t('admin.badges.ruleBuilder.selectMetric', '选择指标')} />
+                      <SelectValue placeholder={t('admin.badges.ruleBuilder.selectMetric')} />
                     </SelectTrigger>
                     <SelectContent>
                       {METRIC_OPTIONS.map((option) => (
@@ -235,7 +235,7 @@ export function BadgeRuleBuilder({ value, onChange }) {
                 </div>
                 <div className="md:col-span-2 space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">
-                    {t('admin.badges.ruleBuilder.fields.operator', '比较符')}
+                    {t('admin.badges.ruleBuilder.fields.operator')}
                   </label>
                   <Select value={rule.operator} onValueChange={(val) => handleRuleChange(index, { operator: val })}>
                     <SelectTrigger className="w-full">
@@ -252,7 +252,7 @@ export function BadgeRuleBuilder({ value, onChange }) {
                 </div>
                 <div className="md:col-span-3 space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">
-                    {t('admin.badges.ruleBuilder.fields.value', '阈值')}
+                    {t('admin.badges.ruleBuilder.fields.value')}
                   </label>
                   <Input
                     type="number"
@@ -260,7 +260,7 @@ export function BadgeRuleBuilder({ value, onChange }) {
                     onChange={(e) => handleRuleChange(index, { value: Number(e.target.value) })}
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    {metricOption ? t(metricOption.hintI18n, metricOption.hintFallback) : t('admin.badges.ruleBuilder.valueHint', '建议填写整数或带两位小数的数值')}
+                    {metricOption ? t(metricOption.hintI18n, metricOption.hintFallback) : t('admin.badges.ruleBuilder.valueHint')}
                   </p>
                 </div>
                 <div className="md:col-span-2 flex items-end justify-end">
@@ -277,22 +277,22 @@ export function BadgeRuleBuilder({ value, onChange }) {
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">
-                    {t('admin.badges.ruleBuilder.fields.label', '条件标签（可选）')}
+                    {t('admin.badges.ruleBuilder.fields.label')}
                   </label>
                   <Input
                     value={rule.label ?? ''}
                     onChange={(e) => handleRuleChange(index, { label: e.target.value })}
-                    placeholder={t('admin.badges.ruleBuilder.fields.labelPlaceholder', '用于说明条件的简短标题')}
+                    placeholder={t('admin.badges.ruleBuilder.fields.labelPlaceholder')}
                   />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">
-                    {t('admin.badges.ruleBuilder.fields.description', '条件说明（可选）')}
+                    {t('admin.badges.ruleBuilder.fields.description')}
                   </label>
                   <Input
                     value={rule.description ?? ''}
                     onChange={(e) => handleRuleChange(index, { description: e.target.value })}
-                    placeholder={t('admin.badges.ruleBuilder.fields.descriptionPlaceholder', '帮助其他管理员理解该条件')}
+                    placeholder={t('admin.badges.ruleBuilder.fields.descriptionPlaceholder')}
                   />
                 </div>
               </div>
@@ -304,7 +304,7 @@ export function BadgeRuleBuilder({ value, onChange }) {
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" onClick={handleAddRule}>
           <Plus className="mr-2 h-4 w-4" />
-          {t('admin.badges.ruleBuilder.addRule', '添加条件')}
+          {t('admin.badges.ruleBuilder.addRule')}
         </Button>
         {TEMPLATE_LIBRARY.map((template) => (
           <Button
@@ -321,7 +321,7 @@ export function BadgeRuleBuilder({ value, onChange }) {
 
       <div className="rounded-lg border bg-background p-3">
         <p className="text-xs font-medium text-muted-foreground">
-          {t('admin.badges.ruleBuilder.preview', '生成的规则 JSON 预览（保存时自动写入）')}
+          {t('admin.badges.ruleBuilder.preview')}
         </p>
         <pre className="mt-2 max-h-48 overflow-auto text-xs leading-5">{JSON.stringify(safeValue, null, 2)}</pre>
       </div>

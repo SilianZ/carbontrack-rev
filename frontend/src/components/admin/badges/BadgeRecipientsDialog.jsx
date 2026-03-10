@@ -79,9 +79,9 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
 
   const dialogTitle = useMemo(() => {
     if (!badge) {
-      return t('admin.badges.recipients.title', '徽章获奖用户');
+      return t('admin.badges.recipients.title');
     }
-    return t('admin.badges.recipients.titleWithName', '徽章获奖用户：{{name}}', {
+    return t('admin.badges.recipients.titleWithName', {
       name: badge.name_zh || badge.name_en || badge.code || `#${badge.id}`,
     });
   }, [badge, t]);
@@ -92,14 +92,14 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>
-            {t('admin.badges.recipients.subtitle', '查看该徽章的授予记录、搜索用户并筛选状态')}
+            {t('admin.badges.recipients.subtitle')}
           </DialogDescription>
         </DialogHeader>
 
         {query.isLoading ? (
           <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {t('common.loading', '加载中...')}
+            {t('common.loading')}
           </div>
         ) : (
           <div className="space-y-4">
@@ -110,7 +110,7 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
                   <Input
                     value={filters.search}
                     onChange={handleSearchChange}
-                    placeholder={t('admin.badges.recipients.searchPlaceholder', '按用户名或邮箱搜索')}
+                    placeholder={t('admin.badges.recipients.searchPlaceholder')}
                     className="pl-9"
                   />
                 </div>
@@ -121,7 +121,7 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
                   <SelectContent>
                     {STATUS_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        {t(option.i18n, option.fallback)}
+                        {t(option.i18n)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -130,29 +130,29 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users className="h-4 w-4" />
                 <span>
-                  {t('admin.badges.recipients.totalCount', '共 {{count}} 人', { count: pagination.total_items || 0 })}
+                  {t('admin.badges.recipients.totalCount',  { count: pagination.total_items || 0 })}
                 </span>
               </div>
             </div>
 
             {query.error ? (
-              <p className="text-sm text-destructive">{t('admin.badges.recipients.loadFailed', '加载列表失败，请稍后再试')}</p>
+              <p className="text-sm text-destructive">{t('admin.badges.recipients.loadFailed')}</p>
             ) : recipients.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wide">
-                        {t('admin.badges.recipients.table.username', '用户名')}
+                        {t('admin.badges.recipients.table.username')}
                       </th>
                       <th className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wide">
-                        {t('admin.badges.recipients.table.email', '邮箱')}
+                        {t('admin.badges.recipients.table.email')}
                       </th>
                       <th className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wide">
-                        {t('admin.badges.recipients.table.status', '状态')}
+                        {t('admin.badges.recipients.table.status')}
                       </th>
                       <th className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wide">
-                        {t('admin.badges.recipients.table.awardedAt', '授予时间')}
+                        {t('admin.badges.recipients.table.awardedAt')}
                       </th>
                     </tr>
                   </thead>
@@ -170,8 +170,8 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
                           <td className="px-4 py-2">
                             <Badge variant={status === 'awarded' ? 'success' : 'secondary'}>
                               {status === 'awarded'
-                                ? t('admin.badges.recipients.status.awarded', '已授予')
-                                : t('admin.badges.recipients.status.revoked', '已收回')}
+                                ? t('admin.badges.recipients.status.awarded')
+                                : t('admin.badges.recipients.status.revoked')}
                             </Badge>
                           </td>
                           <td className="px-4 py-2 text-gray-600">{awardedAt}</td>
@@ -183,7 +183,7 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
               </div>
             ) : (
               <p className="py-6 text-center text-sm text-muted-foreground">
-                {t('admin.badges.recipients.empty', '还没有授予记录')}
+                {t('admin.badges.recipients.empty')}
               </p>
             )}
 

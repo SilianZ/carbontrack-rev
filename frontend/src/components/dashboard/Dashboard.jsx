@@ -209,10 +209,10 @@ export function Dashboard() {
   const handleTriggerBadgeAuto = async () => {
     try {
       await badgeAPI.triggerAuto();
-      toast.success(t('dashboard.badgeAutoTriggered', '已触发自动授予流程'));
+      toast.success(t('dashboard.badgeAutoTriggered'));
       await fetchDashboardData();
     } catch {
-      toast.error(t('dashboard.badgeAutoTriggerFailed', '触发自动授予失败'));
+      toast.error(t('dashboard.badgeAutoTriggerFailed'));
     }
   };
 
@@ -252,8 +252,8 @@ export function Dashboard() {
               {t('dashboard.welcomeDesc')}
             </p>
             {user?.uuid && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200" title={t('profile.uuid', 'UUID')}>
-                {t('profile.uuid', 'UUID')}: {user.uuid}
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200" title={t('profile.uuid')}>
+                {t('profile.uuid')}: {user.uuid}
               </span>
             )}
           </div>
@@ -377,10 +377,10 @@ export function Dashboard() {
                 <div>
                   <h3 className="text-lg font-semibold text-amber-700 flex items-center gap-2">
                     <Award className="h-5 w-5" />
-                    {t('dashboard.monthlyAchievements', '本月成就')}
+                    {t('dashboard.monthlyAchievements')}
                   </h3>
                   <p className="text-sm text-amber-600">
-                    {t('dashboard.monthlyAchievementsDescription', '追踪你每月的碳减排表现')}
+                    {t('dashboard.monthlyAchievementsDescription')}
                   </p>
                 </div>
               </div>
@@ -392,35 +392,35 @@ export function Dashboard() {
                   <div className="space-y-4">
                     <div className="rounded-lg border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-4">
                       <p className="text-sm font-medium text-amber-700">
-                        {t('dashboard.currentMonthAchievement', '{{month}} 成就概览', { month: current.label })}
+                        {t('dashboard.currentMonthAchievement',  { month: current.label })}
                       </p>
                       <div className="mt-3 grid gap-3 sm:grid-cols-3">
                         <div className="flex flex-col">
                           <span className="text-xs text-amber-500 uppercase tracking-wide">
-                            {t('dashboard.monthlyPointsLabel', '积分获得')}
+                            {t('dashboard.monthlyPointsLabel')}
                           </span>
                           <span className="text-lg font-semibold text-amber-700">
-                            {t('dashboard.monthlyPointsWithUnit', '{{points}} 积分', {
+                            {t('dashboard.monthlyPointsWithUnit',  {
                               points: current.points.toLocaleString(),
                             })}
                           </span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-xs text-amber-500 uppercase tracking-wide">
-                            {t('dashboard.monthlyCarbonLabel', '碳减排')}
+                            {t('dashboard.monthlyCarbonLabel')}
                           </span>
                           <span className="text-lg font-semibold text-amber-700">
-                            {t('dashboard.monthlyCarbonSaved', '{{amount}} 千克', {
+                            {t('dashboard.monthlyCarbonSaved',  {
                               amount: current.carbon.toLocaleString(undefined, { maximumFractionDigits: 2 }),
                             })}
                           </span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-xs text-amber-500 uppercase tracking-wide">
-                            {t('dashboard.monthlyRecordsLabel', '记录次数')}
+                            {t('dashboard.monthlyRecordsLabel')}
                           </span>
                           <span className="text-lg font-semibold text-amber-700">
-                            {t('dashboard.monthlyRecords', '{{count}} 条', {
+                            {t('dashboard.monthlyRecords',  {
                               count: current.records.toLocaleString(),
                             })}
                           </span>
@@ -431,7 +431,7 @@ export function Dashboard() {
                     {history.length > 0 && (
                       <div className="space-y-2">
                         <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">
-                          {t('dashboard.previousMonths', '历史月份')}
+                          {t('dashboard.previousMonths')}
                         </p>
                         <div className="space-y-2">
                           {history.map((item) => (
@@ -439,14 +439,14 @@ export function Dashboard() {
                               <div className="flex flex-col">
                                 <span className="font-medium text-amber-700">{item.label}</span>
                                 <span className="text-xs text-amber-500">
-                                  {t('dashboard.monthlyCarbonSummary', '{{carbon}} 千克减排 · {{records}} 条记录', {
+                                  {t('dashboard.monthlyCarbonSummary',  {
                                     carbon: item.carbon.toLocaleString(undefined, { maximumFractionDigits: 2 }),
                                     records: item.records.toLocaleString(),
                                   })}
                                 </span>
                               </div>
                               <span className="text-sm font-semibold text-amber-700">
-                                {t('dashboard.monthlyPointsShort', '+{{points}} 积分', {
+                                {t('dashboard.monthlyPointsShort',  {
                                   points: item.points.toLocaleString(),
                                 })}
                               </span>
@@ -502,23 +502,23 @@ export function Dashboard() {
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h3 className="text-lg font-semibold text-amber-800 flex items-center gap-2">
                   <Flame className="h-5 w-5" />
-                  {t('dashboard.streakLeaderboard', '连击排行榜')}
+                  {t('dashboard.streakLeaderboard')}
                 </h3>
                 <div className="text-xs text-amber-700">
-                  {t('dashboard.streakMine', '我的连击')} {streakStats.current_streak ?? 0} · {t('dashboard.streakRank', '排名')} {streakStats.ranks?.[activeStreakScope] ?? '--'}
+                  {t('dashboard.streakMine')} {streakStats.current_streak ?? 0} · {t('dashboard.streakRank')} {streakStats.ranks?.[activeStreakScope] ?? '--'}
                 </div>
               </div>
 
               <Tabs value={activeStreakScope} onValueChange={setStreakScope} className="space-y-3">
                 <TabsList className="border-amber-200 bg-amber-50/60">
                   {availableScopes.includes('global') && (
-                    <TabsTrigger value="global">{t('dashboard.leaderboardScopes.global', '全服')}</TabsTrigger>
+                    <TabsTrigger value="global">{t('dashboard.leaderboardScopes.global')}</TabsTrigger>
                   )}
                   {availableScopes.includes('region') && (
-                    <TabsTrigger value="region">{t('dashboard.leaderboardScopes.region', '地区')}</TabsTrigger>
+                    <TabsTrigger value="region">{t('dashboard.leaderboardScopes.region')}</TabsTrigger>
                   )}
                   {availableScopes.includes('school') && (
-                    <TabsTrigger value="school">{t('dashboard.leaderboardScopes.school', '学校')}</TabsTrigger>
+                    <TabsTrigger value="school">{t('dashboard.leaderboardScopes.school')}</TabsTrigger>
                   )}
                 </TabsList>
 
@@ -540,12 +540,12 @@ export function Dashboard() {
                               {renderLeaderboardAvatar(entry, 'h-7 w-7')}
                               <span className="truncate">{entry.username || entry.name || '-'}</span>
                             </div>
-                            <span className="text-xs font-semibold">{entry.current_streak ?? 0} {t('dashboard.streakDays', '天')}</span>
+                            <span className="text-xs font-semibold">{entry.current_streak ?? 0} {t('dashboard.streakDays')}</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-amber-700">{t('dashboard.streakEmpty', '暂无连击数据')}</p>
+                      <p className="text-sm text-amber-700">{t('dashboard.streakEmpty')}</p>
                     )}
                   </TabsContent>
                 ))}

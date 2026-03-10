@@ -154,7 +154,7 @@ export function Navbar() {
       icon: Home,
       public: true,
       section: 'overview',
-      hint: t('nav.hints.home', { defaultValue: 'Return to the overview and hero content' })
+      hint: t('nav.hints.home')
     },
     {
       path: '/about-us',
@@ -162,7 +162,7 @@ export function Navbar() {
       icon: Info,
       public: true,
       section: 'overview',
-      hint: t('nav.hints.about', { defaultValue: 'Learn more about our purpose and team' })
+      hint: t('nav.hints.about')
     },
     {
       path: '/calculate',
@@ -170,7 +170,7 @@ export function Navbar() {
       icon: Calculator,
       auth: true,
       section: 'insights',
-      hint: t('nav.hints.calculate', { defaultValue: 'Estimate your carbon emissions in minutes' })
+      hint: t('nav.hints.calculate')
     },
     {
       path: '/dashboard',
@@ -178,7 +178,7 @@ export function Navbar() {
       icon: BarChart3,
       auth: true,
       section: 'insights',
-      hint: t('nav.hints.dashboard', { defaultValue: 'Monitor historic trends and live targets' })
+      hint: t('nav.hints.dashboard')
     },
     {
       path: '/store',
@@ -186,7 +186,7 @@ export function Navbar() {
       icon: ShoppingBag,
       auth: true,
       section: 'marketplace',
-      hint: t('nav.hints.products', { defaultValue: 'Redeem climate rewards and eco products' })
+      hint: t('nav.hints.products')
     }
   ];
 
@@ -198,16 +198,16 @@ export function Navbar() {
 
   const navSectionsMeta = useMemo(() => ({
     overview: {
-      title: t('nav.sections.overview', { defaultValue: 'Overview' }),
-      description: t('nav.sections.overviewDesc', { defaultValue: 'Get to know the platform quickly' })
+      title: t('nav.sections.overview'),
+      description: t('nav.sections.overviewDesc')
     },
     insights: {
-      title: t('nav.sections.insights', { defaultValue: 'Tracking' }),
-      description: t('nav.sections.insightsDesc', { defaultValue: 'Manage calculations and dashboards' })
+      title: t('nav.sections.insights'),
+      description: t('nav.sections.insightsDesc')
     },
     marketplace: {
-      title: t('nav.sections.marketplace', { defaultValue: 'Marketplace' }),
-      description: t('nav.sections.marketplaceDesc', { defaultValue: 'Redeem credits and eco products' })
+      title: t('nav.sections.marketplace'),
+      description: t('nav.sections.marketplaceDesc')
     }
   }), [t]);
 
@@ -432,8 +432,8 @@ export function Navbar() {
               aria-controls={mobilePanelId}
               aria-label={
                 isOpen
-                  ? t('nav.closeMenu', { defaultValue: 'Close menu' })
-                  : t('nav.openMenu', { defaultValue: 'Open menu' })
+                  ? t('nav.closeMenu')
+                  : t('nav.openMenu')
               }
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -447,7 +447,7 @@ export function Navbar() {
         <button
           type="button"
           onClick={closeMobile}
-          aria-label={t('nav.closeMenu', { defaultValue: 'Close menu' })}
+          aria-label={t('nav.closeMenu')}
           className={clsx(
             'fixed inset-x-0 top-16 bottom-0 z-[55] bg-black/30 transition-opacity duration-200 ease-out md:hidden',
             isAnimatingOut ? 'opacity-0' : 'opacity-100'
@@ -476,17 +476,17 @@ export function Navbar() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-gray-900">
-                  {t('nav.menuTitle', { defaultValue: 'Navigate CarbonTrack' })}
+                  {t('nav.menuTitle')}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {t('nav.menuSubtitle', { defaultValue: 'Jump between key areas effortlessly' })}
+                  {t('nav.menuSubtitle')}
                 </p>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={closeMobile}
-                aria-label={t('nav.closeMenu', { defaultValue: 'Close menu' })}
+                aria-label={t('nav.closeMenu')}
                 className="h-9 w-9 rounded-full border border-gray-200"
               >
                 <X className="h-4 w-4" />
@@ -553,10 +553,10 @@ export function Navbar() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
-                      {t('nav.languageSection', { defaultValue: 'Language' })}
+                      {t('nav.languageSection')}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {t('nav.languageDescription', { defaultValue: 'Switch the interface language' })}
+                      {t('nav.languageDescription')}
                     </p>
                   </div>
                   <LanguageSwitcher variant="ghost" size="sm" showText={false} />
@@ -572,7 +572,7 @@ export function Navbar() {
                         {user?.username}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {t('nav.accountSignedIn', { defaultValue: 'Signed in account' })}
+                        {t('nav.accountSignedIn')}
                       </p>
                     </div>
                   </div>
@@ -620,10 +620,10 @@ export function Navbar() {
               ) : (
                 <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white p-4 shadow-sm">
                   <p className="text-base font-semibold text-gray-900">
-                    {t('nav.getStarted', { defaultValue: 'Get started with CarbonTrack' })}
+                    {t('nav.getStarted')}
                   </p>
                   <p className="mt-1 text-sm text-gray-600">
-                    {t('nav.accountDescription', { defaultValue: 'Create an account to save progress across devices.' })}
+                    {t('nav.accountDescription')}
                   </p>
                   <div className="mt-4 space-y-2">
                     <Link to="/auth/login" onClick={closeMobile}>

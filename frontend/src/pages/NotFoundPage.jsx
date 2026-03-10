@@ -104,7 +104,7 @@ export default function NotFoundPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="text-center max-w-xl">
-        <h1 className="text-5xl font-bold mb-4 text-gray-900">{t('notFoundPage.code', '404')}</h1>
+        <h1 className="text-5xl font-bold mb-4 text-gray-900">{t('notFoundPage.code')}</h1>
         <div
           className="mb-6 flex items-center justify-center"
           onMouseEnter={handleMouseEnter}
@@ -116,7 +116,7 @@ export default function NotFoundPage() {
             className="text-6xl emoji"
             style={{ display: 'inline-block' }}
           >
-            {t('notFoundPage.emoji', '🤔')}
+            {t('notFoundPage.emoji')}
           </span>
         </div>
         <p className="text-lg text-gray-700 mb-2">{t('notFoundPage.message')}</p>

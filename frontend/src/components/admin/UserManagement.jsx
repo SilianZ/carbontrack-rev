@@ -324,11 +324,11 @@ export function UserManagement() {
     }
     const metrics = overviewData?.metrics || {};
     return [
-      { key: 'balance', label: t('admin.users.detail.pointsBalance', '积分余额'), value: detailUser?.points ?? 0, icon: Award },
-      { key: 'earned', label: t('admin.users.detail.pointsEarned', '累计积分'), value: metrics.total_points_earned ?? 0, icon: Sparkles },
-      { key: 'carbon', label: t('admin.users.detail.carbonSaved', '累计碳减排 (kg)'), value: metrics.total_carbon_saved ?? 0, icon: Leaf },
-      { key: 'records', label: t('admin.users.detail.recordsApproved', '审核通过记录'), value: metrics.total_approved_records ?? 0, icon: ClipboardList },
-      { key: 'days', label: t('admin.users.detail.daysSinceRegistration', '注册天数'), value: detailUser?.days_since_registration ?? metrics.days_since_registration ?? 0, icon: CalendarDays },
+      { key: 'balance', label: t('admin.users.detail.pointsBalance'), value: detailUser?.points ?? 0, icon: Award },
+      { key: 'earned', label: t('admin.users.detail.pointsEarned'), value: metrics.total_points_earned ?? 0, icon: Sparkles },
+      { key: 'carbon', label: t('admin.users.detail.carbonSaved'), value: metrics.total_carbon_saved ?? 0, icon: Leaf },
+      { key: 'records', label: t('admin.users.detail.recordsApproved'), value: metrics.total_approved_records ?? 0, icon: ClipboardList },
+      { key: 'days', label: t('admin.users.detail.daysSinceRegistration'), value: detailUser?.days_since_registration ?? metrics.days_since_registration ?? 0, icon: CalendarDays },
     ];
   }, [overviewData, detailUser, t]);
 
@@ -337,10 +337,10 @@ export function UserManagement() {
       return [];
     }
     return [
-      { key: 'current', label: t('admin.users.checkins.currentStreak', '当前连击'), value: checkinStats.current_streak ?? 0, icon: Flame },
-      { key: 'longest', label: t('admin.users.checkins.longestStreak', '历史最长'), value: checkinStats.longest_streak ?? 0, icon: Flame },
-      { key: 'total', label: t('admin.users.checkins.totalDays', '累计打卡'), value: checkinStats.total_days ?? detailUser?.checkin_days ?? 0, icon: CalendarDays },
-      { key: 'makeup', label: t('admin.users.checkins.makeupDays', '补打卡'), value: checkinStats.makeup_days ?? detailUser?.makeup_checkins ?? 0, icon: RefreshCcw },
+      { key: 'current', label: t('admin.users.checkins.currentStreak'), value: checkinStats.current_streak ?? 0, icon: Flame },
+      { key: 'longest', label: t('admin.users.checkins.longestStreak'), value: checkinStats.longest_streak ?? 0, icon: Flame },
+      { key: 'total', label: t('admin.users.checkins.totalDays'), value: checkinStats.total_days ?? detailUser?.checkin_days ?? 0, icon: CalendarDays },
+      { key: 'makeup', label: t('admin.users.checkins.makeupDays'), value: checkinStats.makeup_days ?? detailUser?.makeup_checkins ?? 0, icon: RefreshCcw },
     ];
   }, [overviewData, detailUser, checkinStats, t]);
 
@@ -520,7 +520,7 @@ export function UserManagement() {
 
   const openBulkBadgeDialog = (usersList) => {
     if (!usersList || usersList.length === 0) {
-      toast.error(t('admin.users.selectUserHint', '请先选择用户'));
+      toast.error(t('admin.users.selectUserHint'));
       return;
     }
     setBulkDialog({ open: true, presetUsers: usersList });
@@ -534,7 +534,7 @@ export function UserManagement() {
     if (!user || !user.status) {
       return (
         <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-          {t('common.unknown', '未知')}
+          {t('common.unknown')}
         </span>
       );
     }
@@ -559,7 +559,7 @@ export function UserManagement() {
     if (!user) {
       return (
         <Badge variant="outline">
-          {t('common.unknown', '未知')}
+          {t('common.unknown')}
         </Badge>
       );
     }
@@ -631,7 +631,7 @@ export function UserManagement() {
             <div className="flex items-center gap-2">
               <UsersIcon className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">
-                {t('admin.users.selectedCount', '已选择 {{count}} 位用户', { count: selectedUsers.length })}
+                {t('admin.users.selectedCount',  { count: selectedUsers.length })}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -642,10 +642,10 @@ export function UserManagement() {
                 disabled={badgesQuery.isLoading || badgeOptions.length === 0}
               >
                 <Sparkles className="h-4 w-4 mr-2" />
-                {t('admin.users.bulkAwardBadges', '批量授予徽章')}
+                {t('admin.users.bulkAwardBadges')}
               </Button>
               <Button variant="ghost" size="sm" onClick={clearSelection}>
-                {t('common.clear', '清空')}
+                {t('common.clear')}
               </Button>
             </div>
           </div>
@@ -686,18 +686,18 @@ export function UserManagement() {
                       <Checkbox
                         checked={allSelectedOnPage ? true : partiallySelected ? 'indeterminate' : false}
                         onCheckedChange={(checked) => handleSelectAllOnPage(checked === true || checked === 'indeterminate')}
-                        aria-label={t('admin.users.selectAll', '选择当前页所有用户')}
+                        aria-label={t('admin.users.selectAll')}
                         className="translate-y-0.5"
                       />
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.username')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.email')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.groups.title', '用户组')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.groups.title')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.role')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.status')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.badges', '徽章')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.checkins', '打卡')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.carbon', '碳减排')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.badges')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.checkins')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.carbon')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.points')}</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.actions')}</th>
                   </tr>
@@ -711,7 +711,7 @@ export function UserManagement() {
                           <Checkbox
                             checked={isSelected}
                             onCheckedChange={(checked) => toggleUserSelection(user, checked === true || checked === 'indeterminate')}
-                            aria-label={t('admin.users.selectUser', '选择用户 {{username}}', { username: user.username })}
+                            aria-label={t('admin.users.selectUser',  { username: user.username })}
                           />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.username}</td>
@@ -721,21 +721,21 @@ export function UserManagement() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{renderStatusBadge(user)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <div className="flex flex-col">
-                            <span>{t('admin.users.badgesAwardedCount', '{{count}} 枚', { count: user.badges_awarded || 0 })}</span>
+                            <span>{t('admin.users.badgesAwardedCount',  { count: user.badges_awarded || 0 })}</span>
                             <span className="text-xs text-muted-foreground">
-                              {t('admin.users.activeBadgesCount', '激活 {{count}}', { count: user.active_badges || 0 })}
+                              {t('admin.users.activeBadgesCount',  { count: user.active_badges || 0 })}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <div className="flex flex-col">
-                            <span>{t('admin.users.checkins.totalDaysLabel', '累计 {{count}} 天', { count: user.checkin_days || 0 })}</span>
+                            <span>{t('admin.users.checkins.totalDaysLabel',  { count: user.checkin_days || 0 })}</span>
                             <span className="text-xs text-muted-foreground">
-                              {t('admin.users.checkins.makeupDaysLabel', '补打卡 {{count}}', { count: user.makeup_checkins || 0 })}
+                              {t('admin.users.checkins.makeupDaysLabel',  { count: user.makeup_checkins || 0 })}
                             </span>
                             {user.last_checkin_date && (
                               <span className="text-xs text-muted-foreground">
-                                {t('admin.users.checkins.lastDate', '最近 {{date}}', { date: user.last_checkin_date })}
+                                {t('admin.users.checkins.lastDate',  { date: user.last_checkin_date })}
                               </span>
                             )}
                           </div>
@@ -745,26 +745,26 @@ export function UserManagement() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.points}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
-                          <Button variant="ghost" size="sm" onClick={() => handleToggleStatus(user)} title={t('admin.users.toggleStatusButton', '切换用户状态')}>
+                          <Button variant="ghost" size="sm" onClick={() => handleToggleStatus(user)} title={t('admin.users.toggleStatusButton')}>
                             <Ban className="h-4 w-4 mr-1" />
                             {user.status === 'active' ? t('admin.users.disable') : t('admin.users.enable')}
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => openAdjustPoints(user)} title={t('admin.users.promptAdjustPoints', { username: user.username })}>
                             <PlusCircle className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openUserDetail(user)} title={t('admin.users.viewDetailsButton', '查看详情')}>
+                          <Button variant="ghost" size="sm" onClick={() => openUserDetail(user)} title={t('admin.users.viewDetailsButton')}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openDetailedEdit(user)} title={t('admin.users.editUser', '编辑配置')}>
+                          <Button variant="ghost" size="sm" onClick={() => openDetailedEdit(user)} title={t('admin.users.editUser')}>
                             <Settings className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)} title={t('admin.users.toggleAdminButton', '切换管理员权限')}>
+                          <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)} title={t('admin.users.toggleAdminButton')}>
                             <Shield className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openBulkBadgeDialog([user])} title={t('admin.users.awardBadgeButton', '授予徽章')} disabled={badgeOptions.length === 0}>
+                          <Button variant="ghost" size="sm" onClick={() => openBulkBadgeDialog([user])} title={t('admin.users.awardBadgeButton')} disabled={badgeOptions.length === 0}>
                             <Sparkles className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user)} className="text-red-600 hover:text-red-800" title={t('admin.users.deleteButton', '删除用户')}>
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user)} className="text-red-600 hover:text-red-800" title={t('admin.users.deleteButton')}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </td>
@@ -789,9 +789,9 @@ export function UserManagement() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmDialog.type === 'status' && t('admin.users.confirmToggleStatusTitle', '确认修改状态')}
-              {confirmDialog.type === 'role' && t('admin.users.confirmToggleAdminTitle', '确认切换角色')}
-              {confirmDialog.type === 'delete' && t('admin.users.confirmDeleteTitle', '确认删除用户')}
+              {confirmDialog.type === 'status' && t('admin.users.confirmToggleStatusTitle')}
+              {confirmDialog.type === 'role' && t('admin.users.confirmToggleAdminTitle')}
+              {confirmDialog.type === 'delete' && t('admin.users.confirmDeleteTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmDialog.type === 'status' && confirmDialog.user && (
@@ -811,8 +811,8 @@ export function UserManagement() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeConfirmDialog}>{t('common.cancel', '取消')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAction}>{t('common.confirm', '确认')}</AlertDialogAction>
+            <AlertDialogCancel onClick={closeConfirmDialog}>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAction}>{t('common.confirm')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -820,14 +820,14 @@ export function UserManagement() {
       <Dialog open={pointsDialog.open} onOpenChange={(open) => (!open ? closeAdjustPoints() : null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('admin.users.adjustPointsTitle', '调整积分')}</DialogTitle>
+            <DialogTitle>{t('admin.users.adjustPointsTitle')}</DialogTitle>
             <DialogDescription>
               {pointsDialog.user ? t('admin.users.adjustPointsDescription', { username: pointsDialog.user.username }) : ''}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="points-delta">{t('admin.users.adjustPointsDelta', '积分变动值')}</Label>
+              <Label htmlFor="points-delta">{t('admin.users.adjustPointsDelta')}</Label>
               <Input
                 id="points-delta"
                 type="number"
@@ -836,25 +836,25 @@ export function UserManagement() {
                 placeholder="100"
               />
               <p className="text-xs text-muted-foreground">
-                {t('admin.users.adjustPointsHint', '输入正数表示增加积分，负数表示扣减积分')}
+                {t('admin.users.adjustPointsHint')}
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="points-reason">{t('admin.users.adjustPointsReason', '调整说明')}</Label>
+              <Label htmlFor="points-reason">{t('admin.users.adjustPointsReason')}</Label>
               <Textarea
                 id="points-reason"
                 rows={3}
                 value={pointsDialog.reason}
                 onChange={(e) => setPointsDialog((prev) => ({ ...prev, reason: e.target.value }))}
-                placeholder={t('admin.users.adjustPointsReasonPlaceholder', '请输入调整原因，便于审计记录')}
+                placeholder={t('admin.users.adjustPointsReasonPlaceholder')}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={closeAdjustPoints}>{t('common.cancel', '取消')}</Button>
+            <Button variant="ghost" onClick={closeAdjustPoints}>{t('common.cancel')}</Button>
             <Button onClick={handleSubmitAdjustPoints} disabled={adjustPointsMutation.isLoading}>
               {adjustPointsMutation.isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('common.confirm', '确认')}
+              {t('common.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -863,18 +863,18 @@ export function UserManagement() {
       <Dialog open={editDialog.open} onOpenChange={(open) => (!open ? closeDetailedEdit() : null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{t('admin.users.editUser', '编辑用户配置')}</DialogTitle>
+            <DialogTitle>{t('admin.users.editUser')}</DialogTitle>
             <DialogDescription>{editDialog.user?.username}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmitDetailedEdit} className="space-y-4">
             <div>
-              <Label>{t('admin.groups.title', '用户组')}</Label>
+              <Label>{t('admin.groups.title')}</Label>
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={editDialog.groupId}
                 onChange={(e) => setEditDialog({ ...editDialog, groupId: e.target.value })}
               >
-                <option value="">{t('common.none', '无')}</option>
+                <option value="">{t('common.none')}</option>
                 {groups?.map(g => (
                   <option key={g.id} value={g.id}>{g.name}</option>
                 ))}
@@ -883,25 +883,25 @@ export function UserManagement() {
 
             {/* Dynamic Quota Usage Inputs - Render inputs for each flattened quota key */}
             <div className="space-y-3 border-t pt-3 border-b pb-3">
-              <Label className="text-base font-semibold">{t('admin.groups.quotaOverride', '配额单独设置')}</Label>
+              <Label className="text-base font-semibold">{t('admin.groups.quotaOverride')}</Label>
               {Object.keys(editDialog.quotaFlat || {}).length > 0 ? (
                 Object.entries(editDialog.quotaFlat).map(([key, value]) => (
                   <div key={key}>
-                    <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
+                          <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
                     <Input
                       type="number"
                       value={value ?? ''}
                       onChange={e => handleQuotaChange(key, e.target.value)}
-                      placeholder={t('common.default', '默认')}
+                            placeholder={t('common.default')}
                     />
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">{t('admin.groups.noQuotasAvailable', '暂无可配置的配额项目')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.groups.noQuotasAvailable')}</p>
               )}
             </div>
             <div>
-              <Label>{t('admin.groups.notes', '备注')}</Label>
+              <Label>{t('admin.groups.notes')}</Label>
               <Textarea
                 value={editDialog.notes}
                 onChange={e => setEditDialog({ ...editDialog, notes: e.target.value })}
@@ -920,40 +920,40 @@ export function UserManagement() {
           <DialogHeader>
             <DialogTitle>
               {detailUser
-                ? t('admin.users.detailTitle', '用户详情：{{username}}', { username: detailUser.username })
-                : t('admin.users.detailTitleFallback', '用户详情')}
+                ? t('admin.users.detailTitle',  { username: detailUser.username })
+                : t('admin.users.detailTitleFallback')}
             </DialogTitle>
             <DialogDescription>{detailUser?.email || ''}</DialogDescription>
           </DialogHeader>
           {userOverviewQuery.isLoading ? (
             <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {t('common.loading', '加载中...')}
+              {t('common.loading')}
             </div>
           ) : userOverviewQuery.error ? (
-            <p className="text-sm text-destructive">{t('admin.users.detailLoadFailed', '无法加载用户详情')}</p>
+            <p className="text-sm text-destructive">{t('admin.users.detailLoadFailed')}</p>
           ) : overviewData ? (
             <div className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-lg border bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.username', '用户名')}</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.username')}</p>
                   <p className="mt-1 text-sm font-medium text-gray-900">{detailUser?.username}</p>
                 </div>
                 <div className="rounded-lg border bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.role', '角色')}</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.role')}</p>
                   <p className="mt-1 text-sm font-medium text-gray-900">{renderRoleBadge(detailUser)}</p>
                 </div>
                 <div className="rounded-lg border bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.status', '状态')}</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.status')}</p>
                   <p className="mt-1 text-sm font-medium text-gray-900">{renderStatusBadge(detailUser)}</p>
                 </div>
                 <div className="rounded-lg border bg-white p-4 shadow-sm">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.registrationDays', '注册天数')}</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.registrationDays')}</p>
                   <p className="mt-1 text-sm font-medium text-gray-900">{detailUser?.days_since_registration ?? 0}</p>
                 </div>
                 {detailUser?.lastlgn && (
                   <div className="rounded-lg border bg-white p-4 shadow-sm sm:col-span-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.lastLogin', '最近登录')}</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.lastLogin')}</p>
                     <p className="mt-1 text-sm font-medium text-gray-900">
                       {format(new Date(detailUser.lastlgn), 'yyyy-MM-dd HH:mm')}
                     </p>
@@ -981,8 +981,8 @@ export function UserManagement() {
               {checkinCards.length > 0 && (
                 <div className="space-y-3">
                   <div>
-                    <h4 className="text-base font-semibold">{t('admin.users.checkins.title', '打卡概况')}</h4>
-                    <p className="text-sm text-muted-foreground">{t('admin.users.checkins.subtitle', '查看用户连击与补打卡情况')}</p>
+                    <h4 className="text-base font-semibold">{t('admin.users.checkins.title')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('admin.users.checkins.subtitle')}</p>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {checkinCards.map((card) => {
@@ -1002,10 +1002,10 @@ export function UserManagement() {
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {checkinStats.active_today
-                      ? t('admin.users.checkins.activeToday', '今日已打卡')
-                      : t('admin.users.checkins.inactiveToday', '今日未打卡')}
+                      ? t('admin.users.checkins.activeToday')
+                      : t('admin.users.checkins.inactiveToday')}
                     {checkinStats.last_checkin_date || detailUser?.last_checkin_date ? (
-                      <> · {t('admin.users.checkins.lastDateLong', '最近打卡 {{date}}', { date: checkinStats.last_checkin_date || detailUser?.last_checkin_date })}</>
+                      <> · {t('admin.users.checkins.lastDateLong',  { date: checkinStats.last_checkin_date || detailUser?.last_checkin_date })}</>
                     ) : null}
                   </div>
                 </div>
@@ -1014,25 +1014,25 @@ export function UserManagement() {
               <div className="space-y-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h4 className="text-base font-semibold">{t('admin.users.badgeSummary', '徽章概况')}</h4>
-                    <p className="text-sm text-muted-foreground">{t('admin.users.badgeSummaryHint', '展示授予和回收的徽章统计')}</p>
+                    <h4 className="text-base font-semibold">{t('admin.users.badgeSummary')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('admin.users.badgeSummaryHint')}</p>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Switch checked={showRevokedBadges} onCheckedChange={(checked) => setShowRevokedBadges(Boolean(checked))} />
-                    <span>{t('admin.users.showRevokedBadges', '显示已收回的徽章')}</span>
+                    <span>{t('admin.users.showRevokedBadges')}</span>
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="rounded-lg border bg-white p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesAwarded', '授予')}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesAwarded')}</p>
                     <p className="mt-2 text-2xl font-semibold">{badgeSummary.awarded}</p>
                   </div>
                   <div className="rounded-lg border bg-white p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesRevoked', '收回')}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesRevoked')}</p>
                     <p className="mt-2 text-2xl font-semibold">{badgeSummary.revoked}</p>
                   </div>
                   <div className="rounded-lg border bg-white p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesTotal', '总数')}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesTotal')}</p>
                     <p className="mt-2 text-2xl font-semibold">{badgeSummary.total}</p>
                   </div>
                 </div>
@@ -1040,18 +1040,18 @@ export function UserManagement() {
                 {userBadgesQuery.isLoading ? (
                   <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('common.loading', '加载中...')}
+                    {t('common.loading')}
                   </div>
                 ) : userBadgesQuery.error ? (
-                  <p className="text-sm text-destructive">{t('admin.users.badgesLoadFailed', '无法加载徽章列表')}</p>
+                  <p className="text-sm text-destructive">{t('admin.users.badgesLoadFailed')}</p>
                 ) : badgeRows.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 text-sm">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-4 py-2 text-left font-medium text-gray-500">{t('admin.users.badgeTable.badge', '徽章')}</th>
-                          <th className="px-4 py-2 text-left font-medium text-gray-500">{t('admin.users.badgeTable.status', '状态')}</th>
-                          <th className="px-4 py-2 text-left font-medium text-gray-500">{t('admin.users.badgeTable.awardedAt', '授予时间')}</th>
+                          <th className="px-4 py-2 text-left font-medium text-gray-500">{t('admin.users.badgeTable.badge')}</th>
+                          <th className="px-4 py-2 text-left font-medium text-gray-500">{t('admin.users.badgeTable.status')}</th>
+                          <th className="px-4 py-2 text-left font-medium text-gray-500">{t('admin.users.badgeTable.awardedAt')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 bg-white">
@@ -1085,7 +1085,7 @@ export function UserManagement() {
                                 </div>
                               </td>
                               <td className="px-4 py-2">
-                                <Badge variant={record.status === 'awarded' ? 'success' : 'secondary'}>{record.status === 'awarded' ? t('admin.users.badgeStatusAwarded', '已授予') : t('admin.users.badgeStatusRevoked', '已收回')}</Badge>
+                                <Badge variant={record.status === 'awarded' ? 'success' : 'secondary'}>{record.status === 'awarded' ? t('admin.users.badgeStatusAwarded') : t('admin.users.badgeStatusRevoked')}</Badge>
                               </td>
                               <td className="px-4 py-2 text-sm text-muted-foreground">
                                 {record.awarded_at ? format(new Date(record.awarded_at), 'yyyy-MM-dd HH:mm') : '--'}
@@ -1097,12 +1097,12 @@ export function UserManagement() {
                     </table>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">{t('admin.users.badgesEmpty', '暂无徽章记录')}</p>
+                  <p className="text-sm text-muted-foreground">{t('admin.users.badgesEmpty')}</p>
                 )}
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">{t('admin.users.detailEmpty', '暂无详情数据')}</p>
+            <p className="text-sm text-muted-foreground">{t('admin.users.detailEmpty')}</p>
           )}
         </DialogContent>
       </Dialog>

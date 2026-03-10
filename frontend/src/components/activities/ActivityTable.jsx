@@ -45,7 +45,7 @@ export function ActivityTable({ activities, onRowClick }) {
               scope="col"
               className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              {t('activities.table.images', 'Images')}
+              {t('activities.table.images')}
             </th>
             <th
               scope="col"
@@ -102,12 +102,12 @@ export function ActivityTable({ activities, onRowClick }) {
                   {getName(activity)}
                 </div>
                 <div className="text-sm text-gray-500">
-                  {t(`activities.categories.${getCategory(activity)}`, getCategory(activity))}
+                    {t(`activities.categories.${getCategory(activity)}`, getCategory(activity))}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {formatNumber(activity.data_value ?? activity.amount)} {t(`units.${getUnit(activity)}`, getUnit(activity))}
+                    {formatNumber(activity.data_value ?? activity.amount)} {t(`units.${getUnit(activity)}`, getUnit(activity))}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -142,4 +142,3 @@ export function ActivityTable({ activities, onRowClick }) {
     </div>
   );
 }
-

@@ -249,7 +249,7 @@ export function ActivityReview() {
 
       const trimmedReason = decisionDialog.reason.trim();
       if (!trimmedReason) {
-        setDecisionDialog((prev) => ({ ...prev, error: t('admin.activities.rejectReasonRequired', '请填写拒绝原因') }));
+        setDecisionDialog((prev) => ({ ...prev, error: t('admin.activities.rejectReasonRequired') }));
         return;
       }
 
@@ -276,7 +276,7 @@ export function ActivityReview() {
 
     const trimmedReason = decisionDialog.reason.trim();
     if (!trimmedReason) {
-      setDecisionDialog((prev) => ({ ...prev, error: t('admin.activities.rejectReasonRequired', '请填写拒绝原因') }));
+      setDecisionDialog((prev) => ({ ...prev, error: t('admin.activities.rejectReasonRequired') }));
       return;
     }
 
@@ -389,7 +389,7 @@ export function ActivityReview() {
               </p>
             ) : (
               <p className="text-sm text-muted-foreground">
-                {t('admin.activities.selectionHint', '选择待审核的记录后即可批量处理。')}
+                {t('admin.activities.selectionHint')}
               </p>
             )}
           </div>
@@ -400,7 +400,7 @@ export function ActivityReview() {
               onClick={clearSelection}
               disabled={selectedPendingIds.length === 0 || reviewActivitiesBulkMutation.isLoading}
             >
-              {t('admin.activities.clearSelection', 'Clear selection')}
+              {t('admin.activities.clearSelection')}
             </Button>
             <Button
               variant="outline"
@@ -414,7 +414,7 @@ export function ActivityReview() {
               ) : (
                 <CheckCircle className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               )}
-              {t('admin.activities.bulkApprove', '批量通过')}
+              {t('admin.activities.bulkApprove')}
             </Button>
             <Button
               variant="destructive"
@@ -427,7 +427,7 @@ export function ActivityReview() {
               ) : (
                 <XCircle className="mr-2 h-4 w-4" />
               )}
-              {t('admin.activities.bulkReject', '批量驳回')}
+              {t('admin.activities.bulkReject')}
             </Button>
           </div>
         </div>
@@ -443,13 +443,13 @@ export function ActivityReview() {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <Checkbox
-                      aria-label={t('admin.activities.selectAll', 'Select all pending')}
+                      aria-label={t('admin.activities.selectAll')}
                       checked={headerCheckboxState}
                       onCheckedChange={(value) => handleToggleSelectAll(value === true)}
                       disabled={selectablePendingIds.length === 0}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.images', 'Images')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.images')}</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.user')}</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.activity')}</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.data')}</th>
@@ -465,7 +465,7 @@ export function ActivityReview() {
                   <tr key={activity.id}>
                     <td className="px-4 py-4 align-top">
                       <Checkbox
-                        aria-label={t('admin.activities.selectRecord', 'Select record')}
+                        aria-label={t('admin.activities.selectRecord')}
                         checked={selectedIds.includes(activity.id)}
                         disabled={activity.status !== 'pending'}
                         onCheckedChange={(value) => handleToggleSelect(activity.id, activity.status, value === true)}
@@ -477,7 +477,7 @@ export function ActivityReview() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{activity.user_username}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{activity.activity_name}</div>
-                      <div className="text-sm text-gray-500">{t(`activities.categories.${activity.activity_category}`, activity.activity_category)}</div>
+                        <div className="text-sm text-gray-500">{t(`activities.categories.${activity.activity_category}`, activity.activity_category)}</div>
                       {activity.description && (
                         <div className="mt-1 text-xs text-gray-600 flex items-start max-w-[36rem]">
                           <MessageSquare className="h-3 w-3 mr-1 mt-[2px] text-gray-500" />
@@ -485,7 +485,7 @@ export function ActivityReview() {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(activity.data_value)} {t(`units.${activity.activity_unit}`, activity.activity_unit)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(activity.data_value)} {t(`units.${activity.activity_unit}`, activity.activity_unit)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(activity.carbon_saved)} kg CO2e</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">+{formatNumber(activity.points_earned)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -548,13 +548,13 @@ export function ActivityReview() {
           <DialogHeader>
             <DialogTitle>
               {decisionDialog.mode === 'approve'
-                ? t('admin.activities.dialog.approveTitle', '确认通过审核')
-                : t('admin.activities.dialog.rejectTitle', '拒绝该活动')}
+                ? t('admin.activities.dialog.approveTitle')
+                : t('admin.activities.dialog.rejectTitle')}
             </DialogTitle>
             <DialogDescription>
               {decisionDialog.mode === 'approve'
-                ? t('admin.activities.dialog.approveDescription', '该活动将计入用户积分并发送通知。')
-                : t('admin.activities.dialog.rejectDescription', '请填写拒绝原因，我们会通知提交者。')}
+                ? t('admin.activities.dialog.approveDescription')
+                : t('admin.activities.dialog.rejectDescription')}
             </DialogDescription>
           </DialogHeader>
           {decisionDialog.activity && (
@@ -565,14 +565,14 @@ export function ActivityReview() {
           {decisionDialog.mode === 'reject' && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700" htmlFor="reject-reason">
-                {t('admin.activities.dialog.reasonLabel', '拒绝原因')}
+                {t('admin.activities.dialog.reasonLabel')}
               </label>
               <Textarea
                 id="reject-reason"
                 rows={4}
                 value={decisionDialog.reason}
                 onChange={handleDecisionReasonChange}
-                placeholder={t('admin.activities.dialog.reasonPlaceholder', '请简要说明拒绝的原因')}
+                placeholder={t('admin.activities.dialog.reasonPlaceholder')}
               />
               {decisionDialog.error && (
                 <p className="text-xs text-red-500">{decisionDialog.error}</p>
@@ -581,7 +581,7 @@ export function ActivityReview() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={closeDecisionDialog}>
-              {t('common.cancel', '取消')}
+              {t('common.cancel')}
             </Button>
             <Button
               variant={decisionDialog.mode === 'reject' ? 'destructive' : 'default'}
@@ -592,7 +592,7 @@ export function ActivityReview() {
               {confirmSuccess ? (
                 <span className="inline-flex items-center bg-green-600 text-white px-3 py-1 rounded-md animate-pulse">
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  {t('admin.activities.dialog.approveAction', '通过审核')}
+                  {t('admin.activities.dialog.approveAction')}
                 </span>
               ) : isReviewSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -603,8 +603,8 @@ export function ActivityReview() {
               )}
               {!confirmSuccess && (
                 decisionDialog.mode === 'approve'
-                  ? t('admin.activities.dialog.approveAction', '通过审核')
-                  : t('admin.activities.dialog.rejectAction', '拒绝活动')
+                  ? t('admin.activities.dialog.approveAction')
+                  : t('admin.activities.dialog.rejectAction')
               )}
             </Button>
           </DialogFooter>

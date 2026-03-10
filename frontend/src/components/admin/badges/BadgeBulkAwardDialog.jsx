@@ -81,7 +81,7 @@ export function BadgeBulkAwardDialog({
   const badgeSummary = useMemo(() => {
     const selected = Array.from(selectedBadgeIds);
     if (!selected.length) {
-      return t([...i18nBase, 'noBadgeSelected'].join('.'), isRevoke ? '未选择需收回的徽章' : '未选择徽章');
+      return t([...i18nBase, 'noBadgeSelected'].join('.'));
     }
     if (selected.length === 1) {
       const badge = badgeMap.get(selected[0]);
@@ -143,11 +143,11 @@ export function BadgeBulkAwardDialog({
   const handleSubmit = async () => {
     const badgeIds = Array.from(selectedBadgeIds);
     if (!badgeIds.length) {
-      toast.error(t([...i18nBase, 'selectBadgeError'].join('.'), '请至少选择一个徽章'));
+      toast.error(t([...i18nBase, 'selectBadgeError'].join('.')));
       return;
     }
     if (!selectedUsers.length) {
-      toast.error(t([...i18nBase, 'selectUserError'].join('.'), '请至少选择一个用户'));
+      toast.error(t([...i18nBase, 'selectUserError'].join('.')));
       return;
     }
 
@@ -183,12 +183,12 @@ export function BadgeBulkAwardDialog({
 
     if (success) {
       toast.success(
-        t([...i18nBase, 'success'].join('.'), isRevoke ? '已成功收回 {{count}} 次徽章' : '已成功授予 {{count}} 次徽章', { count: success })
+        t([...i18nBase, 'success'].join('.'),  { count: success })
       );
     }
     if (failed) {
       toast.error(
-        t([...i18nBase, 'partialFailed'].join('.'), '{{failed}} 条操作失败', { failed })
+        t([...i18nBase, 'partialFailed'].join('.'),  { failed })
       );
     }
 
@@ -233,14 +233,14 @@ export function BadgeBulkAwardDialog({
           />
         </div>
         <p className="text-xs text-muted-foreground line-clamp-2">
-          {badge.description_zh || badge.description_en || t([...i18nBase, 'noDescription'].join('.'), '暂无描述')}
+          {badge.description_zh || badge.description_en || t([...i18nBase, 'noDescription'].join('.'))}
         </p>
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Badge variant={badge.is_active ? 'success' : 'secondary'}>
-            {badge.is_active ? t('admin.badges.active', '启用') : t('admin.badges.inactive', '停用')}
+            {badge.is_active ? t('admin.badges.active') : t('admin.badges.inactive')}
           </Badge>
           {badge.auto_grant_enabled ? (
-            <Badge variant="outline">{t('admin.badges.autoEnabled', '自动授予')}</Badge>
+            <Badge variant="outline">{t('admin.badges.autoEnabled')}</Badge>
           ) : null}
         </div>
       </div>
@@ -254,7 +254,7 @@ export function BadgeBulkAwardDialog({
         <div className="min-w-0">
           <p className="text-sm font-medium leading-tight">{user.username || user.email || ('#' + user.id)}</p>
           <p className="text-xs text-muted-foreground">
-            {user.email || t([...i18nBase, 'noEmail'].join('.'), '无邮箱')} · ID: {user.id}
+            {user.email || t([...i18nBase, 'noEmail'].join('.'))} · ID: {user.id}
           </p>
         </div>
         <Button
@@ -263,7 +263,7 @@ export function BadgeBulkAwardDialog({
           variant={alreadySelected ? 'secondary' : 'outline'}
           onClick={() => (alreadySelected ? handleRemoveUser(user.id) : handleAddUser(user))}
         >
-          {alreadySelected ? t('common.remove', '移除') : t('common.add', isRevoke ? '加入收回列表' : '加入授予列表')}
+          {alreadySelected ? t('common.remove') : t('common.add')}
         </Button>
       </div>
     );
@@ -276,10 +276,10 @@ export function BadgeBulkAwardDialog({
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>
-            {t([...i18nBase, 'dialogTitle'].join('.'), isRevoke ? '批量收回徽章' : '批量授予徽章')}
+            {t([...i18nBase, 'dialogTitle'].join('.'))}
           </DialogTitle>
           <DialogDescription>
-            {t([...i18nBase, 'dialogDescription'].join('.'), isRevoke ? '选择徽章与用户，系统会逐一收回并记录日志。' : '选择徽章与用户，系统会逐一授予并记录日志。')}
+            {t([...i18nBase, 'dialogDescription'].join('.'))}
           </DialogDescription>
         </DialogHeader>
 
@@ -287,50 +287,50 @@ export function BadgeBulkAwardDialog({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold leading-none tracking-tight">
-                {t([...i18nBase, 'badgeSelection'].join('.'), isRevoke ? '选择需要收回的徽章' : '选择要授予的徽章')}
+                {t([...i18nBase, 'badgeSelection'].join('.'))}
               </h3>
               <Button variant="ghost" size="sm" onClick={handleSelectAllBadges}>
                 {selectedBadgeIds.size === badgeChoices.length
-                  ? t([...i18nBase, 'clearAllBadges'].join('.'), '清空选择')
-                  : t([...i18nBase, 'selectAllBadges'].join('.'), '全选徽章')}
+                  ? t([...i18nBase, 'clearAllBadges'].join('.'))
+                  : t([...i18nBase, 'selectAllBadges'].join('.'))}
               </Button>
             </div>
             <ScrollArea className="h-72 rounded-lg border">
               <div className="grid gap-3 p-3">
                 {badgeChoices.length === 0 && (
                   <p className="text-sm text-muted-foreground">
-                    {t([...i18nBase, 'noBadges'].join('.'), '暂无可用徽章，请先创建。')}
+                    {t([...i18nBase, 'noBadges'].join('.'))}
                   </p>
                 )}
                 {badgeChoices.map(renderBadgeCard)}
               </div>
             </ScrollArea>
             <p className="text-xs text-muted-foreground">
-              {t([...i18nBase, 'selectedSummary'].join('.'), '已选择：{{summary}}', { summary: badgeSummary })}
+              {t([...i18nBase, 'selectedSummary'].join('.'),  { summary: badgeSummary })}
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-semibold leading-none tracking-tight">
-                {t([...i18nBase, 'userSelection'].join('.'), isRevoke ? '选择需要收回的用户' : '选择要授予的用户')}
+                {t([...i18nBase, 'userSelection'].join('.'))}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {t([...i18nBase, 'userSelectionHint'].join('.'), '支持通过用户名或邮箱搜索，或从下方列表移除。')}
+                {t([...i18nBase, 'userSelectionHint'].join('.'))}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={t([...i18nBase, 'userSearchPlaceholder'].join('.'), '搜索用户名、邮箱或ID')}
+                placeholder={t([...i18nBase, 'userSearchPlaceholder'].join('.'))}
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setSearchTerm('')}
               >
-                {t('common.reset', '重置')}
+                {t('common.reset')}
               </Button>
             </div>
             <ScrollArea className="h-32 rounded-lg border">
@@ -338,18 +338,18 @@ export function BadgeBulkAwardDialog({
                 {Boolean(searchTerm) && (isUsersLoading || isUsersFetching) && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    {t('common.loading', '加载中...')}
+                    {t('common.loading')}
                   </div>
                 )}
                 {Boolean(searchTerm) && !isUsersLoading && !isUsersFetching && usersResult.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    {t([...i18nBase, 'noUserFound'].join('.'), '未找到匹配的用户')}
+                    {t([...i18nBase, 'noUserFound'].join('.'))}
                   </p>
                 )}
                 {usersResult.map(renderUserResult)}
                 {!searchTerm && selectedUsers.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    {t([...i18nBase, 'startSearchHint'].join('.'), '输入关键词以搜索目标用户。')}
+                    {t([...i18nBase, 'startSearchHint'].join('.'))}
                   </p>
                 )}
               </div>
@@ -361,13 +361,13 @@ export function BadgeBulkAwardDialog({
               <div className="flex items-center gap-2">
                 <UsersIcon className="h-4 w-4 text-muted-foreground" />
                 <h3 className="text-sm font-semibold leading-none tracking-tight">
-                  {t([...i18nBase, 'selectedUsers'].join('.'), '已选择的用户')}
+                  {t([...i18nBase, 'selectedUsers'].join('.'))}
                 </h3>
               </div>
               <div className="mt-3 grid gap-2">
                 {selectedUsers.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    {t([...i18nBase, 'noUserSelected'].join('.'), '暂未选择用户')}
+                    {t([...i18nBase, 'noUserSelected'].join('.'))}
                   </p>
                 )}
                 {selectedUsers.map((user) => (
@@ -394,7 +394,7 @@ export function BadgeBulkAwardDialog({
         <div className="flex flex-col gap-3 border-t pt-4">
           {progressState && (
             <p className="text-xs text-muted-foreground">
-              {t([...i18nBase, 'progress'].join('.'), '处理进度：{{processed}} / {{total}} · 成功 {{success}} · 失败 {{failed}}', {
+              {t([...i18nBase, 'progress'].join('.'),  {
                 processed: progressState.processed,
                 total: progressState.total,
                 success: progressState.success,
@@ -405,20 +405,20 @@ export function BadgeBulkAwardDialog({
           <div className="flex flex-col gap-2 text-xs text-muted-foreground">
             <p>
               <IconAction className="mr-1 inline-block h-3 w-3" />
-              {t([...i18nBase, 'tipUsers'].join('.'), isRevoke ? '可多选用户，系统会逐一收回并记录操作日志。' : '可多选用户，系统会逐一授予并记录操作日志。')}
+              {t([...i18nBase, 'tipUsers'].join('.'))}
             </p>
             <p>
               <Award className="mr-1 inline-block h-3 w-3" />
-              {t([...i18nBase, 'tipBadges'].join('.'), '徽章选择支持单选或多选，将逐个执行。')}
+              {t([...i18nBase, 'tipBadges'].join('.'))}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 justify-end">
             <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={submitting}>
-              {t('common.cancel', '取消')}
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleSubmit} disabled={submitting}>
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t([...i18nBase, 'confirm'].join('.'), isRevoke ? '开始收回' : '开始授予')}
+              {t([...i18nBase, 'confirm'].join('.'))}
             </Button>
           </div>
         </div>

@@ -98,7 +98,7 @@ export function AvatarManagement() {
       }
     } catch (error) {
       console.error('Avatar list fetch failed:', error);
-      toast.error(t('admin.avatars.loadFailed', '加载头像列表失败'));
+      toast.error(t('admin.avatars.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -144,7 +144,7 @@ export function AvatarManagement() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('admin.avatars.fileTooLarge', '文件大小不能超过5MB'));
+      toast.error(t('admin.avatars.fileTooLarge'));
       event.target.value = '';
       return;
     }
@@ -163,9 +163,9 @@ export function AvatarManagement() {
         icon_url: info.url || info.public_url || prev.icon_url,
         icon_presigned_url: info.presigned_url || prev.icon_presigned_url,
       }));
-      toast.success(t('admin.avatars.uploadSuccess', '头像文件上传成功'));
+      toast.success(t('admin.avatars.uploadSuccess'));
     } catch (error) {
-      toast.error(error?.message || t('admin.avatars.uploadFailed', '头像文件上传失败'));
+      toast.error(error?.message || t('admin.avatars.uploadFailed'));
     } finally {
       setUploadingAvatar(false);
       if (event.target) {
@@ -177,7 +177,7 @@ export function AvatarManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formValues.file_path) {
-      toast.error(t('admin.avatars.fileRequired', '请先上传头像文件'));
+      toast.error(t('admin.avatars.fileRequired'));
       return;
     }
 
@@ -195,15 +195,15 @@ export function AvatarManagement() {
       setSaving(true);
       if (formValues.id) {
         await adminAPI.updateAvatar(formValues.id, payload);
-        toast.success(t('admin.avatars.updateSuccess', '头像已更新'));
+        toast.success(t('admin.avatars.updateSuccess'));
       } else {
         await adminAPI.createAvatar(payload);
-        toast.success(t('admin.avatars.createSuccess', '头像已创建'));
+        toast.success(t('admin.avatars.createSuccess'));
       }
       resetForm();
       fetchAvatars();
     } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.saveFailed', '保存头像失败'));
+      toast.error(error.response?.data?.message || t('admin.avatars.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -214,8 +214,8 @@ export function AvatarManagement() {
     try {
       await adminAPI.updateAvatar(avatar.id, { is_active: nextActive });
       toast.success(nextActive
-        ? t('admin.avatars.enabled', '头像已启用')
-        : t('admin.avatars.disabled', '头像已停用'));
+        ? t('admin.avatars.enabled')
+        : t('admin.avatars.disabled'));
       setAvatars((prev) => prev.map((item) => (item.id === avatar.id ? { ...item, is_active: nextActive } : item)));
       setFormValues((prev) => {
         if (prev.id !== avatar.id) {
@@ -224,7 +224,7 @@ export function AvatarManagement() {
         return { ...prev, is_active: nextActive };
       });
     } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.toggleFailed', '更新头像状态失败'));
+      toast.error(error.response?.data?.message || t('admin.avatars.toggleFailed'));
     }
   };
 
@@ -232,10 +232,10 @@ export function AvatarManagement() {
   const setDefault = async (avatarId) => {
     try {
       await adminAPI.setDefaultAvatar(avatarId);
-      toast.success(t('admin.avatars.setDefaultSuccess', '已设为默认头像'));
+      toast.success(t('admin.avatars.setDefaultSuccess'));
       fetchAvatars();
     } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.setDefaultFailed', '设置默认头像失败'));
+      toast.error(error.response?.data?.message || t('admin.avatars.setDefaultFailed'));
     }
   };
 
@@ -255,11 +255,11 @@ export function AvatarManagement() {
     try {
       setIsDeleting(true);
       await adminAPI.deleteAvatar(deleteDialog.avatar.id);
-      toast.success(t('admin.avatars.deleteSuccess', '头像已删除'));
+      toast.success(t('admin.avatars.deleteSuccess'));
       closeDeleteDialog();
       fetchAvatars();
     } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.deleteFailed', '删除头像失败'));
+      toast.error(error.response?.data?.message || t('admin.avatars.deleteFailed'));
     } finally {
       setIsDeleting(false);
     }
@@ -268,10 +268,10 @@ export function AvatarManagement() {
   const restoreAvatar = async (avatarId) => {
     try {
       await adminAPI.restoreAvatar(avatarId);
-      toast.success(t('admin.avatars.restoreSuccess', '头像已恢复'));
+      toast.success(t('admin.avatars.restoreSuccess'));
       fetchAvatars();
     } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.restoreFailed', '恢复头像失败'));
+      toast.error(error.response?.data?.message || t('admin.avatars.restoreFailed'));
     }
   };
 
@@ -282,14 +282,14 @@ export function AvatarManagement() {
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <CardTitle>{t('admin.avatars.listTitle', '头像库')}</CardTitle>
+          <CardTitle>{t('admin.avatars.listTitle')}</CardTitle>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={fetchAvatars} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              {t('common.refresh', '刷新')}
+              {t('common.refresh')}
             </Button>
             <Button variant="secondary" onClick={resetForm}>
-              {t('admin.avatars.newAvatar', '新建头像')}
+              {t('admin.avatars.newAvatar')}
             </Button>
           </div>
         </CardHeader>
@@ -297,7 +297,7 @@ export function AvatarManagement() {
           {loading ? (
             <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              {t('common.loading', '加载中...')}
+              {t('common.loading')}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -305,25 +305,25 @@ export function AvatarManagement() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.avatars.table.icon', '图标')}
+                      {t('admin.avatars.table.icon')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.avatars.table.name', '名称')}
+                      {t('admin.avatars.table.name')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.avatars.table.category', '分类')}
+                      {t('admin.avatars.table.category')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.avatars.table.status', '状态')}
+                      {t('admin.avatars.table.status')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.avatars.table.sort', '排序')}
+                      {t('admin.avatars.table.sort')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.avatars.table.updated', '更新时间')}
+                      {t('admin.avatars.table.updated')}
                     </th>
                     <th className="px-4 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">
-                      {t('common.actions', '操作')}
+                      {t('common.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -354,11 +354,11 @@ export function AvatarManagement() {
                       <td className="px-4 py-3 space-x-2">
                         <Badge variant={avatar.is_active ? 'success' : 'secondary'}>
                           {avatar.is_active
-                            ? t('admin.avatars.active', '启用')
-                            : t('admin.avatars.inactive', '停用')}
+                            ? t('admin.avatars.active')
+                            : t('admin.avatars.inactive')}
                         </Badge>
                         {avatar.is_default && (
-                          <Badge variant="outline">{t('admin.avatars.default', '默认')}</Badge>
+                          <Badge variant="outline">{t('admin.avatars.default')}</Badge>
                         )}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">{avatar.sort_order}</td>
@@ -370,26 +370,26 @@ export function AvatarManagement() {
                       <td className="px-4 py-3 text-right space-x-2">
                         <Button variant="ghost" size="sm" onClick={() => handleEdit(avatar)}>
                           <Edit className="h-4 w-4 mr-1" />
-                          {t('common.edit', '编辑')}
+                          {t('common.edit')}
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => toggleActive(avatar)}>
                           {avatar.is_active
-                            ? t('admin.avatars.disable', '停用')
-                            : t('admin.avatars.enable', '启用')}
+                            ? t('admin.avatars.disable')
+                            : t('admin.avatars.enable')}
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => setDefault(avatar.id)} disabled={avatar.is_default}>
                           <Star className="h-4 w-4 mr-1" />
-                          {t('admin.avatars.setDefault', '设为默认')}
+                          {t('admin.avatars.setDefault')}
                         </Button>
                         {avatar.deleted_at ? (
                           <Button variant="ghost" size="sm" onClick={() => restoreAvatar(avatar.id)}>
                             <RotateCcw className="h-4 w-4 mr-1" />
-                            {t('admin.avatars.restore', '恢复')}
+                            {t('admin.avatars.restore')}
                           </Button>
                         ) : (
                           <Button variant="ghost" size="sm" onClick={() => requestDeleteAvatar(avatar)}>
                             <Trash2 className="h-4 w-4 mr-1" />
-                            {t('admin.avatars.delete', '删除')}
+                            {t('admin.avatars.delete')}
                           </Button>
                         )}
                       </td>
@@ -399,7 +399,7 @@ export function AvatarManagement() {
                   {formattedAvatars.length === 0 && !loading && (
                     <tr>
                       <td colSpan={7} className="px-4 py-6 text-center text-sm text-gray-500">
-                        {t('admin.avatars.empty', '还没有头像数据')} 
+                        {t('admin.avatars.empty')} 
                       </td>
                     </tr>
                   )}
@@ -414,8 +414,8 @@ export function AvatarManagement() {
         <CardHeader>
           <CardTitle>
             {formValues.id
-              ? t('admin.avatars.editTitle', '编辑头像')
-              : t('admin.avatars.createTitle', '创建新头像')}
+              ? t('admin.avatars.editTitle')
+              : t('admin.avatars.createTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -423,7 +423,7 @@ export function AvatarManagement() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  {t('admin.avatars.fields.name', '显示名称')}
+                  {t('admin.avatars.fields.name')}
                 </label>
                 <Input
                   name="name"
@@ -434,7 +434,7 @@ export function AvatarManagement() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  {t('admin.avatars.fields.description', '描述')}
+                  {t('admin.avatars.fields.description')}
                 </label>
                 <Textarea
                   name="description"
@@ -445,7 +445,7 @@ export function AvatarManagement() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  {t('admin.avatars.fields.category', '分类')}
+                  {t('admin.avatars.fields.category')}
                 </label>
                 <Input
                   name="category"
@@ -456,7 +456,7 @@ export function AvatarManagement() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  {t('admin.avatars.fields.icon', '上传头像图片')}
+                  {t('admin.avatars.fields.icon')}
                 </label>
                 <input
                   ref={avatarInputRef}
@@ -477,10 +477,10 @@ export function AvatarManagement() {
                   ) : (
                     <Upload className="h-4 w-4" />
                   )}
-                  {t('admin.avatars.selectFile', '选择图片并上传')}
+                  {t('admin.avatars.selectFile')}
                 </Button>
                 <p className="text-xs text-gray-500">
-                  {t('admin.avatars.uploadHint', '支持 JPG/PNG/WebP，单个不超过5MB。')}
+                  {t('admin.avatars.uploadHint')}
                 </p>
                 {(formValues.icon_presigned_url || formValues.icon_url || formValues.file_path) && (
                   <div className="mt-2 w-20 h-20 rounded-full overflow-hidden border">
@@ -498,7 +498,7 @@ export function AvatarManagement() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  {t('admin.avatars.fields.sortOrder', '排序')}
+                  {t('admin.avatars.fields.sortOrder')}
                 </label>
                 <Input
                   type="number"
@@ -508,19 +508,19 @@ export function AvatarManagement() {
                 />
               </div>
               <div className="flex items-center justify-between bg-gray-50 border rounded-md px-3 py-2">
-                <span className="text-sm text-gray-700">{t('admin.avatars.fields.active', '是否启用')}</span>
+                <span className="text-sm text-gray-700">{t('admin.avatars.fields.active')}</span>
                 <Switch
                   checked={formValues.is_active}
                   onCheckedChange={handleToggle('is_active')}
-                  aria-label={t('admin.avatars.fields.active', '是否启用')}
+                  aria-label={t('admin.avatars.fields.active')}
                 />
               </div>
               <div className="flex items-center justify-between bg-gray-50 border rounded-md px-3 py-2">
-                <span className="text-sm text-gray-700">{t('admin.avatars.fields.default', '设为默认')}</span>
+                <span className="text-sm text-gray-700">{t('admin.avatars.fields.default')}</span>
                 <Switch
                   checked={formValues.is_default}
                   onCheckedChange={handleToggle('is_default')}
-                  aria-label={t('admin.avatars.fields.default', '设为默认')}
+                  aria-label={t('admin.avatars.fields.default')}
                 />
               </div>
 
@@ -532,11 +532,11 @@ export function AvatarManagement() {
                     <ImageIcon className="h-4 w-4 mr-2" />
                   )}
                   {formValues.id
-                    ? t('admin.avatars.updateAction', '保存修改')
-                    : t('admin.avatars.createAction', '创建头像')}
+                    ? t('admin.avatars.updateAction')
+                    : t('admin.avatars.createAction')}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
-                  {t('common.cancel', '取消')}
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -546,14 +546,14 @@ export function AvatarManagement() {
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => (!open ? closeDeleteDialog() : null)}>
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('admin.avatars.deleteTitle', '移除头像')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.avatars.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('admin.avatars.deleteConfirm', '确定要停用并移除该头像吗？')}
+              {t('admin.avatars.deleteConfirm')}
               {deleteDialog.avatar?.name ? ` (${deleteDialog.avatar.name})` : ''}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDeleteDialog}>{t('common.cancel', '取消')}</AlertDialogCancel>
+            <AlertDialogCancel onClick={closeDeleteDialog}>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAvatar}
               className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-600"
@@ -564,7 +564,7 @@ export function AvatarManagement() {
               ) : (
                 <Trash2 className="mr-2 h-4 w-4" />
               )}
-              {t('common.confirm', '确认')}
+              {t('common.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

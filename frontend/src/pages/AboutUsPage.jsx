@@ -249,7 +249,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
                       />
                     )}
                     <span className="mr-2 relative z-10">
-                      {member.linkLabel || t('about.team.learnMore', 'Learn More')}
+                      {member.linkLabel || t('about.team.learnMore')}
                     </span>
                     {member.link?.includes('github.com') ? (
                       <Github className="h-5 w-5 transition-transform group-hover:rotate-12 relative z-10" />
@@ -514,7 +514,7 @@ const AboutUsPage = () => {
                         })
                       )}
                     >
-                      {specialThanks.linkLabel || t('about.specialThanks.visit', 'Visit Website')}
+                      {specialThanks.linkLabel || t('about.specialThanks.visit')}
                     </a>
                   )}
                 </CardContent>

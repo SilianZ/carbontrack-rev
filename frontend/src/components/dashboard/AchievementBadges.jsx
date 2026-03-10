@@ -26,12 +26,12 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Award className="h-5 w-5 text-yellow-500" />
-            {t('dashboard.achievementBadges', '成就徽章')}
+            {t('dashboard.achievementBadges')}
           </h3>
           <p className="text-sm text-gray-500">
             {totalCount > 0
-              ? t('dashboard.badgeProgress', '{{owned}} / {{total}} 已解锁', { owned: ownedCount, total: totalCount })
-              : t('dashboard.noBadgesAvailable', '暂时没有可用的成就徽章')}
+              ? t('dashboard.badgeProgress',  { owned: ownedCount, total: totalCount })
+              : t('dashboard.noBadgesAvailable')}
           </p>
         </div>
         {isAdmin && (
@@ -43,7 +43,7 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
             className="flex items-center gap-2"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            {t('dashboard.triggerBadgeAuto', '触发自动授予')}
+            {t('dashboard.triggerBadgeAuto')}
           </Button>
         )}
       </div>
@@ -56,7 +56,7 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
         </div>
       ) : totalCount === 0 ? (
         <div className="text-sm text-gray-500 bg-gray-50 rounded-md p-4 text-center">
-          {t('dashboard.noBadgesHint', '完成更多环保行动后，将会开放成就徽章功能。')}
+          {t('dashboard.noBadgesHint')}
         </div>
       ) : (
         <div className="space-y-4">
@@ -102,18 +102,18 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                     {owned ? (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600">
                         <Award className="h-3 w-3" />
-                        {t('dashboard.badgeUnlocked', '已解锁')}
+                        {t('dashboard.badgeUnlocked')}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-xs text-gray-400">
                         <Lock className="h-3 w-3" />
-                        {t('dashboard.badgeLocked', '待解锁')}
+                        {t('dashboard.badgeLocked')}
                       </span>
                     )}
                   </div>
                   {owned && userBadge?.awarded_at && (
                     <p className="text-[11px] text-gray-400">
-                      {t('dashboard.badgeAwardedAt', '解锁时间')}: {new Date(userBadge.awarded_at).toLocaleDateString()}
+                      {t('dashboard.badgeAwardedAt')}: {new Date(userBadge.awarded_at).toLocaleDateString()}
                     </p>
                   )}
                 </div>

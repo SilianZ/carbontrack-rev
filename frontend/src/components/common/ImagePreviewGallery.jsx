@@ -39,7 +39,7 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
   if (!normalized.length) {
     return (
       <div className={`text-xs text-gray-400 italic flex items-center gap-1 ${className}`}>
-        <ImageIcon className="h-3 w-3" /> {t('images.none', 'No images')}
+        <ImageIcon className="h-3 w-3" /> {t('images.none')}
       </div>
     );
   }
@@ -59,7 +59,7 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
           type="button"
           className={`relative border rounded-md overflow-hidden bg-gray-50 hover:ring-2 hover:ring-green-500 transition ${thumbSizeClass}`}
           onClick={() => setLightboxIndex(idx)}
-          title={img.original_name || t('images.clickToPreview', 'Click to preview')}
+          title={img.original_name || t('images.clickToPreview')}
         >
           <R2Image
             src={resolveSrc(img)}
@@ -82,7 +82,7 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
             <button
               onClick={() => setLightboxIndex(-1)}
               className="text-white/80 hover:text-white p-2"
-              aria-label={t('common.close', 'Close')}
+              aria-label={t('common.close')}
             >
               <X className="h-6 w-6" />
             </button>
@@ -92,7 +92,7 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
               disabled={lightboxIndex === 0}
               onClick={() => setLightboxIndex((current) => Math.max(0, current - 1))}
               className="p-3 text-white/70 hover:text-white disabled:opacity-30"
-              aria-label={t('images.prev', 'Previous')}
+              aria-label={t('images.prev')}
             >
               <ChevronLeft className="h-10 w-10" />
             </button>
@@ -110,13 +110,13 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
               disabled={lightboxIndex === normalized.length - 1}
               onClick={() => setLightboxIndex((current) => Math.min(normalized.length - 1, current + 1))}
               className="p-3 text-white/70 hover:text-white disabled:opacity-30"
-              aria-label={t('images.next', 'Next')}
+              aria-label={t('images.next')}
             >
               <ChevronRight className="h-10 w-10" />
             </button>
           </div>
           <div className="pb-4 text-center text-white text-xs opacity-80">
-            {t('images.counter', '{{current}} / {{total}}', { current: lightboxIndex + 1, total: normalized.length })}
+            {t('images.counter',  { current: lightboxIndex + 1, total: normalized.length })}
           </div>
         </div>
       )}

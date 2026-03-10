@@ -102,7 +102,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose }) {
               <div>
                 <p className="text-sm font-medium text-gray-500">{t('activities.table.activity')}</p>
                 <p className="text-lg font-semibold text-gray-900">{getName(activity)}</p>
-                <p className="text-sm text-gray-600">{t(`activities.categories.${getCategory(activity)}`, getCategory(activity))}</p>
+              <p className="text-sm text-gray-600">{t(`activities.categories.${getCategory(activity)}`, getCategory(activity))}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">{t('activities.table.status')}</p>
@@ -114,7 +114,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose }) {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">{t('activities.table.data')}</p>
-            <p className="text-gray-900">{formatNumber(activity.data_value ?? activity.amount)} {t(`units.${getUnit(activity)}`, getUnit(activity))}</p>
+              <p className="text-gray-900">{formatNumber(activity.data_value ?? activity.amount)} {t(`units.${getUnit(activity)}`, getUnit(activity))}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">{t('activities.table.carbonSaved')}</p>

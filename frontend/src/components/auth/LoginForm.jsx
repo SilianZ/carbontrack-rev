@@ -86,7 +86,7 @@ export function LoginForm() {
       }
       const status = err.response?.status;
       if (status === 404 || status === 405) {
-        setError(t('auth.errors.PASSKEY_LOGIN_UNAVAILABLE', { defaultValue: t('auth.loginFailed') + ': 通行密钥登录功能正在开发中' }));
+        setError(t('auth.errors.PASSKEY_LOGIN_UNAVAILABLE'));
         return;
       }
       const responseData = err.response?.data;
@@ -104,13 +104,13 @@ export function LoginForm() {
 
     switch (passkeySupport.reason) {
       case PASSKEY_SUPPORT_REASONS.INSECURE_CONTEXT:
-        return t('auth.passkeySupportReasonInsecureContext', '当前页面不是安全上下文，请使用 HTTPS 或 localhost。');
+        return t('auth.passkeySupportReasonInsecureContext');
       case PASSKEY_SUPPORT_REASONS.MISSING_PUBLIC_KEY_CREDENTIAL:
-        return t('auth.passkeySupportReasonMissingWebauthn', '当前浏览器未提供 WebAuthn 能力。');
+        return t('auth.passkeySupportReasonMissingWebauthn');
       case PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API:
-        return t('auth.passkeySupportReasonMissingCredentialsApi', '当前浏览器未提供凭据管理接口。');
+        return t('auth.passkeySupportReasonMissingCredentialsApi');
       default:
-        return t('auth.passkeySupportUnavailable', '当前设备或环境暂不支持通行密钥登录。');
+        return t('auth.passkeySupportUnavailable');
     }
   })();
 
@@ -284,7 +284,7 @@ export function LoginForm() {
                     </div>
                     <div className="relative flex justify-center text-sm">
                       <span className="px-2 bg-white text-gray-500">
-                        {t('auth.orContinueWith', '或使用以下方式继续')}
+                        {t('auth.orContinueWith')}
                       </span>
                     </div>
                   </div>
@@ -298,14 +298,14 @@ export function LoginForm() {
                       disabled={isLoading}
                     >
                       <Fingerprint className="h-5 w-5 text-green-600" />
-                      {t('auth.signInWithPasskey', '使用通行密钥登录')}
+                      {t('auth.signInWithPasskey')}
                     </Button>
                   ) : (
                     <Alert>
                       <AlertDescription>
                         {passkeySupport
                           ? passkeySupportMessage
-                          : t('auth.passkeyCheckingSupport', '正在检查通行密钥支持情况...')}
+                          : t('auth.passkeyCheckingSupport')}
                       </AlertDescription>
                     </Alert>
                   )}

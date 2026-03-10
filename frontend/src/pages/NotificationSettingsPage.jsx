@@ -155,14 +155,14 @@ const NotificationSettingsPage = () => {
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-900">
-                            {t(`settings.notifications.categories.${pref.category}.label`, {
-                              defaultValue: pref.label,
-                            })}
+                  {t(`settings.notifications.categories.${pref.category}.label`, {
+                    defaultValue: pref.label,
+                  })}
                           </p>
                           <p className="text-xs text-gray-500 mt-1">
-                            {t(`settings.notifications.categories.${pref.category}.description`, {
-                              defaultValue: pref.label,
-                            })}
+                  {t(`settings.notifications.categories.${pref.category}.description`, {
+                    defaultValue: pref.label,
+                  })}
                           </p>
                           {pref.locked && (
                             <p className="text-xs text-amber-600 mt-2">

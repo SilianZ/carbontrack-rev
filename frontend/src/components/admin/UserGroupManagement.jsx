@@ -68,7 +68,7 @@ export function UserGroupManagement() {
         onSuccess: () => {
             queryClient.invalidateQueries('userGroups');
             setIsDialogOpen(false);
-            toast.success(t('admin.groups.createSuccess', '创建成功'));
+            toast.success(t('admin.groups.createSuccess'));
         }
     });
 
@@ -76,7 +76,7 @@ export function UserGroupManagement() {
         onSuccess: () => {
             queryClient.invalidateQueries('userGroups');
             setIsDialogOpen(false);
-            toast.success(t('admin.groups.updateSuccess', '更新成功'));
+            toast.success(t('admin.groups.updateSuccess'));
         }
     });
 
@@ -84,7 +84,7 @@ export function UserGroupManagement() {
         onSuccess: () => {
             queryClient.invalidateQueries('userGroups');
             setDeleteConfirm({ open: false, group: null });
-            toast.success(t('admin.groups.deleteSuccess', '删除成功'));
+            toast.success(t('admin.groups.deleteSuccess'));
         }
     });
 
@@ -128,12 +128,12 @@ export function UserGroupManagement() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">{t('admin.groups.title', '用户组管理')}</h2>
-                    <p className="text-muted-foreground">{t('admin.groups.description', '管理用户组及配额设置')}</p>
+                    <h2 className="text-2xl font-bold tracking-tight">{t('admin.groups.title')}</h2>
+                    <p className="text-muted-foreground">{t('admin.groups.description')}</p>
                 </div>
                 <Button onClick={handleCreate}>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    {t('admin.groups.create', '创建用户组')}
+                    {t('admin.groups.create')}
                 </Button>
             </div>
 
@@ -145,16 +145,16 @@ export function UserGroupManagement() {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {t('admin.groups.name', '名称')}
+                                    {t('admin.groups.name')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {t('admin.groups.code', '代码')}
+                                    {t('admin.groups.code')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {t('admin.groups.isDefault', '默认')}
+                                    {t('admin.groups.isDefault')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {t('admin.groups.actions', '操作')}
+                                    {t('admin.groups.actions')}
                                 </th>
                             </tr>
                         </thead>
@@ -168,7 +168,7 @@ export function UserGroupManagement() {
                                         {group.code}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {group.is_default ? t('common.yes', '是') : t('common.no', '否')}
+                                        {group.is_default ? t('common.yes') : t('common.no')}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                         <Button variant="ghost" size="sm" onClick={() => handleEdit(group)}>
@@ -194,12 +194,12 @@ export function UserGroupManagement() {
                 <DialogContent className="max-w-lg">
                     <DialogHeader>
                         <DialogTitle>
-                            {editingGroup?.id ? t('admin.groups.edit', '编辑用户组') : t('admin.groups.create', '创建用户组')}
+                            {editingGroup?.id ? t('admin.groups.edit') : t('admin.groups.create')}
                         </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <Label>{t('admin.groups.name', '名称')}</Label>
+                            <Label>{t('admin.groups.name')}</Label>
                             <Input
                                 value={editingGroup?.name || ''}
                                 onChange={e => setEditingGroup({ ...editingGroup, name: e.target.value })}
@@ -207,7 +207,7 @@ export function UserGroupManagement() {
                             />
                         </div>
                         <div>
-                            <Label>{t('admin.groups.code', '代码')}</Label>
+                            <Label>{t('admin.groups.code')}</Label>
                             <Input
                                 value={editingGroup?.code || ''}
                                 onChange={e => setEditingGroup({ ...editingGroup, code: e.target.value })}
@@ -219,14 +219,14 @@ export function UserGroupManagement() {
                                 checked={editingGroup?.is_default}
                                 onCheckedChange={checked => setEditingGroup({ ...editingGroup, is_default: checked })}
                             />
-                            <Label>{t('admin.groups.setAsDefault', '设为默认用户组')}</Label>
+                            <Label>{t('admin.groups.setAsDefault')}</Label>
                         </div>
                         <div className="space-y-3 border-t pt-3 border-b pb-3">
-                            <Label className="text-base font-semibold">{t('admin.groups.quotaOverride', '配额单独设置')}</Label>
+                            <Label className="text-base font-semibold">{t('admin.groups.quotaOverride')}</Label>
                             {Object.keys(editingGroup?.quotaFlat || {}).length > 0 ? (
                                 Object.entries(editingGroup.quotaFlat || {}).map(([key, value]) => (
                                     <div key={key}>
-                                        <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
+                          <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
                                         <Input
                                             type="number"
                                             value={value ?? ''}
@@ -234,16 +234,16 @@ export function UserGroupManagement() {
                                                 ...editingGroup,
                                                 quotaFlat: { ...editingGroup.quotaFlat, [key]: e.target.value }
                                             })}
-                                            placeholder={t('common.default', '默认')}
+                            placeholder={t('common.default')}
                                         />
                                     </div>
                                 ))
                             ) : (
-                                <p className="text-sm text-muted-foreground">{t('admin.groups.noQuotasAvailable', '暂无可配置的配额项目')}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.groups.noQuotasAvailable')}</p>
                             )}
                         </div>
                         <div>
-                            <Label>{t('admin.groups.notes', '备注')}</Label>
+                            <Label>{t('admin.groups.notes')}</Label>
                             <Textarea
                                 value={editingGroup?.notes || ''}
                                 onChange={e => setEditingGroup({ ...editingGroup, notes: e.target.value })}
@@ -251,7 +251,7 @@ export function UserGroupManagement() {
                         </div>
                         <DialogFooter>
                             <Button type="submit" disabled={createmutation.isLoading || updateMutation.isLoading}>
-                                {t('common.save', '保存')}
+                                {t('common.save')}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -261,15 +261,15 @@ export function UserGroupManagement() {
             <AlertDialog open={deleteConfirm.open} onOpenChange={open => !open && setDeleteConfirm({ open: false, group: null })}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>{t('admin.groups.confirmDelete', '确认删除？')}</AlertDialogTitle>
+                        <AlertDialogTitle>{t('admin.groups.confirmDelete')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            {t('admin.groups.deleteWarning', '此操作无法撤销。该组下的用户将不再属于任何组（或回退到默认组）。')}
+                            {t('admin.groups.deleteWarning')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>{t('common.cancel', '取消')}</AlertDialogCancel>
+                        <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                         <AlertDialogAction onClick={() => deleteMutation.mutate(deleteConfirm.group.id)}>
-                            {t('common.confirm', '确认')}
+                            {t('common.confirm')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

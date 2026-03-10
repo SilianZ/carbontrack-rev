@@ -244,9 +244,9 @@ export function CarbonCalculator() {
       {checkinDate && (
         <Alert className="mb-6 border-emerald-200 bg-emerald-50 text-emerald-800">
           <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
-            <span>{t('activities.checkin.makeupNotice', '补打卡日期：{{date}}，提交记录后将计入该日', { date: checkinDate })}</span>
+            <span>{t('activities.checkin.makeupNotice',  { date: checkinDate })}</span>
             <Button variant="ghost" size="sm" onClick={clearCheckinDate}>
-              {t('activities.checkin.clear', '取消补打卡')}
+              {t('activities.checkin.clear')}
             </Button>
           </AlertDescription>
         </Alert>

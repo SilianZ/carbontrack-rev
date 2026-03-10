@@ -94,15 +94,15 @@ export default function AdminLayout() {
 
     return NAV_LINKS.map((link) => ({
       ...link,
-      label: t(`admin.nav.${link.key}`, fallbackLabels[link.key] || link.key),
+      label: t(`admin.nav.${link.key}`),
     }));
   }, [t]);
 
   const quickActions = useMemo(() => ([
     {
       id: 'search-users',
-      label: t('admin.command.searchUsers', '搜索用户'),
-      description: t('admin.command.searchUsersHint', '打开用户管理并聚焦搜索框'),
+      label: t('admin.command.searchUsers'),
+      description: t('admin.command.searchUsersHint'),
       shortcut: 'U',
       onSelect: () => {
         navigate('/admin/users?focus=search');
@@ -111,8 +111,8 @@ export default function AdminLayout() {
     },
     {
       id: 'create-badge',
-      label: t('admin.command.createBadge', '创建新徽章'),
-      description: t('admin.command.createBadgeHint', '跳转到徽章管理并开启新建模式'),
+      label: t('admin.command.createBadge'),
+      description: t('admin.command.createBadgeHint'),
       shortcut: 'B',
       onSelect: () => {
         navigate('/admin/badges?create=1');
@@ -121,8 +121,8 @@ export default function AdminLayout() {
     },
     {
       id: 'review-activities',
-      label: t('admin.command.reviewActivities', '待审核活动'),
-      description: t('admin.command.reviewActivitiesHint', '查看并处理碳减排活动审核'),
+      label: t('admin.command.reviewActivities'),
+      description: t('admin.command.reviewActivitiesHint'),
       shortcut: 'A',
       onSelect: () => {
         navigate('/admin/activities?filter=pending');
@@ -131,8 +131,8 @@ export default function AdminLayout() {
     },
     {
       id: 'broadcast',
-      label: t('admin.command.sendBroadcast', '发布平台公告'),
-      description: t('admin.command.sendBroadcastHint', '打开广播中心发送新公告'),
+      label: t('admin.command.sendBroadcast'),
+      description: t('admin.command.sendBroadcastHint'),
       shortcut: 'N',
       onSelect: () => {
         navigate('/admin/broadcast?compose=1');
@@ -144,11 +144,11 @@ export default function AdminLayout() {
   const getTapHint = useCallback((intentType) => {
     switch (intentType) {
       case 'action':
-        return t('admin.command.aiTapToRun', '点击执行此操作');
+        return t('admin.command.aiTapToRun');
       case 'quick_action':
-        return t('admin.command.aiTapQuick', '点击执行快捷操作');
+        return t('admin.command.aiTapQuick');
       default:
-        return t('admin.command.aiTapToOpen', '点击前往该位置');
+        return t('admin.command.aiTapToOpen');
     }
   }, [t]);
 
@@ -194,7 +194,7 @@ export default function AdminLayout() {
     (intent) => {
       const targetRoute = intent?.target?.route;
       if (!targetRoute) {
-        toast.error(t('admin.command.aiMissingRoute', '未找到目标跳转页面'));
+        toast.error(t('admin.command.aiMissingRoute'));
         return;
       }
       const fullRoute = buildRouteWithQuery(targetRoute, intent?.target?.query || {});
@@ -209,14 +209,14 @@ export default function AdminLayout() {
     async (intent) => {
       const missing = Array.isArray(intent.missing) ? intent.missing : [];
       if (missing.length > 0) {
-        toast.error(missing[0]?.description || t('admin.command.aiMissingInfo', '请补全所需信息后再试'));
+        toast.error(missing[0]?.description || t('admin.command.aiMissingInfo'));
         return;
       }
 
       const apiConfig = intent.action?.api || {};
       let path = apiConfig.path || '';
       if (!path) {
-        toast.error(t('admin.command.aiMissingPath', '缺少要执行的接口路径'));
+        toast.error(t('admin.command.aiMissingPath'));
         return;
       }
       const method = (apiConfig.method || 'post').toLowerCase();
@@ -238,12 +238,12 @@ export default function AdminLayout() {
       try {
         setIsExecutingAiAction(true);
         await api.request(requestConfig);
-        toast.success(t('admin.command.aiActionSuccess', 'Command executed'));
+        toast.success(t('admin.command.aiActionSuccess'));
         setCommandQuery('');
         setCommandOpen(false);
       } catch (error) {
         const requestId = error?.response?.data?.request_id;
-        let message = t('admin.command.aiActionFailed', 'Command failed');
+        let message = t('admin.command.aiActionFailed');
         if (requestId) {
           message += ` (ReqID: ${requestId})`;
         }
@@ -271,7 +271,7 @@ export default function AdminLayout() {
         return;
       }
 
-      toast(t('admin.command.aiNoMatch', '暂时无法理解该指令'), { icon: '🤖' });
+      toast(t('admin.command.aiNoMatch'), { icon: '🤖' });
     },
     [executeIntentAction, handleNavigationIntent, isExecutingAiAction, t]
   );
@@ -342,7 +342,7 @@ export default function AdminLayout() {
     } catch (err) {
       const apiError = err?.response?.data;
       const message =
-        apiError?.error || t('admin.command.aiErrorGeneric', '无法获取 AI 响应，请稍后再试');
+        apiError?.error || t('admin.command.aiErrorGeneric');
       setAiSessions((prev) =>
         prev.map((session) =>
           session.id === sessionId
@@ -372,10 +372,10 @@ export default function AdminLayout() {
     [sendAiCommand]
   );
 
-  const aiInputHint = t('admin.command.aiHint', '按 Enter 或点击发送，让 AI 帮你导航或执行操作');
+  const aiInputHint = t('admin.command.aiHint');
   const sendButtonLabel = isAiRequesting
-    ? t('admin.command.aiSending', 'AI 正在解析…')
-    : t('admin.command.send', '发送指令');
+    ? t('admin.command.aiSending')
+    : t('admin.command.send');
 
   useEffect(() => {
     const target = typeof globalThis !== 'undefined' ? globalThis : undefined;
@@ -404,7 +404,7 @@ export default function AdminLayout() {
               value={commandQuery}
               onValueChange={setCommandQuery}
               onKeyDown={handleCommandKeyDown}
-              placeholder={t('admin.command.placeholder', '输入命令以跳转或执行操作')}
+              placeholder={t('admin.command.placeholder')}
             />
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 bg-slate-50/80 px-4 py-2 text-xs text-muted-foreground">
               <span className="text-[11px] text-slate-500">{aiInputHint}</span>
@@ -424,16 +424,16 @@ export default function AdminLayout() {
               </Button>
             </div>
             <CommandList>
-              <CommandEmpty>{t('admin.command.noResults', '没有匹配的结果')}</CommandEmpty>
+              <CommandEmpty>{t('admin.command.noResults')}</CommandEmpty>
               <div className="px-4 py-2 text-xs text-muted-foreground">
-                {t('admin.command.hint', '提示：直接在上方输入自然语言命令，AI 会结合当前页面给出建议。')}
+                {t('admin.command.hint')}
               </div>
               {showAiSection && (
-                <CommandGroup heading={t('admin.command.aiConversation', 'AI 对话')}>
+                <CommandGroup heading={t('admin.command.aiConversation')}>
                   <div className="flex flex-col gap-3 py-1">
                     {aiSessions.length === 0 && !isAiRequesting && (
                       <div className="rounded-2xl border border-dashed border-slate-300/80 bg-white/70 px-4 py-6 text-center text-sm text-slate-500">
-                        {t('admin.command.aiEmptyState', '还没有对话，试着描述你想做的事情吧。')}
+                        {t('admin.command.aiEmptyState')}
                       </div>
                     )}
                     {isAiRequesting && (
@@ -443,11 +443,11 @@ export default function AdminLayout() {
                         className="pointer-events-none items-start gap-3 rounded-2xl bg-transparent px-0 py-0"
                       >
                         <span className="mt-1 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
-                          {t('admin.command.aiLabel', '助手')}
+                          {t('admin.command.aiLabel')}
                         </span>
                         <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-600 shadow-sm">
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>{t('admin.command.aiLoading', 'AI 正在分析指令...')}</span>
+                          <span>{t('admin.command.aiLoading')}</span>
                         </div>
                       </CommandItem>
                     )}
@@ -459,7 +459,7 @@ export default function AdminLayout() {
                           className="pointer-events-none items-start gap-3 rounded-2xl bg-transparent px-0 py-0"
                         >
                           <span className="mt-1 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
-                            {t('admin.command.userLabel', '你')}
+                            {t('admin.command.userLabel')}
                           </span>
                           <div className="max-w-full rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-700 shadow-sm">
                             {session.query}
@@ -472,13 +472,13 @@ export default function AdminLayout() {
                             className="pointer-events-none items-start gap-3 rounded-2xl bg-transparent px-0 py-0"
                           >
                             <span className="mt-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-600">
-                              {t('admin.command.aiLabel', '助手')}
+                              {t('admin.command.aiLabel')}
                             </span>
                             <div className="flex w-full flex-col gap-1 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2 text-sm text-rose-600 shadow-sm">
                               <span>{session.error}</span>
                               {session.errorCode && (
                                 <span className="text-xs text-rose-500/80">
-                                  {t('admin.command.aiErrorCode', '错误代码')}：{session.errorCode}
+                                  {t('admin.command.aiErrorCode')}：{session.errorCode}
                                 </span>
                               )}
                             </div>
@@ -488,10 +488,10 @@ export default function AdminLayout() {
                             {session.intent && (() => {
                               const isFallback = session.intent.type === 'fallback';
                               const intentLabel = isFallback
-                                ? t('admin.command.aiFallbackTitle', '未能理解的指令')
-                                : (session.intent.label || t('admin.command.aiSuggestionFallback', '智能建议'));
+                                ? t('admin.command.aiFallbackTitle')
+                                : (session.intent.label || t('admin.command.aiSuggestionFallback'));
                               const intentReasoning = isFallback
-                                ? t('admin.command.aiFallbackReason', '无法从输入中提取明确的管理指令，请改用关键字搜索或再具体一些。')
+                                ? t('admin.command.aiFallbackReason')
                                 : session.intent.reasoning;
                               const intentTagClass = isFallback
                                 ? 'bg-amber-100 text-amber-800'
@@ -518,7 +518,7 @@ export default function AdminLayout() {
                                     intentTagClass
                                   )}
                                 >
-                                  {t('admin.command.aiLabel', '助手')}
+                                  {t('admin.command.aiLabel')}
                                 </span>
                                 <div className={cn('flex w-full flex-col gap-2 rounded-2xl border px-3 py-2 text-sm shadow-sm', intentCardClass)}>
                                   <span className="font-medium">{intentLabel}</span>
@@ -533,7 +533,7 @@ export default function AdminLayout() {
                                         {session.metadata?.mode && <span>{session.metadata.mode}</span>}
                                         {session.metadata?.usage?.total_tokens && (
                                           <span>
-                                            {t('admin.command.aiTokens', 'Tokens')}：{session.metadata.usage.total_tokens}
+                                            {t('admin.command.aiTokens')}：{session.metadata.usage.total_tokens}
                                           </span>
                                         )}
                                         {session.capabilities?.fingerprint && (
@@ -561,12 +561,12 @@ export default function AdminLayout() {
                                 className="items-start gap-3 rounded-2xl bg-transparent px-0 py-0"
                               >
                                 <span className="mt-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-600">
-                                  {t('admin.command.aiLabel', '助手')}
+                                  {t('admin.command.aiLabel')}
                                 </span>
                                 <div className="flex w-full flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
                                   <div className="flex items-center gap-2">
                                     <Sparkles className="h-4 w-4 text-emerald-500" />
-                                    <span className="font-medium">{alt.label || t('admin.command.aiAlternativeFallback', '可选方案')}</span>
+                                    <span className="font-medium">{alt.label || t('admin.command.aiAlternativeFallback')}</span>
                                   </div>
                                   {alt.reasoning && (
                                     <span className="text-xs text-slate-500">{alt.reasoning}</span>
@@ -584,7 +584,7 @@ export default function AdminLayout() {
                   </div>
                 </CommandGroup>
               )}
-              <CommandGroup heading={t('admin.command.navigation', '导航菜单')}>
+              <CommandGroup heading={t('admin.command.navigation')}>
                 {translatedLinks.map((link) => (
                   <CommandItem
                     key={link.to}
@@ -599,7 +599,7 @@ export default function AdminLayout() {
                   </CommandItem>
                 ))}
               </CommandGroup>
-              <CommandGroup heading={t('admin.command.quickActions', '快捷操作')}>
+              <CommandGroup heading={t('admin.command.quickActions')}>
                 {quickActions.map((action) => (
                   <CommandItem key={action.id} value={action.label} onSelect={action.onSelect}>
                     <Sparkles className="h-4 w-4" />
@@ -623,7 +623,7 @@ export default function AdminLayout() {
                     {t('admin.title')}
                   </div>
                   <p className="mt-3 text-xs leading-relaxed text-slate-500">
-                    {t('admin.subtitle', '集中管理CarbonTrack的一切')}
+                    {t('admin.subtitle')}
                   </p>
                 </SidebarHeader>
                 <SidebarContent className="px-3 py-4">
@@ -673,7 +673,7 @@ export default function AdminLayout() {
                   <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white/70 p-3 shadow-sm">
                     <Sparkles className="mt-1 h-4 w-4 text-emerald-500" />
                     <p className="text-xs leading-relaxed text-slate-600">
-                      {t('admin.footer.tip', '提示：使用 Ctrl + K 调出指挥面板')}
+                      {t('admin.footer.tip')}
                     </p>
                   </div>
                 </SidebarFooter>
@@ -684,7 +684,7 @@ export default function AdminLayout() {
                     <SidebarTrigger className="md:hidden" />
                     <div className="flex flex-col gap-2">
                       <Badge variant="outline" className="w-fit rounded-full border-emerald-200 bg-emerald-100/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-600">
-                        {t('admin.header.section', '当前板块')}
+                        {t('admin.header.section')}
                       </Badge>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">{activeLink?.label}</h1>
                     </div>
@@ -695,7 +695,7 @@ export default function AdminLayout() {
                         onClick={() => setCommandOpen(true)}
                       >
                         <Bot className="h-4 w-4" />
-                        {t('admin.command.open', '打开 AI 面板 / Ctrl + K')}
+                        {t('admin.command.open')}
                       </Button>
                       <Button
                         variant="ghost"
@@ -710,7 +710,7 @@ export default function AdminLayout() {
                         onClick={() => navigate('/admin/badges?create=1')}
                       >
                         <Award className="h-4 w-4" />
-                        {t('admin.header.quickBadge', '快速创建徽章')}
+                        {t('admin.header.quickBadge')}
                       </Button>
                     </div>
                   </div>

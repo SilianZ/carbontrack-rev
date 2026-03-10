@@ -91,8 +91,8 @@ export default function AdminPage() {
 
   const messageChartData = useMemo(
     () => [
-      { name: t('admin.dashboard.messages.readShort', '已读'), value: messageSummary.read },
-      { name: t('admin.dashboard.messages.unreadShort', '未读'), value: messageSummary.unread },
+      { name: t('admin.dashboard.messages.readShort'), value: messageSummary.read },
+      { name: t('admin.dashboard.messages.unreadShort'), value: messageSummary.unread },
     ],
     [messageSummary.read, messageSummary.unread, t]
   );
@@ -217,14 +217,14 @@ export default function AdminPage() {
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            {t('admin.dashboard.messages.title', '平台公告阅读情况')}
+                            {t('admin.dashboard.messages.title')}
                           </h3>
                           <p className="text-sm text-gray-500">
-                            {t('admin.dashboard.messages.subtitle', '展示最近公告与系统消息的阅读比例')}
+                            {t('admin.dashboard.messages.subtitle')}
                           </p>
                         </div>
                         <div className="rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-600">
-                          {t('admin.dashboard.messages.unreadBadge', '未读')} {number.format(messageSummary.unread)}
+                          {t('admin.dashboard.messages.unreadBadge')} {number.format(messageSummary.unread)}
                         </div>
                       </div>
                       <div className="mt-6 h-64">
@@ -249,7 +249,7 @@ export default function AdminPage() {
                           </ResponsiveContainer>
                         ) : (
                           <div className="flex h-full items-center justify-center text-sm text-gray-400">
-                            {t('admin.dashboard.messages.empty', '暂无公告阅读数据')}
+                            {t('admin.dashboard.messages.empty')}
                           </div>
                         )}
                       </div>
@@ -257,37 +257,37 @@ export default function AdminPage() {
 
                     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {t('admin.dashboard.messages.detailsTitle', '阅读明细')}
+                        {t('admin.dashboard.messages.detailsTitle')}
                       </h3>
                       <p className="mt-1 text-sm text-gray-500">
-                        {t('admin.dashboard.messages.detailsSubtitle', '统计截止最近一次后台刷新')}
+                        {t('admin.dashboard.messages.detailsSubtitle')}
                       </p>
 
                       <div className="mt-6 space-y-3 text-sm text-gray-600">
                         <div className="flex items-center justify-between">
-                          <span>{t('admin.dashboard.messages.totalLabel', '总消息数')}</span>
+                          <span>{t('admin.dashboard.messages.totalLabel')}</span>
                           <span className="font-semibold text-gray-900">{number.format(messageSummary.total)}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span>{t('admin.dashboard.messages.readLabel', '已读消息')}</span>
+                          <span>{t('admin.dashboard.messages.readLabel')}</span>
                           <span className="font-semibold text-emerald-600">{number.format(messageSummary.read)}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span>{t('admin.dashboard.messages.unreadLabel', '未读消息')}</span>
+                          <span>{t('admin.dashboard.messages.unreadLabel')}</span>
                           <span className="font-semibold text-sky-600">{number.format(messageSummary.unread)}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span>{t('admin.dashboard.messages.unreadRatioLabel', '未读率')}</span>
+                          <span>{t('admin.dashboard.messages.unreadRatioLabel')}</span>
                           <span className="font-semibold text-orange-500">{percent.format(unreadRate)}</span>
                         </div>
                       </div>
 
                       <div className="mt-6 flex flex-wrap items-center gap-3">
                         <div className="flex-1 rounded-lg bg-slate-50 p-4 text-xs text-slate-600">
-                          {t('admin.dashboard.messages.tip', '提示：前往广播中心可查看公告发送记录与优先级分析。')}
+                          {t('admin.dashboard.messages.tip')}
                         </div>
                         <Button variant="outline" size="sm" onClick={() => setActiveTab('broadcast')}>
-                          {t('admin.dashboard.messages.viewBroadcast', '前往广播中心')}
+                          {t('admin.dashboard.messages.viewBroadcast')}
                         </Button>
                       </div>
                     </div>

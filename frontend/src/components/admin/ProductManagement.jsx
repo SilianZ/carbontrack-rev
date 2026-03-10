@@ -723,7 +723,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
     const file = event.target.files && event.target.files[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('admin.products.form.fileTooLarge', '图片大小不能超过 5MB'));
+      toast.error(t('admin.products.form.fileTooLarge'));
       event.target.value = '';
       return;
     }
@@ -760,10 +760,10 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
         image_presigned_url: imageData.presigned_url || '',
         images: [imageData],
       }));
-      toast.success(t('admin.products.form.uploadSuccess', '图片上传成功'));
+      toast.success(t('admin.products.form.uploadSuccess'));
     } catch (error) {
       console.error('Product image upload failed', error);
-      toast.error(t('admin.products.form.uploadFailed', '图片上传失败，请重试'));
+      toast.error(t('admin.products.form.uploadFailed'));
     } finally {
       setUploading(false);
       if (event.target) {
@@ -1052,7 +1052,7 @@ function ProductCategorySelector({ value, onChange, initialCategories = [], t })
               type="button"
               className="rounded-full p-0.5 hover:bg-gray-200"
               onClick={handleClear}
-              aria-label={t('admin.products.form.removeCategory', '移除分类')}
+              aria-label={t('admin.products.form.removeCategory')}
             >
               <X className="h-3 w-3" />
             </button>
@@ -1072,14 +1072,14 @@ function ProductCategorySelector({ value, onChange, initialCategories = [], t })
               handleCreate();
             }
           }}
-          placeholder={t('admin.products.form.categorySearchPlaceholder', '输入或搜索分类名称')}
+          placeholder={t('admin.products.form.categorySearchPlaceholder')}
         />
         <Button type="button" variant="outline" onClick={handleCreate} disabled={!query.trim()}>
-          {t('admin.products.form.useCategory', '使用分类')}
+          {t('admin.products.form.useCategory')}
         </Button>
       </div>
       <p className="mt-1 text-xs text-gray-500">
-        {t('admin.products.form.categoryHint', '可选择已有分类或输入新分类，新分类会自动保存。')}
+        {t('admin.products.form.categoryHint')}
       </p>
       <div className="mt-3 rounded-md border bg-gray-50">
         <div className="flex items-center justify-between border-b px-3 py-2 text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -1089,7 +1089,7 @@ function ProductCategorySelector({ value, onChange, initialCategories = [], t })
         <div className="max-h-44 overflow-y-auto">
           {suggestions.length === 0 && !loading ? (
             <div className="px-3 py-2 text-sm text-gray-500">
-              {t('admin.products.form.noCategorySuggestions', '暂无匹配的分类，按回车创建新的分类。')}
+              {t('admin.products.form.noCategorySuggestions')}
             </div>
           ) : (
             suggestions.map((item) => {
@@ -1196,7 +1196,7 @@ function ProductTagSelector({ value, onChange, t }) {
                 type="button"
                 className="rounded-full p-0.5 hover:bg-gray-200"
                 onClick={() => handleRemove(index)}
-                aria-label={t('admin.products.form.removeTag', '移除标签')}
+                aria-label={t('admin.products.form.removeTag')}
               >
                 <X className="h-3 w-3" />
               </button>

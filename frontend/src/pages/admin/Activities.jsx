@@ -15,13 +15,13 @@ export default function AdminActivitiesPage() {
           value="library"
           className="rounded-lg py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow text-sm font-semibold transition-all duration-200"
         >
-          {t('admin.activities.tab.library', 'Activity Library')}
+          {t('admin.activities.tab.library')}
         </TabsTrigger>
         <TabsTrigger
           value="review"
           className="rounded-lg py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow text-sm font-semibold transition-all duration-200"
         >
-          {t('admin.activities.tab.review', 'Record Review')}
+          {t('admin.activities.tab.review')}
         </TabsTrigger>
       </TabsList>
       <TabsContent value="library">

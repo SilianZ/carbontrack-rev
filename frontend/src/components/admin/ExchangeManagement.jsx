@@ -90,7 +90,7 @@ export function ExchangeManagement() {
     const trimmedNotes = statusDialog.adminNotes.trim();
 
     if (requiresNotes && !trimmedNotes) {
-      setStatusDialog((prev) => ({ ...prev, error: t('admin.exchanges.notesRequired', '请填写处理说明') }));
+      setStatusDialog((prev) => ({ ...prev, error: t('admin.exchanges.notesRequired') }));
       return;
     }
 

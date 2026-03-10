@@ -175,7 +175,7 @@ export function StoreFilters({
               const count = category.product_count ?? category.count ?? category.total ?? 0;
               return (
                 <option key={key} value={key}>
-                  {t(`store.categories.${key}`, label)} ({count})
+                    {t(`store.categories.${key}`, label)} ({count})
                 </option>
               );
             })}
@@ -335,7 +335,7 @@ export function StoreFilters({
                 onClick={() => handleFilterChange('category', key)}
                 className="text-xs"
               >
-                {t(`store.categories.${key}`, label)}
+                    {t(`store.categories.${key}`, label)}
                 <span className="ml-1 text-xs opacity-75">({count})</span>
               </Button>
             );

@@ -72,15 +72,15 @@ export function CheckinCalendar({
           <div>
             <CardTitle className="text-lg font-semibold text-emerald-800 flex items-center gap-2">
               <CalendarDays className="h-5 w-5" />
-              {t('dashboard.checkin.calendarTitle', '活动日历')}
+              {t('dashboard.checkin.calendarTitle')}
             </CardTitle>
             <CardDescription className="text-sm text-emerald-700">
-              {t('dashboard.checkin.calendarDescription', '每天提交一次碳减排记录即可点亮当日。')}
+              {t('dashboard.checkin.calendarDescription')}
             </CardDescription>
           </div>
           {typeof remaining === 'number' && (
             <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
-              {t('dashboard.checkin.makeupRemaining', '补打卡剩余 {{count}}', { count: remaining })}
+              {t('dashboard.checkin.makeupRemaining',  { count: remaining })}
             </Badge>
           )}
         </div>
@@ -90,34 +90,34 @@ export function CheckinCalendar({
           <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
             <div className="flex items-center gap-2 text-sm text-emerald-700">
               <Flame className="h-4 w-4" />
-              {t('dashboard.checkin.currentStreak', '当前连击')}
+              {t('dashboard.checkin.currentStreak')}
             </div>
             <div className="mt-1 text-2xl font-semibold text-emerald-800">{currentStreak}</div>
             <div className="text-xs text-emerald-600">
               {activeToday
-                ? t('dashboard.checkin.todayChecked', '今日已打卡')
-                : t('dashboard.checkin.todayMissing', '今天还未打卡')}
+                ? t('dashboard.checkin.todayChecked')
+                : t('dashboard.checkin.todayMissing')}
             </div>
           </div>
           <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
             <div className="flex items-center gap-2 text-sm text-emerald-700">
               <Flame className="h-4 w-4" />
-              {t('dashboard.checkin.longestStreak', '历史最长')}
+              {t('dashboard.checkin.longestStreak')}
             </div>
             <div className="mt-1 text-2xl font-semibold text-emerald-800">{longestStreak}</div>
             <div className="text-xs text-emerald-600">
-              {t('dashboard.checkin.totalDays', '累计打卡 {{count}} 天', { count: totalDays })}
+              {t('dashboard.checkin.totalDays',  { count: totalDays })}
             </div>
           </div>
           <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
             <div className="flex items-center gap-2 text-sm text-emerald-700">
               <RefreshCcw className="h-4 w-4" />
-              {t('dashboard.checkin.makeupQuota', '补打卡额度')}
+              {t('dashboard.checkin.makeupQuota')}
             </div>
             <div className="mt-1 text-2xl font-semibold text-emerald-800">
               {remaining ?? '--'}
             </div>
-            <div className="text-xs text-emerald-600">{t('dashboard.checkin.monthlyReset', '每月重置')}</div>
+            <div className="text-xs text-emerald-600">{t('dashboard.checkin.monthlyReset')}</div>
           </div>
         </div>
 
@@ -146,11 +146,11 @@ export function CheckinCalendar({
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              {t('dashboard.checkin.legendActive', '提交日活跃')}
+              {t('dashboard.checkin.legendActive')}
             </span>
             <span className="inline-flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-amber-400" />
-              {t('dashboard.checkin.legendMakeup', '补打卡')}
+              {t('dashboard.checkin.legendMakeup')}
             </span>
           </div>
         </div>
@@ -158,21 +158,21 @@ export function CheckinCalendar({
         <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
           <div className="text-sm text-emerald-700 font-medium">
             {selectedDay
-              ? t('dashboard.checkin.selectedDate', '已选择 {{date}}', { date: selectedKey })
-              : t('dashboard.checkin.selectHint', '选择日期以查看状态')}
+              ? t('dashboard.checkin.selectedDate',  { date: selectedKey })
+              : t('dashboard.checkin.selectHint')}
           </div>
           <div className="mt-1 text-xs text-emerald-600">
             {selectedDay
               ? selectedCheckin
-                ? `${t('dashboard.checkin.statusChecked', '已打卡')} · ${
+                ? `${t('dashboard.checkin.statusChecked')} · ${
                   selectedCheckin.source === 'makeup'
-                    ? t('dashboard.checkin.statusMakeup', '补打卡')
-                    : t('dashboard.checkin.statusRecord', '提交记录')
+                    ? t('dashboard.checkin.statusMakeup')
+                    : t('dashboard.checkin.statusRecord')
                 }`
                 : isFutureSelected
-                  ? t('dashboard.checkin.statusFuture', '未来日期不可补打卡')
-                  : t('dashboard.checkin.statusMissing', '未打卡')
-              : t('dashboard.checkin.selectHelper', '点击日历上的日期后，可补打卡缺失的日子。')}
+                  ? t('dashboard.checkin.statusFuture')
+                  : t('dashboard.checkin.statusMissing')
+              : t('dashboard.checkin.selectHelper')}
           </div>
           <div className="mt-3 flex items-center gap-2">
             <Button
@@ -181,13 +181,13 @@ export function CheckinCalendar({
               disabled={!canMakeup || loading}
               className={cn(!canMakeup && 'opacity-60')}
             >
-              {t('dashboard.checkin.makeupAction', '去补打卡')}
+              {t('dashboard.checkin.makeupAction')}
             </Button>
             {remaining === 0 && (
-              <span className="text-xs text-amber-600">{t('dashboard.checkin.makeupQuotaUsed', '本月补打卡额度已用完')}</span>
+              <span className="text-xs text-amber-600">{t('dashboard.checkin.makeupQuotaUsed')}</span>
             )}
             {canMakeup && (
-              <span className="text-xs text-emerald-600">{t('dashboard.checkin.makeupHint', '将跳转到提交活动页面完成补打卡')}</span>
+              <span className="text-xs text-emerald-600">{t('dashboard.checkin.makeupHint')}</span>
             )}
           </div>
         </div>

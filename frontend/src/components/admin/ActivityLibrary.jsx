@@ -108,7 +108,7 @@ export default function ActivityLibrary() {
 
   const createMutation = useMutation((payload) => adminAPI.createActivity(payload), {
     onSuccess: () => {
-      toast.success(t('admin.activities.library.saveSuccess', 'Activity saved successfully'));
+      toast.success(t('admin.activities.library.saveSuccess'));
       queryClient.invalidateQueries('adminActivitiesLibrary');
       closeModal();
     },
@@ -119,9 +119,9 @@ export default function ActivityLibrary() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries('adminActivitiesLibrary');
       if (variables?.mode === 'toggle') {
-        toast.success(t('admin.activities.library.toggleActiveSuccess', 'Activity status updated'));
+        toast.success(t('admin.activities.library.toggleActiveSuccess'));
       } else {
-        toast.success(t('admin.activities.library.saveSuccess', 'Activity saved successfully'));
+        toast.success(t('admin.activities.library.saveSuccess'));
         closeModal();
       }
     },
@@ -130,7 +130,7 @@ export default function ActivityLibrary() {
 
   const deleteMutation = useMutation((id) => adminAPI.deleteActivity(id), {
     onSuccess: () => {
-      toast.success(t('admin.activities.library.deleteSuccess', 'Activity archived'));
+      toast.success(t('admin.activities.library.deleteSuccess'));
       queryClient.invalidateQueries('adminActivitiesLibrary');
       setConfirmDelete({ open: false, activity: null });
     },
@@ -139,7 +139,7 @@ export default function ActivityLibrary() {
 
   const restoreMutation = useMutation((id) => adminAPI.restoreActivity(id), {
     onSuccess: () => {
-      toast.success(t('admin.activities.library.restoreSuccess', 'Activity restored'));
+      toast.success(t('admin.activities.library.restoreSuccess'));
       queryClient.invalidateQueries('adminActivitiesLibrary');
     },
     onError: () => toast.error(t('common.error')),
@@ -168,7 +168,7 @@ export default function ActivityLibrary() {
     };
 
     if (!payload.name_zh || !payload.name_en || !payload.category || !payload.unit || Number.isNaN(payload.carbon_factor)) {
-      setFormError(t('admin.activities.library.validationError', 'Please complete all required fields.'));
+      setFormError(t('admin.activities.library.validationError'));
       return;
     }
 
@@ -200,14 +200,14 @@ export default function ActivityLibrary() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t('admin.activities.library.title', 'Activity Library')}</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('admin.activities.library.title')}</h2>
           <p className="text-muted-foreground">
-            {t('admin.activities.library.description', 'Maintain the catalogue of carbon-reduction activities available to users.')}
+            {t('admin.activities.library.description')}
           </p>
         </div>
         <Button onClick={openCreate} className="w-full md:w-auto">
           <PlusCircle className="mr-2 h-4 w-4" />
-          {t('admin.activities.library.create', 'Create Activity')}
+          {t('admin.activities.library.create')}
         </Button>
       </div>
 
@@ -215,17 +215,17 @@ export default function ActivityLibrary() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('admin.activities.library.filters.search', 'Search')}
+              {t('admin.activities.library.filters.search')}
             </label>
             <Input
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              placeholder={t('admin.activities.library.searchPlaceholder', 'Search by name or description...')}
+              placeholder={t('admin.activities.library.searchPlaceholder')}
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('admin.activities.library.filters.category', 'Category')}
+              {t('admin.activities.library.filters.category')}
             </label>
             <select
               value={filters.category}
@@ -240,17 +240,17 @@ export default function ActivityLibrary() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('admin.activities.library.filters.status', 'Status')}
+              {t('admin.activities.library.filters.status')}
             </label>
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
-              <option value="active">{t('admin.activities.library.status.active', 'Active')}</option>
-              <option value="inactive">{t('admin.activities.library.status.inactive', 'Inactive')}</option>
-              <option value="deleted">{t('admin.activities.library.status.deleted', 'Deleted')}</option>
-              <option value="all">{t('admin.activities.library.status.all', 'All')}</option>
+              <option value="active">{t('admin.activities.library.status.active')}</option>
+              <option value="inactive">{t('admin.activities.library.status.inactive')}</option>
+              <option value="deleted">{t('admin.activities.library.status.deleted')}</option>
+              <option value="all">{t('admin.activities.library.status.all')}</option>
             </select>
           </div>
         </div>
@@ -260,25 +260,25 @@ export default function ActivityLibrary() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('admin.activities.library.table.name', 'Name')}
+                  {t('admin.activities.library.table.name')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('admin.activities.library.table.category', 'Category')}
+                  {t('admin.activities.library.table.category')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('admin.activities.library.table.unit', 'Unit')}
+                  {t('admin.activities.library.table.unit')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('admin.activities.library.table.carbon_factor', 'Carbon factor')}
+                  {t('admin.activities.library.table.carbon_factor')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('admin.activities.library.table.status', 'Status')}
+                  {t('admin.activities.library.table.status')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('admin.activities.library.table.updated_at', 'Updated')}
+                  {t('admin.activities.library.table.updated_at')}
                 </th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('admin.activities.library.table.actions', 'Actions')}
+                  {t('admin.activities.library.table.actions')}
                 </th>
               </tr>
             </thead>
@@ -292,17 +292,17 @@ export default function ActivityLibrary() {
               ) : activities.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-6 text-center text-sm text-gray-500">
-                    {t('admin.activities.library.empty', 'No activities match the current filters.')}
+                    {t('admin.activities.library.empty')}
                   </td>
                 </tr>
               ) : (
                 activities.map((activity) => {
                   const updatedAt = activity.updated_at ? format(new Date(activity.updated_at), 'yyyy-MM-dd HH:mm') : '—';
                   const statusLabel = activity.deleted_at
-                    ? t('admin.activities.library.status.deleted', 'Deleted')
+                    ? t('admin.activities.library.status.deleted')
                     : activity.is_active
-                      ? t('admin.activities.library.status.active', 'Active')
-                      : t('admin.activities.library.status.inactive', 'Inactive');
+                      ? t('admin.activities.library.status.active')
+                      : t('admin.activities.library.status.inactive');
 
                   return (
                     <tr key={activity.id}>
@@ -374,11 +374,11 @@ export default function ActivityLibrary() {
           <DialogHeader>
             <DialogTitle>
               {editingId
-                ? t('admin.activities.library.edit', 'Edit Activity')
-                : t('admin.activities.library.create', 'Create Activity')}
+                ? t('admin.activities.library.edit')
+                : t('admin.activities.library.create')}
             </DialogTitle>
             <DialogDescription>
-              {t('admin.activities.library.description', 'Maintain the catalogue of carbon-reduction activities available to users.')}
+              {t('admin.activities.library.description')}
             </DialogDescription>
           </DialogHeader>
 
@@ -386,7 +386,7 @@ export default function ActivityLibrary() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.activities.library.fields.name_zh', 'Name (Chinese)')}
+                  {t('admin.activities.library.fields.name_zh')}
                 </label>
                 <Input
                   value={formState.name_zh}
@@ -396,7 +396,7 @@ export default function ActivityLibrary() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.activities.library.fields.name_en', 'Name (English)')}
+                  {t('admin.activities.library.fields.name_en')}
                 </label>
                 <Input
                   value={formState.name_en}
@@ -409,7 +409,7 @@ export default function ActivityLibrary() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.activities.library.fields.category', 'Category')}
+                  {t('admin.activities.library.fields.category')}
                 </label>
                 <Input
                   value={formState.category}
@@ -425,7 +425,7 @@ export default function ActivityLibrary() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.activities.library.fields.unit', 'Unit')}
+                  {t('admin.activities.library.fields.unit')}
                 </label>
                 <select
                   value={formState.unit}
@@ -442,7 +442,7 @@ export default function ActivityLibrary() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.activities.library.fields.carbon_factor', 'Carbon factor')}
+                  {t('admin.activities.library.fields.carbon_factor')}
                 </label>
                 <Input
                   type="number"
@@ -454,7 +454,7 @@ export default function ActivityLibrary() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.activities.library.fields.sort_order', 'Sort order')}
+                  {t('admin.activities.library.fields.sort_order')}
                 </label>
                 <Input
                   type="number"
@@ -467,7 +467,7 @@ export default function ActivityLibrary() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.activities.library.fields.description_zh', 'Description (Chinese)')}
+                  {t('admin.activities.library.fields.description_zh')}
                 </label>
                 <Textarea
                   value={formState.description_zh}
@@ -477,7 +477,7 @@ export default function ActivityLibrary() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.activities.library.fields.description_en', 'Description (English)')}
+                  {t('admin.activities.library.fields.description_en')}
                 </label>
                 <Textarea
                   value={formState.description_en}
@@ -490,7 +490,7 @@ export default function ActivityLibrary() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('admin.activities.library.fields.icon', 'Icon key')}
+                  {t('admin.activities.library.fields.icon')}
                 </label>
                 <Input
                   value={formState.icon}
@@ -501,7 +501,7 @@ export default function ActivityLibrary() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('admin.activities.library.fields.is_active', 'Active')}
+                    {t('admin.activities.library.fields.is_active')}
                   </label>
                   <Switch
                     checked={Boolean(formState.is_active)}
@@ -518,11 +518,11 @@ export default function ActivityLibrary() {
 
           <DialogFooter>
             <Button variant="outline" onClick={closeModal} disabled={busy}>
-              {t('admin.activities.library.actions.cancel', 'Cancel')}
+              {t('admin.activities.library.actions.cancel')}
             </Button>
             <Button onClick={handleFormSubmit} disabled={busy}>
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('admin.activities.library.actions.save', 'Save')}
+              {t('admin.activities.library.actions.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -531,9 +531,9 @@ export default function ActivityLibrary() {
       <AlertDialog open={confirmDelete.open} onOpenChange={(open) => !open && setConfirmDelete({ open: false, activity: null })}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('admin.activities.library.actions.delete', 'Disable')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.activities.library.actions.delete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('admin.activities.library.confirmDelete', 'Disable and archive this activity?')}
+              {t('admin.activities.library.confirmDelete')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

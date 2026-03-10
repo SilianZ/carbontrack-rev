@@ -64,8 +64,8 @@ export default function ProfilePage() {
       <div className="container mx-auto py-8 px-4">
         <Alert variant="warning">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{t('common.notice', '提示')}</AlertTitle>
-          <AlertDescription>{t('profile.noUserData', '暂未获取到个人资料，请稍后重试。')}</AlertDescription>
+          <AlertTitle>{t('common.notice')}</AlertTitle>
+          <AlertDescription>{t('profile.noUserData')}</AlertDescription>
         </Alert>
       </div>
     );

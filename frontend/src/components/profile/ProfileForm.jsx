@@ -135,19 +135,19 @@ export function ProfileForm({ user }) {
 
   const summaryItems = [
     {
-      label: t('profile.userId', '用户ID'),
+      label: t('profile.userId'),
       value: user?.id ?? FALLBACK,
     },
     {
-      label: t('profile.uuid', 'UUID'),
+      label: t('profile.uuid'),
       value: user?.uuid || FALLBACK,
     },
     {
-      label: t('profile.points', '积分'),
+      label: t('profile.points'),
       value: user?.points ?? 0,
     },
     {
-      label: t('profile.lastUpdated', '最后更新'),
+      label: t('profile.lastUpdated'),
       value: formattedUpdatedAt,
     },
   ];
@@ -162,12 +162,12 @@ export function ProfileForm({ user }) {
       value: user?.email || FALLBACK,
     },
     {
-      label: t('profile.region', 'Region'),
+      label: t('profile.region'),
       value: user?.region_label || user?.region_code || FALLBACK,
     },
     {
       label: t('profile.school'),
-      value: currentSchoolName || t('profile.schoolUnset', 'Not set'),
+      value: currentSchoolName || t('profile.schoolUnset'),
     },
   ];
 
@@ -208,7 +208,7 @@ export function ProfileForm({ user }) {
     if (!pendingPayload) {
       setFeedback({
         type: 'error',
-        message: t('profile.noChanges', 'No changes detected.'),
+        message: t('profile.noChanges'),
       });
       return;
     }
@@ -242,13 +242,13 @@ export function ProfileForm({ user }) {
       setInputValue('');
       setFeedback({
         type: 'success',
-        message: t('profile.updateSuccess', 'Profile updated successfully.'),
+        message: t('profile.updateSuccess'),
       });
     } catch (error) {
       const message =
         error.response?.data?.message ||
         error.message ||
-        t('profile.updateFailed', 'Unable to update profile.');
+        t('profile.updateFailed');
       setFeedback({ type: 'error', message });
     } finally {
       setIsSaving(false);
@@ -276,13 +276,11 @@ export function ProfileForm({ user }) {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
           <div>
             <h3 className="text-base font-semibold text-gray-900">
-              {t('profile.editProfile', 'Edit Profile')}
+              {t('profile.editProfile')}
             </h3>
             <p className="text-sm text-muted-foreground">
               {t(
-                'profile.editDescription',
-                'Update your region and school information.'
-              )}
+                'profile.editDescription')}
             </p>
           </div>
         </div>
@@ -290,7 +288,7 @@ export function ProfileForm({ user }) {
         <form className="space-y-6" onSubmit={handleSubmit}>
           
           <div className="space-y-4">
-             <h4 className="text-sm font-medium text-gray-900 border-b pb-2">{t('profile.regionSettings', 'Region Settings')}</h4>
+             <h4 className="text-sm font-medium text-gray-900 border-b pb-2">{t('profile.regionSettings')}</h4>
              <RegionSelector
                 countryCode={countryCode}
                 stateCode={stateCode}
@@ -301,45 +299,41 @@ export function ProfileForm({ user }) {
 
           <div className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h4 className="text-sm font-medium text-gray-900 border-b pb-2 w-full">{t('profile.schoolSettings', 'School Settings')}</h4>
+                <h4 className="text-sm font-medium text-gray-900 border-b pb-2 w-full">{t('profile.schoolSettings')}</h4>
             </div>
             
             <div>
                 <label htmlFor="schoolSearch" className="block text-sm font-medium text-gray-700">
-                {t('auth.school', 'School')}
+                {t('auth.school')}
                 </label>
                 <Input
                 id="schoolSearch"
                 className="mt-2"
                 placeholder={t(
-                    'profile.schoolSearchPlaceholder',
-                    'Search for a school or enter a new name'
-                )}
+                    'profile.schoolSearchPlaceholder')}
                 value={inputValue}
                 onChange={handleInputChange}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
                 {t(
-                    'profile.schoolInputHint',
-                    'Selecting an existing school keeps data consistent. Typing a new school name will create it after verification.'
-                )}
+                    'profile.schoolInputHint')}
                 </p>
             </div>
 
             <div className="rounded-md border bg-white">
                 <div className="flex items-center justify-between border-b px-3 py-2">
                 <span className="text-sm font-medium text-muted-foreground">
-                    {t('profile.schoolSuggestions', 'Suggestions')}
+                    {t('profile.schoolSuggestions')}
                 </span>
                 <Button type="button" variant="ghost" size="sm" onClick={handleClearSelection}>
-                    {t('profile.clearSelection', 'Clear selection')}
+                    {t('profile.clearSelection')}
                 </Button>
                 </div>
                 <div className="max-h-48 overflow-y-auto">
                 {loadingSuggestions ? (
                     <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    {t('profile.loadingSchools', 'Loading schools...')}
+                    {t('profile.loadingSchools')}
                     </div>
                 ) : suggestions.length > 0 ? (
                     suggestions.map((school) => {
@@ -354,13 +348,13 @@ export function ProfileForm({ user }) {
                         }`}
                         >
                         <span>{school.name}</span>
-                        {isActive && <Badge variant="outline">{t('profile.selected', 'Selected')}</Badge>}
+                        {isActive && <Badge variant="outline">{t('profile.selected')}</Badge>}
                         </button>
                     );
                     })
                 ) : (
                     <div className="px-3 py-3 text-sm text-muted-foreground">
-                    {t('profile.schoolNoResults', 'No matching schools. Enter a new name above.')}
+                    {t('profile.schoolNoResults')}
                     </div>
                 )}
                 </div>
@@ -384,18 +378,16 @@ export function ProfileForm({ user }) {
             />
             <p className="text-xs text-muted-foreground text-center">
               {t(
-                'profile.turnstileNotice',
-                'Verification is required to prevent automated updates.'
-              )}
+                'profile.turnstileNotice')}
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Button type="submit" className="flex-1" loading={isSaving} disabled={submitDisabled}>
-              {t('profile.saveChanges', 'Save Changes')}
+              {t('profile.saveChanges')}
             </Button>
             <Button type="button" variant="outline" className="flex-1" onClick={handleReset}>
-              {t('profile.reset', 'Reset')}
+              {t('profile.reset')}
             </Button>
           </div>
         </form>

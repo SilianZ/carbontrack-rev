@@ -57,11 +57,11 @@ export function PasskeyManagement() {
 
     switch (passkeySupport.reason) {
       case PASSKEY_SUPPORT_REASONS.INSECURE_CONTEXT:
-        return t('profile.passkey.supportReasonInsecureContext', '当前页面不是安全上下文，请使用 HTTPS 或 localhost。');
+        return t('profile.passkey.supportReasonInsecureContext');
       case PASSKEY_SUPPORT_REASONS.MISSING_PUBLIC_KEY_CREDENTIAL:
-        return t('profile.passkey.supportReasonMissingWebauthn', '当前浏览器未提供 WebAuthn 能力。');
+        return t('profile.passkey.supportReasonMissingWebauthn');
       case PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API:
-        return t('profile.passkey.supportReasonMissingCredentialsApi', '当前浏览器未提供凭据管理接口。');
+        return t('profile.passkey.supportReasonMissingCredentialsApi');
       default:
         return t('profile.passkey.notSupported');
     }
@@ -101,7 +101,7 @@ export function PasskeyManagement() {
       onError: (err) => {
         console.error('Passkey registration error:', err);
         if (err?.code === 'PASSKEY_REGISTRATION_CANCELLED') {
-          toast.error(t('profile.passkey.registerCancelled', '通行密钥注册已取消'));
+          toast.error(t('profile.passkey.registerCancelled'));
           return;
         }
         toast.error(t('profile.passkey.registerFailed'));
@@ -119,7 +119,7 @@ export function PasskeyManagement() {
       onError: (err) => {
         const status = err.response?.status;
         if (status === 404 || status === 405) {
-          toast.error(t('profile.passkey.deleteUnavailable', '通行密钥删除功能暂未上线'));
+          toast.error(t('profile.passkey.deleteUnavailable'));
           return;
         }
         toast.error(t('profile.passkey.deleteFailed'));
@@ -153,7 +153,7 @@ export function PasskeyManagement() {
           </CardTitle>
           <CardDescription className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-            {t('common.loading', '正在加载...')}
+            {t('common.loading')}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -215,7 +215,7 @@ export function PasskeyManagement() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>{t('common.error')}</AlertTitle>
-            <AlertDescription>{t('profile.passkey.loadError', '加载通行密钥失败')}</AlertDescription>
+            <AlertDescription>{t('profile.passkey.loadError')}</AlertDescription>
           </Alert>
         ) : passkeys.length === 0 ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">

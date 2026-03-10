@@ -302,7 +302,7 @@ export default function DataInputForm({
               </div>
               <div>
                 <span className="text-gray-500">{t('activities.unit')}:</span>
-                <div className="font-medium">{t(`units.${activity.unit}`, activity.unit)}</div>
+                    <div className="font-medium">{t(`units.${activity.unit}`, activity.unit)}</div>
               </div>
               <div>
                 <span className="text-gray-500">{t('activities.carbonFactor')}:</span>
@@ -381,7 +381,7 @@ export default function DataInputForm({
                 )}
                 {checkinDate && (
                   <p className="mt-2 text-xs text-emerald-600">
-                    {t('activities.checkin.makeupHelper', '补打卡日期：{{date}}（不影响活动发生时间）', { date: checkinDate })}
+                    {t('activities.checkin.makeupHelper',  { date: checkinDate })}
                   </p>
                 )}
               </div>

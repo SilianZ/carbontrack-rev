@@ -233,19 +233,19 @@ export default function MessagesPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmDialog.type === 'delete' && t('messages.confirmDeleteTitle', 'Confirm Delete')}
-              {confirmDialog.type === 'deleteAll' && t('messages.confirmDeleteAllTitle', 'Confirm Delete All')}
-              {confirmDialog.type === 'markAllRead' && t('messages.confirmMarkAllReadTitle', 'Confirm Mark All Read')}
+              {confirmDialog.type === 'delete' && t('messages.confirmDeleteTitle')}
+              {confirmDialog.type === 'deleteAll' && t('messages.confirmDeleteAllTitle')}
+              {confirmDialog.type === 'markAllRead' && t('messages.confirmMarkAllReadTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmDialog.type === 'delete' && t('messages.confirmDelete', 'Are you sure you want to delete this message?')}
-              {confirmDialog.type === 'deleteAll' && t('messages.confirmDeleteAll', 'Are you sure you want to delete all messages?')}
-              {confirmDialog.type === 'markAllRead' && t('messages.confirmMarkAllRead', 'Are you sure you want to mark all messages as read?')}
+              {confirmDialog.type === 'delete' && t('messages.confirmDelete')}
+              {confirmDialog.type === 'deleteAll' && t('messages.confirmDeleteAll')}
+              {confirmDialog.type === 'markAllRead' && t('messages.confirmMarkAllRead')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeConfirmDialog}>{t('common.cancel', 'Cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAction}>{t('common.confirm', 'Confirm')}</AlertDialogAction>
+            <AlertDialogCancel onClick={closeConfirmDialog}>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAction}>{t('common.confirm')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

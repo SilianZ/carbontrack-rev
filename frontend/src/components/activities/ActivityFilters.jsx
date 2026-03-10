@@ -112,7 +112,7 @@ export function ActivityFilters({
             <option value="">{t('activities.filters.allCategories')}</option>
             {normalizedCategories.map((category) => (
               <option key={category.category} value={category.category}>
-                {t(`activities.categories.${category.category}`, category.category)}
+                    {t(`activities.categories.${category.category}`, category.category)}
               </option>
             ))}
           </select>
@@ -249,4 +249,3 @@ export function ActivityFilters({
     </div>
   );
 }
-
