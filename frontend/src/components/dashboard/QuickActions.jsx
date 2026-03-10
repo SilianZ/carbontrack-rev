@@ -88,7 +88,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
 
       <CardContent>
         {/* 固定最多两列：避免在右侧 1/3 宽容器内出现三列导致过窄/错位 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2 gap-4">
           {actions.map((action) => {
             const Icon = action.icon;
 
@@ -96,7 +96,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
               <Button
                 key={action.id}
                 variant={action.primary ? "default" : "outline"}
-                className={`h-auto w-full p-4 flex flex-col items-start justify-start text-left gap-3 relative whitespace-normal ${action.primary ? action.color : 'hover:bg-gray-50'
+                className={`h-auto w-full min-w-0 p-4 flex flex-col items-start justify-start text-left gap-3 relative whitespace-normal ${action.primary ? action.color : 'hover:bg-gray-50'
                   }`}
                 onClick={() => handleActionClick(action)}
               >
@@ -106,13 +106,13 @@ export function QuickActions({ userStats = {}, onActionClick }) {
                   </div>
                 )}
 
-                <div className="flex items-start gap-3 w-full">
+                <div className="flex items-start gap-3 w-full min-w-0">
                   <Icon className={`h-6 w-6 mt-1 flex-shrink-0 ${action.primary ? 'text-white' : 'text-gray-700'}`} />
-                  <span className={`text-lg font-semibold flex-1 ${action.primary ? 'text-white' : 'text-gray-800'}`}>
+                  <span className={`block min-w-0 flex-1 break-words text-base font-semibold leading-tight sm:text-lg ${action.primary ? 'text-white' : 'text-gray-800'}`}>
                     {action.title}
                   </span>
                 </div>
-                <p className={`text-sm ${action.primary ? 'text-gray-200' : 'text-gray-500'} text-wrap`}>
+                <p className={`w-full break-words text-sm ${action.primary ? 'text-gray-200' : 'text-gray-500'}`}>
                   {action.description}
                 </p>
               </Button>
