@@ -87,7 +87,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
       </CardHeader>
 
       <CardContent>
-        {/* 固定最多两列：避免在右侧 1/3 宽容器内出现三列导致过窄/错位 */}
+        {/* 根据侧栏宽度在 1/2 列间切换：中等宽度两列、窄侧栏回退单列、超宽屏再恢复两列 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2 gap-4">
           {actions.map((action) => {
             const Icon = action.icon;
