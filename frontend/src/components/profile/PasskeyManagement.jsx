@@ -4,7 +4,8 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { passkeyAPI } from '../../lib/api/passkey';
 import { 
   IS_PASSKEY_ENABLED, 
-  isPasskeySupported, 
+  getPasskeySupport,
+  PASSKEY_SUPPORT_REASONS,
   prepareRegistrationOptions, 
   encodeRegistrationResponse 
 } from '../../lib/passkey';
@@ -27,18 +28,18 @@ import { formatDateSafe } from '../../lib/utils';
 export function PasskeyManagement() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [supported, setSupported] = useState(null);
+  const [passkeySupport, setPasskeySupport] = useState(null);
 
   // Check support on mount
   React.useEffect(() => {
-    isPasskeySupported().then(setSupported);
+    getPasskeySupport().then(setPasskeySupport);
   }, []);
 
   const { data: passkeysData, isLoading, error } = useQuery(
     'passkeys',
     () => passkeyAPI.listPasskeys(),
     { 
-      enabled: IS_PASSKEY_ENABLED && supported === true,
+      enabled: IS_PASSKEY_ENABLED && passkeySupport?.canRegister === true,
       retry: false,
       onError: (err) => {
         // If 404, backend might not have the endpoint yet, which is fine for Phase A
@@ -48,6 +49,23 @@ export function PasskeyManagement() {
       }
     }
   );
+
+  const passkeySupportMessage = (() => {
+    if (!passkeySupport || passkeySupport.canRegister) {
+      return '';
+    }
+
+    switch (passkeySupport.reason) {
+      case PASSKEY_SUPPORT_REASONS.INSECURE_CONTEXT:
+        return t('profile.passkey.supportReasonInsecureContext', '当前页面不是安全上下文，请使用 HTTPS 或 localhost。');
+      case PASSKEY_SUPPORT_REASONS.MISSING_PUBLIC_KEY_CREDENTIAL:
+        return t('profile.passkey.supportReasonMissingWebauthn', '当前浏览器未提供 WebAuthn 能力。');
+      case PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API:
+        return t('profile.passkey.supportReasonMissingCredentialsApi', '当前浏览器未提供凭据管理接口。');
+      default:
+        return t('profile.passkey.notSupported');
+    }
+  })();
 
   const registerMutation = useMutation(
     async () => {
@@ -125,7 +143,7 @@ export function PasskeyManagement() {
     );
   }
 
-  if (supported === null) {
+  if (passkeySupport === null) {
     return (
       <Card>
         <CardHeader>
@@ -142,7 +160,7 @@ export function PasskeyManagement() {
     );
   }
 
-  if (supported === false) {
+  if (passkeySupport.canRegister === false) {
     return (
       <Card>
         <CardHeader>
@@ -152,7 +170,7 @@ export function PasskeyManagement() {
           </CardTitle>
           <CardDescription className="text-amber-600 flex items-center gap-1">
             <AlertCircle className="h-4 w-4" />
-            {t('profile.passkey.notSupported')}
+            {passkeySupportMessage}
           </CardDescription>
         </CardHeader>
       </Card>

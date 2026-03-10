@@ -6,7 +6,8 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { authAPI, getReturnUrl, getValidationRules } from '../../lib/auth';
 import { 
   IS_PASSKEY_ENABLED, 
-  isPasskeySupported, 
+  getPasskeySupport,
+  PASSKEY_SUPPORT_REASONS,
   prepareAuthenticationOptions, 
   encodeAuthenticationResponse 
 } from '../../lib/passkey';
@@ -25,10 +26,10 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const turnstileRef = useRef(null);
   const [turnstileToken, setTurnstileToken] = useState('');
-  const [isPasskeySupportedState, setIsPasskeySupportedState] = useState(false);
+  const [passkeySupport, setPasskeySupport] = useState(null);
 
   React.useEffect(() => {
-    isPasskeySupported().then(setIsPasskeySupportedState);
+    getPasskeySupport().then(setPasskeySupport);
   }, []);
 
   const {
@@ -52,11 +53,7 @@ export function LoginForm() {
   };
 
   const onPasskeyLogin = async () => {
-    const identifier = watch('identifier');
-    if (!identifier) {
-      setError(t('auth.errors.IDENTIFIER_REQUIRED', { defaultValue: t('auth.usernameOrEmailRequired', '请输入用户名或邮箱') }));
-      return;
-    }
+    const identifier = watch('identifier')?.trim();
     setIsLoading(true);
     setError('');
     try {
@@ -99,6 +96,23 @@ export function LoginForm() {
       setIsLoading(false);
     }
   };
+
+  const passkeySupportMessage = (() => {
+    if (!passkeySupport || passkeySupport.canAuthenticate) {
+      return '';
+    }
+
+    switch (passkeySupport.reason) {
+      case PASSKEY_SUPPORT_REASONS.INSECURE_CONTEXT:
+        return t('auth.passkeySupportReasonInsecureContext', '当前页面不是安全上下文，请使用 HTTPS 或 localhost。');
+      case PASSKEY_SUPPORT_REASONS.MISSING_PUBLIC_KEY_CREDENTIAL:
+        return t('auth.passkeySupportReasonMissingWebauthn', '当前浏览器未提供 WebAuthn 能力。');
+      case PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API:
+        return t('auth.passkeySupportReasonMissingCredentialsApi', '当前浏览器未提供凭据管理接口。');
+      default:
+        return t('auth.passkeySupportUnavailable', '当前设备或环境暂不支持通行密钥登录。');
+    }
+  })();
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -172,7 +186,7 @@ export function LoginForm() {
                   <Input
                     id="identifier"
                     type="text"
-                    autoComplete="username"
+                    autoComplete="username webauthn"
                     placeholder={t('auth.usernameOrEmailPlaceholder')}
                     error={errors.identifier}
                     {...register('identifier', validationRules.usernameOrEmail)}
@@ -262,7 +276,7 @@ export function LoginForm() {
                 </Button>
               </div>
 
-              {IS_PASSKEY_ENABLED && isPasskeySupportedState && (
+              {IS_PASSKEY_ENABLED && (
                 <div className="space-y-4">
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
@@ -275,16 +289,26 @@ export function LoginForm() {
                     </div>
                   </div>
 
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full flex items-center justify-center gap-2"
-                    onClick={onPasskeyLogin}
-                    disabled={isLoading}
-                  >
-                    <Fingerprint className="h-5 w-5 text-green-600" />
-                    {t('auth.signInWithPasskey', '使用通行密钥登录')}
-                  </Button>
+                  {passkeySupport?.canAuthenticate ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-2"
+                      onClick={onPasskeyLogin}
+                      disabled={isLoading}
+                    >
+                      <Fingerprint className="h-5 w-5 text-green-600" />
+                      {t('auth.signInWithPasskey', '使用通行密钥登录')}
+                    </Button>
+                  ) : (
+                    <Alert>
+                      <AlertDescription>
+                        {passkeySupport
+                          ? passkeySupportMessage
+                          : t('auth.passkeyCheckingSupport', '正在检查通行密钥支持情况...')}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               )}
             </form>

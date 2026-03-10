@@ -22,7 +22,10 @@ export const passkeyAPI = {
    * @param {string} identifier email or username
    * @returns {Promise<Object>}
    */
-  getAuthenticationOptions: (identifier) => api.post('/auth/passkey/login/options', { identifier }),
+  getAuthenticationOptions: (identifier) => api.post(
+    '/auth/passkey/login/options',
+    identifier ? { identifier } : {}
+  ),
 
   /**
    * Send the authentication response to the server

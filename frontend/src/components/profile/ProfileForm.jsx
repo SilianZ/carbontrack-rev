@@ -59,6 +59,7 @@ export function ProfileForm({ user }) {
 
   useEffect(() => {
     setSelectedSchool(currentSchoolId ? { id: currentSchoolId, name: currentSchoolName } : null);
+    setInputValue(currentSchoolName);
   }, [currentSchoolId, currentSchoolName]);
 
   useEffect(() => {
@@ -162,7 +163,7 @@ export function ProfileForm({ user }) {
     },
     {
       label: t('profile.region', 'Region'),
-      value: user?.region_label || FALLBACK,
+      value: user?.region_label || user?.region_code || FALLBACK,
     },
     {
       label: t('profile.school'),
@@ -194,7 +195,7 @@ export function ProfileForm({ user }) {
 
   const handleReset = () => {
     setSelectedSchool(currentSchoolId ? { id: currentSchoolId, name: currentSchoolName } : null);
-    setInputValue('');
+    setInputValue(currentSchoolName);
     setCountryCode(user?.country_code || '');
     setStateCode(user?.state_code || '');
     setFeedback(null);

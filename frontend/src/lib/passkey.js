@@ -3,6 +3,12 @@
  * Handles WebAuthn data transformations between browser and backend.
  */
 
+export const PASSKEY_SUPPORT_REASONS = {
+  INSECURE_CONTEXT: 'insecure_context',
+  MISSING_PUBLIC_KEY_CREDENTIAL: 'missing_public_key_credential',
+  MISSING_CREDENTIALS_API: 'missing_credentials_api',
+};
+
 /**
  * Converts a Base64URL string to an ArrayBuffer.
  * @param {string} base64url 
@@ -41,13 +47,55 @@ export function arrayBufferToBase64url(buffer) {
 }
 
 /**
- * Checks if the browser supports WebAuthn.
- * We no longer require `isUserVerifyingPlatformAuthenticatorAvailable()` to return true,
- * because users may use roaming authenticators (like a security key, or hybrid cross-device flows).
+ * Checks whether passkey authentication and registration can be attempted in the current environment.
+ * @returns {Promise<{supported: boolean, canAuthenticate: boolean, canRegister: boolean, reason: string | null}>}
+ */
+export async function getPasskeySupport() {
+  if (!window.isSecureContext) {
+    return {
+      supported: false,
+      canAuthenticate: false,
+      canRegister: false,
+      reason: PASSKEY_SUPPORT_REASONS.INSECURE_CONTEXT,
+    };
+  }
+
+  if (!window.PublicKeyCredential) {
+    return {
+      supported: false,
+      canAuthenticate: false,
+      canRegister: false,
+      reason: PASSKEY_SUPPORT_REASONS.MISSING_PUBLIC_KEY_CREDENTIAL,
+    };
+  }
+
+  const canAuthenticate = Boolean(navigator.credentials && typeof navigator.credentials.get === 'function');
+  const canRegister = Boolean(navigator.credentials && typeof navigator.credentials.create === 'function');
+
+  if (!canAuthenticate) {
+    return {
+      supported: false,
+      canAuthenticate,
+      canRegister,
+      reason: PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API,
+    };
+  }
+
+  return {
+    supported: true,
+    canAuthenticate,
+    canRegister,
+    reason: canRegister ? null : PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API,
+  };
+}
+
+/**
+ * Legacy boolean helper for existing call sites.
  * @returns {Promise<boolean>}
  */
 export async function isPasskeySupported() {
-  return !!window.PublicKeyCredential;
+  const support = await getPasskeySupport();
+  return support.supported;
 }
 
 /**
