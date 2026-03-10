@@ -51,7 +51,7 @@ export function arrayBufferToBase64url(buffer) {
  * @returns {Promise<{supported: boolean, canAuthenticate: boolean, canRegister: boolean, reason: string | null}>}
  */
 export async function getPasskeySupport() {
-  if (!window.isSecureContext) {
+  if (typeof window.isSecureContext === 'boolean' && !window.isSecureContext) {
     return {
       supported: false,
       canAuthenticate: false,

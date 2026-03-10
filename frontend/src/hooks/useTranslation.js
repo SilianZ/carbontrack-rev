@@ -54,15 +54,29 @@ export const useTranslation = (ns = 'common') => {
   // 获取嵌套对象的所有翻译
   const getTranslations = (keyPrefix) => {
     const translations = {};
-    const keys = Object.keys(i18n.getResourceBundle(currentLanguage, ns) || {});
-    
-    keys.forEach(key => {
-      if (key.startsWith(keyPrefix)) {
-        const subKey = key.replace(keyPrefix + '.', '');
-        translations[subKey] = t(key);
+    const resourceBundle = i18n.getResourceBundle(currentLanguage, ns) || {};
+    const segments = keyPrefix.split('.').filter(Boolean);
+    const subtree = segments.reduce((acc, segment) => (
+      acc && typeof acc === 'object' ? acc[segment] : undefined
+    ), resourceBundle);
+
+    const collectTranslations = (node, prefix = '') => {
+      if (Array.isArray(node) || node == null) {
+        return;
       }
-    });
-    
+      if (typeof node !== 'object') {
+        translations[prefix] = t(prefix ? `${keyPrefix}.${prefix}` : keyPrefix);
+        return;
+      }
+
+      Object.keys(node).forEach((childKey) => {
+        const nextPrefix = prefix ? `${prefix}.${childKey}` : childKey;
+        collectTranslations(node[childKey], nextPrefix);
+      });
+    };
+
+    collectTranslations(subtree);
+
     return translations;
   };
   
@@ -187,4 +201,3 @@ export const useTranslation = (ns = 'common') => {
 };
 
 export default useTranslation;
-
