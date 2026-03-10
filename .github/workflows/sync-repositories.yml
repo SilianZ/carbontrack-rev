@@ -6,9 +6,6 @@ env:
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-    types: [ closed ]
 
 permissions:
   contents: read
@@ -18,8 +15,7 @@ permissions:
 jobs:
   sync-repositories:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-    
+
     steps:
     - name: Checkout monorepo
       uses: actions/checkout@v4
@@ -185,14 +181,9 @@ jobs:
            exit 0
         fi
 
-        # 添加并提交变更（允许在无差异时忽略错误）
+        # 添加并提交变更（分支与推送交给 create-pull-request）
         git add -A
         git commit -m "sync: update from monorepo (${GITHUB_SHA::7})" || true
-
-        # 推送到临时分支并由 PR 合并（避免直接改写 main）
-        BRANCH="sync/monorepo-${GITHUB_SHA}"
-        git push origin HEAD:$BRANCH --force-with-lease
-        echo "Pushed frontend changes to branch $BRANCH"
 
         cd ..
 
@@ -211,8 +202,6 @@ jobs:
         if git status --porcelain | grep -q .; then
           git add .github/workflows/ci.yml
           git commit -m "chore(ci): sync frontend CI from monorepo (${GITHUB_SHA::7})" || true
-          BRANCH="sync/bootstrap-ci-${GITHUB_SHA}"
-          git push origin HEAD:$BRANCH --force-with-lease
         else
           echo "Frontend CI up-to-date; no changes"
         fi
@@ -361,14 +350,9 @@ jobs:
            exit 0
         fi
 
-        # 添加并提交变更（允许在无差异时忽略错误）
+        # 添加并提交变更（分支与推送交给 create-pull-request）
         git add -A
         git commit -m "sync: update from monorepo (${GITHUB_SHA::7})" || true
-
-        # 推送到临时分支并由 PR 合并（避免直接改写 main）
-        BRANCH="sync/monorepo-${GITHUB_SHA}"
-        git push origin HEAD:$BRANCH --force-with-lease
-        echo "Pushed backend changes to branch $BRANCH"
 
         cd ..
 
@@ -387,8 +371,6 @@ jobs:
         if git status --porcelain | grep -q .; then
           git add .github/workflows/ci.yml
           git commit -m "chore(ci): sync backend CI from monorepo (${GITHUB_SHA::7})" || true
-          BRANCH="sync/bootstrap-ci-${GITHUB_SHA}"
-          git push origin HEAD:$BRANCH --force-with-lease
         else
           echo "Backend CI up-to-date; no changes"
         fi
@@ -454,40 +436,3 @@ jobs:
         # Do NOT merge here — target repo controls merge (enable branch protection & auto-merge there)
         echo "Backend PR #$PR_NUM is ready for review. No merge will be attempted from monorepo."
 
-    - name: Create summary comment (for PRs)
-      if: github.event_name == 'pull_request' && (steps.frontend-changes.outputs.changed == 'true' || steps.backend-changes.outputs.changed == 'true')
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const frontendChanged = '${{ steps.frontend-changes.outputs.changed }}' === 'true';
-          const backendChanged = '${{ steps.backend-changes.outputs.changed }}' === 'true';
-
-          let message = '🔄 **Repository Sync Summary**\n\n';
-
-          if (frontendChanged) {
-            message += '✅ Frontend changes synced to `carbon-track/frontend`\n';
-          }
-
-          if (backendChanged) {
-            message += '✅ Backend changes synced to `carbon-track/backend`\n';
-          }
-
-          if (!frontendChanged && !backendChanged) {
-            message += 'ℹ️ No frontend or backend changes detected, no sync needed.\n';
-          }
-
-          if (!context.issue.number) {
-            core.info('No pull request number available; skipping summary comment.');
-            return;
-          }
-
-          try {
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: message
-            });
-          } catch (error) {
-            core.warning(`Failed to create summary comment: ${error.message}`);
-          }
