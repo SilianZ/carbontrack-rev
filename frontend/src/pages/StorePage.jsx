@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ShoppingBag, Coins, Package, AlertCircle, CheckCircle, History } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 import { formatNumber } from '../lib/utils';
@@ -92,16 +92,7 @@ export default function StorePage() {
   }, []);
 
   // 获取商品列表
-  useEffect(() => {
-    fetchProducts();
-  }, [filters]);
-
-  // 获取分类列表
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -147,9 +138,9 @@ export default function StorePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, t]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const res = await productAPI.getCategories();
       const payload = res.data?.data;
@@ -165,7 +156,16 @@ export default function StorePage() {
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // 获取分类列表
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleExchange = (product) => {
     if (!user) {

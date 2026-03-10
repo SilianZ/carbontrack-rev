@@ -253,9 +253,14 @@ export function ProductManagement() {
 
   const isSubmitting = createProduct.isLoading || updateProduct.isLoading;
 
-  const productsContainer = productsQuery.data?.data || productsQuery.data || {};
-  const productsRaw = productsContainer.products || productsContainer.data || productsQuery.data || [];
-  const products = useMemo(() => (Array.isArray(productsRaw) ? productsRaw : []), [productsRaw]);
+  const productsContainer = useMemo(
+    () => (productsQuery.data?.data || productsQuery.data || {}),
+    [productsQuery.data]
+  );
+  const products = useMemo(() => {
+    const source = productsContainer.products || productsContainer.data || productsQuery.data || [];
+    return Array.isArray(source) ? source : [];
+  }, [productsContainer, productsQuery.data]);
   const pagination = productsContainer.pagination || {
     page: filters.page,
     limit: filters.limit,
@@ -995,7 +1000,6 @@ function ProductCategorySelector({ value, onChange, initialCategories = [], t })
           : response.data?.categories || [];
       setSuggestions(mapCategorySuggestions(items));
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Category search failed', error);
     } finally {
       setLoading(false);
@@ -1130,7 +1134,6 @@ function ProductTagSelector({ value, onChange, t }) {
       const response = await adminAPI.searchProductTags({ search: term || '', limit: 12 });
       setSuggestions(response.data?.data?.tags || []);
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Tag search failed', error);
     } finally {
       setLoading(false);

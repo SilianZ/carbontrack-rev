@@ -171,14 +171,14 @@ export default function AdminLlmUsagePage() {
   );
 
   const usageData = usageQuery.data || {};
-  const summary = usageData.summary || {};
+  const summary = useMemo(() => usageQuery.data?.summary || {}, [usageQuery.data]);
   const users = usageData.users || [];
   const pagination = usageData.pagination || {};
 
   const analyticsData = analyticsQuery.data || {};
   const trendData = analyticsData.trends || [];
   const distributions = analyticsData.distributions || {};
-  const insights = analyticsData.insights || {};
+  const insights = useMemo(() => analyticsQuery.data?.insights || {}, [analyticsQuery.data]);
   const recentConversations = analyticsData.recent_conversations || [];
 
   const llmLogs = logsQuery.data?.data?.llm?.items || [];

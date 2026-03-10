@@ -172,7 +172,7 @@ const FileUpload = ({
     } finally {
       setUploading(false);
     }
-  }, [files, uploading, directory, entityType, entityId, multiple, onUploadSuccess, onUploadError]);
+  }, [files, uploading, directory, entityType, entityId, mode, multiple, onUploadSuccess, onUploadError]);
 
   // 移除文件
   const removeFile = useCallback((fileId) => {

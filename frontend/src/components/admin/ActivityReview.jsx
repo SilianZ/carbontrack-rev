@@ -63,33 +63,35 @@ export function ActivityReview() {
 
   // 后端记录列表结构：{ success, data: [ { record... } ], pagination: {...} }
   // 兼容旧结构：{ data: { activities: [...] } } 或直接数组。
-  const rawRecords = data?.data?.activities || data?.data?.records || data?.data || data?.activities || [];
-  const recordsArray = Array.isArray(rawRecords) ? rawRecords : [];
-
   // 归一化：将 carbon_records 与 carbon_activities 定义混合的不同字段统一到渲染层字段
-  const normalizedActivities = useMemo(() => recordsArray.map((item) => {
-    // 判断是“记录”还是“活动定义”
-    const isRecord = 'status' in item && ('carbon_saved' in item || 'points_earned' in item || 'user_id' in item);
-    const username = item.user_username || item.username || item.user_name || item.user || '-';
-    const activityName = item.activity_name || item.activity_name_zh || item.activity_name_en || item.combined_name || item.name_zh || item.name_en || t('activities.unknownActivity');
-    const categoryRaw = item.activity_category || item.category || 'unknown';
-    const unitRaw = item.activity_unit || item.unit || '';
-    const description = item.description || item.notes || item.note || item.remark || item.comments || '';
-    return {
-      id: item.id,
-      images: item.images || [],
-      user_username: username,
-      activity_name: activityName,
-      activity_category: categoryRaw || 'unknown',
-      activity_unit: unitRaw || '-',
-      data_value: item.data_value || item.amount || item.data || 0,
-      carbon_saved: item.carbon_saved || 0,
-      points_earned: item.points_earned || 0,
-      status: item.status || (isRecord ? 'pending' : (item.is_active ? 'approved' : 'pending')),
-      created_at: item.created_at || item.date || item.updated_at || null,
-      description,
-    };
-  }), [recordsArray, t]);
+  const normalizedActivities = useMemo(() => {
+    const rawRecords = data?.data?.activities || data?.data?.records || data?.data || data?.activities || [];
+    const recordsArray = Array.isArray(rawRecords) ? rawRecords : [];
+
+    return recordsArray.map((item) => {
+      // 判断是“记录”还是“活动定义”
+      const isRecord = 'status' in item && ('carbon_saved' in item || 'points_earned' in item || 'user_id' in item);
+      const username = item.user_username || item.username || item.user_name || item.user || '-';
+      const activityName = item.activity_name || item.activity_name_zh || item.activity_name_en || item.combined_name || item.name_zh || item.name_en || t('activities.unknownActivity');
+      const categoryRaw = item.activity_category || item.category || 'unknown';
+      const unitRaw = item.activity_unit || item.unit || '';
+      const description = item.description || item.notes || item.note || item.remark || item.comments || '';
+      return {
+        id: item.id,
+        images: item.images || [],
+        user_username: username,
+        activity_name: activityName,
+        activity_category: categoryRaw || 'unknown',
+        activity_unit: unitRaw || '-',
+        data_value: item.data_value || item.amount || item.data || 0,
+        carbon_saved: item.carbon_saved || 0,
+        points_earned: item.points_earned || 0,
+        status: item.status || (isRecord ? 'pending' : (item.is_active ? 'approved' : 'pending')),
+        created_at: item.created_at || item.date || item.updated_at || null,
+        description,
+      };
+    });
+  }, [data, t]);
 
   useEffect(() => {
     const pendingSet = new Set(

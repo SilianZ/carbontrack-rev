@@ -4,6 +4,12 @@ import { Button } from '../components/ui/Button';
 import { useTranslation } from '../hooks/useTranslation';
 import './NotFoundPage.css';
 
+const BASE_SPEED = 40;
+const ANGULAR_ACCEL = 360;
+const SCALE_BASE_RATE = 1.2;
+const SCALE_VELOCITY_FACTOR = 1 / 800;
+const COLOR_LERP = 8;
+
 export default function NotFoundPage() {
   const { t } = useTranslation();
   const emojiRef = useRef(null);
@@ -13,11 +19,6 @@ export default function NotFoundPage() {
   const lastTimeRef = useRef(null);
   const directionRef = useRef(1);
   const isHoveredRef = useRef(false);
-  const BASE_SPEED = 40;
-  const ANGULAR_ACCEL = 360;
-  const SCALE_BASE_RATE = 1.2;
-  const SCALE_VELOCITY_FACTOR = 1 / 800;
-  const COLOR_LERP = 8;
   const scaleRef = useRef(1);
   const colorMixRef = useRef(0); // 0..1
 

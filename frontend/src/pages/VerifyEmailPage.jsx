@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -17,6 +17,11 @@ const toTimestamp = (value) => {
   return Number.isNaN(ts) ? null : ts;
 };
 
+const getSessionValue = (key) => {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem(key);
+};
+
 const VerifyEmailPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -24,17 +29,11 @@ const VerifyEmailPage = () => {
   const tokenParam = searchParams.get('token');
   const returnParam = searchParams.get('return');
 
-  const getSessionValue = (key) => {
-    if (typeof window === 'undefined') return null;
-    return sessionStorage.getItem(key);
-  };
-
   const initialEmail = useMemo(() => {
     return searchParams.get('email')
       || getSessionValue('pending_verification_email')
       || userManager.getUser()?.email
       || '';
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const {
@@ -69,7 +68,7 @@ const VerifyEmailPage = () => {
 
   const emailValue = watch('email');
 
-  const processVerifiedSession = (payload) => {
+  const processVerifiedSession = useCallback((payload) => {
     const token = payload?.token;
     const user = payload?.user;
 
@@ -90,7 +89,7 @@ const VerifyEmailPage = () => {
     } else {
       navigate(returnParam || '/dashboard', { replace: true });
     }
-  };
+  }, [navigate, returnParam]);
 
   useEffect(() => {
     if (!resendAvailableAt) {
@@ -146,7 +145,7 @@ const VerifyEmailPage = () => {
 
       verifyWithToken();
     }
-  }, [tokenParam, tokenHandled, t]);
+  }, [processVerifiedSession, t, tokenHandled, tokenParam]);
 
   const ensureTurnstile = () => {
     if (requiresTurnstile && !turnstileToken) {

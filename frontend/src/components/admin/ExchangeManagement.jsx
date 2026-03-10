@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useTranslation } from '../../hooks/useTranslation';
 import { formatNumber, formatDateSafe } from '../../lib/utils';
@@ -104,7 +104,9 @@ export function ExchangeManagement() {
     );
   };
 
-  const exchanges = data?.data?.data || [];
+  const exchanges = useMemo(() => (
+    Array.isArray(data?.data?.data) ? data.data.data : []
+  ), [data]);
   const pagination = data?.data?.pagination || {};
 
   React.useEffect(() => {

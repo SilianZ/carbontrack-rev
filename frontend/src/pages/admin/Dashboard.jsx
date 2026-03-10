@@ -106,7 +106,6 @@ export default function AdminDashboardPage() {
     }
   );
 
-  const statsData = statsQuery.data ?? {};
   const isLoading = statsQuery.isLoading;
   const isError = statsQuery.isError;
   const error = statsQuery.error;
@@ -142,7 +141,7 @@ export default function AdminDashboardPage() {
 
 
   const normalizedStats = useMemo(() => {
-    const base = statsData ?? {};
+    const base = statsQuery.data ?? {};
     const users = {
       total: safeNumber(base.users?.total_users),
       active: safeNumber(base.users?.active_users),
@@ -233,7 +232,7 @@ export default function AdminDashboardPage() {
     };
 
     return { users, transactions, exchanges, messages, activities, carbon, trends, trendSummary, recent };
-  }, [statsData]);
+  }, [statsQuery.data]);
 
 
   const trendChartData = useMemo(() => {

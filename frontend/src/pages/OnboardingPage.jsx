@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { schoolAPI, profileAPI } from '../lib/api';
 import { userManager } from '../lib/auth';
@@ -8,18 +8,11 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../co
 import { Alert, AlertDescription } from '../components/ui/Alert';
 import { useTranslation } from '../hooks/useTranslation';
 
-const debounce = (fn, delay = 300) => {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
-  };
-};
-
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const user = userManager.getUser();
+  const currentSchoolId = user?.school_id;
   const [schools, setSchools] = useState([]);
   const [schoolQuery, setSchoolQuery] = useState('');
   const [selectedSchoolId, setSelectedSchoolId] = useState('');
@@ -27,17 +20,7 @@ export default function OnboardingPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    // 如果用户已完善信息，直接跳走
-    if (user?.school_id) {
-      navigate('/dashboard', { replace: true });
-      return;
-    }
-    // 初始加载一批学校
-    loadSchools('');
-  }, []);
-
-  const loadSchools = async (search) => {
+  const loadSchools = useCallback(async (search) => {
     try {
       const res = await schoolAPI.getSchools({ search, limit: 20, page: 1 });
       const list = res.data?.data?.schools || [];
@@ -45,13 +28,26 @@ export default function OnboardingPage() {
     } catch (e) {
       console.error('Load schools failed:', e);
     }
-  };
-
-  const debouncedLoadSchools = useMemo(() => debounce(loadSchools, 300), []);
+  }, []);
 
   useEffect(() => {
-    debouncedLoadSchools(schoolQuery.trim());
-  }, [schoolQuery]);
+    if (currentSchoolId) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [currentSchoolId, navigate]);
+
+  useEffect(() => {
+    if (currentSchoolId) {
+      return undefined;
+    }
+
+    const trimmedQuery = schoolQuery.trim();
+    const timer = setTimeout(() => {
+      loadSchools(trimmedQuery);
+    }, trimmedQuery ? 300 : 0);
+
+    return () => clearTimeout(timer);
+  }, [currentSchoolId, loadSchools, schoolQuery]);
 
   const ensureSchool = async (nameOrId) => {
     if (!nameOrId) return null;

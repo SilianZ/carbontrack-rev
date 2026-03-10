@@ -17,7 +17,7 @@ import { queryClient } from './lib/react-query';
 })();
 
 // 加载中组件
-const LoadingFallback = () => (
+const loadingFallback = (
   <div className="flex items-center justify-center min-h-screen">
     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
   </div>
@@ -26,7 +26,7 @@ const LoadingFallback = () => (
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Suspense fallback={<LoadingFallback />}>
+      <Suspense fallback={loadingFallback}>
         <App />
       </Suspense>
     </QueryClientProvider>

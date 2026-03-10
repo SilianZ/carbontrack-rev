@@ -317,7 +317,10 @@ export function UserManagement() {
     [overviewData]
   );
   const detailUser = selectedUser ?? overviewUser;
-  const checkinStats = overviewData?.checkin_stats || {};
+  const checkinStats = useMemo(
+    () => (overviewData?.checkin_stats || {}),
+    [overviewData]
+  );
   const metricsCards = useMemo(() => {
     if (!overviewData && !detailUser) {
       return [];

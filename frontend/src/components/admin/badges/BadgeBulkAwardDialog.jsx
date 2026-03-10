@@ -46,7 +46,10 @@ export function BadgeBulkAwardDialog({
 }) {
   const { t } = useTranslation();
   const isRevoke = mode === 'revoke';
-  const i18nBase = ['admin', 'badges', isRevoke ? 'bulkRevokeDialog' : 'bulkAwardDialog'];
+  const i18nBase = useMemo(
+    () => ['admin', 'badges', isRevoke ? 'bulkRevokeDialog' : 'bulkAwardDialog'],
+    [isRevoke]
+  );
   const [selectedBadgeIds, setSelectedBadgeIds] = useState(() => new Set(defaultSelectedBadgeIds));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUsers, setSelectedUsers] = useState(presetUsers);

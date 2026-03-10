@@ -127,10 +127,18 @@ export default function SystemLogsPage() {
     }
   }, []);
 
-  const systemLogs = data?.data?.system?.items || [];
-  const auditLogs = data?.data?.audit?.items || [];
-  const errorLogs = data?.data?.error?.items || [];
-  const llmLogs = data?.data?.llm?.items || [];
+  const systemLogs = useMemo(() => (
+    Array.isArray(data?.data?.system?.items) ? data.data.system.items : []
+  ), [data]);
+  const auditLogs = useMemo(() => (
+    Array.isArray(data?.data?.audit?.items) ? data.data.audit.items : []
+  ), [data]);
+  const errorLogs = useMemo(() => (
+    Array.isArray(data?.data?.error?.items) ? data.data.error.items : []
+  ), [data]);
+  const llmLogs = useMemo(() => (
+    Array.isArray(data?.data?.llm?.items) ? data.data.llm.items : []
+  ), [data]);
 
   useEffect(() => {
     if (!systemLogs.length) return;
@@ -225,7 +233,7 @@ export default function SystemLogsPage() {
     } finally {
       setExporting(false);
     }
-  }, [q, dateFrom, dateTo, activeTypes, limitPerType, extraParams]);
+  }, [parsedQuery.free, dateFrom, dateTo, activeTypes, limitPerType, extraParams]);
 
   const hasResults = systemLogs.length + auditLogs.length + errorLogs.length + llmLogs.length > 0;
   const activeFilterEntries = Object.entries(parsedQuery.tokens || {}).filter(([, value]) => value && typeof value !== 'object');

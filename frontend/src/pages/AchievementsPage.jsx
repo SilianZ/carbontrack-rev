@@ -88,8 +88,12 @@ export default function AchievementsPage() {
     }
   );
 
-  const badges = badgeListData || [];
-  const rawUserBadges = myBadgesData || [];
+  const badges = useMemo(() => (
+    Array.isArray(badgeListData) ? badgeListData : []
+  ), [badgeListData]);
+  const rawUserBadges = useMemo(() => (
+    Array.isArray(myBadgesData) ? myBadgesData : []
+  ), [myBadgesData]);
 
   const badgesById = useMemo(() => {
     const map = new Map();

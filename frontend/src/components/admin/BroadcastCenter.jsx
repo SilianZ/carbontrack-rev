@@ -915,7 +915,8 @@ export function BroadcastCenter() {
         customTargetIds.forEach((id) => combinedIds.add(id));
       } else if (manualInput.length > 0 && selectedRecipientIds.length === 0) {
         nextErrors.target_users_text = t(
-          "admin.broadcast.validation.targetsInvalid");
+          "admin.broadcast.validation.targetsInvalid",
+        );
       }
 
       if (combinedIds.size > 0) {
@@ -924,7 +925,8 @@ export function BroadcastCenter() {
 
       if (combinedIds.size === 0 && appliedFilters.length === 0) {
         nextErrors.target_users_text = t(
-          "admin.broadcast.validation.targetsRequired");
+          "admin.broadcast.validation.targetsRequired",
+        );
       }
 
       if (appliedFilters.length > 0) {
@@ -1554,7 +1556,8 @@ export function BroadcastCenter() {
                     </label>
                     <Input
                       placeholder={t(
-                        "admin.broadcast.form.targetUsersPlaceholder")}
+                        "admin.broadcast.form.targetUsersPlaceholder",
+                      )}
                       value={form.target_users_text}
                       onChange={(event) =>
                         setField("target_users_text", event.target.value)
@@ -1709,7 +1712,8 @@ export function BroadcastCenter() {
                         setRecipientField("search", event.target.value)
                       }
                       placeholder={t(
-                        "admin.broadcast.recipientSearch.searchPlaceholder")}
+                        "admin.broadcast.recipientSearch.searchPlaceholder",
+                      )}
                     />
                     <select
                       value={recipientForm.fields}
@@ -1740,7 +1744,8 @@ export function BroadcastCenter() {
                         setRecipientField("school", event.target.value)
                       }
                       placeholder={t(
-                        "admin.broadcast.recipientSearch.schoolPlaceholder")}
+                        "admin.broadcast.recipientSearch.schoolPlaceholder",
+                      )}
                     />
                     <Input
                       value={recipientForm.emailSuffix}
@@ -1748,7 +1753,8 @@ export function BroadcastCenter() {
                         setRecipientField("emailSuffix", event.target.value)
                       }
                       placeholder={t(
-                        "admin.broadcast.recipientSearch.emailPlaceholder")}
+                        "admin.broadcast.recipientSearch.emailPlaceholder",
+                      )}
                     />
                     <select
                       value={recipientForm.status}
@@ -1917,7 +1923,8 @@ export function BroadcastCenter() {
                                           <div>
                                             <span className="font-medium text-gray-700">
                                               {t(
-                                                "admin.broadcast.recipientSearch.hover.userId")}
+                                                "admin.broadcast.recipientSearch.hover.userId",
+                                              )}
                                               :
                                             </span>{" "}
                                             #{id}
@@ -1934,7 +1941,8 @@ export function BroadcastCenter() {
                                             <div>
                                               <span className="font-medium text-gray-700">
                                                 {t(
-                                                  "admin.broadcast.recipientSearch.hover.school")}
+                                                  "admin.broadcast.recipientSearch.hover.school",
+                                                )}
                                                 :
                                               </span>{" "}
                                               {item.school}
@@ -1944,7 +1952,8 @@ export function BroadcastCenter() {
                                             <div>
                                               <span className="font-medium text-gray-700">
                                                 {t(
-                                                  "admin.broadcast.recipientSearch.hover.location")}
+                                                  "admin.broadcast.recipientSearch.hover.location",
+                                                )}
                                                 :
                                               </span>{" "}
                                               {item.location}
@@ -1986,14 +1995,16 @@ export function BroadcastCenter() {
                                     }
                                   >
                                     {t(
-                                      "admin.broadcast.recipientSearch.viewProfile")}
+                                      "admin.broadcast.recipientSearch.viewProfile",
+                                    )}
                                   </Button>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
                                   {item.email
                                     ? item.email
                                     : t(
-                                        "admin.broadcast.recipientSearch.noEmail")}
+                                        "admin.broadcast.recipientSearch.noEmail",
+                                      )}
                                   {item.school ? ` • ${item.school}` : ""}
                                 </p>
                                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">

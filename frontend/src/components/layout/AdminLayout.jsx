@@ -77,21 +77,6 @@ export default function AdminLayout() {
   const [isAiRequesting, setIsAiRequesting] = useState(false);
 
   const translatedLinks = useMemo(() => {
-    const fallbackLabels = {
-      dashboard: '管理总览',
-      users: '用户管理',
-      groups: '用户组管理',
-      activities: '碳活动管理',
-      products: '兑换商品',
-      badges: '徽章管理',
-      avatars: '头像管理',
-      exchanges: '积分兑换',
-      broadcast: '公告广播',
-      llmUsage: 'LLM 使用额度',
-      systemLogs: '系统日志',
-      diagnostics: 'AI 诊断',
-    };
-
     return NAV_LINKS.map((link) => ({
       ...link,
       label: t(`admin.nav.${link.key}`),
