@@ -1018,7 +1018,62 @@
       "manage": "Manage Passkeys",
       "lastUsed": "Last used",
       "createdAt": "Added at",
-      "unnamed": "Unnamed Key"
+      "unnamed": "Unnamed Key",
+      "edit": "Edit label",
+      "editTitle": "Edit passkey label",
+      "editDescription": "Update the display name used for this passkey in your list.",
+      "editPlaceholder": "For example: My MacBook",
+      "editHint": "Leave blank to show this passkey as unnamed.",
+      "editSuccess": "Passkey label updated",
+      "editFailed": "Failed to update passkey label"
+    }
+  },
+  "securityActivity": {
+    "title": "Security Activity",
+    "description": "Review recent sign-in, password, and passkey-related security events.",
+    "loadError": "Failed to load security activity. Please try again later.",
+    "empty": "No security activity yet.",
+    "status": {
+      "success": "Success",
+      "other": "Other"
+    },
+    "meta": {
+      "ipAddress": "IP {{ip}}",
+      "requestId": "Request {{id}}"
+    },
+    "actions": {
+      "login": {
+        "title": "Password sign-in",
+        "description": "Signed in with the account password."
+      },
+      "passkey_login": {
+        "title": "Passkey sign-in",
+        "description": "Signed in with a passkey.",
+        "descriptionWithLabel": "Signed in with passkey \"{{label}}\"."
+      },
+      "logout": {
+        "title": "Signed out",
+        "description": "The current session was signed out."
+      },
+      "password_change": {
+        "title": "Password changed",
+        "description": "The account password was updated."
+      },
+      "passkey_registered": {
+        "title": "Passkey added",
+        "description": "A new passkey was registered.",
+        "descriptionWithLabel": "A new passkey \"{{label}}\" was registered."
+      },
+      "passkey_deleted": {
+        "title": "Passkey removed",
+        "description": "A passkey was removed.",
+        "descriptionWithLabel": "Passkey \"{{label}}\" was removed."
+      },
+      "passkey_label_updated": {
+        "title": "Passkey label updated",
+        "description": "The passkey label was updated.",
+        "descriptionWithLabel": "The passkey label was updated to \"{{label}}\"."
+      }
     }
   },
   "admin": {
@@ -1037,6 +1092,7 @@
     "restore": "Restore",
     "nav": {
       "dashboard": "Overview",
+      "passkeys": "Passkeys",
       "users": "Users",
       "groups": "User Groups",
       "activities": "Activities",
@@ -1088,6 +1144,42 @@
       "sendBroadcast": "Send broadcast",
       "sendBroadcastHint": "Compose a new broadcast message",
       "open": "Search / Ctrl + K"
+    },
+    "passkeys": {
+      "title": "Passkey Overview",
+      "description": "Inspect registered passkeys across the platform and how they are being used.",
+      "listTitle": "Passkey Directory",
+      "listDescription": "Filter active passkeys by user, label, and recent usage.",
+      "searchPlaceholder": "Search by username, email, or passkey label",
+      "loadError": "Failed to load passkey data.",
+      "empty": "No passkeys match the current filters.",
+      "unnamed": "Unnamed key",
+      "neverUsed": "Never used",
+      "sort": {
+        "createdAtDesc": "Sort by created date",
+        "lastUsedAtDesc": "Sort by last used date",
+        "signCountDesc": "Sort by sign count"
+      },
+      "table": {
+        "user": "User",
+        "label": "Label",
+        "createdAt": "Registered",
+        "lastUsedAt": "Last used",
+        "signCount": "Sign count",
+        "backup": "Backup"
+      },
+      "backup": {
+        "synced": "Backup enabled",
+        "available": "Backup eligible",
+        "unavailable": "No backup"
+      },
+      "stats": {
+        "usersWithPasskeys": "Users with passkeys",
+        "totalActivePasskeys": "Active passkeys",
+        "newPasskeys30d": "New passkeys (30d)",
+        "passkeyLogins7d": "Passkey logins (7d)",
+        "passkeyLogins30d": "Passkey logins (30d)"
+      }
     },
     "header": {
       "section": "Current section",
@@ -1698,9 +1790,13 @@
         "points": "Points",
         "actions": "Actions",
         "badges": "Badges",
+        "passkeys": "Passkeys",
         "carbon": "Carbon saved (kg)",
         "checkins": "Check-ins"
       },
+      "passkeyCount": "{{count}} passkeys",
+      "passkeyLastUsed": "Last used {{date}}",
+      "passkeyNeverUsed": "Never used",
       "checkins": {
         "title": "Check-in overview",
         "subtitle": "Streaks and makeup usage for this user",
@@ -1753,6 +1849,16 @@
       "detailTitleFallback": "User Details",
       "detailLoadFailed": "Failed to load user details",
       "detailEmpty": "No detail data",
+      "security": {
+        "title": "Security overview",
+        "subtitle": "Passkey summary and the 10 most recent security events.",
+        "passkeysTotal": "Total passkeys",
+        "backupEnabled": "Backup enabled",
+        "backupEligible": "Backup eligible",
+        "lastPasskeyUsed": "Last passkey use",
+        "neverUsed": "Never used",
+        "empty": "No recent security activity."
+      },
       "badgeTable": {
         "badge": "Badge",
         "status": "Status",

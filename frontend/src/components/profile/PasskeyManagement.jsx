@@ -12,6 +12,8 @@ import {
 import { Button } from '../ui/Button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/Card';
 import { Alert, AlertTitle, AlertDescription } from '../ui/Alert';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Input } from '../ui/Input';
 import { 
   Fingerprint, 
   Plus, 
@@ -20,7 +22,8 @@ import {
   AlertCircle, 
   ShieldCheck,
   Smartphone,
-  Calendar
+  Calendar,
+  Pencil
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatDateSafe } from '../../lib/utils';
@@ -29,6 +32,8 @@ export function PasskeyManagement() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [passkeySupport, setPasskeySupport] = useState(null);
+  const [editingPasskey, setEditingPasskey] = useState(null);
+  const [labelDraft, setLabelDraft] = useState('');
 
   // Check support on mount
   React.useEffect(() => {
@@ -97,6 +102,7 @@ export function PasskeyManagement() {
       onSuccess: () => {
         toast.success(t('profile.passkey.registerSuccess'));
         queryClient.invalidateQueries('passkeys');
+        queryClient.invalidateQueries('securityActivity');
       },
       onError: (err) => {
         console.error('Passkey registration error:', err);
@@ -115,6 +121,7 @@ export function PasskeyManagement() {
       onSuccess: () => {
         toast.success(t('profile.passkey.deleteSuccess'));
         queryClient.invalidateQueries('passkeys');
+        queryClient.invalidateQueries('securityActivity');
       },
       onError: (err) => {
         const status = err.response?.status;
@@ -123,6 +130,22 @@ export function PasskeyManagement() {
           return;
         }
         toast.error(t('profile.passkey.deleteFailed'));
+      }
+    }
+  );
+
+  const updateMutation = useMutation(
+    ({ id, label }) => passkeyAPI.updatePasskey(id, { label }),
+    {
+      onSuccess: () => {
+        toast.success(t('profile.passkey.editSuccess'));
+        queryClient.invalidateQueries('passkeys');
+        queryClient.invalidateQueries('securityActivity');
+        setEditingPasskey(null);
+        setLabelDraft('');
+      },
+      onError: () => {
+        toast.error(t('profile.passkey.editFailed'));
       }
     }
   );
@@ -179,95 +202,149 @@ export function PasskeyManagement() {
 
   const passkeys = passkeysData?.data?.data?.passkeys || [];
 
+  const openEditDialog = (passkey) => {
+    setEditingPasskey(passkey);
+    setLabelDraft(passkey?.label || '');
+  };
+
+  const closeEditDialog = () => {
+    setEditingPasskey(null);
+    setLabelDraft('');
+  };
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="space-y-1">
-          <CardTitle className="flex items-center gap-2">
-            <Fingerprint className="h-5 w-5 text-green-600" />
-            {t('profile.passkey.title')}
-          </CardTitle>
-          <CardDescription>
-            {t('profile.passkey.description')}
-          </CardDescription>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => registerMutation.mutate()}
-          disabled={registerMutation.isLoading}
-          className="flex items-center gap-1"
-        >
-          {registerMutation.isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2">
+              <Fingerprint className="h-5 w-5 text-green-600" />
+              {t('profile.passkey.title')}
+            </CardTitle>
+            <CardDescription>
+              {t('profile.passkey.description')}
+            </CardDescription>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => registerMutation.mutate()}
+            disabled={registerMutation.isLoading}
+            className="flex items-center gap-1"
+          >
+            {registerMutation.isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            {t('profile.passkey.add')}
+          </Button>
+        </CardHeader>
+        <CardContent className="pt-4">
+          {isLoading ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            </div>
+          ) : error && error.response?.status !== 404 ? (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>{t('common.error')}</AlertTitle>
+              <AlertDescription>{t('profile.passkey.loadError')}</AlertDescription>
+            </Alert>
+          ) : passkeys.length === 0 ? (
+            <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+              <Smartphone className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">{t('profile.passkey.empty')}</p>
+            </div>
           ) : (
-            <Plus className="h-4 w-4" />
-          )}
-          {t('profile.passkey.add')}
-        </Button>
-      </CardHeader>
-      <CardContent className="pt-4">
-        {isLoading ? (
-          <div className="flex justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-          </div>
-        ) : error && error.response?.status !== 404 ? (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>{t('common.error')}</AlertTitle>
-            <AlertDescription>{t('profile.passkey.loadError')}</AlertDescription>
-          </Alert>
-        ) : passkeys.length === 0 ? (
-          <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-            <Smartphone className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">{t('profile.passkey.empty')}</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {passkeys.map((pk) => (
-              <div 
-                key={pk.id} 
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white hover:border-green-200 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
-                    <ShieldCheck className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {pk.label || t('profile.passkey.unnamed')}
-                    </p>
-                    <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {formatDateSafe(pk.created_at)}
-                      </span>
-                      {pk.last_used_at && (
-                        <span>
-                          {t('profile.passkey.lastUsed')}: {formatDateSafe(pk.last_used_at)}
+            <div className="space-y-3">
+              {passkeys.map((pk) => (
+                <div 
+                  key={pk.id} 
+                  className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-100 bg-white hover:border-green-200 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
+                      <ShieldCheck className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {pk.label || t('profile.passkey.unnamed')}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3 mt-0.5 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDateSafe(pk.created_at)}
                         </span>
-                      )}
+                        {pk.last_used_at && (
+                          <span>
+                            {t('profile.passkey.lastUsed')}: {formatDateSafe(pk.last_used_at)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-slate-700"
+                      onClick={() => openEditDialog(pk)}
+                      title={t('profile.passkey.edit')}
+                      disabled={updateMutation.isLoading}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-gray-400 hover:text-red-500"
+                      onClick={() => {
+                        if (window.confirm(t('profile.passkey.deleteConfirm'))) {
+                          deleteMutation.mutate(pk.id);
+                        }
+                      }}
+                      disabled={deleteMutation.isLoading}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-gray-400 hover:text-red-500"
-                  onClick={() => {
-                    if (window.confirm(t('profile.passkey.deleteConfirm'))) {
-                      deleteMutation.mutate(pk.id);
-                    }
-                  }}
-                  disabled={deleteMutation.isLoading}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={Boolean(editingPasskey)} onOpenChange={(open) => (!open ? closeEditDialog() : null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('profile.passkey.editTitle')}</DialogTitle>
+            <DialogDescription>{t('profile.passkey.editDescription')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Input
+              value={labelDraft}
+              onChange={(event) => setLabelDraft(event.target.value)}
+              maxLength={100}
+              placeholder={t('profile.passkey.editPlaceholder')}
+            />
+            <p className="text-xs text-muted-foreground">{t('profile.passkey.editHint')}</p>
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <DialogFooter>
+            <Button variant="ghost" onClick={closeEditDialog}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={() => updateMutation.mutate({ id: editingPasskey?.id, label: labelDraft })}
+              disabled={!editingPasskey || updateMutation.isLoading}
+            >
+              {updateMutation.isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('common.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

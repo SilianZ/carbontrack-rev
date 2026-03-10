@@ -30,6 +30,7 @@ import { cn } from '../../lib/utils';
 import {
   Award,
   Bot,
+  Fingerprint,
   LayoutDashboard,
   Leaf,
   Loader2,
@@ -52,6 +53,7 @@ const MAX_SESSIONS = 6;
 
 const NAV_LINKS = [
   { key: 'dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
+  { key: 'passkeys', to: '/admin/passkeys', icon: Fingerprint },
   { key: 'users', to: '/admin/users', icon: Users },
   { key: 'groups', to: '/admin/users/groups', icon: UserCog },
   { key: 'activities', to: '/admin/activities', icon: Leaf },

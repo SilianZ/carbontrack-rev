@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { format } from 'date-fns';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useTranslation } from '../../hooks/useTranslation';
 import { adminAPI } from '../../lib/api';
+import { formatDateSafe } from '../../lib/utils';
 import {
   Loader2,
   Trash2,
@@ -16,6 +16,7 @@ import {
   Ban,
   Users as UsersIcon,
   Eye,
+  Fingerprint,
   Leaf,
   ClipboardList,
   CalendarDays,
@@ -52,6 +53,7 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
 import BadgeBulkAwardDialog from './badges/BadgeBulkAwardDialog';
+import SecurityActivityList from '../security/SecurityActivityList';
 import R2Image from '@/components/common/R2Image';
 import { resolveR2ImageSource } from '@/lib/r2Image';
 import { toast } from 'react-hot-toast';
@@ -319,6 +321,20 @@ export function UserManagement() {
   const detailUser = selectedUser ?? overviewUser;
   const checkinStats = useMemo(
     () => (overviewData?.checkin_stats || {}),
+    [overviewData]
+  );
+  const passkeySummary = useMemo(
+    () => ({
+      total: Number(overviewData?.passkey_summary?.total ?? 0),
+      backup_enabled: Number(overviewData?.passkey_summary?.backup_enabled ?? 0),
+      backup_eligible: Number(overviewData?.passkey_summary?.backup_eligible ?? 0),
+      last_used_at: overviewData?.passkey_summary?.last_used_at ?? null,
+      last_registered_at: overviewData?.passkey_summary?.last_registered_at ?? null,
+    }),
+    [overviewData]
+  );
+  const recentSecurityActivity = useMemo(
+    () => (Array.isArray(overviewData?.recent_security_activity) ? overviewData.recent_security_activity : []),
     [overviewData]
   );
   const metricsCards = useMemo(() => {
@@ -699,6 +715,7 @@ export function UserManagement() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.role')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.status')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.badges')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.passkeys')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.checkins')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.carbon')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.points')}</th>
@@ -727,6 +744,22 @@ export function UserManagement() {
                             <span>{t('admin.users.badgesAwardedCount',  { count: user.badges_awarded || 0 })}</span>
                             <span className="text-xs text-muted-foreground">
                               {t('admin.users.activeBadgesCount',  { count: user.active_badges || 0 })}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex flex-col">
+                            <span>{t('admin.users.passkeyCount', { count: user.passkey_count || 0 })}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {(user.passkey_count || 0) > 0
+                                ? t('admin.users.passkeyLastUsed', {
+                                    date: formatDateSafe(
+                                      user.last_passkey_used_at,
+                                      'yyyy-MM-dd HH:mm',
+                                      t('admin.users.passkeyNeverUsed')
+                                    ),
+                                  })
+                                : t('admin.users.passkeyNeverUsed')}
                             </span>
                           </div>
                         </td>
@@ -958,7 +991,7 @@ export function UserManagement() {
                   <div className="rounded-lg border bg-white p-4 shadow-sm sm:col-span-2">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.lastLogin')}</p>
                     <p className="mt-1 text-sm font-medium text-gray-900">
-                      {format(new Date(detailUser.lastlgn), 'yyyy-MM-dd HH:mm')}
+                      {formatDateSafe(detailUser.lastlgn, 'yyyy-MM-dd HH:mm', '--')}
                     </p>
                   </div>
                 )}
@@ -1013,6 +1046,43 @@ export function UserManagement() {
                   </div>
                 </div>
               )}
+
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <Fingerprint className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-semibold">{t('admin.users.security.title')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('admin.users.security.subtitle')}</p>
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.passkeysTotal')}</p>
+                    <p className="mt-2 text-2xl font-semibold">{passkeySummary.total}</p>
+                  </div>
+                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.backupEnabled')}</p>
+                    <p className="mt-2 text-2xl font-semibold">{passkeySummary.backup_enabled}</p>
+                  </div>
+                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.backupEligible')}</p>
+                    <p className="mt-2 text-2xl font-semibold">{passkeySummary.backup_eligible}</p>
+                  </div>
+                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.lastPasskeyUsed')}</p>
+                    <p className="mt-2 text-sm font-semibold text-gray-900">
+                      {formatDateSafe(passkeySummary.last_used_at, 'yyyy-MM-dd HH:mm', t('admin.users.security.neverUsed'))}
+                    </p>
+                  </div>
+                </div>
+                <SecurityActivityList
+                  items={recentSecurityActivity}
+                  compact
+                  emptyText={t('admin.users.security.empty')}
+                />
+              </div>
 
               <div className="space-y-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1091,7 +1161,7 @@ export function UserManagement() {
                                 <Badge variant={record.status === 'awarded' ? 'success' : 'secondary'}>{record.status === 'awarded' ? t('admin.users.badgeStatusAwarded') : t('admin.users.badgeStatusRevoked')}</Badge>
                               </td>
                               <td className="px-4 py-2 text-sm text-muted-foreground">
-                                {record.awarded_at ? format(new Date(record.awarded_at), 'yyyy-MM-dd HH:mm') : '--'}
+                                {formatDateSafe(record.awarded_at, 'yyyy-MM-dd HH:mm', '--')}
                               </td>
                             </tr>
                           );

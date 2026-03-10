@@ -27,6 +27,7 @@ const CookiePolicyPage = React.lazy(() => import('../pages/CookiePolicyPage'));
 const SecurityPage = React.lazy(() => import('../pages/SecurityPage'));
 // Admin pages
 const AdminDashboardPage = React.lazy(() => import('../pages/admin/Dashboard'));
+const AdminPasskeysPage = React.lazy(() => import('../pages/admin/Passkeys'));
 const AdminUsersPage = React.lazy(() => import('../pages/admin/Users'));
 const AdminUserGroupsPage = React.lazy(() => import('../pages/admin/UserGroups'));
 const AdminActivitiesPage = React.lazy(() => import('../pages/admin/Activities'));
@@ -96,6 +97,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: 'dashboard', element: <React.Suspense fallback={loadingSpinner}><AdminDashboardPage /></React.Suspense> },
+      { path: 'passkeys', element: <React.Suspense fallback={loadingSpinner}><AdminPasskeysPage /></React.Suspense> },
       { path: 'users', element: <React.Suspense fallback={loadingSpinner}><AdminUsersPage /></React.Suspense> },
       { path: 'users/groups', element: <React.Suspense fallback={loadingSpinner}><AdminUserGroupsPage /></React.Suspense> },
       { path: 'activities', element: <React.Suspense fallback={loadingSpinner}><AdminActivitiesPage /></React.Suspense> },

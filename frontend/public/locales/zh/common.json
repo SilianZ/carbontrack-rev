@@ -1014,7 +1014,62 @@
       "manage": "管理通行密钥",
       "lastUsed": "最后使用",
       "createdAt": "添加时间",
-      "unnamed": "未命名密钥"
+      "unnamed": "未命名密钥",
+      "edit": "编辑备注",
+      "editTitle": "编辑通行密钥备注",
+      "editDescription": "更新此通行密钥在列表中的显示名称。",
+      "editPlaceholder": "例如：我的 MacBook",
+      "editHint": "留空将显示为未命名密钥。",
+      "editSuccess": "通行密钥备注已更新",
+      "editFailed": "更新通行密钥备注失败"
+    }
+  },
+  "securityActivity": {
+    "title": "安全活动",
+    "description": "查看最近登录、密码与通行密钥相关安全事件。",
+    "loadError": "加载安全活动失败，请稍后重试。",
+    "empty": "暂无安全活动记录。",
+    "status": {
+      "success": "成功",
+      "other": "其他"
+    },
+    "meta": {
+      "ipAddress": "IP {{ip}}",
+      "requestId": "请求 {{id}}"
+    },
+    "actions": {
+      "login": {
+        "title": "密码登录",
+        "description": "已使用账户密码完成登录。"
+      },
+      "passkey_login": {
+        "title": "通行密钥登录",
+        "description": "已使用通行密钥完成登录。",
+        "descriptionWithLabel": "已使用“{{label}}”完成通行密钥登录。"
+      },
+      "logout": {
+        "title": "退出登录",
+        "description": "当前会话已退出。"
+      },
+      "password_change": {
+        "title": "修改密码",
+        "description": "账户密码已更新。"
+      },
+      "passkey_registered": {
+        "title": "添加通行密钥",
+        "description": "已注册新的通行密钥。",
+        "descriptionWithLabel": "已注册新的通行密钥“{{label}}”。"
+      },
+      "passkey_deleted": {
+        "title": "删除通行密钥",
+        "description": "已删除一枚通行密钥。",
+        "descriptionWithLabel": "已删除通行密钥“{{label}}”。"
+      },
+      "passkey_label_updated": {
+        "title": "更新通行密钥备注",
+        "description": "已更新通行密钥备注。",
+        "descriptionWithLabel": "已将通行密钥备注更新为“{{label}}”。"
+      }
     }
   },
   "admin": {
@@ -1033,6 +1088,7 @@
     "restore": "恢复",
     "nav": {
       "dashboard": "管理总览",
+      "passkeys": "通行密钥",
       "users": "用户管理",
       "groups": "用户组",
       "activities": "碳活动管理",
@@ -1084,6 +1140,42 @@
       "sendBroadcast": "发布平台公告",
       "sendBroadcastHint": "打开广播中心发送新公告",
       "open": "搜索 / Ctrl + K"
+    },
+    "passkeys": {
+      "title": "通行密钥概览",
+      "description": "集中查看平台内已注册通行密钥的使用与分布情况。",
+      "listTitle": "通行密钥列表",
+      "listDescription": "按用户、备注与最近使用情况筛选已启用的通行密钥。",
+      "searchPlaceholder": "搜索用户名、邮箱或通行密钥备注",
+      "loadError": "加载通行密钥数据失败。",
+      "empty": "暂无符合条件的通行密钥。",
+      "unnamed": "未命名密钥",
+      "neverUsed": "尚未使用",
+      "sort": {
+        "createdAtDesc": "按添加时间排序",
+        "lastUsedAtDesc": "按最近使用排序",
+        "signCountDesc": "按签名次数排序"
+      },
+      "table": {
+        "user": "用户",
+        "label": "备注",
+        "createdAt": "注册时间",
+        "lastUsedAt": "最近使用",
+        "signCount": "签名计数",
+        "backup": "备份状态"
+      },
+      "backup": {
+        "synced": "已启用备份",
+        "available": "可备份",
+        "unavailable": "未启用备份"
+      },
+      "stats": {
+        "usersWithPasskeys": "已启用通行密钥用户",
+        "totalActivePasskeys": "活跃通行密钥总数",
+        "newPasskeys30d": "30 天新增通行密钥",
+        "passkeyLogins7d": "7 天通行密钥登录",
+        "passkeyLogins30d": "30 天通行密钥登录"
+      }
     },
     "header": {
       "section": "当前板块",
@@ -1690,9 +1782,13 @@
         "points": "积分",
         "actions": "操作",
         "badges": "徽章",
+        "passkeys": "通行密钥",
         "carbon": "累计减排 (kg)",
         "checkins": "打卡"
       },
+      "passkeyCount": "{{count}} 枚通行密钥",
+      "passkeyLastUsed": "最近使用 {{date}}",
+      "passkeyNeverUsed": "尚未使用",
       "checkins": {
         "title": "打卡概况",
         "subtitle": "查看用户连击与补打卡情况",
@@ -1747,6 +1843,16 @@
       "detailTitleFallback": "用户详情",
       "detailLoadFailed": "无法加载用户详情",
       "detailEmpty": "暂无详情数据",
+      "security": {
+        "title": "安全概况",
+        "subtitle": "查看通行密钥汇总与最近 10 条安全事件。",
+        "passkeysTotal": "通行密钥总数",
+        "backupEnabled": "已启用备份",
+        "backupEligible": "可备份设备",
+        "lastPasskeyUsed": "最近通行密钥使用",
+        "neverUsed": "尚未使用",
+        "empty": "暂无最近安全事件。"
+      },
       "badgeTable": {
         "badge": "徽章",
         "status": "状态",

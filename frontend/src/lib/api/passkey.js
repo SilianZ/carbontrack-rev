@@ -41,6 +41,14 @@ export const passkeyAPI = {
   listPasskeys: () => api.get('/users/me/passkeys'),
 
   /**
+   * Update a registered passkey label
+   * @param {string|number} id
+   * @param {Object} data
+   * @returns {Promise<Object>}
+   */
+  updatePasskey: (id, data) => api.patch(`/users/me/passkeys/${id}`, data),
+
+  /**
    * Delete a registered passkey
    * @param {string} id 
    * @returns {Promise<Object>}

@@ -95,6 +95,7 @@ export const userAPI = {
   getNotificationPreferences: () => api.get('/users/me/notification-preferences'),
   updateNotificationPreferences: (data) => api.put('/users/me/notification-preferences', data),
   sendNotificationTestEmail: (category) => api.post('/users/me/notification-preferences/test-email', { category }),
+  getSecurityActivity: (params = {}) => api.get('/users/me/security-activity', { params }),
 };
 
 export const carbonAPI = {
@@ -265,6 +266,8 @@ export const adminAPI = {
     }
     return api.get('/admin/users', { params: query });
   },
+  getPasskeys: (params = {}) => api.get('/admin/passkeys', { params }),
+  getPasskeyStats: () => api.get('/admin/passkeys/stats'),
   getUserOverview: (id) => api.get(`/admin/users/${id}/overview`),
   getUserBadges: (id, params = {}) => api.get(`/admin/users/${id}/badges`, { params }),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),

@@ -8,6 +8,7 @@ import R2Image from '../components/common/R2Image';
 import { buildAvatarDisplayProps } from '../lib/avatarUtils';
 import { PasswordChangeForm } from '../components/profile/PasswordChangeForm';
 import { PasskeyManagement } from '../components/profile/PasskeyManagement';
+import { SecurityActivityCard } from '../components/profile/SecurityActivityCard';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/Alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
@@ -130,8 +131,9 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        <div className="lg:col-span-2">
+        <div className="grid gap-8 lg:col-span-2 xl:grid-cols-2">
           <PasskeyManagement />
+          <SecurityActivityCard />
         </div>
       </div>
     </div>
