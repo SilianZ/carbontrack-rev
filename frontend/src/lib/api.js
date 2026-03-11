@@ -245,6 +245,15 @@ export const profileAPI = {
   updateProfile: (data) => api.put('/users/me/profile', data),
 };
 
+const UUID_PATH_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function buildAdminUserPath(identifier, suffix = '') {
+  if (typeof identifier === 'string' && UUID_PATH_PATTERN.test(identifier.trim())) {
+    return `/admin/users/by-uuid/${identifier.trim().toLowerCase()}${suffix}`;
+  }
+  return `/admin/users/${identifier}${suffix}`;
+}
+
 export const adminAPI = {
   // 获取用户列表
   getUsers: (params = {}) => {
@@ -264,13 +273,21 @@ export const adminAPI = {
       }
       delete query.role;
     }
+    if (typeof query.userUuid === 'string') {
+      const trimmed = query.userUuid.trim();
+      if (trimmed) {
+        query.user_uuid = trimmed.toLowerCase();
+      }
+      delete query.userUuid;
+    }
     return api.get('/admin/users', { params: query });
   },
   getPasskeys: (params = {}) => api.get('/admin/passkeys', { params }),
   getPasskeyStats: () => api.get('/admin/passkeys/stats'),
-  getUserOverview: (id) => api.get(`/admin/users/${id}/overview`),
-  getUserBadges: (id, params = {}) => api.get(`/admin/users/${id}/badges`, { params }),
-  updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
+  getUserOverview: (identifier) => api.get(buildAdminUserPath(identifier, '/overview')),
+  getUserBadges: (identifier, params = {}) => api.get(buildAdminUserPath(identifier, '/badges'), { params }),
+  updateUser: (identifier, data) => api.put(buildAdminUserPath(identifier), data),
+  deleteUser: (identifier) => api.delete(buildAdminUserPath(identifier)),
 
   // User Groups
   getUserGroups: () => api.get('/admin/users/groups'),
@@ -280,7 +297,7 @@ export const adminAPI = {
   deleteUserGroup: (id) => api.delete(`/admin/users/groups/${id}`),
 
   // 调整用户积分
-  adjustUserPoints: (id, data) => api.post('/admin/users/' + id + '/points/adjust', data),
+  adjustUserPoints: (identifier, data) => api.post(buildAdminUserPath(identifier, '/points/adjust'), data),
 
   // 获取待审核交易
   getPendingTransactions: (params = {}) => api.get('/admin/transactions/pending', { params }),

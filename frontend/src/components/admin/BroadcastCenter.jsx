@@ -799,8 +799,13 @@ export function BroadcastCenter() {
         event.preventDefault();
         event.stopPropagation();
       }
-      if (!recipient || recipient.id === undefined || recipient.id === null) {
+      if (!recipient) {
         toast.error(t("admin.broadcast.recipientSearch.invalidUser"));
+        return;
+      }
+      const userUuid = typeof recipient.uuid === "string" ? recipient.uuid.trim().toLowerCase() : "";
+      if (userUuid) {
+        navigate(`/admin/users?userUuid=${userUuid}`);
         return;
       }
       const userId = Number(recipient.id);

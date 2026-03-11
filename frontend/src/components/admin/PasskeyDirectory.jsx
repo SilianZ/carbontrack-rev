@@ -203,7 +203,7 @@ export function PasskeyDirectory() {
                           <button
                             type="button"
                             className="text-left"
-                            onClick={() => navigate(`/admin/users?userId=${passkey.user_id}`)}
+                            onClick={() => navigate(`/admin/users?userUuid=${passkey.user_uuid}`)}
                           >
                             <div className="font-medium text-slate-900">{passkey.username}</div>
                             <div className="text-xs text-slate-500">{passkey.email}</div>

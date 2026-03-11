@@ -102,6 +102,8 @@ const normalizeBadgeSummary = (summary = {}) => ({
   total: Number(summary.total ?? (Number(summary.awarded ?? 0) + Number(summary.revoked ?? 0))),
 });
 
+const getUserIdentifier = (user) => user?.uuid || user?.id || null;
+
 function normalizeUsersResponse(response) {
   const payload = response?.data?.data || response?.data || {};
   if (Array.isArray(payload.users)) {
@@ -128,7 +130,7 @@ export function UserManagement() {
   const [pointsDialog, setPointsDialog] = useState({ open: false, user: null, delta: '', reason: '' });
   const [selectedUsersMap, setSelectedUsersMap] = useState(new Map());
   const [bulkDialog, setBulkDialog] = useState({ open: false, presetUsers: [] });
-  const [detailState, setDetailState] = useState({ open: false, userId: null });
+  const [detailState, setDetailState] = useState({ open: false, userId: null, userUuid: null });
   const [showRevokedBadges, setShowRevokedBadges] = useState(false);
   const [editDialog, setEditDialog] = useState({
     open: false,
@@ -175,11 +177,13 @@ export function UserManagement() {
     { staleTime: 60000 }
   );
 
+  const detailIdentifier = detailState.userUuid || detailState.userId;
+
   const userOverviewQuery = useQuery(
-    ['adminUserOverview', detailState.userId],
-    () => adminAPI.getUserOverview(detailState.userId).then((res) => res.data?.data),
+    ['adminUserOverview', detailIdentifier],
+    () => adminAPI.getUserOverview(detailIdentifier).then((res) => res.data?.data),
     {
-      enabled: detailState.open && Boolean(detailState.userId),
+      enabled: detailState.open && Boolean(detailIdentifier),
       select: (data) => {
         if (!data) {
           return null;
@@ -198,13 +202,13 @@ export function UserManagement() {
   );
 
   const userBadgesQuery = useQuery(
-    ['adminUserBadges', detailState.userId, showRevokedBadges],
+    ['adminUserBadges', detailIdentifier, showRevokedBadges],
     () =>
       adminAPI
-        .getUserBadges(detailState.userId, { include_revoked: showRevokedBadges })
+        .getUserBadges(detailIdentifier, { include_revoked: showRevokedBadges })
         .then((res) => res.data?.data),
     {
-      enabled: detailState.open && Boolean(detailState.userId),
+      enabled: detailState.open && Boolean(detailIdentifier),
       select: (data) => {
         if (!data) {
           return null;
@@ -223,7 +227,7 @@ export function UserManagement() {
   );
 
   const updateUserMutation = useMutation(
-    ({ id, data }) => adminAPI.updateUser(id, data),
+    ({ identifier, data }) => adminAPI.updateUser(identifier, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('adminUsers');
@@ -236,7 +240,7 @@ export function UserManagement() {
   );
 
   const deleteUserMutation = useMutation(
-    (id) => adminAPI.deleteUser(id),
+    (identifier) => adminAPI.deleteUser(identifier),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('adminUsers');
@@ -249,7 +253,7 @@ export function UserManagement() {
   );
 
   const adjustPointsMutation = useMutation(
-    ({ id, data }) => adminAPI.adjustUserPoints(id, data),
+    ({ identifier, data }) => adminAPI.adjustUserPoints(identifier, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('adminUsers');
@@ -273,38 +277,54 @@ export function UserManagement() {
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
+    const userUuidParam = searchParams.get('userUuid');
     const userIdParam = searchParams.get('userId');
-    if (!userIdParam) {
+    if (!userUuidParam && !userIdParam) {
       return;
     }
     const cleanup = () => {
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev);
+        next.delete('userUuid');
         next.delete('userId');
         return next;
       }, { replace: true });
     };
+    if (userUuidParam) {
+      const normalized = userUuidParam.trim().toLowerCase();
+      if (!normalized) {
+        cleanup();
+        return;
+      }
+      if (!detailState.open || detailState.userUuid !== normalized) {
+        setDetailState({ open: true, userId: null, userUuid: normalized });
+        setShowRevokedBadges(false);
+      }
+      cleanup();
+      return;
+    }
+
     const parsed = Number(userIdParam);
     if (!Number.isInteger(parsed) || parsed <= 0) {
       cleanup();
       return;
     }
     if (!detailState.open || detailState.userId !== parsed) {
-      setDetailState({ open: true, userId: parsed });
+      setDetailState({ open: true, userId: parsed, userUuid: null });
       setShowRevokedBadges(false);
     }
     cleanup();
-  }, [searchParams, detailState.open, detailState.userId, setSearchParams, setShowRevokedBadges]);
+  }, [searchParams, detailState.open, detailState.userId, detailState.userUuid, setSearchParams, setShowRevokedBadges]);
 
   const { users, pagination } = useMemo(() => normalizeUsersResponse(usersQuery.data), [usersQuery.data]);
   const isInitialUsersLoading = usersQuery.isLoading && !usersQuery.data;
   const isRefetchingUsers = usersQuery.isFetching && !!usersQuery.data;
   const selectedUser = useMemo(() => {
-    if (!detailState.userId) {
+    if (!detailIdentifier) {
       return null;
     }
-    return users.find((item) => item.id === detailState.userId) || null;
-  }, [detailState.userId, users]);
+    return users.find((item) => item.uuid === detailState.userUuid || item.id === detailState.userId) || null;
+  }, [detailIdentifier, detailState.userId, detailState.userUuid, users]);
 
   const overviewData = userOverviewQuery.data || null;
   const badgeData = userBadgesQuery.data || null;
@@ -430,12 +450,12 @@ export function UserManagement() {
     if (!user) {
       return;
     }
-    setDetailState({ open: true, userId: user.id });
+    setDetailState({ open: true, userId: user.id ?? null, userUuid: user.uuid ?? null });
     setShowRevokedBadges(false);
   };
 
   const closeUserDetail = () => {
-    setDetailState({ open: false, userId: null });
+    setDetailState({ open: false, userId: null, userUuid: null });
     setShowRevokedBadges(false);
   };
 
@@ -454,18 +474,20 @@ export function UserManagement() {
     }
     if (confirmDialog.type === 'status') {
       const nextStatus = confirmDialog.payload.nextStatus;
+      const identifier = getUserIdentifier(confirmDialog.user);
       updateUserMutation.mutate(
-        { id: confirmDialog.user.id, data: { status: nextStatus } },
+        { identifier, data: { status: nextStatus } },
         { onSettled: closeConfirmDialog }
       );
     } else if (confirmDialog.type === 'role') {
       const makeAdmin = confirmDialog.payload.makeAdmin;
+      const identifier = getUserIdentifier(confirmDialog.user);
       updateUserMutation.mutate(
-        { id: confirmDialog.user.id, data: { is_admin: makeAdmin } },
+        { identifier, data: { is_admin: makeAdmin } },
         { onSettled: closeConfirmDialog }
       );
     } else if (confirmDialog.type === 'delete') {
-      deleteUserMutation.mutate(confirmDialog.user.id, { onSettled: closeConfirmDialog });
+      deleteUserMutation.mutate(getUserIdentifier(confirmDialog.user), { onSettled: closeConfirmDialog });
     } else {
       closeConfirmDialog();
     }
@@ -486,8 +508,9 @@ export function UserManagement() {
       toast.error(t('admin.users.invalidDelta'));
       return;
     }
+    const identifier = getUserIdentifier(pointsDialog.user);
     adjustPointsMutation.mutate(
-      { id: pointsDialog.user.id, data: { delta: deltaValue, reason: pointsDialog.reason } },
+      { identifier, data: { delta: deltaValue, reason: pointsDialog.reason } },
       { onSettled: closeAdjustPoints }
     );
   };
@@ -527,7 +550,7 @@ export function UserManagement() {
     };
 
     updateUserMutation.mutate(
-      { id: editDialog.user.id, data: payload },
+      { identifier: getUserIdentifier(editDialog.user), data: payload },
       {
         onSuccess: () => {
           closeDetailedEdit();
