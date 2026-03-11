@@ -1868,13 +1868,17 @@
       "detailEmpty": "No detail data",
       "security": {
         "title": "Security overview",
-        "subtitle": "Passkey summary and the 10 most recent security events.",
+        "subtitle": "Show the latest 3 security events by default, with expandable filters and pagination matching the profile view.",
         "passkeysTotal": "Total passkeys",
         "backupEnabled": "Backup enabled",
         "backupEligible": "Backup eligible",
         "lastPasskeyUsed": "Last passkey use",
         "neverUsed": "Never used",
-        "empty": "No recent security activity."
+        "empty": "No recent security activity.",
+        "expand": "Expand all",
+        "collapse": "Collapse",
+        "previewHint": "Only the latest 3 events are shown by default.",
+        "expandedHint": "Full security activity is expanded with type and time filters."
       },
       "badgeTable": {
         "badge": "Badge",

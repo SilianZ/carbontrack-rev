@@ -1862,13 +1862,17 @@
       "detailEmpty": "暂无详情数据",
       "security": {
         "title": "安全概况",
-        "subtitle": "查看通行密钥汇总与最近 10 条安全事件。",
+        "subtitle": "默认展示最近 3 条安全事件，可展开后按用户侧逻辑筛选与分页浏览。",
         "passkeysTotal": "通行密钥总数",
         "backupEnabled": "已启用备份",
         "backupEligible": "可备份设备",
         "lastPasskeyUsed": "最近通行密钥使用",
         "neverUsed": "尚未使用",
-        "empty": "暂无最近安全事件。"
+        "empty": "暂无最近安全事件。",
+        "expand": "展开全部",
+        "collapse": "收起",
+        "previewHint": "当前默认仅显示最近 3 条事件。",
+        "expandedHint": "已展开完整安全事件列表，可按类型与时间范围筛选。"
       },
       "badgeTable": {
         "badge": "徽章",

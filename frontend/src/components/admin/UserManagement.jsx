@@ -24,6 +24,8 @@ import {
   Settings,
   Flame,
   RefreshCcw,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -132,6 +134,12 @@ export function UserManagement() {
   const [bulkDialog, setBulkDialog] = useState({ open: false, presetUsers: [] });
   const [detailState, setDetailState] = useState({ open: false, userId: null, userUuid: null });
   const [showRevokedBadges, setShowRevokedBadges] = useState(false);
+  const [securityActivityExpanded, setSecurityActivityExpanded] = useState(false);
+  const [securityActivityPage, setSecurityActivityPage] = useState(1);
+  const [securityActivityFilters, setSecurityActivityFilters] = useState({
+    type: 'all',
+    period: 'all',
+  });
   const [editDialog, setEditDialog] = useState({
     open: false,
     user: null,
@@ -178,6 +186,7 @@ export function UserManagement() {
   );
 
   const detailIdentifier = detailState.userUuid || detailState.userId;
+  const securityActivityLimit = securityActivityExpanded ? 10 : 3;
 
   const userOverviewQuery = useQuery(
     ['adminUserOverview', detailIdentifier],
@@ -223,6 +232,22 @@ export function UserManagement() {
           badges,
         };
       },
+    }
+  );
+
+  const userSecurityActivityQuery = useQuery(
+    ['adminUserSecurityActivity', detailIdentifier, securityActivityPage, securityActivityLimit, securityActivityFilters.type, securityActivityFilters.period],
+    () =>
+      adminAPI
+        .getUserSecurityActivity(detailIdentifier, {
+          page: securityActivityPage,
+          limit: securityActivityLimit,
+          ...securityActivityFilters,
+        })
+        .then((res) => res.data?.data),
+    {
+      enabled: detailState.open && Boolean(detailIdentifier),
+      keepPreviousData: true,
     }
   );
 
@@ -354,8 +379,29 @@ export function UserManagement() {
     [overviewData]
   );
   const recentSecurityActivity = useMemo(
-    () => (Array.isArray(overviewData?.recent_security_activity) ? overviewData.recent_security_activity : []),
-    [overviewData]
+    () => (Array.isArray(userSecurityActivityQuery.data?.items) ? userSecurityActivityQuery.data.items : []),
+    [userSecurityActivityQuery.data]
+  );
+  const securityActivityPagination = userSecurityActivityQuery.data?.pagination || {};
+
+  const securityActivityTypeOptions = useMemo(
+    () => [
+      { value: 'all', label: t('securityActivity.filters.types.all') },
+      { value: 'sign_ins', label: t('securityActivity.filters.types.signIns') },
+      { value: 'passkey_changes', label: t('securityActivity.filters.types.passkeyChanges') },
+      { value: 'password_changes', label: t('securityActivity.filters.types.passwordChanges') },
+      { value: 'logouts', label: t('securityActivity.filters.types.logouts') },
+    ],
+    [t]
+  );
+  const securityActivityPeriodOptions = useMemo(
+    () => [
+      { value: 'all', label: t('securityActivity.filters.periods.all') },
+      { value: '7d', label: t('securityActivity.filters.periods.last7Days') },
+      { value: '30d', label: t('securityActivity.filters.periods.last30Days') },
+      { value: '90d', label: t('securityActivity.filters.periods.last90Days') },
+    ],
+    [t]
   );
   const metricsCards = useMemo(() => {
     if (!overviewData && !detailUser) {
@@ -452,11 +498,17 @@ export function UserManagement() {
     }
     setDetailState({ open: true, userId: user.id ?? null, userUuid: user.uuid ?? null });
     setShowRevokedBadges(false);
+    setSecurityActivityExpanded(false);
+    setSecurityActivityPage(1);
+    setSecurityActivityFilters({ type: 'all', period: 'all' });
   };
 
   const closeUserDetail = () => {
     setDetailState({ open: false, userId: null, userUuid: null });
     setShowRevokedBadges(false);
+    setSecurityActivityExpanded(false);
+    setSecurityActivityPage(1);
+    setSecurityActivityFilters({ type: 'all', period: 'all' });
   };
 
   const openConfirmDialog = (config) => {
@@ -465,6 +517,14 @@ export function UserManagement() {
 
   const closeConfirmDialog = () => {
     setConfirmDialog({ open: false, type: null, user: null, payload: null });
+  };
+
+  const handleSecurityActivityFilterChange = (key, value) => {
+    setSecurityActivityPage(1);
+    setSecurityActivityFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
   const handleConfirmAction = () => {
@@ -1102,11 +1162,87 @@ export function UserManagement() {
                     </p>
                   </div>
                 </div>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    {securityActivityExpanded
+                      ? t('admin.users.security.expandedHint')
+                      : t('admin.users.security.previewHint')}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSecurityActivityExpanded((prev) => !prev);
+                      setSecurityActivityPage(1);
+                    }}
+                  >
+                    {securityActivityExpanded ? (
+                      <>
+                        <ChevronUp className="mr-2 h-4 w-4" />
+                        {t('admin.users.security.collapse')}
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="mr-2 h-4 w-4" />
+                        {t('admin.users.security.expand')}
+                      </>
+                    )}
+                  </Button>
+                </div>
+                {securityActivityExpanded && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="space-y-1 text-sm">
+                      <span className="font-medium text-slate-700">{t('securityActivity.filters.typeLabel')}</span>
+                      <select
+                        value={securityActivityFilters.type}
+                        onChange={(event) => handleSecurityActivityFilterChange('type', event.target.value)}
+                        className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        {securityActivityTypeOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="space-y-1 text-sm">
+                      <span className="font-medium text-slate-700">{t('securityActivity.filters.periodLabel')}</span>
+                      <select
+                        value={securityActivityFilters.period}
+                        onChange={(event) => handleSecurityActivityFilterChange('period', event.target.value)}
+                        className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        {securityActivityPeriodOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                )}
+                {userSecurityActivityQuery.isError ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>{t('common.error')}</AlertTitle>
+                    <AlertDescription>{t('securityActivity.loadError')}</AlertDescription>
+                  </Alert>
+                ) : null}
                 <SecurityActivityList
                   items={recentSecurityActivity}
                   compact
+                  isLoading={userSecurityActivityQuery.isLoading}
                   emptyText={t('admin.users.security.empty')}
                 />
+                {securityActivityExpanded && !userSecurityActivityQuery.isError ? (
+                  <Pagination
+                    currentPage={securityActivityPagination.current_page}
+                    totalPages={securityActivityPagination.total_pages}
+                    onPageChange={setSecurityActivityPage}
+                    itemsPerPage={securityActivityPagination.per_page}
+                    totalItems={securityActivityPagination.total_items}
+                  />
+                ) : null}
               </div>
 
               <div className="space-y-3">

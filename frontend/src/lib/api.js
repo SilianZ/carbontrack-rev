@@ -285,6 +285,7 @@ export const adminAPI = {
   getPasskeys: (params = {}) => api.get('/admin/passkeys', { params }),
   getPasskeyStats: () => api.get('/admin/passkeys/stats'),
   getUserOverview: (identifier) => api.get(buildAdminUserPath(identifier, '/overview')),
+  getUserSecurityActivity: (identifier, params = {}) => api.get(buildAdminUserPath(identifier, '/security-activity'), { params }),
   getUserBadges: (identifier, params = {}) => api.get(buildAdminUserPath(identifier, '/badges'), { params }),
   updateUser: (identifier, data) => api.put(buildAdminUserPath(identifier), data),
   deleteUser: (identifier) => api.delete(buildAdminUserPath(identifier)),
