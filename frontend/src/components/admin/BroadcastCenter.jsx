@@ -803,9 +803,16 @@ export function BroadcastCenter() {
         toast.error(t("admin.broadcast.recipientSearch.invalidUser"));
         return;
       }
-      const userUuid = typeof recipient.uuid === "string" ? recipient.uuid.trim().toLowerCase() : "";
+      const userUuid =
+        typeof recipient.uuid === "string"
+          ? recipient.uuid.trim().toLowerCase()
+          : "";
       if (userUuid) {
         navigate(`/admin/users?userUuid=${userUuid}`);
+        return;
+      }
+      if (recipient.id === undefined || recipient.id === null) {
+        toast.error(t("admin.broadcast.recipientSearch.invalidUser"));
         return;
       }
       const userId = Number(recipient.id);
@@ -1934,6 +1941,14 @@ export function BroadcastCenter() {
                                             </span>{" "}
                                             #{id}
                                           </div>
+                                          {item.uuid && (
+                                            <div>
+                                              <span className="font-medium text-gray-700">
+                                                UUID:
+                                              </span>{" "}
+                                              {item.uuid}
+                                            </div>
+                                          )}
                                           {item.email && (
                                             <div>
                                               <span className="font-medium text-gray-700">

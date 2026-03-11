@@ -39,7 +39,7 @@ export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
   };
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose?.(); }}>
-      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-none overflow-hidden p-0 sm:w-[calc(100vw-3rem)] sm:max-w-4xl xl:max-w-5xl">
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-none overflow-hidden p-0 sm:w-[calc(100vw-3rem)] sm:max-w-2xl lg:max-w-3xl">
         <div className="flex max-h-[calc(100dvh-2rem)] flex-col">
           <DialogHeader className="shrink-0 border-b px-6 py-5 pr-14">
             <DialogTitle className="text-xl">{t('messages.detail.title')}</DialogTitle>
