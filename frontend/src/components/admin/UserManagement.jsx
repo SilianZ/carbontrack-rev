@@ -952,25 +952,27 @@ export function UserManagement() {
       </Dialog>
 
       <Dialog open={detailState.open} onOpenChange={(open) => (!open ? closeUserDetail() : null)}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>
-              {detailUser
-                ? t('admin.users.detailTitle',  { username: detailUser.username })
-                : t('admin.users.detailTitleFallback')}
-            </DialogTitle>
-            <DialogDescription>{detailUser?.email || ''}</DialogDescription>
-          </DialogHeader>
-          {userOverviewQuery.isLoading ? (
-            <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {t('common.loading')}
-            </div>
-          ) : userOverviewQuery.error ? (
-            <p className="text-sm text-destructive">{t('admin.users.detailLoadFailed')}</p>
-          ) : overviewData ? (
-            <div className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-none overflow-hidden p-0 sm:w-[calc(100vw-3rem)] sm:max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px]">
+          <div className="flex max-h-[calc(100dvh-2rem)] flex-col">
+            <DialogHeader className="shrink-0 border-b px-6 py-5 pr-14">
+              <DialogTitle>
+                {detailUser
+                  ? t('admin.users.detailTitle',  { username: detailUser.username })
+                  : t('admin.users.detailTitleFallback')}
+              </DialogTitle>
+              <DialogDescription>{detailUser?.email || ''}</DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              {userOverviewQuery.isLoading ? (
+                <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('common.loading')}
+                </div>
+              ) : userOverviewQuery.error ? (
+                <p className="text-sm text-destructive">{t('admin.users.detailLoadFailed')}</p>
+              ) : overviewData ? (
+                <div className="space-y-6">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-lg border bg-white p-4 shadow-sm">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.username')}</p>
                   <p className="mt-1 text-sm font-medium text-gray-900">{detailUser?.username}</p>
@@ -997,7 +999,7 @@ export function UserManagement() {
                 )}
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 {metricsCards.map((card) => {
                   const Icon = card.icon;
                   return (
@@ -1020,7 +1022,7 @@ export function UserManagement() {
                     <h4 className="text-base font-semibold">{t('admin.users.checkins.title')}</h4>
                     <p className="text-sm text-muted-foreground">{t('admin.users.checkins.subtitle')}</p>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
                     {checkinCards.map((card) => {
                       const Icon = card.icon;
                       return (
@@ -1057,7 +1059,7 @@ export function UserManagement() {
                     <p className="text-sm text-muted-foreground">{t('admin.users.security.subtitle')}</p>
                   </div>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="rounded-lg border bg-white p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.passkeysTotal')}</p>
                     <p className="mt-2 text-2xl font-semibold">{passkeySummary.total}</p>
@@ -1095,7 +1097,7 @@ export function UserManagement() {
                     <span>{t('admin.users.showRevokedBadges')}</span>
                   </div>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
                   <div className="rounded-lg border bg-white p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesAwarded')}</p>
                     <p className="mt-2 text-2xl font-semibold">{badgeSummary.awarded}</p>
@@ -1173,10 +1175,12 @@ export function UserManagement() {
                   <p className="text-sm text-muted-foreground">{t('admin.users.badgesEmpty')}</p>
                 )}
               </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">{t('admin.users.detailEmpty')}</p>
+              )}
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t('admin.users.detailEmpty')}</p>
-          )}
+          </div>
         </DialogContent>
       </Dialog>
 

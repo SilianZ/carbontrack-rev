@@ -1029,6 +1029,23 @@
     "description": "查看最近登录、密码与通行密钥相关安全事件。",
     "loadError": "加载安全活动失败，请稍后重试。",
     "empty": "暂无安全活动记录。",
+    "filters": {
+      "typeLabel": "活动类型",
+      "periodLabel": "时间范围",
+      "types": {
+        "all": "全部活动",
+        "signIns": "登录记录",
+        "passkeyChanges": "通行密钥变更",
+        "passwordChanges": "密码变更",
+        "logouts": "退出记录"
+      },
+      "periods": {
+        "all": "全部时间",
+        "last7Days": "最近 7 天",
+        "last30Days": "最近 30 天",
+        "last90Days": "最近 90 天"
+      }
+    },
     "status": {
       "success": "成功",
       "other": "其他"

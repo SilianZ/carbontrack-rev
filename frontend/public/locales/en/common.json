@@ -1033,6 +1033,23 @@
     "description": "Review recent sign-in, password, and passkey-related security events.",
     "loadError": "Failed to load security activity. Please try again later.",
     "empty": "No security activity yet.",
+    "filters": {
+      "typeLabel": "Activity type",
+      "periodLabel": "Time range",
+      "types": {
+        "all": "All activity",
+        "signIns": "Sign-ins",
+        "passkeyChanges": "Passkey changes",
+        "passwordChanges": "Password changes",
+        "logouts": "Sign-outs"
+      },
+      "periods": {
+        "all": "All time",
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "last90Days": "Last 90 days"
+      }
+    },
     "status": {
       "success": "Success",
       "other": "Other"

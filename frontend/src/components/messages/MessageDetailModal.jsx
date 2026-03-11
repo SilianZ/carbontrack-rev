@@ -39,74 +39,73 @@ export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
   };
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose?.(); }}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl">{t('messages.detail.title')}</DialogTitle>
-          <DialogDescription>{t('messages.detail.subtitle')}</DialogDescription>
-        </DialogHeader>
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-none overflow-hidden p-0 sm:w-[calc(100vw-3rem)] sm:max-w-4xl xl:max-w-5xl">
+        <div className="flex max-h-[calc(100dvh-2rem)] flex-col">
+          <DialogHeader className="shrink-0 border-b px-6 py-5 pr-14">
+            <DialogTitle className="text-xl">{t('messages.detail.title')}</DialogTitle>
+            <DialogDescription>{t('messages.detail.subtitle')}</DialogDescription>
+          </DialogHeader>
 
-          <div className="flex items-center space-x-2">
-            {message.priority && (
-              <Badge variant={message.priority}>
-                {t(`messages.priority.${message.priority}`)}
-              </Badge>
-            )}
-            {isAnnouncement && (
-              <Badge variant="outline">{t('messages.labels.announcement')}</Badge>
-            )}
-          </div>
+          <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
+            <div className="flex flex-wrap items-center gap-2">
+              {message.priority && (
+                <Badge variant={message.priority}>
+                  {t(`messages.priority.${message.priority}`)}
+                </Badge>
+              )}
+              {isAnnouncement && (
+                <Badge variant="outline">{t('messages.labels.announcement')}</Badge>
+              )}
+            </div>
 
-        <div className="space-y-6">
-          {/* 基本信息 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <p className="text-sm font-medium text-gray-500">{t('messages.status')}</p>
+                {getStatusBadge(message.is_read)}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">{t('messages.date')}</p>
+                <p className="text-gray-900">{formatDateSafe(message.created_at, 'yyyy-MM-dd HH:mm')}</p>
+              </div>
+            </div>
+
             <div>
-              <p className="text-sm font-medium text-gray-500">{t('messages.status')}</p>
-              {getStatusBadge(message.is_read)}
+              <h4 className="mb-2 flex items-center text-md font-semibold text-gray-700">
+                <MessageSquare className="mr-2 h-4 w-4" />{t('messages.subject')}
+              </h4>
+              <p className="rounded-md bg-gray-50 p-3 text-gray-900">{message.title}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">{t('messages.date')}</p>
-              <p className="text-gray-900">{formatDateSafe(message.created_at, 'yyyy-MM-dd HH:mm')}</p>
+              <h4 className="mb-2 flex items-center text-md font-semibold text-gray-700">
+                <Info className="mr-2 h-4 w-4" />{t('messages.content')}
+              </h4>
+              {isAnnouncement ? (
+                <AnnouncementContent
+                  content={message.content}
+                  contentFormat={announcementContentFormat}
+                  className="rounded-md bg-gray-50 p-3"
+                />
+              ) : (
+                <div
+                  className="rounded-md bg-gray-50 p-3 text-gray-700 whitespace-pre-wrap break-words [&_a]:text-blue-600 [&_a]:underline [&_pre]:overflow-x-auto"
+                  dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+                ></div>
+              )}
             </div>
-          </div>
 
-          {/* 主题和内容 */}
-          <div>
-            <h4 className="text-md font-semibold text-gray-700 mb-2 flex items-center">
-              <MessageSquare className="h-4 w-4 mr-2" />{t('messages.subject')}
-            </h4>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{message.title}</p>
+            <DialogFooter className="shrink-0 border-t pt-4">
+              {!message.is_read && (
+                <Button
+                  variant="outline"
+                  onClick={() => onMarkRead(message.id)}
+                  className="mr-2"
+                >
+                  <MailOpen className="h-4 w-4 mr-1" /> {t('messages.markRead')}
+                </Button>
+              )}
+              <Button onClick={onClose}>{t('common.close')}</Button>
+            </DialogFooter>
           </div>
-          <div>
-            <h4 className="text-md font-semibold text-gray-700 mb-2 flex items-center">
-              <Info className="h-4 w-4 mr-2" />{t('messages.content')}
-            </h4>
-            {isAnnouncement ? (
-              <AnnouncementContent
-                content={message.content}
-                contentFormat={announcementContentFormat}
-                className="bg-gray-50 rounded-md p-3"
-              />
-            ) : (
-              <div
-                className="text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap break-words [&_a]:text-blue-600 [&_a]:underline [&_pre]:overflow-x-auto"
-                dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-              ></div>
-            )}
-          </div>
-
-          {/* 操作按钮 */}
-          <DialogFooter className="pt-2">
-            {!message.is_read && (
-              <Button
-                variant="outline"
-                onClick={() => onMarkRead(message.id)}
-                className="mr-2"
-              >
-                <MailOpen className="h-4 w-4 mr-1" /> {t('messages.markRead')}
-              </Button>
-            )}
-            <Button onClick={onClose}>{t('common.close')}</Button>
-          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>
@@ -128,4 +127,3 @@ MessageDetailModal.propTypes = {
     type: PropTypes.string,
   }),
 };
-

@@ -12,17 +12,49 @@ import SecurityActivityList from '../security/SecurityActivityList';
 export function SecurityActivityCard() {
   const { t } = useTranslation();
   const [page, setPage] = React.useState(1);
+  const [filters, setFilters] = React.useState({
+    type: 'all',
+    period: 'all',
+  });
   const limit = 10;
 
+  const typeOptions = React.useMemo(
+    () => [
+      { value: 'all', label: t('securityActivity.filters.types.all') },
+      { value: 'sign_ins', label: t('securityActivity.filters.types.signIns') },
+      { value: 'passkey_changes', label: t('securityActivity.filters.types.passkeyChanges') },
+      { value: 'password_changes', label: t('securityActivity.filters.types.passwordChanges') },
+      { value: 'logouts', label: t('securityActivity.filters.types.logouts') },
+    ],
+    [t]
+  );
+  const periodOptions = React.useMemo(
+    () => [
+      { value: 'all', label: t('securityActivity.filters.periods.all') },
+      { value: '7d', label: t('securityActivity.filters.periods.last7Days') },
+      { value: '30d', label: t('securityActivity.filters.periods.last30Days') },
+      { value: '90d', label: t('securityActivity.filters.periods.last90Days') },
+    ],
+    [t]
+  );
+
   const securityActivityQuery = useQuery(
-    ['securityActivity', page, limit],
-    () => userAPI.getSecurityActivity({ page, limit }),
+    ['securityActivity', page, limit, filters.type, filters.period],
+    () => userAPI.getSecurityActivity({ page, limit, ...filters }),
     { keepPreviousData: true }
   );
 
   const payload = securityActivityQuery.data?.data?.data || securityActivityQuery.data?.data || {};
   const items = Array.isArray(payload.items) ? payload.items : [];
   const pagination = payload.pagination || {};
+
+  const handleFilterChange = (key, value) => {
+    setPage(1);
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   return (
     <Card>
@@ -41,6 +73,36 @@ export function SecurityActivityCard() {
           </Alert>
         ) : (
           <>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="space-y-1 text-sm">
+                <span className="font-medium text-slate-700">{t('securityActivity.filters.typeLabel')}</span>
+                <select
+                  value={filters.type}
+                  onChange={(event) => handleFilterChange('type', event.target.value)}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  {typeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="font-medium text-slate-700">{t('securityActivity.filters.periodLabel')}</span>
+                <select
+                  value={filters.period}
+                  onChange={(event) => handleFilterChange('period', event.target.value)}
+                  className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  {periodOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
             <SecurityActivityList
               items={items}
               isLoading={securityActivityQuery.isLoading}
