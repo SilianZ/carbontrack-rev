@@ -131,6 +131,36 @@ const truncateUsers = (users, max = MAX_USERS_PREVIEW) => {
   return { list: users.slice(0, max), more: users.length - max };
 };
 
+const getRecipientUuid = (entry) => {
+  if (typeof entry?.uuid === "string" && entry.uuid.trim()) {
+    return entry.uuid.trim().toLowerCase();
+  }
+  if (typeof entry?.user_id === "string" && entry.user_id.trim()) {
+    return entry.user_id.trim().toLowerCase();
+  }
+  return "";
+};
+
+const getRecipientLegacyId = (entry) => {
+  const candidates = [entry?.legacy_user_id, entry?.id, entry?.user_id];
+  for (const candidate of candidates) {
+    const parsed = Number(candidate);
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return null;
+};
+
+const getRecipientFallbackLabel = (entry) => {
+  const uuid = getRecipientUuid(entry);
+  if (uuid) {
+    return uuid;
+  }
+  const legacyId = getRecipientLegacyId(entry);
+  return legacyId ? `#${legacyId}` : "#?";
+};
+
 function ResultStat({ label, value, tone = "default" }) {
   return (
     <div className="rounded-md border px-4 py-3">
@@ -161,12 +191,15 @@ function UserChips({ users, onViewUser, t }) {
   return (
     <div className="space-y-2">
       {users.map((entry, index) => {
-        const id = Number(entry?.user_id ?? entry?.id ?? index);
-        if (!Number.isFinite(id) || id <= 0) {
+        const uuid = getRecipientUuid(entry);
+        const legacyId = getRecipientLegacyId(entry);
+        const identity = uuid || legacyId || index;
+        if (!uuid && !legacyId) {
           return null;
         }
 
-        const label = entry?.username ?? entry?.email ?? `#${id}`;
+        const label =
+          entry?.username ?? entry?.email ?? getRecipientFallbackLabel(entry);
         const email = entry?.email ?? entry?.user_email ?? null;
         const statusValue =
           typeof entry?.status === "string" ? entry.status.toLowerCase() : "";
@@ -190,13 +223,13 @@ function UserChips({ users, onViewUser, t }) {
 
         const handleNavigate = (event) => {
           if (onViewUser) {
-            onViewUser(event, { ...entry, id });
+            onViewUser(event, { ...entry, id: legacyId, uuid });
           }
         };
 
         return (
           <div
-            key={`${id}-${index}`}
+            key={`${identity}-${index}`}
             className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2"
           >
             <HoverCard>
@@ -206,12 +239,20 @@ function UserChips({ users, onViewUser, t }) {
                 </span>
               </HoverCardTrigger>
               <HoverCardContent className="w-64 space-y-1 text-xs text-muted-foreground">
-                <div>
-                  <span className="font-medium text-gray-700">
-                    {t("admin.broadcast.recipientSearch.hover.userId")}
-                  </span>{" "}
-                  #{id}
-                </div>
+                {legacyId && (
+                  <div>
+                    <span className="font-medium text-gray-700">
+                      {t("admin.broadcast.recipientSearch.hover.userId")}
+                    </span>{" "}
+                    #{legacyId}
+                  </div>
+                )}
+                {uuid && (
+                  <div>
+                    <span className="font-medium text-gray-700">UUID</span>{" "}
+                    {uuid}
+                  </div>
+                )}
                 {email && (
                   <div>
                     <span className="font-medium text-gray-700">
@@ -803,10 +844,7 @@ export function BroadcastCenter() {
         toast.error(t("admin.broadcast.recipientSearch.invalidUser"));
         return;
       }
-      const userUuid =
-        typeof recipient.uuid === "string"
-          ? recipient.uuid.trim().toLowerCase()
-          : "";
+      const userUuid = getRecipientUuid(recipient);
       if (userUuid) {
         navigate(`/admin/users?userUuid=${userUuid}`);
         return;
@@ -1167,12 +1205,18 @@ export function BroadcastCenter() {
           (item.actor_user_id ? `#${item.actor_user_id}` : t("common.unknown"));
         const readUsers = Array.isArray(item.read_users)
           ? item.read_users
-              .map((user) => user.username || `#${user.user_id ?? "?"}`)
+              .map(
+                (user) =>
+                  user.username || user.email || getRecipientFallbackLabel(user),
+              )
               .join("; ")
           : "";
         const unreadUsers = Array.isArray(item.unread_users)
           ? item.unread_users
-              .map((user) => user.username || `#${user.user_id ?? "?"}`)
+              .map(
+                (user) =>
+                  user.username || user.email || getRecipientFallbackLabel(user),
+              )
               .join("; ")
           : "";
         return [
