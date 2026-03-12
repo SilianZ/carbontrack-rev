@@ -10,6 +10,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Alert, AlertDescription } from '../ui/Alert';
 // 移除即时上传组件，改为提交时统一上传
 
+const MAX_UPLOAD_FILES = 5;
+const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
+const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+const SUPPORTED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
 export default function DataInputForm({
   activity,
   onCalculate,
@@ -19,10 +24,10 @@ export default function DataInputForm({
   initialData,
   checkinDate
 }) {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage, tFileSize } = useTranslation();
   // 选中的本地文件（未立即上传）
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [uploadError, setUploadError] = useState('');
+  const [uploadError, setUploadError] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedMeta, setUploadedMeta] = useState([]); // 成功上传后的元数据
   const [previewUrls, setPreviewUrls] = useState([]);
@@ -104,11 +109,171 @@ export default function DataInputForm({
     };
   }, [activity, watchedData, onCalculate]);
 
+  const setDetailedUploadError = (summary, details = []) => {
+    setUploadError({
+      summary,
+      details: details.filter(Boolean),
+    });
+  };
+
+  const buildUploadErrorFromException = (error) => {
+    const rawMessage = String(error?.rawMessage || error?.message || '').trim();
+    const normalizedMessage = rawMessage.toLowerCase();
+    const status = error?.status ?? null;
+    const requestId = error?.requestId || error?.request_id || null;
+    const fileName = error?.fileName || error?.file_name || null;
+    const step = error?.step || null;
+    const details = [];
+    const supportedFormats = SUPPORTED_IMAGE_EXTENSIONS.map((item) => item.toUpperCase()).join(', ');
+
+    if (fileName) {
+      details.push(t('activities.form.uploadErrors.details.file', { name: fileName }));
+    }
+
+    if (requestId) {
+      details.push(t('activities.form.uploadErrors.details.requestId', { id: requestId }));
+    }
+
+    if (status === 401 || normalizedMessage === 'unauthorized') {
+      return {
+        summary: t('activities.form.uploadErrors.expiredSessionSummary'),
+        details,
+      };
+    }
+
+    if (rawMessage === 'MIME type not allowed' || rawMessage === 'File extension not allowed') {
+      return {
+        summary: t('activities.form.uploadErrors.unsupportedFormatSummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.details.supportedFormats', { formats: supportedFormats }),
+        ],
+      };
+    }
+
+    if (rawMessage === 'File size exceeds limit') {
+      return {
+        summary: t('activities.form.uploadErrors.fileTooLargeSummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.details.maxSize', { size: tFileSize(MAX_UPLOAD_SIZE) }),
+        ],
+      };
+    }
+
+    if (rawMessage === 'File not found in storage') {
+      return {
+        summary: t('activities.form.uploadErrors.storageDelaySummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.storageDelayDetail'),
+        ],
+      };
+    }
+
+    if (rawMessage === 'File ownership conflict detected' || error?.code === 'FILE_OWNERSHIP_CONFLICT') {
+      return {
+        summary: t('activities.form.uploadErrors.ownershipConflictSummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.ownershipConflictDetail'),
+        ],
+      };
+    }
+
+    if (rawMessage === 'Invalid directory name') {
+      return {
+        summary: t('activities.form.uploadErrors.invalidConfigSummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.invalidConfigDetail'),
+        ],
+      };
+    }
+
+    if (
+      normalizedMessage.includes('network error') ||
+      normalizedMessage.includes('failed to fetch') ||
+      error?.code === 'ERR_NETWORK'
+    ) {
+      return {
+        summary: t('activities.form.uploadErrors.networkSummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.networkDetail'),
+        ],
+      };
+    }
+
+    if (normalizedMessage.includes('timeout') || error?.code === 'ECONNABORTED') {
+      return {
+        summary: t('activities.form.uploadErrors.timeoutSummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.timeoutDetail'),
+        ],
+      };
+    }
+
+    if (step === 'put') {
+      return {
+        summary: t('activities.form.uploadErrors.putSummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.putDetail'),
+        ],
+      };
+    }
+
+    if (step === 'presign') {
+      return {
+        summary: t('activities.form.uploadErrors.presignSummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.presignDetail'),
+        ],
+      };
+    }
+
+    if (step === 'confirm') {
+      return {
+        summary: t('activities.form.uploadErrors.confirmSummary'),
+        details: [
+          ...details,
+          t('activities.form.uploadErrors.confirmDetail'),
+        ],
+      };
+    }
+
+    return {
+      summary: t('activities.form.uploadErrors.genericSummary'),
+      details: [
+        ...details,
+        rawMessage
+          ? t('activities.form.uploadErrors.details.serverMessage', { message: rawMessage })
+          : t('activities.form.uploadErrors.genericDetail'),
+      ],
+    };
+  };
+
+  const isSupportedImageFile = (file) => {
+    const ext = (file?.name?.split('.').pop() || '').toLowerCase();
+    if (file?.type && SUPPORTED_IMAGE_MIME_TYPES.includes(file.type)) {
+      return true;
+    }
+    return SUPPORTED_IMAGE_EXTENSIONS.includes(ext);
+  };
+
   const onFormSubmit = async (data) => {
-    setUploadError('');
+    setUploadError(null);
     // 校验至少一张图片
     if (!selectedFiles.length && !uploadedMeta.length) {
-      setUploadError(t('activities.form.imageRequired') || '请至少选择一张图片');
+      setDetailedUploadError(
+        t('activities.form.imageRequired'),
+        [
+          t('activities.form.uploadErrors.proofImageRequiredDetail'),
+        ]
+      );
       return;
     }
     // 若还未上传（正常情况）则先上传
@@ -130,7 +295,8 @@ export default function DataInputForm({
         }));
         setUploadedMeta(finalImages);
       } catch (e) {
-        setUploadError(e.message || '上传失败');
+        const readableError = buildUploadErrorFromException(e);
+        setDetailedUploadError(readableError.summary, readableError.details);
         setUploading(false);
         return;
       }
@@ -151,15 +317,18 @@ export default function DataInputForm({
   };
 
   const processFiles = (files) => {
-    setUploadError('');
-    const MAX = 5;
-    const MAX_SIZE = 5 * 1024 * 1024;
+    setUploadError(null);
 
     const currentFiles = [...selectedFiles];
     const currentPreviews = [...previewUrls];
 
-    if (currentFiles.length + files.length > MAX) {
-      setUploadError(t('activities.form.maxFilesReached') || '最多只能上传 5 张图片');
+    if (currentFiles.length + files.length > MAX_UPLOAD_FILES) {
+      setDetailedUploadError(
+        t('activities.form.maxFilesReached'),
+        [
+          t('activities.form.uploadErrors.maxFilesDetail', { current: currentFiles.length, incoming: files.length }),
+        ]
+      );
       return;
     }
 
@@ -167,8 +336,27 @@ export default function DataInputForm({
     const newPreviews = [];
 
     for (const f of files) {
-      if (f.size > MAX_SIZE) {
-        setUploadError(t('activities.form.fileTooLarge') || '文件过大');
+      if (!isSupportedImageFile(f)) {
+        setDetailedUploadError(
+          t('activities.form.uploadErrors.unsupportedFormatSummary'),
+          [
+            t('activities.form.uploadErrors.details.file', { name: f.name }),
+            t('activities.form.uploadErrors.details.supportedFormats', {
+              formats: SUPPORTED_IMAGE_EXTENSIONS.map((item) => item.toUpperCase()).join(', '),
+            }),
+          ]
+        );
+        continue;
+      }
+      if (f.size > MAX_UPLOAD_SIZE) {
+        setDetailedUploadError(
+          t('activities.form.fileTooLarge'),
+          [
+            t('activities.form.uploadErrors.details.file', { name: f.name }),
+            t('activities.form.uploadErrors.details.currentSize', { size: tFileSize(f.size) }),
+            t('activities.form.uploadErrors.details.maxSize', { size: tFileSize(MAX_UPLOAD_SIZE) }),
+          ]
+        );
         continue;
       }
       // 简单去重：同名同大小
@@ -255,13 +443,13 @@ export default function DataInputForm({
           {t('activities.form.calculationResult')}
         </CardTitle>
         <CardDescription className="text-xs">
-          {t('activities.form.previewAutoUpdate') || '实时预览'}
+          {t('activities.form.previewAutoUpdate')}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-4">
           <div className="bg-white rounded-lg p-3 border">
-            <div className="text-xs text-gray-500 mb-1">{t('activities.carbonSaved')} (kg CO₂)</div>
+            <div className="text-xs text-gray-500 mb-1">{t('activities.form.carbonSavedMetric')}</div>
             <div className="text-2xl font-bold text-green-600 leading-none">
               {(() => { const v = calculationResult.carbon_saved; const num = typeof v === 'number' ? v : Number(v); return Number.isFinite(num) ? num.toFixed(2) : '0.00'; })()}
             </div>
@@ -439,10 +627,10 @@ export default function DataInputForm({
 
                   <div className="text-center">
                     <p className="text-sm font-medium text-gray-700">
-                      {isDragging ? (t('activities.form.dropHere') || '释放以上传') : (t('activities.form.clickOrDrag') || '点击或拖拽上传图片')}
+                      {isDragging ? t('activities.form.dropHere') : t('activities.form.clickOrDrag')}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {t('activities.form.uploadHint') || '支持 JPG, PNG (最大 5MB)'}
+                      {t('activities.form.uploadHint')}
                     </p>
                   </div>
                 </div>
@@ -454,10 +642,10 @@ export default function DataInputForm({
                       {selectedFiles.map((f, i) => (
                         <li key={i} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md border border-gray-200 hover:border-gray-300 transition-colors">
                           <div className="flex items-center gap-3 min-w-0">
-                            {previewUrls[i] && <img src={previewUrls[i]} alt={f.name} className="h-10 w-10 object-cover rounded border border-gray-200" />}
+                            {previewUrls[i] && <img src={previewUrls[i]} alt={t('activities.form.imagePreviewAlt', { name: f.name })} className="h-10 w-10 object-cover rounded border border-gray-200" />}
                             <div className="flex flex-col min-w-0">
                               <span className="truncate font-medium text-gray-700">{f.name}</span>
-                              <span className="text-xs text-gray-500">{(f.size / 1024).toFixed(1)} KB</span>
+                              <span className="text-xs text-gray-500">{t('activities.form.fileSizeLabel', { size: tFileSize(f.size) })}</span>
                             </div>
                           </div>
                           <button
@@ -475,15 +663,24 @@ export default function DataInputForm({
                   {uploading && (
                     <div className="text-xs text-blue-600 flex items-center gap-2">
                       <div className="animate-spin rounded-full h-3 w-3 border-2 border-blue-600 border-t-transparent"></div>
-                      {t('common.uploading') || '正在上传...'} {progress.total > 0 ? `${progress.done}/${progress.total}` : ''}
+                      {t('common.uploading')} {progress.total > 0 ? `${progress.done}/${progress.total}` : ''}
                     </div>
                   )}
 
                   {uploadError && (
-                    <p className="text-xs text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {uploadError}
-                    </p>
+                    <Alert variant="destructive" className="py-3">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription className="space-y-2">
+                        <p className="text-sm font-medium">{uploadError.summary}</p>
+                        {Array.isArray(uploadError.details) && uploadError.details.length > 0 && (
+                          <ul className="list-disc space-y-1 pl-5 text-xs">
+                            {uploadError.details.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </AlertDescription>
+                    </Alert>
                   )}
                 </div>
               </div>
@@ -497,7 +694,7 @@ export default function DataInputForm({
                   loading={isSubmitting || uploading}
                   disabled={isSubmitting || uploading || !showCalculation}
                 >
-                  {(isSubmitting || uploading) ? (t('activities.form.submitting') || '提交中...') : t('activities.form.submit')}
+                  {(isSubmitting || uploading) ? t('activities.form.submitting') : t('activities.form.submit')}
                 </Button>
 
                 <Button
@@ -531,11 +728,11 @@ export default function DataInputForm({
                   {t('activities.form.calculationResult')}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  {t('activities.form.enterDataToPreview') || '输入数值后出现'}
+                  {t('activities.form.enterDataToPreview')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-xs text-gray-400">
-                {t('activities.form.previewPlaceholder') || '填写数据以查看实时计算'}
+                {t('activities.form.previewPlaceholder')}
               </CardContent>
             </Card>
           )}
