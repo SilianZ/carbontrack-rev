@@ -1,5 +1,5 @@
 
-# Frontend CI for target repo - runs install, lint, build and unit tests
+# Frontend CI for mirror repo - runs push-time smoke checks after monorepo sync
 name: Frontend CI
 
 env:

@@ -1,5 +1,5 @@
 
-# Backend CI for target repo - installs PHP & composer, runs phpunit and optional static analysis
+# Backend CI for mirror repo - runs push-time smoke checks after monorepo sync
 name: Backend CI
 
 on:
