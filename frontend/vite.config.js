@@ -12,25 +12,12 @@ function normalizeApiBaseUrl(value) {
 }
 
 function resolveApiBaseUrl(env) {
-  const explicitApiUrl = normalizeApiBaseUrl(env.VITE_API_URL)
-  if (explicitApiUrl) {
-    return explicitApiUrl
+  const configuredApiUrl = normalizeApiBaseUrl(env.VITE_API_URL)
+  if (configuredApiUrl) {
+    return configuredApiUrl
   }
 
-  const isCloudflarePages = ['1', 'true'].includes(String(env.CF_PAGES || '').toLowerCase())
-  if (!isCloudflarePages) {
-    return 'https://dev-api.carbontrackapp.com/api/v1'
-  }
 
-  const branch = String(env.CF_PAGES_BRANCH || '').trim().toLowerCase()
-  if (branch === 'main' || branch === 'master') {
-    return 'https://api.carbontrackapp.com/api/v1'
-  }
-  if (branch === 'dev') {
-    return 'https://dev-api.carbontrackapp.com/api/v1'
-  }
-
-  return 'https://mig-api.carbontrackapp.com/api/v1'
 }
 
 // https://vite.dev/config/
