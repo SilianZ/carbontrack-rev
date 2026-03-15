@@ -1104,6 +1104,7 @@ class FileUploadController
     private function buildDirectUploadFileRecordData(string $filePath, int $userId, string $originalName, array $fileInfo, ?string $sha256 = null): array
     {
         $recordData = [
+            'sha256' => $this->resolveFileRecordSha256($sha256, $filePath, $fileInfo, $originalName),
             'file_path' => $filePath,
             'mime_type' => $fileInfo['mime_type'] ?? null,
             'size' => (int) ($fileInfo['size'] ?? 0),
@@ -1111,10 +1112,6 @@ class FileUploadController
             'user_id' => $userId,
             'reference_count' => 1,
         ];
-
-        if ($sha256) {
-            $recordData['sha256'] = $sha256;
-        }
 
         return $recordData;
     }
@@ -1172,20 +1169,39 @@ class FileUploadController
 
     private function buildMultipartFileRecordData(string $filePath, int $userId, ?array $fileInfo = null, ?string $sha256 = null): array
     {
+        $originalName = (string) ($fileInfo['metadata']['original_name'] ?? basename($filePath));
         $recordData = [
+            'sha256' => $this->resolveFileRecordSha256($sha256, $filePath, $fileInfo ?? [], $originalName),
             'file_path' => $filePath,
             'mime_type' => $fileInfo['mime_type'] ?? null,
             'size' => isset($fileInfo['size']) ? (int) $fileInfo['size'] : 0,
-            'original_name' => (string) ($fileInfo['metadata']['original_name'] ?? basename($filePath)),
+            'original_name' => $originalName,
             'user_id' => $userId,
             'reference_count' => 1,
         ];
 
-        if ($sha256) {
-            $recordData['sha256'] = $sha256;
+        return $recordData;
+    }
+
+    private function resolveFileRecordSha256(?string $sha256, string $filePath, array $fileInfo, string $originalName): string
+    {
+        $candidate = is_string($sha256) ? strtolower(trim($sha256)) : '';
+        if ($candidate !== '' && preg_match('/^[a-f0-9]{64}$/', $candidate)) {
+            return $candidate;
         }
 
-        return $recordData;
+        $metadataSha256 = strtolower(trim((string) ($fileInfo['metadata']['sha256'] ?? '')));
+        if ($metadataSha256 !== '' && preg_match('/^[a-f0-9]{64}$/', $metadataSha256)) {
+            return $metadataSha256;
+        }
+
+        return hash('sha256', json_encode([
+            'file_path' => $filePath,
+            'etag' => (string) ($fileInfo['etag'] ?? ''),
+            'size' => (int) ($fileInfo['size'] ?? 0),
+            'mime_type' => (string) ($fileInfo['mime_type'] ?? ''),
+            'original_name' => $originalName,
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
 
     private function authorizeMultipartUpload(Response $response, array $user, string $uploadId, string $filePath): ?Response
