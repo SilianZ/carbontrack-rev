@@ -7,6 +7,7 @@
 说明：
 - 本地开发若未设置 `VITE_API_URL`，默认回退到 `https://dev-api.carbontrackapp.com/api/v1`。
 - Cloudflare Pages 不再按分支名推算 API 地址，需在对应环境中直接设置 `VITE_API_URL`。
+
 - 后端主要在版本化前缀下提供接口，即 `/api/v1/...`。
 - 为了兼容历史调用，后端提供少量 `/api/...` 的别名路由；但为了避免未来的不一致，强烈建议始终使用 `/api/v1` 作为前缀。
 - 前端会对 `VITE_API_URL` 做一次轻量规范化：如果你误将其配置为以 `/api` 结尾（如 `https://example.com/api`），前端会自动补全为 `https://example.com/api/v1`，以避免在未开启别名路由的环境出现 404。为清晰与稳定，仍建议显式配置到 `/api/v1`。
