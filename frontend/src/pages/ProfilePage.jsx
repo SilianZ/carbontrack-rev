@@ -35,7 +35,6 @@ export default function ProfilePage() {
     if (!user) return { src: '', filePath: '', alt: '', fallbackInitial: '' };
     return buildAvatarDisplayProps({
       ...user,
-      file_path: user.avatar_url,
       name: user.username,
     });
   }, [user]);
