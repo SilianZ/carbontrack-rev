@@ -94,6 +94,7 @@ jobs:
           repositories: |
             frontend
           permission-contents: write
+          permission-workflows: write
 
       - name: Resolve frontend app bot identity
         id: frontend-bot
@@ -145,12 +146,13 @@ jobs:
           find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
           cp -a ../frontend/. .
 
-          if git diff --quiet --exit-code && git diff --cached --quiet --exit-code; then
+          git add -A
+
+          if git diff --cached --quiet --exit-code; then
             echo "Frontend mirror already up to date on ${TARGET_BRANCH}"
             exit 0
           fi
 
-          git add -A
           git commit -m "chore(sync): 映单仓前端之变于镜仓 (${SHORT_SHA})"
           git push origin "HEAD:${TARGET_BRANCH}"
 
@@ -176,6 +178,7 @@ jobs:
           repositories: |
             backend
           permission-contents: write
+          permission-workflows: write
 
       - name: Resolve backend app bot identity
         id: backend-bot
@@ -221,11 +224,12 @@ jobs:
           find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
           cp -a ../backend/. .
 
-          if git diff --quiet --exit-code && git diff --cached --quiet --exit-code; then
+          git add -A
+
+          if git diff --cached --quiet --exit-code; then
             echo "Backend mirror already up to date on ${TARGET_BRANCH}"
             exit 0
           fi
 
-          git add -A
           git commit -m "chore(sync): 映单仓后端之变于镜仓 (${SHORT_SHA})"
           git push origin "HEAD:${TARGET_BRANCH}"

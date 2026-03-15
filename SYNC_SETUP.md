@@ -63,6 +63,7 @@ Minimum repository permissions for the app:
 
 - `Contents: Read and write`
 - `Metadata: Read`
+- `Workflows: Read and write`
 
 If branch protection is enabled on the child repositories, grant the app explicit bypass/push permission for `main` and `dev`.
 
