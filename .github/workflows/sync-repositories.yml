@@ -1,438 +1,231 @@
-name: Sync Monorepo to Individual Repositories
+name: Sync Monorepo Mirrors
 
 env:
   FRONTEND_NODE_VERSION: '20.9.0'
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - dev
 
 permissions:
   contents: read
-  issues: write
-  pull-requests: write
+
+concurrency:
+  group: sync-mirrors-${{ github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
-  sync-repositories:
+  detect-changes:
+    name: detect-changes
     runs-on: ubuntu-latest
-
+    outputs:
+      frontend_changed: ${{ steps.filter.outputs.frontend_changed }}
+      backend_changed: ${{ steps.filter.outputs.backend_changed }}
+      target_branch: ${{ steps.branch.outputs.target_branch }}
+      short_sha: ${{ steps.branch.outputs.short_sha }}
     steps:
-    - name: Checkout monorepo
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # 获取完整历史，便于检测变更
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Git
-      run: |
-        git config --global user.name 'GitHub Actions Bot'
-        git config --global user.email 'actions@github.com'
+      - name: Resolve branch metadata
+        id: branch
+        run: |
+          echo "target_branch=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
-    - name: Bootstrap target repos with CI workflows
-      run: |
-        echo "Ensuring target repos have CI workflow files from monorepo..."
-      # This step intentionally left as a placeholder; detailed steps follow per-repo below
+      - name: Detect changed areas
+        id: filter
+        run: |
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.event.after }}"
+          ZERO_SHA="0000000000000000000000000000000000000000"
 
-    - name: Check for frontend changes
-      id: frontend-changes
-      run: |
-        # 定义变量
-        BEFORE="${{ github.event.before }}"
-        AFTER="${{ github.event.after }}"
-        ZERO_SHA="0000000000000000000000000000000000000000"
-
-        # 判断是否为 Push 事件
-        if [ "${{ github.event_name }}" = "push" ]; then
-          
-          # 【关键修复】如果是新分支 (Before 是 000...) 或 Before 不再存在（例如 force-push），则改用 HEAD~1 对比 HEAD
-          if [ "$BEFORE" = "$ZERO_SHA" ]; then
-            echo "New branch detected. Comparing HEAD~1 to HEAD..."
-            DIFF_RANGE="HEAD~1 HEAD"
-          elif git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+          if [ "$BEFORE" = "$ZERO_SHA" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            if git rev-parse HEAD~1 >/dev/null 2>&1; then
+              DIFF_RANGE="HEAD~1..HEAD"
+              CHANGED_FILES="$(git diff --name-only $DIFF_RANGE)"
+            else
+              DIFF_RANGE="HEAD"
+              CHANGED_FILES="$(git show --pretty='' --name-only HEAD)"
+            fi
+          else
             DIFF_RANGE="$BEFORE..$AFTER"
-          else
-            echo "Before commit not found (likely force-push). Falling back to HEAD~1..HEAD"
-            DIFF_RANGE="HEAD~1 HEAD"
-          fi
-          DIFF_CMD="git diff --name-only $DIFF_RANGE"
-          
-          # 执行检查
-          if $DIFF_CMD | grep -q "^frontend/"; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Frontend changes detected"
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No frontend changes"
+            CHANGED_FILES="$(git diff --name-only $DIFF_RANGE)"
           fi
 
-        else
-          # PR 合并时的逻辑 (Pull Request)
-          if git diff --name-only HEAD~1 HEAD | grep -q "^frontend/"; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Frontend changes detected in PR"
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No frontend changes in PR"
-          fi
-        fi
+          echo "Using diff range: $DIFF_RANGE"
+          echo "$CHANGED_FILES"
 
-    - name: Check for backend changes
-      id: backend-changes
-      run: |
-        BEFORE="${{ github.event.before }}"
-        AFTER="${{ github.event.after }}"
-        ZERO_SHA="0000000000000000000000000000000000000000"
-
-        if [ "${{ github.event_name }}" = "push" ]; then
-          
-          if [ "$BEFORE" = "$ZERO_SHA" ]; then
-            echo "New branch detected. Comparing HEAD~1 to HEAD..."
-            DIFF_RANGE="HEAD~1 HEAD"
-          elif git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-            DIFF_RANGE="$BEFORE..$AFTER"
+          if echo "$CHANGED_FILES" | grep -q '^frontend/'; then
+            echo "frontend_changed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Before commit not found (likely force-push). Falling back to HEAD~1..HEAD"
-            DIFF_RANGE="HEAD~1 HEAD"
-          fi
-          DIFF_CMD="git diff --name-only $DIFF_RANGE"
-
-          if $DIFF_CMD | grep -q "^backend/"; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Backend changes detected"
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No backend changes"
+            echo "frontend_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-        else
-          if git diff --name-only HEAD~1 HEAD | grep -q "^backend/"; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Backend changes detected in PR"
+          if echo "$CHANGED_FILES" | grep -q '^backend/'; then
+            echo "backend_changed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No backend changes in PR"
+            echo "backend_changed=false" >> "$GITHUB_OUTPUT"
           fi
-        fi
-    
-    - name: Sync frontend repository
-      if: steps.frontend-changes.outputs.changed == 'true'
-      env:
-        FRONTEND_TOKEN: ${{ secrets.FRONTEND_REPO_TOKEN }}
-      run: |
-        echo "Syncing frontend changes..."
-        # 克隆 frontend 仓库
-        git clone https://x-access-token:${FRONTEND_TOKEN}@github.com/carbon-track/frontend.git frontend-repo
-        cd frontend-repo
 
-        # 确保 main 是最新的基底
-        git fetch origin main --depth=1
-        git checkout -B main origin/main
+  sync-frontend:
+    name: sync-frontend
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend_changed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: ${{ needs.detect-changes.outputs.target_branch }}
+      SHORT_SHA: ${{ needs.detect-changes.outputs.short_sha }}
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
 
-    - name: Setup pnpm for frontend sync
-      if: steps.frontend-changes.outputs.changed == 'true'
-      uses: pnpm/action-setup@v4
-      with:
-        package_json_file: frontend/package.json
+      - name: Create frontend GitHub App token
+        id: frontend-app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.MIRROR_SYNC_APP_ID }}
+          private-key: ${{ secrets.MIRROR_SYNC_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            frontend
+          permission-contents: write
 
-    - name: Setup Node for frontend sync
-      if: steps.frontend-changes.outputs.changed == 'true'
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.FRONTEND_NODE_VERSION }}
-        cache: 'pnpm'
-        cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Resolve frontend app bot identity
+        id: frontend-bot
+        env:
+          GH_TOKEN: ${{ steps.frontend-app-token.outputs.token }}
+        run: |
+          echo "user_id=$(gh api "/users/${{ steps.frontend-app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
 
-    - name: Build & test frontend (monorepo)
-      if: steps.frontend-changes.outputs.changed == 'true'
-      run: |
-        echo "Building frontend in monorepo..."
-        cd frontend
-        pnpm install --frozen-lockfile
-        pnpm build
-        echo "Frontend build succeeded"
+      - name: Setup Git
+        run: |
+          git config --global user.name "${{ steps.frontend-app-token.outputs.app-slug }}[bot]"
+          git config --global user.email "${{ steps.frontend-bot.outputs.user_id }}+${{ steps.frontend-app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
 
-        # Switch to the cloned frontend repo and copy build output into it
-        cd ..
-        if [ ! -d frontend-repo ]; then
-          echo "frontend-repo not found; expected clone from earlier step"
-          exit 1
-        fi
-        cd frontend-repo
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
 
-        # 清空现有内容（除了 .git）
-        shopt -s extglob
-        rm -rf !(".git")
-        shopt -u extglob
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.FRONTEND_NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
-        # 复制新内容（包括隐藏文件）
-        cp -r ../frontend/* . 2>/dev/null || true
-        cp -r ../frontend/.[!.]* . 2>/dev/null || true
+      - name: Validate frontend in monorepo
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm build
 
-        # 配置提交者信息（CI 环境）
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Mirror frontend subtree to target repository
+        run: |
+          rm -rf frontend-repo
+          git clone "https://x-access-token:${{ steps.frontend-app-token.outputs.token }}@github.com/carbon-track/frontend.git" frontend-repo
+          cd frontend-repo
 
-        # 如果没有变化则退出
-        if git diff --quiet --exit-code && git diff --staged --quiet --exit-code; then
-          echo "No changes to commit in frontend repository"
-           # 保留 frontend-repo 目录，后续 create-pull-request 仍会使用该路径
-           # 若工作树为空，action 会安全地判定为无需创建/更新 PR
-           cd ..
-           exit 0
-        fi
+          if git ls-remote --exit-code --heads origin "${TARGET_BRANCH}" >/dev/null 2>&1; then
+            git fetch origin "${TARGET_BRANCH}" --depth=1
+            git checkout -B "${TARGET_BRANCH}" "origin/${TARGET_BRANCH}"
+          elif git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
+            git fetch origin main --depth=1
+            git checkout -B "${TARGET_BRANCH}" origin/main
+          else
+            git checkout --orphan "${TARGET_BRANCH}"
+          fi
 
-        # 添加并提交变更（分支与推送交给 create-pull-request）
-        git add -A
-        git commit -m "sync: update from monorepo (${GITHUB_SHA::7})" || true
+          find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
+          cp -a ../frontend/. .
 
-        cd ..
+          if git diff --quiet --exit-code && git diff --cached --quiet --exit-code; then
+            echo "Frontend mirror already up to date on ${TARGET_BRANCH}"
+            exit 0
+          fi
 
-    - name: Bootstrap frontend CI to target repo
-      env:
-        FRONTEND_TOKEN: ${{ secrets.FRONTEND_REPO_TOKEN }}
-      run: |
-        echo "Bootstrapping frontend CI in target repo (if different)"
-        rm -rf frontend-repo-boot
-        git clone https://x-access-token:${FRONTEND_TOKEN}@github.com/carbon-track/frontend.git frontend-repo-boot
-        cd frontend-repo-boot
-        git fetch origin main --depth=1
-        git checkout -B main origin/main
-        mkdir -p .github/workflows
-        cp -f ../frontend/.github/workflows/ci.yml .github/workflows/ci.yml || true
-        if git status --porcelain | grep -q .; then
-          git add .github/workflows/ci.yml
-          git commit -m "chore(ci): sync frontend CI from monorepo (${GITHUB_SHA::7})" || true
-        else
-          echo "Frontend CI up-to-date; no changes"
-        fi
-        cd ..
-        # do not remove frontend-repo-boot here; PR creation step needs this directory
+          git add -A
+          git commit -m "chore(sync): 映单仓前端之变于镜仓 (${SHORT_SHA})"
+          git push origin "HEAD:${TARGET_BRANCH}"
 
+  sync-backend:
+    name: sync-backend
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend_changed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: ${{ needs.detect-changes.outputs.target_branch }}
+      SHORT_SHA: ${{ needs.detect-changes.outputs.short_sha }}
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
 
-    - name: Prepare short sha
-      id: vars
-      run: |
-        echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+      - name: Create backend GitHub App token
+        id: backend-app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.MIRROR_SYNC_APP_ID }}
+          private-key: ${{ secrets.MIRROR_SYNC_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            backend
+          permission-contents: write
 
-    - name: Create PR for frontend
-      if: steps.frontend-changes.outputs.changed == 'true'
-      uses: peter-evans/create-pull-request@v5
-      with:
-        token: ${{ secrets.FRONTEND_REPO_TOKEN }}
-        path: frontend-repo
-        commit-message: "sync: update from monorepo (${{ steps.vars.outputs.short_sha }})"
-        branch: 'sync/monorepo-${{ github.sha }}'
-        base: main
-        title: "sync: update from monorepo (${{ steps.vars.outputs.short_sha }})"
-        body: |
-          Automated sync from monorepo `frontend/` folder.
-        labels: sync
-        draft: false
+      - name: Resolve backend app bot identity
+        id: backend-bot
+        env:
+          GH_TOKEN: ${{ steps.backend-app-token.outputs.token }}
+        run: |
+          echo "user_id=$(gh api "/users/${{ steps.backend-app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
 
-    - name: Enable Auto-merge for frontend
-      if: steps.frontend-changes.outputs.changed == 'true'
-      env:
-        GH_TOKEN: ${{ secrets.FRONTEND_REPO_TOKEN }}
-      run: |
-        echo "Enabling auto-merge for frontend PR..."
-        # 使用你创建 PR 时用的同一个分支名
-        BRANCH="sync/monorepo-${{ github.sha }}"
-        # 调用 GitHub CLI 开启自动合并
-        gh pr merge "$BRANCH" --repo "carbon-track/frontend" --auto --merge
+      - name: Setup Git
+        run: |
+          git config --global user.name "${{ steps.backend-app-token.outputs.app-slug }}[bot]"
+          git config --global user.email "${{ steps.backend-bot.outputs.user_id }}+${{ steps.backend-app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
 
-    - name: Create bootstrap PR for frontend
-      uses: peter-evans/create-pull-request@v5
-      with:
-        token: ${{ secrets.FRONTEND_REPO_TOKEN }}
-        path: frontend-repo-boot
-        commit-message: "chore(ci): bootstrap frontend CI from monorepo (${{ steps.vars.outputs.short_sha }})"
-        branch: 'sync/bootstrap-ci-${{ github.sha }}'
-        base: main
-        title: "chore(ci): bootstrap frontend CI from monorepo (${{ steps.vars.outputs.short_sha }})"
-        body: |
-          This PR bootstraps/updates the frontend CI workflow in the target repo from the monorepo.
-        labels: sync,bootstrap
-        draft: false
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer:v2
 
-    - name: Mark frontend PR ready for review
-      if: steps.frontend-changes.outputs.changed == 'true'
-      env:
-        FRONTEND_TOKEN: ${{ secrets.FRONTEND_REPO_TOKEN }}
-      run: |
-        echo "Marking frontend PR ready_for_review to trigger target-repo checks..."
-        REPO="carbon-track/frontend"
-        BRANCH="sync/monorepo-${GITHUB_SHA}"
-        PR_JSON=$(curl -s -H "Authorization: token $FRONTEND_TOKEN" "https://api.github.com/repos/$REPO/pulls?head=carbon-track:$BRANCH")
-        PR_NUM=$(echo "$PR_JSON" | jq -r '.[0].number')
-        if [ -z "$PR_NUM" ] || [ "$PR_NUM" = "null" ]; then
-          echo "No frontend PR found for branch $BRANCH"
-          exit 0
-        fi
-        echo "Found PR #$PR_NUM — marking ready for review..."
-        curl -s -X POST -H "Authorization: token $FRONTEND_TOKEN" "https://api.github.com/repos/$REPO/pulls/$PR_NUM/ready_for_review" || true
+      - name: Validate backend in monorepo
+        working-directory: backend
+        run: |
+          composer install --no-interaction --prefer-dist
+          composer test
 
-        # Do NOT merge here — target repo controls merge (enable branch protection & auto-merge there)
-        echo "Frontend PR #$PR_NUM is ready for review. No merge will be attempted from monorepo." 
+      - name: Mirror backend subtree to target repository
+        run: |
+          rm -rf backend-repo
+          git clone "https://x-access-token:${{ steps.backend-app-token.outputs.token }}@github.com/carbon-track/backend.git" backend-repo
+          cd backend-repo
 
-    - name: Cleanup frontend-repo
-      if: steps.frontend-changes.outputs.changed == 'true'
-      run: |
-        echo "Cleaning up cloned frontend-repo"
-        rm -rf frontend-repo || true
+          if git ls-remote --exit-code --heads origin "${TARGET_BRANCH}" >/dev/null 2>&1; then
+            git fetch origin "${TARGET_BRANCH}" --depth=1
+            git checkout -B "${TARGET_BRANCH}" "origin/${TARGET_BRANCH}"
+          elif git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
+            git fetch origin main --depth=1
+            git checkout -B "${TARGET_BRANCH}" origin/main
+          else
+            git checkout --orphan "${TARGET_BRANCH}"
+          fi
 
-    - name: Sync backend repository
-      if: steps.backend-changes.outputs.changed == 'true'
-      env:
-        BACKEND_TOKEN: ${{ secrets.BACKEND_REPO_TOKEN }}
-      run: |
-        echo "Syncing backend changes..."
-        # 克隆 backend 仓库
-        git clone https://x-access-token:${BACKEND_TOKEN}@github.com/carbon-track/backend.git backend-repo
-        cd backend-repo
+          find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
+          cp -a ../backend/. .
 
-        # 确保 main 是最新的基底
-        git fetch origin main --depth=1
-        git checkout -B main origin/main
+          if git diff --quiet --exit-code && git diff --cached --quiet --exit-code; then
+            echo "Backend mirror already up to date on ${TARGET_BRANCH}"
+            exit 0
+          fi
 
-    - name: Setup PHP & run backend tests (monorepo)
-      if: steps.backend-changes.outputs.changed == 'true'
-      run: |
-        echo "Setting up PHP and running backend tests..."
-        sudo apt-get update
-        sudo apt-get install -y php-cli unzip git curl
-        curl -sS https://getcomposer.org/installer | php
-        sudo mv composer.phar /usr/local/bin/composer
-        cd backend
-        composer install --no-interaction --prefer-dist
-        # start any local services if required by tests
-        composer run start &
-        echo $! > /tmp/backend_start_pid || true
-        # run phpunit (use vendor binary if present)
-        if [ -f vendor/bin/phpunit ]; then
-          vendor/bin/phpunit || true
-        else
-          phpunit || true
-        fi
-        # stop background services
-        if [ -f /tmp/backend_start_pid ]; then
-          kill $(cat /tmp/backend_start_pid) || true
-          rm /tmp/backend_start_pid || true
-        fi
-        echo "Backend tests completed"
-
-        # Switch to the cloned backend repo and copy monorepo backend files into it
-        cd ..
-        if [ ! -d backend-repo ]; then
-          echo "backend-repo not found; expected clone from earlier step"
-          exit 1
-        fi
-        cd backend-repo
-
-        # 清空现有内容（除了 .git）
-        shopt -s extglob
-        rm -rf !(".git")
-        shopt -u extglob
-
-        # 复制新内容（包括隐藏文件）
-        cp -r ../backend/* . 2>/dev/null || true
-        cp -r ../backend/.[!.]* . 2>/dev/null || true
-
-        # 配置提交者信息（CI 环境）
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-        # 如果没有变化则退出
-        if git diff --quiet --exit-code && git diff --staged --quiet --exit-code; then
-          echo "No changes to commit in backend repository"
-           # 保留 backend-repo 目录，后续 create-pull-request 仍会使用该路径
-           # 若工作树为空，action 会安全地判定为无需创建/更新 PR
-           cd ..
-           exit 0
-        fi
-
-        # 添加并提交变更（分支与推送交给 create-pull-request）
-        git add -A
-        git commit -m "sync: update from monorepo (${GITHUB_SHA::7})" || true
-
-        cd ..
-
-    - name: Bootstrap backend CI to target repo
-      env:
-        BACKEND_TOKEN: ${{ secrets.BACKEND_REPO_TOKEN }}
-      run: |
-        echo "Bootstrapping backend CI in target repo (if different)"
-        rm -rf backend-repo-boot
-        git clone https://x-access-token:${BACKEND_TOKEN}@github.com/carbon-track/backend.git backend-repo-boot
-        cd backend-repo-boot
-        git fetch origin main --depth=1
-        git checkout -B main origin/main
-        mkdir -p .github/workflows
-        cp -f ../backend/.github/workflows/ci.yml .github/workflows/ci.yml || true
-        if git status --porcelain | grep -q .; then
-          git add .github/workflows/ci.yml
-          git commit -m "chore(ci): sync backend CI from monorepo (${GITHUB_SHA::7})" || true
-        else
-          echo "Backend CI up-to-date; no changes"
-        fi
-        cd ..
-        # do not remove backend-repo-boot here; PR creation step needs this directory
-
-
-    - name: Create PR for backend
-      if: steps.backend-changes.outputs.changed == 'true'
-      uses: peter-evans/create-pull-request@v5
-      with:
-        token: ${{ secrets.BACKEND_REPO_TOKEN }}
-        path: backend-repo
-        commit-message: "sync: update from monorepo (${{ steps.vars.outputs.short_sha }})"
-        branch: 'sync/monorepo-${{ github.sha }}'
-        base: main
-        title: "sync: update from monorepo (${{ steps.vars.outputs.short_sha }})"
-        body: |
-          Automated sync from monorepo `backend/` folder.
-        labels: sync
-        draft: false
-
-    - name: Enable Auto-merge for backend
-      if: steps.backend-changes.outputs.changed == 'true'
-      env:
-        GH_TOKEN: ${{ secrets.BACKEND_REPO_TOKEN }}
-      run: |
-        echo "Enabling auto-merge for backend PR..."
-        BRANCH="sync/monorepo-${{ github.sha }}"
-        gh pr merge "$BRANCH" --repo "carbon-track/backend" --auto --merge
-
-    - name: Create bootstrap PR for backend
-      uses: peter-evans/create-pull-request@v5
-      with:
-        token: ${{ secrets.BACKEND_REPO_TOKEN }}
-        path: backend-repo-boot
-        commit-message: "chore(ci): bootstrap backend CI from monorepo (${{ steps.vars.outputs.short_sha }})"
-        branch: 'sync/bootstrap-ci-${{ github.sha }}'
-        base: main
-        title: "chore(ci): bootstrap backend CI from monorepo (${{ steps.vars.outputs.short_sha }})"
-        body: |
-          This PR bootstraps/updates the backend CI workflow in the target repo from the monorepo.
-        labels: sync,bootstrap
-        draft: false
-
-    - name: Mark backend PR ready for review
-      if: steps.backend-changes.outputs.changed == 'true'
-      env:
-        BACKEND_TOKEN: ${{ secrets.BACKEND_REPO_TOKEN }}
-      run: |
-        echo "Marking backend PR ready_for_review to trigger target-repo checks..."
-        REPO="carbon-track/backend"
-        BRANCH="sync/monorepo-${GITHUB_SHA}"
-        PR_JSON=$(curl -s -H "Authorization: token $BACKEND_TOKEN" "https://api.github.com/repos/$REPO/pulls?head=carbon-track:$BRANCH")
-        PR_NUM=$(echo "$PR_JSON" | jq -r '.[0].number')
-        if [ -z "$PR_NUM" ] || [ "$PR_NUM" = "null" ]; then
-          echo "No backend PR found for branch $BRANCH"
-          exit 0
-        fi
-        echo "Found PR #$PR_NUM — marking ready for review..."
-        curl -s -X POST -H "Authorization: token $BACKEND_TOKEN" "https://api.github.com/repos/$REPO/pulls/$PR_NUM/ready_for_review" || true
-        
-        # Do NOT merge here — target repo controls merge (enable branch protection & auto-merge there)
-        echo "Backend PR #$PR_NUM is ready for review. No merge will be attempted from monorepo."
-
+          git add -A
+          git commit -m "chore(sync): 映单仓后端之变于镜仓 (${SHORT_SHA})"
+          git push origin "HEAD:${TARGET_BRANCH}"

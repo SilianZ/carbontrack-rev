@@ -34,16 +34,16 @@ function Test-WorkflowFile {
         
         # Check if the workflow has the correct triggers
         $content = Get-Content $Path -Raw
-        if ($content -match "push:" -and $content -match "branches.*main") {
-            Write-Host "  ✅ Push trigger configured for main branch" -ForegroundColor Green
+        if ($content -match "push:" -and $content -match "- main" -and $content -match "- dev") {
+            Write-Host "  ✅ Push trigger configured for main and dev branches" -ForegroundColor Green
         } else {
-            Write-Host "  ⚠️  Push trigger may not be properly configured" -ForegroundColor Yellow
+            Write-Host "  ⚠️  Push trigger may not be properly configured for main/dev" -ForegroundColor Yellow
         }
         
-        if ($content -match "FRONTEND_REPO_TOKEN" -and $content -match "BACKEND_REPO_TOKEN") {
-            Write-Host "  ✅ Required secrets referenced in workflow" -ForegroundColor Green
+        if ($content -match "MIRROR_SYNC_APP_ID" -and $content -match "MIRROR_SYNC_APP_PRIVATE_KEY" -and $content -match "create-github-app-token") {
+            Write-Host "  ✅ GitHub App credentials referenced in workflow" -ForegroundColor Green
         } else {
-            Write-Host "  ❌ Required secrets not found in workflow" -ForegroundColor Red
+            Write-Host "  ❌ GitHub App credentials not fully configured in workflow" -ForegroundColor Red
         }
         
         return $true
@@ -51,6 +51,27 @@ function Test-WorkflowFile {
         Write-Host "❌ GitHub Actions workflow file not found" -ForegroundColor Red
         return $false
     }
+}
+
+# Function to test whether local branch model exists
+function Test-BranchModel {
+    $localBranches = git branch --format="%(refname:short)" 2>$null
+    $hasMain = $localBranches -contains "main"
+    $hasDev = $localBranches -contains "dev"
+
+    if ($hasMain) {
+        Write-Host "✅ Local main branch exists" -ForegroundColor Green
+    } else {
+        Write-Host "⚠️  Local main branch not found" -ForegroundColor Yellow
+    }
+
+    if ($hasDev) {
+        Write-Host "✅ Local dev branch exists" -ForegroundColor Green
+    } else {
+        Write-Host "⚠️  Local dev branch not found yet; create it before enabling the mirror flow" -ForegroundColor Yellow
+    }
+
+    return ($hasMain -and $hasDev)
 }
 
 # Function to create a test change
@@ -84,6 +105,10 @@ Write-Host "`n🔧 Checking GitHub Actions setup..." -ForegroundColor Yellow
 
 $workflowExists = Test-WorkflowFile -Path ".\.github\workflows\sync-repositories.yml"
 
+Write-Host "`n🌿 Checking branch model..." -ForegroundColor Yellow
+
+$branchModelReady = Test-BranchModel
+
 Write-Host "`n📋 Setup status summary:" -Foregroundcolor Yellow
 
 if ($frontendExists -and $backendExists -and $workflowExists) {
@@ -100,13 +125,14 @@ if ($frontendExists -and $backendExists -and $workflowExists) {
         
         if ($frontendTestFile -or $backendTestFile) {
             Write-Host "`n🚀 Test files created! Next steps:" -ForegroundColor Green
-            Write-Host "1. Commit and push these changes to the main branch" -ForegroundColor White
-            Write-Host "2. Check the Actions tab in your GitHub repository" -ForegroundColor White
-            Write-Host "3. Verify that changes appear in individual repositories" -ForegroundColor White
+            Write-Host "1. Commit these changes on a feature branch" -ForegroundColor White
+            Write-Host "2. Open a PR into dev in the monorepo" -ForegroundColor White
+            Write-Host "3. Merge dev and confirm frontend/dev + backend/dev receive the mirror commit" -ForegroundColor White
+            Write-Host "4. Promote dev -> main and confirm frontend/main + backend/main update" -ForegroundColor White
             Write-Host "`nCommands to commit:" -ForegroundColor Cyan
             Write-Host "git add ." -ForegroundColor Gray
-            Write-Host "git commit -m `"test: verify repository sync setup`"" -ForegroundColor Gray
-            Write-Host "git push origin main" -ForegroundColor Gray
+            Write-Host 'git commit -m "test(sync): 验镜像之流是否可行"' -ForegroundColor Gray
+            Write-Host 'git push origin <feature-branch>' -ForegroundColor Gray
         }
     }
 } else {
@@ -114,9 +140,16 @@ if ($frontendExists -and $backendExists -and $workflowExists) {
 }
 
 Write-Host "`n📚 Additional steps needed:" -ForegroundColor Yellow
-Write-Host "1. Add FRONTEND_REPO_TOKEN secret to GitHub repository settings" -ForegroundColor White
-Write-Host "2. Add BACKEND_REPO_TOKEN secret to GitHub repository settings" -ForegroundColor White
-Write-Host "3. Ensure tokens have 'repo' and 'workflow' permissions" -ForegroundColor White
-Write-Host "4. See SYNC_SETUP.md for detailed instructions" -ForegroundColor White
+Write-Host "1. Add MIRROR_SYNC_APP_ID as a repository variable" -ForegroundColor White
+Write-Host "2. Add MIRROR_SYNC_APP_PRIVATE_KEY as a repository secret" -ForegroundColor White
+Write-Host "3. Install the GitHub App on monorepo/frontend/backend and allow it to push main/dev in mirror repos" -ForegroundColor White
+Write-Host "4. Protect monorepo main/dev with PR + required checks from monorepo-ci.yml" -ForegroundColor White
+Write-Host "5. Required checks: monorepo / frontend-ci, monorepo / frontend-cd-readiness, monorepo / backend-ci, monorepo / backend-cd-readiness" -ForegroundColor White
+Write-Host "6. Keep child repos bot-only; their checks are push smoke checks, not merge gates" -ForegroundColor White
+Write-Host "7. See SYNC_SETUP.md for detailed instructions" -ForegroundColor White
+
+if (-not $branchModelReady) {
+    Write-Host "`n⚠️  Branch model is not fully ready. Create local/remote dev before relying on the new flow." -ForegroundColor Yellow
+}
 
 Write-Host "`n🎉 Test completed!" -ForegroundColor Cyan

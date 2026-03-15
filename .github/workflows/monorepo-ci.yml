@@ -1,0 +1,132 @@
+name: Monorepo CI
+
+env:
+  NODE_VERSION: '20.9.0'
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+  push:
+    branches:
+      - main
+      - dev
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-ci:
+    name: monorepo / frontend-ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint frontend
+        working-directory: frontend
+        run: pnpm lint
+
+      - name: Build frontend
+        working-directory: frontend
+        run: pnpm build
+
+  frontend-cd-readiness:
+    name: monorepo / frontend-cd-readiness
+    runs-on: ubuntu-latest
+    needs: frontend-ci
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Simulate mirrored frontend repository
+        shell: bash
+        run: |
+          rm -rf /tmp/frontend-mirror
+          mkdir -p /tmp/frontend-mirror
+          cp -a frontend/. /tmp/frontend-mirror/
+
+      - name: Install mirrored frontend dependencies
+        working-directory: /tmp/frontend-mirror
+        run: pnpm install --frozen-lockfile
+
+      - name: Build mirrored frontend
+        working-directory: /tmp/frontend-mirror
+        run: pnpm build
+
+  backend-ci:
+    name: monorepo / backend-ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run backend tests
+        working-directory: backend
+        run: composer test
+
+  backend-cd-readiness:
+    name: monorepo / backend-cd-readiness
+    runs-on: ubuntu-latest
+    needs: backend-ci
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer:v2
+
+      - name: Simulate mirrored backend repository
+        shell: bash
+        run: |
+          rm -rf /tmp/backend-mirror
+          mkdir -p /tmp/backend-mirror
+          cp -a backend/. /tmp/backend-mirror/
+
+      - name: Install production backend dependencies
+        working-directory: /tmp/backend-mirror
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
