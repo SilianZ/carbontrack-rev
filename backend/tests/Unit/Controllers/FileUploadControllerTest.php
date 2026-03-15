@@ -467,7 +467,10 @@ class FileUploadControllerTest extends TestCase
             $r2->method('getFileInfo')->willReturn([
                 'file_path' => self::FOREIGN_DUPLICATE_PATH,
                 'size' => 10,
-                'mime_type' => self::MIME_JPEG
+                'mime_type' => self::MIME_JPEG,
+                'metadata' => [
+                    'sha256' => str_repeat('e', 64),
+                ],
             ]);
         }, $fileMeta);
 
@@ -756,7 +759,10 @@ class FileUploadControllerTest extends TestCase
                 'file_path' => self::MULTIPART_FILE_PATH,
                 'size' => 98765,
                 'mime_type' => self::MIME_JPEG,
-                'metadata' => ['original_name' => 'big.jpg']
+                'metadata' => [
+                    'original_name' => 'big.jpg',
+                    'sha256' => self::MULTIPART_SHA256,
+                ]
             ]);
         }, $fileMeta, $multipart);
 

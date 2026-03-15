@@ -1059,6 +1059,7 @@ class FileUploadController
 
         $duplicated = false;
         $persistedSha256 = $sha256;
+        $digestClearedForConflict = false;
         if ($sha256) {
             $existing = $this->fileMetadataService->findBySha256($sha256);
             if ($existing && $existing->file_path === $filePath && $this->isOwnedFileRecord($existing, $userId)) {
@@ -1070,11 +1071,19 @@ class FileUploadController
 
             if ($existing) {
                 $persistedSha256 = null;
+                $digestClearedForConflict = true;
             }
         }
 
         $fileRecord = $this->fileMetadataService->createRecord(
-            $this->buildDirectUploadFileRecordData($filePath, $userId, $originalName, $fileInfo, $persistedSha256)
+            $this->buildDirectUploadFileRecordData(
+                $filePath,
+                $userId,
+                $originalName,
+                $fileInfo,
+                $persistedSha256,
+                !$digestClearedForConflict
+            )
         );
 
         return ['file' => $fileRecord, 'duplicate' => $duplicated];
@@ -1101,10 +1110,17 @@ class FileUploadController
         return $fileRecord;
     }
 
-    private function buildDirectUploadFileRecordData(string $filePath, int $userId, string $originalName, array $fileInfo, ?string $sha256 = null): array
+    private function buildDirectUploadFileRecordData(
+        string $filePath,
+        int $userId,
+        string $originalName,
+        array $fileInfo,
+        ?string $sha256 = null,
+        bool $allowMetadataSha256 = true
+    ): array
     {
         $recordData = [
-            'sha256' => $this->resolveFileRecordSha256($sha256, $filePath, $fileInfo, $originalName),
+            'sha256' => $this->resolveFileRecordSha256($sha256, $filePath, $fileInfo, $originalName, $allowMetadataSha256),
             'file_path' => $filePath,
             'mime_type' => $fileInfo['mime_type'] ?? null,
             'size' => (int) ($fileInfo['size'] ?? 0),
@@ -1132,12 +1148,22 @@ class FileUploadController
         }
 
         $persistedSha256 = $sha256;
+        $digestClearedForConflict = false;
         $existing = $this->fileMetadataService->findBySha256($sha256);
         if ($existing) {
             $persistedSha256 = null;
+            $digestClearedForConflict = true;
         }
 
-        $this->fileMetadataService->createRecord($this->buildMultipartFileRecordData($filePath, $userId, $fileInfo, $persistedSha256));
+        $this->fileMetadataService->createRecord(
+            $this->buildMultipartFileRecordData(
+                $filePath,
+                $userId,
+                $fileInfo,
+                $persistedSha256,
+                !$digestClearedForConflict
+            )
+        );
 
         return true;
     }
@@ -1167,11 +1193,17 @@ class FileUploadController
         return true;
     }
 
-    private function buildMultipartFileRecordData(string $filePath, int $userId, ?array $fileInfo = null, ?string $sha256 = null): array
+    private function buildMultipartFileRecordData(
+        string $filePath,
+        int $userId,
+        ?array $fileInfo = null,
+        ?string $sha256 = null,
+        bool $allowMetadataSha256 = true
+    ): array
     {
         $originalName = (string) ($fileInfo['metadata']['original_name'] ?? basename($filePath));
         $recordData = [
-            'sha256' => $this->resolveFileRecordSha256($sha256, $filePath, $fileInfo ?? [], $originalName),
+            'sha256' => $this->resolveFileRecordSha256($sha256, $filePath, $fileInfo ?? [], $originalName, $allowMetadataSha256),
             'file_path' => $filePath,
             'mime_type' => $fileInfo['mime_type'] ?? null,
             'size' => isset($fileInfo['size']) ? (int) $fileInfo['size'] : 0,
@@ -1183,16 +1215,24 @@ class FileUploadController
         return $recordData;
     }
 
-    private function resolveFileRecordSha256(?string $sha256, string $filePath, array $fileInfo, string $originalName): string
+    private function resolveFileRecordSha256(
+        ?string $sha256,
+        string $filePath,
+        array $fileInfo,
+        string $originalName,
+        bool $allowMetadataSha256 = true
+    ): string
     {
         $candidate = is_string($sha256) ? strtolower(trim($sha256)) : '';
         if ($candidate !== '' && preg_match('/^[a-f0-9]{64}$/', $candidate)) {
             return $candidate;
         }
 
-        $metadataSha256 = strtolower(trim((string) ($fileInfo['metadata']['sha256'] ?? '')));
-        if ($metadataSha256 !== '' && preg_match('/^[a-f0-9]{64}$/', $metadataSha256)) {
-            return $metadataSha256;
+        if ($allowMetadataSha256) {
+            $metadataSha256 = strtolower(trim((string) ($fileInfo['metadata']['sha256'] ?? '')));
+            if ($metadataSha256 !== '' && preg_match('/^[a-f0-9]{64}$/', $metadataSha256)) {
+                return $metadataSha256;
+            }
         }
 
         return hash('sha256', json_encode([
