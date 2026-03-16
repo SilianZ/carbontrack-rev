@@ -22,7 +22,7 @@
   - 推荐插件：ESLint, Tailwind CSS, PHP Intelephense, Thunder Client (接口测试)
 
 ### 2. 后端要求 (PHP)
-- **PHP**: v8.1+
+- **PHP**: v8.2+
 - **Composer**: PHP 包管理器
 - **MySQL**: 数据库（推荐 v5.7+ 或 v8.0+）
 
