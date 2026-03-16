@@ -51,6 +51,14 @@ import api, { adminAPI } from '../../lib/api';
 const COMMAND_MIN_LENGTH = 3;
 const MAX_SESSIONS = 6;
 
+function generateSecureId(length = 8) {
+  // Generate a cryptographically secure random string using Web Crypto API
+  const bytes = new Uint8Array(length);
+  (window.crypto || crypto).getRandomValues(bytes);
+  // Convert bytes to a base36 string (0-9, a-z)
+  return Array.from(bytes, (b) => b.toString(36)).join('').slice(0, length);
+}
+
 const NAV_LINKS = [
   { key: 'dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
   { key: 'passkeys', to: '/admin/passkeys', icon: Fingerprint },
@@ -268,7 +276,7 @@ export default function AdminLayout() {
       return;
     }
 
-    const sessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const sessionId = `${Date.now()}-${generateSecureId(6)}`;
     const baseSession = {
       id: sessionId,
       query: trimmed,
