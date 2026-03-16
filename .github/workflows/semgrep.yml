@@ -1,0 +1,47 @@
+name: Semgrep
+
+on:
+  push:
+    branches: [ "dev" ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/semgrep.yml"
+      - ".semgrepignore"
+  pull_request:
+    branches: [ "dev" ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/semgrep.yml"
+      - ".semgrepignore"
+  schedule:
+    - cron: "44 11 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  semgrep:
+    name: Scan backend
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+
+    if: github.actor != 'dependabot[bot]'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep on backend only
+        run: semgrep ci --include backend --sarif > semgrep.sarif
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep-backend
