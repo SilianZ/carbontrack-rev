@@ -135,8 +135,8 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-border bg-card">
         <Card className="border-0 shadow-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <div>
@@ -155,7 +155,7 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
 
           <CardContent className="space-y-6">
             {/* 商品信息 */}
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="rounded-lg bg-muted/50 p-4">
               <div className="flex items-start space-x-4">
                 {hasImage && (
                   <R2Image
@@ -167,15 +167,15 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
                 )}
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg">{product.name}</h3>
-                  <p className="text-gray-600 text-sm mt-1">{product.description}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{product.description}</p>
                   <div className="flex items-center space-x-4 mt-2">
                     <div className="flex items-center space-x-1">
                       <span className="text-lg font-bold text-green-600">
                         {formatNumber(product.points_required)}
                       </span>
-                      <span className="text-sm text-gray-500">{t('common.points')}</span>
+                      <span className="text-sm text-muted-foreground">{t('common.points')}</span>
                     </div>
-                    <div className="flex items-center space-x-1 text-sm text-gray-500">
+                    <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                       <Package className="h-4 w-4" />
                       <span>
                         {product.stock === -1 
@@ -192,7 +192,7 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* 数量选择 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('store.exchange.quantity')}
                 </label>
                 <div className="flex items-center space-x-3">
@@ -222,7 +222,7 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
                   >
                     +
                   </Button>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     {t('store.exchange.maxQuantity', { max: maxQuantity })}
                   </span>
                 </div>
@@ -233,7 +233,7 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
 
               {/* 收货地址 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   <MapPin className="h-4 w-4 inline mr-1" />
                   {t('store.exchange.deliveryAddress')}
                 </label>
@@ -249,7 +249,7 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
                   placeholder={t('store.exchange.addressPlaceholder')}
                   className={errors.deliveryAddress ? 'border-red-500' : ''}
                 />
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {t('store.exchange.addressHint')}
                 </p>
                 {errors.deliveryAddress && (
@@ -259,7 +259,7 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
 
               {/* 联系方式 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   <Phone className="h-4 w-4 inline mr-1" />
                   {t('store.exchange.contactPhone')} ({t('common.optional')})
                 </label>
@@ -302,12 +302,12 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
                     )}
                   </div>
                 </div>
-                <p className="text-gray-500 text-sm mt-1">{t('store.exchange.phoneOptionalHint')}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t('store.exchange.phoneOptionalHint')}</p>
               </div>
 
               {/* 备注 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   <MessageSquare className="h-4 w-4 inline mr-1" />
                   {t('store.exchange.notes')} ({t('common.optional')})
                 </label>
@@ -316,12 +316,12 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={t('store.exchange.notesPlaceholder')}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                  className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
 
               {/* 费用汇总 */}
-              <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="rounded-lg bg-blue-500/10 p-4">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span>{t('store.exchange.unitPrice')}:</span>
@@ -331,14 +331,14 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
                     <span>{t('store.exchange.quantity')}:</span>
                     <span>{quantity}</span>
                   </div>
-                  <hr className="border-gray-300" />
+                  <hr className="border-border" />
                   <div className="flex justify-between items-center font-semibold text-lg">
                     <span>{t('store.exchange.totalCost')}:</span>
                     <span className="text-green-600">
                       {formatNumber(totalPoints)} {t('common.points')}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-sm text-gray-600">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span>{t('store.exchange.currentPoints')}:</span>
                     <span>{formatNumber(userPoints)} {t('common.points')}</span>
                   </div>

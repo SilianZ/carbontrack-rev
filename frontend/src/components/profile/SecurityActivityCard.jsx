@@ -75,7 +75,7 @@ export function SecurityActivityCard() {
           <>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="space-y-1 text-sm">
-                <span className="font-medium text-slate-700">{t('securityActivity.filters.typeLabel')}</span>
+                <span className="font-medium text-foreground">{t('securityActivity.filters.typeLabel')}</span>
                 <select
                   value={filters.type}
                   onChange={(event) => handleFilterChange('type', event.target.value)}
@@ -89,7 +89,7 @@ export function SecurityActivityCard() {
                 </select>
               </label>
               <label className="space-y-1 text-sm">
-                <span className="font-medium text-slate-700">{t('securityActivity.filters.periodLabel')}</span>
+                <span className="font-medium text-foreground">{t('securityActivity.filters.periodLabel')}</span>
                 <select
                   value={filters.period}
                   onChange={(event) => handleFilterChange('period', event.target.value)}

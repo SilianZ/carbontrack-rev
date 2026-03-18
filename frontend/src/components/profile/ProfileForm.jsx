@@ -15,8 +15,8 @@ const FALLBACK = '—';
 
 const renderField = (label, value) => (
   <div className="space-y-1" key={label}>
-    <p className="text-sm font-medium text-gray-700">{label}</p>
-    <div className="rounded-md border border-dashed border-gray-200 bg-muted/40 px-3 py-2 text-sm text-gray-900">
+    <p className="text-sm font-medium text-foreground">{label}</p>
+    <div className="rounded-md border border-dashed border-border bg-muted/40 px-3 py-2 text-sm text-foreground">
       {value ?? FALLBACK}
     </div>
   </div>
@@ -275,7 +275,7 @@ export function ProfileForm({ user }) {
       <section className="rounded-lg border p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
           <div>
-            <h3 className="text-base font-semibold text-gray-900">
+            <h3 className="text-base font-semibold text-foreground">
               {t('profile.editProfile')}
             </h3>
             <p className="text-sm text-muted-foreground">
@@ -288,7 +288,7 @@ export function ProfileForm({ user }) {
         <form className="space-y-6" onSubmit={handleSubmit}>
           
           <div className="space-y-4">
-             <h4 className="text-sm font-medium text-gray-900 border-b pb-2">{t('profile.regionSettings')}</h4>
+             <h4 className="border-b border-border pb-2 text-sm font-medium text-foreground">{t('profile.regionSettings')}</h4>
              <RegionSelector
                 countryCode={countryCode}
                 stateCode={stateCode}
@@ -299,11 +299,11 @@ export function ProfileForm({ user }) {
 
           <div className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h4 className="text-sm font-medium text-gray-900 border-b pb-2 w-full">{t('profile.schoolSettings')}</h4>
+                <h4 className="w-full border-b border-border pb-2 text-sm font-medium text-foreground">{t('profile.schoolSettings')}</h4>
             </div>
             
             <div>
-                <label htmlFor="schoolSearch" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="schoolSearch" className="block text-sm font-medium text-foreground">
                 {t('auth.school')}
                 </label>
                 <Input
@@ -320,8 +320,8 @@ export function ProfileForm({ user }) {
                 </p>
             </div>
 
-            <div className="rounded-md border bg-white">
-                <div className="flex items-center justify-between border-b px-3 py-2">
+            <div className="rounded-md border border-border bg-card">
+                <div className="flex items-center justify-between border-b border-border px-3 py-2">
                 <span className="text-sm font-medium text-muted-foreground">
                     {t('profile.schoolSuggestions')}
                 </span>
@@ -344,7 +344,7 @@ export function ProfileForm({ user }) {
                         key={school.id}
                         onClick={() => handleSelectSchool(school)}
                         className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted ${
-                            isActive ? 'bg-green-50 text-green-700' : ''
+                            isActive ? 'bg-green-500/12 text-green-500' : 'text-foreground'
                         }`}
                         >
                         <span>{school.name}</span>

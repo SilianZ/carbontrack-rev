@@ -171,11 +171,11 @@ export function PasskeyManagement() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Fingerprint className="h-5 w-5 text-gray-400" />
+            <Fingerprint className="h-5 w-5 text-muted-foreground" />
             {t('profile.passkey.title')}
           </CardTitle>
           <CardDescription className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             {t('common.loading')}
           </CardDescription>
         </CardHeader>
@@ -243,7 +243,7 @@ export function PasskeyManagement() {
         <CardContent className="pt-4">
           {isLoading ? (
             <div className="flex justify-center py-4">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : error && error.response?.status !== 404 ? (
             <Alert variant="destructive">
@@ -252,26 +252,26 @@ export function PasskeyManagement() {
               <AlertDescription>{t('profile.passkey.loadError')}</AlertDescription>
             </Alert>
           ) : passkeys.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-              <Smartphone className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">{t('profile.passkey.empty')}</p>
+            <div className="rounded-lg border border-dashed border-border bg-muted/40 py-8 text-center">
+              <Smartphone className="mx-auto mb-2 h-10 w-10 text-muted-foreground/60" />
+              <p className="text-sm text-muted-foreground">{t('profile.passkey.empty')}</p>
             </div>
           ) : (
             <div className="space-y-3">
               {passkeys.map((pk) => (
                 <div 
                   key={pk.id} 
-                  className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-100 bg-white hover:border-green-200 transition-colors"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-green-500/30"
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
                       <ShieldCheck className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-foreground">
                         {pk.label || t('profile.passkey.unnamed')}
                       </p>
-                      <div className="flex flex-wrap items-center gap-3 mt-0.5 text-xs text-gray-500">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {formatDateSafe(pk.created_at)}
@@ -288,7 +288,7 @@ export function PasskeyManagement() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-gray-400 hover:text-slate-700"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
                       onClick={() => openEditDialog(pk)}
                       title={t('profile.passkey.edit')}
                       disabled={updateMutation.isLoading}
@@ -298,7 +298,7 @@ export function PasskeyManagement() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-8 w-8 text-gray-400 hover:text-red-500"
+                      className="h-8 w-8 text-muted-foreground hover:text-red-500"
                       onClick={() => {
                         if (window.confirm(t('profile.passkey.deleteConfirm'))) {
                           deleteMutation.mutate(pk.id);

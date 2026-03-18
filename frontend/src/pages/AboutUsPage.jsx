@@ -141,7 +141,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
           }}
         >
           <Card
-            className="group relative overflow-hidden bg-white/90 backdrop-blur-xl border-none shadow-2xl hover:shadow-3xl transition-all duration-500"
+            className="group relative overflow-hidden border border-border/60 bg-card/85 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500"
             style={{
               transformStyle: "preserve-3d",
               transform: "translateZ(0)",
@@ -178,7 +178,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
               }}
               whileHover={{ opacity: 1 }}
             >
-              <div className="h-full w-full rounded-lg bg-white" />
+              <div className="h-full w-full rounded-lg bg-card" />
             </m.div>
 
             <div className="relative" style={{ transform: "translateZ(50px)" }}>
@@ -192,7 +192,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
                     ease: [0.22, 1, 0.36, 1]
                   }}
                 >
-                  <CardTitle className="text-2xl md:text-3xl text-gray-900 font-bold mb-2">
+                  <CardTitle className="text-2xl md:text-3xl text-foreground font-bold mb-2">
                     {member.name}
                   </CardTitle>
                   {member.role && (
@@ -203,7 +203,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
                 </m.div>
               </CardHeader>
 
-              <CardContent className="text-gray-700 space-y-4">
+              <CardContent className="text-muted-foreground space-y-4">
                 <m.p
                   className="leading-relaxed text-base md:text-lg"
                   initial={{ opacity: 0, y: 20 }}
@@ -332,18 +332,18 @@ const AboutUsPage = () => {
   return (
     <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion="user" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-        <div className="relative">
-          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-green-50 via-white to-blue-50" />
-          <div className="absolute top-10 right-10 h-72 w-72 rounded-full bg-green-200/40 blur-3xl -z-10" />
-          <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl -z-10" />
+        <div className="relative text-foreground">
+          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-background via-background to-secondary/30" />
+          <div className="absolute top-10 right-10 h-72 w-72 rounded-full bg-green-500/15 blur-3xl -z-10" />
+          <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-blue-500/15 blur-3xl -z-10" />
 
           <header className="relative px-4 py-24">
             <div className="max-w-5xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
                 {hero.title || 'About CarbonTrack'}
               </h1>
               {hero.subtitle && (
-                <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8">
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
                   {hero.subtitle}
                 </p>
               )}
@@ -384,11 +384,11 @@ const AboutUsPage = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               >
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                  <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
                   {team?.title || 'Our Team'}
                 </h2>
                 {team?.intro && (
-                  <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                     {team.intro}
                   </p>
                 )}
@@ -417,13 +417,13 @@ const AboutUsPage = () => {
             </section>
 
             <section className="max-w-5xl mx-auto">
-              <Card className="bg-white/80 backdrop-blur border-none shadow-lg shadow-blue-100">
+              <Card className="border border-border/60 bg-card/80 backdrop-blur shadow-lg shadow-blue-950/10">
                 <CardHeader>
-                  <CardTitle className="text-3xl text-gray-900">
+                  <CardTitle className="text-3xl text-foreground">
                     {mission?.title || 'Our Mission'}
                   </CardTitle>
                   {mission?.description && (
-                    <CardDescription className="text-base text-gray-600">
+                    <CardDescription className="text-base text-muted-foreground">
                       {mission.description}
                     </CardDescription>
                   )}
@@ -433,7 +433,7 @@ const AboutUsPage = () => {
                     {(mission?.items || []).map((item) => (
                       <li key={item} className="flex items-start gap-3">
                         <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-r from-green-500 to-blue-500" />
-                        <span className="text-gray-700 leading-relaxed">{item}</span>
+                        <span className="text-muted-foreground leading-relaxed">{item}</span>
                       </li>
                     ))}
                   </ul>
@@ -443,11 +443,11 @@ const AboutUsPage = () => {
 
             <section className="max-w-6xl mx-auto">
               <div className="mb-10 text-center">
-                <h2 className="text-3xl font-semibold text-gray-900 mb-4">
+                <h2 className="text-3xl font-semibold text-foreground mb-4">
                   {achievements?.title || 'Our Achievements'}
                 </h2>
                 {achievements?.description && (
-                  <p className="text-gray-600 max-w-3xl mx-auto">
+                  <p className="text-muted-foreground max-w-3xl mx-auto">
                     {achievements.description}
                   </p>
                 )}
@@ -456,10 +456,10 @@ const AboutUsPage = () => {
                 {achievementStats.map((stat) => (
                   <Card
                     key={stat.label}
-                    className="bg-white/80 backdrop-blur border-none shadow-lg shadow-purple-100 hover:shadow-xl transition-shadow duration-300"
+                    className="border border-border/60 bg-card/80 backdrop-blur shadow-lg shadow-purple-950/10 hover:shadow-xl transition-shadow duration-300"
                   >
                     <CardHeader>
-                      <CardTitle className="text-xl text-gray-900">{stat.label}</CardTitle>
+                      <CardTitle className="text-xl text-foreground">{stat.label}</CardTitle>
                       {stat.highlight && (
                         <CardDescription className="text-green-600 font-semibold">
                           {stat.highlight}
@@ -468,12 +468,12 @@ const AboutUsPage = () => {
                     </CardHeader>
                     <CardContent>
                       {stat.value && (
-                        <div className="text-3xl font-bold text-gray-900 mb-4">
+                        <div className="text-3xl font-bold text-foreground mb-4">
                           {stat.value}
                         </div>
                       )}
                       {stat.description && (
-                        <p className="text-gray-600 leading-relaxed">
+                        <p className="text-muted-foreground leading-relaxed">
                           {stat.description}
                         </p>
                       )}
@@ -510,7 +510,7 @@ const AboutUsPage = () => {
                         buttonVariants({
                           variant: 'secondary',
                           className:
-                            'bg-white text-pink-600 hover:bg-white/90 border-none justify-center',
+                            'border border-white/25 bg-white/12 text-white shadow-sm shadow-black/20 hover:bg-white/20 justify-center',
                         })
                       )}
                     >

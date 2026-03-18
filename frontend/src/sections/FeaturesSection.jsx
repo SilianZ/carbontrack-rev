@@ -9,8 +9,8 @@ export default function FeaturesSection(){
     <section className="py-20 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('home.features.title')}</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">{t('home.features.subtitle')}</p>
+          <h2 className="text-3xl font-bold text-foreground mb-4">{t('home.features.title')}</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">{t('home.features.subtitle')}</p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           <Card>
@@ -19,7 +19,7 @@ export default function FeaturesSection(){
               <CardTitle>{t('home.features.calculate.title')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 text-center">{t('home.features.calculate.description')}</p>
+              <p className="text-muted-foreground text-center">{t('home.features.calculate.description')}</p>
             </CardContent>
           </Card>
           <Card>
@@ -28,7 +28,7 @@ export default function FeaturesSection(){
               <CardTitle>{t('home.features.rewards.title')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 text-center">{t('home.features.rewards.description')}</p>
+              <p className="text-muted-foreground text-center">{t('home.features.rewards.description')}</p>
             </CardContent>
           </Card>
           <Card>
@@ -37,7 +37,7 @@ export default function FeaturesSection(){
               <CardTitle>{t('home.features.tracking.title')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 text-center">{t('home.features.tracking.description')}</p>
+              <p className="text-muted-foreground text-center">{t('home.features.tracking.description')}</p>
             </CardContent>
           </Card>
           <Card>
@@ -46,7 +46,7 @@ export default function FeaturesSection(){
               <CardTitle>{t('home.features.community.title')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 text-center">{t('home.features.community.description')}</p>
+              <p className="text-muted-foreground text-center">{t('home.features.community.description')}</p>
             </CardContent>
           </Card>
         </div>

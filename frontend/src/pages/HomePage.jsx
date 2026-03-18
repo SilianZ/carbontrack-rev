@@ -14,7 +14,7 @@ const TrustSection = React.lazy(() => import('../sections/TrustSection'));
 const AnnouncementSection = React.lazy(() => import('../sections/AnnouncementSection'));
 const FeatureShowcaseSection = React.lazy(() => import('../sections/FeatureShowcaseSection'));
 
-function SkeletonBlock({ className='' }) { return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />; }
+function SkeletonBlock({ className='' }) { return <div className={`animate-pulse rounded bg-muted ${className}`} />; }
 function SectionSkeleton() { return (
   <div className="py-16 px-4"><div className="max-w-7xl mx-auto space-y-6">
     <SkeletonBlock className="h-8 w-1/3" />
@@ -38,16 +38,16 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.16),_transparent_45%),linear-gradient(180deg,var(--background),color-mix(in_oklab,var(--background)_88%,var(--secondary)))] text-foreground">
       {/* Hero Section */}
       <section className="relative py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <div className="mb-8">
             <Leaf className="h-16 w-16 text-green-600 mx-auto mb-4" />
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">
+            <h1 className="text-5xl font-bold mb-6">
               {t('home.hero.title')}
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
               {t('home.hero.subtitle')}
             </p>
           </div>
@@ -112,9 +112,9 @@ export default function HomePage() {
       </Suspense>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-green-600">
+      <section className="py-20 px-4 bg-green-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-bold mb-4">
             {t('home.cta.title')}
           </h2>
           <p className="text-xl text-green-100 mb-8">

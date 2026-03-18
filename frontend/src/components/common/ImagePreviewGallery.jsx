@@ -38,7 +38,7 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
 
   if (!normalized.length) {
     return (
-      <div className={`text-xs text-gray-400 italic flex items-center gap-1 ${className}`}>
+      <div className={`flex items-center gap-1 text-xs italic text-muted-foreground ${className}`}>
         <ImageIcon className="h-3 w-3" /> {t('images.none')}
       </div>
     );
@@ -57,7 +57,7 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
         <button
           key={resolveKey(img, idx)}
           type="button"
-          className={`relative border rounded-md overflow-hidden bg-gray-50 hover:ring-2 hover:ring-green-500 transition ${thumbSizeClass}`}
+          className={`relative overflow-hidden rounded-md border border-border bg-muted/50 transition hover:ring-2 hover:ring-green-500 ${thumbSizeClass}`}
           onClick={() => setLightboxIndex(idx)}
           title={img.original_name || t('images.clickToPreview')}
         >
@@ -66,7 +66,7 @@ export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', cl
             filePath={img.file_path || undefined}
             alt={img.original_name || `image-${idx}`}
             className="object-cover w-full h-full"
-            fallback={<div className="w-full h-full bg-gray-100 text-gray-400 text-[10px] flex items-center justify-center">IMG</div>}
+            fallback={<div className="flex h-full w-full items-center justify-center bg-muted text-[10px] text-muted-foreground">IMG</div>}
           />
           {overflow > 0 && idx === toDisplay.length - 1 && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs font-semibold">

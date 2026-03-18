@@ -244,15 +244,15 @@ export function Dashboard() {
       {/* 欢迎标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-foreground">
             {t('dashboard.welcome')}{user?.username && `, ${user.username}`}！
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="mt-1 text-muted-foreground">
             {t('dashboard.welcomeDesc')}
           </p>
         </div>
         
-        <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
+        <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
           <span>{t('dashboard.lastLogin')}:</span>
           <span>{user?.lastlgn ? new Date(user.lastlgn).toLocaleString('zh-CN') : t('dashboard.firstTime')}</span>
         </div>
@@ -307,7 +307,7 @@ export function Dashboard() {
 
       {/* 图表和快速操作 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        <div className="h-full lg:col-span-2">
           <ActivityChart
             data={chartData}
             title={t('dashboard.activityTrend')}
@@ -365,14 +365,14 @@ export function Dashboard() {
           />
           {/* 本月成就 */}
           {monthlyAchievements.length > 0 && (
-            <div className="bg-white border rounded-lg shadow-sm p-6 space-y-4">
+            <div className="space-y-4 rounded-lg border border-border/80 bg-card/95 p-6 shadow-sm">
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                  <h3 className="text-lg font-semibold text-amber-700 flex items-center gap-2">
+                  <h3 className="flex items-center gap-2 text-lg font-semibold text-amber-500">
                     <Award className="h-5 w-5" />
                     {t('dashboard.monthlyAchievements')}
                   </h3>
-                  <p className="text-sm text-amber-600">
+                  <p className="text-sm text-amber-400">
                     {t('dashboard.monthlyAchievementsDescription')}
                   </p>
                 </div>
@@ -383,36 +383,36 @@ export function Dashboard() {
                 const history = monthlyAchievements.slice(1, 4);
                 return (
                   <div className="space-y-4">
-                    <div className="rounded-lg border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-4">
-                      <p className="text-sm font-medium text-amber-700">
+                    <div className="rounded-lg border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-4">
+                      <p className="text-sm font-medium text-amber-500">
                         {t('dashboard.currentMonthAchievement',  { month: current.label })}
                       </p>
                       <div className="mt-3 grid gap-3 sm:grid-cols-3">
                         <div className="flex flex-col">
-                          <span className="text-xs text-amber-500 uppercase tracking-wide">
+                          <span className="text-xs uppercase tracking-wide text-amber-400">
                             {t('dashboard.monthlyPointsLabel')}
                           </span>
-                          <span className="text-lg font-semibold text-amber-700">
+                          <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyPointsWithUnit',  {
                               points: current.points.toLocaleString(),
                             })}
                           </span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs text-amber-500 uppercase tracking-wide">
+                          <span className="text-xs uppercase tracking-wide text-amber-400">
                             {t('dashboard.monthlyCarbonLabel')}
                           </span>
-                          <span className="text-lg font-semibold text-amber-700">
+                          <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyCarbonSaved',  {
                               amount: current.carbon.toLocaleString(undefined, { maximumFractionDigits: 2 }),
                             })}
                           </span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs text-amber-500 uppercase tracking-wide">
+                          <span className="text-xs uppercase tracking-wide text-amber-400">
                             {t('dashboard.monthlyRecordsLabel')}
                           </span>
-                          <span className="text-lg font-semibold text-amber-700">
+                          <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyRecords',  {
                               count: current.records.toLocaleString(),
                             })}
@@ -423,22 +423,22 @@ export function Dashboard() {
 
                     {history.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">
+                        <p className="text-xs font-medium uppercase tracking-wide text-amber-400">
                           {t('dashboard.previousMonths')}
                         </p>
                         <div className="space-y-2">
                           {history.map((item) => (
-                            <div key={item.month || item.label} className="flex items-center justify-between rounded-md border border-amber-100 bg-amber-50/60 px-3 py-2 text-sm">
+                            <div key={item.month || item.label} className="flex items-center justify-between rounded-md border border-amber-500/15 bg-amber-500/5 px-3 py-2 text-sm">
                               <div className="flex flex-col">
-                                <span className="font-medium text-amber-700">{item.label}</span>
-                                <span className="text-xs text-amber-500">
+                                <span className="font-medium text-foreground">{item.label}</span>
+                                <span className="text-xs text-muted-foreground">
                                   {t('dashboard.monthlyCarbonSummary',  {
                                     carbon: item.carbon.toLocaleString(undefined, { maximumFractionDigits: 2 }),
                                     records: item.records.toLocaleString(),
                                   })}
                                 </span>
                               </div>
-                              <span className="text-sm font-semibold text-amber-700">
+                              <span className="text-sm font-semibold text-amber-500">
                                 {t('dashboard.monthlyPointsShort',  {
                                   points: item.points.toLocaleString(),
                                 })}
@@ -456,8 +456,8 @@ export function Dashboard() {
           
           {/* 排行榜预览 */}
           {stats.leaderboard && (
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+            <div className="rounded-lg border border-blue-500/20 bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-6">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-blue-500">
                 <Users className="h-5 w-5" />
                 {t('dashboard.leaderboard')}
               </h3>
@@ -468,18 +468,18 @@ export function Dashboard() {
                     <div key={entry.id ?? `${index}-${displayName}`} className="flex items-center gap-3">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                         index === 0 ? 'bg-yellow-500 text-white' :
-                        index === 1 ? 'bg-gray-400 text-white' :
+                        index === 1 ? 'bg-zinc-500 text-white' :
                         index === 2 ? 'bg-orange-500 text-white' :
-                        'bg-gray-200 text-gray-600'
+                        'bg-muted text-muted-foreground'
                       }`}>
                         {index + 1}
                       </div>
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         {renderLeaderboardAvatar(entry)}
-                        <span className="truncate text-sm text-blue-700 font-medium">{displayName}</span>
+                        <span className="truncate text-sm font-medium text-foreground">{displayName}</span>
                       </div>
                       {Number.isFinite(entry.total_points) ? (
-                        <span className="text-sm text-blue-600">
+                        <span className="text-sm text-blue-400">
                           {entry.total_points} {t('common.points')}
                         </span>
                       ) : null}
@@ -491,13 +491,13 @@ export function Dashboard() {
           )}
 
           {stats.streak_leaderboards && (
-            <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 border border-amber-200 rounded-lg p-6">
+            <div className="rounded-lg border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-rose-500/10 p-6">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <h3 className="text-lg font-semibold text-amber-800 flex items-center gap-2">
+                <h3 className="flex items-center gap-2 text-lg font-semibold text-amber-500">
                   <Flame className="h-5 w-5" />
                   {t('dashboard.streakLeaderboard')}
                 </h3>
-                <div className="text-xs text-amber-700">
+                <div className="text-xs text-amber-400">
                   {t('dashboard.streakMine')} {streakStats.current_streak ?? 0} · {t('dashboard.streakRank')} {streakStats.ranks?.[activeStreakScope] ?? '--'}
                 </div>
               </div>
@@ -520,12 +520,12 @@ export function Dashboard() {
                     {streakLeaderboards?.[scope]?.entries?.length ? (
                       <div className="space-y-3">
                         {streakLeaderboards[scope].entries.slice(0, 10).map((entry, index) => (
-                          <div key={entry.id ?? `${scope}-${index}`} className="flex items-center gap-3 text-sm text-amber-800">
+                          <div key={entry.id ?? `${scope}-${index}`} className="flex items-center gap-3 text-sm text-foreground">
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                               index === 0 ? 'bg-yellow-500 text-white' :
-                              index === 1 ? 'bg-gray-400 text-white' :
+                              index === 1 ? 'bg-zinc-500 text-white' :
                               index === 2 ? 'bg-orange-500 text-white' :
-                              'bg-amber-200 text-amber-800'
+                              'bg-muted text-muted-foreground'
                             }`}>
                               {index + 1}
                             </div>
@@ -538,7 +538,7 @@ export function Dashboard() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-amber-700">{t('dashboard.streakEmpty')}</p>
+                      <p className="text-sm text-muted-foreground">{t('dashboard.streakEmpty')}</p>
                     )}
                   </TabsContent>
                 ))}

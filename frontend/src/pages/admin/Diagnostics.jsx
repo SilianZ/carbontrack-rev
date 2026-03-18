@@ -41,12 +41,13 @@ import {
   Search,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { API_BASE_URL } from '../../lib/api';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'];
 const UNTAGGED_TOKEN = '__untagged__';
 const REMOTE_SPEC_FALLBACK =
   'https://raw.githubusercontent.com/carbon-track/carbontrack-rev/refs/heads/main/backend/openapi.json';
-const API_TEST_BASE_URL = import.meta.env?.VITE_API_URL || 'http://localhost:8080/api/v1';
+const API_TEST_BASE_URL = API_BASE_URL;
 const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 const HTTP_METHOD_STYLES = {
@@ -292,7 +293,7 @@ export default function AdminDiagnosticsPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-slate-200/70 bg-white/90">
+      <Card className="border-border/70 bg-card/90">
         <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <CardTitle>{t('admin.diagnostics.title')}</CardTitle>
@@ -382,7 +383,7 @@ export default function AdminDiagnosticsPage() {
         />
       </div>
 
-      <Card className="border-slate-200/70 bg-white/90">
+      <Card className="border-border/70 bg-card/90">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">
             {t('admin.diagnostics.filters.title')}
@@ -394,7 +395,7 @@ export default function AdminDiagnosticsPage() {
         </CardHeader>
         <CardContent className="grid gap-4 lg:grid-cols-2">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-slate-700">
+            <label className="text-sm font-medium text-foreground">
               {t('admin.diagnostics.filters.search')}
             </label>
             <div className="relative">
@@ -470,8 +471,8 @@ export default function AdminDiagnosticsPage() {
         </Alert>
       )}
 
-      <Card className="border-slate-200/70 bg-white/90">
-        <CardHeader className="flex flex-col gap-2 border-b border-slate-100/80 pb-4">
+      <Card className="border-border/70 bg-card/90">
+        <CardHeader className="flex flex-col gap-2 border-b border-border/80 pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <CardTitle className="text-base">
@@ -512,7 +513,7 @@ export default function AdminDiagnosticsPage() {
                       <div className="flex flex-1 flex-col gap-2">
                         <div className="flex flex-wrap items-center gap-3">
                           <MethodBadge method={operation.method} />
-                          <p className="font-mono text-sm text-slate-900">{operation.path}</p>
+                          <p className="font-mono text-sm text-foreground">{operation.path}</p>
                           {operation.deprecated && (
                             <Badge
                               variant="destructive"
@@ -545,7 +546,7 @@ export default function AdminDiagnosticsPage() {
                       </div>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="bg-slate-50/60 px-4">
+                  <AccordionContent className="bg-muted/40 px-4">
                     <div className="space-y-6 rounded-lg border border-slate-200/80 bg-white p-6">
                       {operation.description && (
                         <p className="text-sm text-slate-600">{operation.description}</p>
@@ -716,14 +717,14 @@ export default function AdminDiagnosticsPage() {
 function StatCard({ icon, label, value }) {
   const IconComponent = icon;
   return (
-    <Card className="border-slate-200/70 bg-white/90">
+    <Card className="border-border/70 bg-card/90">
       <CardContent className="flex items-center gap-3 p-4">
-        <div className="rounded-full bg-slate-100 p-2 text-slate-700">
+        <div className="rounded-full bg-muted p-2 text-foreground/80">
           <IconComponent className="h-5 w-5" />
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-          <p className="text-xl font-semibold text-slate-900">{value}</p>
+          <p className="text-xl font-semibold text-foreground">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -733,7 +734,7 @@ function StatCard({ icon, label, value }) {
 function FilterSelect({ label, value, onValueChange, placeholder, options = [] }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-slate-700">{label}</label>
+      <label className="text-sm font-medium text-foreground">{label}</label>
       <Select value={value} onValueChange={(val) => onValueChange(val)}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
@@ -782,18 +783,18 @@ function SecurityBadge({ secured, labels }) {
 function Section({ title, children }) {
   return (
     <div className="space-y-3">
-      <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
-      <div className="text-sm text-slate-700">{children}</div>
+      <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+      <div className="text-sm text-foreground/80">{children}</div>
     </div>
   );
 }
 
 function InfoBlock({ title, value }) {
   return (
-    <div className="space-y-2 rounded-xl border border-slate-200/80 bg-slate-50/60 p-4">
+    <div className="space-y-2 rounded-xl border border-border/80 bg-muted/40 p-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</p>
       {typeof value === 'string' || typeof value === 'number' ? (
-        <p className="text-sm text-slate-800">{value}</p>
+        <p className="text-sm text-foreground/90">{value}</p>
       ) : (
         value
       )}
@@ -966,10 +967,10 @@ function RequestTester({ operation }) {
   };
 
   return (
-    <div className="space-y-4 rounded-xl border border-slate-200/80 bg-white p-4">
+    <div className="space-y-4 rounded-xl border border-border/80 bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-slate-900">
+          <p className="text-sm font-semibold text-foreground">
             {t('admin.diagnostics.tester.title')}
           </p>
           <p className="text-xs text-muted-foreground">
@@ -988,7 +989,7 @@ function RequestTester({ operation }) {
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="text-sm font-medium text-slate-700">
+              <label className="text-sm font-medium text-foreground">
                 {t('admin.diagnostics.tester.fields.baseUrl')}
               </label>
               <Input
@@ -998,7 +999,7 @@ function RequestTester({ operation }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-slate-700">
+              <label className="text-sm font-medium text-foreground">
                 {t('admin.diagnostics.tester.fields.resolvedPath')}
               </label>
               <Input value={resolvedPath} readOnly className="font-mono text-xs" />
@@ -1006,7 +1007,7 @@ function RequestTester({ operation }) {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700">
+            <label className="text-sm font-medium text-foreground">
               {t('admin.diagnostics.tester.fields.finalUrl')}
             </label>
             <Input value={lastUrl || previewUrl} readOnly className="font-mono text-xs" />
@@ -1014,7 +1015,7 @@ function RequestTester({ operation }) {
 
           {pathParams.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-slate-700">
+              <p className="text-sm font-medium text-foreground">
                 {t('admin.diagnostics.tester.fields.pathParams')}
               </p>
               <div className="grid gap-4 md:grid-cols-2">
@@ -1043,7 +1044,7 @@ function RequestTester({ operation }) {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="text-sm font-medium text-slate-700">
+              <label className="text-sm font-medium text-foreground">
                 {t('admin.diagnostics.tester.fields.query')}
               </label>
               <Textarea
@@ -1054,7 +1055,7 @@ function RequestTester({ operation }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-slate-700">
+              <label className="text-sm font-medium text-foreground">
                 {t('admin.diagnostics.tester.fields.headers')}
               </label>
               <Textarea
@@ -1067,7 +1068,7 @@ function RequestTester({ operation }) {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700">
+            <label className="text-sm font-medium text-foreground">
               {t('admin.diagnostics.tester.fields.body')}
             </label>
             <Textarea
@@ -1086,14 +1087,14 @@ function RequestTester({ operation }) {
             )}
           </div>
 
-          <div className="flex items-center gap-3 rounded-lg border border-slate-200/80 bg-slate-50/80 p-3">
+          <div className="flex items-center gap-3 rounded-lg border border-border/80 bg-muted/50 p-3">
             <Switch
               id={`tester-auth-${operation.id}`}
               checked={includeAuth}
               onCheckedChange={setIncludeAuth}
             />
             <div>
-              <label className="text-sm font-medium text-slate-700" htmlFor={`tester-auth-${operation.id}`}>
+              <label className="text-sm font-medium text-foreground" htmlFor={`tester-auth-${operation.id}`}>
                 {t('admin.diagnostics.tester.fields.auth')}
               </label>
               <p className="text-xs text-muted-foreground">
@@ -1132,7 +1133,7 @@ function RequestTester({ operation }) {
           )}
 
           {responseInfo && (
-            <div className="space-y-3 rounded-xl border border-slate-200/80 bg-slate-50/80 p-4">
+            <div className="space-y-3 rounded-xl border border-border/80 bg-muted/50 p-4">
               <div className="flex flex-wrap items-center gap-3">
                 <Badge
                   variant={responseInfo.ok ? 'secondary' : 'destructive'}
@@ -1146,7 +1147,7 @@ function RequestTester({ operation }) {
                   })}
                 </span>
                 {lastUrl && (
-                  <span className="font-mono text-[11px] text-slate-600 break-all">{lastUrl}</span>
+                  <span className="font-mono text-[11px] text-muted-foreground break-all">{lastUrl}</span>
                 )}
               </div>
               {responseInfo.headers.length > 0 && (
@@ -1154,10 +1155,10 @@ function RequestTester({ operation }) {
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {t('admin.diagnostics.tester.results.headers')}
                   </p>
-                  <ul className="mt-2 space-y-1 text-xs font-mono text-slate-700">
+                  <ul className="mt-2 space-y-1 text-xs font-mono text-foreground/80">
                     {responseInfo.headers.map((header) => (
                       <li key={`${header.key}-${header.value}`}>
-                        <span className="text-slate-500">{header.key}:</span> {header.value}
+                        <span className="text-muted-foreground">{header.key}:</span> {header.value}
                       </li>
                     ))}
                   </ul>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, CalendarDays, Info, Image as ImageIcon, MessageSquare, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { X, CalendarDays, Info, Image as ImageIcon, MessageSquare, CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react';
 import { ImagePreviewGallery } from '../common/ImagePreviewGallery';
 import { useTranslation } from '../../hooks/useTranslation';
 import { formatNumber, formatDateSafe } from '../../lib/utils';
@@ -52,23 +52,29 @@ export function ActivityDetailModal({ activity, isOpen, onClose }) {
     .map(toNormalizedImage)
     .filter((item) => item && (item.presigned_url || item.url || item.file_path));
 
+  const statusBadgeClassNames = {
+    pending: 'bg-blue-100 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/30',
+    approved: 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/30',
+    rejected: 'bg-red-100 text-red-700 ring-1 ring-inset ring-red-200 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-400/30',
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClassNames.pending}`}>
             <Clock className="h-3 w-3 mr-1" /> {t('activities.status.pending')}
           </span>
         );
       case 'approved':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClassNames.approved}`}>
             <CheckCircle className="h-3 w-3 mr-1" /> {t('activities.status.approved')}
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClassNames.rejected}`}>
             <XCircle className="h-3 w-3 mr-1" /> {t('activities.status.rejected')}
           </span>
         );
@@ -78,8 +84,8 @@ export function ActivityDetailModal({ activity, isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-border bg-card">
         <Card className="border-0 shadow-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <div>
@@ -100,28 +106,28 @@ export function ActivityDetailModal({ activity, isOpen, onClose }) {
             {/* 基本信息 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm font-medium text-gray-500">{t('activities.table.activity')}</p>
-                <p className="text-lg font-semibold text-gray-900">{getName(activity)}</p>
-              <p className="text-sm text-gray-600">{t(`activities.categories.${getCategory(activity)}`, getCategory(activity))}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('activities.table.activity')}</p>
+                <p className="text-lg font-semibold text-foreground">{getName(activity)}</p>
+              <p className="text-sm text-muted-foreground">{t(`activities.categories.${getCategory(activity)}`, getCategory(activity))}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">{t('activities.table.status')}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('activities.table.status')}</p>
                 {getStatusBadge(activity.status)}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">{t('activities.table.date')}</p>
-                  <p className="text-gray-900">{formatDateSafe(getDate(activity), 'yyyy-MM-dd')}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('activities.table.date')}</p>
+                  <p className="text-foreground">{formatDateSafe(getDate(activity), 'yyyy-MM-dd')}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">{t('activities.table.data')}</p>
-              <p className="text-gray-900">{formatNumber(activity.data_value ?? activity.amount)} {t(`units.${getUnit(activity)}`, getUnit(activity))}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('activities.table.data')}</p>
+              <p className="text-foreground">{formatNumber(activity.data_value ?? activity.amount)} {t(`units.${getUnit(activity)}`, getUnit(activity))}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">{t('activities.table.carbonSaved')}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('activities.table.carbonSaved')}</p>
                  <p className="text-green-600 font-semibold">{formatNumber(activity.carbon_saved)} kg CO2e</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">{t('activities.table.points')}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('activities.table.points')}</p>
                  <p className="text-green-600 font-semibold">+{formatNumber(activity.points_earned)} {t('common.points')}</p>
               </div>
             </div>
@@ -129,27 +135,27 @@ export function ActivityDetailModal({ activity, isOpen, onClose }) {
             {/* 描述/备注 */}
             {getDescription(activity) && (
               <div>
-                <h4 className="text-md font-semibold text-gray-700 mb-2 flex items-center">
+                <h4 className="mb-2 flex items-center text-md font-semibold text-foreground">
                   <MessageSquare className="h-4 w-4 mr-2" />{t('activities.detail.notes')}
                 </h4>
-                <p className="text-gray-700 bg-gray-50 p-3 rounded-md whitespace-pre-wrap break-words">{getDescription(activity)}</p>
+                <p className="rounded-md bg-muted/60 p-3 whitespace-pre-wrap break-words text-foreground">{getDescription(activity)}</p>
               </div>
             )}
 
             {/* 审核信息 */}
             {activity.status === 'rejected' && activity.admin_notes && (
               <div>
-                <h4 className="text-md font-semibold text-red-700 mb-2 flex items-center">
+                <h4 className="mb-2 flex items-center text-md font-semibold text-red-400">
                   <AlertCircle className="h-4 w-4 mr-2" />{t('activities.detail.rejectionReason')}
                 </h4>
-                <p className="text-red-700 bg-red-50 p-3 rounded-md">{activity.admin_notes}</p>
+                <p className="rounded-md border border-red-500/20 bg-red-500/10 p-3 text-red-200">{activity.admin_notes}</p>
               </div>
             )}
 
             {/* 证明图片 */}
             {normalizedImages.length > 0 && (
               <div>
-                <h4 className="text-md font-semibold text-gray-700 mb-2 flex items-center">
+                <h4 className="mb-2 flex items-center text-md font-semibold text-foreground">
                   <ImageIcon className="h-4 w-4 mr-2" />{t('activities.detail.proofImages')}
                 </h4>
                 <ImagePreviewGallery images={normalizedImages} maxThumbnails={6} size="md" />

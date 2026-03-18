@@ -14,24 +14,24 @@ export function StatsCard({
 }) {
   const colorClasses = {
     blue: {
-      bg: 'bg-blue-50',
+      bg: 'bg-blue-500/12',
       icon: 'text-blue-600',
-      value: 'text-blue-900'
+      value: 'text-blue-500'
     },
     green: {
-      bg: 'bg-green-50',
+      bg: 'bg-green-500/12',
       icon: 'text-green-600',
-      value: 'text-green-900'
+      value: 'text-green-500'
     },
     orange: {
-      bg: 'bg-orange-50',
+      bg: 'bg-orange-500/12',
       icon: 'text-orange-600',
-      value: 'text-orange-900'
+      value: 'text-orange-500'
     },
     purple: {
-      bg: 'bg-purple-50',
+      bg: 'bg-purple-500/12',
       icon: 'text-purple-600',
-      value: 'text-purple-900'
+      value: 'text-purple-500'
     }
   };
 
@@ -44,7 +44,7 @@ export function StatsCard({
   const changeColors = {
     increase: 'text-green-600',
     decrease: 'text-red-600',
-    neutral: 'text-gray-600'
+    neutral: 'text-muted-foreground'
   };
 
   const ChangeIcon = changeIcons[changeType];
@@ -52,15 +52,15 @@ export function StatsCard({
 
   if (loading) {
     return (
-      <Card>
+      <Card className="border-border/80 bg-card/95">
         <CardContent className="p-6">
           <div className="animate-pulse">
             <div className="flex items-center justify-between mb-4">
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-8 w-8 bg-gray-200 rounded"></div>
+              <div className="h-4 w-1/2 rounded bg-muted"></div>
+              <div className="h-8 w-8 rounded bg-muted"></div>
             </div>
-            <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+            <div className="mb-2 h-8 w-3/4 rounded bg-muted"></div>
+            <div className="h-4 w-1/3 rounded bg-muted"></div>
           </div>
         </CardContent>
       </Card>
@@ -68,10 +68,10 @@ export function StatsCard({
   }
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
+    <Card className="border-border/80 bg-card/95 transition-shadow duration-200 hover:shadow-md">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <CardTitle className="text-sm font-medium text-gray-600">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
             {title}
           </CardTitle>
           {Icon && (
@@ -87,7 +87,7 @@ export function StatsCard({
               {typeof value === 'number' ? value.toLocaleString() : value}
             </span>
             {unit && (
-              <span className="text-sm text-gray-500">{unit}</span>
+              <span className="text-sm text-muted-foreground">{unit}</span>
             )}
           </div>
           
@@ -100,7 +100,7 @@ export function StatsCard({
                   change
                 }
               </span>
-              <span className="text-gray-500 ml-1">vs 上月</span>
+              <span className="ml-1 text-muted-foreground">vs 上月</span>
             </div>
           )}
         </div>
@@ -108,4 +108,3 @@ export function StatsCard({
     </Card>
   );
 }
-

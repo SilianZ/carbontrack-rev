@@ -391,7 +391,7 @@ export default function AdminLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-slate-100 text-slate-900">
+      <div className="min-h-screen bg-background text-foreground">
         <Navbar />
         <SidebarProvider>
           <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
@@ -401,8 +401,8 @@ export default function AdminLayout() {
               onKeyDown={handleCommandKeyDown}
               placeholder={t('admin.command.placeholder')}
             />
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 bg-slate-50/80 px-4 py-2 text-xs text-muted-foreground">
-              <span className="text-[11px] text-slate-500">{aiInputHint}</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
+              <span className="text-[11px] text-muted-foreground">{aiInputHint}</span>
               <Button
                 size="sm"
                 variant="outline"
@@ -427,7 +427,7 @@ export default function AdminLayout() {
                 <CommandGroup heading={t('admin.command.aiConversation')}>
                   <div className="flex flex-col gap-3 py-1">
                     {aiSessions.length === 0 && !isAiRequesting && (
-                      <div className="rounded-2xl border border-dashed border-slate-300/80 bg-white/70 px-4 py-6 text-center text-sm text-slate-500">
+                      <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
                         {t('admin.command.aiEmptyState')}
                       </div>
                     )}
@@ -437,10 +437,10 @@ export default function AdminLayout() {
                         disabled
                         className="pointer-events-none items-start gap-3 rounded-2xl bg-transparent px-0 py-0"
                       >
-                        <span className="mt-1 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+                        <span className="mt-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                           {t('admin.command.aiLabel')}
                         </span>
-                        <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-600 shadow-sm">
+                        <div className="flex items-center gap-2 rounded-2xl bg-muted px-3 py-2 text-sm text-muted-foreground shadow-sm">
                           <Loader2 className="h-4 w-4 animate-spin" />
                           <span>{t('admin.command.aiLoading')}</span>
                         </div>
@@ -453,10 +453,10 @@ export default function AdminLayout() {
                           disabled
                           className="pointer-events-none items-start gap-3 rounded-2xl bg-transparent px-0 py-0"
                         >
-                          <span className="mt-1 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+                          <span className="mt-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                             {t('admin.command.userLabel')}
                           </span>
-                          <div className="max-w-full rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-700 shadow-sm">
+                          <div className="max-w-full rounded-2xl bg-muted px-3 py-2 text-sm text-foreground shadow-sm">
                             {session.query}
                           </div>
                         </CommandItem>
@@ -558,15 +558,15 @@ export default function AdminLayout() {
                                 <span className="mt-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-600">
                                   {t('admin.command.aiLabel')}
                                 </span>
-                                <div className="flex w-full flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
+                                <div className="flex w-full flex-col gap-2 rounded-2xl border border-border bg-card px-3 py-2 text-sm text-foreground shadow-sm">
                                   <div className="flex items-center gap-2">
                                     <Sparkles className="h-4 w-4 text-emerald-500" />
                                     <span className="font-medium">{alt.label || t('admin.command.aiAlternativeFallback')}</span>
                                   </div>
                                   {alt.reasoning && (
-                                    <span className="text-xs text-slate-500">{alt.reasoning}</span>
+                                    <span className="text-xs text-muted-foreground">{alt.reasoning}</span>
                                   )}
-                                  <span className="self-start rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                                  <span className="self-start rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                                     {getTapHint(alt.type)}
                                   </span>
                                 </div>
@@ -611,13 +611,13 @@ export default function AdminLayout() {
           <div className="relative flex min-h-[calc(100vh-4rem)] flex-col">
             <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_65%)]" />
             <div className="flex flex-1">
-              <Sidebar className="border-r border-slate-200/70 bg-white/80 shadow-sm backdrop-blur">
+              <Sidebar className="border-r border-border bg-card/80 shadow-sm backdrop-blur">
                 <SidebarHeader className="px-5 py-6">
                   <div className="flex items-center gap-3 rounded-2xl bg-emerald-50/80 px-3 py-2 text-sm font-semibold text-emerald-700">
                     <ShieldCheck className="h-4 w-4" />
                     {t('admin.title')}
                   </div>
-                  <p className="mt-3 text-xs leading-relaxed text-slate-500">
+                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
                     {t('admin.subtitle')}
                   </p>
                 </SidebarHeader>
@@ -643,14 +643,14 @@ export default function AdminLayout() {
                               to={link.to}
                               className={({ isActive: navIsActive }) =>
                                 cn(
-                                  'flex w-full items-center gap-3 text-sm font-medium text-slate-600 transition-colors',
+                                  'flex w-full items-center gap-3 text-sm font-medium text-muted-foreground transition-colors',
                                   (isActive || navIsActive) && 'text-emerald-700'
                                 )
                               }
                             >
                               <span
                                 className={cn(
-                                  'flex h-10 w-10 items-center justify-center rounded-xl border border-transparent bg-slate-50 text-emerald-600 transition-all group-hover:border-emerald-100 group-hover:bg-emerald-50',
+                                  'flex h-10 w-10 items-center justify-center rounded-xl border border-transparent bg-muted text-emerald-600 transition-all group-hover:border-emerald-100 group-hover:bg-emerald-50',
                                   isActive && 'border-emerald-200 bg-emerald-50 text-emerald-600'
                                 )}
                               >
@@ -665,9 +665,9 @@ export default function AdminLayout() {
                   </SidebarMenu>
                 </SidebarContent>
                 <SidebarFooter className="px-5 pb-6 pt-0">
-                  <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white/70 p-3 shadow-sm">
+                  <div className="flex items-start gap-3 rounded-2xl border border-border bg-background/70 p-3 shadow-sm">
                     <Sparkles className="mt-1 h-4 w-4 text-emerald-500" />
-                    <p className="text-xs leading-relaxed text-slate-600">
+                    <p className="text-xs leading-relaxed text-muted-foreground">
                       {t('admin.footer.tip')}
                     </p>
                   </div>
@@ -681,12 +681,12 @@ export default function AdminLayout() {
                       <Badge variant="outline" className="w-fit rounded-full border-emerald-200 bg-emerald-100/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-600">
                         {t('admin.header.section')}
                       </Badge>
-                      <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">{activeLink?.label}</h1>
+                      <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{activeLink?.label}</h1>
                     </div>
                     <div className="ml-auto flex items-center gap-2">
                       <Button
                         variant="outline"
-                        className="hidden items-center gap-2 rounded-full border-emerald-200 bg-white/80 px-4 md:inline-flex"
+                        className="hidden items-center gap-2 rounded-full border-emerald-200 bg-background/80 px-4 md:inline-flex"
                         onClick={() => setCommandOpen(true)}
                       >
                         <Bot className="h-4 w-4" />

@@ -77,7 +77,7 @@ export function Footer() {
           {/* 品牌信息 */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <img src="/favicon_48x48.ico" alt="CarbonTrack logo" className="h-8 w-8" />
+              <img src="/favicon.ico" alt="CarbonTrack logo" className="h-8 w-8" />
               <span className="text-xl font-bold">CarbonTrack</span>
             </div>
             <p className="text-gray-300 mb-6 text-sm leading-relaxed">

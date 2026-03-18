@@ -21,14 +21,14 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
   const topBadges = badges.slice(0, 8);
 
   return (
-    <div className="bg-white border rounded-lg shadow-sm p-6">
+    <div className="rounded-lg border border-border/80 bg-card/95 p-6 shadow-sm">
       <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Award className="h-5 w-5 text-yellow-500" />
             {t('dashboard.achievementBadges')}
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {totalCount > 0
               ? t('dashboard.badgeProgress',  { owned: ownedCount, total: totalCount })
               : t('dashboard.noBadgesAvailable')}
@@ -51,16 +51,16 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
       {loading ? (
         <div className="grid grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, idx) => (
-            <div key={idx} className="animate-pulse rounded-lg bg-gray-100 aspect-square" />
+            <div key={idx} className="aspect-square animate-pulse rounded-lg bg-muted" />
           ))}
         </div>
       ) : totalCount === 0 ? (
-        <div className="text-sm text-gray-500 bg-gray-50 rounded-md p-4 text-center">
+        <div className="rounded-md bg-muted/60 p-4 text-center text-sm text-muted-foreground">
           {t('dashboard.noBadgesHint')}
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400"
               style={{ width: `${completion}%` }}
@@ -77,26 +77,26 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
               return (
                 <div
                   key={badge.id}
-                  className={`relative border rounded-lg p-3 flex flex-col items-center gap-3 transition ${
-                    owned ? 'border-green-500 shadow-md' : 'border-gray-200 hover:border-gray-300'
+                  className={`relative flex flex-col items-center gap-3 rounded-lg border p-3 transition ${
+                    owned ? 'border-green-500/70 bg-green-500/5 shadow-md' : 'border-border bg-background/50 hover:border-border/80'
                   }`}
                 >
-                  <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border">
+                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-border bg-muted/50">
                     {badgeImage.src || badgeImage.filePath ? (
                       <R2Image
                         src={badgeImage.src || undefined}
                         filePath={badgeImage.filePath || undefined}
                         alt={badge.name_zh || badge.name_en}
                         className="w-full h-full object-cover"
-                        fallback={<div className="text-gray-400 text-xs">IMG</div>}
+                        fallback={<div className="text-xs text-muted-foreground">IMG</div>}
                       />
                     ) : (
-                      <Award className="h-8 w-8 text-gray-300" />
+                      <Award className="h-8 w-8 text-muted-foreground/60" />
                     )}
                   </div>
                   <div className="text-center space-y-1">
-                    <p className="text-sm font-semibold text-gray-800">{badge.name_zh || badge.name_en}</p>
-                    <p className="text-xs text-gray-500">{badge.name_en}</p>
+                    <p className="text-sm font-semibold text-foreground">{badge.name_zh || badge.name_en}</p>
+                    <p className="text-xs text-muted-foreground">{badge.name_en}</p>
                   </div>
                   <div className="w-full text-center">
                     {owned ? (
@@ -105,14 +105,14 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                         {t('dashboard.badgeUnlocked')}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                         <Lock className="h-3 w-3" />
                         {t('dashboard.badgeLocked')}
                       </span>
                     )}
                   </div>
                   {owned && userBadge?.awarded_at && (
-                    <p className="text-[11px] text-gray-400">
+                    <p className="text-[11px] text-muted-foreground">
                       {t('dashboard.badgeAwardedAt')}: {new Date(userBadge.awarded_at).toLocaleDateString()}
                     </p>
                   )}

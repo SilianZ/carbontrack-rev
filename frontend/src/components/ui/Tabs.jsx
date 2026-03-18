@@ -26,7 +26,7 @@ export function Tabs({ children, value, onValueChange, className = '' }) {
 
 export function TabsList({ children, active, setActive, className = '' }) {
   return (
-    <div className={`inline-flex rounded-md border bg-white ${className}`} role="tablist">
+    <div className={`inline-flex rounded-md border border-border bg-card ${className}`} role="tablist">
       {React.Children.map(children, (child) => {
         if (!React.isValidElement(child)) return child;
         return React.cloneElement(child, { active, setActive });
@@ -42,7 +42,7 @@ export function TabsTrigger({ value, children, active, setActive, className = ''
       role="tab"
       aria-selected={isActive}
       onClick={() => setActive(value)}
-      className={`px-3 py-2 text-sm border-r last:border-r-0 ${isActive ? 'bg-gray-100 font-semibold' : 'hover:bg-gray-50'} ${className}`}
+      className={`border-r border-border px-3 py-2 text-sm text-foreground last:border-r-0 ${isActive ? 'bg-muted font-semibold' : 'hover:bg-muted/60'} ${className}`}
     >
       {children}
     </button>
@@ -57,4 +57,3 @@ export function TabsContent({ value, active, children, className = '' }) {
     </div>
   );
 }
-

@@ -18,11 +18,11 @@ const Section = ({ title, icon: Icon, children }) => (
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
     >
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <h2 className="text-xl md:text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
             {Icon && <Icon className="h-6 w-6 text-green-600" />}
             {title}
         </h2>
-        <div className="text-gray-600 leading-relaxed space-y-4">
+        <div className="text-muted-foreground leading-relaxed space-y-4">
             {children}
         </div>
     </Motion.div>
@@ -45,7 +45,7 @@ const PrivacyPolicyPage = () => {
 
     return (
         <LazyMotion features={domAnimation}>
-            <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
+            <div className="min-h-screen bg-background text-foreground py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
                     <Motion.div
                         className="text-center mb-12"
@@ -53,16 +53,16 @@ const PrivacyPolicyPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <h1 className="text-4xl font-extrabold text-gray-900 mb-4">{t('legal.privacy.title')}</h1>
-                        <p className="text-lg text-gray-600">
+                        <h1 className="text-4xl font-extrabold text-foreground mb-4">{t('legal.privacy.title')}</h1>
+                        <p className="text-lg text-muted-foreground">
                             {t('legal.lastUpdated', { date: currentDate })}
                         </p>
-                        <p className="mt-4 text-gray-500 max-w-2xl mx-auto">
+                        <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
                             <Trans i18nKey="legal.privacy.intro" components={{ strong: <strong /> }} />
                         </p>
                     </Motion.div>
 
-                    <Card className="bg-white/80 backdrop-blur shadow-xl border-none">
+                    <Card className="border-border/60 bg-card/85 backdrop-blur shadow-xl">
                         <CardContent className="p-8 md:p-12">
                             <Section title={t('legal.privacy.sections.identity.title')} icon={Globe}>
                                 <p>
@@ -121,11 +121,11 @@ const PrivacyPolicyPage = () => {
                                         </li>
                                     ))}
                                 </ul>
-                                <p className="mt-4 text-sm bg-gray-100 p-4 rounded-lg">
+                                <p className="mt-4 rounded-lg bg-muted/60 p-4 text-sm">
                                     <Trans
                                         i18nKey="legal.privacy.sections.rights.contact"
                                         values={{ email: import.meta.env.VITE_PRIVACY_EMAIL }}
-                                        components={{ a: <a href={toMailtoLink(import.meta.env.VITE_PRIVACY_EMAIL)} className="text-blue-600 hover:underline" /> }}
+                                        components={{ a: <a href={toMailtoLink(import.meta.env.VITE_PRIVACY_EMAIL)} className="text-blue-600 hover:underline dark:text-blue-400" /> }}
                                     />
                                 </p>
                             </Section>
@@ -147,7 +147,7 @@ const PrivacyPolicyPage = () => {
                                     <Trans
                                         i18nKey="legal.privacy.sections.contact.details"
                                         values={{ email: import.meta.env.VITE_PRIVACY_EMAIL }}
-                                        components={{ strong: <strong />, a: <a href={toMailtoLink(import.meta.env.VITE_PRIVACY_EMAIL)} className="text-blue-600 hover:underline" />, br: <br /> }}
+                                        components={{ strong: <strong />, a: <a href={toMailtoLink(import.meta.env.VITE_PRIVACY_EMAIL)} className="text-blue-600 hover:underline dark:text-blue-400" />, br: <br /> }}
                                     />
                                 </div>
                             </Section>

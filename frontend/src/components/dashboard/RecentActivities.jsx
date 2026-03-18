@@ -27,12 +27,12 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
   const getStatusColor = (status) => {
     switch (status) {
       case 'approved':
-        return 'text-green-600 bg-green-50';
+        return 'bg-green-500/12 text-green-600';
       case 'rejected':
-        return 'text-red-600 bg-red-50';
+        return 'bg-red-500/12 text-red-600';
       case 'pending':
       default:
-        return 'text-orange-600 bg-orange-50';
+        return 'bg-orange-500/12 text-orange-600';
     }
   };
 
@@ -62,11 +62,11 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
 
   if (loading) {
     return (
-      <Card>
+      <Card className="border-border/80 bg-card/95">
         <CardHeader>
           <div className="animate-pulse">
-            <div className="h-6 bg-gray-200 rounded w-1/2 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="mb-2 h-6 w-1/2 rounded bg-muted"></div>
+            <div className="h-4 w-3/4 rounded bg-muted"></div>
           </div>
         </CardHeader>
         <CardContent>
@@ -74,12 +74,12 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                  <div className="h-10 w-10 rounded-full bg-muted"></div>
                   <div className="flex-1">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    <div className="mb-2 h-4 w-3/4 rounded bg-muted"></div>
+                    <div className="h-3 w-1/2 rounded bg-muted"></div>
                   </div>
-                  <div className="h-6 w-16 bg-gray-200 rounded"></div>
+                  <div className="h-6 w-16 rounded bg-muted"></div>
                 </div>
               </div>
             ))}
@@ -90,7 +90,7 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
   }
 
   return (
-    <Card>
+    <Card className="border-border/80 bg-card/95">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -115,8 +115,8 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
         {activities.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-4xl mb-2">🌱</div>
-            <p className="text-gray-600 mb-2">{t('dashboard.noRecentActivities')}</p>
-            <p className="text-sm text-gray-500">{t('dashboard.startRecordingHint')}</p>
+            <p className="mb-2 text-muted-foreground">{t('dashboard.noRecentActivities')}</p>
+            <p className="text-sm text-muted-foreground">{t('dashboard.startRecordingHint')}</p>
             <Button className="mt-4" onClick={() => window.location.href = '/calculate'}>
               {t('dashboard.recordFirstActivity')}
             </Button>
@@ -124,16 +124,16 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
         ) : (
           <div className="space-y-4">
             {activities.slice(0, 5).map((activity) => (
-              <div key={activity.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <div key={activity.id} className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/60">
                 <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/12">
                     {getStatusIcon(activity.status)}
                   </div>
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="truncate text-sm font-medium text-foreground">
                       {getActivityName(activity)}
                     </p>
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(activity.status)}`}>
@@ -141,7 +141,7 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
                     </span>
                   </div>
                   
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>{formatDate(activity.created_at)}</span>
                     <span>
                       {activity.data}
@@ -172,7 +172,7 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
             ))}
             
             {activities.length > 5 && (
-              <div className="text-center pt-4 border-t">
+              <div className="border-t border-border pt-4 text-center">
                 <Button variant="outline" onClick={onViewAll}>
                   {t('dashboard.viewAllActivities', { count: activities.length })}
                 </Button>

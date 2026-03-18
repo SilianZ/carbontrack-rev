@@ -407,13 +407,13 @@ export function ProductManagement() {
         <p className="text-muted-foreground">{t('admin.products.description')}</p>
       </div>
 
-      <div className="rounded-lg border bg-white p-6 shadow-sm">
+      <div className="bg-card rounded-lg border p-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">{t('common.search')}</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">{t('common.search')}</label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                 <Input
                   value={filters.search}
                   onChange={(event) => handleFilterChange('search', event.target.value)}
@@ -423,11 +423,11 @@ export function ProductManagement() {
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">{t('admin.products.category')}</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.products.category')}</label>
               <select
                 value={filters.category}
                 onChange={(event) => handleFilterChange('category', event.target.value)}
-                className="mt-0 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
+                className="bg-background mt-0 block w-full rounded-md border border-input px-3 py-2 text-foreground focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
               >
                 <option value="">{t('common.all')}</option>
                 {categories.map((category) => (
@@ -441,11 +441,11 @@ export function ProductManagement() {
               </select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">{t('admin.products.status')}</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.products.status')}</label>
               <select
                 value={filters.status}
                 onChange={(event) => handleFilterChange('status', event.target.value)}
-                className="mt-0 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
+                className="bg-background mt-0 block w-full rounded-md border border-input px-3 py-2 text-foreground focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
               >
                 <option value="">{t('common.all')}</option>
                 {STATUS_OPTIONS.map((option) => (
@@ -472,43 +472,43 @@ export function ProductManagement() {
           <AlertDescription>{t('errors.loadFailed')}</AlertDescription>
         </Alert>
       ) : products.length === 0 ? (
-        <div className="rounded-lg border bg-white p-16 text-center shadow-sm">
+        <div className="bg-card rounded-lg border p-16 text-center shadow-sm">
           <h3 className="text-xl font-semibold">{t('admin.products.noProductsFound')}</h3>
           <p className="mt-2 text-muted-foreground">{t('admin.products.tryDifferentFilters')}</p>
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="bg-card overflow-x-auto rounded-lg border shadow-sm">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.image')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.name')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.category')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.price')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.stock')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.tags')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.status')}
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.actions')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card divide-y divide-border">
                 {products.map((product) => {
                   const price = product.points_required !== undefined && product.points_required !== null ? product.points_required : product.price || 0;
                   const isOutOfStock = product.stock === 0;

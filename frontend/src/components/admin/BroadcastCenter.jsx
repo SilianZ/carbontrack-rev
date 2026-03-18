@@ -163,7 +163,7 @@ const getRecipientFallbackLabel = (entry) => {
 
 function ResultStat({ label, value, tone = "default" }) {
   return (
-    <div className="rounded-md border px-4 py-3">
+    <div className="bg-card rounded-md border px-4 py-3">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p
         className={cn(
@@ -230,18 +230,18 @@ function UserChips({ users, onViewUser, t }) {
         return (
           <div
             key={`${identity}-${index}`}
-            className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2"
+            className="bg-muted/40 flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2"
           >
             <HoverCard>
               <HoverCardTrigger asChild>
-                <span className="cursor-help text-sm font-medium text-gray-900 hover:text-green-600">
+                <span className="cursor-help text-sm font-medium text-foreground hover:text-green-600">
                   {label}
                 </span>
               </HoverCardTrigger>
               <HoverCardContent className="w-64 space-y-1 text-xs text-muted-foreground">
                 {legacyId && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-foreground/80">
                       {t("admin.broadcast.recipientSearch.hover.userId")}
                     </span>{" "}
                     #{legacyId}
@@ -249,13 +249,13 @@ function UserChips({ users, onViewUser, t }) {
                 )}
                 {uuid && (
                   <div>
-                    <span className="font-medium text-gray-700">UUID</span>{" "}
+                    <span className="font-medium text-foreground/80">UUID</span>{" "}
                     {uuid}
                   </div>
                 )}
                 {email && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-foreground/80">
                       {t("common.email")}
                     </span>{" "}
                     {email}
@@ -263,7 +263,7 @@ function UserChips({ users, onViewUser, t }) {
                 )}
                 {statusLabel && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-foreground/80">
                       {t("admin.broadcast.recipientSearch.hover.status")}
                     </span>{" "}
                     {statusLabel}
@@ -271,7 +271,7 @@ function UserChips({ users, onViewUser, t }) {
                 )}
                 {hasAdminFlag && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-foreground/80">
                       {t("admin.broadcast.recipientSearch.hover.role")}
                     </span>{" "}
                     {isAdmin
@@ -2607,7 +2607,7 @@ export function BroadcastCenter() {
                           className="h-2.5 w-2.5 rounded-full"
                           style={{ backgroundColor: entry.color }}
                         />
-                        <span className="font-medium text-gray-700">
+                        <span className="font-medium text-foreground/80">
                           {entry.name}
                         </span>
                       </div>
@@ -2626,7 +2626,7 @@ export function BroadcastCenter() {
 
             <div className="grid gap-4 md:grid-cols-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t("admin.broadcast.filters.search")}
                 </label>
                 <Input
@@ -2638,7 +2638,7 @@ export function BroadcastCenter() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t("admin.broadcast.filters.priority")}
                 </label>
                 <select
@@ -2646,7 +2646,7 @@ export function BroadcastCenter() {
                   onChange={(event) =>
                     updateFilters({ priority: event.target.value })
                   }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="bg-background w-full rounded-md border border-input px-3 py-2 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="any">{t("common.all")}</option>
                   {PRIORITIES.map((value) => (
@@ -2657,7 +2657,7 @@ export function BroadcastCenter() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t("admin.broadcast.filters.scope")}
                 </label>
                 <select
@@ -2665,7 +2665,7 @@ export function BroadcastCenter() {
                   onChange={(event) =>
                     updateFilters({ scope: event.target.value })
                   }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="bg-background w-full rounded-md border border-input px-3 py-2 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="any">{t("common.all")}</option>
                   <option value="all">{t("admin.broadcast.scope.all")}</option>
@@ -2751,7 +2751,7 @@ export function BroadcastCenter() {
                             contentFormat={normalizeAnnouncementContentFormat(
                               item.content_format,
                             )}
-                            className="rounded-md bg-slate-50 p-4"
+                            className="bg-muted/50 rounded-md p-4"
                           />
                         </div>
                         <div className="flex flex-wrap gap-2">

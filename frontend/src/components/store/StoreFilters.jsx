@@ -120,10 +120,10 @@ export function StoreFilters({
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+    <div className="mb-6 rounded-lg border border-border bg-card/95 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <Filter className="h-5 w-5 text-gray-600" />
+          <Filter className="h-5 w-5 text-muted-foreground" />
           <h3 className="text-lg font-semibold">{t('store.filters.title')}</h3>
         </div>
         {hasActiveFilters && (
@@ -131,7 +131,7 @@ export function StoreFilters({
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-muted-foreground hover:text-foreground"
           >
             <X className="h-4 w-4 mr-1" />
             {t('store.filters.clear')}
@@ -142,11 +142,11 @@ export function StoreFilters({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 搜索框 */}
         <div className="lg:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-foreground">
             {t('store.filters.search')}
           </label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
             <Input
               type="text"
               value={filters.search}
@@ -159,13 +159,13 @@ export function StoreFilters({
 
         {/* 分类筛选 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-foreground">
             {t('store.filters.category')}
           </label>
           <select
             value={filters.category}
             onChange={(e) => handleFilterChange('category', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
             disabled={isLoading}
           >
             <option value="">{t('store.filters.allCategories')}</option>
@@ -184,13 +184,13 @@ export function StoreFilters({
 
         {/* 排序 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-foreground">
             {t('store.filters.sortBy')}
           </label>
           <select
             value={filters.sort}
             onChange={(e) => handleFilterChange('sort', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
             disabled={isLoading}
           >
             {sortOptions.map((option) => (
@@ -204,7 +204,7 @@ export function StoreFilters({
 
       {/* 积分范围筛选 */}
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="mb-2 block text-sm font-medium text-foreground">
           {t('store.filters.pointsRange')}
         </label>
         <div className="flex items-center space-x-3">
@@ -216,7 +216,7 @@ export function StoreFilters({
             className="w-32"
             min="0"
           />
-          <span className="text-gray-500">-</span>
+          <span className="text-muted-foreground">-</span>
           <Input
             type="number"
             value={filters.max_points}
@@ -229,9 +229,9 @@ export function StoreFilters({
       </div>
 
       {/* 标签筛选 */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-          <Tag className="h-4 w-4 text-gray-500" />
+      <div className="mt-4 border-t border-border pt-4">
+        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+          <Tag className="h-4 w-4 text-muted-foreground" />
           {t('store.filters.tags')}
         </label>
         <div className="flex flex-wrap gap-2 mb-2">
@@ -240,7 +240,7 @@ export function StoreFilters({
               <span>{tag.name || tag.slug}</span>
               <button
                 type="button"
-                className="rounded-full p-0.5 hover:bg-gray-200"
+                className="rounded-full p-0.5 hover:bg-muted"
                 onClick={() => removeTag(index)}
                 aria-label={t('store.filters.removeTag')}
               >
@@ -281,15 +281,15 @@ export function StoreFilters({
             {t('store.filters.addTag')}
           </Button>
         </div>
-        <p className="mt-1 text-xs text-gray-500">{t('store.filters.tagHint')}</p>
-        <div className="mt-3 rounded-md border bg-gray-50">
-          <div className="flex items-center justify-between border-b px-3 py-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+        <p className="mt-1 text-xs text-muted-foreground">{t('store.filters.tagHint')}</p>
+        <div className="mt-3 rounded-md border border-border bg-muted/40">
+          <div className="flex items-center justify-between border-b border-border px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             <span>{t('store.filters.suggestions')}</span>
             {tagsLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-500" /> : null}
           </div>
           <div className="max-h-44 overflow-y-auto">
             {tagSuggestions.length === 0 && !tagsLoading ? (
-              <div className="px-3 py-2 text-sm text-gray-500">{t('store.filters.noTagSuggestions')}</div>
+              <div className="px-3 py-2 text-sm text-muted-foreground">{t('store.filters.noTagSuggestions')}</div>
             ) : (
               tagSuggestions.map((suggestion, index) => (
                 <button
@@ -299,10 +299,10 @@ export function StoreFilters({
                     addTag(suggestion);
                     setTagQuery('');
                   }}
-                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-white"
+                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-foreground hover:bg-background/70"
                 >
                   <span>{suggestion.name}</span>
-                  {suggestion.slug ? <span className="text-xs uppercase text-gray-400">{suggestion.slug}</span> : null}
+                  {suggestion.slug ? <span className="text-xs uppercase text-muted-foreground">{suggestion.slug}</span> : null}
                 </button>
               ))
             )}
@@ -311,7 +311,7 @@ export function StoreFilters({
       </div>
 
       {/* 快速筛选标签 */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
+      <div className="mt-4 border-t border-border pt-4">
         <div className="flex flex-wrap gap-2">
           <Button
             variant={!filters.category ? "default" : "outline"}
@@ -355,9 +355,9 @@ export function StoreFilters({
 
       {/* 活动筛选结果提示 */}
       {hasActiveFilters && (
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+        <div className="mt-4 rounded-lg bg-blue-500/10 p-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-sm text-blue-700">
+            <div className="flex items-center space-x-2 text-sm text-blue-500">
               <Filter className="h-4 w-4" />
               <span>{t('store.filters.activeFilters')}:</span>
             </div>

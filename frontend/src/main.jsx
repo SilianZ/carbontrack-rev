@@ -5,6 +5,8 @@ import './lib/i18n.js' // 初始化i18n
 import App from './App.jsx'
 import { QueryClientProvider } from 'react-query';
 import { queryClient } from './lib/react-query';
+import { ThemeProvider } from './components/theme/ThemeProvider.jsx'
+import { Toaster } from './components/ui/sonner.jsx'
 
 // 首次加载强制重置本地登录态（清一次历史token），确保“默认未登录”
 (() => {
@@ -26,9 +28,12 @@ const loadingFallback = (
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Suspense fallback={loadingFallback}>
-        <App />
-      </Suspense>
+      <ThemeProvider>
+        <Suspense fallback={loadingFallback}>
+          <App />
+        </Suspense>
+        <Toaster />
+      </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>,
 )

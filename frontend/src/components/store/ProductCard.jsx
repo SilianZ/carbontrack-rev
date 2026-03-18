@@ -82,22 +82,20 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
   const hasImage = Boolean(imageSrc || imagePath);
 
   return (
-    <Card className={`h-full transition-all duration-200 hover:shadow-lg ${
-      !isAvailable || !canAfford ? 'opacity-75' : 'hover:scale-105'
-    }`}>
+    <Card className={`h-full ${!isAvailable || !canAfford ? 'opacity-75' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2">
             <span className="text-2xl">{getCategoryIcon()}</span>
             <div>
               <CardTitle className="text-lg line-clamp-2">{product.name}</CardTitle>
-              <CardDescription className="text-sm text-gray-500">
+              <CardDescription className="text-sm text-muted-foreground">
                 {t(`store.categories.${product.category}`, product.category)}
               </CardDescription>
             </div>
           </div>
           {product.is_featured && (
-            <div className="flex items-center space-x-1 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+            <div className="flex items-center space-x-1 rounded-full bg-yellow-500/15 px-2 py-1 text-xs text-yellow-500">
               <Star className="h-3 w-3 fill-current" />
               <span>{t('store.featured')}</span>
             </div>
@@ -108,7 +106,7 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
       <CardContent className="space-y-4">
         {/* Product image */}
         {hasImage && (
-          <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+          <div className="aspect-video overflow-hidden rounded-lg bg-muted">
             <R2Image
               src={imageSrc || undefined}
               filePath={imagePath || undefined}
@@ -117,7 +115,7 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
             />
           </div>
         )}
-        <p className="text-sm text-gray-600 line-clamp-3">{product.description}</p>
+        <p className="line-clamp-3 text-sm text-muted-foreground">{product.description}</p>
 
         {Array.isArray(product.tags) && product.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
@@ -135,7 +133,7 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
               <span className="text-2xl font-bold text-green-600">
                 {formatNumber(product.points_required)}
               </span>
-              <span className="text-sm text-gray-500">{t('common.points')}</span>
+              <span className="text-sm text-muted-foreground">{t('common.points')}</span>
             </div>
             <div className={`flex items-center space-x-1 text-sm ${getStockColor()}`}>
               <Package className="h-4 w-4" />
@@ -145,7 +143,7 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
 
           {/* 兑换统计 */}
           {product.total_exchanged > 0 && (
-            <div className="flex items-center space-x-1 text-xs text-gray-500">
+            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
               <span>{t('store.exchangedCount', { count: product.total_exchanged })}</span>
             </div>
@@ -184,7 +182,7 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
 
         {/* 用户积分提示 */}
         {canAfford && isAvailable && isInStock && (
-          <div className="text-xs text-center text-gray-500">
+          <div className="text-center text-xs text-muted-foreground">
             {t('store.afterExchange')}: {formatNumber(userPoints - product.points_required)} {t('common.points')}
           </div>
         )}

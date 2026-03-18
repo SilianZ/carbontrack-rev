@@ -16,18 +16,18 @@ export default function FeatureShowcaseSection() {
   const cards = t('home.featureShowcase.cards', { returnObjects: true }) || [];
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-blue-50 via-white to-emerald-50/60">
-      <div className="max-w-6xl mx-auto space-y-10">
-        <div className="text-center space-y-4">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+    <section className="relative isolate overflow-hidden bg-gradient-to-br from-background via-background to-secondary/35 px-4 py-24">
+      <div className="mx-auto max-w-6xl space-y-12">
+        <div className="relative z-10 mx-auto max-w-4xl text-center">
+          <h2 className="bg-gradient-to-r from-blue-600 via-emerald-500 to-teal-500 bg-clip-text text-3xl font-bold leading-tight text-transparent md:text-5xl md:leading-[1.12]">
             {t('home.featureShowcase.title')}
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
             {t('home.featureShowcase.subtitle')}
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="relative z-10 grid gap-6 md:grid-cols-2">
           {cards.map((card, index) => {
             const Icon = ICONS[card.id] ?? Leaf;
             return (
@@ -36,7 +36,7 @@ export default function FeatureShowcaseSection() {
                 className={cn(
                   'relative overflow-hidden border-none shadow-lg transition-transform duration-500 hover:-translate-y-1',
                   index % 2 === 0
-                    ? 'bg-white/85 backdrop-blur'
+                    ? 'border border-border/60 bg-card/85 backdrop-blur'
                     : 'bg-gradient-to-br from-blue-600 to-emerald-500 text-white'
                 )}
               >
@@ -64,7 +64,7 @@ export default function FeatureShowcaseSection() {
                     </CardTitle>
                     {card.subtitle && (
                       <CardDescription className={cn(
-                        index % 2 === 0 ? 'text-gray-600' : 'text-white/70'
+                        index % 2 === 0 ? 'text-muted-foreground' : 'text-white/70'
                       )}>
                         {card.subtitle}
                       </CardDescription>
@@ -73,7 +73,7 @@ export default function FeatureShowcaseSection() {
                 </CardHeader>
                 <CardContent className="relative space-y-3 text-sm leading-relaxed">
                   <p className={cn(
-                    index % 2 === 0 ? 'text-gray-600' : 'text-white/90'
+                    index % 2 === 0 ? 'text-muted-foreground' : 'text-white/90'
                   )}>
                     {card.description}
                   </p>
@@ -84,7 +84,7 @@ export default function FeatureShowcaseSection() {
                           key={highlightIndex}
                           className={cn(
                             'flex items-start gap-2',
-                            index % 2 === 0 ? 'text-gray-700' : 'text-white/90'
+                            index % 2 === 0 ? 'text-foreground/85' : 'text-white/90'
                           )}
                         >
                           <span className="mt-1 h-2 w-2 rounded-full bg-emerald-400" />

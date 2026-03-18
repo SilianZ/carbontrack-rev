@@ -9,8 +9,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe, Check } from 'lucide-react';
 import { supportedLanguages, changeLanguage, getCurrentLanguage } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
-const LanguageSwitcher = ({ variant = 'default', size = 'default', showText = true }) => {
+const LanguageSwitcher = ({ variant = 'default', size = 'default', showText = true, className }) => {
   // i18n instance is initialized globally; we don't use t() here directly.
   useTranslation();
   const [isChanging, setIsChanging] = useState(false);
@@ -38,7 +39,7 @@ const LanguageSwitcher = ({ variant = 'default', size = 'default', showText = tr
           variant={variant} 
           size={size}
           disabled={isChanging}
-          className="gap-2"
+          className={cn('gap-2', className)}
         >
           <Globe className="h-4 w-4" />
           {showText && (
@@ -75,4 +76,3 @@ const LanguageSwitcher = ({ variant = 'default', size = 'default', showText = tr
 };
 
 export default LanguageSwitcher;
-

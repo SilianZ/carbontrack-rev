@@ -76,7 +76,7 @@ export default function ActivitiesPage() {
           <AlertDescription>{t('errors.loadFailed')}</AlertDescription>
         </Alert>
       ) : activities.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-lg shadow-sm border">
+        <div className="rounded-lg border border-border bg-card/95 py-16 text-center shadow-sm">
           <h3 className="text-xl font-semibold">{t('activities.history.noActivitiesFound')}</h3>
           <p className="text-muted-foreground mt-2">{t('activities.history.tryDifferentFilters')}</p>
         </div>

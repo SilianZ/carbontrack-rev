@@ -76,7 +76,7 @@ export default function ProfilePage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center text-3xl font-semibold text-gray-400">
+            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-muted text-3xl font-semibold text-muted-foreground">
               {avatarDisplay.src || avatarDisplay.filePath ? (
                 <R2Image
                   src={avatarDisplay.src || undefined}
@@ -90,9 +90,9 @@ export default function ProfilePage() {
             </div>
           </div>
           <div className="space-y-1">
-            <h2 className="text-2xl font-semibold text-gray-900">{user.username}</h2>
-            {user.email && <p className="text-sm text-gray-500">{user.email}</p>}
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+            <h2 className="text-2xl font-semibold text-foreground">{user.username}</h2>
+            {user.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               <span>{t('profile.points')}: {user.points ?? 0}</span>
               {user.school_name && <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-green-400" />{user.school_name}</span>}
             </div>

@@ -133,7 +133,7 @@ export function ActivitySelector({ onActivitySelect, selectedActivity }) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-        <span className="ml-2 text-gray-600">{t('common.loading')}</span>
+        <span className="ml-2 text-muted-foreground">{t('common.loading')}</span>
       </div>
     );
   }
@@ -154,7 +154,7 @@ export function ActivitySelector({ onActivitySelect, selectedActivity }) {
       {/* 搜索和筛选 */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder={t('activities.searchPlaceholder')}
@@ -165,11 +165,11 @@ export function ActivitySelector({ onActivitySelect, selectedActivity }) {
         </div>
         
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-gray-400" />
+          <Filter className="h-4 w-4 text-muted-foreground" />
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-xs outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/40"
           >
             <option value="all">{t('activities.categories.all')}</option>
             {categories.map(category => (
@@ -194,25 +194,25 @@ export function ActivitySelector({ onActivitySelect, selectedActivity }) {
               key={activityId}
               className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
                 isSelected 
-                  ? 'ring-2 ring-green-500 bg-green-50' 
-                  : 'hover:bg-gray-50'
+                  ? 'border-green-500/40 bg-green-500/10 ring-2 ring-green-500/60'
+                  : 'hover:bg-muted/60'
               }`}
               onClick={() => handleActivitySelect(activity)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg ${
-                    isSelected ? 'bg-green-200' : 'bg-gray-100'
+                    isSelected ? 'bg-green-500/15' : 'bg-muted'
                   }`}>
                     <IconComponent className={`h-5 w-5 ${
-                      isSelected ? 'text-green-700' : 'text-gray-600'
+                      isSelected ? 'text-green-500' : 'text-muted-foreground'
                     }`} />
                   </div>
                   <div className="flex-1">
                     <CardTitle className="text-sm font-medium">
                       {getActivityName(activity)}
                     </CardTitle>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="mt-1 text-xs text-muted-foreground">
                       {getCategoryName(activity.category)}
                     </div>
                   </div>
@@ -220,12 +220,12 @@ export function ActivitySelector({ onActivitySelect, selectedActivity }) {
               </CardHeader>
               
               <CardContent className="pt-0">
-                <CardDescription className="text-sm text-gray-600 mb-3">
+                <CardDescription className="mb-3 text-sm text-muted-foreground">
                   {getActivityDescription(activity)}
                 </CardDescription>
                 
                 <div className="flex items-center justify-between text-xs">
-                  <div className="text-gray-500">
+                  <div className="text-muted-foreground">
                     {t('activities.unit')}: {t(`units.${activity.unit}`, activity.unit)}
                   </div>
                   <div className="text-green-600 font-medium">
@@ -246,11 +246,11 @@ export function ActivitySelector({ onActivitySelect, selectedActivity }) {
 
       {filteredActivities.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-gray-400 mb-2">
+          <div className="mb-2 text-muted-foreground">
             <Search className="h-12 w-12 mx-auto" />
           </div>
-          <p className="text-gray-600">{t('activities.noActivitiesFound')}</p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-foreground">{t('activities.noActivitiesFound')}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
             {t('activities.tryDifferentSearch')}
           </p>
         </div>

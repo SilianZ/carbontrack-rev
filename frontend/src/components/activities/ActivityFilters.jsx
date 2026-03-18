@@ -61,10 +61,10 @@ export function ActivityFilters({
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+    <div className="mb-6 rounded-lg border border-border bg-card/95 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <Filter className="h-5 w-5 text-gray-600" />
+          <Filter className="h-5 w-5 text-muted-foreground" />
           <h3 className="text-lg font-semibold">{t('activities.filters.title')}</h3>
         </div>
         {hasActiveFilters && (
@@ -72,7 +72,7 @@ export function ActivityFilters({
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-muted-foreground hover:text-foreground"
           >
             <X className="h-4 w-4 mr-1" />
             {t('common.clear')}
@@ -83,11 +83,11 @@ export function ActivityFilters({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 搜索框 */}
         <div className="lg:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-foreground">
             {t('common.search')}
           </label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
             <Input
               type="text"
               value={filters.search}
@@ -100,13 +100,13 @@ export function ActivityFilters({
 
         {/* 分类筛选 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-foreground">
             {t('activities.filters.category')}
           </label>
           <select
             value={filters.category}
             onChange={(e) => handleFilterChange('category', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
             disabled={isLoading}
           >
             <option value="">{t('activities.filters.allCategories')}</option>
@@ -120,13 +120,13 @@ export function ActivityFilters({
 
         {/* 状态筛选 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-foreground">
             {t('activities.filters.status')}
           </label>
           <select
             value={filters.status}
             onChange={(e) => handleFilterChange('status', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
             disabled={isLoading}
           >
             <option value="">{t('activities.filters.allStatus')}</option>
@@ -142,7 +142,7 @@ export function ActivityFilters({
       {/* 日期范围筛选 */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-foreground">
             <CalendarDays className="h-4 w-4 inline mr-1" />
             {t('activities.filters.startDate')}
           </label>
@@ -154,7 +154,7 @@ export function ActivityFilters({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-foreground">
             <CalendarDays className="h-4 w-4 inline mr-1" />
             {t('activities.filters.endDate')}
           </label>
@@ -169,13 +169,13 @@ export function ActivityFilters({
 
       {/* 排序 */}
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="mb-2 block text-sm font-medium text-foreground">
           {t('common.sort.sortBy')}
         </label>
         <select
           value={filters.sort}
           onChange={(e) => handleFilterChange('sort', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
           disabled={isLoading}
         >
           {sortOptions.map((option) => (
@@ -188,16 +188,16 @@ export function ActivityFilters({
 
       {/* 活动筛选结果提示 */}
       {hasActiveFilters && (
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+        <div className="mt-4 rounded-lg bg-blue-500/10 p-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-sm text-blue-700">
+            <div className="flex items-center space-x-2 text-sm text-blue-500">
               <Filter className="h-4 w-4" />
               <span>{t('activities.filters.activeFilters')}:</span>
             </div>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             {filters.search && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-1 text-xs text-blue-500">
                 {t('common.search')}: "{filters.search}"
                 <button
                   onClick={() => handleFilterChange('search', '')}
@@ -208,7 +208,7 @@ export function ActivityFilters({
               </span>
             )}
             {filters.category && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-1 text-xs text-blue-500">
                 {t(`activities.categories.${filters.category}`, filters.category)}
                 <button
                   onClick={() => handleFilterChange('category', '')}
@@ -219,7 +219,7 @@ export function ActivityFilters({
               </span>
             )}
             {filters.status && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-1 text-xs text-blue-500">
                 {t(`activities.status.${filters.status}`)}
                 <button
                   onClick={() => handleFilterChange('status', '')}
@@ -230,7 +230,7 @@ export function ActivityFilters({
               </span>
             )}
             {(filters.start_date || filters.end_date) && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-1 text-xs text-blue-500">
                 {filters.start_date} - {filters.end_date}
                 <button
                   onClick={() => {

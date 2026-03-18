@@ -15,6 +15,7 @@ const ResetPasswordPage = React.lazy(() => import('../pages/ResetPasswordPage'))
 const CalculatePage = React.lazy(() => import('../pages/CalculatePage'));
 const ActivitiesPage = React.lazy(() => import('../pages/ActivitiesPage'));
 const StorePage = React.lazy(() => import('../pages/StorePage'));
+const ExchangeHistoryPage = React.lazy(() => import('../pages/ExchangeHistoryPage'));
 const MessagesPage = React.lazy(() => import('../pages/MessagesPage'));
 const ProfilePage = React.lazy(() => import('../pages/ProfilePage'));
 const OnboardingPage = React.lazy(() => import('../pages/OnboardingPage'));
@@ -42,8 +43,8 @@ const AdminLlmUsagePage = React.lazy(() => import('../pages/admin/LlmUsage'));
 const NotFoundPage = React.lazy(() => import('../pages/NotFoundPage'));
 
 const loadingSpinner = (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500" />
+  <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+    <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-green-500" />
   </div>
 );
 
@@ -62,6 +63,7 @@ export const router = createBrowserRouter([
       { path: 'calculate', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><CalculatePage /></React.Suspense></ProtectedRoute> },
       { path: 'activities', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><ActivitiesPage /></React.Suspense></ProtectedRoute> },
       { path: 'store', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><StorePage /></React.Suspense></ProtectedRoute> },
+      { path: 'store/exchanges', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><ExchangeHistoryPage /></React.Suspense></ProtectedRoute> },
       { path: 'messages', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><MessagesPage /></React.Suspense></ProtectedRoute> },
       { path: 'profile', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><ProfilePage /></React.Suspense></ProtectedRoute> },
       { path: 'achievements', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><AchievementsPage /></React.Suspense></ProtectedRoute> },
