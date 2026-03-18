@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Calculator, Calendar, FileText, Upload, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
 import { batchUpload } from '../../lib/r2Upload';
@@ -35,6 +35,9 @@ export default function DataInputForm({
   const [showCalculation, setShowCalculation] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+  const getSafePreviewUrl = useCallback((previewUrl) => (
+    typeof previewUrl === 'string' && previewUrl.startsWith('blob:') ? previewUrl : ''
+  ), []);
 
   const {
     register,
@@ -639,24 +642,28 @@ export default function DataInputForm({
                 <div className="mt-4 space-y-3">
                   {selectedFiles.length > 0 && (
                     <ul className="space-y-2 text-sm">
-                      {selectedFiles.map((f, i) => (
-                        <li key={i} className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 transition-colors hover:border-border/80">
-                          <div className="flex items-center gap-3 min-w-0">
-                            {previewUrls[i] && <img src={previewUrls[i]} alt={t('activities.form.imagePreviewAlt', { name: f.name })} className="h-10 w-10 rounded border border-border object-cover" />}
-                            <div className="flex flex-col min-w-0">
-                              <span className="truncate font-medium text-foreground">{f.name}</span>
-                              <span className="text-xs text-muted-foreground">{t('activities.form.fileSizeLabel', { size: tFileSize(f.size) })}</span>
+                      {selectedFiles.map((f, i) => {
+                        const safePreviewUrl = getSafePreviewUrl(previewUrls[i]);
+
+                        return (
+                          <li key={i} className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 transition-colors hover:border-border/80">
+                            <div className="flex items-center gap-3 min-w-0">
+                              {safePreviewUrl && <img src={safePreviewUrl} alt={t('activities.form.imagePreviewAlt', { name: f.name })} className="h-10 w-10 rounded border border-border object-cover" />}
+                              <div className="flex flex-col min-w-0">
+                                <span className="truncate font-medium text-foreground">{f.name}</span>
+                                <span className="text-xs text-muted-foreground">{t('activities.form.fileSizeLabel', { size: tFileSize(f.size) })}</span>
+                              </div>
                             </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                            className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </li>
-                      ))}
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                              className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
 

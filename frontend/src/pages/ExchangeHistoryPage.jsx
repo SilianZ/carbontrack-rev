@@ -77,12 +77,14 @@ function resolveExchangeImage(exchange) {
   return { src: null, filePath: null };
 }
 
-function OverviewCard({ icon: Icon, label, value, hint, accentClass }) {
+function OverviewCard({ icon, label, value, hint, accentClass }) {
+  const iconElement = React.createElement(icon, { className: 'h-5 w-5' });
+
   return (
     <Card className="border-border/80 bg-card/90 shadow-sm">
       <CardContent className="flex items-start gap-4 p-5">
         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${accentClass}`}>
-          <Icon className="h-5 w-5" />
+          {iconElement}
         </div>
         <div className="min-w-0">
           <p className="text-sm text-muted-foreground">{label}</p>
