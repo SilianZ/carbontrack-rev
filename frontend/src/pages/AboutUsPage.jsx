@@ -19,6 +19,7 @@ const CONTACT_ICON_MAP = {
 const DEFAULT_ICON = ArrowUpRight;
 const numberFormatter = new Intl.NumberFormat();
 const carbonFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
+const GITHUB_HOSTS = new Set(['github.com', 'www.github.com']);
 
 const formatNumber = (value) => numberFormatter.format(Math.max(0, Math.round(value || 0)));
 const formatCarbon = (value, t) => {
@@ -29,9 +30,23 @@ const formatCarbon = (value, t) => {
   return `${carbonFormatter.format(numericValue)} ${t('units.kg')}`;
 };
 
+const isGithubProfileLink = (value) => {
+  if (typeof value !== 'string' || value.trim() === '') {
+    return false;
+  }
+
+  try {
+    const { hostname } = new URL(value);
+    return GITHUB_HOSTS.has(hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+};
+
 // Timeline Card Component with Apple-style animations (memoized for perf)
 const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
   const cardRef = useRef(null);
+  const isGithubLink = isGithubProfileLink(member.link);
   const isInView = useInView(cardRef, {
     once: false,
     margin: "-100px",
@@ -225,7 +240,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
                     className={cn(
                       buttonVariants({
                         size: 'lg',
-                        className: member.link?.includes('github.com')
+                        className: isGithubLink
                           ? 'w-full justify-center bg-[#24292e] text-white border-none shadow-lg hover:bg-[#2f363d] hover:shadow-xl hover:shadow-gray-900/20 overflow-hidden relative'
                           : 'w-full justify-center bg-gradient-to-r from-green-500 to-blue-500 text-white border-none shadow-lg hover:shadow-xl group-hover:from-green-600 group-hover:to-blue-600',
                       })
@@ -240,7 +255,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {member.link?.includes('github.com') && (
+                    {isGithubLink && (
                       <m.div
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-20deg]"
                         initial={{ x: '-150%' }}
@@ -251,7 +266,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
                     <span className="mr-2 relative z-10">
                       {member.linkLabel || t('about.team.learnMore')}
                     </span>
-                    {member.link?.includes('github.com') ? (
+                    {isGithubLink ? (
                       <Github className="h-5 w-5 transition-transform group-hover:rotate-12 relative z-10" />
                     ) : (
                       <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 relative z-10" />
