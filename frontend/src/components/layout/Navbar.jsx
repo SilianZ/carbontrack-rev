@@ -310,10 +310,10 @@ export function Navbar() {
   return (
     <nav
       className={clsx(
-        'sticky top-0 z-50 border-b shadow-sm',
+        'sticky top-0 z-50 transition-all duration-300',
         isAdminRoute
-          ? 'border-border bg-background'
-          : 'border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90'
+          ? 'border-b border-border bg-background'
+          : 'border-b border-black/5 dark:border-white/10 bg-white/70 dark:bg-black/50 backdrop-blur-xl supports-[backdrop-filter]:backdrop-blur-xl'
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

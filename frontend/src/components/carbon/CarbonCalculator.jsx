@@ -185,19 +185,23 @@ export function CarbonCalculator() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* 页面标题 */}
-      <div className="text-center mb-8">
-        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-500/12">
-          <Leaf className="w-8 h-8 text-green-600" />
+    <div className="relative min-h-full">
+      {/* Ambient Glow */}
+      <div className="absolute top-0 left-1/2 -z-10 h-[500px] w-[800px] -translate-x-1/2 blur-[120px] bg-gradient-to-tr from-green-50/50 via-emerald-100/30 to-transparent opacity-50 dark:from-green-900/20 dark:via-emerald-900/10 dark:opacity-30 pointer-events-none" />
+
+      <div className="max-w-4xl mx-auto p-6 relative">
+        {/* 页面标题 */}
+        <div className="text-center mb-8">
+          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-green-500/12 shadow-sm border border-green-500/20 backdrop-blur-md">
+            <Leaf className="w-8 h-8 text-green-600" />
+          </div>
+          <h1 className="mb-2 text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">
+            {t('activities.title')}
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            {t('activities.description')}
+          </p>
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-foreground">
-          {t('activities.title')}
-        </h1>
-        <p className="text-muted-foreground">
-          {t('activities.description')}
-        </p>
-      </div>
 
       {/* 步骤指示器 */}
       <div className="mb-8">
@@ -363,6 +367,7 @@ export function CarbonCalculator() {
           </Card>
         )}
       </div>
+    </div>
     </div>
   );
 }

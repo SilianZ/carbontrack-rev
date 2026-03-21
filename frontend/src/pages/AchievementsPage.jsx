@@ -207,17 +207,21 @@ export default function AchievementsPage() {
   }, [refetchBadges, refetchMyBadges, refetchStats]);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-8 text-foreground">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Trophy className="h-8 w-8 text-yellow-500" />
-            {t('achievements.title')}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {t('achievements.subtitle')}
-          </p>
-        </div>
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
+      {/* Ambient Glow */}
+      <div className="absolute top-0 right-1/4 -z-10 h-[500px] w-[500px] blur-[120px] bg-gradient-to-bl from-amber-50/50 via-orange-50/30 to-transparent opacity-50 dark:from-amber-900/20 dark:via-orange-900/10 dark:opacity-30 pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8 relative">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">
+              <Trophy className="h-8 w-8 text-yellow-500" />
+              {t('achievements.title')}
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              {t('achievements.subtitle')}
+            </p>
+          </div>
         <Button variant="outline" onClick={handleRefresh} disabled={isFetching} className="self-start md:self-auto">
           <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
           {t('achievements.refresh')}
@@ -597,6 +601,7 @@ export default function AchievementsPage() {
           )}
         </div>
       )}
+    </div>
     </div>
   );
 }
