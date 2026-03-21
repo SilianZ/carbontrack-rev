@@ -22,11 +22,11 @@ import { Pagination } from '../components/ui/Pagination';
 import R2Image from '../components/common/R2Image';
 
 const STATUS_STYLES = {
-  pending: 'border-blue-500/25 bg-blue-500/12 text-blue-600 dark:border-blue-400/25 dark:bg-blue-400/15 dark:text-blue-300',
-  completed: 'border-emerald-500/25 bg-emerald-500/12 text-emerald-600 dark:border-emerald-400/25 dark:bg-emerald-400/15 dark:text-emerald-300',
-  shipped: 'border-amber-500/25 bg-amber-500/12 text-amber-600 dark:border-amber-400/25 dark:bg-amber-400/15 dark:text-amber-300',
-  rejected: 'border-red-500/25 bg-red-500/12 text-red-600 dark:border-red-400/25 dark:bg-red-400/15 dark:text-red-300',
-  cancelled: 'border-red-500/25 bg-red-500/12 text-red-600 dark:border-red-400/25 dark:bg-red-400/15 dark:text-red-300',
+  pending: 'border-blue-500/25 bg-blue-500/12 text-blue-600 dark:border-blue-400/30 dark:bg-blue-500/20 dark:text-blue-300',
+  completed: 'border-emerald-500/25 bg-emerald-500/12 text-emerald-600 dark:border-emerald-400/30 dark:bg-emerald-500/20 dark:text-emerald-300',
+  shipped: 'border-amber-500/25 bg-amber-500/12 text-amber-600 dark:border-amber-400/30 dark:bg-amber-500/20 dark:text-amber-300',
+  rejected: 'border-red-500/25 bg-red-500/12 text-red-600 dark:border-red-400/30 dark:bg-red-500/20 dark:text-red-300',
+  cancelled: 'border-red-500/25 bg-red-500/12 text-red-600 dark:border-red-400/30 dark:bg-red-500/20 dark:text-red-300',
   default: 'border-border bg-muted/70 text-foreground',
 };
 
@@ -345,28 +345,28 @@ export default function ExchangeHistoryPage() {
                 label={t('store.history.overview.totalOrders')}
                 value={pagination.total}
                 hint={t('store.history.overview.totalOrdersHint')}
-                accentClass="bg-blue-500/12 text-blue-600 dark:bg-blue-400/15 dark:text-blue-300"
+                accentClass="bg-blue-500/12 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300"
               />
               <OverviewCard
                 icon={Clock3}
                 label={t('store.history.overview.pendingOrders')}
                 value={overview.pendingOrders}
                 hint={t('store.history.overview.pendingOrdersHint')}
-                accentClass="bg-amber-500/12 text-amber-600 dark:bg-amber-400/15 dark:text-amber-300"
+                accentClass="bg-amber-500/12 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300"
               />
               <OverviewCard
                 icon={Truck}
                 label={t('store.history.overview.shippedOrders')}
                 value={overview.shippedOrders}
                 hint={t('store.history.overview.shippedOrdersHint')}
-                accentClass="bg-emerald-500/12 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-300"
+                accentClass="bg-emerald-500/12 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300"
               />
               <OverviewCard
                 icon={Coins}
                 label={t('store.history.overview.pointsSpent')}
                 value={`${formatNumber(overview.totalPointsSpent)} ${t('common.points')}`}
                 hint={t('store.history.overview.pointsSpentHint')}
-                accentClass="bg-green-500/12 text-green-600 dark:bg-green-400/15 dark:text-green-300"
+                accentClass="bg-green-500/12 text-green-600 dark:bg-green-500/20 dark:text-green-300"
               />
             </div>
           </div>
