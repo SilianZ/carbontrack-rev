@@ -51,7 +51,7 @@ export function Pagination({
 
   return (
     <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}>
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-muted-foreground">
         {t('pagination.showing', {
           start: (safeCurrent - 1) * safePerPage + 1,
           end: Math.min(safeCurrent * safePerPage, safeTotalItems),
@@ -64,7 +64,7 @@ export function Pagination({
           <li>
             <button
               onClick={() => safeCurrent > 1 && onPageChange(safeCurrent - 1)}
-              className={`px-3 py-2 rounded-md border text-sm ${safeCurrent <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
+              className={`rounded-md border border-border px-3 py-2 text-sm text-foreground ${safeCurrent <= 1 ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted/60'}`}
               disabled={safeCurrent <= 1}
             >
               {t('common.previous')}
@@ -74,11 +74,11 @@ export function Pagination({
           {visiblePages.map((page, index) => (
             <li key={index}>
               {page === '...' ? (
-                <span className="px-3 py-2 text-sm text-gray-400">…</span>
+                <span className="px-3 py-2 text-sm text-muted-foreground">…</span>
               ) : (
                 <button
                   onClick={() => onPageChange(page)}
-                  className={`px-3 py-2 rounded-md border text-sm ${page === safeCurrent ? 'bg-gray-100 border-gray-300' : 'hover:bg-gray-50'}`}
+                  className={`rounded-md border px-3 py-2 text-sm ${page === safeCurrent ? 'border-border bg-muted text-foreground' : 'border-border text-foreground hover:bg-muted/60'}`}
                 >
                   {page}
                 </button>
@@ -89,7 +89,7 @@ export function Pagination({
           <li>
             <button
               onClick={() => safeCurrent < safeTotalPages && onPageChange(safeCurrent + 1)}
-              className={`px-3 py-2 rounded-md border text-sm ${safeCurrent >= safeTotalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
+              className={`rounded-md border border-border px-3 py-2 text-sm text-foreground ${safeCurrent >= safeTotalPages ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted/60'}`}
               disabled={safeCurrent >= safeTotalPages}
             >
               {t('common.next')}
@@ -100,4 +100,3 @@ export function Pagination({
     </div>
   );
 }
-

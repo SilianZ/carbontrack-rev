@@ -10,24 +10,29 @@ export function ActivityTable({ activities, onRowClick }) {
   const getName = (a) => a.activity_name || a.activity_name_zh || a.activity_name_en || a.activity || '';
   const getCategory = (a) => a.activity_category || a.category || 'unknown';
   const getUnit = (a) => a.activity_unit || a.unit || '';
+  const statusBadgeClassNames = {
+    pending: 'bg-blue-100 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/30',
+    approved: 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/30',
+    rejected: 'bg-red-100 text-red-700 ring-1 ring-inset ring-red-200 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-400/30',
+  };
 
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClassNames.pending}`}>
             <Clock className="h-3 w-3 mr-1" /> {t('activities.status.pending')}
           </span>
         );
       case 'approved':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClassNames.approved}`}>
             <CheckCircle className="h-3 w-3 mr-1" /> {t('activities.status.approved')}
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClassNames.rejected}`}>
             <XCircle className="h-3 w-3 mr-1" /> {t('activities.status.rejected')}
           </span>
         );
@@ -37,81 +42,81 @@ export function ActivityTable({ activities, onRowClick }) {
   };
 
   return (
-    <div className="overflow-x-auto bg-white rounded-lg shadow-sm border">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
+      <table className="min-w-full divide-y divide-border">
+        <thead className="bg-muted/50">
           <tr>
             <th
               scope="col"
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('activities.table.images')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('activities.table.activity')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('activities.table.data')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('activities.table.carbonSaved')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('activities.table.points')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('activities.table.status')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('activities.table.date')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('activities.table.actions')}
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="divide-y divide-border bg-card">
           {activities.map((activity) => (
-            <tr key={activity.id} className="hover:bg-gray-50">
+            <tr key={activity.id} className="hover:bg-muted/40">
               <td className="px-4 py-4 whitespace-nowrap align-top">
                 <ImagePreviewGallery images={activity.images || []} maxThumbnails={1} />
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-foreground">
                   {getName(activity)}
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                     {t(`activities.categories.${getCategory(activity)}`, getCategory(activity))}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">
+                <div className="text-sm text-foreground">
                     {formatNumber(activity.data_value ?? activity.amount)} {t(`units.${getUnit(activity)}`, getUnit(activity))}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">
+                <div className="text-sm text-foreground">
                   {formatNumber(activity.carbon_saved)} kg CO2e
                 </div>
               </td>
@@ -123,7 +128,7 @@ export function ActivityTable({ activities, onRowClick }) {
               <td className="px-6 py-4 whitespace-nowrap">
                 {getStatusBadge(activity.status)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                 {formatDateSafe(activity.activity_date, 'yyyy-MM-dd')}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

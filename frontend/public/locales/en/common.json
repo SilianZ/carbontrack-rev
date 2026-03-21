@@ -870,6 +870,47 @@
       "failed": "Exchange failed. Please try again.",
       "completed": "Exchange completed"
     },
+    "history": {
+      "title": "Exchange History",
+      "subtitle": "Review the rewards you've redeemed and track delivery updates in one place.",
+      "backToStore": "Back to Store",
+      "exchangeId": "Exchange ID",
+      "orderDate": "Order Date",
+      "quantity": "Quantity",
+      "unitPoints": "Unit Points",
+      "pointsUsed": "Points Used",
+      "deliveryAddress": "Delivery Address",
+      "contactPhone": "Contact Phone",
+      "trackingNumber": "Tracking Number",
+      "notes": "Notes",
+      "productInfo": "Product",
+      "deliveryInfo": "Delivery Information",
+      "notProvided": "Not provided",
+      "notAvailable": "Not available yet",
+      "noNotes": "No notes were submitted for this exchange.",
+      "unknownProduct": "Reward item",
+      "noRecords": "No exchange records yet",
+      "noRecordsDescription": "Once you redeem a reward from the store, it will appear here.",
+      "loadFailed": "Failed to load exchange history",
+      "overview": {
+        "totalOrders": "Total Orders",
+        "totalOrdersHint": "All visible exchange records",
+        "pendingOrders": "Pending",
+        "pendingOrdersHint": "Awaiting fulfillment or review",
+        "shippedOrders": "Shipped / Completed",
+        "shippedOrdersHint": "Orders already processed",
+        "pointsSpent": "Points Spent",
+        "pointsSpentHint": "Points used on this page"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "completed": "Completed",
+        "shipped": "Shipped",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled",
+        "unknown": "Unknown"
+      }
+    },
     "errors": {
       "loadFailed": "Failed to load products",
       "exchangeFailed": "Exchange failed, please try again",

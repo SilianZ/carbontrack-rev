@@ -188,13 +188,13 @@ export function CarbonCalculator() {
     <div className="max-w-4xl mx-auto p-6">
       {/* 页面标题 */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-500/12">
           <Leaf className="w-8 h-8 text-green-600" />
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="mb-2 text-3xl font-bold text-foreground">
           {t('activities.title')}
         </h1>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           {t('activities.description')}
         </p>
       </div>
@@ -206,7 +206,7 @@ export function CarbonCalculator() {
             <div key={step.id} className="flex items-center">
               <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${currentStep >= step.id
                 ? 'bg-green-600 border-green-600 text-white'
-                : 'border-gray-300 text-gray-500'
+                : 'border-border text-muted-foreground'
                 }`}>
                 {currentStep > step.id ? (
                   <CheckCircle className="w-6 h-6" />
@@ -216,17 +216,17 @@ export function CarbonCalculator() {
               </div>
 
               <div className="ml-3 hidden sm:block">
-                <div className={`text-sm font-medium ${currentStep >= step.id ? 'text-green-600' : 'text-gray-500'
+                <div className={`text-sm font-medium ${currentStep >= step.id ? 'text-green-600' : 'text-muted-foreground'
                   }`}>
                   {step.title}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-muted-foreground">
                   {step.description}
                 </div>
               </div>
 
               {index < steps.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-4 ${currentStep > step.id ? 'bg-green-600' : 'bg-gray-300'
+                <div className={`mx-4 h-0.5 flex-1 ${currentStep > step.id ? 'bg-green-600' : 'bg-border'
                   }`} />
               )}
             </div>
@@ -277,7 +277,7 @@ export function CarbonCalculator() {
                 <ArrowLeft className="w-4 h-4" />
                 {t('common.back')}
               </Button>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted-foreground">
                 {t('activities.form.step2Of3')}
               </div>
             </div>
@@ -297,12 +297,12 @@ export function CarbonCalculator() {
 
         {/* 步骤3: 提交成功 */}
         {currentStep === 3 && submitResult && (
-          <Card className="bg-green-50 border-green-200">
+          <Card className="border-green-500/20 bg-green-500/10">
             <CardHeader className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4 mx-auto">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <CardTitle className="text-green-800">
+              <CardTitle className="text-green-500">
                 {t('activities.form.submitSuccess')}
               </CardTitle>
               <CardDescription>
@@ -312,7 +312,7 @@ export function CarbonCalculator() {
 
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white rounded-lg p-4 text-center">
+                <div className="rounded-lg bg-card p-4 text-center">
                   <div className="text-2xl font-bold text-green-600">
                     {(() => {
                       const v = submitResult.carbon_saved;
@@ -320,32 +320,32 @@ export function CarbonCalculator() {
                       return Number.isFinite(num) ? num.toFixed(2) : '0.00';
                     })()}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     {t('activities.carbonSaved')} (kg CO₂)
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg p-4 text-center">
+                <div className="rounded-lg bg-card p-4 text-center">
                   <div className="text-2xl font-bold text-blue-600">
                     {submitResult.points_earned || 0}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     {t('activities.pointsEarned')}
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg p-4 text-center">
+                <div className="rounded-lg bg-card p-4 text-center">
                   <div className="text-2xl font-bold text-orange-600">
                     {t('activities.status.pending')}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     {t('activities.currentStatus')}
                   </div>
                 </div>
               </div>
 
               <div className="text-center space-y-4">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   {t('activities.form.reviewNotice')}
                 </p>
 

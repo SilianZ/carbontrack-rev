@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { useTranslation } from '../hooks/useTranslation';
 import { ActivityFilters } from '../components/activities/ActivityFilters';
@@ -11,6 +12,7 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 
 export default function ActivitiesPage() {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     search: '',
     category: '',
@@ -22,6 +24,7 @@ export default function ActivitiesPage() {
     limit: 10
   });
   const [selectedActivity, setSelectedActivity] = useState(null);
+  const activityIdParam = searchParams.get('activityId');
 
   const { data, isLoading, error, isFetching } = useQuery(
     ['activities', filters],
@@ -30,6 +33,42 @@ export default function ActivitiesPage() {
   );
 
   const { data: categoriesData } = useQuery('activityCategories', () => carbonAPI.getActivities({ grouped: true }));
+  const { data: activityDetailData } = useQuery(
+    ['activityDetail', activityIdParam],
+    () => carbonAPI.getTransaction(activityIdParam),
+    { enabled: Boolean(activityIdParam) }
+  );
+
+  const activities = data?.data?.data || [];
+  const pagination = data?.data?.pagination || {};
+  const categories = categoriesData?.data?.data || [];
+
+  const selectedActivityFromQuery = useMemo(() => {
+    if (!activityIdParam) return null;
+
+    const matchedActivity = activities.find((activity) => String(activity.id) === String(activityIdParam));
+    if (matchedActivity) {
+      return matchedActivity;
+    }
+
+    return (
+      activityDetailData?.data?.data?.data ??
+      activityDetailData?.data?.data ??
+      activityDetailData?.data ??
+      null
+    );
+  }, [activities, activityDetailData, activityIdParam]);
+
+  useEffect(() => {
+    if (!activityIdParam) {
+      setSelectedActivity(null);
+      return;
+    }
+
+    if (selectedActivityFromQuery) {
+      setSelectedActivity(selectedActivityFromQuery);
+    }
+  }, [activityIdParam, selectedActivityFromQuery]);
 
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
@@ -41,15 +80,21 @@ export default function ActivitiesPage() {
 
   const handleRowClick = (activity) => {
     setSelectedActivity(activity);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('activityId', String(activity.id));
+      return next;
+    });
   };
 
   const closeModal = () => {
     setSelectedActivity(null);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('activityId');
+      return next;
+    });
   };
-
-  const activities = data?.data?.data || [];
-  const pagination = data?.data?.pagination || {};
-  const categories = categoriesData?.data?.data || [];
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -76,7 +121,7 @@ export default function ActivitiesPage() {
           <AlertDescription>{t('errors.loadFailed')}</AlertDescription>
         </Alert>
       ) : activities.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-lg shadow-sm border">
+        <div className="rounded-lg border border-border bg-card/95 py-16 text-center shadow-sm">
           <h3 className="text-xl font-semibold">{t('activities.history.noActivitiesFound')}</h3>
           <p className="text-muted-foreground mt-2">{t('activities.history.tryDifferentFilters')}</p>
         </div>

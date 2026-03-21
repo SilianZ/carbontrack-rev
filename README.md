@@ -1,162 +1,62 @@
-# CarbonTrack (Developer Branch)
+# CarbonTrack Website
 
-面向开发者的快速上手文档：在本地启动前后端并完成基础测试。
+面向校园与社区场景的低碳生活平台，连接「个人碳减排行为」与「可持续激励机制」。
 
-## 1) 项目结构
+> 当前对外文档适用版本：**V3.0+（V3.0 及以上）**
 
-这是一个 monorepo，包含两部分：
+## 产品简介
 
-- `backend/`: PHP + Slim API 服务
-- `frontend/`: React + Vite 单页应用
+`CarbonTrack` 以轻量化数字产品形态，帮助用户记录低碳行动、积累绿色积分，并通过兑换与活动机制提升持续参与度。  
+平台同时提供管理侧能力，支持运营团队进行内容、商品、活动和用户治理。
 
-前后端通过 REST API 通信，接口主前缀为 `/api/v1`。
+## 核心功能亮点
 
-## 2) 环境要求
+### 用户端能力
 
-- PHP `>= 8.1`（项目 `composer.json` 最低写的是 7.4，但建议按团队开发环境使用 8.1+）
-- Composer（后端依赖管理）
-- MySQL（建议 5.7+ / 8.0+）
-- Node.js `>= 20.9.0`
-- pnpm `>= 10.4.1`
+- 低碳行为记录与展示
+- 积分累计、兑换与成长体系
+- 登录注册与安全校验（含验证码能力）
+- Onboarding 入门引导与资料完善流程
+- 多语言体验（中文/英文）
 
-可先验证：
+### 管理端能力
 
-```bash
-php -v
-composer -V
-mysql --version
-node -v
-pnpm -v
-```
+- 管理仪表盘与运营数据概览
+- 用户运维（检索、编辑、积分调整）
+- 活动审核与内容治理
+- 商品与兑换流程管理
+- 广播中心与站内通知触达
 
-## 3) 一次性初始化
+## 技术架构概览
 
-在仓库根目录执行。
+- **Frontend**: React + Vite + Tailwind + shadcn/ui
+- **Backend**: PHP + Slim + Eloquent ORM
+- **Data & API**: MySQL + RESTful API（`/api/v1`）
+- **Engineering**: Monorepo 协作模式（`frontend/` + `backend/`）
 
-### 3.1 后端初始化
+## 为什么是 V3.0+
 
-```bash
-cd backend
-composer install
-cp .env.example .env
-```
+`V3.0+` 代表当前主线版本在产品和工程层面的升级方向：
 
-编辑 `backend/.env`，至少确认以下变量可用：
+- 更完整的管理后台信息架构
+- 更明确的版本化 API 约定
+- 更稳定的前后端协作与发布链路
+- 面向持续迭代的模块化扩展能力
 
-- `DB_HOST`
-- `DB_PORT`
-- `DB_DATABASE`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `JWT_SECRET`
+## 快速入口
 
-初始化数据库：
+- 项目总览：本仓库根目录
+- 前端说明：`frontend/README.md`
+- 后端能力：`backend/` 目录与接口定义
 
-```bash
-# 1) 创建数据库（如已存在可跳过）
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS carbontrack CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+## 开发者文档入口
 
-# 2) 导入表结构与基础数据
-mysql -u root -p carbontrack < backend/database/localhost.sql
-```
+若你是开发者或贡献者，请直接查看：
 
-### 3.2 前端初始化
+- 环境与本地运行：`SETUP.md`
+- 分仓同步与发布链路：`SYNC_SETUP.md`
 
-```bash
-cd frontend
-pnpm install
-cp .env.example .env
-```
+---
 
-建议在 `frontend/.env` 显式设置本地 API：
-
-```env
-VITE_API_URL=http://localhost:8080/api/v1
-```
-
-## 4) 本地运行
-
-使用两个终端分别启动后端和前端。
-
-### 终端 A（后端）
-
-```bash
-cd backend
-composer start
-```
-
-默认监听：`http://localhost:8080`
-
-### 终端 B（前端）
-
-```bash
-cd frontend
-pnpm dev
-```
-
-默认访问：`http://localhost:5173`
-
-## 5) 测试与质量检查
-
-在仓库根目录分别执行。
-
-### 后端测试
-
-```bash
-cd backend
-composer test
-```
-
-### 前端检查
-
-```bash
-cd frontend
-pnpm lint
-pnpm build
-```
-
-## 6) 快速验证
-
-- 打开前端：`http://localhost:5173`
-- 访问后端健康接口：`http://localhost:8080/api/v1/health`
-
-如果前端能打开且 API 返回成功，说明本地链路可用。
-
-## 7) 常见问题排查
-
-### `zsh: command not found: composer`
-
-你还未安装 Composer，先安装后重开终端再执行 `composer -V` 验证。
-
-### `zsh: command not found: pnpm`
-
-优先使用 Corepack：
-
-```bash
-corepack enable
-corepack prepare pnpm@10.4.1 --activate
-pnpm -v
-```
-
-若 `corepack` 不可用，再使用：
-
-```bash
-npm install -g pnpm@10.4.1
-```
-
-### `cd: no such file or directory: backend`
-
-通常是已经在 `backend` 目录里又执行了一次 `cd backend`。先用 `pwd` 确认当前位置。
-
-### 数据库连接失败 / 500
-
-检查 `backend/.env` 的数据库配置是否与本机 MySQL 一致，并确认数据库已导入 `backend/database/localhost.sql`。
-
-### 前端请求 404（API 路径）
-
-确保 `VITE_API_URL` 带有 `/api/v1` 前缀，例如：`http://localhost:8080/api/v1`。
-
-## 8) 更多说明
-
-- 详细环境配置：`SETUP.md`
-- 同步与仓库策略：`SYNC_SETUP.md`
+如需商务合作、校园共建或技术对接，可基于仓库信息联系项目维护团队。  
+CarbonTrack 文档将持续围绕 **V3.0 及以上** 版本演进。

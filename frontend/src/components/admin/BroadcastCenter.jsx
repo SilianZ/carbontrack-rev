@@ -163,7 +163,7 @@ const getRecipientFallbackLabel = (entry) => {
 
 function ResultStat({ label, value, tone = "default" }) {
   return (
-    <div className="rounded-md border px-4 py-3">
+    <div className="bg-card rounded-md border px-4 py-3">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p
         className={cn(
@@ -230,18 +230,18 @@ function UserChips({ users, onViewUser, t }) {
         return (
           <div
             key={`${identity}-${index}`}
-            className="flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2"
+            className="bg-muted/40 flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2"
           >
             <HoverCard>
               <HoverCardTrigger asChild>
-                <span className="cursor-help text-sm font-medium text-gray-900 hover:text-green-600">
+                <span className="cursor-help text-sm font-medium text-foreground hover:text-green-600">
                   {label}
                 </span>
               </HoverCardTrigger>
               <HoverCardContent className="w-64 space-y-1 text-xs text-muted-foreground">
                 {legacyId && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-foreground/80">
                       {t("admin.broadcast.recipientSearch.hover.userId")}
                     </span>{" "}
                     #{legacyId}
@@ -249,13 +249,13 @@ function UserChips({ users, onViewUser, t }) {
                 )}
                 {uuid && (
                   <div>
-                    <span className="font-medium text-gray-700">UUID</span>{" "}
+                    <span className="font-medium text-foreground/80">UUID</span>{" "}
                     {uuid}
                   </div>
                 )}
                 {email && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-foreground/80">
                       {t("common.email")}
                     </span>{" "}
                     {email}
@@ -263,7 +263,7 @@ function UserChips({ users, onViewUser, t }) {
                 )}
                 {statusLabel && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-foreground/80">
                       {t("admin.broadcast.recipientSearch.hover.status")}
                     </span>{" "}
                     {statusLabel}
@@ -271,7 +271,7 @@ function UserChips({ users, onViewUser, t }) {
                 )}
                 {hasAdminFlag && (
                   <div>
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-foreground/80">
                       {t("admin.broadcast.recipientSearch.hover.role")}
                     </span>{" "}
                     {isAdmin
@@ -1335,16 +1335,16 @@ export function BroadcastCenter() {
       </p>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-6 inline-flex bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-[0.8rem] border border-slate-200 dark:border-slate-800 shadow-inner">
+        <TabsList className="mb-6 inline-flex rounded-[0.8rem] border border-border bg-muted/60 p-1.5 shadow-inner">
           <TabsTrigger
             value="compose"
-            className="rounded-lg py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow text-sm font-semibold transition-all duration-200"
+            className="rounded-lg py-2 text-sm font-semibold transition-all duration-200 data-[state=active]:bg-card data-[state=active]:shadow"
           >
             {t("admin.broadcast.pageTabs.compose")}
           </TabsTrigger>
           <TabsTrigger
             value="history"
-            className="rounded-lg py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow text-sm font-semibold transition-all duration-200"
+            className="rounded-lg py-2 text-sm font-semibold transition-all duration-200 data-[state=active]:bg-card data-[state=active]:shadow"
           >
             {t("admin.broadcast.pageTabs.history")}
           </TabsTrigger>
@@ -1434,10 +1434,10 @@ export function BroadcastCenter() {
                 </div>
               </div>
 
-              <div className="rounded-xl border bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-900/30">
+              <div className="rounded-xl border border-border bg-muted/40 p-4">
                 <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <h3 className="text-base font-semibold text-foreground">
                       {t("admin.broadcast.sections.content")}
                     </h3>
                     <p className="text-sm text-muted-foreground">
@@ -1508,7 +1508,7 @@ export function BroadcastCenter() {
                   <div className="rounded-lg border bg-background p-4 shadow-sm">
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        <h4 className="text-sm font-semibold text-foreground">
                           {t("admin.broadcast.livePreview.title")}
                         </h4>
                         <p className="text-xs text-muted-foreground">
@@ -1519,9 +1519,9 @@ export function BroadcastCenter() {
                       </div>
                     </div>
                     <div className="grid gap-4 xl:grid-cols-2">
-                      <div className="rounded-lg border bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/60">
+                      <div className="rounded-lg border border-border bg-muted/40 p-4">
                         <div className="mb-2 flex items-center justify-between gap-2">
-                          <h5 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          <h5 className="text-sm font-semibold text-foreground">
                             {t("admin.broadcast.livePreview.web")}
                           </h5>
                           <Badge variant="outline">
@@ -1531,7 +1531,7 @@ export function BroadcastCenter() {
                           </Badge>
                         </div>
                         <div className="rounded-md border bg-background p-4">
-                          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                          <h3 className="text-base font-semibold text-foreground">
                             {livePreview.title}
                           </h3>
                           <AnnouncementContent
@@ -1542,9 +1542,9 @@ export function BroadcastCenter() {
                         </div>
                       </div>
 
-                      <div className="rounded-lg border bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/60">
+                      <div className="rounded-lg border border-border bg-muted/40 p-4">
                         <div className="mb-2 flex items-center justify-between gap-2">
-                          <h5 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                          <h5 className="text-sm font-semibold text-foreground">
                             {t("admin.broadcast.livePreview.email")}
                           </h5>
                           <Badge variant="secondary">
@@ -1579,7 +1579,7 @@ export function BroadcastCenter() {
 
               <div className="border-t pt-6 space-y-4">
                 <div>
-                  <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  <h3 className="text-base font-semibold text-foreground">
                     {t("admin.broadcast.sections.targeting")}
                   </h3>
                   <p className="text-sm text-muted-foreground">
@@ -1604,10 +1604,10 @@ export function BroadcastCenter() {
             </div>
 
             {form.scope === "custom" && (
-              <div className="space-y-4 rounded-lg border border-dashed bg-slate-50/60 p-4">
+              <div className="space-y-4 rounded-lg border border-border border-dashed bg-muted/40 p-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-foreground">
                       {t("admin.broadcast.form.targetUsers")}
                     </label>
                     <Input
@@ -1636,7 +1636,7 @@ export function BroadcastCenter() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium text-gray-700">
+                      <h4 className="text-sm font-medium text-foreground">
                         {t("admin.broadcast.recipients.selected")}
                       </h4>
                       {selectedRecipientIds.length > 0 && (
@@ -1690,7 +1690,7 @@ export function BroadcastCenter() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-gray-700">
+                    <h4 className="text-sm font-medium text-foreground">
                       {t("admin.broadcast.recipientFilters.title")}
                     </h4>
                     {appliedFilters.length > 0 && (
@@ -1733,7 +1733,7 @@ export function BroadcastCenter() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-medium text-gray-700">
+                      <h4 className="text-sm font-medium text-foreground">
                         {t("admin.broadcast.recipientSearch.title")}
                       </h4>
                       <p className="text-xs text-muted-foreground">
@@ -1776,7 +1776,7 @@ export function BroadcastCenter() {
                       onChange={(event) =>
                         setRecipientField("fields", event.target.value)
                       }
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                     >
                       <option value="username,email,school,location">
                         {t("admin.broadcast.recipientSearch.fields.all")}
@@ -1817,7 +1817,7 @@ export function BroadcastCenter() {
                       onChange={(event) =>
                         setRecipientField("status", event.target.value)
                       }
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                     >
                       <option value="any">
                         {t("admin.broadcast.recipientSearch.status.any")}
@@ -1834,7 +1834,7 @@ export function BroadcastCenter() {
                       onChange={(event) =>
                         setRecipientField("isAdmin", event.target.value)
                       }
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                     >
                       <option value="any">
                         {t("admin.broadcast.recipientSearch.role.any")}
@@ -1854,7 +1854,7 @@ export function BroadcastCenter() {
                           Number(event.target.value) || 25,
                         )
                       }
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                     >
                       {[10, 25, 50, 100].map((value) => (
                         <option key={value} value={value}>
@@ -1954,7 +1954,7 @@ export function BroadcastCenter() {
                           return (
                             <label
                               key={id}
-                              className="flex items-start gap-3 rounded-md border border-gray-200 bg-white p-3 shadow-sm"
+                              className="flex items-start gap-3 rounded-md border border-border bg-card p-3 shadow-sm"
                             >
                               <Checkbox
                                 checked={checked}
@@ -1966,18 +1966,18 @@ export function BroadcastCenter() {
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                   <HoverCard>
                                     <HoverCardTrigger asChild>
-                                      <span className="cursor-help text-sm font-medium text-gray-800 hover:text-green-600">
+                                      <span className="cursor-help text-sm font-medium text-foreground transition-colors hover:text-green-600">
                                         {label}
                                       </span>
                                     </HoverCardTrigger>
                                     <HoverCardContent className="w-72">
                                       <div className="space-y-2">
-                                        <p className="text-sm font-semibold text-gray-900">
+                                        <p className="text-sm font-semibold text-foreground">
                                           {label}
                                         </p>
                                         <div className="space-y-1 text-xs text-muted-foreground">
                                           <div>
-                                            <span className="font-medium text-gray-700">
+                                            <span className="font-medium text-foreground/80">
                                               {t(
                                                 "admin.broadcast.recipientSearch.hover.userId",
                                               )}
@@ -1987,7 +1987,7 @@ export function BroadcastCenter() {
                                           </div>
                                           {item.uuid && (
                                             <div>
-                                              <span className="font-medium text-gray-700">
+                                              <span className="font-medium text-foreground/80">
                                                 UUID:
                                               </span>{" "}
                                               {item.uuid}
@@ -1995,7 +1995,7 @@ export function BroadcastCenter() {
                                           )}
                                           {item.email && (
                                             <div>
-                                              <span className="font-medium text-gray-700">
+                                              <span className="font-medium text-foreground/80">
                                                 {t("common.email")}:
                                               </span>{" "}
                                               {item.email}
@@ -2003,7 +2003,7 @@ export function BroadcastCenter() {
                                           )}
                                           {item.school && (
                                             <div>
-                                              <span className="font-medium text-gray-700">
+                                              <span className="font-medium text-foreground/80">
                                                 {t(
                                                   "admin.broadcast.recipientSearch.hover.school",
                                                 )}
@@ -2014,7 +2014,7 @@ export function BroadcastCenter() {
                                           )}
                                           {item.location && (
                                             <div>
-                                              <span className="font-medium text-gray-700">
+                                              <span className="font-medium text-foreground/80">
                                                 {t(
                                                   "admin.broadcast.recipientSearch.hover.location",
                                                 )}
@@ -2038,7 +2038,7 @@ export function BroadcastCenter() {
                                                 </span>
                                               )}
                                               {hasAdminFlag && (
-                                                <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                                                <span className="inline-flex items-center rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                                                   {isAdmin
                                                     ? t("admin.users.roleAdmin")
                                                     : t("admin.users.roleUser")}
@@ -2085,7 +2085,7 @@ export function BroadcastCenter() {
                                     </span>
                                   )}
                                   {hasAdminFlag && (
-                                    <span className="font-medium text-gray-700">
+                                    <span className="font-medium text-foreground/80">
                                       {isAdmin
                                         ? t("admin.users.roleAdmin")
                                         : t("admin.users.roleUser")}
@@ -2190,8 +2190,8 @@ export function BroadcastCenter() {
                     <div className="mb-2 text-sm text-muted-foreground">
                       {t("admin.broadcast.livePreview.web")}
                     </div>
-                    <div className="rounded-md border bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/60">
-                      <div className="font-medium text-slate-900 dark:text-slate-100">
+                    <div className="rounded-md border border-border bg-muted/40 p-4">
+                      <div className="font-medium text-foreground">
                         {preview.title}
                       </div>
                       <AnnouncementContent
@@ -2331,7 +2331,7 @@ export function BroadcastCenter() {
           )}
         </TabsContent>
         <TabsContent value="history" className="mt-0 space-y-6">
-          <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+          <div className="space-y-4 rounded-lg border border-border bg-card p-6 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-lg font-semibold">
@@ -2425,10 +2425,10 @@ export function BroadcastCenter() {
             )}
 
             <div className="space-y-4">
-              <div className="rounded-lg border bg-white p-4 shadow-sm">
+              <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-foreground">
                       {t("admin.broadcast.analytics.trendTitle")}
                     </h3>
                     <p className="text-xs text-muted-foreground">
@@ -2510,9 +2510,9 @@ export function BroadcastCenter() {
                 </div>
               </div>
 
-              <div className="rounded-lg border bg-white p-4 shadow-sm">
+              <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-foreground">
                     {t("admin.broadcast.analytics.priorityTitle")}
                   </h3>
                   <span className="text-xs text-muted-foreground">
@@ -2607,7 +2607,7 @@ export function BroadcastCenter() {
                           className="h-2.5 w-2.5 rounded-full"
                           style={{ backgroundColor: entry.color }}
                         />
-                        <span className="font-medium text-gray-700">
+                        <span className="font-medium text-foreground/80">
                           {entry.name}
                         </span>
                       </div>
@@ -2626,7 +2626,7 @@ export function BroadcastCenter() {
 
             <div className="grid gap-4 md:grid-cols-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t("admin.broadcast.filters.search")}
                 </label>
                 <Input
@@ -2638,7 +2638,7 @@ export function BroadcastCenter() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t("admin.broadcast.filters.priority")}
                 </label>
                 <select
@@ -2646,7 +2646,7 @@ export function BroadcastCenter() {
                   onChange={(event) =>
                     updateFilters({ priority: event.target.value })
                   }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="bg-background w-full rounded-md border border-input px-3 py-2 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="any">{t("common.all")}</option>
                   {PRIORITIES.map((value) => (
@@ -2657,7 +2657,7 @@ export function BroadcastCenter() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t("admin.broadcast.filters.scope")}
                 </label>
                 <select
@@ -2665,7 +2665,7 @@ export function BroadcastCenter() {
                   onChange={(event) =>
                     updateFilters({ scope: event.target.value })
                   }
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="bg-background w-full rounded-md border border-input px-3 py-2 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="any">{t("common.all")}</option>
                   <option value="all">{t("admin.broadcast.scope.all")}</option>
@@ -2751,7 +2751,7 @@ export function BroadcastCenter() {
                             contentFormat={normalizeAnnouncementContentFormat(
                               item.content_format,
                             )}
-                            className="rounded-md bg-slate-50 p-4"
+                            className="bg-muted/50 rounded-md p-4"
                           />
                         </div>
                         <div className="flex flex-wrap gap-2">

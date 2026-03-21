@@ -215,10 +215,10 @@ export default function StorePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <Card className="max-w-md w-full mx-4">
           <CardHeader className="text-center">
-            <ShoppingBag className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <ShoppingBag className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
             <CardTitle>{t('store.loginRequired.title')}</CardTitle>
             <CardDescription>{t('store.loginRequired.description')}</CardDescription>
           </CardHeader>
@@ -233,16 +233,16 @@ export default function StorePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* 页面标题和用户积分 */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="mb-2 text-3xl font-bold text-foreground">
                 {t('store.title')}
               </h1>
-              <p className="text-gray-600">{t('store.subtitle')}</p>
+              <p className="text-muted-foreground">{t('store.subtitle')}</p>
             </div>
             <div className="mt-4 md:mt-0">
               <Card className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
@@ -279,7 +279,7 @@ export default function StorePage() {
         )}
 
         {success && (
-          <Alert variant="default" className="mb-6 border-green-200 bg-green-50 text-green-800">
+          <Alert variant="default" className="mb-6 border-green-500/20 bg-green-500/10 text-green-500">
             <CheckCircle className="h-4 w-4" />
             <span>{success}</span>
             <Button
@@ -306,11 +306,11 @@ export default function StorePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="animate-pulse">
-                <div className="bg-white rounded-lg shadow-sm border p-4">
-                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3 mb-4"></div>
-                  <div className="h-10 bg-gray-200 rounded"></div>
+                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                  <div className="mb-4 h-48 rounded-lg bg-muted"></div>
+                  <div className="mb-2 h-4 rounded bg-muted"></div>
+                  <div className="mb-4 h-4 w-2/3 rounded bg-muted"></div>
+                  <div className="h-10 rounded bg-muted"></div>
                 </div>
               </div>
             ))}
@@ -318,8 +318,8 @@ export default function StorePage() {
         ) : products.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
-              <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <CardTitle className="text-xl text-gray-600 mb-2">
+              <Package className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+              <CardTitle className="mb-2 text-xl text-foreground">
                 {t('store.noProducts.title')}
               </CardTitle>
               <CardDescription>
@@ -412,7 +412,7 @@ export default function StorePage() {
         <div className="mt-8 text-center">
           <Button
             variant="outline"
-            onClick={() => window.location.href = '/activities'}
+            onClick={() => window.location.href = '/store/exchanges'}
             className="mr-4"
           >
             <History className="h-4 w-4 mr-2" />

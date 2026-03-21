@@ -161,7 +161,7 @@ const Turnstile = forwardRef(function Turnstile(
 			<div ref={containerRef} className="inline-block" />
 			{/* 可选：在 require 模式下无 token 时提示 */}
 			{require && !token && loaded && (
-				<p className="mt-2 text-xs text-gray-500">请先完成验证码验证</p>
+				<p className="mt-2 text-xs text-muted-foreground">请先完成验证码验证</p>
 			)}
 		</div>
 	);

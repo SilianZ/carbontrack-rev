@@ -88,8 +88,8 @@ export default function StatsSection() {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
       {Array.from({ length: 4 }).map((_, index) => (
         <div key={`skeleton-${index}`} className="text-center">
-          <div className="mx-auto mb-3 h-8 w-24 animate-pulse rounded bg-gray-200" />
-          <div className="mx-auto h-4 w-20 animate-pulse rounded bg-gray-200" />
+          <div className="bg-muted mx-auto mb-3 h-8 w-24 animate-pulse rounded" />
+          <div className="bg-muted mx-auto h-4 w-20 animate-pulse rounded" />
         </div>
       ))}
     </div>
@@ -107,9 +107,9 @@ export default function StatsSection() {
         {metrics.map((metric) => (
           <div key={metric.key} className="text-center">
             <div className={`text-3xl font-bold mb-2 ${metric.accent}`}>{metric.value}</div>
-            <div className="text-gray-600 text-sm font-medium">{metric.label}</div>
+            <div className="text-muted-foreground text-sm font-medium">{metric.label}</div>
             {metric.detail && (
-              <div className="mt-1 text-xs text-gray-400">{metric.detail}</div>
+              <div className="text-muted-foreground/80 mt-1 text-xs">{metric.detail}</div>
             )}
           </div>
         ))}
@@ -118,13 +118,13 @@ export default function StatsSection() {
   );
 
   return (
-    <section className="py-16 px-4 bg-white">
+    <section className="bg-card/70 py-16 px-4 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto">
         {isLoading && renderSkeleton()}
         {!isLoading && isError && renderError()}
         {!isLoading && !isError && renderContent()}
         {updatedAt && (
-          <div className="mt-6 text-center text-xs text-gray-400">
+          <div className="text-muted-foreground/80 mt-6 text-center text-xs">
             {t('home.stats.updatedAt', { time: updatedAt.toLocaleString() })}
           </div>
         )}

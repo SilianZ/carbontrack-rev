@@ -114,16 +114,16 @@ export function RegisterForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-100">
             <UserPlus className="h-6 w-6 text-green-600" />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-3xl font-extrabold text-foreground">
             {t('auth.createAccount')}
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t('auth.orSignInPrompt')}{' '}
             <Link
               to="/auth/login"
@@ -158,7 +158,7 @@ export function RegisterForm() {
               <div className="grid grid-cols-1 gap-6">
                 {/* 用户名 */}
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="username" className="block text-sm font-medium text-foreground">
                     {t('auth.username')}
                   </label>
                   <div className="mt-1">
@@ -180,7 +180,7 @@ export function RegisterForm() {
 
                 {/* 邮箱 */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="email" className="block text-sm font-medium text-foreground">
                     {t('auth.email')}
                   </label>
                   <div className="mt-1">
@@ -215,13 +215,13 @@ export function RegisterForm() {
 
                 {/* 学校（可选，可选择或自定义新学校） */}
                 <div>
-                  <label htmlFor="schoolId" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="schoolId" className="block text-sm font-medium text-foreground">
                     {t('auth.school')}（{t('common.optional') || '可选'}）
                   </label>
                   <div className="mt-1 space-y-2">
                     <select
                       id="schoolId"
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                      className="block w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
                       {...register('schoolId')}
                       onChange={(e)=>{ if(e.target.value) setCustomSchool(''); }}
                     >
@@ -241,13 +241,13 @@ export function RegisterForm() {
                         disabled={!!watch('schoolId')}
                       />
                       {watch('schoolId') && (
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">{t('common.selected')}</span>
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{t('common.selected')}</span>
                       )}
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {t('auth.schoolOptionalHint')}
                     </p>
-                    <p className="mt-1 text-xs text-gray-400">
+                    <p className="mt-1 text-xs text-muted-foreground/80">
                       {t('auth.newSchoolNote')}
                     </p>
                   </div>
@@ -257,7 +257,7 @@ export function RegisterForm() {
 
                 {/* 密码 */}
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="password" className="block text-sm font-medium text-foreground">
                     {t('auth.password')}
                   </label>
                   <div className="mt-1 relative">
@@ -275,9 +275,9 @@ export function RegisterForm() {
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
                     {errors.password && (
@@ -290,7 +290,7 @@ export function RegisterForm() {
 
                 {/* 确认密码 */}
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
                     {t('auth.confirmPassword')}
                   </label>
                   <div className="mt-1 relative">
@@ -311,9 +311,9 @@ export function RegisterForm() {
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
                     {errors.confirmPassword && (
@@ -347,7 +347,7 @@ export function RegisterForm() {
                 </Button>
               </div>
 
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted-foreground">
                 <p>
                   {t('auth.agreementText')}{' '}
                   <Link to="/terms" className="text-green-600 hover:text-green-500">
@@ -364,7 +364,7 @@ export function RegisterForm() {
         </Card>
 
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {t('auth.haveAccount')}{' '}
             <Link
               to="/auth/login"

@@ -16,7 +16,7 @@ const TogglePasswordButton = ({ visible, onClick }) => (
     className="absolute inset-y-0 right-0 pr-3 flex items-center"
     onClick={onClick}
   >
-    {visible ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
+    {visible ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
   </button>
 );
 
@@ -78,16 +78,16 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-100">
             <Lock className="h-6 w-6 text-green-600" />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-3xl font-extrabold text-foreground">
             {t('auth.resetPassword.newTitle')}
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t('auth.resetPassword.newSubtitle', { email: fromEmail || t('auth.verification.yourEmail') })}
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function ResetPasswordPage() {
 
             <form onSubmit={handleSubmit(handleReset)} className="space-y-6">
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="password" className="block text-sm font-medium text-foreground">
                   {t('auth.resetPassword.newPasswordLabel')}
                 </label>
                 <div className="mt-1 relative">
@@ -138,7 +138,7 @@ export default function ResetPasswordPage() {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
                   {t('auth.resetPassword.confirmPasswordLabel')}
                 </label>
                 <div className="mt-1 relative">

@@ -139,24 +139,24 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
               <p className="text-sm text-destructive">{t('admin.badges.recipients.loadFailed')}</p>
             ) : recipients.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-border text-sm">
+                  <thead className="bg-muted/50">
                     <tr>
-                      <th className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wide">
+                      <th className="px-4 py-2 text-left font-medium uppercase tracking-wide text-muted-foreground">
                         {t('admin.badges.recipients.table.username')}
                       </th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wide">
+                      <th className="px-4 py-2 text-left font-medium uppercase tracking-wide text-muted-foreground">
                         {t('admin.badges.recipients.table.email')}
                       </th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wide">
+                      <th className="px-4 py-2 text-left font-medium uppercase tracking-wide text-muted-foreground">
                         {t('admin.badges.recipients.table.status')}
                       </th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wide">
+                      <th className="px-4 py-2 text-left font-medium uppercase tracking-wide text-muted-foreground">
                         {t('admin.badges.recipients.table.awardedAt')}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 bg-white">
+                  <tbody className="divide-y divide-border bg-card">
                     {recipients.map((entry) => {
                       const user = entry.user || {};
                       const record = entry.user_badge || {};
@@ -164,9 +164,9 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
                       const awardedAt = record.awarded_at ? format(new Date(record.awarded_at), 'yyyy-MM-dd HH:mm') : '--';
 
                       return (
-                        <tr key={`${user.id}-${record.awarded_at || record.status || 'row'}`} className="hover:bg-gray-50">
-                          <td className="px-4 py-2 font-medium text-gray-900">{user.username || '-'}</td>
-                          <td className="px-4 py-2 text-gray-600">{user.email || '-'}</td>
+                        <tr key={`${user.id}-${record.awarded_at || record.status || 'row'}`} className="transition-colors hover:bg-muted/40">
+                          <td className="px-4 py-2 font-medium text-foreground">{user.username || '-'}</td>
+                          <td className="px-4 py-2 text-muted-foreground">{user.email || '-'}</td>
                           <td className="px-4 py-2">
                             <Badge variant={status === 'awarded' ? 'success' : 'secondary'}>
                               {status === 'awarded'
@@ -174,7 +174,7 @@ function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
                                 : t('admin.badges.recipients.status.revoked')}
                             </Badge>
                           </td>
-                          <td className="px-4 py-2 text-gray-600">{awardedAt}</td>
+                          <td className="px-4 py-2 text-muted-foreground">{awardedAt}</td>
                         </tr>
                       );
                     })}

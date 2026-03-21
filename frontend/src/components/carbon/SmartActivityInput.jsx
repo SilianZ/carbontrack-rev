@@ -41,9 +41,9 @@ export function SmartActivityInput({ onSuggestion }) {
     };
 
     return (
-        <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-100 mb-8">
+        <Card className="mb-8 border-green-500/20 bg-gradient-to-r from-green-500/10 via-background to-sky-500/10">
             <CardContent className="pt-6">
-                <div className="flex items-center gap-2 mb-4 text-green-800">
+                <div className="mb-4 flex items-center gap-2 text-green-500">
                     <Sparkles className="h-5 w-5" />
                     <h3 className="font-semibold">{t('activities.smartAdd.title') || 'Smart Add Activity'}</h3>
                 </div>
@@ -54,10 +54,10 @@ export function SmartActivityInput({ onSuggestion }) {
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder={t('activities.smartAdd.placeholder') || "Describe your activity, e.g., 'I took a 5km bus ride'"}
-                            className="min-h-[80px] pr-12 bg-white/80 backdrop-blur-sm focus:bg-white transition-all"
+                            className="min-h-[80px] bg-background/80 pr-12 backdrop-blur-sm transition-all focus:bg-background"
                             maxLength={500}
                         />
-                        <div className="absolute bottom-3 right-3 text-xs text-gray-400">
+                        <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
                             {query.length}/500
                         </div>
                     </div>

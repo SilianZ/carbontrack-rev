@@ -1,8 +1,22 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-// API base URL - 可以通过环境变量配置
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+export const DEFAULT_API_BASE_URL = 'https://dev-api.carbontrackapp.com/api/v1';
+
+function resolveApiBaseUrl() {
+  const configuredBaseUrl = import.meta.env?.VITE_API_URL;
+  if (typeof configuredBaseUrl === 'string' && configuredBaseUrl.trim()) {
+    return configuredBaseUrl.trim();
+  }
+  return DEFAULT_API_BASE_URL;
+}
+
+// API base URL - 优先环境变量，未配置时回退到开发 API
+export const API_BASE_URL = resolveApiBaseUrl();
+
+function shouldPreserveAuthOnUnauthorized(requestUrl = '') {
+  return requestUrl.includes('/files/') && requestUrl.includes('/presigned-url');
+}
 
 // 创建axios实例
 const api = axios.create({
@@ -40,7 +54,8 @@ api.interceptors.response.use(
 
     if (status === 401) {
       const isLoginRequest = requestUrl.includes('/auth/login');
-      if (!isLoginRequest) {
+      const shouldPreserveAuth = shouldPreserveAuthOnUnauthorized(requestUrl);
+      if (!isLoginRequest && !shouldPreserveAuth) {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_info');
         if (window.location.pathname !== '/auth/login') {
@@ -53,7 +68,7 @@ api.interceptors.response.use(
       const rid = error.response?.data?.request_id || error.response?.headers['x-request-id'];
       if (rid) {
         error.request_id = rid;
-        if (!error.__rid_notified && status !== 401) {
+        if (!error.__rid_notified && (status !== 401 || shouldPreserveAuthOnUnauthorized(requestUrl))) {
           error.__rid_notified = true;
           toast.error(`请求失败 (ReqID: ${rid})，请联系管理员并提供该编号。`);
         }

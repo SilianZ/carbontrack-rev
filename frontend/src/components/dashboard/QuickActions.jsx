@@ -64,7 +64,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
       title: t('dashboard.quickActions.settings'),
       description: t('dashboard.quickActions.settingsDesc'),
       icon: Settings,
-      color: 'bg-gray-500 hover:bg-gray-600',
+      color: 'bg-zinc-700 hover:bg-zinc-600',
       href: '/profile'
     }
   ];
@@ -78,7 +78,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
   };
 
   return (
-    <Card>
+    <Card className="flex h-full flex-col border-border/80 bg-card/95">
       <CardHeader>
         <CardTitle>{t('dashboard.quickActions.title')}</CardTitle>
         <CardDescription>
@@ -86,9 +86,8 @@ export function QuickActions({ userStats = {}, onActionClick }) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
-        {/* 根据侧栏宽度在 1/2 列间切换：中等宽度两列、窄侧栏回退单列、超宽屏再恢复两列 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2 gap-4">
+      <CardContent className="flex flex-1 flex-col">
+        <div className="grid auto-rows-fr grid-cols-2 gap-4">
           {actions.map((action) => {
             const Icon = action.icon;
 
@@ -96,7 +95,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
               <Button
                 key={action.id}
                 variant={action.primary ? "default" : "outline"}
-                className={`h-auto w-full min-w-0 p-4 flex flex-col items-start justify-start text-left gap-3 relative whitespace-normal ${action.primary ? action.color : 'hover:bg-gray-50'
+                className={`relative flex h-full min-h-[9.5rem] w-full min-w-0 overflow-hidden flex-col items-start justify-start gap-3 p-4 text-left whitespace-normal ${action.primary ? action.color : 'border-border bg-background/40 hover:bg-muted/60'
                   }`}
                 onClick={() => handleActionClick(action)}
               >
@@ -106,13 +105,13 @@ export function QuickActions({ userStats = {}, onActionClick }) {
                   </div>
                 )}
 
-                <div className="flex items-start gap-3 w-full min-w-0">
-                  <Icon className={`h-6 w-6 mt-1 flex-shrink-0 ${action.primary ? 'text-white' : 'text-gray-700'}`} />
-                  <span className={`block min-w-0 flex-1 break-words text-base font-semibold leading-tight sm:text-lg ${action.primary ? 'text-white' : 'text-gray-800'}`}>
+                <div className="flex w-full min-w-0 items-start gap-3">
+                  <Icon className={`mt-1 h-6 w-6 flex-shrink-0 ${action.primary ? 'text-white' : 'text-foreground/80'}`} />
+                  <span className={`block min-w-0 flex-1 break-words text-base font-semibold leading-snug [overflow-wrap:anywhere] sm:text-lg ${action.primary ? 'text-white' : 'text-foreground'}`}>
                     {action.title}
                   </span>
                 </div>
-                <p className={`w-full break-words text-sm ${action.primary ? 'text-gray-200' : 'text-gray-500'}`}>
+                <p className={`w-full break-words text-sm leading-5 [overflow-wrap:anywhere] ${action.primary ? 'text-emerald-50/90' : 'text-muted-foreground'}`}>
                   {action.description}
                 </p>
               </Button>
@@ -122,14 +121,14 @@ export function QuickActions({ userStats = {}, onActionClick }) {
 
         {/* 特殊提示 */}
         {showPointsHint && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2 text-blue-800">
+          <div className="mt-4 rounded-lg border border-blue-500/25 bg-blue-500/10 p-3">
+            <div className="flex items-center gap-2 text-blue-500">
               <Award className="h-4 w-4" />
               <span className="text-sm font-medium">
                 {t('dashboard.quickActions.pointsHint')}
               </span>
             </div>
-            <p className="text-xs text-blue-600 mt-1">
+            <p className="mt-1 text-xs text-blue-400">
               {t('dashboard.quickActions.pointsHintDesc', {
                 current: pointsBalance,
                 needed: pointsNeeded
@@ -139,14 +138,14 @@ export function QuickActions({ userStats = {}, onActionClick }) {
         )}
 
         {userStats.pending_reviews > 0 && (
-          <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-            <div className="flex items-center gap-2 text-orange-800">
+          <div className="mt-4 rounded-lg border border-orange-500/25 bg-orange-500/10 p-3">
+            <div className="flex items-center gap-2 text-orange-500">
               <MessageSquare className="h-4 w-4" />
               <span className="text-sm font-medium">
                 {t('dashboard.quickActions.pendingReviews')}
               </span>
             </div>
-            <p className="text-xs text-orange-600 mt-1">
+            <p className="mt-1 text-xs text-orange-400">
               {t('dashboard.quickActions.pendingReviewsDesc', {
                 count: userStats.pending_reviews
               })}

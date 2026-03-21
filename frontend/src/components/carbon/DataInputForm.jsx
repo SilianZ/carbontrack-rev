@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Calculator, Calendar, FileText, Upload, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
 import { batchUpload } from '../../lib/r2Upload';
@@ -35,6 +35,9 @@ export default function DataInputForm({
   const [showCalculation, setShowCalculation] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+  const getSafePreviewUrl = useCallback((previewUrl) => (
+    typeof previewUrl === 'string' && previewUrl.startsWith('blob:') ? previewUrl : ''
+  ), []);
 
   const {
     register,
@@ -415,8 +418,8 @@ export default function DataInputForm({
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">{t('activities.selectActivityFirst')}</p>
+          <AlertCircle className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+          <p className="text-muted-foreground">{t('activities.selectActivityFirst')}</p>
         </CardContent>
       </Card>
     );
@@ -437,9 +440,9 @@ export default function DataInputForm({
   };
 
   const calculationCard = (showCalculation && calculationResult) ? (
-    <Card className="bg-green-50 border-green-200 shadow-sm">
+    <Card className="border-green-500/20 bg-green-500/10 shadow-sm">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-green-800">
+        <CardTitle className="text-sm font-medium text-green-500">
           {t('activities.form.calculationResult')}
         </CardTitle>
         <CardDescription className="text-xs">
@@ -448,14 +451,14 @@ export default function DataInputForm({
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-4">
-          <div className="bg-white rounded-lg p-3 border">
-            <div className="text-xs text-gray-500 mb-1">{t('activities.form.carbonSavedMetric')}</div>
+          <div className="rounded-lg border border-border bg-card p-3">
+            <div className="mb-1 text-xs text-muted-foreground">{t('activities.form.carbonSavedMetric')}</div>
             <div className="text-2xl font-bold text-green-600 leading-none">
               {(() => { const v = calculationResult.carbon_saved; const num = typeof v === 'number' ? v : Number(v); return Number.isFinite(num) ? num.toFixed(2) : '0.00'; })()}
             </div>
           </div>
-          <div className="bg-white rounded-lg p-3 border">
-            <div className="text-xs text-gray-500 mb-1">{t('activities.form.expectedPoints')}</div>
+          <div className="rounded-lg border border-border bg-card p-3">
+            <div className="mb-1 text-xs text-muted-foreground">{t('activities.form.expectedPoints')}</div>
             <div className="text-2xl font-bold text-blue-600 leading-none">
               {calculationResult.points_earned ?? 0}
             </div>
@@ -483,24 +486,24 @@ export default function DataInputForm({
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <span className="text-gray-500">{t('activities.category')}:</span>
+                <span className="text-muted-foreground">{t('activities.category')}:</span>
                 <div className="font-medium">
                   {t(`activities.categories.${activity.category}`)}
                 </div>
               </div>
               <div>
-                <span className="text-gray-500">{t('activities.unit')}:</span>
+                <span className="text-muted-foreground">{t('activities.unit')}:</span>
                     <div className="font-medium">{t(`units.${activity.unit}`, activity.unit)}</div>
               </div>
               <div>
-                <span className="text-gray-500">{t('activities.carbonFactor')}:</span>
+                <span className="text-muted-foreground">{t('activities.carbonFactor')}:</span>
                 <div className="font-medium text-green-600">
                   {activity.carbon_factor}
                 </div>
               </div>
               {activity.points_per_unit && (
                 <div>
-                  <span className="text-gray-500">{t('activities.pointsPerUnit')}:</span>
+                  <span className="text-muted-foreground">{t('activities.pointsPerUnit')}:</span>
                   <div className="font-medium text-blue-600">
                     {activity.points_per_unit}
                   </div>
@@ -527,7 +530,7 @@ export default function DataInputForm({
             <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
               {/* 数据输入 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('activities.form.dataValue')} ({t(`units.${activity.unit}`, activity.unit)})
                 </label>
                 <Input
@@ -550,7 +553,7 @@ export default function DataInputForm({
 
               {/* 活动日期 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   <Calendar className="inline h-4 w-4 mr-1" />
                   {t('activities.form.activityDate')}
                 </label>
@@ -576,7 +579,7 @@ export default function DataInputForm({
 
               {/* 备注/描述 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   <FileText className="inline h-4 w-4 mr-1" />
                   {t('activities.form.notes')}
                 </label>
@@ -596,7 +599,7 @@ export default function DataInputForm({
               </div>
               {/* 延迟上传：选择文件 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   <Upload className="inline h-4 w-4 mr-1" />
                   {t('activities.form.uploadImage')}
                 </label>
@@ -604,8 +607,8 @@ export default function DataInputForm({
                 <div
                   className={cn(
                     "border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-3 transition-all duration-200 cursor-pointer",
-                    isDragging ? "border-green-500 bg-green-50 scale-[1.02]" : "border-gray-300 hover:border-green-400 hover:bg-gray-50",
-                    uploadError ? "border-red-300 bg-red-50" : ""
+                    isDragging ? "scale-[1.02] border-green-500 bg-green-500/10" : "border-border hover:border-green-500/60 hover:bg-muted/60",
+                    uploadError ? "border-red-500/40 bg-red-500/10" : ""
                   )}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -621,15 +624,15 @@ export default function DataInputForm({
                     className="hidden"
                   />
 
-                  <div className={cn("p-3 rounded-full transition-colors", isDragging ? "bg-green-100" : "bg-gray-100")}>
-                    <Upload className={cn("h-6 w-6", isDragging ? "text-green-600" : "text-gray-500")} />
+                  <div className={cn("rounded-full p-3 transition-colors", isDragging ? "bg-green-500/15" : "bg-muted")}>
+                    <Upload className={cn("h-6 w-6", isDragging ? "text-green-500" : "text-muted-foreground")} />
                   </div>
 
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-700">
+                    <p className="text-sm font-medium text-foreground">
                       {isDragging ? t('activities.form.dropHere') : t('activities.form.clickOrDrag')}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {t('activities.form.uploadHint')}
                     </p>
                   </div>
@@ -639,24 +642,28 @@ export default function DataInputForm({
                 <div className="mt-4 space-y-3">
                   {selectedFiles.length > 0 && (
                     <ul className="space-y-2 text-sm">
-                      {selectedFiles.map((f, i) => (
-                        <li key={i} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md border border-gray-200 hover:border-gray-300 transition-colors">
-                          <div className="flex items-center gap-3 min-w-0">
-                            {previewUrls[i] && <img src={previewUrls[i]} alt={t('activities.form.imagePreviewAlt', { name: f.name })} className="h-10 w-10 object-cover rounded border border-gray-200" />}
-                            <div className="flex flex-col min-w-0">
-                              <span className="truncate font-medium text-gray-700">{f.name}</span>
-                              <span className="text-xs text-gray-500">{t('activities.form.fileSizeLabel', { size: tFileSize(f.size) })}</span>
+                      {selectedFiles.map((f, i) => {
+                        const safePreviewUrl = getSafePreviewUrl(previewUrls[i]);
+
+                        return (
+                          <li key={i} className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 transition-colors hover:border-border/80">
+                            <div className="flex items-center gap-3 min-w-0">
+                              {safePreviewUrl && <img src={safePreviewUrl} alt={t('activities.form.imagePreviewAlt', { name: f.name })} className="h-10 w-10 rounded border border-border object-cover" />}
+                              <div className="flex flex-col min-w-0">
+                                <span className="truncate font-medium text-foreground">{f.name}</span>
+                                <span className="text-xs text-muted-foreground">{t('activities.form.fileSizeLabel', { size: tFileSize(f.size) })}</span>
+                              </div>
                             </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                            className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </li>
-                      ))}
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                              className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
 
@@ -724,14 +731,14 @@ export default function DataInputForm({
           {calculationCard || (
             <Card className="border-dashed">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm text-gray-600">
+                <CardTitle className="text-sm text-muted-foreground">
                   {t('activities.form.calculationResult')}
                 </CardTitle>
                 <CardDescription className="text-xs">
                   {t('activities.form.enterDataToPreview')}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="text-xs text-gray-400">
+              <CardContent className="text-xs text-muted-foreground">
                 {t('activities.form.previewPlaceholder')}
               </CardContent>
             </Card>

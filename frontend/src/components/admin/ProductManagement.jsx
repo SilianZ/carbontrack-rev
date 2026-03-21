@@ -55,6 +55,12 @@ const STATUS_OPTIONS = [
   { value: 'inactive', labelKey: 'admin.products.statusInactive' },
 ];
 
+const PRODUCT_STATUS_BADGE_STYLES = {
+  active: 'border border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300',
+  inactive: 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-border dark:bg-muted dark:text-muted-foreground',
+  outOfStock: 'border border-red-200 bg-red-100 text-red-800 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300',
+};
+
 const sanitizeNumber = (value, fallback = 0) => {
   if (value === null || value === undefined || value === '') return fallback;
   const num = Number(value);
@@ -407,13 +413,13 @@ export function ProductManagement() {
         <p className="text-muted-foreground">{t('admin.products.description')}</p>
       </div>
 
-      <div className="rounded-lg border bg-white p-6 shadow-sm">
+      <div className="bg-card rounded-lg border p-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">{t('common.search')}</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">{t('common.search')}</label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                 <Input
                   value={filters.search}
                   onChange={(event) => handleFilterChange('search', event.target.value)}
@@ -423,11 +429,11 @@ export function ProductManagement() {
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">{t('admin.products.category')}</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.products.category')}</label>
               <select
                 value={filters.category}
                 onChange={(event) => handleFilterChange('category', event.target.value)}
-                className="mt-0 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
+                className="bg-background mt-0 block w-full rounded-md border border-input px-3 py-2 text-foreground focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
               >
                 <option value="">{t('common.all')}</option>
                 {categories.map((category) => (
@@ -441,11 +447,11 @@ export function ProductManagement() {
               </select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">{t('admin.products.status')}</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.products.status')}</label>
               <select
                 value={filters.status}
                 onChange={(event) => handleFilterChange('status', event.target.value)}
-                className="mt-0 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
+                className="bg-background mt-0 block w-full rounded-md border border-input px-3 py-2 text-foreground focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
               >
                 <option value="">{t('common.all')}</option>
                 {STATUS_OPTIONS.map((option) => (
@@ -472,43 +478,43 @@ export function ProductManagement() {
           <AlertDescription>{t('errors.loadFailed')}</AlertDescription>
         </Alert>
       ) : products.length === 0 ? (
-        <div className="rounded-lg border bg-white p-16 text-center shadow-sm">
+        <div className="bg-card rounded-lg border p-16 text-center shadow-sm">
           <h3 className="text-xl font-semibold">{t('admin.products.noProductsFound')}</h3>
           <p className="mt-2 text-muted-foreground">{t('admin.products.tryDifferentFilters')}</p>
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="bg-card overflow-x-auto rounded-lg border shadow-sm">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.image')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.name')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.category')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.price')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.stock')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.tags')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.status')}
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="text-muted-foreground px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
                     {t('admin.products.table.actions')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card divide-y divide-border">
                 {products.map((product) => {
                   const price = product.points_required !== undefined && product.points_required !== null ? product.points_required : product.price || 0;
                   const isOutOfStock = product.stock === 0;
@@ -561,24 +567,24 @@ export function ProductManagement() {
                             src={resolvedImageSrc || undefined}
                             alt={product.name}
                             className="h-12 w-12 rounded-lg object-cover"
-                            fallback={<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400">IMG</div>}
+                            fallback={<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">IMG</div>}
                           />
                         ) : (
-                          <ImageIcon className="h-10 w-10 text-gray-300" />
+                          <ImageIcon className="h-10 w-10 text-muted-foreground/50" />
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">{product.description}</div>
+                        <div className="text-sm font-medium text-foreground">{product.name}</div>
+                        <div className="text-sm text-muted-foreground">{product.description}</div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{product.category || t('admin.products.form.uncategorized')}</td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">{product.category || t('admin.products.form.uncategorized')}</td>
                       <td className="px-6 py-4 text-sm font-semibold text-green-600">
                         {formatNumber(price, 0)} {t('common.points')}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
                         {unlimited ? t('admin.products.unlimited') : formatNumber(product.stock, 0)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
                         <div className="flex flex-wrap gap-1">
                           {(product.tags || []).map((tag) => {
                             const keyValue = String(product.id || 'product') + '-' + String(tag.id !== undefined && tag.id !== null ? tag.id : tag.slug || tag.name || 'tag');
@@ -592,15 +598,15 @@ export function ProductManagement() {
                       </td>
                       <td className="px-6 py-4 text-sm">
                         {isOutOfStock ? (
-                          <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${PRODUCT_STATUS_BADGE_STYLES.outOfStock}`}>
                             {t('admin.products.statusOutOfStock')}
                           </span>
                         ) : product.status === 'active' ? (
-                          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${PRODUCT_STATUS_BADGE_STYLES.active}`}>
                             {t('admin.products.statusActive')}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${PRODUCT_STATUS_BADGE_STYLES.inactive}`}>
                             {t('admin.products.statusInactive')}
                           </span>
                         )}
@@ -806,7 +812,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
-              <label htmlFor="product-name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="product-name" className="block text-sm font-medium text-foreground">
                 {t('admin.products.form.name')}
               </label>
               <Input
@@ -825,14 +831,14 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
               />
             </div>
             <div>
-              <label htmlFor="product-status" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="product-status" className="block text-sm font-medium text-foreground">
                 {t('admin.products.form.status')}
               </label>
               <select
                 id="product-status"
                 value={formValues.status}
                 onChange={handleChange('status')}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
+                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-emerald-500 focus:outline-none focus:ring-emerald-500"
               >
                 {STATUS_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -842,7 +848,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
               </select>
             </div>
             <div>
-              <label htmlFor="product-points" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="product-points" className="block text-sm font-medium text-foreground">
                 {t('admin.products.form.pointsRequired')}
               </label>
               <Input
@@ -855,7 +861,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
               />
             </div>
             <div>
-              <label htmlFor="product-stock" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="product-stock" className="block text-sm font-medium text-foreground">
                 {t('admin.products.form.stock')}
               </label>
               <Input
@@ -864,10 +870,10 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
                 value={formValues.stock}
                 onChange={handleChange('stock')}
               />
-              <p className="mt-1 text-xs text-gray-500">{t('admin.products.form.stockHint')}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t('admin.products.form.stockHint')}</p>
             </div>
             <div>
-              <label htmlFor="product-sort-order" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="product-sort-order" className="block text-sm font-medium text-foreground">
                 {t('admin.products.form.sortOrder')}
               </label>
               <Input
@@ -880,7 +886,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
           </div>
 
           <div>
-            <label htmlFor="product-description" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="product-description" className="block text-sm font-medium text-foreground">
               {t('admin.products.form.description')}
             </label>
             <Textarea
@@ -896,7 +902,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
           </div>
 
           <div>
-            <span className="block text-sm font-medium text-gray-700">{t('admin.products.form.image')}</span>
+            <span className="block text-sm font-medium text-foreground">{t('admin.products.form.image')}</span>
             <div className="mt-2 flex items-center gap-4">
               {imagePath || externalImage ? (
                 <R2Image
@@ -904,10 +910,10 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
                   src={externalImage || undefined}
                   alt={formValues.name || 'product'}
                   className="h-20 w-20 rounded-lg object-cover"
-                  fallback={<div className="flex h-20 w-20 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400">IMG</div>}
+                  fallback={<div className="flex h-20 w-20 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">IMG</div>}
                 />
               ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-gray-400">
+                <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-dashed border-border bg-muted/40 text-muted-foreground">
                   <ImageIcon className="h-6 w-6" />
                 </div>
               )}
@@ -929,7 +935,7 @@ function ProductFormModal({ isOpen, onClose, onSubmit, product, categories, isSu
                     </Button>
                   )}
                 </div>
-                <p className="text-xs text-gray-500">{t('admin.products.form.imageHint')}</p>
+                <p className="text-xs text-muted-foreground">{t('admin.products.form.imageHint')}</p>
               </div>
             </div>
             <input
@@ -1047,14 +1053,14 @@ function ProductCategorySelector({ value, onChange, initialCategories = [], t })
 
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">{t('admin.products.form.category')}</label>
+      <label htmlFor={inputId} className="block text-sm font-medium text-foreground">{t('admin.products.form.category')}</label>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {normalizedValue ? (
           <Badge variant="secondary" className="flex items-center gap-1">
             <span>{normalizedValue.name}</span>
             <button
               type="button"
-              className="rounded-full p-0.5 hover:bg-gray-200"
+              className="rounded-full p-0.5 hover:bg-muted"
               onClick={handleClear}
               aria-label={t('admin.products.form.removeCategory')}
             >
@@ -1062,7 +1068,7 @@ function ProductCategorySelector({ value, onChange, initialCategories = [], t })
             </button>
           </Badge>
         ) : (
-          <span className="text-xs text-gray-500">{t('admin.products.form.categoryPlaceholder')}</span>
+          <span className="text-xs text-muted-foreground">{t('admin.products.form.categoryPlaceholder')}</span>
         )}
       </div>
       <div className="mt-3 flex gap-2">
@@ -1082,17 +1088,17 @@ function ProductCategorySelector({ value, onChange, initialCategories = [], t })
           {t('admin.products.form.useCategory')}
         </Button>
       </div>
-      <p className="mt-1 text-xs text-gray-500">
+      <p className="mt-1 text-xs text-muted-foreground">
         {t('admin.products.form.categoryHint')}
       </p>
-      <div className="mt-3 rounded-md border bg-gray-50">
-        <div className="flex items-center justify-between border-b px-3 py-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+      <div className="mt-3 rounded-md border border-border bg-muted/40">
+        <div className="flex items-center justify-between border-b border-border px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           <span>{t('admin.products.form.suggestions')}</span>
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-500" /> : null}
         </div>
         <div className="max-h-44 overflow-y-auto">
           {suggestions.length === 0 && !loading ? (
-            <div className="px-3 py-2 text-sm text-gray-500">
+            <div className="px-3 py-2 text-sm text-muted-foreground">
               {t('admin.products.form.noCategorySuggestions')}
             </div>
           ) : (
@@ -1106,10 +1112,10 @@ function ProductCategorySelector({ value, onChange, initialCategories = [], t })
                   type="button"
                   key={key}
                   onClick={() => handleSelect(item)}
-                  className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-white ${isActive ? 'bg-white' : ''}`}
+                  className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-background ${isActive ? 'bg-background' : ''}`}
                 >
                   <span>{item.name}</span>
-                  <span className="text-xs uppercase text-gray-400">
+                  <span className="text-xs uppercase text-muted-foreground">
                     {item.product_count !== undefined && item.product_count !== null ? item.product_count : item.slug}
                   </span>
                 </button>
@@ -1188,7 +1194,7 @@ function ProductTagSelector({ value, onChange, t }) {
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700">{t('admin.products.form.tags')}</label>
+      <label className="block text-sm font-medium text-foreground">{t('admin.products.form.tags')}</label>
       <div className="mt-2 flex flex-wrap gap-2">
         {(value || []).map((tag, index) => {
           const keyValue = 'selected-tag-' + index + '-' + (tag.id !== undefined && tag.id !== null ? tag.id : tag.slug || tag.name || 'tag');
@@ -1197,7 +1203,7 @@ function ProductTagSelector({ value, onChange, t }) {
               <span>{tag.name}</span>
               <button
                 type="button"
-                className="rounded-full p-0.5 hover:bg-gray-200"
+                className="rounded-full p-0.5 hover:bg-muted"
                 onClick={() => handleRemove(index)}
                 aria-label={t('admin.products.form.removeTag')}
               >
@@ -1224,16 +1230,16 @@ function ProductTagSelector({ value, onChange, t }) {
             {t('admin.products.form.addTag')}
           </Button>
         </div>
-        <p className="mt-1 text-xs text-gray-500">{t('admin.products.form.tagHint')}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t('admin.products.form.tagHint')}</p>
       </div>
-      <div className="mt-3 rounded-md border bg-gray-50">
-        <div className="flex items-center justify-between border-b px-3 py-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+      <div className="mt-3 rounded-md border border-border bg-muted/40">
+        <div className="flex items-center justify-between border-b border-border px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           <span>{t('admin.products.form.suggestions')}</span>
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-500" /> : null}
         </div>
         <div className="max-h-44 overflow-y-auto">
           {suggestions.length === 0 && !loading ? (
-            <div className="px-3 py-2 text-sm text-gray-500">{t('admin.products.form.noSuggestions')}</div>
+            <div className="px-3 py-2 text-sm text-muted-foreground">{t('admin.products.form.noSuggestions')}</div>
           ) : (
             suggestions.map((suggestion, index) => {
               const suggestionKey = 'suggestion-' + (suggestion.id !== undefined && suggestion.id !== null ? suggestion.id : suggestion.slug || suggestion.name || 'tag') + '-' + index;
@@ -1245,10 +1251,10 @@ function ProductTagSelector({ value, onChange, t }) {
                     addTag(suggestion);
                     setQuery('');
                   }}
-                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-white"
+                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-background"
                 >
                   <span>{suggestion.name}</span>
-                  {suggestion.slug ? <span className="text-xs uppercase text-gray-400">{suggestion.slug}</span> : null}
+                  {suggestion.slug ? <span className="text-xs uppercase text-muted-foreground">{suggestion.slug}</span> : null}
                 </button>
               );
             })

@@ -26,7 +26,7 @@ export function PasswordChangeForm() {
       <h3 className="text-lg font-semibold">{t('profile.changePassword')}</h3>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">{t('profile.currentPassword')}</label>
+          <label className="block text-sm font-medium text-foreground">{t('profile.currentPassword')}</label>
           <Input
             type="password"
             {...register('current_password', { required: t('validation.required') })}
@@ -34,7 +34,7 @@ export function PasswordChangeForm() {
           {errors.current_password && <p className="text-red-500 text-xs mt-1">{errors.current_password.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">{t('profile.newPassword')}</label>
+          <label className="block text-sm font-medium text-foreground">{t('profile.newPassword')}</label>
           <Input
             type="password"
             {...register('new_password', {
@@ -45,7 +45,7 @@ export function PasswordChangeForm() {
           {errors.new_password && <p className="text-red-500 text-xs mt-1">{errors.new_password.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">{t('profile.confirmNewPassword')}</label>
+          <label className="block text-sm font-medium text-foreground">{t('profile.confirmNewPassword')}</label>
           <Input
             type="password"
             {...register('confirm_new_password', {

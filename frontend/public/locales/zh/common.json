@@ -866,6 +866,47 @@
       "failed": "兑换失败，请重试",
       "completed": "兑换完成"
     },
+    "history": {
+      "title": "兑换记录",
+      "subtitle": "在这里查看您已兑换的奖励商品，并跟踪最新处理状态。",
+      "backToStore": "返回商城",
+      "exchangeId": "兑换单号",
+      "orderDate": "兑换时间",
+      "quantity": "数量",
+      "unitPoints": "单件积分",
+      "pointsUsed": "消耗积分",
+      "deliveryAddress": "收货地址",
+      "contactPhone": "联系电话",
+      "trackingNumber": "物流单号",
+      "notes": "备注信息",
+      "productInfo": "商品信息",
+      "deliveryInfo": "配送信息",
+      "notProvided": "未填写",
+      "notAvailable": "暂未提供",
+      "noNotes": "此兑换未填写备注。",
+      "unknownProduct": "奖励商品",
+      "noRecords": "暂无兑换记录",
+      "noRecordsDescription": "您在商城完成兑换后，记录会出现在这里。",
+      "loadFailed": "加载兑换记录失败",
+      "overview": {
+        "totalOrders": "订单总数",
+        "totalOrdersHint": "当前列表中的全部兑换记录",
+        "pendingOrders": "待处理",
+        "pendingOrdersHint": "等待审核或发货",
+        "shippedOrders": "已发货 / 已完成",
+        "shippedOrdersHint": "已经进入处理完成阶段",
+        "pointsSpent": "累计消耗积分",
+        "pointsSpentHint": "当前页订单合计"
+      },
+      "statuses": {
+        "pending": "待处理",
+        "completed": "已完成",
+        "shipped": "已发货",
+        "rejected": "已拒绝",
+        "cancelled": "已取消",
+        "unknown": "未知状态"
+      }
+    },
     "errors": {
       "loadFailed": "加载商品失败",
       "exchangeFailed": "兑换失败，请重试",

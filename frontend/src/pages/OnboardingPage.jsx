@@ -103,7 +103,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground sm:px-6 lg:px-8">
       <div className="max-w-lg w-full space-y-6">
         <Card>
           <CardHeader>
@@ -124,26 +124,26 @@ export default function OnboardingPage() {
 
             <form onSubmit={onSubmit} className="space-y-5">
               <div>
-                <label htmlFor="schoolSearch" className="block text-sm font-medium text-gray-700 mb-1">{t('auth.school')}</label>
+                <label htmlFor="schoolSearch" className="mb-1 block text-sm font-medium text-foreground">{t('auth.school')}</label>
                 <Input
                   id="schoolSearch"
                   placeholder={t('onboarding.schoolPlaceholder')}
                   value={schoolQuery}
                   onChange={(e) => setSchoolQuery(e.target.value)}
                 />
-                <div className="mt-2 max-h-40 overflow-auto border rounded">
+                <div className="mt-2 max-h-40 overflow-auto rounded border border-border bg-card">
                   {schools.map((s) => (
                     <button
                       key={s.id}
                       type="button"
-                      className={`w-full text-left px-3 py-2 hover:bg-gray-50 ${String(selectedSchoolId)===String(s.id)?'bg-green-50':''}`}
+                      className={`w-full px-3 py-2 text-left text-foreground hover:bg-muted/60 ${String(selectedSchoolId)===String(s.id)?'bg-green-500/12 text-green-500':''}`}
                       onClick={() => setSelectedSchoolId(String(s.id))}
                     >
                       {s.name}
                     </button>
                   ))}
                   {schools.length === 0 && (
-                    <div className="px-3 py-2 text-gray-500">{t('onboarding.noSchoolMatches')}</div>
+                    <div className="px-3 py-2 text-muted-foreground">{t('onboarding.noSchoolMatches')}</div>
                   )}
                 </div>
               </div>

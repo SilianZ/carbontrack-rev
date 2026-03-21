@@ -635,7 +635,7 @@ export function UserManagement() {
   const renderStatusBadge = (user) => {
     if (!user || !user.status) {
       return (
-        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+        <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
           {t('common.unknown')}
         </span>
       );
@@ -643,12 +643,12 @@ export function UserManagement() {
     return (
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
         {user.status === 'active' ? (
-          <span className="bg-green-100 text-green-800 flex items-center gap-1 px-2 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300">
             <CheckCircle className="h-3 w-3" />
             {t('admin.users.statusActive')}
           </span>
         ) : (
-          <span className="bg-red-100 text-red-800 flex items-center gap-1 px-2 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-red-800 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300">
             <XCircle className="h-3 w-3" />
             {t('admin.users.statusInactive')}
           </span>
@@ -679,12 +679,12 @@ export function UserManagement() {
         <p className="text-muted-foreground">{t('admin.users.description')}</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+      <div className="rounded-lg border border-border bg-card p-6 space-y-4 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('common.search')}</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">{t('common.search')}</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 ref={searchInputRef}
                 type="text"
@@ -696,11 +696,11 @@ export function UserManagement() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.users.role')}</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.users.role')}</label>
             <select
               value={filters.role}
               onChange={(e) => handleFilterChange('role', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
               <option value="">{t('common.all')}</option>
               <option value="user">{t('admin.users.roleUser')}</option>
@@ -708,11 +708,11 @@ export function UserManagement() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.users.status')}</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.users.status')}</label>
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
               <option value="">{t('common.all')}</option>
               <option value="active">{t('admin.users.statusActive')}</option>
@@ -772,7 +772,7 @@ export function UserManagement() {
         }
         if (users.length === 0) {
           return (
-            <div className="text-center py-16 bg-white rounded-lg shadow-sm border">
+            <div className="rounded-lg border border-border bg-card py-16 text-center shadow-sm">
               <h3 className="text-xl font-semibold">{t('admin.users.noUsersFound')}</h3>
               <p className="text-muted-foreground mt-2">{t('admin.users.tryDifferentFilters')}</p>
             </div>
@@ -780,9 +780,9 @@ export function UserManagement() {
         }
         return (
           <>
-            <div className="overflow-x-auto bg-white rounded-lg shadow-sm border">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted/40">
                   <tr>
                     <th className="px-4 py-3 text-left">
                       <Checkbox
@@ -792,24 +792,24 @@ export function UserManagement() {
                         className="translate-y-0.5"
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.username')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.email')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.groups.title')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.role')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.status')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.badges')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.passkeys')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.checkins')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.carbon')}</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.points')}</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.actions')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.username')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.email')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.groups.title')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.role')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.status')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.badges')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.passkeys')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.checkins')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.carbon')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.points')}</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.table.actions')}</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-border bg-card">
                   {users.map((user) => {
                     const isSelected = selectedUsersMap.has(user.id);
                     return (
-                      <tr key={user.id} className={isSelected ? 'bg-emerald-50/40' : ''}>
+                      <tr key={user.id} className={isSelected ? 'bg-emerald-50/40 dark:bg-emerald-950/30' : 'hover:bg-muted/40'}>
                         <td className="px-4 py-3">
                           <Checkbox
                             checked={isSelected}
@@ -817,12 +817,12 @@ export function UserManagement() {
                             aria-label={t('admin.users.selectUser',  { username: user.username })}
                           />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.username}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.group_name || '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{renderRoleBadge(user)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{renderStatusBadge(user)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{user.username}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.group_name || '-'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{renderRoleBadge(user)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{renderStatusBadge(user)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           <div className="flex flex-col">
                             <span>{t('admin.users.badgesAwardedCount',  { count: user.badges_awarded || 0 })}</span>
                             <span className="text-xs text-muted-foreground">
@@ -830,7 +830,7 @@ export function UserManagement() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           <div className="flex flex-col">
                             <span>{t('admin.users.passkeyCount', { count: user.passkey_count || 0 })}</span>
                             <span className="text-xs text-muted-foreground">
@@ -846,7 +846,7 @@ export function UserManagement() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           <div className="flex flex-col">
                             <span>{t('admin.users.checkins.totalDaysLabel',  { count: user.checkin_days || 0 })}</span>
                             <span className="text-xs text-muted-foreground">
@@ -859,10 +859,10 @@ export function UserManagement() {
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                           {Number(user.total_carbon_saved || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.points}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.points}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
                           <Button variant="ghost" size="sm" onClick={() => handleToggleStatus(user)} title={t('admin.users.toggleStatusButton')}>
                             <Ban className="h-4 w-4 mr-1" />
@@ -1056,26 +1056,26 @@ export function UserManagement() {
               ) : overviewData ? (
                 <div className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-lg border bg-white p-4 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.username')}</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{detailUser?.username}</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{detailUser?.username}</p>
                 </div>
-                <div className="rounded-lg border bg-white p-4 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.role')}</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{renderRoleBadge(detailUser)}</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{renderRoleBadge(detailUser)}</p>
                 </div>
-                <div className="rounded-lg border bg-white p-4 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.status')}</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{renderStatusBadge(detailUser)}</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{renderStatusBadge(detailUser)}</p>
                 </div>
-                <div className="rounded-lg border bg-white p-4 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.registrationDays')}</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{detailUser?.days_since_registration ?? 0}</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{detailUser?.days_since_registration ?? 0}</p>
                 </div>
                 {detailUser?.lastlgn && (
-                  <div className="rounded-lg border bg-white p-4 shadow-sm sm:col-span-2">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm sm:col-span-2">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.lastLogin')}</p>
-                    <p className="mt-1 text-sm font-medium text-gray-900">
+                    <p className="mt-1 text-sm font-medium text-foreground">
                       {formatDateSafe(detailUser.lastlgn, 'yyyy-MM-dd HH:mm', '--')}
                     </p>
                   </div>
@@ -1086,7 +1086,7 @@ export function UserManagement() {
                 {metricsCards.map((card) => {
                   const Icon = card.icon;
                   return (
-                    <div key={card.key} className="rounded-lg border bg-white p-4 shadow-sm">
+                        <div key={card.key} className="rounded-lg border border-border bg-card p-4 shadow-sm">
                       <div className="flex items-center justify-between">
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{card.label}</p>
                         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -1109,7 +1109,7 @@ export function UserManagement() {
                     {checkinCards.map((card) => {
                       const Icon = card.icon;
                       return (
-                        <div key={card.key} className="rounded-lg border bg-white p-4 shadow-sm">
+                    <div key={card.key} className="rounded-lg border border-border bg-card p-4 shadow-sm">
                           <div className="flex items-center justify-between">
                             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{card.label}</p>
                             <Icon className="h-4 w-4 text-muted-foreground" />
@@ -1143,21 +1143,21 @@ export function UserManagement() {
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.passkeysTotal')}</p>
                     <p className="mt-2 text-2xl font-semibold">{passkeySummary.total}</p>
                   </div>
-                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.backupEnabled')}</p>
                     <p className="mt-2 text-2xl font-semibold">{passkeySummary.backup_enabled}</p>
                   </div>
-                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.backupEligible')}</p>
                     <p className="mt-2 text-2xl font-semibold">{passkeySummary.backup_eligible}</p>
                   </div>
-                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.lastPasskeyUsed')}</p>
-                    <p className="mt-2 text-sm font-semibold text-gray-900">
+                    <p className="mt-2 text-sm font-semibold text-foreground">
                       {formatDateSafe(passkeySummary.last_used_at, 'yyyy-MM-dd HH:mm', t('admin.users.security.neverUsed'))}
                     </p>
                   </div>
@@ -1193,7 +1193,7 @@ export function UserManagement() {
                 {securityActivityExpanded && (
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="space-y-1 text-sm">
-                      <span className="font-medium text-slate-700">{t('securityActivity.filters.typeLabel')}</span>
+                      <span className="font-medium text-foreground">{t('securityActivity.filters.typeLabel')}</span>
                       <select
                         value={securityActivityFilters.type}
                         onChange={(event) => handleSecurityActivityFilterChange('type', event.target.value)}
@@ -1207,7 +1207,7 @@ export function UserManagement() {
                       </select>
                     </label>
                     <label className="space-y-1 text-sm">
-                      <span className="font-medium text-slate-700">{t('securityActivity.filters.periodLabel')}</span>
+                      <span className="font-medium text-foreground">{t('securityActivity.filters.periodLabel')}</span>
                       <select
                         value={securityActivityFilters.period}
                         onChange={(event) => handleSecurityActivityFilterChange('period', event.target.value)}
@@ -1257,15 +1257,15 @@ export function UserManagement() {
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesAwarded')}</p>
                     <p className="mt-2 text-2xl font-semibold">{badgeSummary.awarded}</p>
                   </div>
-                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesRevoked')}</p>
                     <p className="mt-2 text-2xl font-semibold">{badgeSummary.revoked}</p>
                   </div>
-                  <div className="rounded-lg border bg-white p-4 shadow-sm">
+                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesTotal')}</p>
                     <p className="mt-2 text-2xl font-semibold">{badgeSummary.total}</p>
                   </div>
@@ -1280,15 +1280,15 @@ export function UserManagement() {
                   <p className="text-sm text-destructive">{t('admin.users.badgesLoadFailed')}</p>
                 ) : badgeRows.length > 0 ? (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 text-sm">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-border text-sm">
+                      <thead className="bg-muted/40">
                         <tr>
-                          <th className="px-4 py-2 text-left font-medium text-gray-500">{t('admin.users.badgeTable.badge')}</th>
-                          <th className="px-4 py-2 text-left font-medium text-gray-500">{t('admin.users.badgeTable.status')}</th>
-                          <th className="px-4 py-2 text-left font-medium text-gray-500">{t('admin.users.badgeTable.awardedAt')}</th>
+                          <th className="px-4 py-2 text-left font-medium text-muted-foreground">{t('admin.users.badgeTable.badge')}</th>
+                          <th className="px-4 py-2 text-left font-medium text-muted-foreground">{t('admin.users.badgeTable.status')}</th>
+                          <th className="px-4 py-2 text-left font-medium text-muted-foreground">{t('admin.users.badgeTable.awardedAt')}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100 bg-white">
+                      <tbody className="divide-y divide-border bg-card">
                         {badgeRows.map((entry, index) => {
                           const badge = entry.badge || {};
                           const record = entry.user_badge || {};
@@ -1297,7 +1297,7 @@ export function UserManagement() {
                             pathCandidates: [badge.icon_path],
                           });
                           return (
-                            <tr key={index} className="hover:bg-gray-50">
+                            <tr key={index} className="hover:bg-muted/40">
                               <td className="px-4 py-2">
                                 <div className="flex items-center gap-3">
                                   <div className="h-10 w-10 overflow-hidden rounded-full border bg-muted">
@@ -1313,7 +1313,7 @@ export function UserManagement() {
                                     )}
                                   </div>
                                   <div>
-                                    <p className="font-medium text-gray-900">{badge.name_zh || badge.name_en || '-'}</p>
+                                    <p className="font-medium text-foreground">{badge.name_zh || badge.name_en || '-'}</p>
                                     {badge.name_en && <p className="text-xs text-muted-foreground">{badge.name_en}</p>}
                                   </div>
                                 </div>

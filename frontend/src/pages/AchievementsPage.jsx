@@ -207,14 +207,14 @@ export default function AchievementsPage() {
   }, [refetchBadges, refetchMyBadges, refetchStats]);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+    <div className="max-w-6xl mx-auto px-6 py-8 space-y-8 text-foreground">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
             <Trophy className="h-8 w-8 text-yellow-500" />
             {t('achievements.title')}
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-muted-foreground mt-2">
             {t('achievements.subtitle')}
           </p>
         </div>
@@ -235,16 +235,16 @@ export default function AchievementsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">{t('achievements.summary.totalBadges')}</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('achievements.summary.totalBadges')}</CardTitle>
             <Award className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-7 w-20" />
             ) : (
-              <div className="text-2xl font-bold text-gray-900">{totalBadges}</div>
+              <div className="text-2xl font-bold">{totalBadges}</div>
             )}
-            <CardDescription className="text-xs text-gray-500 mt-1">
+            <CardDescription className="text-xs text-muted-foreground mt-1">
               {t('achievements.summary.totalBadgesHint')}
             </CardDescription>
           </CardContent>
@@ -252,7 +252,7 @@ export default function AchievementsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">{t('achievements.summary.unlocked')}</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('achievements.summary.unlocked')}</CardTitle>
             <Sparkles className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -270,7 +270,7 @@ export default function AchievementsPage() {
                 )}
               </>
             )}
-            <CardDescription className="text-xs text-gray-500 mt-1">
+            <CardDescription className="text-xs text-muted-foreground mt-1">
               {t('achievements.summary.unlockedHint')}
             </CardDescription>
           </CardContent>
@@ -278,16 +278,16 @@ export default function AchievementsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">{t('achievements.summary.locked')}</CardTitle>
-            <Lock className="h-4 w-4 text-gray-400" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('achievements.summary.locked')}</CardTitle>
+            <Lock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-7 w-20" />
             ) : (
-              <div className="text-2xl font-bold text-gray-700">{Math.max(lockedCount, 0)}</div>
+              <div className="text-2xl font-bold text-foreground/80">{Math.max(lockedCount, 0)}</div>
             )}
-            <CardDescription className="text-xs text-gray-500 mt-1">
+            <CardDescription className="text-xs text-muted-foreground mt-1">
               {t('achievements.summary.lockedHint')}
             </CardDescription>
           </CardContent>
@@ -295,7 +295,7 @@ export default function AchievementsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">{t('achievements.summary.completion')}</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t('achievements.summary.completion')}</CardTitle>
             <CalendarDays className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
@@ -304,7 +304,7 @@ export default function AchievementsPage() {
             ) : (
               <div className="text-2xl font-bold text-blue-600">{completion}%</div>
             )}
-            <CardDescription className="text-xs text-gray-500 mt-1">
+            <CardDescription className="text-xs text-muted-foreground mt-1">
               {t('achievements.summary.completionHint')}
             </CardDescription>
           </CardContent>
@@ -313,11 +313,11 @@ export default function AchievementsPage() {
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-900">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Award className="h-5 w-5 text-yellow-500" />
             {t('achievements.unlocked.title')}
           </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
+          <CardDescription className="text-sm text-muted-foreground">
             {t('achievements.unlocked.description')}
           </CardDescription>
         </CardHeader>
@@ -329,7 +329,7 @@ export default function AchievementsPage() {
               ))}
             </div>
           ) : unlockedBadges.length === 0 ? (
-            <div className="text-sm text-gray-500 bg-gray-50 border rounded-md p-6 text-center">
+            <div className="bg-muted/60 border rounded-md p-6 text-center text-sm text-muted-foreground">
               {t('achievements.unlocked.empty')}
             </div>
           ) : (
@@ -340,9 +340,9 @@ export default function AchievementsPage() {
                 return (
                   <div
                     key={item.badgeId}
-                    className="border rounded-lg p-4 flex gap-4 bg-white hover:shadow-md transition"
+                    className="bg-card border rounded-lg p-4 flex gap-4 transition hover:shadow-md"
                   >
-                    <div className="w-16 h-16 rounded-full border bg-white flex items-center justify-center overflow-hidden">
+                    <div className="bg-background w-16 h-16 rounded-full border flex items-center justify-center overflow-hidden">
                       {badgeImage.src || badgeImage.filePath ? (
                         <R2Image
                           src={badgeImage.src || undefined}
@@ -356,10 +356,10 @@ export default function AchievementsPage() {
                       )}
                     </div>
                     <div className="flex-1 space-y-1">
-                      <div className="text-base font-semibold text-gray-900">
+                      <div className="text-base font-semibold">
                         {badge.name_zh || badge.name_en || badge.name || t('achievements.labels.unnamedBadge')}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         {badge.name_en}
                       </div>
                       {item.awardedAt && (
@@ -368,7 +368,7 @@ export default function AchievementsPage() {
                         </div>
                       )}
                       {badge.description_zh || badge.description_en ? (
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {badge.description_zh || badge.description_en}
                         </p>
                       ) : null}
@@ -388,11 +388,11 @@ export default function AchievementsPage() {
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-900">
-            <Lock className="h-5 w-5 text-gray-500" />
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Lock className="h-5 w-5 text-muted-foreground" />
             {t('achievements.locked.title')}
           </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
+          <CardDescription className="text-sm text-muted-foreground">
             {t('achievements.locked.description')}
           </CardDescription>
         </CardHeader>
@@ -404,7 +404,7 @@ export default function AchievementsPage() {
               ))}
             </div>
           ) : lockedBadges.length === 0 ? (
-            <div className="text-sm text-gray-500 bg-green-50 border border-green-100 rounded-md p-6 text-center">
+            <div className="border border-green-200/60 bg-green-500/10 rounded-md p-6 text-center text-sm text-muted-foreground">
               {t('achievements.locked.empty')}
             </div>
           ) : (
@@ -413,10 +413,10 @@ export default function AchievementsPage() {
                 const badgeImage = resolveBadgeImage(badge);
                 return (
                   <div key={badge.id || badge.badge_id}
-                    className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition"
+                    className="bg-muted/50 border rounded-lg p-4 transition hover:bg-muted"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-full border border-dashed border-gray-300 bg-white flex items-center justify-center overflow-hidden">
+                      <div className="bg-background w-14 h-14 rounded-full border border-dashed border-border flex items-center justify-center overflow-hidden">
                         {badgeImage.src || badgeImage.filePath ? (
                           <R2Image
                             src={badgeImage.src || undefined}
@@ -426,23 +426,23 @@ export default function AchievementsPage() {
                             expiresIn={TEN_MINUTES}
                           />
                         ) : (
-                          <Lock className="h-6 w-6 text-gray-300" />
+                          <Lock className="h-6 w-6 text-muted-foreground/50" />
                         )}
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-gray-800">
+                        <div className="text-sm font-semibold">
                           {badge.name_zh || badge.name_en || badge.name || t('achievements.labels.unnamedBadge')}
                         </div>
-                        <div className="text-xs text-gray-500">{badge.name_en}</div>
+                        <div className="text-xs text-muted-foreground">{badge.name_en}</div>
                       </div>
                     </div>
                     {badge.description_zh || badge.description_en ? (
-                      <p className="text-sm text-gray-600 mt-3">
+                      <p className="text-sm text-muted-foreground mt-3">
                         {badge.description_zh || badge.description_en}
                       </p>
                     ) : null}
                     {badge.auto_grant_criteria_description ? (
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-muted-foreground mt-2">
                         {t('achievements.locked.requirements')}: {badge.auto_grant_criteria_description}
                       </p>
                     ) : null}
@@ -456,11 +456,11 @@ export default function AchievementsPage() {
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-900">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-purple-500" />
             {t('achievements.timeline.title')}
           </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
+          <CardDescription className="text-sm text-muted-foreground">
             {t('achievements.timeline.description')}
           </CardDescription>
         </CardHeader>
@@ -472,22 +472,22 @@ export default function AchievementsPage() {
               ))}
             </div>
           ) : timeline.length === 0 ? (
-            <div className="text-sm text-gray-500 bg-gray-50 border rounded-md p-6 text-center">
+            <div className="bg-muted/60 border rounded-md p-6 text-center text-sm text-muted-foreground">
               {t('achievements.timeline.empty')}
             </div>
           ) : (
-            <ol className="relative border-l border-gray-200 pl-6 space-y-6">
+            <ol className="relative border-l border-border pl-6 space-y-6">
               {timeline.map((item) => {
                 const badge = item.badge || {};
                 const badgeImage = resolveBadgeImage(badge);
                 return (
                   <li key={item.id} className="relative">
-                    <span className="absolute -left-[11px] top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white border border-green-400">
+                    <span className="bg-background absolute -left-[11px] top-1 flex h-5 w-5 items-center justify-center rounded-full border border-green-400">
                       <Sparkles className="h-3 w-3 text-green-500" />
                     </span>
-                    <div className="bg-white border rounded-lg p-4 shadow-sm">
+                    <div className="bg-card border rounded-lg p-4 shadow-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border bg-white flex items-center justify-center">
+                        <div className="bg-background w-12 h-12 rounded-full overflow-hidden border flex items-center justify-center">
                           {badgeImage.src || badgeImage.filePath ? (
                             <R2Image
                               src={badgeImage.src || undefined}
@@ -502,10 +502,10 @@ export default function AchievementsPage() {
                         </div>
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center justify-between gap-2">
-                            <div className="font-semibold text-gray-900">
+                            <div className="font-semibold">
                               {badge.name_zh || badge.name_en || badge.name || t('achievements.labels.unnamedBadge')}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-muted-foreground">
                               {formatDateSafe(item.awardedAt, 'yyyy-MM-dd HH:mm')}
                             </div>
                           </div>
@@ -515,7 +515,7 @@ export default function AchievementsPage() {
                             </div>
                           ) : null}
                           {item.description ? (
-                            <p className="text-sm text-gray-600 leading-relaxed">
+                            <p className="text-sm text-muted-foreground leading-relaxed">
                               {item.description}
                             </p>
                           ) : null}
@@ -533,27 +533,27 @@ export default function AchievementsPage() {
       {statsData && (statsData.monthly_achievements || statsData.leaderboard) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {Array.isArray(statsData.monthly_achievements) && statsData.monthly_achievements.length > 0 && (
-            <Card className="bg-gradient-to-r from-yellow-50 via-orange-50 to-pink-50 border-yellow-100">
+            <Card className="border-yellow-500/20 bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-pink-500/10">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-yellow-800">
+                <CardTitle className="flex items-center gap-2 text-yellow-500">
                   <Award className="h-5 w-5" />
                   {t('dashboard.monthlyAchievements')}
                 </CardTitle>
-                <CardDescription className="text-sm text-yellow-700">
+                <CardDescription className="text-sm text-yellow-400">
                   {t('achievements.monthly.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {statsData.monthly_achievements.map((achievement, idx) => (
                   <div key={`${achievement.id || idx}`}
-                    className="flex items-center gap-3 text-sm text-yellow-800"
+                    className="flex items-center gap-3 text-sm text-foreground"
                   >
                     <span className="w-2 h-2 rounded-full bg-yellow-500" />
                     <span className="flex-1">
                       {achievement.name || achievement.title || ''}
                     </span>
                     {achievement.points ? (
-                      <span className="font-semibold text-yellow-700">+{achievement.points} {t('common.points')}</span>
+                      <span className="font-semibold text-yellow-500">+{achievement.points} {t('common.points')}</span>
                     ) : null}
                   </div>
                 ))}
@@ -562,33 +562,33 @@ export default function AchievementsPage() {
           )}
 
           {Array.isArray(statsData.leaderboard) && statsData.leaderboard.length > 0 && (
-            <Card className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-100">
+            <Card className="border-blue-500/20 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-blue-900">
+                <CardTitle className="flex items-center gap-2 text-blue-500">
                   <Trophy className="h-5 w-5" />
                   {t('dashboard.leaderboard')}
                 </CardTitle>
-                <CardDescription className="text-sm text-blue-800">
+                <CardDescription className="text-sm text-blue-400">
                   {t('achievements.leaderboard.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {statsData.leaderboard.slice(0, 5).map((leader, index) => (
-                  <div key={leader.id || index} className="flex items-center gap-3 text-sm text-blue-900">
+                  <div key={leader.id || index} className="flex items-center gap-3 text-sm text-foreground">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
                       index === 0
                         ? 'bg-yellow-500 text-white'
                         : index === 1
-                        ? 'bg-gray-400 text-white'
+                        ? 'bg-zinc-500 text-white'
                         : index === 2
                         ? 'bg-orange-500 text-white'
-                        : 'bg-blue-200 text-blue-900'
+                        : 'bg-muted text-muted-foreground'
                     }`}>
                       {index + 1}
                     </div>
                     <span className="flex-1 truncate">{leader.username || leader.name}</span>
                     {leader.total_points ? (
-                      <span className="text-xs font-medium text-blue-800">{leader.total_points} {t('common.points')}</span>
+                      <span className="text-xs font-medium text-blue-400">{leader.total_points} {t('common.points')}</span>
                     ) : null}
                   </div>
                 ))}

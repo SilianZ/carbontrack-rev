@@ -115,10 +115,10 @@ const NotificationSettingsPage = () => {
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           {t('settings.notifications.title')}
         </h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           {t('settings.notifications.subtitle')}
         </p>
       </div>
@@ -130,7 +130,7 @@ const NotificationSettingsPage = () => {
         </CardHeader>
         <CardContent className="space-y-5">
           {loading ? (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               {t('common.loading')}
             </div>
@@ -150,16 +150,16 @@ const NotificationSettingsPage = () => {
                   return (
                     <div
                       key={pref.category}
-                      className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3"
+                      className="rounded-lg border border-border bg-muted/40 px-4 py-3"
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-foreground">
                   {t(`settings.notifications.categories.${pref.category}.label`, {
                     defaultValue: pref.label,
                   })}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="mt-1 text-xs text-muted-foreground">
                   {t(`settings.notifications.categories.${pref.category}.description`, {
                     defaultValue: pref.label,
                   })}

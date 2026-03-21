@@ -18,11 +18,11 @@ const Section = ({ title, icon: Icon, children }) => (
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
     >
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <h2 className="text-xl md:text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
             {Icon && <Icon className="h-6 w-6 text-green-600" />}
             {title}
         </h2>
-        <div className="text-gray-600 leading-relaxed space-y-4">
+        <div className="text-muted-foreground leading-relaxed space-y-4">
             {children}
         </div>
     </Motion.div>
@@ -43,7 +43,7 @@ const SecurityPage = () => {
 
     return (
         <LazyMotion features={domAnimation}>
-            <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
+            <div className="min-h-screen bg-background text-foreground py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
                     <Motion.div
                         className="text-center mb-12"
@@ -51,12 +51,12 @@ const SecurityPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <h1 className="text-4xl font-extrabold text-gray-900 mb-4">{t('legal.security.title')}</h1>
-                        <p className="text-lg text-gray-600">
+                        <h1 className="text-4xl font-extrabold text-foreground mb-4">{t('legal.security.title')}</h1>
+                        <p className="text-lg text-muted-foreground">
                             {t('legal.security.subtitle')}
                         </p>
                     </Motion.div>
-                    <Card className="bg-white/80 backdrop-blur shadow-xl border-none">
+                    <Card className="border-border/60 bg-card/85 backdrop-blur shadow-xl">
                         <CardContent className="p-8 md:p-12">
                             <Section title={t('legal.security.sections.commitment.title')} icon={ShieldCheck}>
                                 <p>
@@ -91,16 +91,16 @@ const SecurityPage = () => {
                                 <p>
                                     {t('legal.security.sections.vuln.intro')}
                                 </p>
-                                <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg mt-4">
-                                    <h3 className="font-bold text-blue-900 mb-2">{t('legal.security.sections.vuln.policyTitle')}</h3>
-                                    <p className="text-sm text-blue-800 mb-2">
+                                <div className="mt-4 rounded-lg border border-blue-500/20 bg-blue-500/10 p-4">
+                                    <h3 className="font-bold text-blue-700 dark:text-blue-300 mb-2">{t('legal.security.sections.vuln.policyTitle')}</h3>
+                                    <p className="mb-2 text-sm text-blue-700 dark:text-blue-300">
                                         <Trans
                                             i18nKey="legal.security.sections.vuln.contact"
                                             values={{ email: import.meta.env.VITE_SECURITY_EMAIL }}
                                             components={{ a: <a href={toMailtoLink(import.meta.env.VITE_SECURITY_EMAIL)} className="underline font-semibold" /> }}
                                         />
                                     </p>
-                                    <ul className="list-disc pl-5 text-sm text-blue-800">
+                                    <ul className="list-disc pl-5 text-sm text-blue-700 dark:text-blue-300">
                                         {Array.isArray(vulnItems) && vulnItems.map((item, index) => (
                                             <li key={toItemKey(`vuln-${index}`, item)}>{item}</li>
                                         ))}

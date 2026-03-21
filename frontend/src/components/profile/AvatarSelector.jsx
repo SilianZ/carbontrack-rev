@@ -38,7 +38,7 @@ export function AvatarSelector({ currentAvatarId, onAvatarChange }) {
   const AvatarThumbnail = ({ avatar }) => {
     const { src, filePath, alt, fallbackInitial } = buildAvatarDisplayProps(avatar);
     const fallback = (
-      <div className="w-full aspect-square flex items-center justify-center text-xs text-gray-400 bg-gray-100 rounded-md">
+      <div className="flex aspect-square w-full items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
         {fallbackInitial || 'IMG'}
       </div>
     );
@@ -87,7 +87,7 @@ export function AvatarSelector({ currentAvatarId, onAvatarChange }) {
           <div
             key={avatar.id}
             className={`relative p-2 border-2 rounded-lg cursor-pointer
-              ${selectedAvatar === avatar.id ? 'border-green-500' : 'border-gray-200 hover:border-gray-300'}`}
+              ${selectedAvatar === avatar.id ? 'border-green-500' : 'border-border hover:border-border/80'}`}
             onClick={() => handleSelectAvatar(avatar.id)}
           >
             <AvatarThumbnail avatar={avatar} />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ImagePreviewGallery } from '../common/ImagePreviewGallery';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -26,6 +27,7 @@ import { toast } from 'react-hot-toast';
 export function ActivityReview() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const location = useLocation();
   const [filters, setFilters] = useState({
     search: '',
     status: 'pending', // Default to pending activities
@@ -122,6 +124,13 @@ export function ActivityReview() {
           : false;
 
   const pagination = data?.data?.pagination || data?.pagination || { page: filters.page, limit: filters.limit, total: normalizedActivities.length, pages: 1 };
+
+  useEffect(() => {
+    const routedActivity = location.state?.selectedActivity;
+    if (routedActivity?.id) {
+      setSelectedActivity(routedActivity);
+    }
+  }, [location.state]);
 
   const reviewActivityMutation = useMutation(
     ({ id, status, admin_notes }) => adminAPI.reviewActivity(id, { status, admin_notes }),
@@ -289,19 +298,24 @@ export function ActivityReview() {
   };
 
   // Combined loading state for single + bulk review mutations
-  const isReviewSubmitting = reviewActivityMutation.isLoading || reviewActivitiesBulkMutation.isLoading;
+const isReviewSubmitting = reviewActivityMutation.isLoading || reviewActivitiesBulkMutation.isLoading;
+  const reviewStatusClassName = {
+    pending: 'border border-blue-200 bg-blue-100 text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300',
+    approved: 'border border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300',
+    rejected: 'border border-red-200 bg-red-100 text-red-800 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300',
+  };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold tracking-tight">{t('admin.activities.title')}</h2>
       <p className="text-muted-foreground">{t('admin.activities.description')}</p>
 
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('common.search')}</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">{t('common.search')}</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
                 value={filters.search}
@@ -312,11 +326,11 @@ export function ActivityReview() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('admin.activities.status')}</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">{t('admin.activities.status')}</label>
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
             >
               <option value="">{t('common.all')}</option>
               <option value="pending">{t('activities.status.pending')}</option>
@@ -325,21 +339,21 @@ export function ActivityReview() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('common.sort.sortBy')}</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">{t('common.sort.sortBy')}</label>
             <select
               value={filters.sort}
               onChange={(e) => handleFilterChange('sort', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
             >
               <option value="created_at_asc">{t('common.sort.oldest')}</option>
               <option value="created_at_desc">{t('common.sort.newest')}</option>
             </select>
           </div>
           <div className="flex flex-col space-y-2 md:col-span-3 lg:col-span-1">
-            <label className="flex items-center text-sm font-medium text-gray-700 space-x-2">
+            <label className="flex items-center space-x-2 text-sm font-medium text-foreground">
               <input
                 type="checkbox"
-                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                className="rounded border-input bg-background text-green-600 focus:ring-green-500"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
               />
@@ -350,7 +364,7 @@ export function ActivityReview() {
                 <select
                   value={refreshIntervalMs}
                   onChange={(e) => setRefreshIntervalMs(parseInt(e.target.value, 10))}
-                  className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                 >
                   <option value={5000}>5s</option>
                   <option value={10000}>10s</option>
@@ -377,7 +391,7 @@ export function ActivityReview() {
           <AlertDescription>{t('errors.loadFailed')}</AlertDescription>
         </Alert>
   ) : normalizedActivities.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-lg shadow-sm border">
+        <div className="rounded-lg border border-border bg-card py-16 text-center shadow-sm">
           <h3 className="text-xl font-semibold">{t('admin.activities.noActivitiesFound')}</h3>
           <p className="text-muted-foreground mt-2">{t('admin.activities.tryDifferentFilters')}</p>
         </div>
@@ -386,7 +400,7 @@ export function ActivityReview() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             {selectedPendingIds.length > 0 ? (
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 {t('admin.activities.selectedCount', { count: selectedPendingIds.length })}
               </p>
             ) : (
@@ -434,16 +448,16 @@ export function ActivityReview() {
           </div>
         </div>
 
-          <div className="overflow-x-auto bg-white rounded-lg shadow-sm border relative">
+          <div className="relative overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
             {initialLoadedRef.current && isFetching && (
-              <div className="absolute top-2 right-2 flex items-center text-xs text-gray-500">
+              <div className="absolute top-2 right-2 flex items-center text-xs text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin mr-1" /> {t('common.loading')}
               </div>
             )}
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     <Checkbox
                       aria-label={t('admin.activities.selectAll')}
                       checked={headerCheckboxState}
@@ -451,18 +465,18 @@ export function ActivityReview() {
                       disabled={selectablePendingIds.length === 0}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.images')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.user')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.activity')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.data')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.carbonSaved')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.points')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.status')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.activities.table.date')}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.actions')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.activities.table.images')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.activities.table.user')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.activities.table.activity')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.activities.table.data')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.activities.table.carbonSaved')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.activities.table.points')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.activities.table.status')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.activities.table.date')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('common.actions')}</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-border bg-card">
                 {normalizedActivities.map((activity) => (
                   <tr key={activity.id}>
                     <td className="px-4 py-4 align-top">
@@ -476,48 +490,48 @@ export function ActivityReview() {
                     <td className="px-4 py-4 whitespace-nowrap align-top">
                       <ImagePreviewGallery images={activity.images || []} maxThumbnails={1} />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{activity.user_username}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{activity.user_username}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{activity.activity_name}</div>
-                        <div className="text-sm text-gray-500">{t(`activities.categories.${activity.activity_category}`, activity.activity_category)}</div>
+                      <div className="text-sm font-medium text-foreground">{activity.activity_name}</div>
+                        <div className="text-sm text-muted-foreground">{t(`activities.categories.${activity.activity_category}`, activity.activity_category)}</div>
                       {activity.description && (
-                        <div className="mt-1 text-xs text-gray-600 flex items-start max-w-[36rem]">
-                          <MessageSquare className="h-3 w-3 mr-1 mt-[2px] text-gray-500" />
+                        <div className="mt-1 flex max-w-[36rem] items-start text-xs text-muted-foreground">
+                          <MessageSquare className="mt-[2px] mr-1 h-3 w-3 text-muted-foreground" />
                           <span className="truncate" title={activity.description}>{activity.description}</span>
                         </div>
                       )}
                     </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(activity.data_value)} {t(`units.${activity.activity_unit}`, activity.activity_unit)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatNumber(activity.carbon_saved)} kg CO2e</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{formatNumber(activity.data_value)} {t(`units.${activity.activity_unit}`, activity.activity_unit)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{formatNumber(activity.carbon_saved)} kg CO2e</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">+{formatNumber(activity.points_earned)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                       {activity.status === 'pending' && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${reviewStatusClassName.pending}`}>
                           <Clock className="h-3 w-3 mr-1" /> {t('activities.status.pending')}
                         </span>
                       )}
                       {activity.status === 'approved' && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${reviewStatusClassName.approved}`}>
                           <CheckCircle className="h-3 w-3 mr-1" /> {t('activities.status.approved')}
                         </span>
                       )}
                       {activity.status === 'rejected' && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${reviewStatusClassName.rejected}`}>
                           <XCircle className="h-3 w-3 mr-1" /> {t('activities.status.rejected')}
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateSafe(activity.created_at, 'yyyy-MM-dd')}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{formatDateSafe(activity.created_at, 'yyyy-MM-dd')}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Button variant="ghost" size="sm" onClick={() => handleViewDetails(activity)} className="mr-2">
                         <Eye className="h-4 w-4" />
                       </Button>
                       {activity.status === 'pending' && (
                         <>
-                          <Button variant="ghost" size="sm" onClick={() => openApproveDialog(activity)} className="mr-2 text-green-600 hover:text-green-800">
+                          <Button variant="ghost" size="sm" onClick={() => openApproveDialog(activity)} className="mr-2 text-green-600 hover:text-green-700 dark:text-green-300 dark:hover:text-green-200">
                             <CheckCircle className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openRejectDialog(activity)} className="text-red-600 hover:text-red-800">
+                          <Button variant="ghost" size="sm" onClick={() => openRejectDialog(activity)} className="text-red-600 hover:text-red-700 dark:text-red-300 dark:hover:text-red-200">
                             <XCircle className="h-4 w-4" />
                           </Button>
                         </>
@@ -560,13 +574,13 @@ export function ActivityReview() {
             </DialogDescription>
           </DialogHeader>
           {decisionDialog.activity && (
-            <div className="mb-4 rounded-xl border border-emerald-200/40 bg-emerald-50/40 px-3 py-2 text-sm text-emerald-700">
+            <div className="mb-4 rounded-xl border border-emerald-200/40 bg-emerald-50/60 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
               <span className="font-medium">{decisionDialog.activity.activity_name}</span> · {decisionDialog.activity.user_username}
             </div>
           )}
           {decisionDialog.mode === 'reject' && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700" htmlFor="reject-reason">
+              <label className="text-sm font-medium text-foreground" htmlFor="reject-reason">
                 {t('admin.activities.dialog.reasonLabel')}
               </label>
               <Textarea

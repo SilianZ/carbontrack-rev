@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 export function Layout({ showFooter = true }) {
   const { t } = useTranslation();
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Navbar />
       
       <main className="flex-1">
@@ -35,7 +35,7 @@ export function SimpleLayout() {
 // 认证页面布局
 export function AuthLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Navbar />
       <main className="flex-1">
         <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -45,4 +45,3 @@ export function AuthLayout() {
     </div>
   );
 }
-

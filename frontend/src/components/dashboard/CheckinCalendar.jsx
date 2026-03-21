@@ -66,20 +66,20 @@ export function CheckinCalendar({
   const activeToday = stats?.active_today ?? false;
 
   return (
-    <Card className="border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-sky-50">
+    <Card className="border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-card to-sky-500/10">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-lg font-semibold text-emerald-800 flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg font-semibold text-emerald-500">
               <CalendarDays className="h-5 w-5" />
               {t('dashboard.checkin.calendarTitle')}
             </CardTitle>
-            <CardDescription className="text-sm text-emerald-700">
+            <CardDescription className="text-sm text-emerald-400">
               {t('dashboard.checkin.calendarDescription')}
             </CardDescription>
           </div>
           {typeof remaining === 'number' && (
-            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-500">
               {t('dashboard.checkin.makeupRemaining',  { count: remaining })}
             </Badge>
           )}
@@ -87,41 +87,41 @@ export function CheckinCalendar({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
-            <div className="flex items-center gap-2 text-sm text-emerald-700">
+          <div className="rounded-lg border border-emerald-500/20 bg-card/90 p-3">
+            <div className="flex items-center gap-2 text-sm text-emerald-500">
               <Flame className="h-4 w-4" />
               {t('dashboard.checkin.currentStreak')}
             </div>
-            <div className="mt-1 text-2xl font-semibold text-emerald-800">{currentStreak}</div>
-            <div className="text-xs text-emerald-600">
+            <div className="mt-1 text-2xl font-semibold text-foreground">{currentStreak}</div>
+            <div className="text-xs text-emerald-400">
               {activeToday
                 ? t('dashboard.checkin.todayChecked')
                 : t('dashboard.checkin.todayMissing')}
             </div>
           </div>
-          <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
-            <div className="flex items-center gap-2 text-sm text-emerald-700">
+          <div className="rounded-lg border border-emerald-500/20 bg-card/90 p-3">
+            <div className="flex items-center gap-2 text-sm text-emerald-500">
               <Flame className="h-4 w-4" />
               {t('dashboard.checkin.longestStreak')}
             </div>
-            <div className="mt-1 text-2xl font-semibold text-emerald-800">{longestStreak}</div>
-            <div className="text-xs text-emerald-600">
+            <div className="mt-1 text-2xl font-semibold text-foreground">{longestStreak}</div>
+            <div className="text-xs text-emerald-400">
               {t('dashboard.checkin.totalDays',  { count: totalDays })}
             </div>
           </div>
-          <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
-            <div className="flex items-center gap-2 text-sm text-emerald-700">
+          <div className="rounded-lg border border-emerald-500/20 bg-card/90 p-3">
+            <div className="flex items-center gap-2 text-sm text-emerald-500">
               <RefreshCcw className="h-4 w-4" />
               {t('dashboard.checkin.makeupQuota')}
             </div>
-            <div className="mt-1 text-2xl font-semibold text-emerald-800">
+            <div className="mt-1 text-2xl font-semibold text-foreground">
               {remaining ?? '--'}
             </div>
-            <div className="text-xs text-emerald-600">{t('dashboard.checkin.monthlyReset')}</div>
+            <div className="text-xs text-emerald-400">{t('dashboard.checkin.monthlyReset')}</div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-emerald-100 bg-white/90 p-3">
+        <div className="rounded-lg border border-emerald-500/20 bg-card/95 p-3">
           <Calendar
             mode="single"
             selected={selectedDay}
@@ -155,13 +155,13 @@ export function CheckinCalendar({
           </div>
         </div>
 
-        <div className="rounded-lg border border-emerald-100 bg-white/80 p-3">
-          <div className="text-sm text-emerald-700 font-medium">
+        <div className="rounded-lg border border-emerald-500/20 bg-card/90 p-3">
+          <div className="text-sm font-medium text-foreground">
             {selectedDay
               ? t('dashboard.checkin.selectedDate',  { date: selectedKey })
               : t('dashboard.checkin.selectHint')}
           </div>
-          <div className="mt-1 text-xs text-emerald-600">
+          <div className="mt-1 text-xs text-muted-foreground">
             {selectedDay
               ? selectedCheckin
                 ? `${t('dashboard.checkin.statusChecked')} · ${
@@ -184,10 +184,10 @@ export function CheckinCalendar({
               {t('dashboard.checkin.makeupAction')}
             </Button>
             {remaining === 0 && (
-              <span className="text-xs text-amber-600">{t('dashboard.checkin.makeupQuotaUsed')}</span>
+              <span className="text-xs text-amber-500">{t('dashboard.checkin.makeupQuotaUsed')}</span>
             )}
             {canMakeup && (
-              <span className="text-xs text-emerald-600">{t('dashboard.checkin.makeupHint')}</span>
+              <span className="text-xs text-emerald-500">{t('dashboard.checkin.makeupHint')}</span>
             )}
           </div>
         </div>

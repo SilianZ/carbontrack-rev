@@ -37,6 +37,12 @@ The backend is a lean API service. Avoid adding redundant database structure che
 - **Run Server**: `composer start` (runs `php -S localhost:8080 -t public`).
 - **Run Tests**: `composer test` (runs `phpunit`). Tests are located in `backend/tests/`.
 - **Debugging API**: To bypass Cloudflare firewall protection when debugging backend APIs, add the `x-debug-token` header with value `9c0d4f1a-5a0b-4b2c-9c7e-a1e2f3d4b5c6` to your requests.
+- **Logging & Audit Baseline (Mandatory)**: Any backend feature you add or modify must be wired into the project’s custom observability stack so operations can troubleshoot and auditors can trace behavior.
+    - **System logs**: HTTP endpoints must remain covered by the global `RequestLoggingMiddleware` + `SystemLogService`. Non-HTTP execution paths (jobs, CLI flows, async tasks) must add an equivalent explicit system-event record or documented fallback.
+    - **Audit logs**: Business actions, admin operations, user-triggered mutations, sensitive reads, exports, AI operations, and batch/system actions must record structured entries through `AuditLogService`.
+    - **Error handling**: Expected and unexpected failures must use explicit error handling and persist exceptions/errors through `ErrorLogService`; do not rely only on plain `error_log()` or a generic PSR logger.
+    - **DI requirement**: When a controller/service/job needs audit or error logging, register the required dependencies in `backend/src/dependencies.php`; do not leave logging as an optional afterthought.
+    - **Review rule**: If you touch an endpoint or business flow and it still lacks the custom logging trio above, treat that as incomplete work and fix it before finishing.
 - **After Backend Changes (Required)**: Whenever you modify controllers, routes, models, requests, or responses:
     - Update `openapi.json` to reflect the new or changed endpoints, request/response schemas, status codes, and auth requirements.
     - Add or update PHPUnit tests covering the changed behavior in `backend/tests/` (Unit and/or Integration). Focus on happy paths, validation errors, edge cases, and auth. Run it in the Powershell terminal to see output.

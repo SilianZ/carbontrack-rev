@@ -103,9 +103,9 @@ export default function NotFoundPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 text-foreground">
       <div className="text-center max-w-xl">
-        <h1 className="text-5xl font-bold mb-4 text-gray-900">{t('notFoundPage.code')}</h1>
+        <h1 className="mb-4 text-5xl font-bold text-foreground">{t('notFoundPage.code')}</h1>
         <div
           className="mb-6 flex items-center justify-center"
           onMouseEnter={handleMouseEnter}
@@ -120,8 +120,8 @@ export default function NotFoundPage() {
             {t('notFoundPage.emoji')}
           </span>
         </div>
-        <p className="text-lg text-gray-700 mb-2">{t('notFoundPage.message')}</p>
-        <p className="text-base text-gray-600 mb-6">{t('notFoundPage.submessage')}</p>
+        <p className="mb-2 text-lg text-foreground">{t('notFoundPage.message')}</p>
+        <p className="mb-6 text-base text-muted-foreground">{t('notFoundPage.submessage')}</p>
         <div className="flex items-center justify-center gap-3">
           <Button 
             onClick={() => window.location.reload()}

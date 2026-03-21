@@ -18,6 +18,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { checkAuthStatus, authAPI } from '../../lib/auth';
 import { useUnreadMessagesCount } from '../../hooks/useUnreadMessagesCount';
 import LanguageSwitcher from '../LanguageSwitcher';
+import { ThemeToggle } from '../ThemeToggle';
 import { Button } from '../ui/Button';
 import R2Image from '../common/R2Image';
 
@@ -26,6 +27,7 @@ const NAV_SECTION_ORDER = ['overview', 'insights', 'marketplace'];
 export function Navbar() {
   const { t } = useTranslation();
   const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -299,38 +301,45 @@ export function Navbar() {
         filePath={resolvedFilePath}
         src={isAbsoluteUrl ? avatarUrl : undefined}
         alt={user?.username || 'avatar'}
-        className={`${sizeClass} rounded-full border border-gray-200 object-cover`}
+        className={`${sizeClass} rounded-full border border-border object-cover`}
         fallback={fallback}
       />
     );
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <nav
+      className={clsx(
+        'sticky top-0 z-50 border-b shadow-sm',
+        isAdminRoute
+          ? 'border-border bg-background'
+          : 'border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90'
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 text-xl font-bold text-green-600">
-            <img src="/favicon_64x64.ico" alt="CarbonTrack logo" className="h-8 w-8" />
+          <Link to="/" className="flex items-center gap-3 text-xl font-bold text-green-600 dark:text-emerald-400">
+            <img src="/favicon.ico" alt="CarbonTrack logo" className="h-12 w-12 shrink-0 object-contain" />
             <span>CarbonTrack</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-1 lg:gap-2">
             {filteredNavItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors relative ${
+                  className={`relative flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors lg:px-4 ${
                     isActivePath(item.path)
-                      ? 'text-green-600 bg-green-50'
-                      : 'text-gray-700 hover:text-green-600 hover:bg-gray-50'
+                      ? 'bg-green-50 text-green-600 dark:bg-emerald-500/15 dark:text-emerald-300'
+                      : 'text-muted-foreground hover:bg-green-50/70 hover:text-green-600 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <span className="whitespace-nowrap">{item.label}</span>
                   {item.badge && item.badge > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                       {item.badge > 99 ? '99+' : item.badge}
@@ -342,8 +351,15 @@ export function Navbar() {
           </div>
 
           {/* Desktop User Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            <LanguageSwitcher />
+          <div className="hidden md:flex items-center space-x-2">
+            <LanguageSwitcher
+              variant="outline"
+              className="rounded-xl border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
+            />
+            <ThemeToggle
+              variant="outline"
+              className="rounded-xl border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
+            />
             
             {isAuthenticated ? (
               <div className="flex items-center space-x-3">
@@ -351,7 +367,7 @@ export function Navbar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="relative"
+                  className="relative rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
                   aria-label={t('nav.messages')}
                   onClick={() => navigate('/messages')}
                 >
@@ -364,17 +380,17 @@ export function Navbar() {
                 </Button>
                 {/* 用户菜单 */}
                 <div className="relative group">
-                  <Button variant="ghost" className="flex items-center gap-3">
+                  <Button variant="ghost" className="flex items-center gap-3 whitespace-nowrap rounded-xl px-2 text-foreground hover:bg-muted">
                     {renderUserAvatar('h-8 w-8')}
                     <span className="hidden lg:inline">{user?.username}</span>
                   </Button>
                   
                   {/* 下拉菜单 */}
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="absolute right-0 mt-2 w-48 rounded-md border border-border bg-card text-card-foreground shadow-lg shadow-black/10 opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible">
                     <div className="py-1">
                       <Link
                         to="/profile"
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
                         <Settings className="h-4 w-4" />
                         {t('nav.profile')}
@@ -382,7 +398,7 @@ export function Navbar() {
 
                       <Link
                         to="/settings/notifications"
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
                         <Bell className="h-4 w-4" />
                         {t('nav.notifications')}
@@ -391,18 +407,18 @@ export function Navbar() {
                       {user?.is_admin && (
                         <Link
                           to="/admin"
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                         >
                           <Settings className="h-4 w-4" />
                           {t('nav.admin')}
                         </Link>
                       )}
                       
-                      <hr className="my-1" />
+                      <hr className="my-1 border-border" />
                       
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
                         <LogOut className="h-4 w-4" />
                         {t('nav.logout')}
@@ -414,10 +430,14 @@ export function Navbar() {
             ) : (
               <div className="flex items-center space-x-2">
                 <Link to="/auth/login">
-                  <Button variant="ghost">{t('nav.login')}</Button>
+                  <Button variant="ghost" className="rounded-xl text-foreground hover:bg-muted">
+                    {t('nav.login')}
+                  </Button>
                 </Link>
                 <Link to="/auth/register">
-                  <Button>{t('nav.register')}</Button>
+                  <Button className="rounded-xl bg-green-600 text-white hover:bg-green-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400">
+                    {t('nav.register')}
+                  </Button>
                 </Link>
               </div>
             )}
@@ -460,10 +480,10 @@ export function Navbar() {
           role={isPortrait ? 'dialog' : 'region'}
           aria-modal={isPortrait ? 'true' : undefined}
           className={clsx(
-            'md:hidden bg-white border-t border-gray-200',
+            'md:hidden border-t border-border bg-background text-foreground',
             isPortrait
-              ? 'fixed inset-x-3 top-20 bottom-4 z-[60] rounded-2xl border border-gray-100 shadow-2xl backdrop-blur'
-              : 'z-10 rounded-b-2xl border border-gray-100 shadow-lg',
+              ? 'fixed inset-x-3 top-20 bottom-4 z-[60] rounded-2xl border border-border shadow-2xl shadow-black/10 backdrop-blur'
+              : 'z-10 rounded-b-2xl border border-border shadow-lg shadow-black/10',
             isAnimatingOut ? 'animate-mobile-nav-out' : 'animate-mobile-nav-in'
           )}
         >
@@ -475,10 +495,10 @@ export function Navbar() {
           >
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-semibold text-foreground">
                   {t('nav.menuTitle')}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {t('nav.menuSubtitle')}
                 </p>
               </div>
@@ -487,7 +507,7 @@ export function Navbar() {
                 size="icon"
                 onClick={closeMobile}
                 aria-label={t('nav.closeMenu')}
-                className="h-9 w-9 rounded-full border border-gray-200"
+                className="h-9 w-9 rounded-full border border-border"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -496,14 +516,14 @@ export function Navbar() {
             {mobileNavSections.map((section) => (
               <div
                 key={section.key}
-                className="rounded-2xl border border-gray-100 bg-white/95 p-4 shadow-sm"
+                className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5"
               >
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
                     {section.title}
                   </p>
                   {section.description && (
-                    <p className="mt-1 text-sm text-gray-500">{section.description}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
                   )}
                 </div>
                 <div
@@ -523,8 +543,8 @@ export function Navbar() {
                         className={clsx(
                           'flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40',
                           isActive
-                            ? 'border-green-200 bg-green-50/80 text-green-700 shadow-sm'
-                            : 'border-gray-100 text-gray-700 hover:border-green-200 hover:bg-gray-50/80 hover:text-green-700'
+                            ? 'border-green-200 bg-green-50/80 text-green-700 shadow-sm dark:border-green-900/60 dark:bg-green-950/30 dark:text-green-300'
+                            : 'border-border text-muted-foreground hover:border-green-200 hover:bg-accent hover:text-foreground'
                         )}
                       >
                         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600">
@@ -533,7 +553,7 @@ export function Navbar() {
                         <div className="flex-1">
                           <span className="text-sm font-semibold">{item.label}</span>
                           {item.hint && (
-                            <p className="mt-0.5 text-xs text-gray-500">{item.hint}</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground">{item.hint}</p>
                           )}
                         </div>
                         {item.badge && item.badge > 0 && (
@@ -549,29 +569,41 @@ export function Navbar() {
             ))}
 
             <div className="space-y-4">
-              <div className="rounded-2xl border border-gray-100 bg-white/95 p-4 shadow-sm">
+              <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
                       {t('nav.languageSection')}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {t('nav.languageDescription')}
                     </p>
                   </div>
-                  <LanguageSwitcher variant="ghost" size="sm" showText={false} />
+                  <div className="flex items-center gap-2">
+                    <LanguageSwitcher
+                      variant="outline"
+                      size="sm"
+                      showText={false}
+                      className="border-border bg-background/80 text-foreground hover:bg-accent"
+                    />
+                    <ThemeToggle
+                      variant="outline"
+                      size="icon"
+                      className="border-border bg-background/80 text-foreground hover:bg-accent"
+                    />
+                  </div>
                 </div>
               </div>
 
               {isAuthenticated ? (
-                <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-green-50/70 to-white p-4 shadow-sm">
+                <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
                   <div className="flex items-center gap-3">
                     {renderUserAvatar('h-12 w-12')}
                     <div>
-                      <p className="text-base font-semibold text-gray-900">
+                      <p className="text-base font-semibold text-foreground">
                         {user?.username}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {t('nav.accountSignedIn')}
                       </p>
                     </div>
@@ -591,7 +623,7 @@ export function Navbar() {
                               key={action.key}
                               to={action.to}
                               onClick={closeMobile}
-                              className="flex items-center gap-2 rounded-xl border border-white/60 bg-white/80 px-3 py-3 text-sm font-medium text-gray-700 transition hover:-translate-y-0.5 hover:border-green-200 hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40"
+                              className="flex items-center gap-2 rounded-xl border border-border bg-background/80 px-3 py-3 text-sm font-medium text-muted-foreground transition hover:-translate-y-0.5 hover:border-green-200 hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40 dark:bg-background/60"
                             >
                               <ActionIcon className="h-4 w-4" />
                               <span>{action.label}</span>
@@ -618,11 +650,11 @@ export function Navbar() {
                   </button>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white p-4 shadow-sm">
-                  <p className="text-base font-semibold text-gray-900">
+                <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
+                  <p className="text-base font-semibold text-foreground">
                     {t('nav.getStarted')}
                   </p>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {t('nav.accountDescription')}
                   </p>
                   <div className="mt-4 space-y-2">

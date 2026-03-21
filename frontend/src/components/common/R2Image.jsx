@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Image as ImageIcon } from 'lucide-react';
 import { getPresignedReadUrl, invalidateFileUrl } from '../../lib/fileAccess';
 import { resolveR2ImageSource } from '../../lib/r2Image';
 
@@ -50,8 +51,8 @@ export function R2Image({ filePath, src, alt='', className='', expiresIn=600, fa
     return () => { cancelled = true; };
   }, [directSrc, resolvedFilePath, expiresIn, onError]);
 
-  const errorClassName = ['bg-gray-100', 'text-gray-400', 'text-xs', 'flex', 'items-center', 'justify-center', className].filter(Boolean).join(' ');
-  const loadingClassName = ['animate-pulse', 'bg-gray-100', className].filter(Boolean).join(' ');
+  const errorClassName = ['bg-muted', 'text-muted-foreground', 'text-xs', 'flex', 'items-center', 'justify-center', className].filter(Boolean).join(' ');
+  const loadingClassName = ['animate-pulse', 'bg-muted', className].filter(Boolean).join(' ');
 
   const handleImageError = useCallback(() => {
     if (!resolvedFilePath) {
@@ -84,7 +85,14 @@ export function R2Image({ filePath, src, alt='', className='', expiresIn=600, fa
   }, [err, expiresIn, onError, resolvedFilePath]);
 
   if (err) {
-    return fallback || <div className={errorClassName}>ERR</div>;
+    return fallback || (
+      <div className={errorClassName}>
+        <div className="flex flex-col items-center justify-center gap-1">
+          <ImageIcon className="h-4 w-4" />
+          <span>IMG</span>
+        </div>
+      </div>
+    );
   }
   if (!resolved) {
     return <div className={loadingClassName} />;
