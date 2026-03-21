@@ -233,6 +233,7 @@ export default function ExchangeHistoryPage() {
     pages: 1,
     total: 0,
     limit: 10,
+    status: '', // 新增状态筛选
   });
 
   const overview = useMemo(() => {
@@ -261,10 +262,16 @@ export default function ExchangeHistoryPage() {
       setLoading(true);
       setError(null);
 
-      const res = await productAPI.getExchangeTransactions({
+      const params = {
         page: pagination.page,
         limit: pagination.limit,
-      });
+      };
+
+      if (pagination.status) {
+        params.status = pagination.status;
+      }
+
+      const res = await productAPI.getExchangeTransactions(params);
 
       if (res.data?.success === false) {
         throw new Error('Exchange history request failed');
@@ -294,8 +301,12 @@ export default function ExchangeHistoryPage() {
     fetchExchanges();
   }, [fetchExchanges]);
 
-  const handlePageChange = (page) => {
-    setPagination((prev) => ({ ...prev, page }));
+  const handlePageChange = (page, status = undefined) => {
+    setPagination((prev) => ({ 
+      ...prev, 
+      page,
+      ...(status !== undefined && { status })
+    }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -358,6 +369,40 @@ export default function ExchangeHistoryPage() {
                 accentClass="bg-green-500/12 text-green-600 dark:bg-green-400/15 dark:text-green-300"
               />
             </div>
+          </div>
+        </div>
+
+        {/* 筛选与操作区 */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex-1 flex gap-2">
+            <Button
+              variant={pagination.status === '' ? 'default' : 'outline'}
+              onClick={() => handlePageChange(1, '')}
+              className="rounded-full shadow-sm"
+            >
+              全部
+            </Button>
+            <Button
+              variant={pagination.status === 'pending' ? 'default' : 'outline'}
+              onClick={() => handlePageChange(1, 'pending')}
+              className="rounded-full shadow-sm"
+            >
+              处理中
+            </Button>
+            <Button
+              variant={pagination.status === 'shipped' ? 'default' : 'outline'}
+              onClick={() => handlePageChange(1, 'shipped')}
+              className="rounded-full shadow-sm"
+            >
+              已发货
+            </Button>
+            <Button
+              variant={pagination.status === 'completed' ? 'default' : 'outline'}
+              onClick={() => handlePageChange(1, 'completed')}
+              className="rounded-full shadow-sm"
+            >
+              已完成
+            </Button>
           </div>
         </div>
 
