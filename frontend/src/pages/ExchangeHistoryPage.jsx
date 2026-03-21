@@ -81,7 +81,7 @@ function OverviewCard({ icon, label, value, hint, accentClass }) {
   const iconElement = React.createElement(icon, { className: 'h-5 w-5' });
 
   return (
-    <Card className="border-border/80 bg-card/90 shadow-sm">
+    <Card className="border border-black/5 bg-card/90 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:bg-white/5 dark:border-white/10 dark:shadow-none dark:hover:bg-white/10 dark:backdrop-blur-md">
       <CardContent className="flex items-start gap-4 p-5">
         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${accentClass}`}>
           {iconElement}
@@ -105,11 +105,11 @@ function ExchangeCard({ exchange, t }) {
   const unitPoints = quantity > 0 ? totalPoints / quantity : totalPoints;
 
   return (
-    <Card className="overflow-hidden border-border/80 bg-card shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/20 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+    <Card className="overflow-hidden border-black/5 dark:border-white/10 bg-card shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none dark:bg-white/5 dark:backdrop-blur-md">
+      <div className="flex flex-col gap-3 border-b border-black/5 dark:border-white/10 bg-muted/20 dark:bg-black/20 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <span className="rounded-full border border-border bg-background/70 px-3 py-1">
+            <span className="rounded-full border border-black/5 dark:border-white/10 bg-background/70 dark:bg-black/20 px-3 py-1">
               {t('store.history.exchangeId')}: {exchange.id}
             </span>
             <span>{t('store.history.orderDate')}: {formatDateSafe(exchange.created_at, 'yyyy-MM-dd HH:mm', '--')}</span>
@@ -129,9 +129,9 @@ function ExchangeCard({ exchange, t }) {
 
       <CardContent className="p-0">
         <div className="grid gap-0 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-          <div className="border-b border-border/70 p-6 lg:border-b-0 lg:border-r">
+          <div className="border-b border-black/5 dark:border-white/10 p-6 lg:border-b-0 lg:border-r">
             <div className="flex flex-col gap-5 sm:flex-row">
-              <div className="h-28 w-full shrink-0 overflow-hidden rounded-2xl border border-border bg-muted sm:w-28">
+              <div className="h-28 w-full shrink-0 overflow-hidden rounded-2xl border border-black/5 dark:border-white/10 bg-muted/50 sm:w-28">
                 {imageMeta.src || imageMeta.filePath ? (
                   <R2Image
                     src={imageMeta.src || undefined}
@@ -140,7 +140,7 @@ function ExchangeCard({ exchange, t }) {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+                  <div className="flex h-full w-full items-center justify-center bg-muted/50 text-muted-foreground">
                     <Package className="h-8 w-8" />
                   </div>
                 )}
@@ -155,17 +155,17 @@ function ExchangeCard({ exchange, t }) {
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-border bg-background/80 p-4">
+                  <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-background/50 dark:bg-black/20 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{t('store.history.quantity')}</p>
                     <p className="mt-2 text-xl font-semibold text-foreground">{quantity}</p>
                   </div>
-                  <div className="rounded-2xl border border-border bg-background/80 p-4">
+                  <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-background/50 dark:bg-black/20 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{t('store.history.unitPoints')}</p>
                     <p className="mt-2 text-xl font-semibold text-foreground">
                       {formatNumber(unitPoints)} {t('common.points')}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-border bg-background/80 p-4">
+                  <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-background/50 dark:bg-black/20 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{t('store.history.pointsUsed')}</p>
                     <p className="mt-2 text-xl font-semibold text-foreground">
                       {formatNumber(totalPoints)} {t('common.points')}
@@ -176,8 +176,8 @@ function ExchangeCard({ exchange, t }) {
             </div>
           </div>
 
-          <div className="space-y-4 bg-muted/15 p-6">
-            <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="space-y-4 bg-muted/10 dark:bg-black/10 p-6">
+            <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-card p-4 dark:bg-white/5 dark:backdrop-blur-sm">
               <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span>{t('store.history.deliveryInfo')}</span>
@@ -187,7 +187,7 @@ function ExchangeCard({ exchange, t }) {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-border bg-card p-4">
+            <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-card p-4 dark:bg-white/5 dark:backdrop-blur-sm">
               <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <span>{t('store.history.contactPhone')}</span>
@@ -197,7 +197,7 @@ function ExchangeCard({ exchange, t }) {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-border bg-card p-4">
+            <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-card p-4 dark:bg-white/5 dark:backdrop-blur-sm">
               <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
                 <Truck className="h-4 w-4 text-muted-foreground" />
                 <span>{t('store.history.trackingNumber')}</span>
@@ -207,7 +207,7 @@ function ExchangeCard({ exchange, t }) {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-border bg-card p-4">
+            <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-card p-4 dark:bg-white/5 dark:backdrop-blur-sm">
               <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
                 <StickyNote className="h-4 w-4 text-muted-foreground" />
                 <span>{t('store.history.notes')}</span>
