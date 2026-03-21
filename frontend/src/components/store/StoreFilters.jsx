@@ -1,64 +1,108 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Search, Filter, X, Package, Star, Tag, Loader2 } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  Loader2,
+  Search,
+  SlidersHorizontal,
+  Tag,
+  X,
+} from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
+import { productAPI } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/badge';
-import { productAPI } from '../../lib/api';
+import { Collapsible, CollapsibleContent } from '../ui/collapsible';
 
-export function StoreFilters({ 
-  filters, 
-  onFiltersChange, 
-  categories = [], 
-  isLoading = false 
+const DEFAULT_SORT = 'created_at';
+
+const buildDefaultFilters = (limit = 12) => ({
+  search: '',
+  category: '',
+  min_points: '',
+  max_points: '',
+  sort: DEFAULT_SORT,
+  page: 1,
+  limit,
+  tags: [],
+});
+
+const normalizeTagList = (value) => (Array.isArray(value) ? value : []);
+
+export function StoreFilters({
+  filters,
+  onFiltersChange,
+  categories = [],
+  isLoading = false,
 }) {
   const { t } = useTranslation();
-  const normalizeSlugValue = useCallback((value) => {
-    if (typeof value !== 'string') {
-      value = value !== undefined && value !== null ? String(value) : '';
-    }
-    const trimmed = value.trim().toLowerCase();
-    if (!trimmed) return '';
-    const slug = trimmed
-      .replace(/[^a-z0-9\-\s]+/g, '-')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-    return slug || ('tag-' + Math.random().toString(36).slice(2, 8));
-  }, []);
+  const [basicSearch, setBasicSearch] = useState(filters.search ?? '');
+  const [advancedOpen, setAdvancedOpen] = useState(Boolean(
+    filters.category || filters.min_points || filters.max_points || (Array.isArray(filters.tags) && filters.tags.length)
+  ));
+  const [advancedFilters, setAdvancedFilters] = useState({
+    category: filters.category ?? '',
+    min_points: filters.min_points ?? '',
+    max_points: filters.max_points ?? '',
+    sort: filters.sort ?? DEFAULT_SORT,
+    tags: normalizeTagList(filters.tags),
+  });
   const [tagQuery, setTagQuery] = useState('');
   const [tagSuggestions, setTagSuggestions] = useState([]);
   const [tagsLoading, setTagsLoading] = useState(false);
 
-  const selectedTags = useMemo(() => Array.isArray(filters.tags) ? filters.tags : [], [filters.tags]);
+  useEffect(() => {
+    setBasicSearch(filters.search ?? '');
+  }, [filters.search]);
 
-  const handleFilterChange = (key, value) => {
-    onFiltersChange({
-      ...filters,
-      [key]: value,
-      page: 1 // 重置到第一页
+  useEffect(() => {
+    setAdvancedFilters({
+      category: filters.category ?? '',
+      min_points: filters.min_points ?? '',
+      max_points: filters.max_points ?? '',
+      sort: filters.sort ?? DEFAULT_SORT,
+      tags: normalizeTagList(filters.tags),
     });
-  };
+  }, [filters.category, filters.min_points, filters.max_points, filters.sort, filters.tags]);
 
-  const clearFilters = () => {
-    onFiltersChange({
-      search: '',
-      category: '',
-      min_points: '',
-      max_points: '',
-      sort: 'created_at',
-      page: 1,
-      limit: filters.limit ?? 12,
-      tags: []
-    });
-  };
+  const normalizeSlugValue = useCallback((value) => {
+    if (typeof value !== 'string') {
+      value = value !== undefined && value !== null ? String(value) : '';
+    }
 
-  const hasActiveFilters = Boolean(
+    const trimmed = value.trim().toLowerCase();
+    if (!trimmed) {
+      return '';
+    }
+
+    return trimmed
+      .replace(/[^a-z0-9\-\s]+/g, '-')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }, []);
+
+  const selectedTags = useMemo(() => normalizeTagList(advancedFilters.tags), [advancedFilters.tags]);
+  const quickCategories = useMemo(() => categories.slice(0, 6), [categories]);
+
+  const activeAdvancedCount = useMemo(() => {
+    let count = 0;
+    if (filters.category) count += 1;
+    if (filters.min_points || filters.max_points) count += 1;
+    if ((filters.sort ?? DEFAULT_SORT) !== DEFAULT_SORT) count += 1;
+    if (Array.isArray(filters.tags) && filters.tags.length) count += 1;
+    return count;
+  }, [filters.category, filters.min_points, filters.max_points, filters.sort, filters.tags]);
+
+  const hasAnyFilters = Boolean(
     filters.search ||
     filters.category ||
     filters.min_points ||
     filters.max_points ||
-    selectedTags.length
+    (Array.isArray(filters.tags) && filters.tags.length) ||
+    (filters.sort ?? DEFAULT_SORT) !== DEFAULT_SORT
   );
 
   const loadTagSuggestions = useCallback(async (searchText) => {
@@ -80,11 +124,35 @@ export function StoreFilters({
   }, [loadTagSuggestions]);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
+    const handler = window.setTimeout(() => {
       loadTagSuggestions(tagQuery.trim());
     }, 250);
-    return () => clearTimeout(handler);
+
+    return () => window.clearTimeout(handler);
   }, [tagQuery, loadTagSuggestions]);
+
+  const pushFilters = (nextFilters) => {
+    onFiltersChange({
+      ...filters,
+      ...nextFilters,
+      page: 1,
+      limit: filters.limit ?? 12,
+    });
+  };
+
+  const handleQuickSearchSubmit = (event) => {
+    event.preventDefault();
+    pushFilters({ search: basicSearch.trim() });
+  };
+
+  const handleQuickCategory = (categoryValue) => {
+    setAdvancedFilters((prev) => ({ ...prev, category: categoryValue }));
+    pushFilters({ category: categoryValue });
+  };
+
+  const handleAdvancedChange = (key, value) => {
+    setAdvancedFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
   const addTag = (tag) => {
     const nameSource = tag?.name || tag?.label || tag?.value || tag;
@@ -94,325 +162,439 @@ export function StoreFilters({
     if (!rawName || !slug) {
       return;
     }
-    const normalized = { name: rawName, slug };
-    if (!normalized || !normalized.slug) {
-      return;
-    }
-    const exists = selectedTags.some((item) => (item.slug || item) === normalized.slug);
+
+    const exists = selectedTags.some((item) => (item.slug || item) === slug);
     if (exists) {
       return;
     }
-    handleFilterChange('tags', selectedTags.concat([{ name: normalized.name, slug: normalized.slug }]));
+
+    setAdvancedFilters((prev) => ({
+      ...prev,
+      tags: prev.tags.concat([{ name: rawName, slug }]),
+    }));
   };
 
-  const removeTag = (index) => {
-    const next = selectedTags.slice();
-    next.splice(index, 1);
-    handleFilterChange('tags', next);
+  const removeDraftTag = (index) => {
+    setAdvancedFilters((prev) => {
+      const nextTags = prev.tags.slice();
+      nextTags.splice(index, 1);
+      return { ...prev, tags: nextTags };
+    });
+  };
+
+  const applyAdvancedFilters = () => {
+    pushFilters({
+      category: advancedFilters.category,
+      min_points: advancedFilters.min_points,
+      max_points: advancedFilters.max_points,
+      sort: advancedFilters.sort,
+      tags: advancedFilters.tags,
+    });
+  };
+
+  const clearAllFilters = () => {
+    const nextDefaults = buildDefaultFilters(filters.limit ?? 12);
+    setBasicSearch('');
+    setAdvancedFilters({
+      category: '',
+      min_points: '',
+      max_points: '',
+      sort: DEFAULT_SORT,
+      tags: [],
+    });
+    setTagQuery('');
+    onFiltersChange(nextDefaults);
+  };
+
+  const removeAppliedFilter = (key, value) => {
+    if (key === 'search') {
+      setBasicSearch('');
+      pushFilters({ search: '' });
+      return;
+    }
+
+    if (key === 'range') {
+      setAdvancedFilters((prev) => ({ ...prev, min_points: '', max_points: '' }));
+      pushFilters({ min_points: '', max_points: '' });
+      return;
+    }
+
+    if (key === 'tag') {
+      const nextTags = normalizeTagList(filters.tags).filter((tag) => (tag.slug || tag) !== value);
+      setAdvancedFilters((prev) => ({ ...prev, tags: nextTags }));
+      pushFilters({ tags: nextTags });
+      return;
+    }
+
+    setAdvancedFilters((prev) => ({ ...prev, [key]: '' }));
+    pushFilters({ [key]: key === 'sort' ? DEFAULT_SORT : '' });
   };
 
   const sortOptions = [
-    { value: 'created_at', label: t('store.filters.sort.newest') },
+    { value: DEFAULT_SORT, label: t('store.filters.sort.newest') },
     { value: 'points_asc', label: t('store.filters.sort.pointsLowToHigh') },
     { value: 'points_desc', label: t('store.filters.sort.pointsHighToLow') },
     { value: 'popular', label: t('store.filters.sort.popular') },
-    { value: 'name', label: t('store.filters.sort.name') }
+    { value: 'name', label: t('store.filters.sort.name') },
   ];
 
+  const categoryPreview = advancedFilters.category
+    ? t(`store.categories.${advancedFilters.category}`, advancedFilters.category)
+    : t('store.filters.allCategories');
+
   return (
-    <div className="mb-6 rounded-lg border border-border bg-card/95 p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <Filter className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-lg font-semibold">{t('store.filters.title')}</h3>
-        </div>
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-4 w-4 mr-1" />
-            {t('store.filters.clear')}
-          </Button>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* 搜索框 */}
-        <div className="lg:col-span-2">
-          <label className="mb-2 block text-sm font-medium text-foreground">
-            {t('store.filters.search')}
-          </label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-            <Input
-              type="text"
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              placeholder={t('store.filters.searchPlaceholder')}
-              className="pl-10"
-            />
+    <div className="mb-8 rounded-[28px] border border-black/5 bg-card/95 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.9fr)]">
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-300">
+              <Search className="h-3.5 w-3.5" />
+              <span>{t('store.filters.quickTitle')}</span>
+            </div>
+            <div>
+              <h3 className="text-2xl font-semibold tracking-tight text-foreground">{t('store.filters.title')}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{t('store.filters.quickDescription')}</p>
+            </div>
           </div>
-        </div>
 
-        {/* 分类筛选 */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">
-            {t('store.filters.category')}
-          </label>
-          <select
-            value={filters.category}
-            onChange={(e) => handleFilterChange('category', e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-            disabled={isLoading}
-          >
-            <option value="">{t('store.filters.allCategories')}</option>
-            {categories.map((category, index) => {
+          <form onSubmit={handleQuickSearchSubmit} className="flex flex-col gap-3 md:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                value={basicSearch}
+                onChange={(event) => setBasicSearch(event.target.value)}
+                placeholder={t('store.filters.searchPlaceholder')}
+                className="h-12 rounded-2xl border-border bg-background pl-10"
+                disabled={isLoading}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" className="h-12 rounded-2xl px-5" disabled={isLoading}>
+                {t('store.filters.searchButton')}
+              </Button>
+              {filters.search ? (
+                <Button type="button" variant="outline" className="h-12 rounded-2xl px-4" onClick={() => removeAppliedFilter('search')}>
+                  <X className="mr-2 h-4 w-4" />
+                  {t('store.filters.clearSearch')}
+                </Button>
+              ) : null}
+            </div>
+          </form>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant={!filters.category ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleQuickCategory('')}
+              className="rounded-full"
+            >
+              {t('store.filters.allProducts')}
+            </Button>
+            {quickCategories.map((category, index) => {
               const key = (category.slug || category.category || category.name || `category-${index}`).toString();
               const label = category.name || category.category || key;
               const count = category.product_count ?? category.count ?? category.total ?? 0;
               return (
-                <option key={key} value={key}>
-                    {t(`store.categories.${key}`, label)} ({count})
-                </option>
+                <Button
+                  key={key}
+                  type="button"
+                  variant={filters.category === key ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleQuickCategory(key)}
+                  className="rounded-full"
+                >
+                  {t(`store.categories.${key}`, label)}
+                  <span className="ml-1 text-xs opacity-70">({count})</span>
+                </Button>
               );
             })}
-          </select>
-        </div>
-
-        {/* 排序 */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">
-            {t('store.filters.sortBy')}
-          </label>
-          <select
-            value={filters.sort}
-            onChange={(e) => handleFilterChange('sort', e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-            disabled={isLoading}
-          >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* 积分范围筛选 */}
-      <div className="mt-4">
-        <label className="mb-2 block text-sm font-medium text-foreground">
-          {t('store.filters.pointsRange')}
-        </label>
-        <div className="flex items-center space-x-3">
-          <Input
-            type="number"
-            value={filters.min_points}
-            onChange={(e) => handleFilterChange('min_points', e.target.value)}
-            placeholder={t('store.filters.minPoints')}
-            className="w-32"
-            min="0"
-          />
-          <span className="text-muted-foreground">-</span>
-          <Input
-            type="number"
-            value={filters.max_points}
-            onChange={(e) => handleFilterChange('max_points', e.target.value)}
-            placeholder={t('store.filters.maxPoints')}
-            className="w-32"
-            min="0"
-          />
-        </div>
-      </div>
-
-      {/* 标签筛选 */}
-      <div className="mt-4 border-t border-border pt-4">
-        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
-          <Tag className="h-4 w-4 text-muted-foreground" />
-          {t('store.filters.tags')}
-        </label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {selectedTags.map((tag, index) => (
-            <Badge key={`selected-tag-${tag.slug}-${index}`} variant="secondary" className="flex items-center gap-1 uppercase">
-              <span>{tag.name || tag.slug}</span>
-              <button
-                type="button"
-                className="rounded-full p-0.5 hover:bg-muted"
-                onClick={() => removeTag(index)}
-                aria-label={t('store.filters.removeTag')}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <Input
-            value={tagQuery}
-            onChange={(event) => setTagQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                if (tagQuery.trim()) {
-                  const input = tagQuery.trim();
-                  addTag({ name: input, slug: normalizeSlugValue(input) });
-                  setTagQuery('');
-                }
-              }
-            }}
-            placeholder={t('store.filters.tagPlaceholder')}
-            disabled={isLoading}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              if (tagQuery.trim()) {
-                const input = tagQuery.trim();
-                addTag({ name: input, slug: normalizeSlugValue(input) });
-                setTagQuery('');
-              }
-            }}
-            disabled={!tagQuery.trim() || isLoading}
-          >
-            {t('store.filters.addTag')}
-          </Button>
-        </div>
-        <p className="mt-1 text-xs text-muted-foreground">{t('store.filters.tagHint')}</p>
-        <div className="mt-3 rounded-md border border-border bg-muted/40">
-          <div className="flex items-center justify-between border-b border-border px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <span>{t('store.filters.suggestions')}</span>
-            {tagsLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-500" /> : null}
-          </div>
-          <div className="max-h-44 overflow-y-auto">
-            {tagSuggestions.length === 0 && !tagsLoading ? (
-              <div className="px-3 py-2 text-sm text-muted-foreground">{t('store.filters.noTagSuggestions')}</div>
-            ) : (
-              tagSuggestions.map((suggestion, index) => (
-                <button
-                  type="button"
-                  key={`tag-suggestion-${suggestion.id ?? suggestion.slug ?? suggestion.name ?? index}`}
-                  onClick={() => {
-                    addTag(suggestion);
-                    setTagQuery('');
-                  }}
-                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-foreground hover:bg-background/70"
-                >
-                  <span>{suggestion.name}</span>
-                  {suggestion.slug ? <span className="text-xs uppercase text-muted-foreground">{suggestion.slug}</span> : null}
-                </button>
-              ))
-            )}
           </div>
         </div>
-      </div>
 
-      {/* 快速筛选标签 */}
-      <div className="mt-4 border-t border-border pt-4">
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant={!filters.category ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleFilterChange('category', '')}
-            className="text-xs"
-          >
-            <Package className="h-3 w-3 mr-1" />
-            {t('store.filters.allProducts')}
-          </Button>
-          
-          {categories.slice(0, 5).map((category, index) => {
-            const key = (category.slug || category.category || category.name || `category-${index}`).toString();
-            const label = category.name || category.category || key;
-            const count = category.product_count ?? category.count ?? category.total ?? 0;
-            return (
-              <Button
-                key={key}
-                variant={filters.category === key ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleFilterChange('category', key)}
-                className="text-xs"
-              >
-                    {t(`store.categories.${key}`, label)}
-                <span className="ml-1 text-xs opacity-75">({count})</span>
-              </Button>
-            );
-          })}
+        <div className="rounded-[24px] border border-black/5 bg-muted/30 p-5 dark:border-white/10 dark:bg-black/15">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                <span>{t('store.filters.advancedTitle')}</span>
+              </div>
+              <p className="text-sm text-muted-foreground">{t('store.filters.advancedDescription')}</p>
+            </div>
 
-          <Button
-            variant={filters.sort === 'popular' ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleFilterChange('sort', 'popular')}
-            className="text-xs"
-          >
-            <Star className="h-3 w-3 mr-1" />
-            {t('store.filters.popular')}
-          </Button>
-        </div>
-      </div>
+            <Button type="button" variant="outline" className="rounded-2xl" onClick={() => setAdvancedOpen((prev) => !prev)}>
+              {advancedOpen ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
+              {t('store.filters.advancedToggle', { count: activeAdvancedCount })}
+            </Button>
+          </div>
 
-      {/* 活动筛选结果提示 */}
-      {hasActiveFilters && (
-        <div className="mt-4 rounded-lg bg-blue-500/10 p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-sm text-blue-500">
-              <Filter className="h-4 w-4" />
-              <span>{t('store.filters.activeFilters')}:</span>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-background/80 p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{t('store.filters.category')}</p>
+              <p className="mt-2 text-sm font-medium text-foreground">{categoryPreview}</p>
+            </div>
+            <div className="rounded-2xl border border-border bg-background/80 p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{t('store.filters.sortBy')}</p>
+              <p className="mt-2 text-sm font-medium text-foreground">
+                {sortOptions.find((option) => option.value === advancedFilters.sort)?.label ?? t('store.filters.sort.newest')}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-background/80 p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{t('store.filters.pointsRange')}</p>
+              <p className="mt-2 text-sm font-medium text-foreground">
+                {advancedFilters.min_points || 0} - {advancedFilters.max_points || '∞'}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-background/80 p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{t('store.filters.tags')}</p>
+              <p className="mt-2 text-sm font-medium text-foreground">
+                {selectedTags.length > 0 ? t('store.filters.tagCount', { count: selectedTags.length }) : t('store.filters.noTagsSelected')}
+              </p>
             </div>
           </div>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {filters.search && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                {t('store.filters.search')}: "{filters.search}"
-                <button
-                  onClick={() => handleFilterChange('search', '')}
-                  className="ml-1 hover:text-blue-600"
+        </div>
+      </div>
+
+      <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+        <CollapsibleContent className="mt-6">
+          <div className="rounded-[24px] border border-border bg-muted/20 p-5">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-foreground">{t('store.filters.category')}</label>
+                <select
+                  value={advancedFilters.category}
+                  onChange={(event) => handleAdvancedChange('category', event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-3 py-3 text-foreground focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  disabled={isLoading}
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            )}
-            {filters.category && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                {t(`store.categories.${filters.category}`, filters.category)}
-                <button
-                  onClick={() => handleFilterChange('category', '')}
-                  className="ml-1 hover:text-blue-600"
+                  <option value="">{t('store.filters.allCategories')}</option>
+                  {categories.map((category, index) => {
+                    const key = (category.slug || category.category || category.name || `category-${index}`).toString();
+                    const label = category.name || category.category || key;
+                    const count = category.product_count ?? category.count ?? category.total ?? 0;
+                    return (
+                      <option key={key} value={key}>
+                        {t(`store.categories.${key}`, label)} ({count})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-foreground">{t('store.filters.sortBy')}</label>
+                <select
+                  value={advancedFilters.sort}
+                  onChange={(event) => handleAdvancedChange('sort', event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-3 py-3 text-foreground focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  disabled={isLoading}
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            )}
-            {(filters.min_points || filters.max_points) && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                {filters.min_points || 0} - {filters.max_points || '∞'} {t('common.points')}
-                <button
-                  onClick={() => {
-                    handleFilterChange('min_points', '');
-                    handleFilterChange('max_points', '');
+                  {sortOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="mb-2 block text-sm font-medium text-foreground">{t('store.filters.pointsRange')}</label>
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
+                <Input
+                  type="number"
+                  value={advancedFilters.min_points}
+                  onChange={(event) => handleAdvancedChange('min_points', event.target.value)}
+                  placeholder={t('store.filters.minPoints')}
+                  min="0"
+                  className="rounded-2xl"
+                />
+                <span className="hidden text-center text-muted-foreground sm:block">-</span>
+                <Input
+                  type="number"
+                  value={advancedFilters.max_points}
+                  onChange={(event) => handleAdvancedChange('max_points', event.target.value)}
+                  placeholder={t('store.filters.maxPoints')}
+                  min="0"
+                  className="rounded-2xl"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[22px] border border-border bg-background/80 p-4">
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+                <Tag className="h-4 w-4 text-muted-foreground" />
+                {t('store.filters.tags')}
+              </label>
+
+              <div className="mb-3 flex flex-wrap gap-2">
+                {selectedTags.map((tag, index) => (
+                  <Badge key={`draft-tag-${tag.slug}-${index}`} variant="secondary" className="flex items-center gap-1 uppercase">
+                    <span>{tag.name || tag.slug}</span>
+                    <button
+                      type="button"
+                      className="rounded-full p-0.5 hover:bg-muted"
+                      onClick={() => removeDraftTag(index)}
+                      aria-label={t('store.filters.removeTag')}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-2 md:flex-row">
+                <Input
+                  value={tagQuery}
+                  onChange={(event) => setTagQuery(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      if (tagQuery.trim()) {
+                        addTag({ name: tagQuery.trim(), slug: normalizeSlugValue(tagQuery.trim()) });
+                        setTagQuery('');
+                      }
+                    }
                   }}
-                  className="ml-1 hover:text-blue-600"
+                  placeholder={t('store.filters.tagPlaceholder')}
+                  disabled={isLoading}
+                  className="rounded-2xl"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-2xl"
+                  onClick={() => {
+                    if (tagQuery.trim()) {
+                      addTag({ name: tagQuery.trim(), slug: normalizeSlugValue(tagQuery.trim()) });
+                      setTagQuery('');
+                    }
+                  }}
+                  disabled={!tagQuery.trim() || isLoading}
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            )}
-            {selectedTags.map((tag, index) => (
-              <span key={`active-tag-${tag.slug}-${index}`} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                {tag.name || tag.slug}
-                <button
-                  onClick={() => removeTag(index)}
-                  className="ml-1 hover:text-blue-600"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
+                  {t('store.filters.addTag')}
+                </Button>
+              </div>
+
+              <p className="mt-2 text-xs text-muted-foreground">{t('store.filters.tagHint')}</p>
+
+              <div className="mt-4 rounded-2xl border border-border bg-muted/40">
+                <div className="flex items-center justify-between border-b border-border px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <span>{t('store.filters.suggestions')}</span>
+                  {tagsLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-500" /> : null}
+                </div>
+                <div className="max-h-44 overflow-y-auto">
+                  {tagSuggestions.length === 0 && !tagsLoading ? (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">{t('store.filters.noTagSuggestions')}</div>
+                  ) : (
+                    tagSuggestions.map((suggestion, index) => (
+                      <button
+                        type="button"
+                        key={`tag-suggestion-${suggestion.id ?? suggestion.slug ?? suggestion.name ?? index}`}
+                        onClick={() => {
+                          addTag(suggestion);
+                          setTagQuery('');
+                        }}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-foreground hover:bg-background/70"
+                      >
+                        <span>{suggestion.name}</span>
+                        {suggestion.slug ? <span className="text-xs uppercase text-muted-foreground">{suggestion.slug}</span> : null}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="text-sm text-muted-foreground">
+                {t('store.filters.refinedResults')}
+              </div>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" className="rounded-2xl" onClick={clearAllFilters}>
+                  {t('store.filters.clear')}
+                </Button>
+                <Button type="button" className="rounded-2xl" onClick={applyAdvancedFilters} disabled={isLoading}>
+                  {t('store.filters.applyAdvanced')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {hasAnyFilters ? (
+        <div className="mt-5 rounded-[22px] border border-blue-500/15 bg-blue-500/8 p-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-300">
+              <Filter className="h-4 w-4" />
+              <span>{t('store.filters.activeFilters')}</span>
+            </div>
+            <Button type="button" variant="ghost" size="sm" onClick={clearAllFilters}>
+              {t('store.filters.clear')}
+            </Button>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {filters.search ? (
+              <button
+                type="button"
+                onClick={() => removeAppliedFilter('search')}
+                className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-800 dark:bg-blue-500/20 dark:text-blue-100"
+              >
+                <span>{t('store.filters.search')}: "{filters.search}"</span>
+                <X className="h-3 w-3" />
+              </button>
+            ) : null}
+
+            {filters.category ? (
+              <button
+                type="button"
+                onClick={() => removeAppliedFilter('category')}
+                className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-800 dark:bg-blue-500/20 dark:text-blue-100"
+              >
+                <span>{t(`store.categories.${filters.category}`, filters.category)}</span>
+                <X className="h-3 w-3" />
+              </button>
+            ) : null}
+
+            {(filters.min_points || filters.max_points) ? (
+              <button
+                type="button"
+                onClick={() => removeAppliedFilter('range')}
+                className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-800 dark:bg-blue-500/20 dark:text-blue-100"
+              >
+                <span>{filters.min_points || 0} - {filters.max_points || '∞'} {t('common.points')}</span>
+                <X className="h-3 w-3" />
+              </button>
+            ) : null}
+
+            {(filters.sort ?? DEFAULT_SORT) !== DEFAULT_SORT ? (
+              <button
+                type="button"
+                onClick={() => removeAppliedFilter('sort')}
+                className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-800 dark:bg-blue-500/20 dark:text-blue-100"
+              >
+                <span>{sortOptions.find((option) => option.value === filters.sort)?.label ?? filters.sort}</span>
+                <X className="h-3 w-3" />
+              </button>
+            ) : null}
+
+            {normalizeTagList(filters.tags).map((tag, index) => (
+              <button
+                type="button"
+                key={`applied-tag-${tag.slug || tag}-${index}`}
+                onClick={() => removeAppliedFilter('tag', tag.slug || tag)}
+                className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-800 dark:bg-blue-500/20 dark:text-blue-100"
+              >
+                <span>{tag.name || tag.slug || tag}</span>
+                <X className="h-3 w-3" />
+              </button>
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
