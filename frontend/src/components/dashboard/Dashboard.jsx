@@ -319,7 +319,7 @@ export function Dashboard() {
           />
         </div>
         
-        <div>
+        <div className="h-full">
           <QuickActions
             userStats={{
               points_balance: stats.total_points,

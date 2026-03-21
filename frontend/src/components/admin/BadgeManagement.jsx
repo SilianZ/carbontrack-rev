@@ -404,42 +404,42 @@ export default function BadgeManagement() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
+            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
               {t('common.loading')}
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border text-sm">
+                <thead className="bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.badges.table.icon')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.badges.table.name')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.badges.table.status')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.badges.table.stats')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.badges.table.auto')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.badges.table.sort')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.badges.table.updated')}
                     </th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right font-medium uppercase tracking-wider text-muted-foreground">
                       {t('common.actions')}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-border bg-card">
                   {formattedBadges.map((badge) => {
                     const ruleCount = Array.isArray(badge.auto_grant_criteria?.rules)
                       ? badge.auto_grant_criteria.rules.length
@@ -449,9 +449,9 @@ export default function BadgeManagement() {
                     const stats = badge.stats || DEFAULT_BADGE_STATS;
                     const badgeImage = resolveBadgeImage(badge);
                     return (
-                      <tr key={badge.id} className="hover:bg-gray-50">
+                      <tr key={badge.id} className="transition-colors hover:bg-muted/40">
                         <td className="px-4 py-3">
-                          <div className="w-12 h-12 rounded-full bg-gray-100 border overflow-hidden flex items-center justify-center">
+                          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border bg-muted">
                             {badgeImage.src || badgeImage.filePath ? (
                               <R2Image
                                 src={badgeImage.src || undefined}
@@ -460,13 +460,13 @@ export default function BadgeManagement() {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <Award className="h-5 w-5 text-gray-400" />
+                              <Award className="h-5 w-5 text-muted-foreground" />
                             )}
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="font-medium text-gray-900">{badge.name_zh || badge.name_en}</div>
-                          <div className="text-xs text-gray-500">{badge.name_en}</div>
+                          <div className="font-medium text-foreground">{badge.name_zh || badge.name_en}</div>
+                          <div className="text-xs text-muted-foreground">{badge.name_en}</div>
                         </td>
                         <td className="px-4 py-3">
                           <Badge variant={badge.is_active ? 'success' : 'secondary'}>
@@ -475,7 +475,7 @@ export default function BadgeManagement() {
                               : t('admin.badges.inactive')}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">
+                        <td className="px-4 py-3 text-sm text-foreground/80">
                           <div className="flex flex-col gap-1">
                             <span>{t('admin.badges.stats.summary',  { awarded: stats.awarded_records || 0, total: stats.total_records || 0 })}</span>
                             <span className="text-xs text-muted-foreground">
@@ -502,8 +502,8 @@ export default function BadgeManagement() {
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{badge.sort_order}</td>
-                        <td className="px-4 py-3 text-xs text-gray-500">
+                        <td className="px-4 py-3 text-sm text-foreground/80">{badge.sort_order}</td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground">
                           {badge.updated_at
                             ? format(new Date(badge.updated_at), 'yyyy-MM-dd HH:mm')
                             : '--'}
@@ -533,7 +533,7 @@ export default function BadgeManagement() {
                   })}
                   {formattedBadges.length === 0 && !loading && (
                     <tr>
-                      <td colSpan={8} className="px-4 py-6 text-center text-sm text-gray-500">
+                      <td colSpan={8} className="px-4 py-6 text-center text-sm text-muted-foreground">
                         {t('admin.badges.empty')}
                       </td>
                     </tr>
@@ -558,7 +558,7 @@ export default function BadgeManagement() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('admin.badges.fields.nameZh')}
                   </label>
                   <Input
@@ -569,7 +569,7 @@ export default function BadgeManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('admin.badges.fields.nameEn')}
                   </label>
                   <Input
@@ -580,7 +580,7 @@ export default function BadgeManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('admin.badges.fields.descZh')}
                   </label>
                   <Textarea
@@ -591,7 +591,7 @@ export default function BadgeManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('admin.badges.fields.descEn')}
                   </label>
                   <Textarea
@@ -603,7 +603,7 @@ export default function BadgeManagement() {
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-foreground">
                       {t('admin.badges.fields.sort')}
                     </label>
                     <Input
@@ -615,7 +615,7 @@ export default function BadgeManagement() {
                   </div>
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
-                      <p className="text-sm font-medium text-gray-700">
+                      <p className="text-sm font-medium text-foreground">
                         {t('admin.badges.fields.isActive')}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -629,7 +629,7 @@ export default function BadgeManagement() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('admin.badges.fields.icon')}
                   </label>
                   <div className="flex items-center gap-4">
@@ -677,7 +677,7 @@ export default function BadgeManagement() {
                 <div className="space-y-3 rounded-lg border bg-muted/40 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-700">
+                      <p className="text-sm font-medium text-foreground">
                         {t('admin.badges.fields.autoGrantTitle')}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -719,7 +719,7 @@ export default function BadgeManagement() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('admin.badges.fields.messageTitleZh')}
                   </label>
                   <Input
@@ -729,7 +729,7 @@ export default function BadgeManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('admin.badges.fields.messageTitleEn')}
                   </label>
                   <Input
@@ -739,7 +739,7 @@ export default function BadgeManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('admin.badges.fields.messageBodyZh')}
                   </label>
                   <Textarea
@@ -750,7 +750,7 @@ export default function BadgeManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('admin.badges.fields.messageBodyEn')}
                   </label>
                   <Textarea

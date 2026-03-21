@@ -78,7 +78,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
   };
 
   return (
-    <Card className="border-border/80 bg-card/95">
+    <Card className="flex h-full flex-col border-border/80 bg-card/95">
       <CardHeader>
         <CardTitle>{t('dashboard.quickActions.title')}</CardTitle>
         <CardDescription>
@@ -86,8 +86,8 @@ export function QuickActions({ userStats = {}, onActionClick }) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
+      <CardContent className="flex flex-1 flex-col">
+        <div className="grid auto-rows-fr grid-cols-2 gap-4">
           {actions.map((action) => {
             const Icon = action.icon;
 
@@ -95,7 +95,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
               <Button
                 key={action.id}
                 variant={action.primary ? "default" : "outline"}
-                className={`relative h-auto w-full min-w-0 overflow-hidden flex-col items-start justify-start gap-3 p-4 text-left whitespace-normal ${action.primary ? action.color : 'border-border bg-background/40 hover:bg-muted/60'
+                className={`relative flex h-full min-h-[9.5rem] w-full min-w-0 overflow-hidden flex-col items-start justify-start gap-3 p-4 text-left whitespace-normal ${action.primary ? action.color : 'border-border bg-background/40 hover:bg-muted/60'
                   }`}
                 onClick={() => handleActionClick(action)}
               >

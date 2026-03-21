@@ -30,7 +30,7 @@ const DEFAULT_FILTERS = {
 function getBackupBadge(t, passkey) {
   if (passkey?.backup_state) {
     return (
-      <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+      <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300">
         {t('admin.passkeys.backup.synced')}
       </Badge>
     );
@@ -38,14 +38,14 @@ function getBackupBadge(t, passkey) {
 
   if (passkey?.backup_eligible) {
     return (
-      <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+      <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300">
         {t('admin.passkeys.backup.available')}
       </Badge>
     );
   }
 
   return (
-    <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600">
+    <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600 dark:border-border dark:bg-muted dark:text-muted-foreground">
       {t('admin.passkeys.backup.unavailable')}
     </Badge>
   );
@@ -128,11 +128,11 @@ export function PasskeyDirectory() {
               <CardContent className="flex items-center justify-between p-5">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{card.label}</p>
-                  <p className="text-2xl font-semibold text-slate-900">
+                  <p className="text-2xl font-semibold text-foreground">
                     {statsQuery.isLoading ? '...' : Number(card.value || 0).toLocaleString()}
                   </p>
                 </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
                   <Icon className="h-5 w-5" />
                 </div>
               </CardContent>
@@ -149,7 +149,7 @@ export function PasskeyDirectory() {
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr),220px]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={filters.q}
                 onChange={(event) => handleFilterChange('q', event.target.value)}
@@ -179,46 +179,46 @@ export function PasskeyDirectory() {
               {t('common.loading')}
             </div>
           ) : passkeys.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-muted-foreground">
+            <div className="rounded-lg border border-dashed border-border bg-muted/40 px-4 py-10 text-center text-sm text-muted-foreground">
               {t('admin.passkeys.empty')}
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200 text-sm">
-                  <thead className="bg-slate-50">
+                <table className="min-w-full divide-y divide-border text-sm">
+                  <thead className="bg-muted/50">
                     <tr>
-                      <th className="px-4 py-3 text-left font-medium text-slate-500">{t('admin.passkeys.table.user')}</th>
-                      <th className="px-4 py-3 text-left font-medium text-slate-500">{t('admin.passkeys.table.label')}</th>
-                      <th className="px-4 py-3 text-left font-medium text-slate-500">{t('admin.passkeys.table.createdAt')}</th>
-                      <th className="px-4 py-3 text-left font-medium text-slate-500">{t('admin.passkeys.table.lastUsedAt')}</th>
-                      <th className="px-4 py-3 text-left font-medium text-slate-500">{t('admin.passkeys.table.signCount')}</th>
-                      <th className="px-4 py-3 text-left font-medium text-slate-500">{t('admin.passkeys.table.backup')}</th>
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t('admin.passkeys.table.user')}</th>
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t('admin.passkeys.table.label')}</th>
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t('admin.passkeys.table.createdAt')}</th>
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t('admin.passkeys.table.lastUsedAt')}</th>
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t('admin.passkeys.table.signCount')}</th>
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t('admin.passkeys.table.backup')}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 bg-white">
+                  <tbody className="divide-y divide-border bg-card">
                     {passkeys.map((passkey) => (
-                      <tr key={passkey.id} className="hover:bg-slate-50">
+                      <tr key={passkey.id} className="transition-colors hover:bg-muted/40">
                         <td className="px-4 py-3">
                           <button
                             type="button"
                             className="text-left"
                             onClick={() => navigate(`/admin/users?userUuid=${passkey.user_uuid}`)}
                           >
-                            <div className="font-medium text-slate-900">{passkey.username}</div>
-                            <div className="text-xs text-slate-500">{passkey.email}</div>
+                            <div className="font-medium text-foreground">{passkey.username}</div>
+                            <div className="text-xs text-muted-foreground">{passkey.email}</div>
                           </button>
                         </td>
-                        <td className="px-4 py-3 text-slate-700">
+                        <td className="px-4 py-3 text-foreground/80">
                           {passkey.label || t('admin.passkeys.unnamed')}
                         </td>
-                        <td className="px-4 py-3 text-slate-600">
+                        <td className="px-4 py-3 text-muted-foreground">
                           {formatDateSafe(passkey.created_at, 'yyyy-MM-dd HH:mm', '--')}
                         </td>
-                        <td className="px-4 py-3 text-slate-600">
+                        <td className="px-4 py-3 text-muted-foreground">
                           {formatDateSafe(passkey.last_used_at, 'yyyy-MM-dd HH:mm', t('admin.passkeys.neverUsed'))}
                         </td>
-                        <td className="px-4 py-3 text-slate-700">
+                        <td className="px-4 py-3 text-foreground/80">
                           {Number(passkey.sign_count || 0).toLocaleString()}
                         </td>
                         <td className="px-4 py-3">

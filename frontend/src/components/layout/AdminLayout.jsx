@@ -611,9 +611,9 @@ export default function AdminLayout() {
           <div className="relative flex min-h-[calc(100vh-4rem)] flex-col">
             <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_65%)]" />
             <div className="flex flex-1">
-              <Sidebar className="border-r border-border bg-card/80 shadow-sm backdrop-blur">
+              <Sidebar className="top-16 border-r border-border bg-card shadow-sm md:h-[calc(100svh-4rem)]">
                 <SidebarHeader className="px-5 py-6">
-                  <div className="flex items-center gap-3 rounded-2xl bg-emerald-50/80 px-3 py-2 text-sm font-semibold text-emerald-700">
+                  <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
                     <ShieldCheck className="h-4 w-4" />
                     {t('admin.title')}
                   </div>
@@ -635,8 +635,8 @@ export default function AdminLayout() {
                             size="lg"
                             variant="outline"
                             className={cn(
-                              'group justify-start rounded-2xl border border-transparent bg-transparent transition-all duration-150 hover:border-emerald-100 hover:bg-emerald-50/60',
-                              isActive && 'border-emerald-200 bg-emerald-50/80 text-emerald-700 shadow-sm'
+                              'group justify-start rounded-2xl border border-transparent bg-transparent transition-all duration-150 hover:border-emerald-200 hover:bg-emerald-50/80 dark:hover:border-emerald-500/30 dark:hover:bg-emerald-500/10',
+                              isActive && 'border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm dark:border-emerald-500/45 dark:bg-emerald-500/12 dark:text-emerald-200'
                             )}
                           >
                             <NavLink
@@ -644,14 +644,14 @@ export default function AdminLayout() {
                               className={({ isActive: navIsActive }) =>
                                 cn(
                                   'flex w-full items-center gap-3 text-sm font-medium text-muted-foreground transition-colors',
-                                  (isActive || navIsActive) && 'text-emerald-700'
+                                  (isActive || navIsActive) && 'text-emerald-700 dark:text-emerald-200'
                                 )
                               }
                             >
                               <span
                                 className={cn(
-                                  'flex h-10 w-10 items-center justify-center rounded-xl border border-transparent bg-muted text-emerald-600 transition-all group-hover:border-emerald-100 group-hover:bg-emerald-50',
-                                  isActive && 'border-emerald-200 bg-emerald-50 text-emerald-600'
+                                  'flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-100 text-emerald-700 transition-all group-hover:border-emerald-300 group-hover:bg-emerald-100 group-hover:text-emerald-700 dark:border-emerald-500/12 dark:bg-emerald-500/8 dark:text-emerald-400 dark:group-hover:border-emerald-500/30 dark:group-hover:bg-emerald-500/12 dark:group-hover:text-emerald-300',
+                                  isActive && 'border-emerald-300 bg-emerald-100 text-emerald-700 dark:border-emerald-500/35 dark:bg-emerald-500/14 dark:text-emerald-300'
                                 )}
                               >
                                 <Icon className="h-4 w-4" />

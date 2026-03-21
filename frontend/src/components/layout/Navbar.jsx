@@ -27,6 +27,7 @@ const NAV_SECTION_ORDER = ['overview', 'insights', 'marketplace'];
 export function Navbar() {
   const { t } = useTranslation();
   const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -307,7 +308,14 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/70 bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/90">
+    <nav
+      className={clsx(
+        'sticky top-0 z-50 border-b shadow-sm',
+        isAdminRoute
+          ? 'border-border bg-background'
+          : 'border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90'
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
