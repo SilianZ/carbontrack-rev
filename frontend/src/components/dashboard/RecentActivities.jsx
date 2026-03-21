@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, XCircle, AlertCircle, Eye } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useTranslation } from '../../hooks/useTranslation';
 import { formatNumber } from '../../lib/utils';
-import { ActivityDetailModal } from '../activities/ActivityDetailModal';
 
 export function RecentActivities({ activities = [], loading = false, onViewAll }) {
   const { t, tUnit } = useTranslation();
-  const [selected, setSelected] = useState(null);
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
+  const openActivityHistoryDetail = (activityId) => {
+    if (!activityId) return;
+    navigate(`/activities?activityId=${encodeURIComponent(activityId)}`);
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -117,14 +120,26 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
             <div className="text-4xl mb-2">🌱</div>
             <p className="mb-2 text-muted-foreground">{t('dashboard.noRecentActivities')}</p>
             <p className="text-sm text-muted-foreground">{t('dashboard.startRecordingHint')}</p>
-            <Button className="mt-4" onClick={() => window.location.href = '/calculate'}>
+            <Button className="mt-4" onClick={() => navigate('/calculate')}>
               {t('dashboard.recordFirstActivity')}
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
             {activities.slice(0, 5).map((activity) => (
-              <div key={activity.id} className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/60">
+              <div
+                key={activity.id}
+                role="button"
+                tabIndex={0}
+                className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                onClick={() => openActivityHistoryDetail(activity.id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openActivityHistoryDetail(activity.id);
+                  }
+                }}
+              >
                 <div className="flex-shrink-0">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/12">
                     {getStatusIcon(activity.status)}
@@ -164,7 +179,14 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
                 </div>
                 
                 <div className="flex-shrink-0">
-                  <Button variant="ghost" size="sm" onClick={() => { setSelected(activity); setOpen(true); }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openActivityHistoryDetail(activity.id);
+                    }}
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
                 </div>
@@ -181,12 +203,6 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
           </div>
         )}
       </CardContent>
-
-      <ActivityDetailModal
-        activity={selected}
-        isOpen={open}
-        onClose={() => { setOpen(false); setSelected(null); }}
-      />
     </Card>
   );
 }

@@ -295,45 +295,45 @@ export function AvatarManagement() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
+            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
               {t('common.loading')}
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border text-sm">
+                <thead className="bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.avatars.table.icon')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.avatars.table.name')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.avatars.table.category')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.avatars.table.status')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.avatars.table.sort')}
                     </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
                       {t('admin.avatars.table.updated')}
                     </th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right font-medium uppercase tracking-wider text-muted-foreground">
                       {t('common.actions')}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-border bg-card">
                   {formattedAvatars.map((avatar) => {
                     const avatarImage = resolveAvatarImage(avatar);
                     return (
-                      <tr key={avatar.id} className="hover:bg-gray-50">
+                      <tr key={avatar.id} className="transition-colors hover:bg-muted/40">
                       <td className="px-4 py-3">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border bg-gray-100 flex items-center justify-center">
+                        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border bg-muted">
                           {avatarImage.src || avatarImage.filePath ? (
                             <R2Image
                               src={avatarImage.src || undefined}
@@ -342,15 +342,15 @@ export function AvatarManagement() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <ImageIcon className="h-5 w-5 text-gray-400" />
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-gray-900">{avatar.name}</div>
-                        <div className="text-xs text-gray-500 truncate max-w-[180px]">{avatar.description}</div>
+                        <div className="font-medium text-foreground">{avatar.name}</div>
+                        <div className="max-w-[180px] truncate text-xs text-muted-foreground">{avatar.description}</div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{avatar.category || 'default'}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80">{avatar.category || 'default'}</td>
                       <td className="px-4 py-3 space-x-2">
                         <Badge variant={avatar.is_active ? 'success' : 'secondary'}>
                           {avatar.is_active
@@ -361,8 +361,8 @@ export function AvatarManagement() {
                           <Badge variant="outline">{t('admin.avatars.default')}</Badge>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{avatar.sort_order}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">
+                      <td className="px-4 py-3 text-sm text-foreground/80">{avatar.sort_order}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
                         {avatar.updated_at
                           ? format(new Date(avatar.updated_at), 'yyyy-MM-dd HH:mm')
                           : '--'}
@@ -398,7 +398,7 @@ export function AvatarManagement() {
                   })}
                   {formattedAvatars.length === 0 && !loading && (
                     <tr>
-                      <td colSpan={7} className="px-4 py-6 text-center text-sm text-gray-500">
+                      <td colSpan={7} className="px-4 py-6 text-center text-sm text-muted-foreground">
                         {t('admin.avatars.empty')} 
                       </td>
                     </tr>
@@ -422,7 +422,7 @@ export function AvatarManagement() {
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-foreground">
                   {t('admin.avatars.fields.name')}
                 </label>
                 <Input
@@ -433,7 +433,7 @@ export function AvatarManagement() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-foreground">
                   {t('admin.avatars.fields.description')}
                 </label>
                 <Textarea
@@ -444,7 +444,7 @@ export function AvatarManagement() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-foreground">
                   {t('admin.avatars.fields.category')}
                 </label>
                 <Input
@@ -455,7 +455,7 @@ export function AvatarManagement() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-foreground">
                   {t('admin.avatars.fields.icon')}
                 </label>
                 <input
@@ -479,7 +479,7 @@ export function AvatarManagement() {
                   )}
                   {t('admin.avatars.selectFile')}
                 </Button>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {t('admin.avatars.uploadHint')}
                 </p>
                 {(formValues.icon_presigned_url || formValues.icon_url || formValues.file_path) && (
@@ -497,7 +497,7 @@ export function AvatarManagement() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-foreground">
                   {t('admin.avatars.fields.sortOrder')}
                 </label>
                 <Input
@@ -507,16 +507,16 @@ export function AvatarManagement() {
                   onChange={handleInputChange}
                 />
               </div>
-              <div className="flex items-center justify-between bg-gray-50 border rounded-md px-3 py-2">
-                <span className="text-sm text-gray-700">{t('admin.avatars.fields.active')}</span>
+              <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2">
+                <span className="text-sm text-foreground">{t('admin.avatars.fields.active')}</span>
                 <Switch
                   checked={formValues.is_active}
                   onCheckedChange={handleToggle('is_active')}
                   aria-label={t('admin.avatars.fields.active')}
                 />
               </div>
-              <div className="flex items-center justify-between bg-gray-50 border rounded-md px-3 py-2">
-                <span className="text-sm text-gray-700">{t('admin.avatars.fields.default')}</span>
+              <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2">
+                <span className="text-sm text-foreground">{t('admin.avatars.fields.default')}</span>
                 <Switch
                   checked={formValues.is_default}
                   onCheckedChange={handleToggle('is_default')}

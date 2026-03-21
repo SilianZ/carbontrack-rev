@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { adminAPI } from '../../lib/api';
@@ -457,6 +457,48 @@ export default function AdminDashboardPage() {
       .slice(0, 5);
   }, [normalizedStats.trends]);
 
+  const openAdminExchangeDetail = useCallback((exchange) => {
+    if (!exchange?.id) {
+      navigate('/admin/exchanges');
+      return;
+    }
+    navigate('/admin/exchanges', {
+      state: {
+        selectedExchange: exchange,
+      },
+    });
+  }, [navigate]);
+
+  const openAdminActivityReviewDetail = useCallback((activity) => {
+    if (!activity?.id) {
+      navigate('/admin/activities?tab=review');
+      return;
+    }
+    navigate('/admin/activities?tab=review', {
+      state: {
+        selectedActivity: activity,
+      },
+    });
+  }, [navigate]);
+
+  const openAdminUserDetail = useCallback((user) => {
+    if (!user) {
+      navigate('/admin/users');
+      return;
+    }
+
+    const searchParams = new URLSearchParams();
+    const preferredUuid = user.uuid || user.user_uuid || user.userUuid || null;
+    if (preferredUuid) {
+      searchParams.set('userUuid', String(preferredUuid));
+    } else if (user.id) {
+      searchParams.set('userId', String(user.id));
+    }
+
+    const query = searchParams.toString();
+    navigate(query ? `/admin/users?${query}` : '/admin/users');
+  }, [navigate]);
+
   const summaryCards = useMemo(() => {
     const newUserShare = normalizedStats.users.total
       ? percentFormatter.format(normalizedStats.users.newUsersRatio ?? safeDivide(normalizedStats.users.new30d, normalizedStats.users.total))
@@ -648,7 +690,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 shadow-sm">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-0"
+                  className="h-4 w-4 rounded border-input bg-background text-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-0"
                   checked={autoRefresh}
                   onChange={(e) => setAutoRefresh(e.target.checked)}
                 />
@@ -1121,7 +1163,16 @@ export default function AdminDashboardPage() {
                   recent.pendingTransactions.map((item) => (
                     <div 
                       key={item.id} 
-                      className="group rounded-xl border-2 bg-gradient-to-r from-card to-amber-50/30 dark:to-amber-950/10 px-4 py-3 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                      role="button"
+                      tabIndex={0}
+                      className="group cursor-pointer rounded-xl border-2 bg-gradient-to-r from-card to-amber-50/30 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:to-amber-950/10"
+                      onClick={() => openAdminExchangeDetail(item)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          openAdminExchangeDetail(item);
+                        }
+                      }}
                     >
                       <div className="flex items-center justify-between gap-3 mb-2">
                         <span className="font-semibold text-sm truncate">
@@ -1168,7 +1219,16 @@ export default function AdminDashboardPage() {
                   recent.pendingCarbonRecords.map((item) => (
                     <div 
                       key={item.id} 
-                      className="group rounded-xl border-2 bg-gradient-to-r from-card to-green-50/30 dark:to-green-950/10 px-4 py-3 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                      role="button"
+                      tabIndex={0}
+                      className="group cursor-pointer rounded-xl border-2 bg-gradient-to-r from-card to-green-50/30 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:to-green-950/10"
+                      onClick={() => openAdminActivityReviewDetail(item)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          openAdminActivityReviewDetail(item);
+                        }
+                      }}
                     >
                       <div className="flex items-center justify-between gap-3 mb-2">
                         <span className="font-semibold text-sm truncate">
@@ -1213,7 +1273,16 @@ export default function AdminDashboardPage() {
                   recent.latestUsers.map((item) => (
                     <div 
                       key={item.id} 
-                      className="group rounded-xl border-2 bg-gradient-to-r from-card to-blue-50/30 dark:to-blue-950/10 px-4 py-3 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                      role="button"
+                      tabIndex={0}
+                      className="group cursor-pointer rounded-xl border-2 bg-gradient-to-r from-card to-blue-50/30 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:to-blue-950/10"
+                      onClick={() => openAdminUserDetail(item)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          openAdminUserDetail(item);
+                        }
+                      }}
                     >
                       <div className="flex items-center justify-between gap-3 mb-1">
                         <span className="font-semibold text-sm truncate">{item.username}</span>

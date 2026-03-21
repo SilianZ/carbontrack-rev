@@ -643,12 +643,12 @@ export function UserManagement() {
     return (
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
         {user.status === 'active' ? (
-          <span className="bg-green-100 text-green-800 flex items-center gap-1 px-2 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300">
             <CheckCircle className="h-3 w-3" />
             {t('admin.users.statusActive')}
           </span>
         ) : (
-          <span className="bg-red-100 text-red-800 flex items-center gap-1 px-2 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-red-800 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300">
             <XCircle className="h-3 w-3" />
             {t('admin.users.statusInactive')}
           </span>

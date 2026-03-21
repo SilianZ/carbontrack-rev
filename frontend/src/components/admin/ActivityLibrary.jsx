@@ -211,10 +211,10 @@ export default function ActivityLibrary() {
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="space-y-4 rounded-lg border border-border bg-card p-6 shadow-sm">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="mb-2 block text-sm font-medium text-foreground">
               {t('admin.activities.library.filters.search')}
             </label>
             <Input
@@ -224,13 +224,13 @@ export default function ActivityLibrary() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="mb-2 block text-sm font-medium text-foreground">
               {t('admin.activities.library.filters.category')}
             </label>
             <select
               value={filters.category}
               onChange={(e) => handleFilterChange('category', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
             >
               <option value="">{t('common.all')}</option>
               {categories.map((cat) => (
@@ -239,13 +239,13 @@ export default function ActivityLibrary() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="mb-2 block text-sm font-medium text-foreground">
               {t('admin.activities.library.filters.status')}
             </label>
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
             >
               <option value="active">{t('admin.activities.library.status.active')}</option>
               <option value="inactive">{t('admin.activities.library.status.inactive')}</option>
@@ -256,42 +256,42 @@ export default function ActivityLibrary() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('admin.activities.library.table.name')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('admin.activities.library.table.category')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('admin.activities.library.table.unit')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('admin.activities.library.table.carbon_factor')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('admin.activities.library.table.status')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('admin.activities.library.table.updated_at')}
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('admin.activities.library.table.actions')}
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-border bg-card">
               {query.isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-6 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-4 py-6 text-center text-sm text-muted-foreground">
                     <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                   </td>
                 </tr>
               ) : activities.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-6 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-4 py-6 text-center text-sm text-muted-foreground">
                     {t('admin.activities.library.empty')}
                   </td>
                 </tr>
@@ -307,14 +307,14 @@ export default function ActivityLibrary() {
                   return (
                     <tr key={activity.id}>
                       <td className="px-4 py-3 text-sm">
-                        <div className="font-semibold text-gray-900">{activity.name_zh}</div>
-                        <div className="text-gray-500 text-xs">{activity.name_en}</div>
+                        <div className="font-semibold text-foreground">{activity.name_zh}</div>
+                        <div className="text-xs text-muted-foreground">{activity.name_en}</div>
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <Badge variant="secondary">{activity.category || '—'}</Badge>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{activity.unit}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{Number(activity.carbon_factor).toFixed(4)}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80">{activity.unit}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80">{Number(activity.carbon_factor).toFixed(4)}</td>
                       <td className="px-4 py-3 text-sm">
                         <div className="flex items-center gap-2">
                           <Switch
@@ -322,10 +322,10 @@ export default function ActivityLibrary() {
                             checked={Boolean(activity.is_active)}
                             onCheckedChange={(checked) => handleToggleActive(activity, checked)}
                           />
-                          <span className="text-xs text-gray-600">{statusLabel}</span>
+                          <span className="text-xs text-muted-foreground">{statusLabel}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{updatedAt}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80">{updatedAt}</td>
                       <td className="px-4 py-3 text-sm text-right">
                         <div className="flex items-center justify-end gap-2">
                           {!activity.deleted_at && (
@@ -385,7 +385,7 @@ export default function ActivityLibrary() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('admin.activities.library.fields.name_zh')}
                 </label>
                 <Input
@@ -395,7 +395,7 @@ export default function ActivityLibrary() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('admin.activities.library.fields.name_en')}
                 </label>
                 <Input
@@ -408,7 +408,7 @@ export default function ActivityLibrary() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('admin.activities.library.fields.category')}
                 </label>
                 <Input
@@ -424,13 +424,13 @@ export default function ActivityLibrary() {
                 </datalist>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('admin.activities.library.fields.unit')}
                 </label>
                 <select
                   value={formState.unit}
                   onChange={(e) => handleFormChange('unit', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                 >
                   {UNIT_OPTIONS.map((unit) => (
                     <option key={unit} value={unit}>{unit}</option>
@@ -441,7 +441,7 @@ export default function ActivityLibrary() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('admin.activities.library.fields.carbon_factor')}
                 </label>
                 <Input
@@ -453,7 +453,7 @@ export default function ActivityLibrary() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('admin.activities.library.fields.sort_order')}
                 </label>
                 <Input
@@ -466,7 +466,7 @@ export default function ActivityLibrary() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('admin.activities.library.fields.description_zh')}
                 </label>
                 <Textarea
@@ -476,7 +476,7 @@ export default function ActivityLibrary() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('admin.activities.library.fields.description_en')}
                 </label>
                 <Textarea
@@ -489,7 +489,7 @@ export default function ActivityLibrary() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">
                   {t('admin.activities.library.fields.icon')}
                 </label>
                 <Input
@@ -500,7 +500,7 @@ export default function ActivityLibrary() {
               </div>
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="mb-2 block text-sm font-medium text-foreground">
                     {t('admin.activities.library.fields.is_active')}
                   </label>
                   <Switch
