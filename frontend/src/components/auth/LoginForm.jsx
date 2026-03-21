@@ -84,11 +84,6 @@ export function LoginForm() {
       if (err.name === 'NotAllowedError') {
         return;
       }
-      const status = err.response?.status;
-      if (status === 404 || status === 405) {
-        setError(t('auth.errors.PASSKEY_LOGIN_UNAVAILABLE'));
-        return;
-      }
       const responseData = err.response?.data;
       const fallbackMessage = err.response ? t('auth.loginFailed') : t('errors.network');
       setError(resolveErrorMessage(responseData, fallbackMessage));
@@ -278,15 +273,12 @@ export function LoginForm() {
 
               {IS_PASSKEY_ENABLED && (
                 <div className="space-y-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-border" />
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="bg-card px-2 text-muted-foreground">
-                        {t('auth.orContinueWith')}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <span className="h-px flex-1 bg-border" />
+                    <span className="shrink-0">
+                      {t('auth.orContinueWith')}
+                    </span>
+                    <span className="h-px flex-1 bg-border" />
                   </div>
 
                   {passkeySupport?.canAuthenticate ? (
