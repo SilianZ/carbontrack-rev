@@ -300,9 +300,12 @@ export default function ExchangeHistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
-        <div className="overflow-hidden rounded-[28px] border border-border/80 bg-gradient-to-br from-green-500/10 via-background to-blue-500/10 shadow-sm">
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
+      {/* Ambient Glow */}
+      <div className="absolute top-0 right-0 -z-10 h-[500px] w-[500px] blur-[120px] bg-gradient-to-bl from-green-50/50 via-blue-50/30 to-transparent opacity-50 dark:from-green-900/20 dark:via-blue-900/10 dark:opacity-30 pointer-events-none" />
+      
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 relative">
+        <div className="overflow-hidden rounded-[28px] border border-black/5 dark:border-white/10 bg-gradient-to-br from-green-500/10 via-background to-blue-500/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none dark:bg-white/5 dark:backdrop-blur-md">
           <div className="flex flex-col gap-6 px-6 py-7 md:px-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div className="space-y-3">
@@ -311,7 +314,7 @@ export default function ExchangeHistoryPage() {
                   <span>{t('store.viewExchangeHistory')}</span>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('store.history.title')}</h1>
+                  <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">{t('store.history.title')}</h1>
                   <p className="mt-2 max-w-2xl text-muted-foreground">{t('store.history.subtitle')}</p>
                 </div>
               </div>

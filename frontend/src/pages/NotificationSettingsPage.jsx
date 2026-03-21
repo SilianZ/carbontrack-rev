@@ -113,15 +113,19 @@ const NotificationSettingsPage = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          {t('settings.notifications.title')}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t('settings.notifications.subtitle')}
-        </p>
-      </div>
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
+      {/* Ambient Glow */}
+      <div className="absolute top-0 right-1/3 -z-10 h-[500px] w-[500px] blur-[120px] bg-gradient-to-tr from-sky-50/50 via-slate-50/30 to-transparent opacity-50 dark:from-sky-900/20 dark:via-slate-900/10 dark:opacity-30 pointer-events-none" />
+      
+      <div className="max-w-3xl mx-auto px-4 py-10 relative">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">
+            {t('settings.notifications.title')}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t('settings.notifications.subtitle')}
+          </p>
+        </div>
 
       <Card>
         <CardHeader>
@@ -233,6 +237,7 @@ const NotificationSettingsPage = () => {
           )}
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 };

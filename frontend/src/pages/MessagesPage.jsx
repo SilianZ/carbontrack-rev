@@ -159,12 +159,16 @@ export default function MessagesPage() {
   const pagination = data?.data?.pagination || {};
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('messages.title')}</h1>
-          <p className="text-muted-foreground">{t('messages.subtitle')}</p>
-        </div>
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
+      {/* Ambient Glow */}
+      <div className="absolute top-0 right-1/4 -z-10 h-[500px] w-[500px] blur-[120px] bg-gradient-to-tr from-indigo-50/50 via-purple-50/30 to-transparent opacity-50 dark:from-indigo-900/20 dark:via-purple-900/10 dark:opacity-30 pointer-events-none" />
+      
+      <div className="container mx-auto py-8 px-4 relative">
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">{t('messages.title')}</h1>
+            <p className="text-muted-foreground">{t('messages.subtitle')}</p>
+          </div>
         <div className="flex space-x-2">
           <Button
             variant="outline"
@@ -249,6 +253,7 @@ export default function MessagesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
     </div>
   );
 }

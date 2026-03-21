@@ -38,13 +38,16 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.16),_transparent_45%),linear-gradient(180deg,var(--background),color-mix(in_oklab,var(--background)_88%,var(--secondary)))] text-foreground">
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      {/* Ambient Glow */}
+      <div className="absolute top-0 left-1/2 -z-10 h-[500px] w-[800px] -translate-x-1/2 blur-[100px] bg-gradient-to-tr from-blue-50/50 via-gray-100/50 to-transparent opacity-50 dark:from-primary/20 dark:via-primary/10 dark:opacity-20 pointer-events-none" />
+
       {/* Hero Section */}
       <section className="relative py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <div className="mb-8">
-            <Leaf className="h-16 w-16 text-green-600 mx-auto mb-4" />
-            <h1 className="text-5xl font-bold mb-6">
+            <Leaf className="h-16 w-16 text-primary mx-auto mb-4" />
+            <h1 className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60 mb-6">
               {t('home.hero.title')}
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
@@ -63,12 +66,12 @@ export default function HomePage() {
             {isAuthenticated ? (
               <>
                 <Link to="/dashboard">
-                  <Button size="lg" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto rounded-full shadow-sm hover:scale-105 transition-all duration-300">
                     {t('home.hero.goToDashboard')}
                   </Button>
                 </Link>
                 <Link to="/calculate">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto rounded-full bg-white/5 backdrop-blur-md border-black/5 dark:border-white/10 hover:scale-105 transition-all duration-300">
                     {t('home.hero.recordActivity')}
                   </Button>
                 </Link>
@@ -76,12 +79,12 @@ export default function HomePage() {
             ) : (
               <>
                 <Link to="/auth/register">
-                  <Button size="lg" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto rounded-full shadow-sm hover:scale-105 transition-all duration-300">
                     {t('home.hero.getStarted')}
                   </Button>
                 </Link>
                 <Link to="/auth/login">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto rounded-full bg-white/5 backdrop-blur-md border-black/5 dark:border-white/10 hover:scale-105 transition-all duration-300">
                     {t('home.hero.signIn')}
                   </Button>
                 </Link>
@@ -112,18 +115,20 @@ export default function HomePage() {
       </Suspense>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-green-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">
+      <section className="py-24 px-4 relative overflow-hidden">
+        {/* CTA Glow */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent to-primary/5 dark:to-primary/10 pointer-events-none" />
+        <div className="max-w-4xl mx-auto text-center bg-card text-card-foreground border border-black/5 dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md rounded-3xl p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
+          <h2 className="text-3xl font-bold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">
             {t('home.cta.title')}
           </h2>
-          <p className="text-xl text-green-100 mb-8">
+          <p className="text-xl text-muted-foreground mb-8">
             {t('home.cta.subtitle')}
           </p>
           
           {!isAuthenticated && (
             <Link to="/auth/register">
-              <Button size="lg" variant="secondary">
+              <Button size="lg" className="rounded-full shadow-sm hover:scale-105 transition-all duration-300">
                 {t('home.cta.joinNow')}
               </Button>
             </Link>
