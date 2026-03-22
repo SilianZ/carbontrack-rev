@@ -2658,7 +2658,6 @@ class ProductController
 
         return ['(' . implode("\n                    OR ", $clauses) . "\n                )", $bindings];
     }
-
     /**
      * 获取兑换记录
      */

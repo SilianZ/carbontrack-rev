@@ -215,7 +215,6 @@ class AdminProductExchangeFlowTest extends TestCase
         $this->assertNull($dbExchange['tracking_number']);
         $this->assertSame('库存不足', $dbExchange['notes']);
     }
-
     public function testAdminExchangeListSupportsSearchAndSort(): void
     {
         $pdo = $this->createConnection();
