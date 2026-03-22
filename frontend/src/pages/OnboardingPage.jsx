@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { schoolAPI, profileAPI } from '../lib/api';
 import { userManager } from '../lib/auth';
@@ -6,6 +6,7 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/Card';
 import { Alert, AlertDescription } from '../components/ui/Alert';
+import Turnstile from '../components/common/Turnstile';
 import { useTranslation } from '../hooks/useTranslation';
 
 export default function OnboardingPage() {
@@ -19,6 +20,9 @@ export default function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const turnstileRef = useRef(null);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const requiresTurnstile = Boolean(import.meta.env?.VITE_TURNSTILE_SITE_KEY || import.meta.env?.MODE !== 'production');
 
   const loadSchools = useCallback(async (search) => {
     try {
@@ -49,12 +53,18 @@ export default function OnboardingPage() {
     return () => clearTimeout(timer);
   }, [currentSchoolId, loadSchools, schoolQuery]);
 
-  const ensureSchool = async (nameOrId) => {
-    if (!nameOrId) return null;
-    if (/^\d+$/.test(String(nameOrId))) return parseInt(String(nameOrId), 10);
-    // 文本名称则创建或获取
-    const res = await schoolAPI.createOrFetchSchool({ name: nameOrId });
-    return res.data?.data?.school?.id || null;
+  const ensureTurnstile = () => {
+    if (requiresTurnstile && !turnstileToken) {
+      setError(t('auth.verification.turnstileRequired'));
+      return false;
+    }
+
+    return true;
+  };
+
+  const resetTurnstile = () => {
+    setTurnstileToken('');
+    turnstileRef.current?.reset?.();
   };
 
   const onSubmit = async (e) => {
@@ -64,25 +74,25 @@ export default function OnboardingPage() {
     setSuccess('');
 
     try {
-      // 1) 学校：优先用选择的ID；若用户输入自定义文本，则创建/获取
-      let schoolId = selectedSchoolId;
-      if (!schoolId && schoolQuery) {
-        schoolId = await ensureSchool(schoolQuery);
-      }
-
-      // 2) 班级：如果有输入，创建或获取
-      // class_name 已废弃，不再处理
-
-      // 3) 更新用户资料
       const payload = {};
-      if (schoolId) payload.school_id = parseInt(schoolId, 10);
-  // 不再发送 class_name
+      if (selectedSchoolId) {
+        payload.school_id = parseInt(selectedSchoolId, 10);
+      } else if (schoolQuery.trim()) {
+        payload.new_school_name = schoolQuery.trim();
+      }
 
       if (Object.keys(payload).length === 0) {
         setError(t('onboarding.leastOneField'));
         setIsSubmitting(false);
         return;
       }
+
+      if (!ensureTurnstile()) {
+        setIsSubmitting(false);
+        return;
+      }
+
+      payload.cf_turnstile_response = turnstileToken;
 
       const res = await profileAPI.updateProfile(payload);
       if (res.data?.success) {
@@ -96,7 +106,8 @@ export default function OnboardingPage() {
         setError(res.data?.message || t('common.error'));
       }
     } catch (e) {
-      setError(e?.message || t('common.error'));
+      setError(e?.response?.data?.message || e?.message || t('common.error'));
+      resetTurnstile();
     } finally {
       setIsSubmitting(false);
     }
@@ -129,7 +140,10 @@ export default function OnboardingPage() {
                   id="schoolSearch"
                   placeholder={t('onboarding.schoolPlaceholder')}
                   value={schoolQuery}
-                  onChange={(e) => setSchoolQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSchoolQuery(e.target.value);
+                    setSelectedSchoolId('');
+                  }}
                 />
                 <div className="mt-2 max-h-40 overflow-auto rounded border border-border bg-card">
                   {schools.map((s) => (
@@ -137,7 +151,10 @@ export default function OnboardingPage() {
                       key={s.id}
                       type="button"
                       className={`w-full px-3 py-2 text-left text-foreground hover:bg-muted/60 ${String(selectedSchoolId)===String(s.id)?'bg-green-500/12 text-green-500':''}`}
-                      onClick={() => setSelectedSchoolId(String(s.id))}
+                      onClick={() => {
+                        setSelectedSchoolId(String(s.id));
+                        setSchoolQuery(s.name);
+                      }}
                     >
                       {s.name}
                     </button>
@@ -152,8 +169,28 @@ export default function OnboardingPage() {
                 {/* class_name UI 已移除 */}
               </div>
 
+              {requiresTurnstile && (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">{t('auth.turnstileNotice')}</p>
+                  <div className="flex justify-center">
+                    <Turnstile
+                      ref={turnstileRef}
+                      require={requiresTurnstile}
+                      onVerify={(token) => setTurnstileToken(token)}
+                      onExpire={() => setTurnstileToken('')}
+                      onError={() => setTurnstileToken('')}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3">
-                <Button type="submit" className="flex-1" loading={isSubmitting} disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  loading={isSubmitting}
+                  disabled={isSubmitting || (requiresTurnstile && !turnstileToken)}
+                >
                   {t('onboarding.saveAndContinue')}
                 </Button>
                 <Button
