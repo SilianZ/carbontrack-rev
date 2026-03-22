@@ -16,11 +16,11 @@ export default function AnnouncementSection() {
   const announcements = t('home.announcements.items', { returnObjects: true }) || [];
 
   return (
-    <section className="bg-gradient-to-b from-background via-background to-secondary/30 py-16 px-4">
+    <section className="py-16 px-4 relative">
       <div className="max-w-6xl mx-auto">
-        <Card className="border-border/60 bg-card/80 backdrop-blur-lg shadow-xl">
+        <Card className="border border-black/5 bg-card text-card-foreground shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-white/5 dark:border-white/10 dark:shadow-none dark:backdrop-blur-md">
           <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent">
+            <CardTitle className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">
               {t('home.announcements.title')}
             </CardTitle>
             <p className="text-muted-foreground">{t('home.announcements.subtitle')}</p>
@@ -32,8 +32,8 @@ export default function AnnouncementSection() {
                 <div
                   key={item.id || index}
                   className={cn(
-                    'group relative rounded-2xl border border-border/60 bg-card/70 p-6 shadow-sm transition-all duration-300',
-                    'hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg'
+                    'group relative rounded-2xl border border-black/5 bg-background/50 p-6 shadow-sm transition-all duration-300 dark:border-white/10 dark:bg-white/5',
+                    'hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:hover:bg-white/10 dark:hover:shadow-none'
                   )}
                 >
                   <div className="flex items-start gap-4">

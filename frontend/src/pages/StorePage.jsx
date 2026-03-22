@@ -233,13 +233,16 @@ export default function StorePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
+      {/* Ambient Glow */}
+      <div className="absolute top-0 right-0 -z-10 h-[600px] w-[600px] blur-[120px] bg-gradient-to-bl from-blue-50/50 via-purple-50/30 to-transparent opacity-50 dark:from-blue-900/20 dark:via-purple-900/10 dark:opacity-30 pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 py-8 relative">
         {/* 页面标题和用户积分 */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="mb-2 text-3xl font-bold text-foreground">
+              <h1 className="mb-2 text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">
                 {t('store.title')}
               </h1>
               <p className="text-muted-foreground">{t('store.subtitle')}</p>

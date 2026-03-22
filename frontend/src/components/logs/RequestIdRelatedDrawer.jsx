@@ -110,22 +110,27 @@ export function RequestIdRelatedDrawer({
         onClick={onClose}
         aria-label={t('common.close')}
       />
-      <div className="flex h-full w-full max-w-3xl flex-col bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b p-4">
+      <div className="flex h-full w-full max-w-3xl flex-col border-l border-border bg-background text-foreground shadow-xl">
+        <div className="flex items-center justify-between border-b border-border bg-background/95 p-4 backdrop-blur">
           <h2 className="text-lg font-semibold">
             {t('admin.systemLogs.drawer.title', { id: requestId })}
           </h2>
           <div className="flex items-center gap-2">
-            <button className="text-sm text-blue-600" onClick={onRefresh}>
+            <button type="button" className="text-sm text-primary transition-colors hover:text-primary/80" onClick={onRefresh}>
               {t('admin.systemLogs.drawer.refresh')}
             </button>
-            <button className="text-gray-500" onClick={onClose} aria-label={t('common.close')}>
+            <button
+              type="button"
+              className="text-lg leading-none text-muted-foreground transition-colors hover:text-foreground"
+              onClick={onClose}
+              aria-label={t('common.close')}
+            >
               &times;
             </button>
           </div>
         </div>
         <div className="flex-1 space-y-6 overflow-auto p-4 text-sm">
-          {loading && <div>{t('admin.systemLogs.drawer.loading')}</div>}
+          {loading && <div className="text-muted-foreground">{t('admin.systemLogs.drawer.loading')}</div>}
           {!loading && (
             <>
               <Section title={t('admin.systemLogs.drawer.systemTitle', { count: systemLogs.length })}>
@@ -138,7 +143,7 @@ export function RequestIdRelatedDrawer({
                   return (
                     <ExpandableItem
                       key={`system-${log.id}`}
-                      toneClass="bg-gray-50"
+                      toneClass="border-border bg-muted/40"
                       summary={(
                         <>
                           <KeyValueItem label={columnLabel('id')} value={log.id} />
@@ -195,7 +200,7 @@ export function RequestIdRelatedDrawer({
                 {auditLogs.map((log) => (
                   <ExpandableItem
                     key={`audit-${log.id}`}
-                    toneClass="bg-gray-50"
+                    toneClass="border-border bg-muted/40"
                     summary={(
                       <>
                         <KeyValueItem label={columnLabel('id')} value={log.id} />
@@ -239,7 +244,7 @@ export function RequestIdRelatedDrawer({
                 {errorLogs.map((log) => (
                   <ExpandableItem
                     key={`error-${log.id}`}
-                    toneClass="bg-rose-50/60"
+                    toneClass="border-rose-500/20 bg-rose-500/10"
                     summary={(
                       <>
                         <KeyValueItem label={columnLabel('request_id')} value={log.request_id || requestId} />
@@ -266,7 +271,7 @@ export function RequestIdRelatedDrawer({
                           <DetailTextBlock
                             title={columnLabel('error_message')}
                             value={log.error_message}
-                            toneClass="bg-rose-50 text-rose-700"
+                            toneClass="border border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-300"
                           />
                         )}
                       </div>
@@ -285,7 +290,7 @@ export function RequestIdRelatedDrawer({
                   return (
                     <ExpandableItem
                       key={`llm-${log.id}`}
-                      toneClass="bg-indigo-50/60"
+                      toneClass="border-indigo-500/20 bg-indigo-500/10"
                       summary={(
                         <>
                           <KeyValueItem label={columnLabel('actor_type')} value={log.actor_type} />
@@ -339,7 +344,7 @@ export function RequestIdRelatedDrawer({
                             <DetailTextBlock
                               title={t('admin.llmUsage.logs.error')}
                               value={detail?.error_message || log.error_message}
-                              toneClass="bg-rose-50 text-rose-700"
+                              toneClass="border border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-300"
                             />
                           )}
                           {detail?.usage && (
@@ -382,12 +387,12 @@ function ExpandableItem({ summary, detail, openLabel, closeLabel, onOpen, toneCl
   };
 
   return (
-    <div className={`mb-2 rounded border p-2 ${toneClass}`}>
+    <div className={`mb-2 rounded-lg border p-3 ${toneClass}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">{summary}</div>
         <button
           type="button"
-          className="text-[11px] text-blue-600"
+          className="text-[11px] text-primary transition-colors hover:text-primary/80"
           onClick={toggleOpen}
           aria-expanded={open}
         >
@@ -395,7 +400,7 @@ function ExpandableItem({ summary, detail, openLabel, closeLabel, onOpen, toneCl
         </button>
       </div>
       {open && (
-        <div className="mt-2 border-t pt-2">
+        <div className="mt-3 border-t border-border pt-3">
           {detail}
         </div>
       )}
@@ -460,7 +465,7 @@ function DetailValue({ value }) {
   const parsed = parseMaybeJson(value);
   if (typeof parsed === 'string') {
     return (
-      <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded bg-slate-900 p-3 text-[11px] text-green-200">
+      <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded border border-border bg-slate-950 p-3 text-[11px] text-slate-100">
         {parsed}
       </pre>
     );

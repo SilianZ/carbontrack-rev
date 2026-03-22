@@ -43,23 +43,25 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Light mode: extremely light gray background, pure white cards */
+  --background: oklch(0.97 0 0); /* roughly #F5F5F7 */
+  --foreground: oklch(0.2 0 0); /* deep gray, not pure black #1D1D1F */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.2 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.2 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.94 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
+  --muted: oklch(0.94 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.94 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  /* Very light borders for light mode */
+  --border: oklch(0.9 0 0 / 50%);
+  --input: oklch(0.9 0 0 / 50%);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -77,11 +79,14 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  /* Dark mode: pure black background */
+  --background: oklch(0 0 0);
+  /* Slightly off-white for text, pure white is too harsh */
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  /* Cards are slightly elevated with a very dark gray/translucent */
+  --card: oklch(0.15 0 0);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.15 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
@@ -92,7 +97,8 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  /* Extremely subtle borders for dark mode */
+  --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
