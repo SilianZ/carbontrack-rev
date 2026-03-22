@@ -509,9 +509,9 @@ export default function AdminLayout() {
                     </div>
                   </div>
 
-                  <div className="grid min-h-0 xl:grid-cols-[340px_minmax(0,1fr)]">
+                  <div className="flex min-h-0 flex-col xl:grid xl:grid-cols-[340px_minmax(0,1fr)]">
                     <aside className="order-2 flex min-h-0 flex-col border-t border-white/10 bg-white/[0.04] p-4 xl:order-1 xl:border-r xl:border-t-0">
-                      <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-4">
+                      <div className="hidden rounded-[28px] border border-white/10 bg-white/[0.04] p-4 xl:block">
                         <div className="flex items-center gap-3">
                           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400/14 text-emerald-200">
                             <Bot className="h-5 w-5" />
@@ -609,7 +609,7 @@ export default function AdminLayout() {
                       </div>
                     </aside>
 
-                    <section className="order-1 flex min-h-0 flex-col xl:order-2">
+                    <section className="order-1 flex flex-col xl:order-2 xl:min-h-0">
                       <div className="border-b border-white/10 px-5 py-4 sm:px-6">
                         <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
                           <div className="rounded-[24px] border border-white/8 bg-white/[0.045] px-4 py-3">
@@ -632,16 +632,19 @@ export default function AdminLayout() {
                         </div>
                       </div>
 
-                      <div className="flex min-h-0 flex-1 flex-col px-5 pb-5 pt-4 sm:px-6">
-                        <div className="min-h-0 flex-1">
+                      <div className="flex flex-col gap-4 px-5 pb-5 pt-4 sm:px-6 xl:min-h-0 xl:flex-1">
+                        <div className={cn(
+                          'overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.03] shadow-[0_18px_60px_rgba(15,23,42,0.18)]',
+                          visibleMessages.length === 0 ? 'min-h-[9rem]' : 'min-h-[12rem] flex-1'
+                        )}>
                           {visibleMessages.length === 0 ? (
-                            <div className="flex h-full min-h-[22rem] items-center justify-center">
-                              <div className="max-w-xl rounded-[30px] border border-white/10 bg-white/[0.045] p-8 text-center shadow-[0_30px_80px_rgba(15,23,42,0.24)]">
-                                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-emerald-400/14 text-emerald-200">
-                                  <Bot className="h-8 w-8" />
+                            <div className="flex h-full items-center justify-center p-4">
+                              <div className="max-w-lg rounded-[26px] border border-white/10 bg-white/[0.045] px-5 py-5 text-center shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] bg-emerald-400/14 text-emerald-200">
+                                  <Bot className="h-6 w-6" />
                                 </div>
-                                <div className="mt-5 text-2xl font-semibold text-white">{t('admin.command.aiConversation')}</div>
-                                <p className="mt-3 text-sm leading-7 text-slate-300">
+                                <div className="mt-3 text-lg font-semibold text-white">{t('admin.command.aiConversation')}</div>
+                                <p className="mt-2 text-sm leading-6 text-slate-300">
                                   {t('admin.command.sessionEmptyHint')}
                                 </p>
                               </div>
@@ -649,7 +652,7 @@ export default function AdminLayout() {
                           ) : (
                             <div ref={messagePanelRef} className="h-full">
                               <ScrollArea className="h-full pr-2">
-                                <div className="space-y-5 pb-4">
+                                <div className="space-y-5 p-5">
                                   {visibleMessages.map((message) => {
                                     const data = message.meta?.data || {};
                                     return (
@@ -673,65 +676,65 @@ export default function AdminLayout() {
                           )}
                         </div>
 
-                        <div className="mt-4 rounded-[30px] border border-white/10 bg-white/[0.055] p-4 shadow-[0_18px_60px_rgba(15,23,42,0.22)] backdrop-blur">
-                          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                            <div className="text-xs font-medium text-slate-300">{t('admin.command.aiHint')}</div>
-                            <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                              <span>{activeLink?.label || t('admin.command.aiConversation')}</span>
-                              {lastActivityLabel && <span>{lastActivityLabel}</span>}
+                          <div className="rounded-[30px] border border-white/10 bg-white/[0.055] p-4 shadow-[0_18px_60px_rgba(15,23,42,0.22)] backdrop-blur">
+                            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                              <div className="text-xs font-medium text-slate-300">{t('admin.command.aiHint')}</div>
+                              <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                                <span>{activeLink?.label || t('admin.command.aiConversation')}</span>
+                                {lastActivityLabel && <span>{lastActivityLabel}</span>}
+                              </div>
+                            </div>
+
+                            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px]">
+                              <Textarea
+                                value={commandQuery}
+                                onChange={(event) => setCommandQuery(event.target.value)}
+                                onKeyDown={handleCommandKeyDown}
+                                placeholder={t('admin.command.placeholder')}
+                                className="min-h-[96px] rounded-[24px] border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus-visible:border-emerald-400/40 focus-visible:ring-emerald-400/15 lg:min-h-[108px]"
+                              />
+                              <Button
+                                size="lg"
+                                className="h-auto min-h-[56px] rounded-[24px] bg-emerald-400 px-6 text-slate-950 hover:bg-emerald-300 lg:min-h-[108px] lg:min-w-[180px]"
+                                disabled={!canSendAiCommand}
+                                onClick={sendAiMessage}
+                              >
+                                {isSending ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Bot className="mr-2 h-4 w-4" />
+                                )}
+                                {isSending ? t('admin.command.aiSending') : t('admin.command.send')}
+                              </Button>
                             </div>
                           </div>
 
-                          <div className="grid gap-3 2xl:grid-cols-[minmax(0,1fr)_180px]">
-                            <Textarea
-                              value={commandQuery}
-                              onChange={(event) => setCommandQuery(event.target.value)}
-                              onKeyDown={handleCommandKeyDown}
-                              placeholder={t('admin.command.placeholder')}
-                              className="min-h-[108px] rounded-[24px] border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus-visible:border-emerald-400/40 focus-visible:ring-emerald-400/15"
-                            />
-                            <Button
-                              size="lg"
-                              className="h-auto min-h-[108px] rounded-[24px] bg-emerald-400 px-6 text-slate-950 hover:bg-emerald-300 2xl:min-w-[180px]"
-                              disabled={!canSendAiCommand}
-                              onClick={sendAiMessage}
-                            >
-                              {isSending ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <Bot className="mr-2 h-4 w-4" />
-                              )}
-                              {isSending ? t('admin.command.aiSending') : t('admin.command.send')}
-                            </Button>
+                          <div className="max-h-[13rem] overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.04] p-4 shadow-[0_18px_60px_rgba(15,23,42,0.18)] backdrop-blur xl:max-h-[15rem]">
+                            <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                              {t('admin.command.navigation')}
+                            </div>
+                            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                              {translatedLinks.map((link) => (
+                                <button
+                                  key={link.to}
+                                  type="button"
+                                  className="flex items-center justify-between rounded-[20px] border border-white/8 bg-white/[0.04] px-4 py-3 text-left transition-all hover:border-emerald-300/24 hover:bg-white/[0.08]"
+                                  onClick={() => {
+                                    navigate(link.to);
+                                    setCommandOpen(false);
+                                  }}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/8 text-emerald-200">
+                                      <link.icon className="h-4 w-4" />
+                                    </span>
+                                    <span className="text-sm font-medium text-white">{link.label}</span>
+                                  </div>
+                                  <ArrowUpRight className="h-4 w-4 text-slate-500" />
+                                </button>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-
-                        <div className="mt-4 rounded-[28px] border border-white/10 bg-white/[0.04] p-4 shadow-[0_18px_60px_rgba(15,23,42,0.18)] backdrop-blur">
-                          <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                            {t('admin.command.navigation')}
-                          </div>
-                          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                            {translatedLinks.map((link) => (
-                              <button
-                                key={link.to}
-                                type="button"
-                                className="flex items-center justify-between rounded-[20px] border border-white/8 bg-white/[0.04] px-4 py-3 text-left transition-all hover:border-emerald-300/24 hover:bg-white/[0.08]"
-                                onClick={() => {
-                                  navigate(link.to);
-                                  setCommandOpen(false);
-                                }}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/8 text-emerald-200">
-                                    <link.icon className="h-4 w-4" />
-                                  </span>
-                                  <span className="text-sm font-medium text-white">{link.label}</span>
-                                </div>
-                                <ArrowUpRight className="h-4 w-4 text-slate-500" />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
                       </div>
                     </section>
                   </div>
