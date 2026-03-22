@@ -1303,7 +1303,20 @@
       "reviewActivitiesHint": "查看并处理碳减排活动审核",
       "sendBroadcast": "发布平台公告",
       "sendBroadcastHint": "打开广播中心发送新公告",
-      "open": "搜索 / Ctrl + K"
+      "open": "AI 助手 / Ctrl + K",
+      "newConversation": "新会话",
+      "history": "最近会话",
+      "untitledConversation": "未命名会话",
+      "noConversationSummary": "暂无摘要",
+      "messagesCount": "条消息",
+      "pendingActions": "待确认 {{count}}",
+      "sessionEmptyHint": "当前没有已选会话。你可以直接输入指令，让管理员 AI 帮你查询、汇总或准备审批。",
+      "historyLoadFailed": "加载会话历史失败",
+      "decisionFailed": "处理确认结果失败",
+      "confirmAction": "确认执行",
+      "rejectAction": "取消",
+      "openSuggestion": "前往相关页面",
+      "aiEmptyMessage": "助手未返回可见内容"
     },
     "passkeys": {
       "title": "通行密钥概览",
@@ -2544,6 +2557,24 @@
         "relatedCounts": "关联：系统 {{system}} / 审计 {{audit}} / 错误 {{error}}",
         "related": "关联日志",
         "viewDetail": "查看详情"
+      },
+      "sessions": {
+        "title": "Agent 会话审计",
+        "subtitle": "按会话查看管理员 AI 的多轮往来、待确认动作与模型调用情况。",
+        "empty": "暂无会话历史",
+        "untitled": "未命名会话",
+        "noPreview": "暂无摘要",
+        "waiting": "待确认",
+        "active": "进行中",
+        "view": "查看会话",
+        "messages": "消息数",
+        "tokens": "总 Tokens",
+        "calls": "LLM 调用",
+        "lastModel": "最后模型",
+        "lastActivity": "最后活跃",
+        "status": "状态",
+        "detailTitle": "会话详情",
+        "timeline": "时间线"
       },
       "users": {
         "title": "用户配额",

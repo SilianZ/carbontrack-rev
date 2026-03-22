@@ -1307,7 +1307,20 @@
       "reviewActivitiesHint": "Open pending carbon activity reviews",
       "sendBroadcast": "Send broadcast",
       "sendBroadcastHint": "Compose a new broadcast message",
-      "open": "Search / Ctrl + K"
+      "open": "AI Assistant / Ctrl + K",
+      "newConversation": "New session",
+      "history": "Recent sessions",
+      "untitledConversation": "Untitled session",
+      "noConversationSummary": "No summary available",
+      "messagesCount": "messages",
+      "pendingActions": "{{count}} pending",
+      "sessionEmptyHint": "No session selected yet. Type an instruction and let the admin AI query data, summarize findings, or prepare approvals.",
+      "historyLoadFailed": "Failed to load AI session history",
+      "decisionFailed": "Failed to process the proposal decision",
+      "confirmAction": "Confirm",
+      "rejectAction": "Cancel",
+      "openSuggestion": "Open related page",
+      "aiEmptyMessage": "The assistant returned no visible message"
     },
     "passkeys": {
       "title": "Passkey Overview",
@@ -2548,6 +2561,24 @@
         "relatedCounts": "Related: system {{system}}, audit {{audit}}, error {{error}}",
         "related": "Related logs",
         "viewDetail": "View detail"
+      },
+      "sessions": {
+        "title": "Agent Session Audit",
+        "subtitle": "Browse admin AI multi-turn sessions, pending actions, and associated model calls.",
+        "empty": "No session history yet",
+        "untitled": "Untitled session",
+        "noPreview": "No summary available",
+        "waiting": "Waiting for confirmation",
+        "active": "Active",
+        "view": "View session",
+        "messages": "Messages",
+        "tokens": "Total tokens",
+        "calls": "LLM calls",
+        "lastModel": "Last model",
+        "lastActivity": "Last activity",
+        "status": "Status",
+        "detailTitle": "Session detail",
+        "timeline": "Timeline"
       },
       "users": {
         "title": "User Quotas",

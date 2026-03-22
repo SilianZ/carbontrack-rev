@@ -125,7 +125,16 @@ export default function AdminLlmUsagePage() {
   const [trendDays, setTrendDays] = useState(30);
   const [recentLimit] = useState(8);
   const [logQuery, setLogQuery] = useState('');
+  const [logConversationId, setLogConversationId] = useState('');
+  const [logTurnNo, setLogTurnNo] = useState('');
+  const [sessionAdminId, setSessionAdminId] = useState('');
+  const [sessionStatus, setSessionStatus] = useState('');
+  const [sessionModel, setSessionModel] = useState('');
+  const [sessionDateFrom, setSessionDateFrom] = useState('');
+  const [sessionDateTo, setSessionDateTo] = useState('');
+  const [sessionPendingFilter, setSessionPendingFilter] = useState('');
   const [selectedLogId, setSelectedLogId] = useState(null);
+  const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [requestDrawerId, setRequestDrawerId] = useState(null);
   const [related, setRelated] = useState({ system: [], audit: [], error: [], llm: [] });
   const [loadingRelated, setLoadingRelated] = useState(false);
@@ -140,12 +149,14 @@ export default function AdminLlmUsagePage() {
   );
 
   const logsQuery = useQuery(
-    ['llmUsageLogs', logQuery],
+    ['llmUsageLogs', { logQuery, logConversationId, logTurnNo }],
     async () => {
       const response = await searchLogs({
         q: logQuery,
         types: ['llm'],
-        limit_per_type: 30
+        limit_per_type: 30,
+        conversation_id: logConversationId || undefined,
+        turn_no: logTurnNo || undefined
       });
       return response.data || response;
     },
@@ -159,6 +170,39 @@ export default function AdminLlmUsagePage() {
       return response.data?.data || response.data;
     },
     { keepPreviousData: true }
+  );
+
+  const conversationsQuery = useQuery(
+    ['adminAiConversations', {
+      sessionAdminId,
+      sessionStatus,
+      sessionModel,
+      sessionDateFrom,
+      sessionDateTo,
+      sessionPendingFilter
+    }],
+    async () => {
+      const response = await adminAPI.getAiConversations({
+        limit: 20,
+        admin_id: sessionAdminId || undefined,
+        status: sessionStatus || undefined,
+        model: sessionModel || undefined,
+        date_from: sessionDateFrom || undefined,
+        date_to: sessionDateTo || undefined,
+        has_pending_action: sessionPendingFilter || undefined
+      });
+      return response.data?.data || [];
+    },
+    { keepPreviousData: true }
+  );
+
+  const conversationDetailQuery = useQuery(
+    ['adminAiConversationDetail', selectedConversationId],
+    async () => {
+      const response = await adminAPI.getAiConversation(selectedConversationId);
+      return response.data?.data || response.data;
+    },
+    { enabled: Boolean(selectedConversationId) }
   );
 
   const logDetailQuery = useQuery(
@@ -182,6 +226,7 @@ export default function AdminLlmUsagePage() {
   const recentConversations = analyticsData.recent_conversations || [];
 
   const llmLogs = logsQuery.data?.data?.llm?.items || [];
+  const conversationItems = Array.isArray(conversationsQuery.data) ? conversationsQuery.data : [];
 
   const canPrev = page > 1;
   const canNext = page < (pagination.total_pages || 1);
@@ -364,10 +409,11 @@ export default function AdminLlmUsagePage() {
             usageQuery.refetch();
             logsQuery.refetch();
             analyticsQuery.refetch();
+            conversationsQuery.refetch();
           }}
-          disabled={usageQuery.isFetching || logsQuery.isFetching || analyticsQuery.isFetching}
+          disabled={usageQuery.isFetching || logsQuery.isFetching || analyticsQuery.isFetching || conversationsQuery.isFetching}
         >
-          <RefreshCw className={cn('mr-2 h-4 w-4', (usageQuery.isFetching || logsQuery.isFetching || analyticsQuery.isFetching) && 'animate-spin')} />
+          <RefreshCw className={cn('mr-2 h-4 w-4', (usageQuery.isFetching || logsQuery.isFetching || analyticsQuery.isFetching || conversationsQuery.isFetching) && 'animate-spin')} />
           {t('admin.llmUsage.refresh')}
         </Button>
       </div>
@@ -686,6 +732,102 @@ export default function AdminLlmUsagePage() {
 
       <Card>
         <CardHeader className="space-y-4">
+          <CardTitle>{t('admin.llmUsage.sessions.title')}</CardTitle>
+          <CardDescription>{t('admin.llmUsage.sessions.subtitle')}</CardDescription>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <Input
+              value={sessionAdminId}
+              onChange={(event) => setSessionAdminId(event.target.value)}
+              placeholder={t('admin.llmUsage.sessions.filters.adminId', { defaultValue: 'Admin ID' })}
+              className="h-9"
+            />
+            <Input
+              value={sessionModel}
+              onChange={(event) => setSessionModel(event.target.value)}
+              placeholder={t('admin.llmUsage.sessions.filters.model', { defaultValue: 'Model' })}
+              className="h-9"
+            />
+            <select
+              value={sessionStatus}
+              onChange={(event) => setSessionStatus(event.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">{t('admin.llmUsage.sessions.filters.allStatus', { defaultValue: 'All statuses' })}</option>
+              <option value="active">{t('admin.llmUsage.sessions.active')}</option>
+              <option value="waiting_confirmation">{t('admin.llmUsage.sessions.waiting')}</option>
+            </select>
+            <select
+              value={sessionPendingFilter}
+              onChange={(event) => setSessionPendingFilter(event.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">{t('admin.llmUsage.sessions.filters.pendingAny', { defaultValue: 'Any pending state' })}</option>
+              <option value="true">{t('admin.llmUsage.sessions.filters.pendingYes', { defaultValue: 'Has pending action' })}</option>
+              <option value="false">{t('admin.llmUsage.sessions.filters.pendingNo', { defaultValue: 'No pending action' })}</option>
+            </select>
+            <Input
+              type="date"
+              value={sessionDateFrom}
+              onChange={(event) => setSessionDateFrom(event.target.value)}
+              className="h-9"
+            />
+            <Input
+              type="date"
+              value={sessionDateTo}
+              onChange={(event) => setSessionDateTo(event.target.value)}
+              className="h-9"
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {conversationsQuery.isLoading && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t('common.loading')}
+            </div>
+          )}
+          {!conversationsQuery.isLoading && conversationItems.length === 0 && (
+            <div className="text-sm text-muted-foreground">{t('admin.llmUsage.sessions.empty')}</div>
+          )}
+          {conversationItems.map((conversation) => (
+            <div key={conversation.conversation_id} className="rounded-xl border bg-card p-4 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="font-medium">{conversation.title || t('admin.llmUsage.sessions.untitled')}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {conversation.last_message_preview || t('admin.llmUsage.sessions.noPreview')}
+                  </div>
+                  <div className="mt-2 font-mono text-[11px] text-muted-foreground">
+                    {conversation.conversation_id}
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={conversation.status === 'waiting_confirmation' ? 'secondary' : 'outline'}>
+                    {conversation.status === 'waiting_confirmation'
+                      ? t('admin.llmUsage.sessions.waiting')
+                      : t('admin.llmUsage.sessions.active')}
+                  </Badge>
+                  <Button size="sm" variant="outline" onClick={() => setSelectedConversationId(conversation.conversation_id)}>
+                    {t('admin.llmUsage.sessions.view')}
+                  </Button>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                <span>{t('admin.llmUsage.sessions.adminId', { defaultValue: 'Admin' })}: <span className="font-mono text-foreground">#{conversation.admin_id ?? '-'}</span></span>
+                <span>{t('admin.llmUsage.sessions.messages')}: <span className="font-mono text-foreground">{conversation.message_count ?? 0}</span></span>
+                <span>{t('admin.llmUsage.sessions.tokens')}: <span className="font-mono text-foreground">{conversation.total_tokens ?? 0}</span></span>
+                <span>{t('admin.llmUsage.sessions.calls')}: <span className="font-mono text-foreground">{conversation.llm_calls ?? 0}</span></span>
+                <span>{t('admin.llmUsage.sessions.pendingCount', { defaultValue: 'Pending' })}: <span className="font-mono text-foreground">{conversation.pending_action_count ?? 0}</span></span>
+                <span>{t('admin.llmUsage.sessions.lastModel')}: <span className="font-mono text-foreground">{conversation.last_model || '-'}</span></span>
+                <span>{t('admin.llmUsage.sessions.lastActivity')}: <span className="font-mono text-foreground">{safeDate(conversation.last_activity_at)}</span></span>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <CardTitle>{t('admin.llmUsage.users.title')}</CardTitle>
@@ -790,12 +932,26 @@ export default function AdminLlmUsagePage() {
               <CardTitle>{t('admin.llmUsage.logs.title')}</CardTitle>
               <CardDescription>{t('admin.llmUsage.logs.subtitle')}</CardDescription>
             </div>
-            <Input
-              value={logQuery}
-              onChange={(event) => setLogQuery(event.target.value)}
-              placeholder={t('admin.llmUsage.logs.searchPlaceholder')}
-              className="h-9 w-64"
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                value={logQuery}
+                onChange={(event) => setLogQuery(event.target.value)}
+                placeholder={t('admin.llmUsage.logs.searchPlaceholder')}
+                className="h-9 w-64"
+              />
+              <Input
+                value={logConversationId}
+                onChange={(event) => setLogConversationId(event.target.value)}
+                placeholder={t('admin.llmUsage.logs.filters.conversationId', { defaultValue: 'Conversation ID' })}
+                className="h-9 w-52 font-mono"
+              />
+              <Input
+                value={logTurnNo}
+                onChange={(event) => setLogTurnNo(event.target.value)}
+                placeholder={t('admin.llmUsage.logs.filters.turnNo', { defaultValue: 'Turn No.' })}
+                className="h-9 w-28 font-mono"
+              />
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -810,6 +966,8 @@ export default function AdminLlmUsagePage() {
                 <thead className="bg-muted/60">
                   <tr>
                     <th className="px-4 py-2 text-left">{t('admin.llmUsage.logs.columns.time')}</th>
+                    <th className="px-4 py-2 text-left">{t('admin.llmUsage.logs.columns.conversationId', { defaultValue: 'Conversation' })}</th>
+                    <th className="px-4 py-2 text-right">{t('admin.llmUsage.logs.columns.turnNo', { defaultValue: 'Turn' })}</th>
                     <th className="px-4 py-2 text-left">{t('admin.llmUsage.logs.columns.actor')}</th>
                     <th className="px-4 py-2 text-left">{t('admin.llmUsage.logs.columns.source')}</th>
                     <th className="px-4 py-2 text-left">{t('admin.llmUsage.logs.columns.model')}</th>
@@ -825,6 +983,10 @@ export default function AdminLlmUsagePage() {
                   {llmLogs.map((log) => (
                     <tr key={log.id} className="border-b">
                       <td className="px-4 py-2 whitespace-nowrap">{safeDate(log.created_at)}</td>
+                      <td className="px-4 py-2 max-w-[180px] truncate font-mono text-[11px]" title={log.conversation_id || ''}>
+                        {log.conversation_id || '-'}
+                      </td>
+                      <td className="px-4 py-2 text-right">{log.turn_no ?? '-'}</td>
                       <td className="px-4 py-2">
                         <div className="flex items-center gap-2">
                           <Badge variant={log.actor_type === 'admin' ? 'default' : 'secondary'}>
@@ -869,7 +1031,7 @@ export default function AdminLlmUsagePage() {
                   ))}
                   {llmLogs.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">
+                      <td colSpan={12} className="px-4 py-8 text-center text-muted-foreground">
                         {t('admin.llmUsage.logs.empty')}
                       </td>
                     </tr>
@@ -880,6 +1042,67 @@ export default function AdminLlmUsagePage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={Boolean(selectedConversationId)} onOpenChange={(open) => !open && setSelectedConversationId(null)}>
+        <DialogContent className="max-w-5xl">
+          <DialogHeader>
+            <DialogTitle>{t('admin.llmUsage.sessions.detailTitle')}</DialogTitle>
+          </DialogHeader>
+          {conversationDetailQuery.isLoading && (
+            <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t('common.loading')}
+            </div>
+          )}
+          {conversationDetailQuery.data && (
+            <ScrollArea className="max-h-[70vh] pr-2">
+              <div className="space-y-4 text-xs">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <DetailItem label={t('admin.llmUsage.sessions.conversationId', { defaultValue: 'Conversation ID' })} value={conversationDetailQuery.data.conversation_id} />
+                  <DetailItem label={t('admin.llmUsage.sessions.adminId', { defaultValue: 'Admin' })} value={conversationItems.find((item) => item.conversation_id === conversationDetailQuery.data.conversation_id)?.admin_id ?? '-'} />
+                  <DetailItem label={t('admin.llmUsage.sessions.messages')} value={conversationDetailQuery.data.summary?.message_count} />
+                  <DetailItem label={t('admin.llmUsage.sessions.tokens')} value={conversationDetailQuery.data.summary?.total_tokens} />
+                  <DetailItem label={t('admin.llmUsage.sessions.calls')} value={conversationDetailQuery.data.summary?.llm_calls} />
+                  <DetailItem label={t('admin.llmUsage.sessions.lastModel')} value={conversationDetailQuery.data.summary?.last_model || '-'} />
+                  <DetailItem label={t('admin.llmUsage.sessions.status')} value={conversationDetailQuery.data.summary?.status || '-'} />
+                  <DetailItem label={t('admin.llmUsage.sessions.lastActivity')} value={safeDate(conversationDetailQuery.data.summary?.last_activity_at)} />
+                </div>
+
+                <DetailBlock title={t('admin.llmUsage.sessions.timeline')}>
+                  <div className="space-y-3">
+                    {(conversationDetailQuery.data.messages || []).map((item) => (
+                      <div key={item.id} className="rounded-xl border bg-card p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant={item.role === 'user' ? 'secondary' : 'outline'}>
+                              {item.role || item.kind}
+                            </Badge>
+                            <span className="font-mono text-[11px] text-muted-foreground">{item.action}</span>
+                            {item.status && <Badge variant="outline">{item.status}</Badge>}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">{safeDate(item.created_at)}</div>
+                        </div>
+                        {item.content && (
+                          <pre className="mt-3 whitespace-pre-wrap rounded bg-slate-900 p-3 text-[11px] text-emerald-200">
+                            {item.content}
+                          </pre>
+                        )}
+                        {item.meta?.request_id && (
+                          <div className="mt-2">
+                            <Button size="sm" variant="ghost" onClick={() => openRelated(item.meta.request_id)}>
+                              {t('admin.llmUsage.recent.related')}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </DetailBlock>
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={Boolean(selectedLogId)} onOpenChange={(open) => !open && setSelectedLogId(null)}>
         <DialogContent className="max-w-5xl">
@@ -896,6 +1119,8 @@ export default function AdminLlmUsagePage() {
             <ScrollArea className="max-h-[70vh] pr-2">
               <div className="space-y-4 text-xs">
                 <div className="grid gap-3 md:grid-cols-2">
+                  <DetailItem label={t('admin.llmUsage.logs.columns.conversationId', { defaultValue: 'Conversation' })} value={logDetailQuery.data.conversation_id || '-'} />
+                  <DetailItem label={t('admin.llmUsage.logs.columns.turnNo', { defaultValue: 'Turn' })} value={logDetailQuery.data.turn_no ?? '-'} />
                   <DetailItem label={t('admin.llmUsage.logs.columns.requestId')} value={logDetailQuery.data.request_id} />
                   <DetailItem label={t('admin.llmUsage.logs.columns.model')} value={logDetailQuery.data.model} />
                   <DetailItem label={t('admin.llmUsage.logs.columns.source')} value={logDetailQuery.data.source} />
