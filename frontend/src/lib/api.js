@@ -329,6 +329,9 @@ export const adminAPI = {
   getLlmLogDetail: (id) => api.get(`/admin/llm-usage/logs/${id}`),
 
   // AI指挥助手
+  chatWithAdminAi: (data) => api.post('/admin/ai/chat', data),
+  getAiConversations: (params = {}) => api.get('/admin/ai/conversations', { params }),
+  getAiConversation: (conversationId) => api.get(`/admin/ai/conversations/${conversationId}`),
   analyzeCommand: (data) => api.post('/admin/ai/intents', data),
   generateAnnouncementDraft: (data) => api.post('/admin/ai/announcement-drafts', data),
   getAiDiagnostics: (params = {}) => api.get('/admin/ai/diagnostics', { params }),

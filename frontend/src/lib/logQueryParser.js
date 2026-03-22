@@ -37,6 +37,12 @@ const KEY_MAP = {
   actor_type: 'actor_type',
   actor_id: 'actor_id',
   aid: 'actor_id',
+  conversation: 'conversation_id',
+  conv: 'conversation_id',
+  cid: 'conversation_id',
+  conversation_id: 'conversation_id',
+  turn: 'turn_no',
+  turn_no: 'turn_no',
   lstatus: 'llm_status',
   llm_status: 'llm_status'
 };
