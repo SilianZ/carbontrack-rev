@@ -9,6 +9,7 @@
 /.tmp_backup/
 .openclaw/
 .agent/
+.wrangler
 
 # AI Agent Instructions
 
