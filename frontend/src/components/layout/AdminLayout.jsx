@@ -456,7 +456,13 @@ export default function AdminLayout() {
         <Navbar />
         <SidebarProvider>
           <Dialog open={commandOpen} onOpenChange={setCommandOpen}>
-            <DialogContent className="w-[min(1160px,calc(100vw-1rem))] max-w-none border-none bg-transparent p-0 shadow-none">
+            <DialogContent
+              className="border-none bg-transparent p-0 shadow-none"
+              style={{
+                width: 'min(1380px, calc(100vw - 4rem))',
+                maxWidth: 'none',
+              }}
+            >
               <DialogHeader className="sr-only">
                 <DialogTitle>{t('admin.command.aiConversation')}</DialogTitle>
                 <DialogDescription>{t('admin.command.aiHint')}</DialogDescription>
@@ -503,8 +509,8 @@ export default function AdminLayout() {
                     </div>
                   </div>
 
-                  <div className="grid min-h-0 lg:grid-cols-[320px_minmax(0,1fr)]">
-                    <aside className="order-2 flex min-h-0 flex-col border-t border-white/10 bg-white/[0.04] p-4 lg:order-1 lg:border-r lg:border-t-0">
+                  <div className="grid min-h-0 xl:grid-cols-[340px_minmax(0,1fr)]">
+                    <aside className="order-2 flex min-h-0 flex-col border-t border-white/10 bg-white/[0.04] p-4 xl:order-1 xl:border-r xl:border-t-0">
                       <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-4">
                         <div className="flex items-center gap-3">
                           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400/14 text-emerald-200">
@@ -603,9 +609,9 @@ export default function AdminLayout() {
                       </div>
                     </aside>
 
-                    <section className="order-1 flex min-h-0 flex-col lg:order-2">
+                    <section className="order-1 flex min-h-0 flex-col xl:order-2">
                       <div className="border-b border-white/10 px-5 py-4 sm:px-6">
-                        <div className="grid gap-3 md:grid-cols-3">
+                        <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
                           <div className="rounded-[24px] border border-white/8 bg-white/[0.045] px-4 py-3">
                             <div className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{t('admin.command.aiConversation')}</div>
                             <div className="mt-2 flex items-center gap-2 text-lg font-semibold text-white">
@@ -676,7 +682,7 @@ export default function AdminLayout() {
                             </div>
                           </div>
 
-                          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+                          <div className="grid gap-3 2xl:grid-cols-[minmax(0,1fr)_180px]">
                             <Textarea
                               value={commandQuery}
                               onChange={(event) => setCommandQuery(event.target.value)}
@@ -686,7 +692,7 @@ export default function AdminLayout() {
                             />
                             <Button
                               size="lg"
-                              className="h-auto min-h-[108px] rounded-[24px] bg-emerald-400 px-6 text-slate-950 hover:bg-emerald-300 lg:min-w-[150px]"
+                              className="h-auto min-h-[108px] rounded-[24px] bg-emerald-400 px-6 text-slate-950 hover:bg-emerald-300 2xl:min-w-[180px]"
                               disabled={!canSendAiCommand}
                               onClick={sendAiMessage}
                             >
