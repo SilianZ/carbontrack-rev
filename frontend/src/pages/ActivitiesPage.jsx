@@ -39,7 +39,7 @@ export default function ActivitiesPage() {
     { enabled: Boolean(activityIdParam) }
   );
 
-  const activities = data?.data?.data || [];
+  const activities = useMemo(() => data?.data?.data || [], [data?.data?.data]);
   const pagination = data?.data?.pagination || {};
   const categories = categoriesData?.data?.data || [];
 

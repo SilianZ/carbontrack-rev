@@ -149,7 +149,7 @@ function formatConversationTime(value, locale = 'zh-CN') {
       hour: '2-digit',
       minute: '2-digit',
     }).format(new Date(value));
-  } catch (error) {
+  } catch {
     return String(value);
   }
 }
@@ -372,7 +372,7 @@ export default function AdminLayout() {
     } finally {
       setIsSending(false);
     }
-  }, [aiContext, commandQuery, currentConversationId, isSending, loadConversations, t]);
+  }, [aiContext, commandQuery, currentConversation, currentConversationId, isSending, loadConversations, t]);
 
   const handleProposalDecision = useCallback(async (proposalId, outcome) => {
     if (!currentConversationId || !proposalId || isDeciding) {
@@ -404,7 +404,7 @@ export default function AdminLayout() {
     } finally {
       setIsDeciding(false);
     }
-  }, [aiContext, currentConversationId, isDeciding, loadConversations, t]);
+  }, [aiContext, currentConversation, currentConversationId, isDeciding, loadConversations, t]);
 
   const startNewConversation = useCallback(() => {
     setCurrentConversationId(null);
@@ -419,7 +419,10 @@ export default function AdminLayout() {
     }
   }, [sendAiMessage]);
 
-  const commandMessages = Array.isArray(currentConversation?.messages) ? currentConversation.messages : [];
+  const commandMessages = useMemo(
+    () => (Array.isArray(currentConversation?.messages) ? currentConversation.messages : []),
+    [currentConversation?.messages],
+  );
   const visibleMessages = useMemo(
     () => commandMessages.filter((message) => message?.kind === 'message'),
     [commandMessages],
