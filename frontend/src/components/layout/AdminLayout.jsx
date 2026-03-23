@@ -29,7 +29,6 @@ import { Textarea } from '../ui/textarea';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '../../lib/utils';
 import {
-  ArrowUpRight,
   Award,
   Bot,
   Clock3,
@@ -37,7 +36,6 @@ import {
   LayoutDashboard,
   Leaf,
   Loader2,
-  MessageSquare,
   PackageCheck,
   Plus,
   Radio,
@@ -429,8 +427,6 @@ export default function AdminLayout() {
   );
   const currentSummary = currentConversation?.summary || {};
   const selectedConversationTitle = currentSummary.title || activeLink?.label || t('admin.command.aiConversation');
-  const currentMessageCount = currentSummary.message_count ?? visibleMessages.length;
-  const currentPendingCount = currentSummary.pending_action_count ?? 0;
   const lastActivityLabel = formatConversationTime(currentSummary.last_activity_at, userLocale);
   const canSendAiCommand = commandQuery.trim().length >= COMMAND_MIN_LENGTH && !isSending;
 
@@ -583,59 +579,39 @@ export default function AdminLayout() {
                         <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
                           {t('admin.command.quickActions')}
                         </div>
-                        <div className="grid gap-2">
-                          {quickActions.map((action) => (
-                            <button
-                              key={action.id}
-                              type="button"
-                              className="rounded-[22px] border border-white/8 bg-white/[0.04] px-4 py-3 text-left transition-all hover:border-emerald-300/24 hover:bg-emerald-300/10"
-                              onClick={() => {
-                                action.onSelect();
-                                setCommandOpen(false);
-                              }}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8 text-emerald-200">
-                                  <Sparkles className="h-4 w-4" />
+                        <div className="max-h-[18rem] overflow-y-auto pr-1" style={{ scrollbarGutter: 'stable' }}>
+                          <div className="grid gap-2 pb-1">
+                            {quickActions.map((action) => (
+                              <button
+                                key={action.id}
+                                type="button"
+                                className="rounded-[22px] border border-white/8 bg-white/[0.04] px-4 py-3 text-left transition-all hover:border-emerald-300/24 hover:bg-emerald-300/10"
+                                onClick={() => {
+                                  action.onSelect();
+                                  setCommandOpen(false);
+                                }}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8 text-emerald-200">
+                                    <Sparkles className="h-4 w-4" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="truncate text-sm font-medium text-white">{action.label}</div>
+                                    <div className="text-xs leading-5 text-slate-400">{action.description}</div>
+                                  </div>
                                 </div>
-                                <div className="min-w-0">
-                                  <div className="truncate text-sm font-medium text-white">{action.label}</div>
-                                  <div className="text-xs leading-5 text-slate-400">{action.description}</div>
-                                </div>
-                              </div>
-                            </button>
-                          ))}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </aside>
 
-                    <section className="order-1 flex flex-col xl:order-2 xl:min-h-0">
-                      <div className="border-b border-white/10 px-5 py-4 sm:px-6">
-                        <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
-                          <div className="rounded-[24px] border border-white/8 bg-white/[0.045] px-4 py-3">
-                            <div className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{t('admin.command.aiConversation')}</div>
-                            <div className="mt-2 flex items-center gap-2 text-lg font-semibold text-white">
-                              <MessageSquare className="h-4 w-4 text-emerald-200" />
-                              {currentMessageCount} {t('admin.command.messagesCount')}
-                            </div>
-                          </div>
-                          <div className="rounded-[24px] border border-white/8 bg-white/[0.045] px-4 py-3">
-                            <div className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{t('admin.command.history')}</div>
-                            <div className="mt-2 text-lg font-semibold text-white">{conversationList.length}</div>
-                            <div className="mt-1 text-xs text-slate-400">{t('admin.command.noConversationSummary')}</div>
-                          </div>
-                          <div className="rounded-[24px] border border-white/8 bg-white/[0.045] px-4 py-3">
-                            <div className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{t('admin.command.pendingActions', { count: currentPendingCount })}</div>
-                            <div className="mt-2 text-lg font-semibold text-white">{currentPendingCount}</div>
-                            <div className="mt-1 text-xs text-slate-400">{activeLink?.label || t('admin.command.aiConversation')}</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-4 px-5 pb-5 pt-4 sm:px-6 xl:min-h-0 xl:flex-1">
+                    <section className="order-1 flex min-h-0 flex-1 flex-col xl:order-2">
+                      <div className="flex min-h-0 flex-1 flex-col gap-4 px-5 pb-5 pt-4 sm:px-6">
                         <div className={cn(
                           'overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.03] shadow-[0_18px_60px_rgba(15,23,42,0.18)]',
-                          visibleMessages.length === 0 ? 'min-h-[9rem]' : 'min-h-[12rem] flex-1'
+                          visibleMessages.length === 0 ? 'min-h-[9rem]' : 'min-h-0 flex-1'
                         )}>
                           {visibleMessages.length === 0 ? (
                             <div className="flex h-full items-center justify-center p-4">
@@ -650,7 +626,7 @@ export default function AdminLayout() {
                               </div>
                             </div>
                           ) : (
-                            <div ref={messagePanelRef} className="h-full">
+                            <div ref={messagePanelRef} className="flex h-full min-h-0 flex-col">
                               <ScrollArea className="h-full pr-2">
                                 <div className="space-y-5 p-5">
                                   {visibleMessages.map((message) => {
@@ -709,32 +685,6 @@ export default function AdminLayout() {
                             </div>
                           </div>
 
-                          <div className="max-h-[13rem] overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.04] p-4 shadow-[0_18px_60px_rgba(15,23,42,0.18)] backdrop-blur xl:max-h-[15rem]">
-                            <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                              {t('admin.command.navigation')}
-                            </div>
-                            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                              {translatedLinks.map((link) => (
-                                <button
-                                  key={link.to}
-                                  type="button"
-                                  className="flex items-center justify-between rounded-[20px] border border-white/8 bg-white/[0.04] px-4 py-3 text-left transition-all hover:border-emerald-300/24 hover:bg-white/[0.08]"
-                                  onClick={() => {
-                                    navigate(link.to);
-                                    setCommandOpen(false);
-                                  }}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/8 text-emerald-200">
-                                      <link.icon className="h-4 w-4" />
-                                    </span>
-                                    <span className="text-sm font-medium text-white">{link.label}</span>
-                                  </div>
-                                  <ArrowUpRight className="h-4 w-4 text-slate-500" />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
                       </div>
                     </section>
                   </div>
