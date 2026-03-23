@@ -759,7 +759,10 @@ export default function AdminLayout() {
                   <div className="flex flex-wrap items-center gap-4">
                     <SidebarTrigger className="md:hidden" />
                     <div className="flex flex-col gap-2">
-                      <Badge variant="outline" className="w-fit rounded-full border-emerald-200 bg-emerald-100/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-600">
+                      <Badge
+                        variant="outline"
+                        className="w-fit rounded-full border-emerald-200 bg-emerald-100/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-700 dark:border-emerald-300/40 dark:bg-emerald-500/18 dark:text-emerald-100 dark:shadow-[0_0_0_1px_rgba(110,231,183,0.08)]"
+                      >
                         {t('admin.header.section')}
                       </Badge>
                       <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{activeLink?.label}</h1>

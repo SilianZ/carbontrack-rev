@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'path'
 
 function normalizeApiBaseUrl(value) {
@@ -26,11 +27,20 @@ export default defineConfig(({ mode }) => {
   const rawBuildId = (env.CF_PAGES_COMMIT_SHA || 'dev').toString().trim()
   const buildId = rawBuildId.length > 12 ? rawBuildId.slice(0, 12) : rawBuildId
   const apiBaseUrl = resolveApiBaseUrl(env)
+  const shouldAnalyze = mode === 'analyze' || env.ANALYZE === 'true'
 
   return {
     plugins: [
       react(),
       tailwindcss(),
+      shouldAnalyze &&
+        visualizer({
+          filename: 'dist/stats.html',
+          gzipSize: true,
+          brotliSize: true,
+          open: false,
+          template: 'treemap',
+        }),
     ],
     resolve: {
       alias: {
