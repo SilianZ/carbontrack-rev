@@ -37,6 +37,7 @@ const AdminAvatarsPage = React.lazy(() => import('../pages/admin/Avatars'));
 const AdminProductsPage = React.lazy(() => import('../pages/admin/Products'));
 const AdminExchangesPage = React.lazy(() => import('../pages/admin/Exchanges'));
 const AdminBroadcastPage = React.lazy(() => import('../pages/admin/Broadcast'));
+const AdminAiWorkspacePage = React.lazy(() => import('../pages/admin/AiWorkspace'));
 const AdminSystemLogsPage = React.lazy(() => import('../pages/admin/SystemLogs'));
 const AdminDiagnosticsPage = React.lazy(() => import('../pages/admin/Diagnostics'));
 const AdminLlmUsagePage = React.lazy(() => import('../pages/admin/LlmUsage'));
@@ -99,6 +100,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: 'dashboard', element: <React.Suspense fallback={loadingSpinner}><AdminDashboardPage /></React.Suspense> },
+      { path: 'ai', element: <React.Suspense fallback={loadingSpinner}><AdminAiWorkspacePage /></React.Suspense> },
       { path: 'passkeys', element: <React.Suspense fallback={loadingSpinner}><AdminPasskeysPage /></React.Suspense> },
       { path: 'users', element: <React.Suspense fallback={loadingSpinner}><AdminUsersPage /></React.Suspense> },
       { path: 'users/groups', element: <React.Suspense fallback={loadingSpinner}><AdminUserGroupsPage /></React.Suspense> },
