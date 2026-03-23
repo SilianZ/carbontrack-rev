@@ -428,11 +428,12 @@ export default function AdminAiWorkspacePage() {
     },
     {
       enabled: Boolean(selectedConversationId),
-      keepPreviousData: true,
     }
   );
 
   const activeConversation = isCreatingConversation ? null : (conversationDetailQuery.data || null);
+  const activeConversationId = activeConversation?.conversation_id == null ? null : String(activeConversation.conversation_id);
+  const normalizedSelectedConversationId = selectedConversationId == null ? null : String(selectedConversationId);
   const visibleMessages = useMemo(
     () => (Array.isArray(activeConversation?.messages) ? activeConversation.messages.filter((item) => item?.kind === 'message') : []),
     [activeConversation]
@@ -446,6 +447,9 @@ export default function AdminAiWorkspacePage() {
     queryClient.invalidateQueries(['adminAiWorkspace']);
     queryClient.invalidateQueries(['adminAiConversations', currentAdminId]);
   }, [currentAdminId, queryClient]);
+
+  const hasStaleConversationDetail = Boolean(normalizedSelectedConversationId)
+    && activeConversationId !== normalizedSelectedConversationId;
 
   const sendMutation = useMutation(
     async ({ message, conversationId }) => adminAPI.chatWithAdminAi({
@@ -482,8 +486,8 @@ export default function AdminAiWorkspacePage() {
   );
 
   const decisionMutation = useMutation(
-    async ({ proposalId, outcome }) => adminAPI.chatWithAdminAi({
-      conversation_id: selectedConversationId,
+    async ({ proposalId, outcome, conversationId }) => adminAPI.chatWithAdminAi({
+      conversation_id: conversationId,
       context: aiContext,
       decision: {
         proposal_id: proposalId,
@@ -492,16 +496,19 @@ export default function AdminAiWorkspacePage() {
       source: 'admin:/admin/ai',
     }),
     {
-      onSuccess: (response) => {
+      onSuccess: (response, variables) => {
         const payload = response.data || {};
+        const previousConversation = variables?.conversationId
+          ? queryClient.getQueryData(['adminAiConversation', variables.conversationId])
+          : null;
         const nextConversation = buildFallbackConversation(
           payload.conversation || null,
-          payload.conversation_id || selectedConversationId,
-          activeConversation,
+          payload.conversation_id || variables?.conversationId || null,
+          previousConversation,
           null,
           payload.message || null
         );
-        const nextConversationId = payload.conversation_id || selectedConversationId;
+        const nextConversationId = payload.conversation_id || variables?.conversationId || null;
 
         if (nextConversationId) {
           queryClient.setQueryData(['adminAiConversation', nextConversationId], nextConversation);
@@ -532,6 +539,7 @@ export default function AdminAiWorkspacePage() {
     writeCount: managementActions.filter((item) => item.risk_level === 'write').length,
     confirmationCount: managementActions.filter((item) => item.requires_confirmation).length,
   }), [managementActions]);
+  const disableProposalActions = decisionMutation.isLoading || hasStaleConversationDetail;
 
   const handleSelectConversation = useCallback((conversationId) => {
     setIsCreatingConversation(false);
@@ -754,10 +762,18 @@ export default function AdminAiWorkspacePage() {
                         <ConversationMessageBubble
                           key={message.id}
                           message={message}
-                          disabled={decisionMutation.isLoading}
+                          disabled={disableProposalActions}
                           onNavigateSuggestion={handleNavigateSuggestion}
-                          onConfirmProposal={(proposalId) => decisionMutation.mutate({ proposalId, outcome: 'confirm' })}
-                          onRejectProposal={(proposalId) => decisionMutation.mutate({ proposalId, outcome: 'reject' })}
+                          onConfirmProposal={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
+                            proposalId,
+                            outcome: 'confirm',
+                            conversationId: normalizedSelectedConversationId,
+                          })}
+                          onRejectProposal={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
+                            proposalId,
+                            outcome: 'reject',
+                            conversationId: normalizedSelectedConversationId,
+                          })}
                           t={t}
                         />
                       ))}
@@ -830,9 +846,17 @@ export default function AdminAiWorkspacePage() {
                 <PendingActionCard
                   key={action.proposal_id}
                   action={action}
-                  disabled={decisionMutation.isLoading}
-                  onConfirm={(proposalId) => decisionMutation.mutate({ proposalId, outcome: 'confirm' })}
-                  onReject={(proposalId) => decisionMutation.mutate({ proposalId, outcome: 'reject' })}
+                  disabled={disableProposalActions}
+                  onConfirm={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
+                    proposalId,
+                    outcome: 'confirm',
+                    conversationId: normalizedSelectedConversationId,
+                  })}
+                  onReject={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
+                    proposalId,
+                    outcome: 'reject',
+                    conversationId: normalizedSelectedConversationId,
+                  })}
                   t={t}
                 />
               )) : (
