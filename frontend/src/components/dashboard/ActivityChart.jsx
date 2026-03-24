@@ -14,7 +14,7 @@ export function ActivityChart({
   color = '#10b981',
   loading = false 
 }) {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const axisColor = isDark ? 'rgba(244, 244, 245, 0.72)' : '#666';
@@ -48,7 +48,7 @@ export function ActivityChart({
 
   const formatTooltipValue = (value, name) => {
     if (name === 'carbon_saved') {
-      return [`${value} kg CO₂`, t('activities.carbonSaved')];
+      return [`${value} ${t('dashboard.carbonUnit')}`, t('activities.carbonSaved')];
     }
     if (name === 'points') {
       return [`${value} ${t('dashboard.points')}`, t('dashboard.points')];
@@ -63,7 +63,7 @@ export function ActivityChart({
     // 如果是日期格式，进行格式化
     if (typeof value === 'string' && value.includes('-')) {
       const date = new Date(value);
-      return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString(currentLanguage, { month: 'short', day: 'numeric' });
     }
     return value;
   };

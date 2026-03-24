@@ -1,6 +1,7 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export function StatsCard({ 
   title, 
@@ -12,6 +13,7 @@ export function StatsCard({
   color = 'blue',
   loading = false 
 }) {
+  const { t, currentLanguage } = useTranslation();
   const colorClasses = {
     blue: {
       bg: 'bg-blue-500/12',
@@ -84,7 +86,7 @@ export function StatsCard({
         <div className="space-y-2">
           <div className="flex items-baseline gap-2">
             <span className={`text-2xl font-bold ${classes.value}`}>
-              {typeof value === 'number' ? value.toLocaleString() : value}
+              {typeof value === 'number' ? value.toLocaleString(currentLanguage) : value}
             </span>
             {unit && (
               <span className="text-sm text-muted-foreground">{unit}</span>
@@ -100,7 +102,7 @@ export function StatsCard({
                   change
                 }
               </span>
-              <span className="ml-1 text-muted-foreground">vs 上月</span>
+              <span className="ml-1 text-muted-foreground">{t('dashboard.vsLastMonth')}</span>
             </div>
           )}
         </div>

@@ -487,10 +487,17 @@
     "streakRank": "Rank",
     "streakDays": "days",
     "streakEmpty": "No streak data yet",
+    "vsLastMonth": "vs last month",
     "loadError": "Failed to load dashboard data",
     "notLoggedIn": "Please log in to access the dashboard",
     "noDataAvailable": "No data available yet",
     "startRecordingActivities": "Start recording activities to see your progress",
+    "carbonUnit": "kg CO₂",
+    "rankUnit": "of {{total}}",
+    "leaderboardUnknownName": "Unknown user",
+    "avatarAlt": "Avatar",
+    "badgeImageAlt": "Badge icon",
+    "imageFallback": "Image",
     "quickActions": {
       "title": "Quick Actions",
       "description": "Common actions to get you started",
@@ -509,7 +516,8 @@
       "pointsHint": "Points Available",
       "pointsHintDesc": "You currently have {{current}} points and need {{needed}} more to redeem a product",
       "pendingReviews": "Pending Reviews",
-      "pendingReviewsDesc": "{{count}} activities pending review"
+      "pendingReviewsDesc": "{{count}} activities pending review",
+      "badgeOverflow": "{{count}}+"
     },
     "stats": {
       "thisMonth": "This Month",
@@ -527,6 +535,7 @@
     "badgeUnlocked": "Unlocked",
     "badgeLocked": "Locked",
     "badgeAwardedAt": "Unlocked on",
+    "badgeAwardedAtValue": "Unlocked on {{date}}",
     "monthlyAchievementsDescription": "Track how your climate impact evolves each month.",
     "currentMonthAchievement": "{{month}} snapshot",
     "monthlyPointsLabel": "Points earned",
