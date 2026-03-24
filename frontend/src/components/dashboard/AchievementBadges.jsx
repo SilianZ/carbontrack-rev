@@ -7,6 +7,7 @@ import { resolveR2ImageSource } from '../../lib/r2Image';
 
 export function AchievementBadges({ badges = [], userBadges = [], loading = false, onTriggerAuto, isAdmin = false }) {
   const { t, currentLanguage } = useTranslation();
+  const isChineseLocale = currentLanguage?.toLowerCase().startsWith('zh');
   const ownedMap = new Map();
   userBadges.forEach((entry) => {
     const record = entry?.user_badge || {};
@@ -20,7 +21,7 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
   const completion = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
   const topBadges = badges.slice(0, 8);
   const getBadgeName = (badge) => {
-    if (currentLanguage === 'zh') {
+    if (isChineseLocale) {
       return badge.name_zh || badge.name_en || t('dashboard.leaderboardUnknownName');
     }
     return badge.name_en || badge.name_zh || t('dashboard.leaderboardUnknownName');
@@ -104,7 +105,7 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                     <p className="text-sm font-semibold text-foreground">{getBadgeName(badge)}</p>
                     {badge.name_zh && badge.name_en && badge.name_zh !== badge.name_en && (
                       <p className="text-xs text-muted-foreground">
-                        {currentLanguage === 'zh' ? badge.name_en : badge.name_zh}
+                        {isChineseLocale ? badge.name_en : badge.name_zh}
                       </p>
                     )}
                   </div>

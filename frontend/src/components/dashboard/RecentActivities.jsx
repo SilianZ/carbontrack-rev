@@ -10,6 +10,7 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
   const { t, tUnit, currentLanguage } = useTranslation();
   const navigate = useNavigate();
   const carbonUnit = t('dashboard.carbonUnit');
+  const isChineseLocale = currentLanguage?.toLowerCase().startsWith('zh');
 
   const openActivityHistoryDetail = (activityId) => {
     if (!activityId) return;
@@ -61,7 +62,7 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
   };
 
   const getActivityName = (activity) => {
-    if (currentLanguage === 'zh') {
+    if (isChineseLocale) {
       return activity.activity_name_zh || activity.activity_name_en || activity.activity_name || t('activities.unknownActivity');
     }
     return activity.activity_name_en || activity.activity_name_zh || activity.activity_name || t('activities.unknownActivity');
