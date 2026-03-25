@@ -29,6 +29,9 @@ import { ScrollArea } from '../../components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/Alert';
 
 const COMMAND_MIN_LENGTH = 2;
+const PANEL_CLASS = 'rounded-[32px] border border-slate-200/75 bg-white/78 shadow-[0_22px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/58 dark:shadow-none';
+const INNER_PANEL_CLASS = 'rounded-[26px] border border-white/70 bg-white/78 shadow-[0_18px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/58 dark:shadow-none';
+const EYEBROW_CLASS = 'text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground';
 
 function buildRouteWithQuery(route, query = {}) {
   if (!route) return null;
@@ -113,25 +116,37 @@ function formatConversationTime(value, locale = 'zh-CN') {
   }
 }
 
-function StatusPill({ children, tone = 'neutral' }) {
+function StatusPill({ children, tone = 'neutral', className }) {
   const toneClass = tone === 'success'
-    ? 'border-emerald-200/80 bg-emerald-50/90 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200'
+    ? 'border-emerald-200/80 bg-emerald-50/88 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/12 dark:text-emerald-200'
     : tone === 'warning'
-      ? 'border-amber-200/80 bg-amber-50/90 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200'
-      : 'border-slate-200/80 bg-white/85 text-slate-600 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-300';
+      ? 'border-amber-200/80 bg-amber-50/88 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/12 dark:text-amber-200'
+      : 'border-slate-200/80 bg-white/78 text-slate-600 dark:border-white/10 dark:bg-slate-900/72 dark:text-slate-300';
 
   return (
-    <span className={cn('inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium', toneClass)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium shadow-[0_8px_24px_rgba(15,23,42,0.04)] backdrop-blur',
+        toneClass,
+        className
+      )}
+    >
       {children}
     </span>
   );
 }
 
-function WorkspaceMetricCard({ label, value }) {
+function WorkspaceMetricCard({ label, value, detail }) {
   return (
-    <div className="rounded-[26px] border border-white/70 bg-white/80 p-4 shadow-[0_20px_40px_rgba(15,23,42,0.06)] backdrop-blur dark:border-white/10 dark:bg-slate-950/60 dark:shadow-none">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">{label}</div>
-      <div className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{value}</div>
+    <div className={cn(INNER_PANEL_CLASS, 'p-4')}>
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-emerald-400/90 dark:bg-emerald-300/70" />
+        <div className={EYEBROW_CLASS}>{label}</div>
+      </div>
+      <div className="mt-4 text-3xl font-semibold tracking-tight text-foreground">{value}</div>
+      {detail ? (
+        <div className="mt-2 text-xs leading-5 text-muted-foreground">{detail}</div>
+      ) : null}
     </div>
   );
 }
@@ -139,7 +154,7 @@ function WorkspaceMetricCard({ label, value }) {
 function RiskBadge({ action, t }) {
   if (action?.requires_confirmation) {
     return (
-      <Badge className="rounded-full border-0 bg-amber-500/10 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200">
+      <Badge className="rounded-full border-0 bg-amber-500/10 px-3 py-1 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200">
         {t('admin.aiWorkspace.riskConfirm')}
       </Badge>
     );
@@ -153,7 +168,7 @@ function RiskBadge({ action, t }) {
       : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300';
 
   return (
-    <Badge variant="outline" className={cn('rounded-full', toneClass)}>
+    <Badge variant="outline" className={cn('rounded-full px-3 py-1', toneClass)}>
       {level === 'read'
         ? t('admin.aiWorkspace.riskRead')
         : level === 'write'
@@ -169,28 +184,36 @@ function ConversationListItem({ item, active, locale, onSelect, t }) {
       type="button"
       onClick={() => onSelect(item.conversation_id)}
       className={cn(
-        'w-full rounded-[24px] border px-4 py-4 text-left transition-all',
+        'group relative w-full overflow-hidden rounded-[26px] border px-4 py-4 text-left transition-all duration-200',
         active
-          ? 'border-emerald-300/90 bg-emerald-50/80 shadow-[0_18px_38px_rgba(16,185,129,0.12)] dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:shadow-none'
-          : 'border-slate-200/80 bg-white/80 hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-white/10 dark:bg-slate-950/50 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/6'
+          ? 'border-emerald-300/90 bg-[linear-gradient(135deg,rgba(236,253,245,0.95),rgba(255,255,255,0.94))] shadow-[0_22px_38px_rgba(16,185,129,0.12)] dark:border-emerald-500/25 dark:bg-[linear-gradient(135deg,rgba(16,185,129,0.14),rgba(15,23,42,0.82))] dark:shadow-none'
+          : 'border-slate-200/80 bg-white/82 hover:border-emerald-200 hover:bg-emerald-50/55 hover:shadow-[0_16px_28px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-slate-950/55 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/8 dark:hover:shadow-none'
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="truncate text-sm font-semibold text-foreground">
-            {item.title || t('admin.command.untitledConversation')}
+      <div
+        className={cn(
+          'absolute inset-y-4 left-3 w-1 rounded-full transition-colors',
+          active ? 'bg-emerald-400/90 dark:bg-emerald-300/60' : 'bg-transparent group-hover:bg-emerald-200/80 dark:group-hover:bg-emerald-500/25'
+        )}
+      />
+      <div className="pl-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-foreground">
+              {item.title || t('admin.command.untitledConversation')}
+            </div>
+            <div className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">
+              {item.last_message_preview || t('admin.command.noConversationSummary')}
+            </div>
           </div>
-          <div className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
-            {item.last_message_preview || t('admin.command.noConversationSummary')}
-          </div>
+          <Badge variant="outline" className="rounded-full bg-background/85 px-2.5 py-1">
+            {item.message_count || 0}
+          </Badge>
         </div>
-        <Badge variant="outline" className="rounded-full bg-background/90">
-          {item.message_count || 0}
-        </Badge>
-      </div>
-      <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
-        <Clock3 className="h-3 w-3" />
-        <span>{formatConversationTime(item.last_activity_at, locale) || '--'}</span>
+        <div className="mt-4 flex items-center gap-2 text-[11px] text-muted-foreground">
+          <Clock3 className="h-3 w-3" />
+          <span>{formatConversationTime(item.last_activity_at, locale) || '--'}</span>
+        </div>
       </div>
     </button>
   );
@@ -201,13 +224,13 @@ function ShortcutButton({ action, onRun }) {
     <button
       type="button"
       onClick={() => onRun(action)}
-      className="group flex w-full items-start justify-between gap-3 rounded-[24px] border border-slate-200/80 bg-white/80 px-4 py-4 text-left transition-all hover:border-emerald-200 hover:bg-emerald-50/55 dark:border-white/10 dark:bg-slate-950/50 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/6"
+      className="group flex w-full items-start justify-between gap-3 rounded-[24px] border border-slate-200/75 bg-white/82 px-4 py-4 text-left transition-all duration-200 hover:border-emerald-200 hover:bg-emerald-50/55 hover:shadow-[0_14px_28px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-slate-950/55 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/8 dark:hover:shadow-none"
     >
       <div className="min-w-0">
         <div className="truncate text-sm font-medium text-foreground">{action.label}</div>
-        <div className="mt-1 text-xs leading-5 text-muted-foreground">{action.description}</div>
+        <div className="mt-1.5 text-xs leading-5 text-muted-foreground">{action.description}</div>
       </div>
-      <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+      <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
     </button>
   );
 }
@@ -218,7 +241,7 @@ function PromptCard({ item, onUse, compact = false }) {
       type="button"
       onClick={() => onUse(item.prompt)}
       className={cn(
-        'group w-full rounded-[24px] border border-slate-200/80 bg-white/85 text-left transition-all hover:border-emerald-200 hover:bg-emerald-50/55 dark:border-white/10 dark:bg-slate-950/55 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/6',
+        'group w-full rounded-[24px] border border-slate-200/75 bg-white/84 text-left transition-all duration-200 hover:border-emerald-200 hover:bg-emerald-50/55 hover:shadow-[0_16px_28px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-slate-950/58 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/8 dark:hover:shadow-none',
         compact ? 'px-4 py-4' : 'px-5 py-5'
       )}
     >
@@ -235,7 +258,7 @@ function PromptCard({ item, onUse, compact = false }) {
 
 function PendingActionCard({ action, disabled, onConfirm, onReject, t }) {
   return (
-    <div className="rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-slate-950/55 dark:shadow-none">
+    <div className={cn(INNER_PANEL_CLASS, 'p-4')}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold text-foreground">
@@ -249,10 +272,10 @@ function PendingActionCard({ action, disabled, onConfirm, onReject, t }) {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button size="sm" className="rounded-full" disabled={disabled} onClick={() => onConfirm(action.proposal_id)}>
+        <Button size="sm" className="rounded-full px-4" disabled={disabled} onClick={() => onConfirm(action.proposal_id)}>
           {t('admin.command.confirmAction')}
         </Button>
-        <Button size="sm" variant="outline" className="rounded-full" disabled={disabled} onClick={() => onReject(action.proposal_id)}>
+        <Button size="sm" variant="outline" className="rounded-full px-4" disabled={disabled} onClick={() => onReject(action.proposal_id)}>
           {t('admin.command.rejectAction')}
         </Button>
       </div>
@@ -262,17 +285,17 @@ function PendingActionCard({ action, disabled, onConfirm, onReject, t }) {
 
 function CapabilityRow({ action, t }) {
   return (
-    <div className="rounded-[22px] border border-slate-200/80 bg-white/80 px-4 py-4 dark:border-white/10 dark:bg-slate-950/50">
+    <div className="rounded-[24px] border border-slate-200/75 bg-white/82 px-4 py-4 dark:border-white/10 dark:bg-slate-950/55">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold text-foreground">{action.label}</div>
-          <div className="mt-1 text-xs leading-5 text-muted-foreground">{action.description}</div>
+          <div className="mt-1.5 text-xs leading-5 text-muted-foreground">{action.description}</div>
         </div>
         <RiskBadge action={action} t={t} />
       </div>
 
       {Array.isArray(action.requirements) && action.requirements.length > 0 ? (
-        <div className="mt-3 text-[11px] leading-5 text-muted-foreground">
+        <div className="mt-3 rounded-2xl border border-slate-200/70 bg-slate-50/85 px-3 py-2 text-[11px] leading-5 text-muted-foreground dark:border-white/10 dark:bg-white/5">
           {t('admin.aiWorkspace.requiredFields', { fields: action.requirements.join(', ') })}
         </div>
       ) : null}
@@ -281,6 +304,7 @@ function CapabilityRow({ action, t }) {
 }
 
 function ConversationMessageBubble({
+  locale,
   message,
   disabled,
   t,
@@ -291,32 +315,40 @@ function ConversationMessageBubble({
   const isUser = message?.role === 'user';
   const suggestion = message?.meta?.data?.suggestion;
   const proposal = message?.proposal || message?.meta?.data?.proposal;
+  const timestamp = formatConversationTime(message?.created_at, locale);
 
   return (
     <div className={cn('flex flex-col gap-3', isUser ? 'items-end' : 'items-start')}>
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-        <span className={cn(
-          'inline-flex h-9 w-9 items-center justify-center rounded-full border',
-          isUser
-            ? 'border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
-            : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200'
-        )}>
+      <div className={cn('flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground', isUser && 'flex-row-reverse')}>
+        <span
+          className={cn(
+            'inline-flex h-9 w-9 items-center justify-center rounded-full border shadow-[0_10px_24px_rgba(15,23,42,0.06)]',
+            isUser
+              ? 'border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200'
+          )}
+        >
           {isUser ? <MessageSquare className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
         </span>
         <span>{isUser ? t('admin.command.userLabel') : t('admin.command.aiLabel')}</span>
+        {timestamp ? <span className="tracking-normal text-muted-foreground/90">{timestamp}</span> : null}
       </div>
 
-      <div className={cn(
-        'max-w-[min(100%,52rem)] rounded-[28px] border px-5 py-4 text-sm leading-7 shadow-[0_12px_28px_rgba(15,23,42,0.05)]',
-        isUser
-          ? 'rounded-tr-lg border-slate-950 bg-slate-950 text-white dark:border-slate-700'
-          : 'rounded-tl-lg border-slate-200/90 bg-white/90 text-foreground dark:border-white/10 dark:bg-slate-950/70'
-      )}>
-        {message?.content || t('admin.command.aiEmptyMessage')}
+      <div
+        className={cn(
+          'max-w-[min(100%,50rem)] rounded-[30px] border px-5 py-4 text-sm leading-7 shadow-[0_16px_34px_rgba(15,23,42,0.06)]',
+          isUser
+            ? 'rounded-tr-lg border-slate-950 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(30,41,59,0.95))] text-white dark:border-slate-700'
+            : 'rounded-tl-lg border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,250,252,0.9))] text-foreground dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.82),rgba(2,6,23,0.74))]'
+        )}
+      >
+        <div className="whitespace-pre-wrap break-words">
+          {message?.content || t('admin.command.aiEmptyMessage')}
+        </div>
       </div>
 
       {suggestion?.route ? (
-        <Button size="sm" variant="outline" className="rounded-full" onClick={() => onNavigateSuggestion(suggestion)}>
+        <Button size="sm" variant="outline" className="rounded-full bg-white/80 px-4 dark:bg-slate-950/60" onClick={() => onNavigateSuggestion(suggestion)}>
           <ArrowUpRight className="mr-1 h-3.5 w-3.5" />
           {suggestion.label || t('admin.command.openSuggestion')}
         </Button>
@@ -324,10 +356,10 @@ function ConversationMessageBubble({
 
       {proposal?.proposal_id && proposal?.status === 'pending' ? (
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" className="rounded-full" disabled={disabled} onClick={() => onConfirmProposal(proposal.proposal_id)}>
+          <Button size="sm" className="rounded-full px-4" disabled={disabled} onClick={() => onConfirmProposal(proposal.proposal_id)}>
             {t('admin.command.confirmAction')}
           </Button>
-          <Button size="sm" variant="outline" className="rounded-full" disabled={disabled} onClick={() => onRejectProposal(proposal.proposal_id)}>
+          <Button size="sm" variant="outline" className="rounded-full px-4" disabled={disabled} onClick={() => onRejectProposal(proposal.proposal_id)}>
             {t('admin.command.rejectAction')}
           </Button>
         </div>
@@ -340,11 +372,12 @@ function EmptyConversationState({ prompts, onUsePrompt, t }) {
   return (
     <div className="flex h-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-4xl">
-        <div className="mx-auto max-w-2xl text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[24px] border border-emerald-200 bg-emerald-50 text-emerald-700 shadow-[0_18px_36px_rgba(16,185,129,0.12)] dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-200 dark:shadow-none">
-            <Bot className="h-8 w-8" />
+        <div className="mx-auto max-w-2xl rounded-[34px] border border-slate-200/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.88))] px-6 py-10 text-center shadow-[0_26px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.82),rgba(2,6,23,0.74))] dark:shadow-none md:px-10">
+          <div className="mx-auto flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[28px] border border-emerald-200 bg-emerald-50 text-emerald-700 shadow-[0_18px_36px_rgba(16,185,129,0.12)] dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-200 dark:shadow-none">
+            <Bot className="h-9 w-9" />
           </div>
-          <h3 className="mt-6 text-2xl font-semibold tracking-tight text-foreground">
+          <div className={cn(EYEBROW_CLASS, 'mt-6')}>{t('admin.aiWorkspace.badge')}</div>
+          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground md:text-[2rem]">
             {t('admin.aiWorkspace.emptyTitle')}
           </h3>
           <p className="mt-3 text-sm leading-7 text-muted-foreground">
@@ -353,7 +386,7 @@ function EmptyConversationState({ prompts, onUsePrompt, t }) {
         </div>
 
         {prompts.length > 0 ? (
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {prompts.map((item) => (
               <PromptCard key={item.id} item={item} onUse={onUsePrompt} />
             ))}
@@ -523,16 +556,32 @@ export default function AdminAiWorkspacePage() {
   );
 
   const assistant = workspaceQuery.data?.assistant || {};
-  const starterPrompts = Array.isArray(workspaceQuery.data?.starter_prompts) ? workspaceQuery.data.starter_prompts : [];
-  const quickActions = Array.isArray(workspaceQuery.data?.quick_actions) ? workspaceQuery.data.quick_actions : [];
-  const navigationTargets = Array.isArray(workspaceQuery.data?.navigation_targets) ? workspaceQuery.data.navigation_targets : [];
-  const managementActions = Array.isArray(workspaceQuery.data?.management_actions) ? workspaceQuery.data.management_actions : [];
+  const starterPrompts = useMemo(
+    () => (Array.isArray(workspaceQuery.data?.starter_prompts) ? workspaceQuery.data.starter_prompts : []),
+    [workspaceQuery.data?.starter_prompts]
+  );
+  const quickActions = useMemo(
+    () => (Array.isArray(workspaceQuery.data?.quick_actions) ? workspaceQuery.data.quick_actions : []),
+    [workspaceQuery.data?.quick_actions]
+  );
+  const navigationTargets = useMemo(
+    () => (Array.isArray(workspaceQuery.data?.navigation_targets) ? workspaceQuery.data.navigation_targets : []),
+    [workspaceQuery.data?.navigation_targets]
+  );
+  const managementActions = useMemo(
+    () => (Array.isArray(workspaceQuery.data?.management_actions) ? workspaceQuery.data.management_actions : []),
+    [workspaceQuery.data?.management_actions]
+  );
 
-  const currentSummary = activeConversation?.summary || conversationItems.find((item) => item.conversation_id === selectedConversationId) || {};
+  const currentSummary = activeConversation?.summary || conversationItems.find((item) => String(item.conversation_id) === normalizedSelectedConversationId) || {};
   const selectedConversationTitle = currentSummary.title || (isCreatingConversation ? t('admin.command.newConversation') : t('admin.command.aiConversation'));
   const lastActivityLabel = formatConversationTime(currentSummary.last_activity_at, locale);
   const canSend = draft.trim().length >= COMMAND_MIN_LENGTH && !sendMutation.isLoading && assistant.chat_enabled !== false;
   const canCreateConversation = !sendMutation.isLoading && !decisionMutation.isLoading;
+  const visibleQuickActions = quickActions.slice(0, 6);
+  const heroQuickActions = quickActions.slice(0, 3);
+  const featuredPrompts = starterPrompts.slice(0, 4);
+  const composerPrompts = starterPrompts.slice(0, 3);
 
   const capabilitySummary = useMemo(() => ({
     readCount: managementActions.filter((item) => item.risk_level === 'read').length,
@@ -598,22 +647,23 @@ export default function AdminAiWorkspacePage() {
   }, [navigate, t]);
 
   return (
-    <div className="space-y-6 pb-4">
-      <section className="relative overflow-hidden rounded-[34px] border border-slate-200/80 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.96),rgba(236,253,245,0.92)_45%,rgba(248,250,252,0.95)_100%)] p-6 shadow-[0_28px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),rgba(15,23,42,0.96)_42%,rgba(2,6,23,0.98)_100%)] dark:shadow-none md:p-8">
-        <div className="pointer-events-none absolute -right-24 -top-20 h-64 w-64 rounded-full bg-emerald-200/35 blur-3xl dark:bg-emerald-500/12" />
-        <div className="pointer-events-none absolute bottom-0 left-1/4 h-44 w-44 rounded-full bg-sky-200/30 blur-3xl dark:bg-sky-500/10" />
+    <div className="space-y-6 pb-6">
+      <section className="relative overflow-hidden rounded-[38px] border border-slate-200/80 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.98),rgba(236,253,245,0.9)_38%,rgba(248,250,252,0.96)_100%)] p-6 shadow-[0_30px_70px_rgba(15,23,42,0.09)] dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),rgba(15,23,42,0.96)_38%,rgba(2,6,23,0.99)_100%)] dark:shadow-none md:p-8">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-emerald-200/40 blur-3xl dark:bg-emerald-500/15" />
+        <div className="pointer-events-none absolute left-1/3 top-1/2 h-52 w-52 rounded-full bg-sky-200/30 blur-3xl dark:bg-sky-500/12" />
+        <div className="pointer-events-none absolute -bottom-16 left-10 h-48 w-48 rounded-full bg-white/55 blur-3xl dark:bg-white/5" />
 
-        <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-3xl space-y-4">
-            <Badge className="w-fit rounded-full border-0 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
+        <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_360px]">
+          <div className="space-y-6">
+            <Badge className="w-fit rounded-full border-0 bg-white/78 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-700 shadow-[0_12px_24px_rgba(15,23,42,0.05)] dark:bg-white/10 dark:text-emerald-200">
               {t('admin.aiWorkspace.badge')}
             </Badge>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
+            <div className="space-y-4">
+              <h1 className="max-w-4xl text-3xl font-semibold tracking-tight text-foreground md:text-5xl md:leading-[1.05]">
                 {t('admin.aiWorkspace.title')}
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
+              <p className="max-w-3xl text-sm leading-7 text-muted-foreground md:text-base md:leading-8">
                 {t('admin.aiWorkspace.subtitle')}
               </p>
             </div>
@@ -632,28 +682,108 @@ export default function AdminAiWorkspacePage() {
                 <StatusPill>{t('admin.aiWorkspace.historyWindow', { count: assistant.max_history_messages })}</StatusPill>
               ) : null}
             </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <WorkspaceMetricCard label={t('admin.aiWorkspace.readActions')} value={capabilitySummary.readCount} />
+              <WorkspaceMetricCard label={t('admin.aiWorkspace.writeActions')} value={capabilitySummary.writeCount} />
+              <WorkspaceMetricCard label={t('admin.aiWorkspace.pendingConfirmations')} value={capabilitySummary.confirmationCount} />
+            </div>
+
+            {featuredPrompts.length > 0 ? (
+              <div className={cn(INNER_PANEL_CLASS, 'p-5')}>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className={EYEBROW_CLASS}>{t('admin.aiWorkspace.starterPromptsTitle')}</div>
+                    <div className="mt-1 text-sm text-muted-foreground">{t('admin.aiWorkspace.starterPromptsDescription')}</div>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {featuredPrompts.slice(0, 2).map((item) => (
+                    <PromptCard key={item.id} item={item} onUse={handleUsePrompt} compact />
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            <WorkspaceMetricCard label={t('admin.aiWorkspace.readActions')} value={capabilitySummary.readCount} />
-            <WorkspaceMetricCard label={t('admin.aiWorkspace.writeActions')} value={capabilitySummary.writeCount} />
-            <WorkspaceMetricCard label={t('admin.aiWorkspace.pendingConfirmations')} value={capabilitySummary.confirmationCount} />
+          <div className={cn(PANEL_CLASS, 'flex flex-col gap-5 p-5 md:p-6')}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-2">
+                <div className={EYEBROW_CLASS}>{t('admin.aiWorkspace.conversationsTitle')}</div>
+                <div className="text-2xl font-semibold tracking-tight text-foreground">
+                  {selectedConversationTitle}
+                </div>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  {isCreatingConversation
+                    ? t('admin.aiWorkspace.newConversationDescription')
+                    : t('admin.aiWorkspace.conversationDescription')}
+                </p>
+              </div>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[22px] border border-white/70 bg-white/75 text-emerald-700 shadow-[0_14px_30px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-white/5 dark:text-emerald-200 dark:shadow-none">
+                <History className="h-5 w-5" />
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              <div className="rounded-[24px] border border-slate-200/75 bg-white/82 px-4 py-4 dark:border-white/10 dark:bg-slate-950/55">
+                <div className={EYEBROW_CLASS}>{t('admin.aiWorkspace.conversationsTitle')}</div>
+                <div className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{conversationItems.length}</div>
+                <div className="mt-1 text-xs leading-5 text-muted-foreground">
+                  {t('admin.aiWorkspace.conversationsDescription')}
+                </div>
+              </div>
+
+              <div className="rounded-[24px] border border-slate-200/75 bg-white/82 px-4 py-4 dark:border-white/10 dark:bg-slate-950/55">
+                <div className={EYEBROW_CLASS}>{t('admin.aiWorkspace.pendingTitle')}</div>
+                <div className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{pendingActions.length}</div>
+                <div className="mt-1 text-xs leading-5 text-muted-foreground">
+                  {t('admin.aiWorkspace.pendingDescription')}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {lastActivityLabel ? (
+                <StatusPill>
+                  <Clock3 className="h-3.5 w-3.5" />
+                  {lastActivityLabel}
+                </StatusPill>
+              ) : null}
+              {currentSummary.message_count ? (
+                <StatusPill>{t('admin.aiWorkspace.messageCount', { count: currentSummary.message_count })}</StatusPill>
+              ) : null}
+            </div>
+
+            {heroQuickActions.length > 0 ? (
+              <div className="space-y-3">
+                <div className={EYEBROW_CLASS}>{t('admin.aiWorkspace.shortcutsTitle')}</div>
+                <div className="grid gap-3">
+                  {heroQuickActions.map((action) => (
+                    <ShortcutButton key={action.id} action={action} onRun={handleRunQuickAction} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <Button variant="outline" className="mt-auto rounded-full bg-white/82 px-4 dark:bg-slate-950/55" onClick={() => navigate('/admin/llm-usage')}>
+              {t('admin.aiWorkspace.auditAction')}
+            </Button>
           </div>
         </div>
       </section>
 
       {assistant.chat_enabled === false ? (
-        <Alert className="border-amber-200 bg-amber-50/80 dark:border-amber-500/20 dark:bg-amber-500/10">
+        <Alert className="rounded-[26px] border-amber-200 bg-amber-50/85 shadow-[0_18px_36px_rgba(245,158,11,0.08)] dark:border-amber-500/20 dark:bg-amber-500/10 dark:shadow-none">
           <ShieldAlert className="h-4 w-4" />
           <AlertTitle>{t('admin.aiWorkspace.unavailableTitle')}</AlertTitle>
           <AlertDescription>{t('admin.aiWorkspace.unavailableDescription')}</AlertDescription>
         </Alert>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[300px_minmax(0,1fr)_320px]">
+      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)_340px]">
         <div className="space-y-6 xl:sticky xl:top-6 xl:self-start">
-          <Card className="overflow-hidden rounded-[30px] border-slate-200/80 bg-white/75 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
-            <CardHeader className="border-b border-slate-200/70 bg-white/50 dark:border-white/10 dark:bg-white/5">
+          <Card className={cn(PANEL_CLASS, 'overflow-hidden')}>
+            <CardHeader className="border-b border-slate-200/70 bg-white/55 dark:border-white/10 dark:bg-white/5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <CardTitle className="flex items-center gap-2 text-base">
@@ -662,19 +792,19 @@ export default function AdminAiWorkspacePage() {
                   </CardTitle>
                   <CardDescription>{t('admin.aiWorkspace.conversationsDescription')}</CardDescription>
                 </div>
-                <Button size="sm" variant="outline" className="rounded-full" disabled={!canCreateConversation} onClick={handleStartConversation}>
+                <Button size="sm" variant="outline" className="rounded-full bg-white/85 px-4 dark:bg-slate-950/60" disabled={!canCreateConversation} onClick={handleStartConversation}>
                   <Plus className="mr-1 h-3.5 w-3.5" />
                   {t('admin.command.newConversation')}
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[24rem]">
+              <ScrollArea className="h-[30rem]">
                 <div className="space-y-3 p-4">
                   {isCreatingConversation ? (
-                    <div className="rounded-[24px] border border-emerald-300/90 bg-emerald-50/85 px-4 py-4 dark:border-emerald-500/25 dark:bg-emerald-500/10">
+                    <div className="rounded-[26px] border border-emerald-300/90 bg-emerald-50/88 px-4 py-4 shadow-[0_18px_34px_rgba(16,185,129,0.1)] dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:shadow-none">
                       <div className="text-sm font-semibold text-foreground">{t('admin.aiWorkspace.newConversationTitle')}</div>
-                      <div className="mt-1 text-xs leading-5 text-muted-foreground">
+                      <div className="mt-1.5 text-xs leading-5 text-muted-foreground">
                         {t('admin.aiWorkspace.newConversationDescription')}
                       </div>
                     </div>
@@ -684,7 +814,7 @@ export default function AdminAiWorkspacePage() {
                     <ConversationListItem
                       key={item.conversation_id}
                       item={item}
-                      active={selectedConversationId === item.conversation_id && !isCreatingConversation}
+                      active={String(selectedConversationId) === String(item.conversation_id) && !isCreatingConversation}
                       locale={locale}
                       onSelect={handleSelectConversation}
                       t={t}
@@ -692,7 +822,7 @@ export default function AdminAiWorkspacePage() {
                   ))}
 
                   {conversationItems.length === 0 && !conversationsQuery.isLoading && !workspaceQuery.isLoading ? (
-                    <div className="rounded-[24px] border border-dashed border-slate-300/80 px-4 py-8 text-center text-sm leading-6 text-muted-foreground dark:border-white/15">
+                    <div className="rounded-[24px] border border-dashed border-slate-300/80 bg-white/75 px-4 py-8 text-center text-sm leading-6 text-muted-foreground dark:border-white/15 dark:bg-slate-950/45">
                       {t('admin.command.aiEmptyState')}
                     </div>
                   ) : null}
@@ -701,27 +831,28 @@ export default function AdminAiWorkspacePage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-[30px] border-slate-200/80 bg-white/75 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
-            <CardHeader>
+          <Card className={cn(PANEL_CLASS, 'overflow-hidden')}>
+            <CardHeader className="border-b border-slate-200/70 bg-white/55 dark:border-white/10 dark:bg-white/5">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Waypoints className="h-4 w-4 text-emerald-500" />
                 {t('admin.aiWorkspace.shortcutsTitle')}
               </CardTitle>
               <CardDescription>{t('admin.aiWorkspace.shortcutsDescription')}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {quickActions.slice(0, 6).map((action) => (
+            <CardContent className="space-y-3 pt-6">
+              {visibleQuickActions.map((action) => (
                 <ShortcutButton key={action.id} action={action} onRun={handleRunQuickAction} />
               ))}
             </CardContent>
           </Card>
         </div>
 
-        <Card className="overflow-hidden rounded-[32px] border-slate-200/80 bg-white/78 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
+        <Card className={cn(PANEL_CLASS, 'overflow-hidden')}>
           <CardHeader className="border-b border-slate-200/70 bg-white/55 dark:border-white/10 dark:bg-white/5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="space-y-2">
-                <CardTitle className="text-2xl tracking-tight text-foreground">{selectedConversationTitle}</CardTitle>
+                <div className={EYEBROW_CLASS}>{t('admin.aiWorkspace.badge')}</div>
+                <CardTitle className="text-2xl tracking-tight text-foreground md:text-[2rem]">{selectedConversationTitle}</CardTitle>
                 <CardDescription>
                   {isCreatingConversation
                     ? t('admin.aiWorkspace.newConversationDescription')
@@ -739,28 +870,35 @@ export default function AdminAiWorkspacePage() {
                 {currentSummary.message_count ? (
                   <StatusPill>{t('admin.aiWorkspace.messageCount', { count: currentSummary.message_count })}</StatusPill>
                 ) : null}
-                <Button variant="ghost" size="sm" className="rounded-full" onClick={() => navigate('/admin/llm-usage')}>
-                  {t('admin.aiWorkspace.auditAction')}
-                </Button>
+                {pendingActions.length > 0 ? (
+                  <StatusPill tone="warning">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {t('admin.command.pendingActions', { count: pendingActions.length })}
+                  </StatusPill>
+                ) : null}
               </div>
             </div>
           </CardHeader>
 
           <CardContent className="p-0">
-            <div className="flex min-h-[42rem] flex-col">
-              <div className="min-h-0 flex-1">
+            <div className="flex min-h-[46rem] flex-col">
+              <div className="min-h-0 flex-1 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(248,250,252,0.46))] dark:bg-transparent">
                 {conversationDetailQuery.isLoading && !isCreatingConversation ? (
-                  <div className="flex h-full items-center justify-center">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <div className="flex h-full items-center justify-center px-6 py-20">
+                    <div className="flex flex-col items-center gap-3 text-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      <div className="text-sm text-muted-foreground">{t('common.loading')}</div>
+                    </div>
                   </div>
                 ) : visibleMessages.length === 0 ? (
-                  <EmptyConversationState prompts={starterPrompts.slice(0, 4)} onUsePrompt={handleUsePrompt} t={t} />
+                  <EmptyConversationState prompts={featuredPrompts} onUsePrompt={handleUsePrompt} t={t} />
                 ) : (
-                  <ScrollArea className="h-[42rem]">
-                    <div className="space-y-8 p-5 md:p-6">
+                  <ScrollArea className="h-[46rem]">
+                    <div className="space-y-8 p-5 md:p-7">
                       {visibleMessages.map((message) => (
                         <ConversationMessageBubble
                           key={message.id}
+                          locale={locale}
                           message={message}
                           disabled={disableProposalActions}
                           onNavigateSuggestion={handleNavigateSuggestion}
@@ -782,28 +920,48 @@ export default function AdminAiWorkspacePage() {
                 )}
               </div>
 
-              <div className="border-t border-slate-200/70 bg-[linear-gradient(180deg,rgba(248,250,252,0.62),rgba(255,255,255,0.92))] p-4 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.5),rgba(2,6,23,0.82))]">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-                  <span>{t('admin.aiWorkspace.composerHint')}</span>
-                  {sendMutation.isLoading ? (
-                    <span className="inline-flex items-center gap-2">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      {t('admin.command.aiSending')}
-                    </span>
-                  ) : null}
-                </div>
+              <div className="border-t border-slate-200/70 bg-[linear-gradient(180deg,rgba(248,250,252,0.7),rgba(255,255,255,0.96))] p-4 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.5),rgba(2,6,23,0.9))] md:p-5">
+                {composerPrompts.length > 0 ? (
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {composerPrompts.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleUsePrompt(item.prompt)}
+                        className="rounded-full border border-slate-200/80 bg-white/84 px-3.5 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-200 hover:bg-emerald-50 dark:border-white/10 dark:bg-slate-950/60 dark:text-slate-200 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/8"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
 
-                <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_148px]">
-                  <Textarea
-                    ref={composerRef}
-                    value={draft}
-                    onChange={(event) => setDraft(event.target.value)}
-                    onKeyDown={handleComposerKeyDown}
-                    placeholder={assistant.chat_enabled === false ? t('admin.aiWorkspace.placeholderUnavailable') : t('admin.aiWorkspace.placeholderReady')}
-                    disabled={assistant.chat_enabled === false}
-                    className="min-h-[132px] rounded-[28px] border-slate-200/80 bg-white/92 px-4 py-4 text-sm shadow-[0_12px_24px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-slate-950/70 dark:shadow-none"
-                  />
-                  <Button className="h-auto rounded-[28px] text-sm" disabled={!canSend} onClick={handleSend}>
+                <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_170px] lg:items-end">
+                  <div className="rounded-[30px] border border-slate-200/80 bg-white/88 p-2 shadow-[0_18px_34px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-slate-950/68 dark:shadow-none">
+                    <Textarea
+                      ref={composerRef}
+                      value={draft}
+                      onChange={(event) => setDraft(event.target.value)}
+                      onKeyDown={handleComposerKeyDown}
+                      placeholder={assistant.chat_enabled === false ? t('admin.aiWorkspace.placeholderUnavailable') : t('admin.aiWorkspace.placeholderReady')}
+                      disabled={assistant.chat_enabled === false}
+                      className="min-h-[144px] border-0 bg-transparent px-4 py-4 text-sm shadow-none focus-visible:ring-0"
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-3 px-4 pb-3 text-xs text-muted-foreground">
+                      <span>{t('admin.aiWorkspace.composerHint')}</span>
+                      <div className="inline-flex items-center gap-3">
+                        {sendMutation.isLoading ? (
+                          <span className="inline-flex items-center gap-2">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            {t('admin.command.aiSending')}
+                          </span>
+                        ) : null}
+                        <span>{draft.trim().length}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button className="h-[76px] rounded-[28px] text-sm shadow-[0_18px_34px_rgba(15,23,42,0.08)] dark:shadow-none" disabled={!canSend} onClick={handleSend}>
                     {sendMutation.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                     {t('admin.command.send')}
                   </Button>
@@ -814,34 +972,34 @@ export default function AdminAiWorkspacePage() {
         </Card>
 
         <div className="space-y-6 xl:sticky xl:top-6 xl:self-start">
-          <Card className="rounded-[30px] border-slate-200/80 bg-white/75 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
-            <CardHeader>
+          <Card className={cn(PANEL_CLASS, 'overflow-hidden')}>
+            <CardHeader className="border-b border-slate-200/70 bg-white/55 dark:border-white/10 dark:bg-white/5">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Sparkles className="h-4 w-4 text-emerald-500" />
                 {t('admin.aiWorkspace.starterPromptsTitle')}
               </CardTitle>
               <CardDescription>{t('admin.aiWorkspace.starterPromptsDescription')}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 pt-6">
               {starterPrompts.length > 0 ? starterPrompts.map((item) => (
                 <PromptCard key={item.id} item={item} onUse={handleUsePrompt} compact />
               )) : (
-                <div className="rounded-[22px] border border-dashed border-slate-300/80 px-4 py-6 text-sm leading-6 text-muted-foreground dark:border-white/15">
+                <div className="rounded-[22px] border border-dashed border-slate-300/80 bg-white/75 px-4 py-6 text-sm leading-6 text-muted-foreground dark:border-white/15 dark:bg-slate-950/45">
                   {t('admin.aiWorkspace.noStarterPrompts')}
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="rounded-[30px] border-slate-200/80 bg-white/75 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
-            <CardHeader>
+          <Card className={cn(PANEL_CLASS, 'overflow-hidden')}>
+            <CardHeader className="border-b border-slate-200/70 bg-white/55 dark:border-white/10 dark:bg-white/5">
               <CardTitle className="flex items-center gap-2 text-base">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                 {t('admin.aiWorkspace.pendingTitle')}
               </CardTitle>
               <CardDescription>{t('admin.aiWorkspace.pendingDescription')}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 pt-6">
               {pendingActions.length > 0 ? pendingActions.map((action) => (
                 <PendingActionCard
                   key={action.proposal_id}
@@ -860,30 +1018,28 @@ export default function AdminAiWorkspacePage() {
                   t={t}
                 />
               )) : (
-                <div className="rounded-[22px] border border-dashed border-slate-300/80 px-4 py-6 text-sm leading-6 text-muted-foreground dark:border-white/15">
+                <div className="rounded-[22px] border border-dashed border-slate-300/80 bg-white/75 px-4 py-6 text-sm leading-6 text-muted-foreground dark:border-white/15 dark:bg-slate-950/45">
                   {t('admin.aiWorkspace.pendingEmpty')}
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="rounded-[30px] border-slate-200/80 bg-white/75 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
-            <CardHeader>
+          <Card className={cn(PANEL_CLASS, 'overflow-hidden')}>
+            <CardHeader className="border-b border-slate-200/70 bg-white/55 dark:border-white/10 dark:bg-white/5">
               <CardTitle className="text-base">{t('admin.aiWorkspace.capabilityTitle')}</CardTitle>
               <CardDescription>{t('admin.aiWorkspace.capabilityDescription')}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="rounded-[24px] border border-slate-200/80 bg-white/80 p-4 dark:border-white/10 dark:bg-slate-950/50">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                  {t('admin.aiWorkspace.navigationTitle')}
-                </div>
+            <CardContent className="space-y-5 pt-6">
+              <div className="rounded-[24px] border border-slate-200/75 bg-white/82 p-4 dark:border-white/10 dark:bg-slate-950/55">
+                <div className={EYEBROW_CLASS}>{t('admin.aiWorkspace.navigationTitle')}</div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {navigationTargets.slice(0, 10).map((target) => (
                     <button
                       key={target.id}
                       type="button"
                       onClick={() => navigate(target.route)}
-                      className="rounded-full border border-slate-200/80 bg-background/90 px-3 py-1.5 text-xs transition-all hover:border-emerald-200 hover:bg-emerald-50 dark:border-white/10 dark:bg-slate-900/70 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/8"
+                      className="rounded-full border border-slate-200/80 bg-background/88 px-3.5 py-1.5 text-xs transition-all hover:border-emerald-200 hover:bg-emerald-50 dark:border-white/10 dark:bg-slate-900/70 dark:hover:border-emerald-500/20 dark:hover:bg-emerald-500/8"
                     >
                       {target.label}
                     </button>
@@ -892,9 +1048,7 @@ export default function AdminAiWorkspacePage() {
               </div>
 
               <div className="space-y-3">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                  {t('admin.aiWorkspace.managementActionsTitle')}
-                </div>
+                <div className={EYEBROW_CLASS}>{t('admin.aiWorkspace.managementActionsTitle')}</div>
                 {managementActions.slice(0, 8).map((action) => (
                   <CapabilityRow key={action.name} action={action} t={t} />
                 ))}
