@@ -101,16 +101,23 @@ function buildFallbackConversation(conversation, conversationId, previousConvers
   };
 }
 
+const timeFormatters = new Map();
+
 function formatConversationTime(value, locale = 'zh-CN') {
   if (!value) return null;
 
   try {
-    return new Intl.DateTimeFormat(locale, {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(value));
+    let formatter = timeFormatters.get(locale);
+    if (!formatter) {
+      formatter = new Intl.DateTimeFormat(locale, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      timeFormatters.set(locale, formatter);
+    }
+    return formatter.format(new Date(value));
   } catch {
     return String(value);
   }
@@ -881,7 +888,7 @@ export default function AdminAiWorkspacePage() {
           </CardHeader>
 
           <CardContent className="p-0">
-            <div className="flex min-h-[46rem] flex-col">
+            <div className="flex h-[calc(100dvh-12rem)] min-h-[36rem] flex-col">
               <div className="min-h-0 flex-1 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(248,250,252,0.46))] dark:bg-transparent">
                 {conversationDetailQuery.isLoading && !isCreatingConversation ? (
                   <div className="flex h-full items-center justify-center px-6 py-20">
@@ -893,7 +900,7 @@ export default function AdminAiWorkspacePage() {
                 ) : visibleMessages.length === 0 ? (
                   <EmptyConversationState prompts={featuredPrompts} onUsePrompt={handleUsePrompt} t={t} />
                 ) : (
-                  <ScrollArea className="h-[46rem]">
+                  <ScrollArea className="h-full">
                     <div className="space-y-8 p-5 md:p-7">
                       {visibleMessages.map((message) => (
                         <ConversationMessageBubble
