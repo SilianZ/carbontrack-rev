@@ -87,6 +87,23 @@ export default function AdminLayout() {
     return () => target.removeEventListener('keydown', handler);
   }, [navigate]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
+
+    const previousRootOverflowX = document.documentElement.style.overflowX;
+    const previousBodyOverflowX = document.body.style.overflowX;
+
+    document.documentElement.style.overflowX = 'hidden';
+    document.body.style.overflowX = 'hidden';
+
+    return () => {
+      document.documentElement.style.overflowX = previousRootOverflowX;
+      document.body.style.overflowX = previousBodyOverflowX;
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background text-foreground">
@@ -94,7 +111,7 @@ export default function AdminLayout() {
         <SidebarProvider>
           <div className="relative flex min-h-[calc(100vh-4rem)] flex-col">
             <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_65%)]" />
-            <div className="flex flex-1">
+            <div className="flex min-w-0 flex-1">
               <Sidebar className="top-16 border-r border-border bg-card shadow-sm md:h-[calc(100svh-4rem)]">
                 <SidebarHeader className="px-5 py-6">
                   <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
@@ -153,7 +170,7 @@ export default function AdminLayout() {
                   </div>
                 </SidebarFooter>
               </Sidebar>
-              <SidebarInset className="relative flex flex-1 flex-col bg-transparent">
+              <SidebarInset className="relative flex min-w-0 flex-1 flex-col overflow-x-hidden bg-transparent">
                 <header className="top-16 z-30 flex flex-col gap-5 border-b border-transparent px-6 pb-4 pt-6 md:px-10">
                   <div className="flex flex-wrap items-center gap-4">
                     <SidebarTrigger className="md:hidden" />
@@ -191,8 +208,8 @@ export default function AdminLayout() {
                     </div>
                   </div>
                 </header>
-                <main className="px-6 pb-10 pt-6 md:px-10">
-                  <div className="mx-auto w-full max-w-7xl space-y-6">
+                <main className="min-w-0 overflow-x-hidden px-6 pb-10 pt-6 md:px-10">
+                  <div className="mx-auto min-w-0 w-full max-w-7xl space-y-6">
                     <Outlet />
                   </div>
                 </main>
