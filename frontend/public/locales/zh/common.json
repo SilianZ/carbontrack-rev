@@ -483,10 +483,17 @@
     "streakRank": "排名",
     "streakDays": "天",
     "streakEmpty": "暂无连击数据",
+    "vsLastMonth": "较上月",
     "loadError": "加载仪表板数据失败",
     "notLoggedIn": "请先登录以查看仪表板",
     "noDataAvailable": "暂无数据",
     "startRecordingActivities": "开始记录活动以查看趋势图",
+    "carbonUnit": "kg CO₂",
+    "rankUnit": "/ {{total}}",
+    "leaderboardUnknownName": "未知用户",
+    "avatarAlt": "头像",
+    "badgeImageAlt": "徽章图标",
+    "imageFallback": "图片",
     "quickActions": {
       "title": "快速操作",
       "description": "常用功能快速入口",
@@ -505,7 +512,8 @@
       "pointsHint": "积分提示",
       "pointsHintDesc": "您当前有 {{current}} 积分，还需要 {{needed}} 积分即可兑换商品",
       "pendingReviews": "待审核记录",
-      "pendingReviewsDesc": "您有 {{count}} 条记录正在审核中"
+      "pendingReviewsDesc": "您有 {{count}} 条记录正在审核中",
+      "badgeOverflow": "{{count}}+"
     },
     "stats": {
       "thisMonth": "本月",
@@ -523,6 +531,7 @@
     "badgeUnlocked": "已解锁",
     "badgeLocked": "待解锁",
     "badgeAwardedAt": "解锁时间",
+    "badgeAwardedAtValue": "解锁于 {{date}}",
     "monthlyAchievementsDescription": "追踪你每月的碳减排表现",
     "currentMonthAchievement": "{{month}} 成就概览",
     "monthlyPointsLabel": "积分获得",

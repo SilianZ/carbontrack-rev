@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -307,17 +308,236 @@ export function Navbar() {
     );
   };
 
+  const mobileNavigation = renderMobileNav && typeof document !== 'undefined' && document.body
+    ? createPortal(
+        <>
+          {isPortrait && (
+            <button
+              type="button"
+              onClick={closeMobile}
+              aria-label={t('nav.closeMenu')}
+              className={clsx(
+                'fixed inset-x-0 top-16 bottom-0 z-[55] bg-black/30 transition-opacity duration-200 ease-out md:hidden',
+                isAnimatingOut ? 'opacity-0' : 'opacity-100'
+              )}
+            />
+          )}
+          <div
+            id={mobilePanelId}
+            role={isPortrait ? 'dialog' : 'region'}
+            aria-modal={isPortrait ? 'true' : undefined}
+            className={clsx(
+              'md:hidden border-t border-border bg-background text-foreground',
+              isPortrait
+                ? 'fixed inset-x-3 top-20 bottom-4 z-[60] rounded-2xl border border-border shadow-2xl shadow-black/10 backdrop-blur'
+                : 'absolute inset-x-0 top-16 z-10 rounded-b-2xl border border-border shadow-lg shadow-black/10',
+              isAnimatingOut ? 'animate-mobile-nav-out' : 'animate-mobile-nav-in'
+            )}
+          >
+            <div
+              className={clsx(
+                'space-y-5',
+                isPortrait ? 'h-full overflow-y-auto px-4 pt-5 pb-8' : 'px-3 pt-4 pb-6'
+              )}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    {t('nav.menuTitle')}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t('nav.menuSubtitle')}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={closeMobile}
+                  aria-label={t('nav.closeMenu')}
+                  className="h-9 w-9 rounded-full border border-border"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {mobileNavSections.map((section) => (
+                <div
+                  key={section.key}
+                  className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5"
+                >
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
+                      {section.title}
+                    </p>
+                    {section.description && (
+                      <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
+                    )}
+                  </div>
+                  <div
+                    className={clsx(
+                      'mt-4 gap-3',
+                      isPortrait ? 'grid grid-cols-1 min-[420px]:grid-cols-2' : 'flex flex-col'
+                    )}
+                  >
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = isActivePath(item.path);
+                      return (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={closeMobile}
+                          className={clsx(
+                            'flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40',
+                            isActive
+                              ? 'border-green-200 bg-green-50/80 text-green-700 shadow-sm dark:border-green-900/60 dark:bg-green-950/30 dark:text-green-300'
+                              : 'border-border text-muted-foreground hover:border-green-200 hover:bg-accent hover:text-foreground'
+                          )}
+                        >
+                          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600">
+                            <Icon className="h-5 w-5" />
+                          </span>
+                          <div className="flex-1">
+                            <span className="text-sm font-semibold">{item.label}</span>
+                            {item.hint && (
+                              <p className="mt-0.5 text-xs text-muted-foreground">{item.hint}</p>
+                            )}
+                          </div>
+                          {item.badge && item.badge > 0 && (
+                            <span className="ml-auto flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-semibold text-white">
+                              {item.badge > 99 ? '99+' : item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
+                        {t('nav.languageSection')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t('nav.languageDescription')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <LanguageSwitcher
+                        variant="outline"
+                        size="sm"
+                        showText={false}
+                        className="border-border bg-background/80 text-foreground hover:bg-accent"
+                      />
+                      <ThemeToggle
+                        variant="outline"
+                        size="icon"
+                        className="border-border bg-background/80 text-foreground hover:bg-accent"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {isAuthenticated ? (
+                  <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
+                    <div className="flex items-center gap-3">
+                      {renderUserAvatar('h-12 w-12')}
+                      <div>
+                        <p className="text-base font-semibold text-foreground">
+                          {user?.username}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t('nav.accountSignedIn')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {accountActions.length > 0 && (
+                      <div
+                        className={clsx(
+                          'mt-4 gap-3',
+                          isPortrait ? 'grid grid-cols-2' : 'flex flex-col'
+                        )}
+                      >
+                        {accountActions.map((action) => {
+                          const ActionIcon = action.icon;
+                          return (
+                            <Link
+                              key={action.key}
+                              to={action.to}
+                              onClick={closeMobile}
+                              className="flex items-center gap-2 rounded-xl border border-border bg-background/80 px-3 py-3 text-sm font-medium text-muted-foreground transition hover:-translate-y-0.5 hover:border-green-200 hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40 dark:bg-background/60"
+                            >
+                              <ActionIcon className="h-4 w-4" />
+                              <span>{action.label}</span>
+                              {typeof action.badge === 'number' && action.badge > 0 && (
+                                <span className="ml-auto rounded-full bg-red-500 px-2 text-xs font-semibold text-white">
+                                  {action.badge > 99 ? '99+' : action.badge}
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        closeMobile();
+                      }}
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-green-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      {t('nav.logout')}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
+                    <p className="text-base font-semibold text-foreground">
+                      {t('nav.getStarted')}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {t('nav.accountDescription')}
+                    </p>
+                    <div className="mt-4 space-y-2">
+                      <Link to="/auth/login" onClick={closeMobile}>
+                        <Button variant="outline" className="w-full justify-center">
+                          {t('nav.login')}
+                        </Button>
+                      </Link>
+                      <Link to="/auth/register" onClick={closeMobile}>
+                        <Button className="w-full">
+                          {t('nav.register')}
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>,
+        document.body
+      )
+    : null;
+
   return (
-    <nav
-      className={clsx(
-        'sticky top-0 z-50 transition-all duration-300',
-        isAdminRoute
-          ? 'border-b border-border bg-background'
-          : 'border-b border-black/5 dark:border-white/10 bg-white/70 dark:bg-black/50 backdrop-blur-xl supports-[backdrop-filter]:backdrop-blur-xl'
-      )}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <>
+      <nav
+        className={clsx(
+          'sticky top-0 z-50 transition-all duration-300',
+          isAdminRoute
+            ? 'border-b border-border bg-background'
+            : 'border-b border-black/5 dark:border-white/10 bg-white/70 dark:bg-black/50 backdrop-blur-xl supports-[backdrop-filter]:backdrop-blur-xl'
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 text-xl font-bold text-green-600 dark:text-emerald-400">
             <img src="/favicon.ico" alt="CarbonTrack logo" className="h-12 w-12 shrink-0 object-contain" />
@@ -443,238 +663,26 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              onClick={toggleMobile}
-              aria-expanded={isOpen}
-              aria-controls={mobilePanelId}
-              aria-label={
-                isOpen
-                  ? t('nav.closeMenu')
-                  : t('nav.openMenu')
-              }
-            >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Navigation */}
-      {isPortrait && renderMobileNav && (
-        <button
-          type="button"
-          onClick={closeMobile}
-          aria-label={t('nav.closeMenu')}
-          className={clsx(
-            'fixed inset-x-0 top-16 bottom-0 z-[55] bg-black/30 transition-opacity duration-200 ease-out md:hidden',
-            isAnimatingOut ? 'opacity-0' : 'opacity-100'
-          )}
-        />
-      )}
-      {renderMobileNav && (
-        <div
-          id={mobilePanelId}
-          role={isPortrait ? 'dialog' : 'region'}
-          aria-modal={isPortrait ? 'true' : undefined}
-          className={clsx(
-            'md:hidden border-t border-border bg-background text-foreground',
-            isPortrait
-              ? 'fixed inset-x-3 top-20 bottom-4 z-[60] rounded-2xl border border-border shadow-2xl shadow-black/10 backdrop-blur'
-              : 'z-10 rounded-b-2xl border border-border shadow-lg shadow-black/10',
-            isAnimatingOut ? 'animate-mobile-nav-out' : 'animate-mobile-nav-in'
-          )}
-        >
-          <div
-            className={clsx(
-              'space-y-5',
-              isPortrait ? 'h-full overflow-y-auto px-4 pt-5 pb-8' : 'px-3 pt-4 pb-6'
-            )}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  {t('nav.menuTitle')}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t('nav.menuSubtitle')}
-                </p>
-              </div>
+            {/* Mobile menu button */}
+            <div className="md:hidden">
               <Button
                 variant="ghost"
-                size="icon"
-                onClick={closeMobile}
-                aria-label={t('nav.closeMenu')}
-                className="h-9 w-9 rounded-full border border-border"
+                onClick={toggleMobile}
+                aria-expanded={isOpen}
+                aria-controls={mobilePanelId}
+                aria-label={
+                  isOpen
+                    ? t('nav.closeMenu')
+                    : t('nav.openMenu')
+                }
               >
-                <X className="h-4 w-4" />
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
-            </div>
-
-            {mobileNavSections.map((section) => (
-              <div
-                key={section.key}
-                className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5"
-              >
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
-                    {section.title}
-                  </p>
-                  {section.description && (
-                    <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
-                  )}
-                </div>
-                <div
-                  className={clsx(
-                    'mt-4 gap-3',
-                    isPortrait ? 'grid grid-cols-1 min-[420px]:grid-cols-2' : 'flex flex-col'
-                  )}
-                >
-                  {section.items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = isActivePath(item.path);
-                    return (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        onClick={closeMobile}
-                        className={clsx(
-                          'flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40',
-                          isActive
-                            ? 'border-green-200 bg-green-50/80 text-green-700 shadow-sm dark:border-green-900/60 dark:bg-green-950/30 dark:text-green-300'
-                            : 'border-border text-muted-foreground hover:border-green-200 hover:bg-accent hover:text-foreground'
-                        )}
-                      >
-                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600">
-                          <Icon className="h-5 w-5" />
-                        </span>
-                        <div className="flex-1">
-                          <span className="text-sm font-semibold">{item.label}</span>
-                          {item.hint && (
-                            <p className="mt-0.5 text-xs text-muted-foreground">{item.hint}</p>
-                          )}
-                        </div>
-                        {item.badge && item.badge > 0 && (
-                          <span className="ml-auto flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-semibold text-white">
-                            {item.badge > 99 ? '99+' : item.badge}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            <div className="space-y-4">
-              <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
-                      {t('nav.languageSection')}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {t('nav.languageDescription')}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <LanguageSwitcher
-                      variant="outline"
-                      size="sm"
-                      showText={false}
-                      className="border-border bg-background/80 text-foreground hover:bg-accent"
-                    />
-                    <ThemeToggle
-                      variant="outline"
-                      size="icon"
-                      className="border-border bg-background/80 text-foreground hover:bg-accent"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {isAuthenticated ? (
-                <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
-                  <div className="flex items-center gap-3">
-                    {renderUserAvatar('h-12 w-12')}
-                    <div>
-                      <p className="text-base font-semibold text-foreground">
-                        {user?.username}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {t('nav.accountSignedIn')}
-                      </p>
-                    </div>
-                  </div>
-
-                    {accountActions.length > 0 && (
-                      <div
-                        className={clsx(
-                          'mt-4 gap-3',
-                          isPortrait ? 'grid grid-cols-2' : 'flex flex-col'
-                        )}
-                      >
-                        {accountActions.map((action) => {
-                          const ActionIcon = action.icon;
-                          return (
-                            <Link
-                              key={action.key}
-                              to={action.to}
-                              onClick={closeMobile}
-                              className="flex items-center gap-2 rounded-xl border border-border bg-background/80 px-3 py-3 text-sm font-medium text-muted-foreground transition hover:-translate-y-0.5 hover:border-green-200 hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40 dark:bg-background/60"
-                            >
-                              <ActionIcon className="h-4 w-4" />
-                              <span>{action.label}</span>
-                              {typeof action.badge === 'number' && action.badge > 0 && (
-                                <span className="ml-auto rounded-full bg-red-500 px-2 text-xs font-semibold text-white">
-                                  {action.badge > 99 ? '99+' : action.badge}
-                                </span>
-                              )}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      closeMobile();
-                    }}
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-green-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    {t('nav.logout')}
-                  </button>
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
-                  <p className="text-base font-semibold text-foreground">
-                    {t('nav.getStarted')}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {t('nav.accountDescription')}
-                  </p>
-                  <div className="mt-4 space-y-2">
-                    <Link to="/auth/login" onClick={closeMobile}>
-                      <Button variant="outline" className="w-full justify-center">
-                        {t('nav.login')}
-                      </Button>
-                    </Link>
-                    <Link to="/auth/register" onClick={closeMobile}>
-                      <Button className="w-full">
-                        {t('nav.register')}
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
-      )}
-    </nav>
+      </nav>
+      {mobileNavigation}
+    </>
   );
 }
