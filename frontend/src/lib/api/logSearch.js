@@ -7,7 +7,7 @@ export async function searchLogs(params = {}) {
     q, date_from, date_to, types, limit_per_type,
     method, status_code, user_id, request_id, path,
     min_duration, max_duration, action, audit_status, error_type,
-    model, source, actor_type, actor_id, llm_status,
+    model, source, actor_type, actor_id, llm_status, conversation_id, turn_no,
     system_page, audit_page, error_page, llm_page
   } = params;
   const query = new URLSearchParams();
@@ -35,6 +35,8 @@ export async function searchLogs(params = {}) {
   if (actor_type) query.append('actor_type', actor_type);
   if (actor_id) query.append('actor_id', actor_id);
   if (llm_status) query.append('llm_status', llm_status);
+  if (conversation_id) query.append('conversation_id', conversation_id);
+  if (turn_no) query.append('turn_no', turn_no);
   const res = await api.get(`/admin/logs/search?${query.toString()}`);
   return res.data;
 }
@@ -63,7 +65,7 @@ export async function exportLogs(params = {}, format = 'csv') {
     q, date_from, date_to, types,
     method, status_code, user_id, request_id, path,
     min_duration, max_duration, action, audit_status, error_type,
-    model, source, actor_type, actor_id, llm_status,
+    model, source, actor_type, actor_id, llm_status, conversation_id, turn_no,
     max
   } = params;
   const query = new URLSearchParams();
@@ -86,6 +88,8 @@ export async function exportLogs(params = {}, format = 'csv') {
   if (actor_type) query.append('actor_type', actor_type);
   if (actor_id) query.append('actor_id', actor_id);
   if (llm_status) query.append('llm_status', llm_status);
+  if (conversation_id) query.append('conversation_id', conversation_id);
+  if (turn_no) query.append('turn_no', turn_no);
   if (max) query.append('max', max);
   query.append('format', format);
   const res = await api.get(`/admin/logs/export?${query.toString()}`, { responseType: 'blob' });

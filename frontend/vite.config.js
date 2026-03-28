@@ -21,17 +21,29 @@ function resolveApiBaseUrl(env) {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const rawBuildId = (env.CF_PAGES_COMMIT_SHA || 'dev').toString().trim()
   const buildId = rawBuildId.length > 12 ? rawBuildId.slice(0, 12) : rawBuildId
   const apiBaseUrl = resolveApiBaseUrl(env)
+  const shouldAnalyze = mode === 'analyze' || env.ANALYZE === 'true'
+  const plugins = [react(), tailwindcss()]
+
+  if (shouldAnalyze) {
+    const { visualizer } = await import('rollup-plugin-visualizer')
+    plugins.push(
+      visualizer({
+        filename: 'dist/stats.html',
+        gzipSize: true,
+        brotliSize: true,
+        open: false,
+        template: 'treemap',
+      })
+    )
+  }
 
   return {
-    plugins: [
-      react(),
-      tailwindcss(),
-    ],
+    plugins,
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

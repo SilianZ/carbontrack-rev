@@ -17,7 +17,7 @@ import { toast } from 'react-hot-toast';
 import R2Image from '../common/R2Image';
 
 export function Dashboard() {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({});
   const [chartData, setChartData] = useState([]);
@@ -62,7 +62,7 @@ export function Dashboard() {
         <R2Image
           filePath={resolvedFilePath}
           src={isAbsolute ? avatarUrl : undefined}
-          alt={displayName || 'avatar'}
+          alt={displayName || t('dashboard.avatarAlt')}
           className={`${sizeClass} rounded-full object-cover border border-white shadow-sm`}
           fallback={fallback}
         />
@@ -179,10 +179,10 @@ export function Dashboard() {
     window.location.href = '/activities';
   };
 
-  const monthFormatter = useMemo(() => new Intl.DateTimeFormat(undefined, {
+  const monthFormatter = useMemo(() => new Intl.DateTimeFormat(currentLanguage, {
     year: 'numeric',
     month: 'long',
-  }), []);
+  }), [currentLanguage]);
 
   const monthlyAchievements = useMemo(() => {
     const list = Array.isArray(stats.monthly_achievements) ? stats.monthly_achievements : [];
@@ -254,7 +254,7 @@ export function Dashboard() {
         
         <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
           <span>{t('dashboard.lastLogin')}:</span>
-          <span>{user?.lastlgn ? new Date(user.lastlgn).toLocaleString('zh-CN') : t('dashboard.firstTime')}</span>
+          <span>{user?.lastlgn ? new Date(user.lastlgn).toLocaleString(currentLanguage) : t('dashboard.firstTime')}</span>
         </div>
       </div>
 
@@ -274,7 +274,7 @@ export function Dashboard() {
         <StatsCard
           title={t('dashboard.carbonSaved')}
           value={stats.total_carbon_saved || 0}
-          unit="kg CO₂"
+          unit={t('dashboard.carbonUnit')}
           change={stats.carbon_change}
           changeType={stats.carbon_change > 0 ? 'increase' : stats.carbon_change < 0 ? 'decrease' : 'neutral'}
           icon={Leaf}
@@ -296,7 +296,7 @@ export function Dashboard() {
         <StatsCard
           title={t('dashboard.rank')}
           value={stats.rank || '-'}
-          unit={stats.total_users ? `/ ${stats.total_users}` : ''}
+          unit={stats.total_users ? t('dashboard.rankUnit', { total: stats.total_users }) : ''}
           change={stats.rank_change}
           changeType={stats.rank_change > 0 ? 'decrease' : stats.rank_change < 0 ? 'increase' : 'neutral'}
           icon={Users}
@@ -394,7 +394,7 @@ export function Dashboard() {
                           </span>
                           <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyPointsWithUnit',  {
-                              points: current.points.toLocaleString(),
+                              points: current.points.toLocaleString(currentLanguage),
                             })}
                           </span>
                         </div>
@@ -404,7 +404,7 @@ export function Dashboard() {
                           </span>
                           <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyCarbonSaved',  {
-                              amount: current.carbon.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+                              amount: current.carbon.toLocaleString(currentLanguage, { maximumFractionDigits: 2 }),
                             })}
                           </span>
                         </div>
@@ -414,7 +414,7 @@ export function Dashboard() {
                           </span>
                           <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyRecords',  {
-                              count: current.records.toLocaleString(),
+                              count: current.records.toLocaleString(currentLanguage),
                             })}
                           </span>
                         </div>
@@ -433,14 +433,14 @@ export function Dashboard() {
                                 <span className="font-medium text-foreground">{item.label}</span>
                                 <span className="text-xs text-muted-foreground">
                                   {t('dashboard.monthlyCarbonSummary',  {
-                                    carbon: item.carbon.toLocaleString(undefined, { maximumFractionDigits: 2 }),
-                                    records: item.records.toLocaleString(),
+                                    carbon: item.carbon.toLocaleString(currentLanguage, { maximumFractionDigits: 2 }),
+                                    records: item.records.toLocaleString(currentLanguage),
                                   })}
                                 </span>
                               </div>
                               <span className="text-sm font-semibold text-amber-500">
                                 {t('dashboard.monthlyPointsShort',  {
-                                  points: item.points.toLocaleString(),
+                                  points: item.points.toLocaleString(currentLanguage),
                                 })}
                               </span>
                             </div>
@@ -463,7 +463,7 @@ export function Dashboard() {
               </h3>
               <div className="space-y-3">
                 {stats.leaderboard.slice(0, 5).map((entry, index) => {
-                  const displayName = entry.username || entry.name || '—';
+                  const displayName = entry.username || entry.name || t('dashboard.leaderboardUnknownName');
                   return (
                     <div key={entry.id ?? `${index}-${displayName}`} className="flex items-center gap-3">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
@@ -480,7 +480,7 @@ export function Dashboard() {
                       </div>
                       {Number.isFinite(entry.total_points) ? (
                         <span className="text-sm text-blue-400">
-                          {entry.total_points} {t('common.points')}
+                          {Number(entry.total_points).toLocaleString(currentLanguage)} {t('common.points')}
                         </span>
                       ) : null}
                     </div>
@@ -531,7 +531,7 @@ export function Dashboard() {
                             </div>
                             <div className="flex items-center gap-2 flex-1 min-w-0">
                               {renderLeaderboardAvatar(entry, 'h-7 w-7')}
-                              <span className="truncate">{entry.username || entry.name || '-'}</span>
+                              <span className="truncate">{entry.username || entry.name || t('dashboard.leaderboardUnknownName')}</span>
                             </div>
                             <span className="text-xs font-semibold">{entry.current_streak ?? 0} {t('dashboard.streakDays')}</span>
                           </div>

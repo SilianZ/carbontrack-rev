@@ -101,7 +101,7 @@ export function QuickActions({ userStats = {}, onActionClick }) {
               >
                 {action.badge && (
                   <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center">
-                    {action.badge > 99 ? '99+' : action.badge}
+                    {action.badge > 99 ? t('dashboard.quickActions.badgeOverflow', { count: 99 }) : action.badge}
                   </div>
                 )}
 

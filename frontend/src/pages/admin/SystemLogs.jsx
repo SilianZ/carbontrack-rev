@@ -26,9 +26,9 @@ import { Alert, AlertDescription, AlertTitle } from '../../components/ui/Alert';
 import { cn } from '../../lib/utils';
 
 const SYSTEM_COLUMNS = ['id', 'method', 'path', 'status_code', 'user_id', 'duration_ms', 'created_at', 'ops'];
-const AUDIT_COLUMNS = ['id', 'actor_type', 'action', 'operation_category', 'status', 'user_id', 'ip_address', 'created_at', 'ops'];
+const AUDIT_COLUMNS = ['id', 'conversation_id', 'actor_type', 'action', 'operation_category', 'status', 'user_id', 'ip_address', 'created_at', 'ops'];
 const ERROR_COLUMNS = ['id', 'request_id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time', 'ops'];
-const LLM_COLUMNS = ['id', 'actor_type', 'actor_id', 'source', 'model', 'llm_status', 'total_tokens', 'latency_ms', 'created_at', 'ops'];
+const LLM_COLUMNS = ['id', 'conversation_id', 'turn_no', 'actor_type', 'actor_id', 'source', 'model', 'llm_status', 'total_tokens', 'latency_ms', 'created_at', 'ops'];
 
 const COLUMN_STORAGE_KEYS = {
   system: 'logCols_system',
@@ -78,7 +78,7 @@ export default function SystemLogsPage() {
     const params = {};
     const tokens = parsedQuery.tokens || {};
 
-    ['method', 'status_code', 'user_id', 'request_id', 'path', 'action', 'audit_status', 'error_type', 'model', 'source', 'actor_type', 'actor_id', 'llm_status'].forEach((key) => {
+    ['method', 'status_code', 'user_id', 'request_id', 'path', 'action', 'audit_status', 'error_type', 'model', 'source', 'actor_type', 'actor_id', 'llm_status', 'conversation_id', 'turn_no'].forEach((key) => {
       if (tokens[key]) params[key] = tokens[key];
     });
 
@@ -405,6 +405,36 @@ export default function SystemLogsPage() {
                 className="font-mono"
               />
             </FilterField>
+            <FilterField
+              label={t('admin.systemLogs.filters.conversationId', { defaultValue: 'Conversation ID' })}
+              htmlFor="log-conversation-id"
+            >
+              <Input
+                id="log-conversation-id"
+                value={extraParams.conversation_id || ''}
+                onChange={(event) => {
+                  const v = event.target.value;
+                  setQ((prev) => mergeToken(prev, 'cid', v));
+                }}
+                placeholder={t('admin.systemLogs.placeholders.conversationId', { defaultValue: 'admin-ai-...' })}
+                className="font-mono"
+              />
+            </FilterField>
+            <FilterField
+              label={t('admin.systemLogs.filters.turnNo', { defaultValue: 'Turn No.' })}
+              htmlFor="log-turn-no"
+            >
+              <Input
+                id="log-turn-no"
+                value={extraParams.turn_no || ''}
+                onChange={(event) => {
+                  const v = event.target.value;
+                  setQ((prev) => mergeToken(prev, 'turn', v));
+                }}
+                placeholder={t('admin.systemLogs.placeholders.turnNo', { defaultValue: '1' })}
+                className="font-mono"
+              />
+            </FilterField>
             <FilterField label={t('admin.systemLogs.filters.path')} htmlFor="log-path">
               <Input
                 id="log-path"
@@ -603,6 +633,7 @@ export default function SystemLogsPage() {
                 emptyText={t('admin.systemLogs.empty.audit')}
                 headers={[
                   'id',
+                  'conversation_id',
                   'actor_type',
                   'action',
                   'operation_category',
@@ -617,6 +648,7 @@ export default function SystemLogsPage() {
                     key={`audit-${log.id}`}
                     summaryCells={[
                       log.id,
+                      log.conversation_id || '-',
                       log.actor_type,
                       log.action,
                       log.operation_category || '- ',
@@ -1093,6 +1125,7 @@ function AuditDetail({ log, columnLabel }) {
   return (
     <div className="space-y-2 text-xs">
       <KeyVal label={columnLabel('id')} value={log.id} />
+      <KeyVal label={columnLabel('conversation_id')} value={log.conversation_id || '-'} />
       <KeyVal label={columnLabel('action')} value={log.action} />
       <KeyVal label={columnLabel('operation_category')} value={log.operation_category || '-'} />
       <KeyVal label={columnLabel('actor_type')} value={log.actor_type} />
@@ -1140,6 +1173,8 @@ function LlmDetail({ log, columnLabel, onRelated, t }) {
   return (
     <div className="space-y-2 text-xs">
       <div className="flex flex-wrap items-center gap-2">
+        <KeyVal label={columnLabel('conversation_id')} value={log.conversation_id || '-'} />
+        <KeyVal label={columnLabel('turn_no')} value={log.turn_no ?? '-'} />
         <KeyVal label={columnLabel('request_id')} value={log.request_id || '-'} />
         {log.request_id && (
           <Button variant="link" className="h-auto p-0 text-xs" onClick={() => onRelated?.(log.request_id)}>
@@ -1209,6 +1244,10 @@ function llmCell(log, column) {
   switch (column) {
     case 'id':
       return log.id;
+    case 'conversation_id':
+      return log.conversation_id || '-';
+    case 'turn_no':
+      return log.turn_no ?? '-';
     case 'actor_type':
       return log.actor_type;
     case 'actor_id':
