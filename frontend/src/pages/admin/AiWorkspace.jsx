@@ -34,6 +34,8 @@ import { ScrollArea } from '../../components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/Alert';
 
 const COMMAND_MIN_LENGTH = 2;
+const EMPTY_ARRAY = [];
+const EMPTY_OBJECT = {};
 const ROUTE_COPY = {
   dashboard: {
     zh: { label: '管理总览', description: '后台总览、关键指标与快捷处理入口。' },
@@ -189,6 +191,8 @@ const ROUTE_KEY_BY_PATH = {
   '/admin/llm-usage': 'llmUsage',
   '/admin/diagnostics': 'diagnostics',
 };
+
+const MotionDiv = motion.div;
 
 function buildRouteWithQuery(route, query = {}) {
   if (!route) return null;
@@ -799,7 +803,9 @@ function FilterPill({ active, onClick, children }) {
   );
 }
 
-function WorkspaceSectionButton({ active, icon: Icon, label, count, onClick }) {
+function WorkspaceSectionButton({ active, icon, label, count, onClick }) {
+  const iconNode = icon ? React.createElement(icon, { className: 'h-4 w-4' }) : null;
+
   return (
     <button
       type="button"
@@ -811,7 +817,7 @@ function WorkspaceSectionButton({ active, icon: Icon, label, count, onClick }) {
           : 'border-slate-200/80 bg-white/78 text-slate-600 hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-white/18 dark:hover:text-white'
       )}
     >
-      <Icon className="h-4 w-4" />
+      {iconNode}
       <span>{label}</span>
       {count !== undefined ? (
         <span className={cn(
@@ -839,10 +845,13 @@ function JsonPreview({ value, className }) {
 }
 
 function ResultSnapshot({ title, value, isZh }) {
-  if (value == null || value === '') return null;
-
+  const hasValue = value != null && value !== '';
   const [open, setOpen] = useState(false);
   const summary = useMemo(() => {
+    if (!hasValue) {
+      return isZh ? '无结果' : 'No result';
+    }
+
     if (Array.isArray(value)) {
       return isZh ? `数组 · ${value.length} 项` : `Array · ${value.length} items`;
     }
@@ -859,7 +868,9 @@ function ResultSnapshot({ title, value, isZh }) {
 
     const compact = text.replace(/\s+/g, ' ').trim();
     return compact.length > 56 ? `${compact.slice(0, 56)}...` : compact;
-  }, [isZh, value]);
+  }, [hasValue, isZh, value]);
+
+  if (!hasValue) return null;
 
   return (
     <div className="rounded-[20px] border border-slate-200/80 bg-slate-50/90 p-4 dark:border-white/8 dark:bg-black/20">
@@ -897,7 +908,7 @@ function EventTimelineRow({ item, locale, isZh, disabled, onConfirmProposal, onR
   const result = metaData.new_data || metaData.result || null;
 
   return (
-    <motion.div
+    <MotionDiv
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -957,7 +968,7 @@ function EventTimelineRow({ item, locale, isZh, disabled, onConfirmProposal, onR
           </Button>
         </div>
       ) : null}
-    </motion.div>
+    </MotionDiv>
   );
 }
 
@@ -1017,7 +1028,7 @@ function MessageBubble({
   const messageWidthClass = 'w-full max-w-[min(100%,36rem)]';
 
   return (
-    <motion.div
+    <MotionDiv
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -1100,7 +1111,7 @@ function MessageBubble({
           </div>
         ) : null}
       </div>
-    </motion.div>
+    </MotionDiv>
   );
 }
 
@@ -1363,11 +1374,24 @@ export default function AdminAiWorkspacePage() {
     }
   );
 
-  const assistant = workspaceQuery.data?.assistant || {};
-  const starterPrompts = Array.isArray(workspaceQuery.data?.starter_prompts) ? workspaceQuery.data.starter_prompts : [];
-  const quickActions = Array.isArray(workspaceQuery.data?.quick_actions) ? workspaceQuery.data.quick_actions : [];
-  const navigationTargets = Array.isArray(workspaceQuery.data?.navigation_targets) ? workspaceQuery.data.navigation_targets : [];
-  const managementActions = Array.isArray(workspaceQuery.data?.management_actions) ? workspaceQuery.data.management_actions : [];
+  const workspaceData = workspaceQuery.data;
+  const assistant = workspaceData?.assistant || EMPTY_OBJECT;
+  const starterPrompts = useMemo(
+    () => (Array.isArray(workspaceData?.starter_prompts) ? workspaceData.starter_prompts : EMPTY_ARRAY),
+    [workspaceData?.starter_prompts]
+  );
+  const quickActions = useMemo(
+    () => (Array.isArray(workspaceData?.quick_actions) ? workspaceData.quick_actions : EMPTY_ARRAY),
+    [workspaceData?.quick_actions]
+  );
+  const navigationTargets = useMemo(
+    () => (Array.isArray(workspaceData?.navigation_targets) ? workspaceData.navigation_targets : EMPTY_ARRAY),
+    [workspaceData?.navigation_targets]
+  );
+  const managementActions = useMemo(
+    () => (Array.isArray(workspaceData?.management_actions) ? workspaceData.management_actions : EMPTY_ARRAY),
+    [workspaceData?.management_actions]
+  );
 
   const currentSummary = activeConversation?.summary || conversationItems.find((item) => item.conversation_id === selectedConversationId) || {};
   const selectedConversationTitle = currentSummary.title || (isCreatingConversation ? (isZh ? '新会话' : 'New session') : (isZh ? '控制通道' : 'Control channel'));
@@ -1891,7 +1915,7 @@ export default function AdminAiWorkspacePage() {
               </div>
 
               <AnimatePresence mode="wait" initial={false}>
-                <motion.div
+                <MotionDiv
                   key={workspaceSection}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -2084,7 +2108,7 @@ export default function AdminAiWorkspacePage() {
                       </Panel>
                     </div>
                   ) : null}
-                </motion.div>
+                </MotionDiv>
               </AnimatePresence>
             </div>
           </div>
