@@ -6,9 +6,10 @@ import { carbonAPI } from '../../lib/api';
 import { ActivitySelector } from './ActivitySelector';
 import DataInputForm from './DataInputForm';
 import { Button } from '../ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import { Alert, AlertDescription } from '../ui/Alert';
 import { SmartActivityInput } from './SmartActivityInput';
+
+const InteractiveReceipt = React.lazy(() => import('./InteractiveReceipt'));
 
 export function CarbonCalculator() {
   const { t } = useTranslation();
@@ -154,7 +155,15 @@ export function CarbonCalculator() {
         setSubmitResult({
           carbon_saved: calc.carbon_saved || 0,
           points_earned: calc.points_earned || 0,
-          record_id: response.data.record_id
+          record_id: response.data.record_id,
+          amount: formData.amount,
+          date: formData.date,
+          checkin_date: formData.checkin_date || null,
+          description: formData.description || '',
+          images: Array.isArray(formData.images) ? formData.images : [],
+          image_count: Array.isArray(formData.images) ? formData.images.length : 0,
+          submitted_at: new Date().toISOString(),
+          activity: selectedActivity ? { ...selectedActivity } : null,
         });
         setCurrentStep(3);
       } else {
@@ -171,6 +180,7 @@ export function CarbonCalculator() {
   const handleRestart = () => {
     setCurrentStep(1);
     setSelectedActivity(null);
+    setSmartData(null);
     setCalculationResult(null);
     setSubmitResult(null);
     setError('');
@@ -301,70 +311,15 @@ export function CarbonCalculator() {
 
         {/* 步骤3: 提交成功 */}
         {currentStep === 3 && submitResult && (
-          <Card className="border-green-500/20 bg-green-500/10">
-            <CardHeader className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4 mx-auto">
-                <CheckCircle className="w-8 h-8 text-green-600" />
-              </div>
-              <CardTitle className="text-green-500">
-                {t('activities.form.submitSuccess')}
-              </CardTitle>
-              <CardDescription>
-                {t('activities.form.submitSuccessDesc')}
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="rounded-lg bg-card p-4 text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {(() => {
-                      const v = submitResult.carbon_saved;
-                      const num = typeof v === 'number' ? v : Number(v);
-                      return Number.isFinite(num) ? num.toFixed(2) : '0.00';
-                    })()}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {t('activities.carbonSaved')} (kg CO₂)
-                  </div>
-                </div>
-
-                <div className="rounded-lg bg-card p-4 text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {submitResult.points_earned || 0}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {t('activities.pointsEarned')}
-                  </div>
-                </div>
-
-                <div className="rounded-lg bg-card p-4 text-center">
-                  <div className="text-2xl font-bold text-orange-600">
-                    {t('activities.status.pending')}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {t('activities.currentStatus')}
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-center space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {t('activities.form.reviewNotice')}
-                </p>
-
-                <div className="flex gap-4 justify-center">
-                  <Button onClick={handleRestart}>
-                    {t('activities.form.recordAnother')}
-                  </Button>
-
-                  <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
-                    {t('activities.form.goToDashboard')}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <React.Suspense fallback={<div className="h-[560px] rounded-[36px] border border-black/6 bg-white" />}>
+            <InteractiveReceipt
+              receipt={submitResult}
+              onRestart={handleRestart}
+              onGoDashboard={() => {
+                window.location.href = '/dashboard';
+              }}
+            />
+          </React.Suspense>
         )}
       </div>
     </div>
