@@ -399,6 +399,8 @@ export default function AdminLlmUsagePage() {
 
   const openRelated = useCallback(async (requestId) => {
     if (!requestId) return;
+    setSelectedConversationId(null);
+    setSelectedLogId(null);
     setRequestDrawerId(requestId);
     setLoadingRelated(true);
     try {
