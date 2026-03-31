@@ -102,7 +102,7 @@ export function StatsCard({
                   change
                 }
               </span>
-              <span className="ml-1 text-muted-foreground">{t('dashboard.vsPreviousMonth')}</span>
+              <span className="ml-1 text-muted-foreground">{t('dashboard.vsLastMonth')}</span>
             </div>
           )}
         </div>

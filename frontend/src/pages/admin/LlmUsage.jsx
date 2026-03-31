@@ -236,6 +236,20 @@ export default function AdminLlmUsagePage() {
   const decimalFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { maximumFractionDigits: 2 }), [currentLanguage]);
   const percentFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { style: 'percent', maximumFractionDigits: 1 }), [currentLanguage]);
   const shortDateFormatter = useMemo(() => new Intl.DateTimeFormat(currentLanguage, { month: 'short', day: 'numeric' }), [currentLanguage]);
+  const chartTooltipContentStyle = useMemo(() => ({
+    backgroundColor: 'var(--popover)',
+    border: '1px solid var(--border)',
+    borderRadius: '12px',
+    boxShadow: '0 16px 40px rgba(0, 0, 0, 0.18)',
+    color: 'var(--popover-foreground)'
+  }), []);
+  const chartTooltipLabelStyle = useMemo(() => ({
+    color: 'var(--muted-foreground)',
+    fontWeight: 600
+  }), []);
+  const chartTooltipItemStyle = useMemo(() => ({
+    color: 'var(--popover-foreground)'
+  }), []);
 
   const modelData = useMemo(
     () => buildTopData(distributions.models, 'model', 6, t('admin.llmUsage.other')),
@@ -386,6 +400,8 @@ export default function AdminLlmUsagePage() {
 
   const openRelated = useCallback(async (requestId) => {
     if (!requestId) return;
+    setSelectedConversationId(null);
+    setSelectedLogId(null);
     setRequestDrawerId(requestId);
     setLoadingRelated(true);
     try {
@@ -477,6 +493,9 @@ export default function AdminLlmUsagePage() {
                   <Tooltip
                     formatter={(value, name) => [value, name === 'tokens' ? t('admin.llmUsage.charts.tokens') : t('admin.llmUsage.charts.calls')]}
                     labelFormatter={formatTrendDate}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
                   />
                   <Legend />
                   <Bar yAxisId="left" dataKey="calls" name={t('admin.llmUsage.charts.calls')} fill={CHART_COLORS[0]} radius={[6, 6, 0, 0]} />
@@ -513,6 +532,9 @@ export default function AdminLlmUsagePage() {
                       return [value, name === 'success_calls' ? t('admin.llmUsage.charts.success') : t('admin.llmUsage.charts.failed')];
                     }}
                     labelFormatter={formatTrendDate}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
                   />
                   <Legend />
                   <Bar yAxisId="left" dataKey="success_calls" stackId="status" name={t('admin.llmUsage.charts.success')} fill={CHART_COLORS[2]} />
@@ -544,7 +566,12 @@ export default function AdminLlmUsagePage() {
                       <Cell key={`model-${entry.model}-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value, name) => [value, name]} />
+                  <Tooltip
+                    formatter={(value, name) => [value, name]}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -568,7 +595,12 @@ export default function AdminLlmUsagePage() {
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" allowDecimals={false} />
                   <YAxis type="category" dataKey="source" width={90} />
-                  <Tooltip formatter={(value) => [value, t('admin.llmUsage.charts.calls')]} />
+                  <Tooltip
+                    formatter={(value) => [value, t('admin.llmUsage.charts.calls')]}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
+                  />
                   <Bar dataKey="calls" fill={CHART_COLORS[1]} radius={[0, 6, 6, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -594,7 +626,12 @@ export default function AdminLlmUsagePage() {
                       <Cell key={`actor-${entry.actor_label || entry.actor_type}-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value, name) => [value, name]} />
+                  <Tooltip
+                    formatter={(value, name) => [value, name]}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>

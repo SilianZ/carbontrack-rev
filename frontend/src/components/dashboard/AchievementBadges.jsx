@@ -7,7 +7,7 @@ import { resolveR2ImageSource } from '../../lib/r2Image';
 
 export function AchievementBadges({ badges = [], userBadges = [], loading = false, onTriggerAuto, isAdmin = false }) {
   const { t, currentLanguage } = useTranslation();
-  const isEnglish = (currentLanguage || '').toLowerCase().startsWith('en');
+  const isChineseLocale = currentLanguage?.toLowerCase().startsWith('zh');
   const ownedMap = new Map();
   userBadges.forEach((entry) => {
     const record = entry?.user_badge || {};
@@ -20,6 +20,12 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
   const totalCount = badges.length;
   const completion = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
   const topBadges = badges.slice(0, 8);
+  const getBadgeName = (badge) => {
+    if (isChineseLocale) {
+      return badge.name_zh || badge.name_en || t('dashboard.leaderboardUnknownName');
+    }
+    return badge.name_en || badge.name_zh || t('dashboard.leaderboardUnknownName');
+  };
 
   return (
     <div className="rounded-lg border border-border/80 bg-card/95 p-6 shadow-sm">
@@ -71,10 +77,6 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
             {topBadges.map((badge) => {
               const owned = ownedMap.has(badge.id);
               const userBadge = ownedMap.get(badge.id);
-              const primaryName = isEnglish
-                ? badge.name_en || badge.name_zh
-                : badge.name_zh || badge.name_en;
-              const secondaryName = isEnglish ? null : badge.name_en;
               const badgeImage = resolveR2ImageSource({
                 urlCandidates: [badge.icon_url, badge.icon_presigned_url],
                 pathCandidates: [badge.icon_path],
@@ -91,19 +93,21 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                       <R2Image
                         src={badgeImage.src || undefined}
                         filePath={badgeImage.filePath || undefined}
-                        alt={primaryName}
+                        alt={getBadgeName(badge) || t('dashboard.badgeImageAlt')}
                         className="w-full h-full object-cover"
-                        fallback={<div className="text-xs text-muted-foreground">IMG</div>}
+                        fallback={<div className="text-xs text-muted-foreground">{t('dashboard.imageFallback')}</div>}
                       />
                     ) : (
                       <Award className="h-8 w-8 text-muted-foreground/60" />
                     )}
                   </div>
                   <div className="text-center space-y-1">
-                    <p className="text-sm font-semibold text-foreground">{primaryName}</p>
-                    {secondaryName && secondaryName !== primaryName ? (
-                      <p className="text-xs text-muted-foreground">{secondaryName}</p>
-                    ) : null}
+                    <p className="text-sm font-semibold text-foreground">{getBadgeName(badge)}</p>
+                    {badge.name_zh && badge.name_en && badge.name_zh !== badge.name_en && (
+                      <p className="text-xs text-muted-foreground">
+                        {isChineseLocale ? badge.name_en : badge.name_zh}
+                      </p>
+                    )}
                   </div>
                   <div className="w-full text-center">
                     {owned ? (
@@ -120,7 +124,9 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                   </div>
                   {owned && userBadge?.awarded_at && (
                     <p className="text-[11px] text-muted-foreground">
-                      {t('dashboard.badgeAwardedAt')}: {new Date(userBadge.awarded_at).toLocaleDateString(currentLanguage)}
+                      {t('dashboard.badgeAwardedAtValue', {
+                        date: new Intl.DateTimeFormat(currentLanguage).format(new Date(userBadge.awarded_at)),
+                      })}
                     </p>
                   )}
                 </div>

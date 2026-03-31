@@ -62,7 +62,7 @@ export function Dashboard() {
         <R2Image
           filePath={resolvedFilePath}
           src={isAbsolute ? avatarUrl : undefined}
-          alt={displayName || 'avatar'}
+          alt={displayName || t('dashboard.avatarAlt')}
           className={`${sizeClass} rounded-full object-cover border border-white shadow-sm`}
           fallback={fallback}
         />
@@ -179,8 +179,6 @@ export function Dashboard() {
     window.location.href = '/activities';
   };
 
-  const integerFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
-  const decimalFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { maximumFractionDigits: 2 }), [currentLanguage]);
   const monthFormatter = useMemo(() => new Intl.DateTimeFormat(currentLanguage, {
     year: 'numeric',
     month: 'long',
@@ -276,7 +274,7 @@ export function Dashboard() {
         <StatsCard
           title={t('dashboard.carbonSaved')}
           value={stats.total_carbon_saved || 0}
-          unit="kg CO₂"
+          unit={t('dashboard.carbonUnit')}
           change={stats.carbon_change}
           changeType={stats.carbon_change > 0 ? 'increase' : stats.carbon_change < 0 ? 'decrease' : 'neutral'}
           icon={Leaf}
@@ -298,7 +296,7 @@ export function Dashboard() {
         <StatsCard
           title={t('dashboard.rank')}
           value={stats.rank || '-'}
-          unit={stats.total_users ? `/ ${integerFormatter.format(stats.total_users)}` : ''}
+          unit={stats.total_users ? t('dashboard.rankUnit', { total: stats.total_users }) : ''}
           change={stats.rank_change}
           changeType={stats.rank_change > 0 ? 'decrease' : stats.rank_change < 0 ? 'increase' : 'neutral'}
           icon={Users}
@@ -396,7 +394,7 @@ export function Dashboard() {
                           </span>
                           <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyPointsWithUnit',  {
-                              points: integerFormatter.format(current.points),
+                              points: current.points.toLocaleString(currentLanguage),
                             })}
                           </span>
                         </div>
@@ -406,7 +404,7 @@ export function Dashboard() {
                           </span>
                           <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyCarbonSaved',  {
-                              amount: decimalFormatter.format(current.carbon),
+                              amount: current.carbon.toLocaleString(currentLanguage, { maximumFractionDigits: 2 }),
                             })}
                           </span>
                         </div>
@@ -416,7 +414,7 @@ export function Dashboard() {
                           </span>
                           <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyRecords',  {
-                              count: integerFormatter.format(current.records),
+                              count: current.records.toLocaleString(currentLanguage),
                             })}
                           </span>
                         </div>
@@ -435,14 +433,14 @@ export function Dashboard() {
                                 <span className="font-medium text-foreground">{item.label}</span>
                                 <span className="text-xs text-muted-foreground">
                                   {t('dashboard.monthlyCarbonSummary',  {
-                                    carbon: decimalFormatter.format(item.carbon),
-                                    records: integerFormatter.format(item.records),
+                                    carbon: item.carbon.toLocaleString(currentLanguage, { maximumFractionDigits: 2 }),
+                                    records: item.records.toLocaleString(currentLanguage),
                                   })}
                                 </span>
                               </div>
                               <span className="text-sm font-semibold text-amber-500">
                                 {t('dashboard.monthlyPointsShort',  {
-                                  points: integerFormatter.format(item.points),
+                                  points: item.points.toLocaleString(currentLanguage),
                                 })}
                               </span>
                             </div>
@@ -465,7 +463,7 @@ export function Dashboard() {
               </h3>
               <div className="space-y-3">
                 {stats.leaderboard.slice(0, 5).map((entry, index) => {
-                  const displayName = entry.username || entry.name || '—';
+                  const displayName = entry.username || entry.name || t('dashboard.leaderboardUnknownName');
                   return (
                     <div key={entry.id ?? `${index}-${displayName}`} className="flex items-center gap-3">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
@@ -482,7 +480,7 @@ export function Dashboard() {
                       </div>
                       {Number.isFinite(entry.total_points) ? (
                         <span className="text-sm text-blue-400">
-                          {entry.total_points} {t('common.points')}
+                          {Number(entry.total_points).toLocaleString(currentLanguage)} {t('common.points')}
                         </span>
                       ) : null}
                     </div>
@@ -533,7 +531,7 @@ export function Dashboard() {
                             </div>
                             <div className="flex items-center gap-2 flex-1 min-w-0">
                               {renderLeaderboardAvatar(entry, 'h-7 w-7')}
-                              <span className="truncate">{entry.username || entry.name || '-'}</span>
+                              <span className="truncate">{entry.username || entry.name || t('dashboard.leaderboardUnknownName')}</span>
                             </div>
                             <span className="text-xs font-semibold">{entry.current_streak ?? 0} {t('dashboard.streakDays')}</span>
                           </div>

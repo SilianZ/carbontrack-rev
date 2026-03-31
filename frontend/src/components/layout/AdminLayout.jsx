@@ -87,6 +87,23 @@ export default function AdminLayout() {
     return () => target.removeEventListener('keydown', handler);
   }, [navigate]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
+
+    const previousRootOverflowX = document.documentElement.style.overflowX;
+    const previousBodyOverflowX = document.body.style.overflowX;
+
+    document.documentElement.style.overflowX = 'hidden';
+    document.body.style.overflowX = 'hidden';
+
+    return () => {
+      document.documentElement.style.overflowX = previousRootOverflowX;
+      document.body.style.overflowX = previousBodyOverflowX;
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background text-foreground">
@@ -153,7 +170,7 @@ export default function AdminLayout() {
                   </div>
                 </SidebarFooter>
               </Sidebar>
-              <SidebarInset className="relative flex min-w-0 flex-1 flex-col overflow-x-clip bg-transparent">
+              <SidebarInset className="relative flex min-w-0 flex-1 flex-col overflow-x-hidden bg-transparent">
                 <header className="top-16 z-30 flex w-full max-w-full flex-col gap-4 border-b border-transparent px-4 pb-4 pt-4 sm:px-6 md:px-10">
                   <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                     <SidebarTrigger className="self-start md:hidden" />
@@ -191,7 +208,7 @@ export default function AdminLayout() {
                     </div>
                   </div>
                 </header>
-                <main className="min-w-0 px-4 pb-10 pt-6 sm:px-6 md:px-10">
+                <main className="min-w-0 overflow-x-hidden px-4 pb-10 pt-6 sm:px-6 md:px-10">
                   <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6">
                     <Outlet />
                   </div>

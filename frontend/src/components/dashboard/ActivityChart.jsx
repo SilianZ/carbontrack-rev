@@ -48,7 +48,7 @@ export function ActivityChart({
 
   const formatTooltipValue = (value, name) => {
     if (name === 'carbon_saved') {
-      return [`${value} kg CO₂`, t('activities.carbonSaved')];
+      return [`${value} ${t('dashboard.carbonUnit')}`, t('activities.carbonSaved')];
     }
     if (name === 'points') {
       return [`${value} ${t('dashboard.points')}`, t('dashboard.points')];

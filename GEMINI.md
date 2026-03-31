@@ -79,7 +79,9 @@ The frontend is a modern SPA.
 
 - The admin AI is a single multi-turn assistant entry. Do not introduce or document a separate long-lived `intent` product flow as the primary path.
 - The primary admin AI UX lives in the dedicated `/admin/ai` workspace. If you change workspace navigation, starter prompts, quick actions, or bootstrap payloads, update the backend catalogue, OpenAPI contract, and frontend workspace together.
+- Keep task-template prompts and action labels in `/admin/ai` operational and locale-aware. Prefer direct admin phrasing that reliably maps to backend `managementActions`, especially for Chinese prompts used by administrators in production.
 - Conversation history is reconstructed from logs. If you change admin AI message/audit semantics, keep `llm_logs`, `audit_logs`, and any conversation aggregation responses compatible.
+- If the agent adds or changes keyword fallback routing, synonym matching, or “continue from result” affordances, update `backend/config/admin_ai_commands.json` keywords alongside the workspace UI so natural-language prompts and one-click follow-up actions stay aligned.
 - Any change to admin AI tools, keywords, navigation targets, confirmation behavior, session audit structure, or route contracts must update both root agent docs (`AGENTS.md`, `GEMINI.md`).
 
 ## Git Commit Guidelines

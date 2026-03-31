@@ -9,7 +9,8 @@ import { formatNumber } from '../../lib/utils';
 export function RecentActivities({ activities = [], loading = false, onViewAll }) {
   const { t, tUnit, currentLanguage } = useTranslation();
   const navigate = useNavigate();
-  const isEnglish = (currentLanguage || '').toLowerCase().startsWith('en');
+  const carbonUnit = t('dashboard.carbonUnit');
+  const isChineseLocale = currentLanguage?.toLowerCase().startsWith('zh');
 
   const openActivityHistoryDetail = (activityId) => {
     if (!activityId) return;
@@ -53,7 +54,7 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
     } else if (diffDays <= 7) {
       return `${diffDays - 1} ${t('date.daysAgo')}`;
     } else {
-      return date.toLocaleDateString(currentLanguage, { 
+      return date.toLocaleDateString(currentLanguage, {
         month: 'short', 
         day: 'numeric' 
       });
@@ -61,11 +62,10 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
   };
 
   const getActivityName = (activity) => {
-    if (isEnglish) {
-      return activity.activity_name_en || activity.activity_name_zh || activity.activity_name || t('activities.unknownActivity');
+    if (isChineseLocale) {
+      return activity.activity_name_zh || activity.activity_name_en || activity.activity_name || t('activities.unknownActivity');
     }
-
-    return activity.activity_name_zh || activity.activity_name_en || activity.activity_name || t('activities.unknownActivity');
+    return activity.activity_name_en || activity.activity_name_zh || activity.activity_name || t('activities.unknownActivity');
   };
 
   if (loading) {
@@ -171,7 +171,7 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
                       const formatted = formatNumber(activity.carbon_saved, 2);
                       return formatted !== null ? (
                         <span className="text-green-600">
-                          {formatted} kg CO₂
+                          {formatted} {carbonUnit}
                         </span>
                       ) : null;
                     })()}
