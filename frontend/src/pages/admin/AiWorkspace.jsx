@@ -121,7 +121,7 @@ function StatusPill({ children, tone = 'neutral' }) {
       : 'border-slate-200/80 bg-white/85 text-slate-600 dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-300';
 
   return (
-    <span className={cn('inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium', toneClass)}>
+    <span className={cn('inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1 text-left text-xs font-medium leading-snug whitespace-normal break-words', toneClass)}>
       {children}
     </span>
   );
@@ -129,7 +129,7 @@ function StatusPill({ children, tone = 'neutral' }) {
 
 function WorkspaceMetricCard({ label, value }) {
   return (
-    <div className="rounded-[26px] border border-white/70 bg-white/80 p-4 shadow-[0_20px_40px_rgba(15,23,42,0.06)] backdrop-blur dark:border-white/10 dark:bg-slate-950/60 dark:shadow-none">
+    <div className="min-w-0 rounded-[26px] border border-white/70 bg-white/80 p-4 shadow-[0_20px_40px_rgba(15,23,42,0.06)] backdrop-blur dark:border-white/10 dark:bg-slate-950/60 dark:shadow-none">
       <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">{label}</div>
       <div className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{value}</div>
     </div>
@@ -598,27 +598,27 @@ export default function AdminAiWorkspacePage() {
   }, [navigate, t]);
 
   return (
-    <div className="space-y-6 pb-4">
-      <section className="relative overflow-hidden rounded-[34px] border border-slate-200/80 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.96),rgba(236,253,245,0.92)_45%,rgba(248,250,252,0.95)_100%)] p-6 shadow-[0_28px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),rgba(15,23,42,0.96)_42%,rgba(2,6,23,0.98)_100%)] dark:shadow-none md:p-8">
+    <div className="space-y-6 overflow-x-clip pb-4">
+      <section className="relative overflow-hidden rounded-[34px] border border-slate-200/80 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.96),rgba(236,253,245,0.92)_45%,rgba(248,250,252,0.95)_100%)] p-5 shadow-[0_28px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),rgba(15,23,42,0.96)_42%,rgba(2,6,23,0.98)_100%)] dark:shadow-none sm:p-6 md:p-8">
         <div className="pointer-events-none absolute -right-24 -top-20 h-64 w-64 rounded-full bg-emerald-200/35 blur-3xl dark:bg-emerald-500/12" />
         <div className="pointer-events-none absolute bottom-0 left-1/4 h-44 w-44 rounded-full bg-sky-200/30 blur-3xl dark:bg-sky-500/10" />
 
-        <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-3xl space-y-4">
-            <Badge className="w-fit rounded-full border-0 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
+        <div className="relative flex min-w-0 flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div className="max-w-3xl min-w-0 space-y-4">
+            <Badge className="w-fit max-w-full rounded-full border-0 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
               {t('admin.aiWorkspace.badge')}
             </Badge>
 
             <div className="space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
+              <h1 className="max-w-full break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl md:text-5xl">
                 {t('admin.aiWorkspace.title')}
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
+              <p className="max-w-2xl break-words text-sm leading-7 text-muted-foreground md:text-base">
                 {t('admin.aiWorkspace.subtitle')}
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex max-w-full flex-wrap gap-2">
               <StatusPill tone={assistant.chat_enabled ? 'success' : 'warning'}>
                 {assistant.chat_enabled ? t('admin.aiWorkspace.chatReady') : t('admin.aiWorkspace.chatUnavailable')}
               </StatusPill>
@@ -634,7 +634,7 @@ export default function AdminAiWorkspacePage() {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid min-w-0 gap-3 sm:grid-cols-3">
             <WorkspaceMetricCard label={t('admin.aiWorkspace.readActions')} value={capabilitySummary.readCount} />
             <WorkspaceMetricCard label={t('admin.aiWorkspace.writeActions')} value={capabilitySummary.writeCount} />
             <WorkspaceMetricCard label={t('admin.aiWorkspace.pendingConfirmations')} value={capabilitySummary.confirmationCount} />
@@ -651,7 +651,7 @@ export default function AdminAiWorkspacePage() {
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[300px_minmax(0,1fr)_320px]">
-        <div className="space-y-6 xl:sticky xl:top-6 xl:self-start">
+        <div className="min-w-0 space-y-6 xl:sticky xl:top-6 xl:self-start">
           <Card className="overflow-hidden rounded-[30px] border-slate-200/80 bg-white/75 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
             <CardHeader className="border-b border-slate-200/70 bg-white/50 dark:border-white/10 dark:bg-white/5">
               <div className="flex items-start justify-between gap-3">
@@ -717,19 +717,19 @@ export default function AdminAiWorkspacePage() {
           </Card>
         </div>
 
-        <Card className="overflow-hidden rounded-[32px] border-slate-200/80 bg-white/78 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
+        <Card className="min-w-0 overflow-hidden rounded-[32px] border-slate-200/80 bg-white/78 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
           <CardHeader className="border-b border-slate-200/70 bg-white/55 dark:border-white/10 dark:bg-white/5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-2">
-                <CardTitle className="text-2xl tracking-tight text-foreground">{selectedConversationTitle}</CardTitle>
-                <CardDescription>
+            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+              <div className="min-w-0 space-y-2">
+                <CardTitle className="break-words text-2xl tracking-tight text-foreground">{selectedConversationTitle}</CardTitle>
+                <CardDescription className="break-words">
                   {isCreatingConversation
                     ? t('admin.aiWorkspace.newConversationDescription')
                     : t('admin.aiWorkspace.conversationDescription')}
                 </CardDescription>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex max-w-full flex-wrap items-center gap-2">
                 {lastActivityLabel ? (
                   <StatusPill>
                     <Clock3 className="h-3.5 w-3.5" />
@@ -813,7 +813,7 @@ export default function AdminAiWorkspacePage() {
           </CardContent>
         </Card>
 
-        <div className="space-y-6 xl:sticky xl:top-6 xl:self-start">
+        <div className="min-w-0 space-y-6 xl:sticky xl:top-6 xl:self-start">
           <Card className="rounded-[30px] border-slate-200/80 bg-white/75 backdrop-blur dark:border-white/10 dark:bg-slate-950/55">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">

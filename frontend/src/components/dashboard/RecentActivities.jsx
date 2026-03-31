@@ -7,7 +7,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { formatNumber } from '../../lib/utils';
 
 export function RecentActivities({ activities = [], loading = false, onViewAll }) {
-  const { t, tUnit } = useTranslation();
+  const { t, tUnit, currentLanguage } = useTranslation();
   const navigate = useNavigate();
 
   const openActivityHistoryDetail = (activityId) => {
@@ -52,7 +52,7 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
     } else if (diffDays <= 7) {
       return `${diffDays - 1} ${t('date.daysAgo')}`;
     } else {
-      return date.toLocaleDateString('zh-CN', { 
+      return date.toLocaleDateString(currentLanguage, { 
         month: 'short', 
         day: 'numeric' 
       });
@@ -60,6 +60,10 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
   };
 
   const getActivityName = (activity) => {
+    if (currentLanguage === 'en') {
+      return activity.activity_name_en || activity.activity_name_zh || activity.activity_name || t('activities.unknownActivity');
+    }
+
     return activity.activity_name_zh || activity.activity_name_en || activity.activity_name || t('activities.unknownActivity');
   };
 

@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { useTranslation } from '../../hooks/useTranslation';
 import { cn } from '@/lib/utils';
 /* eslint-enable no-unused-vars */
 
@@ -10,6 +11,7 @@ import { cn } from '@/lib/utils';
  * 支持自动播放、手动控制、暂停等功能
  */
 export default function HeroCarousel({ items = [], interval = 5000, className }) {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [isPaused, setIsPaused] = React.useState(false);
   const [direction, setDirection] = React.useState(0);
@@ -160,7 +162,7 @@ export default function HeroCarousel({ items = [], interval = 5000, className })
               type="button"
               onClick={handlePrevious}
               className="group absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-border/60 bg-card/90 p-2 text-emerald-600 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-card hover:shadow-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-background md:p-3"
-              aria-label="上一张"
+              aria-label={t('home.hero.carouselPrevious')}
             >
               <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 transition-transform group-hover:-translate-x-0.5" />
             </button>
@@ -169,7 +171,7 @@ export default function HeroCarousel({ items = [], interval = 5000, className })
               type="button"
               onClick={handleNext}
               className="group absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-border/60 bg-card/90 p-2 text-emerald-600 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-card hover:shadow-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-background md:p-3"
-              aria-label="下一张"
+              aria-label={t('home.hero.carouselNext')}
             >
               <ChevronRight className="w-5 h-5 md:w-6 md:h-6 transition-transform group-hover:translate-x-0.5" />
             </button>
@@ -182,7 +184,7 @@ export default function HeroCarousel({ items = [], interval = 5000, className })
             type="button"
             onClick={() => setIsPaused(!isPaused)}
             className="group absolute right-4 top-4 z-20 rounded-full border border-border/60 bg-card/90 p-2 text-emerald-600 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-card hover:shadow-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-background"
-            aria-label={isPaused ? "继续播放" : "暂停播放"}
+            aria-label={isPaused ? t('home.hero.carouselPlay') : t('home.hero.carouselPause')}
           >
             {isPaused ? (
               <Play className="w-4 h-4 transition-transform group-hover:scale-110" />
@@ -207,7 +209,7 @@ export default function HeroCarousel({ items = [], interval = 5000, className })
                   ? "w-12 h-3"
                   : "w-3 h-3 hover:scale-125"
               )}
-              aria-label={`跳转到第 ${index + 1} 张`}
+              aria-label={t('home.hero.carouselGoTo', { index: index + 1 })}
               aria-current={index === currentIndex}
             >
               <span

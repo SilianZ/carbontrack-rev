@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { resolveR2ImageSource } from '../../lib/r2Image';
 
 export function AchievementBadges({ badges = [], userBadges = [], loading = false, onTriggerAuto, isAdmin = false }) {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const ownedMap = new Map();
   userBadges.forEach((entry) => {
     const record = entry?.user_badge || {};
@@ -70,6 +70,10 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
             {topBadges.map((badge) => {
               const owned = ownedMap.has(badge.id);
               const userBadge = ownedMap.get(badge.id);
+              const primaryName = currentLanguage === 'en'
+                ? badge.name_en || badge.name_zh
+                : badge.name_zh || badge.name_en;
+              const secondaryName = currentLanguage === 'en' ? null : badge.name_en;
               const badgeImage = resolveR2ImageSource({
                 urlCandidates: [badge.icon_url, badge.icon_presigned_url],
                 pathCandidates: [badge.icon_path],
@@ -86,7 +90,7 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                       <R2Image
                         src={badgeImage.src || undefined}
                         filePath={badgeImage.filePath || undefined}
-                        alt={badge.name_zh || badge.name_en}
+                        alt={primaryName}
                         className="w-full h-full object-cover"
                         fallback={<div className="text-xs text-muted-foreground">IMG</div>}
                       />
@@ -95,8 +99,10 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                     )}
                   </div>
                   <div className="text-center space-y-1">
-                    <p className="text-sm font-semibold text-foreground">{badge.name_zh || badge.name_en}</p>
-                    <p className="text-xs text-muted-foreground">{badge.name_en}</p>
+                    <p className="text-sm font-semibold text-foreground">{primaryName}</p>
+                    {secondaryName && secondaryName !== primaryName ? (
+                      <p className="text-xs text-muted-foreground">{secondaryName}</p>
+                    ) : null}
                   </div>
                   <div className="w-full text-center">
                     {owned ? (
@@ -113,7 +119,7 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
                   </div>
                   {owned && userBadge?.awarded_at && (
                     <p className="text-[11px] text-muted-foreground">
-                      {t('dashboard.badgeAwardedAt')}: {new Date(userBadge.awarded_at).toLocaleDateString()}
+                      {t('dashboard.badgeAwardedAt')}: {new Date(userBadge.awarded_at).toLocaleDateString(currentLanguage)}
                     </p>
                   )}
                 </div>

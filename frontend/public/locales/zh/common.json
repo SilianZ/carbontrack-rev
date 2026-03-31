@@ -63,6 +63,11 @@
       "recordActivity": "记录活动",
       "activeHighlight": "当前亮点",
       "switchHighlight": "切换亮点",
+      "carouselPrevious": "上一张",
+      "carouselNext": "下一张",
+      "carouselPlay": "继续播放",
+      "carouselPause": "暂停播放",
+      "carouselGoTo": "跳转到第 {{index}} 张",
       "highlights": [
         {
           "title": "实时了解你的减排贡献",
@@ -461,6 +466,7 @@
     "welcomeDesc": "查看您的环保成就和最新动态",
     "lastLogin": "最后登录",
     "firstTime": "首次登录",
+    "vsPreviousMonth": "较上月",
     "totalPoints": "总积分",
     "carbonSaved": "累计减排",
     "activitiesCount": "活动次数",

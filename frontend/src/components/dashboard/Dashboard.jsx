@@ -17,7 +17,7 @@ import { toast } from 'react-hot-toast';
 import R2Image from '../common/R2Image';
 
 export function Dashboard() {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({});
   const [chartData, setChartData] = useState([]);
@@ -179,10 +179,12 @@ export function Dashboard() {
     window.location.href = '/activities';
   };
 
-  const monthFormatter = useMemo(() => new Intl.DateTimeFormat(undefined, {
+  const integerFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
+  const decimalFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { maximumFractionDigits: 2 }), [currentLanguage]);
+  const monthFormatter = useMemo(() => new Intl.DateTimeFormat(currentLanguage, {
     year: 'numeric',
     month: 'long',
-  }), []);
+  }), [currentLanguage]);
 
   const monthlyAchievements = useMemo(() => {
     const list = Array.isArray(stats.monthly_achievements) ? stats.monthly_achievements : [];
@@ -254,7 +256,7 @@ export function Dashboard() {
         
         <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
           <span>{t('dashboard.lastLogin')}:</span>
-          <span>{user?.lastlgn ? new Date(user.lastlgn).toLocaleString('zh-CN') : t('dashboard.firstTime')}</span>
+          <span>{user?.lastlgn ? new Date(user.lastlgn).toLocaleString(currentLanguage) : t('dashboard.firstTime')}</span>
         </div>
       </div>
 
@@ -296,7 +298,7 @@ export function Dashboard() {
         <StatsCard
           title={t('dashboard.rank')}
           value={stats.rank || '-'}
-          unit={stats.total_users ? `/ ${stats.total_users}` : ''}
+          unit={stats.total_users ? `/ ${integerFormatter.format(stats.total_users)}` : ''}
           change={stats.rank_change}
           changeType={stats.rank_change > 0 ? 'decrease' : stats.rank_change < 0 ? 'increase' : 'neutral'}
           icon={Users}
@@ -394,7 +396,7 @@ export function Dashboard() {
                           </span>
                           <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyPointsWithUnit',  {
-                              points: current.points.toLocaleString(),
+                              points: integerFormatter.format(current.points),
                             })}
                           </span>
                         </div>
@@ -404,7 +406,7 @@ export function Dashboard() {
                           </span>
                           <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyCarbonSaved',  {
-                              amount: current.carbon.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+                              amount: decimalFormatter.format(current.carbon),
                             })}
                           </span>
                         </div>
@@ -414,7 +416,7 @@ export function Dashboard() {
                           </span>
                           <span className="text-lg font-semibold text-foreground">
                             {t('dashboard.monthlyRecords',  {
-                              count: current.records.toLocaleString(),
+                              count: integerFormatter.format(current.records),
                             })}
                           </span>
                         </div>
@@ -433,14 +435,14 @@ export function Dashboard() {
                                 <span className="font-medium text-foreground">{item.label}</span>
                                 <span className="text-xs text-muted-foreground">
                                   {t('dashboard.monthlyCarbonSummary',  {
-                                    carbon: item.carbon.toLocaleString(undefined, { maximumFractionDigits: 2 }),
-                                    records: item.records.toLocaleString(),
+                                    carbon: decimalFormatter.format(item.carbon),
+                                    records: integerFormatter.format(item.records),
                                   })}
                                 </span>
                               </div>
                               <span className="text-sm font-semibold text-amber-500">
                                 {t('dashboard.monthlyPointsShort',  {
-                                  points: item.points.toLocaleString(),
+                                  points: integerFormatter.format(item.points),
                                 })}
                               </span>
                             </div>
