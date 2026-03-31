@@ -465,6 +465,7 @@
     "welcomeDesc": "View your environmental impact and recent activities",
     "lastLogin": "Last login",
     "firstTime": "First login",
+    "vsPreviousMonth": "vs previous month",
     "totalPoints": "Total Points",
     "carbonSaved": "Carbon Saved",
     "activitiesCount": "Activities",
@@ -3005,6 +3006,11 @@
       "recordActivity": "Record Activity",
       "activeHighlight": "Current highlight",
       "switchHighlight": "Switch highlight",
+      "carouselPrevious": "Previous slide",
+      "carouselNext": "Next slide",
+      "carouselPlay": "Resume autoplay",
+      "carouselPause": "Pause autoplay",
+      "carouselGoTo": "Go to slide {{index}}",
       "highlights": [
         {
           "title": "Track Your Impact",

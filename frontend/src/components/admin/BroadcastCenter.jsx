@@ -112,13 +112,13 @@ const parseTargetUserIds = (raw) => {
   return Array.from(unique);
 };
 
-const formatDateTime = (value) => {
+const formatDateTime = (value, locale) => {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value;
   }
-  return date.toLocaleString();
+  return date.toLocaleString(locale);
 };
 
 const truncateUsers = (users, max = MAX_USERS_PREVIEW) => {
@@ -297,20 +297,20 @@ function UserChips({ users, onViewUser, t }) {
 }
 
 export function BroadcastCenter() {
-  const { t } = useTranslation();
-  const numberFormatter = useMemo(() => new Intl.NumberFormat(), []);
+  const { t, currentLanguage } = useTranslation();
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
   const percentFormatter = useMemo(
     () =>
-      new Intl.NumberFormat(undefined, {
+      new Intl.NumberFormat(currentLanguage, {
         style: "percent",
         maximumFractionDigits: 1,
       }),
-    [],
+    [currentLanguage],
   );
   const shortDateFormatter = useMemo(
     () =>
-      new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }),
-    [],
+      new Intl.DateTimeFormat(currentLanguage, { month: "short", day: "numeric" }),
+    [currentLanguage],
   );
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("compose");
@@ -2738,7 +2738,7 @@ export function BroadcastCenter() {
                             {item.title}
                           </h4>
                           <p className="text-sm text-muted-foreground">
-                            {formatDateTime(item.created_at)}
+                            {formatDateTime(item.created_at, currentLanguage)}
                           </p>
                           <p className="text-sm text-muted-foreground">
                             {t("admin.broadcast.sentBy", {

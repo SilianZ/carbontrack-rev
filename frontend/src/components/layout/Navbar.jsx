@@ -317,7 +317,7 @@ export function Navbar() {
               onClick={closeMobile}
               aria-label={t('nav.closeMenu')}
               className={clsx(
-                'fixed inset-x-0 top-16 bottom-0 z-[55] bg-black/30 transition-opacity duration-200 ease-out md:hidden',
+                'fixed inset-0 z-[55] bg-black/45 transition-opacity duration-200 ease-out md:hidden',
                 isAnimatingOut ? 'opacity-0' : 'opacity-100'
               )}
             />
@@ -329,7 +329,7 @@ export function Navbar() {
             className={clsx(
               'md:hidden border-t border-border bg-background text-foreground',
               isPortrait
-                ? 'fixed inset-x-3 top-20 bottom-4 z-[60] rounded-2xl border border-border shadow-2xl shadow-black/10 backdrop-blur'
+                ? 'fixed inset-0 z-[60] border-0 rounded-none bg-background shadow-2xl shadow-black/20'
                 : 'absolute inset-x-0 top-16 z-10 rounded-b-2xl border border-border shadow-lg shadow-black/10',
               isAnimatingOut ? 'animate-mobile-nav-out' : 'animate-mobile-nav-in'
             )}
@@ -337,10 +337,17 @@ export function Navbar() {
             <div
               className={clsx(
                 'space-y-5',
-                isPortrait ? 'h-full overflow-y-auto px-4 pt-5 pb-8' : 'px-3 pt-4 pb-6'
+                isPortrait
+                  ? 'h-[100dvh] overflow-y-auto px-4 pt-0 pb-[max(2rem,env(safe-area-inset-bottom))]'
+                  : 'px-3 pt-4 pb-6'
               )}
             >
-              <div className="flex items-center justify-between gap-3">
+              <div
+                className={clsx(
+                  'flex items-center justify-between gap-3',
+                  isPortrait && 'sticky top-0 z-10 -mx-4 border-b border-border bg-background px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))]'
+                )}
+              >
                 <div>
                   <p className="text-sm font-semibold text-foreground">
                     {t('nav.menuTitle')}
@@ -533,6 +540,8 @@ export function Navbar() {
           'sticky top-0 z-50 transition-all duration-300',
           isAdminRoute
             ? 'border-b border-border bg-background'
+            : isPortrait && renderMobileNav
+              ? 'border-b border-border bg-background'
             : 'border-b border-black/5 dark:border-white/10 bg-white/70 dark:bg-black/50 backdrop-blur-xl supports-[backdrop-filter]:backdrop-blur-xl'
         )}
       >

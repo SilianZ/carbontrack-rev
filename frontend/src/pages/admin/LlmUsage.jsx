@@ -30,6 +30,7 @@ import {
 import { adminAPI } from '../../lib/api';
 import { searchLogs, fetchRelatedLogs } from '../../lib/api/logSearch';
 import { useTranslation } from '../../hooks/useTranslation';
+import { getCurrentLanguage } from '../../lib/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -43,10 +44,10 @@ import { cn } from '../../lib/utils';
 
 const formatNumber = (value) => {
   const num = Number(value);
-  return Number.isFinite(num) ? num.toLocaleString() : '-';
+  return Number.isFinite(num) ? num.toLocaleString(getCurrentLanguage()) : '-';
 };
 
-const safeDate = (value) => (value ? new Date(value).toLocaleString() : '-');
+const safeDate = (value) => (value ? new Date(value).toLocaleString(getCurrentLanguage()) : '-');
 
 const parseMaybeJson = (value) => {
   if (value == null) return null;
@@ -118,7 +119,7 @@ function InsightCard({ title, value, subtitle, trend }) {
 }
 
 export default function AdminLlmUsagePage() {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
@@ -231,10 +232,10 @@ export default function AdminLlmUsagePage() {
   const canPrev = page > 1;
   const canNext = page < (pagination.total_pages || 1);
 
-  const integerFormatter = useMemo(() => new Intl.NumberFormat(), []);
-  const decimalFormatter = useMemo(() => new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }), []);
-  const percentFormatter = useMemo(() => new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 1 }), []);
-  const shortDateFormatter = useMemo(() => new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }), []);
+  const integerFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
+  const decimalFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { maximumFractionDigits: 2 }), [currentLanguage]);
+  const percentFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { style: 'percent', maximumFractionDigits: 1 }), [currentLanguage]);
+  const shortDateFormatter = useMemo(() => new Intl.DateTimeFormat(currentLanguage, { month: 'short', day: 'numeric' }), [currentLanguage]);
   const chartTooltipContentStyle = useMemo(() => ({
     backgroundColor: 'var(--popover)',
     border: '1px solid var(--border)',
