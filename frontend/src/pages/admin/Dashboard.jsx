@@ -77,6 +77,7 @@ const safeDivide = (numerator, denominator) => {
 
 export default function AdminDashboardPage() {
   const { t, currentLanguage } = useTranslation();
+  const isEnglish = (currentLanguage || '').toLowerCase().startsWith('en');
   const navigate = useNavigate();
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -1232,7 +1233,7 @@ export default function AdminDashboardPage() {
                     >
                       <div className="flex items-center justify-between gap-3 mb-2">
                         <span className="font-semibold text-sm truncate">
-                          {(currentLanguage === 'en'
+                          {(isEnglish
                             ? item.activity_name_en || item.activity_name_zh
                             : item.activity_name_zh || item.activity_name_en) || item.activity_id || t('admin.dashboard.unknownActivity')}
                         </span>

@@ -9,6 +9,7 @@ import { formatNumber } from '../../lib/utils';
 export function RecentActivities({ activities = [], loading = false, onViewAll }) {
   const { t, tUnit, currentLanguage } = useTranslation();
   const navigate = useNavigate();
+  const isEnglish = (currentLanguage || '').toLowerCase().startsWith('en');
 
   const openActivityHistoryDetail = (activityId) => {
     if (!activityId) return;
@@ -60,7 +61,7 @@ export function RecentActivities({ activities = [], loading = false, onViewAll }
   };
 
   const getActivityName = (activity) => {
-    if (currentLanguage === 'en') {
+    if (isEnglish) {
       return activity.activity_name_en || activity.activity_name_zh || activity.activity_name || t('activities.unknownActivity');
     }
 

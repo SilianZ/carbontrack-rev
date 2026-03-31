@@ -7,6 +7,7 @@ import { resolveR2ImageSource } from '../../lib/r2Image';
 
 export function AchievementBadges({ badges = [], userBadges = [], loading = false, onTriggerAuto, isAdmin = false }) {
   const { t, currentLanguage } = useTranslation();
+  const isEnglish = (currentLanguage || '').toLowerCase().startsWith('en');
   const ownedMap = new Map();
   userBadges.forEach((entry) => {
     const record = entry?.user_badge || {};
@@ -70,10 +71,10 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
             {topBadges.map((badge) => {
               const owned = ownedMap.has(badge.id);
               const userBadge = ownedMap.get(badge.id);
-              const primaryName = currentLanguage === 'en'
+              const primaryName = isEnglish
                 ? badge.name_en || badge.name_zh
                 : badge.name_zh || badge.name_en;
-              const secondaryName = currentLanguage === 'en' ? null : badge.name_en;
+              const secondaryName = isEnglish ? null : badge.name_en;
               const badgeImage = resolveR2ImageSource({
                 urlCandidates: [badge.icon_url, badge.icon_presigned_url],
                 pathCandidates: [badge.icon_path],
