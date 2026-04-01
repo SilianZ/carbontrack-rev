@@ -1,5 +1,38 @@
 import api from './api';
 
+const DEV_AUTH_TRUTHY_VALUES = new Set(['1', 'true', 'yes', 'on']);
+
+const isDevTruthy = (value) => DEV_AUTH_TRUTHY_VALUES.has(String(value || '').toLowerCase());
+
+const parseDevUserInfoFromEnv = () => {
+  const rawJson = String(import.meta.env?.VITE_DEV_AUTH_USER_INFO_JSON || '').trim();
+  if (rawJson) {
+    try {
+      const parsed = JSON.parse(rawJson);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch (error) {
+      console.warn('Failed to parse VITE_DEV_AUTH_USER_INFO_JSON:', error);
+    }
+  }
+
+  const rawBase64 = String(import.meta.env?.VITE_DEV_AUTH_USER_INFO_BASE64 || '').trim();
+  if (rawBase64) {
+    try {
+      const decodedJson = atob(rawBase64);
+      const parsed = JSON.parse(decodedJson);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch (error) {
+      console.warn('Failed to parse VITE_DEV_AUTH_USER_INFO_BASE64:', error);
+    }
+  }
+
+  return null;
+};
+
 // Token管理
 export const tokenManager = {
   getToken() {
@@ -75,6 +108,36 @@ export const userManager = {
     const user = this.getUser();
     return user?.is_admin || false;
   }
+};
+
+export const bootstrapDevAuthFromEnv = () => {
+  if (!import.meta.env.DEV || !isDevTruthy(import.meta.env?.VITE_ENABLE_DEV_AUTH_FROM_ENV)) {
+    return false;
+  }
+
+  if (globalThis.localStorage === undefined) {
+    return false;
+  }
+
+  const envToken = String(import.meta.env?.VITE_DEV_AUTH_TOKEN || '').trim();
+  const envUserInfo = parseDevUserInfoFromEnv();
+
+  if (!envToken || !envUserInfo) {
+    return false;
+  }
+
+  const forceSync = isDevTruthy(import.meta.env?.VITE_DEV_AUTH_FORCE_SYNC);
+  const existingToken = tokenManager.getToken();
+  const existingUser = userManager.getUser();
+
+  if (!forceSync && existingToken && existingUser) {
+    return false;
+  }
+
+  tokenManager.setToken(envToken);
+  userManager.setUser(envUserInfo);
+
+  return true;
 };
 
 // 认证API (注意：这些方法也在 api.js 中的 authAPI 对象中定义了，建议统一使用)
