@@ -65,6 +65,8 @@ class UserController
     private ?CheckinService $checkinService;
     private ?StreakLeaderboardService $streakLeaderboardService;
     private UserProfileViewService $userProfileViewService;
+    /** @var array<string, string[]> */
+    private array $tableColumnsCache = [];
 
     public function __construct(
         AuthService $authService,
@@ -76,8 +78,8 @@ class UserController
         ?EmailService $emailService = null,
         ?Logger $logger = null,
         ?PDO $db = null,
-        ErrorLogService $errorLogService = null,
-        CloudflareR2Service $r2Service = null,
+        ?ErrorLogService $errorLogService = null,
+        ?CloudflareR2Service $r2Service = null,
         ?RegionService $regionService = null,
         ?LeaderboardService $leaderboardService = null,
         ?CheckinService $checkinService = null,
@@ -1353,8 +1355,8 @@ class UserController
             $offset = ($page - 1) * $limit;
 
             // 兼容不同表结构的用户ID字段（user_id 或 uid）
-            $userIdColumn = $this->resolvePointsUserIdColumn();
             $transactionColumns = $this->getTableColumns('points_transactions');
+            $userIdColumn = $this->resolvePointsUserIdColumn($transactionColumns);
             $activityColumns = $this->getTableColumns('carbon_activities');
             $activityJoinColumn = $this->resolveActivityJoinColumn($activityColumns);
             $activityNameColumn = in_array('name_zh', $activityColumns, true)
@@ -1915,10 +1917,10 @@ class UserController
     /**
      * 解析 points_transactions 表中用户ID列名（兼容 uid/user_id，适配 MySQL/SQLite）
      */
-    private function resolvePointsUserIdColumn(): string
+    private function resolvePointsUserIdColumn(?array $columns = null): string
     {
         try {
-            $columns = $this->getTableColumns('points_transactions');
+            $columns ??= $this->getTableColumns('points_transactions');
             if (in_array('user_id', $columns, true)) {
                 return 'user_id';
             }
@@ -1937,29 +1939,35 @@ class UserController
      */
     private function getTableColumns(string $table): array
     {
+        if (isset($this->tableColumnsCache[$table])) {
+            return $this->tableColumnsCache[$table];
+        }
+
         try {
             $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql';
 
             if ($driver === 'mysql') {
                 $stmt = $this->db->query("SHOW COLUMNS FROM {$table}");
                 $cols = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
-                return array_values(array_filter(array_map(static function (array $column): string {
+                $resolved = array_values(array_filter(array_map(static function (array $column): string {
                     return (string) ($column['Field'] ?? '');
                 }, $cols)));
+                return $this->tableColumnsCache[$table] = $resolved;
             }
 
             if ($driver === 'sqlite') {
                 $stmt = $this->db->query("PRAGMA table_info({$table})");
                 $cols = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
-                return array_values(array_filter(array_map(static function (array $column): string {
+                $resolved = array_values(array_filter(array_map(static function (array $column): string {
                     return (string) ($column['name'] ?? '');
                 }, $cols)));
+                return $this->tableColumnsCache[$table] = $resolved;
             }
         } catch (\Throwable $e) {
             return [];
         }
 
-        return [];
+        return $this->tableColumnsCache[$table] = [];
     }
 
     /**

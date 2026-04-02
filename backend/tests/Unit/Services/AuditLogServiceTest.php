@@ -12,14 +12,20 @@ class AuditLogServiceTest extends TestCase
 {
     private mixed $previousDisableAuditWrites = null;
     private mixed $previousDisableAuditWritesServer = null;
+    private mixed $previousAppEnv = null;
+    private mixed $previousAppEnvServer = null;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->previousDisableAuditWrites = $_ENV['DISABLE_AUDIT_LOG_WRITES'] ?? null;
         $this->previousDisableAuditWritesServer = $_SERVER['DISABLE_AUDIT_LOG_WRITES'] ?? null;
+        $this->previousAppEnv = $_ENV['APP_ENV'] ?? null;
+        $this->previousAppEnvServer = $_SERVER['APP_ENV'] ?? null;
         unset($_ENV['DISABLE_AUDIT_LOG_WRITES']);
         unset($_SERVER['DISABLE_AUDIT_LOG_WRITES']);
+        $_ENV['APP_ENV'] = 'development';
+        $_SERVER['APP_ENV'] = 'development';
     }
 
     protected function tearDown(): void
@@ -33,6 +39,16 @@ class AuditLogServiceTest extends TestCase
             unset($_SERVER['DISABLE_AUDIT_LOG_WRITES']);
         } else {
             $_SERVER['DISABLE_AUDIT_LOG_WRITES'] = $this->previousDisableAuditWritesServer;
+        }
+        if ($this->previousAppEnv === null) {
+            unset($_ENV['APP_ENV']);
+        } else {
+            $_ENV['APP_ENV'] = $this->previousAppEnv;
+        }
+        if ($this->previousAppEnvServer === null) {
+            unset($_SERVER['APP_ENV']);
+        } else {
+            $_SERVER['APP_ENV'] = $this->previousAppEnvServer;
         }
 
         parent::tearDown();
@@ -137,6 +153,27 @@ class AuditLogServiceTest extends TestCase
         $service = new AuditLogService($pdo, $this->createMock(\Monolog\Logger::class));
 
         $this->assertFalse($service->log([
+            'action' => 'register',
+            'operation_category' => 'authentication',
+        ]));
+    }
+
+    public function testProductionEnvironmentIgnoresDisableFlag(): void
+    {
+        $_ENV['APP_ENV'] = 'production';
+        $_SERVER['APP_ENV'] = 'production';
+        $_ENV['DISABLE_AUDIT_LOG_WRITES'] = 'true';
+        $_SERVER['DISABLE_AUDIT_LOG_WRITES'] = 'true';
+
+        $pdo = $this->createMock(\PDO::class);
+        $stmt = $this->createMock(\PDOStatement::class);
+        $stmt->method('execute')->willReturn(true);
+        $pdo->expects($this->once())->method('prepare')->willReturn($stmt);
+        $pdo->method('lastInsertId')->willReturn('1');
+
+        $service = new AuditLogService($pdo, $this->createMock(\Monolog\Logger::class));
+
+        $this->assertTrue($service->log([
             'action' => 'register',
             'operation_category' => 'authentication',
         ]));

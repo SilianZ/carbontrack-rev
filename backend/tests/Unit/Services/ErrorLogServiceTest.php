@@ -14,14 +14,20 @@ class ErrorLogServiceTest extends TestCase
     private PDO $pdo;
     private mixed $previousDisableErrorWrites = null;
     private mixed $previousDisableErrorWritesServer = null;
+    private mixed $previousAppEnv = null;
+    private mixed $previousAppEnvServer = null;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->previousDisableErrorWrites = $_ENV['DISABLE_ERROR_LOG_WRITES'] ?? null;
         $this->previousDisableErrorWritesServer = $_SERVER['DISABLE_ERROR_LOG_WRITES'] ?? null;
+        $this->previousAppEnv = $_ENV['APP_ENV'] ?? null;
+        $this->previousAppEnvServer = $_SERVER['APP_ENV'] ?? null;
         unset($_ENV['DISABLE_ERROR_LOG_WRITES']);
         unset($_SERVER['DISABLE_ERROR_LOG_WRITES']);
+        $_ENV['APP_ENV'] = 'development';
+        $_SERVER['APP_ENV'] = 'development';
         $this->pdo = new PDO('sqlite::memory:');
         $this->pdo->exec('CREATE TABLE error_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,6 +58,16 @@ class ErrorLogServiceTest extends TestCase
             unset($_SERVER['DISABLE_ERROR_LOG_WRITES']);
         } else {
             $_SERVER['DISABLE_ERROR_LOG_WRITES'] = $this->previousDisableErrorWritesServer;
+        }
+        if ($this->previousAppEnv === null) {
+            unset($_ENV['APP_ENV']);
+        } else {
+            $_ENV['APP_ENV'] = $this->previousAppEnv;
+        }
+        if ($this->previousAppEnvServer === null) {
+            unset($_SERVER['APP_ENV']);
+        } else {
+            $_SERVER['APP_ENV'] = $this->previousAppEnvServer;
         }
 
         parent::tearDown();
@@ -95,5 +111,22 @@ class ErrorLogServiceTest extends TestCase
         $this->assertNull($result);
         $count = (int) $this->pdo->query('SELECT COUNT(*) FROM error_logs')->fetchColumn();
         $this->assertSame(0, $count);
+    }
+
+    public function testProductionEnvironmentIgnoresDisableFlag(): void
+    {
+        $_ENV['APP_ENV'] = 'production';
+        $_SERVER['APP_ENV'] = 'production';
+        $_ENV['DISABLE_ERROR_LOG_WRITES'] = '1';
+        $_SERVER['DISABLE_ERROR_LOG_WRITES'] = '1';
+
+        $service = new ErrorLogService($this->pdo, new Logger('test'));
+        $request = makeRequest('GET', '/test');
+
+        $result = $service->logException(new \RuntimeException('boom'), $request);
+
+        $this->assertSame(1, $result);
+        $count = (int) $this->pdo->query('SELECT COUNT(*) FROM error_logs')->fetchColumn();
+        $this->assertSame(1, $count);
     }
 }

@@ -111,7 +111,7 @@ class RegionServiceTest extends TestCase
     public function testRelativeEnvPathResolvesFromBackendDirectoryWhenPresent(): void
     {
         $previousRegionDataPath = $_ENV['REGION_DATA_PATH'] ?? null;
-        $_ENV['REGION_DATA_PATH'] = 'storage\data\states.json';
+        $_ENV['REGION_DATA_PATH'] = 'storage/data/states.json';
 
         try {
             $service = new RegionService(null, null);

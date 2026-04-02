@@ -570,11 +570,21 @@ class AuditLogService
 
     private function isWriteDisabled(): bool
     {
+        if ($this->isProductionEnvironment()) {
+            return false;
+        }
+
         $raw = $_ENV['DISABLE_AUDIT_LOG_WRITES'] ?? $_SERVER['DISABLE_AUDIT_LOG_WRITES'] ?? null;
         if (!is_string($raw) && !is_numeric($raw) && !is_bool($raw)) {
             return false;
         }
 
         return filter_var($raw, FILTER_VALIDATE_BOOLEAN) === true;
+    }
+
+    private function isProductionEnvironment(): bool
+    {
+        $env = strtolower(trim((string) ($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? '')));
+        return $env === 'production';
     }
 }

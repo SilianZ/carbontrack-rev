@@ -261,13 +261,15 @@ class RegionService
             return $path;
         }
 
-        $trimmed = ltrim($path, DIRECTORY_SEPARATOR);
-        $projectResolved = rtrim($projectRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $trimmed;
+        $trimmed = ltrim($path, "/\\");
+        $normalized = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $trimmed);
+
+        $projectResolved = rtrim($projectRoot, "/\\") . DIRECTORY_SEPARATOR . $normalized;
         if (is_file($projectResolved)) {
             return $projectResolved;
         }
 
-        $backendResolved = rtrim($backendRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $trimmed;
+        $backendResolved = rtrim($backendRoot, "/\\") . DIRECTORY_SEPARATOR . $normalized;
         if (is_file($backendResolved)) {
             return $backendResolved;
         }
