@@ -1035,10 +1035,10 @@ export function UserManagement() {
       </Dialog>
 
       <Dialog open={detailState.open} onOpenChange={(open) => (!open ? closeUserDetail() : null)}>
-        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-none overflow-hidden p-0 sm:w-[calc(100vw-3rem)] sm:max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px]">
+        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-none overflow-hidden p-0 sm:w-[calc(100vw-3rem)] sm:max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px] rounded-[1.5rem] bg-white dark:bg-[#121212] border border-zinc-200 dark:border-white/5/80 shadow-2xl dark:shadow-blue-900/5">
           <div className="flex max-h-[calc(100dvh-2rem)] flex-col">
-            <DialogHeader className="shrink-0 px-6 pt-8 pb-4">
-              <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 text-white shadow-sm ring-4 ring-background">
+            <DialogHeader className="shrink-0 px-6 pt-8 pb-4 bg-white dark:bg-black/40 backdrop-blur-xl relative z-10 border-b border-transparent dark:border-white/5">
+              <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 text-white shadow-sm ring-4 ring-white dark:ring-[#121212]">
                 <span className="text-3xl font-semibold">{detailUser?.username?.[0]?.toUpperCase() || '?'}</span>
               </div>
               <DialogTitle className="text-center text-2xl font-semibold tracking-tight text-foreground">
@@ -1046,9 +1046,9 @@ export function UserManagement() {
                   ? t('admin.users.detailTitle',  { username: detailUser.username })
                   : t('admin.users.detailTitleFallback')}
               </DialogTitle>
-              <DialogDescription className="text-center text-base mt-0.5">{detailUser?.email || ''}</DialogDescription>
+              <DialogDescription className="text-center text-base mt-1 text-muted-foreground/80">{detailUser?.email || ''}</DialogDescription>
             </DialogHeader>
-            <div className="flex-1 bg-zinc-50/50 dark:bg-black/5 overflow-y-auto px-6 pb-8 pt-4">
+            <div className="flex-1 bg-zinc-50/80 dark:bg-black/20 overflow-y-auto px-6 pb-8 pt-6 relative isolate">
               {userOverviewQuery.isLoading ? (
                 <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -1062,25 +1062,25 @@ export function UserManagement() {
               {/* Basic Info - iOS Grouped List */}
               <div className="space-y-2">
                 <h4 className="px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Basic Information</h4>
-                <div className="overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 shadow-sm">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 shadow-sm">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
                     <span className="text-base font-medium text-foreground">{t('admin.users.detail.username')}</span>
                     <span className="text-base text-muted-foreground">{detailUser?.username}</span>
                   </div>
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
                     <span className="text-base font-medium text-foreground">{t('admin.users.detail.role')}</span>
                     <span className="text-base text-muted-foreground">{renderRoleBadge(detailUser)}</span>
                   </div>
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
                     <span className="text-base font-medium text-foreground">{t('admin.users.detail.status')}</span>
                     <span className="text-base text-muted-foreground">{renderStatusBadge(detailUser)}</span>
                   </div>
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
                     <span className="text-base font-medium text-foreground">{t('admin.users.detail.registrationDays')}</span>
                     <span className="text-base text-muted-foreground">{detailUser?.days_since_registration ?? 0}</span>
                   </div>
                   {detailUser?.lastlgn && (
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
                       <span className="text-base font-medium text-foreground">{t('admin.users.detail.lastLogin')}</span>
                       <span className="text-base text-muted-foreground">
                         {formatDateSafe(detailUser.lastlgn, 'yyyy-MM-dd HH:mm', '--')}
@@ -1096,7 +1096,7 @@ export function UserManagement() {
                   {metricsCards.map((card) => {
                     const Icon = card.icon;
                     return (
-                      <div key={card.key} className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 shadow-sm transition-transform hover:scale-[1.02]">
+                      <div key={card.key} className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm transition-transform hover:scale-[1.02]">
                         <div className="flex items-center justify-between mb-3 text-muted-foreground">
                           <Icon className="h-5 w-5 opacity-70" />
                           <p className="text-xs font-medium uppercase tracking-wide opacity-80">{card.label}</p>
@@ -1120,7 +1120,7 @@ export function UserManagement() {
                     {checkinCards.map((card) => {
                       const Icon = card.icon;
                       return (
-                        <div key={card.key} className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 shadow-sm transition-transform hover:scale-[1.02]">
+                        <div key={card.key} className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm transition-transform hover:scale-[1.02]">
                           <div className="flex items-center justify-between mb-3 text-muted-foreground">
                             <Icon className="h-5 w-5 opacity-70" />
                             <p className="text-xs font-medium uppercase tracking-wide opacity-80">{card.label}</p>
@@ -1154,27 +1154,27 @@ export function UserManagement() {
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 shadow-sm">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.security.passkeysTotal')}</p>
                     <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{passkeySummary.total}</p>
                   </div>
-                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 shadow-sm">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.security.backupEnabled')}</p>
                     <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{passkeySummary.backup_enabled}</p>
                   </div>
-                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 shadow-sm">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.security.backupEligible')}</p>
                     <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{passkeySummary.backup_eligible}</p>
                   </div>
-                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 shadow-sm">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.security.lastPasskeyUsed')}</p>
                     <p className="mt-3 text-sm font-semibold text-foreground text-right">
                       {formatDateSafe(passkeySummary.last_used_at, 'yyyy-MM-dd HH:mm', t('admin.users.security.neverUsed'))}
                     </p>
                   </div>
                 </div>
-                <div className="overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 shadow-sm">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+                <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 shadow-sm">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5">
                     <p className="text-sm font-medium text-foreground">
                       {securityActivityExpanded
                         ? t('admin.users.security.expandedHint')
@@ -1203,7 +1203,7 @@ export function UserManagement() {
                           <select
                             value={securityActivityFilters.type}
                             onChange={(event) => handleSecurityActivityFilterChange('type', event.target.value)}
-                            className="h-10 w-full appearance-none rounded-xl border-none bg-zinc-50 dark:bg-zinc-800 px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500/20"
+                            className="h-10 w-full appearance-none rounded-xl border-none bg-zinc-50 dark:bg-white/10 px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500/20"
                           >
                             {securityActivityTypeOptions.map((option) => (
                               <option key={option.value} value={option.value}>
@@ -1220,7 +1220,7 @@ export function UserManagement() {
                           <select
                             value={securityActivityFilters.period}
                             onChange={(event) => handleSecurityActivityFilterChange('period', event.target.value)}
-                            className="h-10 w-full appearance-none rounded-xl border-none bg-zinc-50 dark:bg-zinc-800 px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500/20"
+                            className="h-10 w-full appearance-none rounded-xl border-none bg-zinc-50 dark:bg-white/10 px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500/20"
                           >
                             {securityActivityPeriodOptions.map((option) => (
                               <option key={option.value} value={option.value}>
@@ -1239,7 +1239,7 @@ export function UserManagement() {
                       <AlertDescription>{t('securityActivity.loadError')}</AlertDescription>
                     </Alert>
                   ) : null}
-                  <div className="rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-800/30 overflow-hidden">
+                  <div className="rounded-xl border border-zinc-100 dark:border-white/5/80 bg-zinc-50/50 dark:bg-white/10/30 overflow-hidden">
                     <SecurityActivityList
                       items={recentSecurityActivity}
                       compact
@@ -1268,21 +1268,21 @@ export function UserManagement() {
                     <h4 className="text-sm font-semibold tracking-tight text-foreground">{t('admin.users.badgeSummary')}</h4>
                     <p className="text-xs text-muted-foreground">{t('admin.users.badgeSummaryHint')}</p>
                   </div>
-                  <div className="flex items-center justify-end gap-2 text-sm bg-white dark:bg-zinc-900 rounded-full px-3 py-1.5 border border-zinc-100 dark:border-zinc-800 shadow-sm">
+                  <div className="flex items-center justify-end gap-2 text-sm bg-white dark:bg-[#1C1C1E] rounded-full px-3 py-1.5 border border-zinc-100 dark:border-white/5 shadow-sm">
                     <span className="font-medium text-muted-foreground">{t('admin.users.showRevokedBadges')}</span>
                     <Switch checked={showRevokedBadges} onCheckedChange={(checked) => setShowRevokedBadges(Boolean(checked))} className="data-[state=checked]:bg-blue-500" />
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 shadow-sm">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.badgesAwarded')}</p>
                     <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{badgeSummary.awarded}</p>
                   </div>
-                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 shadow-sm">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.badgesRevoked')}</p>
                     <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{badgeSummary.revoked}</p>
                   </div>
-                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 shadow-sm">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.badgesTotal')}</p>
                     <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{badgeSummary.total}</p>
                   </div>
@@ -1296,9 +1296,9 @@ export function UserManagement() {
                 ) : userBadgesQuery.error ? (
                   <p className="text-sm text-destructive px-4">{t('admin.users.badgesLoadFailed')}</p>
                 ) : badgeRows.length > 0 ? (
-                  <div className="overflow-hidden rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+                  <div className="overflow-hidden rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#1C1C1E] shadow-sm">
                     <table className="min-w-full divide-y divide-zinc-100 dark:divide-zinc-800 text-sm">
-                      <thead className="bg-zinc-50/50 dark:bg-zinc-800/30">
+                      <thead className="bg-zinc-50/50 dark:bg-white/10/30">
                         <tr>
                           <th className="px-6 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide">{t('admin.users.badgeTable.badge')}</th>
                           <th className="px-6 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide">{t('admin.users.badgeTable.status')}</th>
@@ -1317,7 +1317,7 @@ export function UserManagement() {
                             <tr key={index} className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                               <td className="px-6 py-3">
                                 <div className="flex items-center gap-4">
-                                  <div className="h-10 w-10 overflow-hidden rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] dark:bg-zinc-800">
+                                  <div className="h-10 w-10 overflow-hidden rounded-xl border border-zinc-100 dark:border-white/5 bg-white shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] dark:bg-white/10">
                                     {badgeImage.src || badgeImage.filePath ? (
                                       <R2Image
                                         src={badgeImage.src || undefined}
