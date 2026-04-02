@@ -1035,93 +1035,104 @@ export function UserManagement() {
       </Dialog>
 
       <Dialog open={detailState.open} onOpenChange={(open) => (!open ? closeUserDetail() : null)}>
-        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-none overflow-hidden p-0 sm:w-[calc(100vw-3rem)] sm:max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px]">
+        <DialogContent className="w-[calc(100vw-1.5rem)] max-w-none overflow-hidden p-0 sm:w-[calc(100vw-3rem)] sm:max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px] rounded-[1.5rem] bg-white dark:bg-[#1C1C1E] border-none shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]">
           <div className="flex max-h-[calc(100dvh-2rem)] flex-col">
-            <DialogHeader className="shrink-0 border-b px-6 py-5 pr-14">
-              <DialogTitle>
+            <DialogHeader className="shrink-0 px-6 pt-8 pb-4 bg-white dark:bg-black/40 backdrop-blur-xl relative z-10 border-b border-transparent dark:border-white/5">
+              <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 text-white shadow-sm ring-4 ring-white dark:ring-[#121212]">
+                <span className="text-3xl font-semibold">{detailUser?.username?.[0]?.toUpperCase() || '?'}</span>
+              </div>
+              <DialogTitle className="text-center text-2xl font-semibold tracking-tight text-foreground">
                 {detailUser
                   ? t('admin.users.detailTitle',  { username: detailUser.username })
                   : t('admin.users.detailTitleFallback')}
               </DialogTitle>
-              <DialogDescription>{detailUser?.email || ''}</DialogDescription>
+              <DialogDescription className="text-center text-base mt-1 text-muted-foreground/80">{detailUser?.email || ''}</DialogDescription>
             </DialogHeader>
-            <div className="flex-1 overflow-y-auto px-6 py-5">
+            <div className="flex-1 bg-zinc-50/80 dark:bg-black/20 overflow-y-auto px-6 pb-8 pt-6 relative isolate">
               {userOverviewQuery.isLoading ? (
-                <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   {t('common.loading')}
                 </div>
               ) : userOverviewQuery.error ? (
-                <p className="text-sm text-destructive">{t('admin.users.detailLoadFailed')}</p>
+                <p className="text-sm text-center text-destructive py-8">{t('admin.users.detailLoadFailed')}</p>
               ) : overviewData ? (
-                <div className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.username')}</p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{detailUser?.username}</p>
-                </div>
-                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.role')}</p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{renderRoleBadge(detailUser)}</p>
-                </div>
-                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.status')}</p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{renderStatusBadge(detailUser)}</p>
-                </div>
-                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.registrationDays')}</p>
-                  <p className="mt-1 text-sm font-medium text-foreground">{detailUser?.days_since_registration ?? 0}</p>
-                </div>
-                {detailUser?.lastlgn && (
-                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm sm:col-span-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('admin.users.detail.lastLogin')}</p>
-                    <p className="mt-1 text-sm font-medium text-foreground">
-                      {formatDateSafe(detailUser.lastlgn, 'yyyy-MM-dd HH:mm', '--')}
-                    </p>
+                <div className="mx-auto max-w-4xl space-y-8">
+              
+              {/* Basic Info - iOS Grouped List */}
+              <div className="space-y-2">
+                <h4 className="px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.detail.basicInformation')}</h4>
+                <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 shadow-sm">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <span className="text-base font-medium text-foreground">{t('admin.users.detail.username')}</span>
+                    <span className="text-base text-muted-foreground">{detailUser?.username}</span>
                   </div>
-                )}
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <span className="text-base font-medium text-foreground">{t('admin.users.detail.role')}</span>
+                    <span className="text-base text-muted-foreground">{renderRoleBadge(detailUser)}</span>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <span className="text-base font-medium text-foreground">{t('admin.users.detail.status')}</span>
+                    <span className="text-base text-muted-foreground">{renderStatusBadge(detailUser)}</span>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <span className="text-base font-medium text-foreground">{t('admin.users.detail.registrationDays')}</span>
+                    <span className="text-base text-muted-foreground">{detailUser?.days_since_registration ?? 0}</span>
+                  </div>
+                  {detailUser?.lastlgn && (
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                      <span className="text-base font-medium text-foreground">{t('admin.users.detail.lastLogin')}</span>
+                      <span className="text-base text-muted-foreground">
+                        {formatDateSafe(detailUser.lastlgn, 'yyyy-MM-dd HH:mm', '--')}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                {metricsCards.map((card) => {
-                  const Icon = card.icon;
-                  return (
-                        <div key={card.key} className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{card.label}</p>
-                        <Icon className="h-4 w-4 text-muted-foreground" />
+              <div className="space-y-2">
+                <h4 className="px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.detail.generalMetrics')}</h4>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                  {metricsCards.map((card) => {
+                    const Icon = card.icon;
+                    return (
+                      <div key={card.key} className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm transition-transform hover:scale-[1.02]">
+                        <div className="flex items-center justify-between mb-3 text-muted-foreground">
+                          <Icon className="h-5 w-5 opacity-70" />
+                          <p className="text-xs font-medium uppercase tracking-wide opacity-80">{card.label}</p>
+                        </div>
+                        <p className="text-2xl font-bold tracking-tight text-foreground text-right mt-1">
+                          {Number(card.value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                        </p>
                       </div>
-                      <p className="mt-2 text-xl font-semibold">
-                        {Number(card.value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                      </p>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
 
               {checkinCards.length > 0 && (
-                <div className="space-y-3">
-                  <div>
-                    <h4 className="text-base font-semibold">{t('admin.users.checkins.title')}</h4>
-                    <p className="text-sm text-muted-foreground">{t('admin.users.checkins.subtitle')}</p>
+                <div className="space-y-2">
+                  <div className="px-4">
+                    <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.checkins.title')}</h4>
+                    <p className="text-xs text-muted-foreground/80 mt-0.5">{t('admin.users.checkins.subtitle')}</p>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
                     {checkinCards.map((card) => {
                       const Icon = card.icon;
                       return (
-                    <div key={card.key} className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{card.label}</p>
-                            <Icon className="h-4 w-4 text-muted-foreground" />
+                        <div key={card.key} className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm transition-transform hover:scale-[1.02]">
+                          <div className="flex items-center justify-between mb-3 text-muted-foreground">
+                            <Icon className="h-5 w-5 opacity-70" />
+                            <p className="text-xs font-medium uppercase tracking-wide opacity-80">{card.label}</p>
                           </div>
-                          <p className="mt-2 text-xl font-semibold">
+                          <p className="text-2xl font-bold tracking-tight text-foreground text-right mt-1">
                             {Number(card.value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                           </p>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="px-4 text-xs font-medium text-muted-foreground border-l-2 border-emerald-500 ml-4 py-0.5">
                     {checkinStats.active_today
                       ? t('admin.users.checkins.activeToday')
                       : t('admin.users.checkins.inactiveToday')}
@@ -1132,163 +1143,169 @@ export function UserManagement() {
                 </div>
               )}
 
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                    <Fingerprint className="h-4 w-4" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 px-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                    <Fingerprint className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-base font-semibold">{t('admin.users.security.title')}</h4>
-                    <p className="text-sm text-muted-foreground">{t('admin.users.security.subtitle')}</p>
+                    <h4 className="text-sm font-semibold tracking-tight text-foreground">{t('admin.users.security.title')}</h4>
+                    <p className="text-xs text-muted-foreground">{t('admin.users.security.subtitle')}</p>
                   </div>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.passkeysTotal')}</p>
-                    <p className="mt-2 text-2xl font-semibold">{passkeySummary.total}</p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.security.passkeysTotal')}</p>
+                    <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{passkeySummary.total}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.backupEnabled')}</p>
-                    <p className="mt-2 text-2xl font-semibold">{passkeySummary.backup_enabled}</p>
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.security.backupEnabled')}</p>
+                    <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{passkeySummary.backup_enabled}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.backupEligible')}</p>
-                    <p className="mt-2 text-2xl font-semibold">{passkeySummary.backup_eligible}</p>
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.security.backupEligible')}</p>
+                    <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{passkeySummary.backup_eligible}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.security.lastPasskeyUsed')}</p>
-                    <p className="mt-2 text-sm font-semibold text-foreground">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.security.lastPasskeyUsed')}</p>
+                    <p className="mt-3 text-sm font-semibold text-foreground text-right">
                       {formatDateSafe(passkeySummary.last_used_at, 'yyyy-MM-dd HH:mm', t('admin.users.security.neverUsed'))}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm text-muted-foreground">
-                    {securityActivityExpanded
-                      ? t('admin.users.security.expandedHint')
-                      : t('admin.users.security.previewHint')}
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSecurityActivityExpanded((prev) => !prev);
-                      setSecurityActivityPage(1);
-                    }}
-                  >
-                    {securityActivityExpanded ? (
-                      <>
-                        <ChevronUp className="mr-2 h-4 w-4" />
-                        {t('admin.users.security.collapse')}
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="mr-2 h-4 w-4" />
-                        {t('admin.users.security.expand')}
-                      </>
-                    )}
-                  </Button>
-                </div>
-                {securityActivityExpanded && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="space-y-1 text-sm">
-                      <span className="font-medium text-foreground">{t('securityActivity.filters.typeLabel')}</span>
-                      <select
-                        value={securityActivityFilters.type}
-                        onChange={(event) => handleSecurityActivityFilterChange('type', event.target.value)}
-                        className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      >
-                        {securityActivityTypeOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="space-y-1 text-sm">
-                      <span className="font-medium text-foreground">{t('securityActivity.filters.periodLabel')}</span>
-                      <select
-                        value={securityActivityFilters.period}
-                        onChange={(event) => handleSecurityActivityFilterChange('period', event.target.value)}
-                        className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      >
-                        {securityActivityPeriodOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 shadow-sm">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5">
+                    <p className="text-sm font-medium text-foreground">
+                      {securityActivityExpanded
+                        ? t('admin.users.security.expandedHint')
+                        : t('admin.users.security.previewHint')}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 rounded-xl px-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-blue-600 font-medium"
+                      onClick={() => {
+                        setSecurityActivityExpanded((prev) => !prev);
+                        setSecurityActivityPage(1);
+                      }}
+                    >
+                      {securityActivityExpanded ? t('admin.users.security.collapse') : t('admin.users.security.expand')}
+                      {securityActivityExpanded ? <ChevronUp className="ml-1.5 h-4 w-4" /> : <ChevronDown className="ml-1.5 h-4 w-4" />}
+                    </Button>
                   </div>
-                )}
-                {userSecurityActivityQuery.isError ? (
-                  <Alert variant="destructive">
-                    <AlertTitle>{t('common.error')}</AlertTitle>
-                    <AlertDescription>{t('securityActivity.loadError')}</AlertDescription>
-                  </Alert>
-                ) : null}
-                <SecurityActivityList
-                  items={recentSecurityActivity}
-                  compact
-                  isLoading={userSecurityActivityQuery.isLoading}
-                  emptyText={t('admin.users.security.empty')}
-                />
-                {securityActivityExpanded && !userSecurityActivityQuery.isError ? (
-                  <Pagination
-                    currentPage={securityActivityPagination.current_page}
-                    totalPages={securityActivityPagination.total_pages}
-                    onPageChange={setSecurityActivityPage}
-                    itemsPerPage={securityActivityPagination.per_page}
-                    totalItems={securityActivityPagination.total_items}
-                  />
-                ) : null}
+                  <div className="p-4">
+                  {securityActivityExpanded && (
+                    <div className="grid gap-3 sm:grid-cols-2 mb-4">
+                      <label className="space-y-1.5 text-sm">
+                        <span className="font-medium px-1 text-muted-foreground">{t('securityActivity.filters.typeLabel')}</span>
+                        <div className="relative">
+                          <select
+                            value={securityActivityFilters.type}
+                            onChange={(event) => handleSecurityActivityFilterChange('type', event.target.value)}
+                            className="h-10 w-full appearance-none rounded-xl border-none bg-zinc-50 dark:bg-white/10 px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500/20"
+                          >
+                            {securityActivityTypeOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </label>
+                      <label className="space-y-1.5 text-sm">
+                        <span className="font-medium px-1 text-muted-foreground">{t('securityActivity.filters.periodLabel')}</span>
+                        <div className="relative">
+                          <select
+                            value={securityActivityFilters.period}
+                            onChange={(event) => handleSecurityActivityFilterChange('period', event.target.value)}
+                            className="h-10 w-full appearance-none rounded-xl border-none bg-zinc-50 dark:bg-white/10 px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500/20"
+                          >
+                            {securityActivityPeriodOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </label>
+                    </div>
+                  )}
+                  {userSecurityActivityQuery.isError ? (
+                    <Alert variant="destructive" className="rounded-xl mb-4 border-red-500/20 bg-red-500/10">
+                      <AlertTitle>{t('common.error')}</AlertTitle>
+                      <AlertDescription>{t('securityActivity.loadError')}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  <div className="rounded-xl border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/10/30 overflow-hidden">
+                    <SecurityActivityList
+                      items={recentSecurityActivity}
+                      compact
+                      isLoading={userSecurityActivityQuery.isLoading}
+                      emptyText={t('admin.users.security.empty')}
+                    />
+                  </div>
+                  {securityActivityExpanded && !userSecurityActivityQuery.isError ? (
+                    <div className="mt-4 flex justify-center">
+                      <Pagination
+                        currentPage={securityActivityPagination.current_page}
+                        totalPages={securityActivityPagination.total_pages}
+                        onPageChange={setSecurityActivityPage}
+                        itemsPerPage={securityActivityPagination.per_page}
+                        totalItems={securityActivityPagination.total_items}
+                      />
+                    </div>
+                  ) : null}
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-4">
                   <div>
-                    <h4 className="text-base font-semibold">{t('admin.users.badgeSummary')}</h4>
-                    <p className="text-sm text-muted-foreground">{t('admin.users.badgeSummaryHint')}</p>
+                    <h4 className="text-sm font-semibold tracking-tight text-foreground">{t('admin.users.badgeSummary')}</h4>
+                    <p className="text-xs text-muted-foreground">{t('admin.users.badgeSummaryHint')}</p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Switch checked={showRevokedBadges} onCheckedChange={(checked) => setShowRevokedBadges(Boolean(checked))} />
-                    <span>{t('admin.users.showRevokedBadges')}</span>
+                  <div className="flex items-center justify-end gap-2 text-sm bg-white dark:bg-[#2C2C2E] rounded-full px-3 py-1.5 border border-zinc-100 dark:border-white/5 shadow-sm">
+                    <span className="font-medium text-muted-foreground">{t('admin.users.showRevokedBadges')}</span>
+                    <Switch checked={showRevokedBadges} onCheckedChange={(checked) => setShowRevokedBadges(Boolean(checked))} className="data-[state=checked]:bg-blue-500" />
                   </div>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesAwarded')}</p>
-                    <p className="mt-2 text-2xl font-semibold">{badgeSummary.awarded}</p>
+                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.badgesAwarded')}</p>
+                    <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{badgeSummary.awarded}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesRevoked')}</p>
-                    <p className="mt-2 text-2xl font-semibold">{badgeSummary.revoked}</p>
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.badgesRevoked')}</p>
+                    <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{badgeSummary.revoked}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('admin.users.badgesTotal')}</p>
-                    <p className="mt-2 text-2xl font-semibold">{badgeSummary.total}</p>
+                  <div className="flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 p-4 shadow-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground opacity-80">{t('admin.users.badgesTotal')}</p>
+                    <p className="mt-3 text-3xl font-bold tracking-tight text-foreground text-right">{badgeSummary.total}</p>
                   </div>
                 </div>
 
                 {userBadgesQuery.isLoading ? (
                   <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     {t('common.loading')}
                   </div>
                 ) : userBadgesQuery.error ? (
-                  <p className="text-sm text-destructive">{t('admin.users.badgesLoadFailed')}</p>
+                  <p className="text-sm text-destructive px-4">{t('admin.users.badgesLoadFailed')}</p>
                 ) : badgeRows.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-border text-sm">
-                      <thead className="bg-muted/40">
+                  <div className="overflow-hidden rounded-2xl border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#2C2C2E] shadow-sm">
+                    <table className="min-w-full divide-y divide-zinc-100 dark:divide-zinc-800 text-sm">
+                      <thead className="bg-zinc-50/50 dark:bg-white/10/30">
                         <tr>
-                          <th className="px-4 py-2 text-left font-medium text-muted-foreground">{t('admin.users.badgeTable.badge')}</th>
-                          <th className="px-4 py-2 text-left font-medium text-muted-foreground">{t('admin.users.badgeTable.status')}</th>
-                          <th className="px-4 py-2 text-left font-medium text-muted-foreground">{t('admin.users.badgeTable.awardedAt')}</th>
+                          <th className="px-6 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide">{t('admin.users.badgeTable.badge')}</th>
+                          <th className="px-6 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide">{t('admin.users.badgeTable.status')}</th>
+                          <th className="px-6 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide">{t('admin.users.badgeTable.awardedAt')}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border bg-card">
+                      <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
                         {badgeRows.map((entry, index) => {
                           const badge = entry.badge || {};
                           const record = entry.user_badge || {};
@@ -1297,10 +1314,10 @@ export function UserManagement() {
                             pathCandidates: [badge.icon_path],
                           });
                           return (
-                            <tr key={index} className="hover:bg-muted/40">
-                              <td className="px-4 py-2">
-                                <div className="flex items-center gap-3">
-                                  <div className="h-10 w-10 overflow-hidden rounded-full border bg-muted">
+                            <tr key={index} className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                              <td className="px-6 py-3">
+                                <div className="flex items-center gap-4">
+                                  <div className="h-10 w-10 overflow-hidden rounded-xl border border-zinc-100 dark:border-white/5 bg-white shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] dark:bg-white/10">
                                     {badgeImage.src || badgeImage.filePath ? (
                                       <R2Image
                                         src={badgeImage.src || undefined}
@@ -1309,19 +1326,19 @@ export function UserManagement() {
                                         className="h-full w-full object-cover"
                                       />
                                     ) : (
-                                      <Award className="h-5 w-5 text-muted-foreground" />
+                                      <Award className="h-5 w-5 text-muted-foreground m-auto mt-2.5" />
                                     )}
                                   </div>
                                   <div>
-                                    <p className="font-medium text-foreground">{badge.name_zh || badge.name_en || '-'}</p>
+                                    <p className="font-semibold text-foreground tracking-tight">{badge.name_zh || badge.name_en || '-'}</p>
                                     {badge.name_en && <p className="text-xs text-muted-foreground">{badge.name_en}</p>}
                                   </div>
                                 </div>
                               </td>
-                              <td className="px-4 py-2">
-                                <Badge variant={record.status === 'awarded' ? 'success' : 'secondary'}>{record.status === 'awarded' ? t('admin.users.badgeStatusAwarded') : t('admin.users.badgeStatusRevoked')}</Badge>
+                              <td className="px-6 py-3 whitespace-nowrap">
+                                <Badge variant={record.status === 'awarded' ? 'success' : 'secondary'} className="rounded-full px-2.5 font-medium">{record.status === 'awarded' ? t('admin.users.badgeStatusAwarded') : t('admin.users.badgeStatusRevoked')}</Badge>
                               </td>
-                              <td className="px-4 py-2 text-sm text-muted-foreground">
+                              <td className="px-6 py-3 whitespace-nowrap text-sm text-muted-foreground font-medium">
                                 {formatDateSafe(record.awarded_at, 'yyyy-MM-dd HH:mm', '--')}
                               </td>
                             </tr>
@@ -1331,7 +1348,7 @@ export function UserManagement() {
                     </table>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">{t('admin.users.badgesEmpty')}</p>
+                  <p className="text-sm text-muted-foreground px-4 py-4">{t('admin.users.badgesEmpty')}</p>
                 )}
               </div>
                 </div>
