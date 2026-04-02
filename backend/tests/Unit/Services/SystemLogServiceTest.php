@@ -12,16 +12,32 @@ use PHPUnit\Framework\TestCase;
 class SystemLogServiceTest extends TestCase
 {
     private array $originalServer = [];
+    private mixed $previousDisableSystemWrites = null;
+    private mixed $previousDisableSystemWritesServer = null;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->originalServer = $_SERVER ?? [];
+        $this->previousDisableSystemWrites = $_ENV['DISABLE_SYSTEM_LOG_WRITES'] ?? null;
+        $this->previousDisableSystemWritesServer = $_SERVER['DISABLE_SYSTEM_LOG_WRITES'] ?? null;
+        unset($_ENV['DISABLE_SYSTEM_LOG_WRITES']);
+        unset($_SERVER['DISABLE_SYSTEM_LOG_WRITES']);
     }
 
     protected function tearDown(): void
     {
         $_SERVER = $this->originalServer;
+        if ($this->previousDisableSystemWrites === null) {
+            unset($_ENV['DISABLE_SYSTEM_LOG_WRITES']);
+        } else {
+            $_ENV['DISABLE_SYSTEM_LOG_WRITES'] = $this->previousDisableSystemWrites;
+        }
+        if ($this->previousDisableSystemWritesServer === null) {
+            unset($_SERVER['DISABLE_SYSTEM_LOG_WRITES']);
+        } else {
+            $_SERVER['DISABLE_SYSTEM_LOG_WRITES'] = $this->previousDisableSystemWritesServer;
+        }
         parent::tearDown();
     }
 
@@ -72,6 +88,25 @@ class SystemLogServiceTest extends TestCase
 
         $this->assertIsArray($meta);
         $this->assertSame('192.0.2.44', $meta['_summary']['ip']);
+    }
+
+    public function testLogReturnsNullWhenWritesDisabled(): void
+    {
+        $_ENV['DISABLE_SYSTEM_LOG_WRITES'] = 'true';
+        $_SERVER['DISABLE_SYSTEM_LOG_WRITES'] = 'true';
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->never())->method('prepare');
+
+        $service = new SystemLogService($pdo, new Logger('test'));
+
+        $result = $service->log([
+            'request_id' => 'req-1',
+            'method' => 'GET',
+            'path' => '/api/test',
+        ]);
+
+        $this->assertNull($result);
     }
 
     private function makeService(): SystemLogService

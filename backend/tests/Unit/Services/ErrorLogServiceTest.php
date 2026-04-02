@@ -12,10 +12,16 @@ use PHPUnit\Framework\TestCase;
 class ErrorLogServiceTest extends TestCase
 {
     private PDO $pdo;
+    private mixed $previousDisableErrorWrites = null;
+    private mixed $previousDisableErrorWritesServer = null;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->previousDisableErrorWrites = $_ENV['DISABLE_ERROR_LOG_WRITES'] ?? null;
+        $this->previousDisableErrorWritesServer = $_SERVER['DISABLE_ERROR_LOG_WRITES'] ?? null;
+        unset($_ENV['DISABLE_ERROR_LOG_WRITES']);
+        unset($_SERVER['DISABLE_ERROR_LOG_WRITES']);
         $this->pdo = new PDO('sqlite::memory:');
         $this->pdo->exec('CREATE TABLE error_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,6 +39,22 @@ class ErrorLogServiceTest extends TestCase
             client_server TEXT,
             request_id TEXT
         )');
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->previousDisableErrorWrites === null) {
+            unset($_ENV['DISABLE_ERROR_LOG_WRITES']);
+        } else {
+            $_ENV['DISABLE_ERROR_LOG_WRITES'] = $this->previousDisableErrorWrites;
+        }
+        if ($this->previousDisableErrorWritesServer === null) {
+            unset($_SERVER['DISABLE_ERROR_LOG_WRITES']);
+        } else {
+            $_SERVER['DISABLE_ERROR_LOG_WRITES'] = $this->previousDisableErrorWritesServer;
+        }
+
+        parent::tearDown();
     }
 
     public function testLogExceptionUsesRequestAttributeRequestId(): void
@@ -58,5 +80,20 @@ class ErrorLogServiceTest extends TestCase
         $row = $this->pdo->query('SELECT request_id FROM error_logs')->fetch(PDO::FETCH_ASSOC);
         $this->assertIsArray($row);
         $this->assertSame('extra-request-id', $row['request_id']);
+    }
+
+    public function testLogExceptionReturnsNullWhenWritesDisabled(): void
+    {
+        $_ENV['DISABLE_ERROR_LOG_WRITES'] = '1';
+        $_SERVER['DISABLE_ERROR_LOG_WRITES'] = '1';
+
+        $service = new ErrorLogService($this->pdo, new Logger('test'));
+        $request = makeRequest('GET', '/test');
+
+        $result = $service->logException(new \RuntimeException('boom'), $request);
+
+        $this->assertNull($result);
+        $count = (int) $this->pdo->query('SELECT COUNT(*) FROM error_logs')->fetchColumn();
+        $this->assertSame(0, $count);
     }
 }
