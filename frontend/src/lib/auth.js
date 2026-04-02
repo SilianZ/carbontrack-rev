@@ -4,6 +4,27 @@ const DEV_AUTH_TRUTHY_VALUES = new Set(['1', 'true', 'yes', 'on']);
 
 const isDevTruthy = (value) => DEV_AUTH_TRUTHY_VALUES.has(String(value || '').toLowerCase());
 
+const decodeBase64Utf8 = (rawBase64) => {
+  const normalized = String(rawBase64 || '').trim().replaceAll('-', '+').replaceAll('_', '/');
+  const paddingLength = normalized.length % 4;
+  const padded = paddingLength ? normalized + '='.repeat(4 - paddingLength) : normalized;
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary, (char) => char.codePointAt(0) ?? 0);
+
+  if (globalThis.TextDecoder) {
+    return new globalThis.TextDecoder('utf-8').decode(bytes);
+  }
+
+  return binary;
+};
+
+const hasMinimalDevUserInfoFields = (userInfo) => (
+  userInfo
+  && typeof userInfo === 'object'
+  && !Array.isArray(userInfo)
+  && userInfo.id != null
+);
+
 const parseDevUserInfoFromEnv = () => {
   const rawJson = String(import.meta.env?.VITE_DEV_AUTH_USER_INFO_JSON || '').trim();
   if (rawJson) {
@@ -20,7 +41,7 @@ const parseDevUserInfoFromEnv = () => {
   const rawBase64 = String(import.meta.env?.VITE_DEV_AUTH_USER_INFO_BASE64 || '').trim();
   if (rawBase64) {
     try {
-      const decodedJson = atob(rawBase64);
+      const decodedJson = decodeBase64Utf8(rawBase64);
       const parsed = JSON.parse(decodedJson);
       if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
         return parsed;
@@ -122,7 +143,12 @@ export const bootstrapDevAuthFromEnv = () => {
   const envToken = String(import.meta.env?.VITE_DEV_AUTH_TOKEN || '').trim();
   const envUserInfo = parseDevUserInfoFromEnv();
 
-  if (!envToken || !envUserInfo) {
+  if (!envToken || !hasMinimalDevUserInfoFields(envUserInfo)) {
+    if (envToken || envUserInfo) {
+      console.warn(
+        '[bootstrapDevAuthFromEnv] Invalid dev auth env payload; requires VITE_DEV_AUTH_TOKEN and user_info with at least "id". Injection skipped.'
+      );
+    }
     return false;
   }
 
