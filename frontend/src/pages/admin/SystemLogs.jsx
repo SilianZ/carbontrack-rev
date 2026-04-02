@@ -26,7 +26,7 @@ import { Alert, AlertDescription, AlertTitle } from '../../components/ui/Alert';
 import { cn } from '../../lib/utils';
 
 const SYSTEM_COLUMNS = ['id', 'method', 'path', 'status_code', 'user_id', 'duration_ms', 'created_at', 'ops'];
-const AUDIT_COLUMNS = ['id', 'conversation_id', 'actor_type', 'action', 'operation_category', 'status', 'user_id', 'ip_address', 'created_at', 'ops'];
+const AUDIT_COLUMNS = ['id', 'conversation_id', 'request_id', 'actor_type', 'action', 'operation_category', 'status', 'user_id', 'ip_address', 'created_at', 'ops'];
 const ERROR_COLUMNS = ['id', 'request_id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time', 'ops'];
 const LLM_COLUMNS = ['id', 'conversation_id', 'turn_no', 'actor_type', 'actor_id', 'source', 'model', 'llm_status', 'total_tokens', 'latency_ms', 'created_at', 'ops'];
 
@@ -634,6 +634,7 @@ export default function SystemLogsPage() {
                 headers={[
                   'id',
                   'conversation_id',
+                  'request_id',
                   'actor_type',
                   'action',
                   'operation_category',
@@ -649,6 +650,18 @@ export default function SystemLogsPage() {
                     summaryCells={[
                       log.id,
                       log.conversation_id || '-',
+                      log.request_id ? (
+                        <Button
+                          key="request"
+                          variant="link"
+                          className="h-auto p-0 text-[11px] font-mono text-indigo-600"
+                          onClick={() => openRelated(log.request_id)}
+                        >
+                          {log.request_id}
+                        </Button>
+                      ) : (
+                        '-'
+                      ),
                       log.actor_type,
                       log.action,
                       log.operation_category || '- ',
@@ -657,7 +670,7 @@ export default function SystemLogsPage() {
                       log.ip_address || '-',
                       log.created_at
                     ]}
-                    detail={<AuditDetail log={log} columnLabel={columnLabel} />}
+                    detail={<AuditDetail log={log} columnLabel={columnLabel} onRelated={openRelated} t={t} />}
                     t={t}
                   />
                 )}
@@ -1121,11 +1134,19 @@ function ExpandableRow({ summaryCells, detail, t }) {
   );
 }
 
-function AuditDetail({ log, columnLabel }) {
+function AuditDetail({ log, columnLabel, onRelated, t }) {
   return (
     <div className="space-y-2 text-xs">
       <KeyVal label={columnLabel('id')} value={log.id} />
       <KeyVal label={columnLabel('conversation_id')} value={log.conversation_id || '-'} />
+      <div className="flex flex-wrap items-center gap-2">
+        <KeyVal label={columnLabel('request_id')} value={log.request_id || '-'} />
+        {log.request_id && (
+          <Button variant="link" className="h-auto p-0 text-xs" onClick={() => onRelated?.(log.request_id)}>
+            {t('admin.systemLogs.related')}
+          </Button>
+        )}
+      </div>
       <KeyVal label={columnLabel('action')} value={log.action} />
       <KeyVal label={columnLabel('operation_category')} value={log.operation_category || '-'} />
       <KeyVal label={columnLabel('actor_type')} value={log.actor_type} />

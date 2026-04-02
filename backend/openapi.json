@@ -19435,6 +19435,18 @@
                         "id": {
                           "type": "integer"
                         },
+                        "conversation_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "request_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "action": {
                           "type": "string"
                         },
@@ -19551,6 +19563,18 @@
                   "properties": {
                     "id": {
                       "type": "integer"
+                    },
+                    "conversation_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "request_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "action": {
                       "type": "string"
