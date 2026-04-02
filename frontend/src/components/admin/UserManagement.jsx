@@ -1061,7 +1061,7 @@ export function UserManagement() {
               
               {/* Basic Info - iOS Grouped List */}
               <div className="space-y-2">
-                <h4 className="px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">Basic Information</h4>
+                <h4 className="px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.detail.basicInformation')}</h4>
                 <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#2C2C2E] border border-zinc-100 dark:border-white/5 shadow-sm">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-white/5 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
                     <span className="text-base font-medium text-foreground">{t('admin.users.detail.username')}</span>
@@ -1091,7 +1091,7 @@ export function UserManagement() {
               </div>
 
               <div className="space-y-2">
-                <h4 className="px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">General Metrics</h4>
+                <h4 className="px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('admin.users.detail.generalMetrics')}</h4>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                   {metricsCards.map((card) => {
                     const Icon = card.icon;
