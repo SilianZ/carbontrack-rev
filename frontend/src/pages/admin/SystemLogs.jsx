@@ -244,6 +244,7 @@ export default function SystemLogsPage() {
     [t]
   );
 
+  const auditHeaders = useMemo(() => auditCols.filter((col) => col !== 'ops'), [auditCols]);
   const llmHeaders = useMemo(() => llmCols.filter((col) => col !== 'ops'), [llmCols]);
 
   return (
@@ -631,45 +632,12 @@ export default function SystemLogsPage() {
                 title={t('admin.systemLogs.sections.audit')}
                 items={auditLogs}
                 emptyText={t('admin.systemLogs.empty.audit')}
-                headers={[
-                  'id',
-                  'conversation_id',
-                  'request_id',
-                  'actor_type',
-                  'action',
-                  'operation_category',
-                  'status',
-                  'user_id',
-                  'ip_address',
-                  'created_at'
-                ]}
+                headers={auditHeaders}
                 columnLabel={columnLabel}
                 renderItem={(log) => (
                   <ExpandableRow
                     key={`audit-${log.id}`}
-                    summaryCells={[
-                      log.id,
-                      log.conversation_id || '-',
-                      log.request_id ? (
-                        <Button
-                          key="request"
-                          variant="link"
-                          className="h-auto p-0 text-[11px] font-mono text-indigo-600"
-                          onClick={() => openRelated(log.request_id)}
-                        >
-                          {log.request_id}
-                        </Button>
-                      ) : (
-                        '-'
-                      ),
-                      log.actor_type,
-                      log.action,
-                      log.operation_category || '- ',
-                      log.status,
-                      log.user_id || '-',
-                      log.ip_address || '-',
-                      log.created_at
-                    ]}
+                    summaryCells={auditHeaders.map((column) => auditCell(log, column, openRelated))}
                     detail={<AuditDetail log={log} columnLabel={columnLabel} onRelated={openRelated} t={t} />}
                     t={t}
                   />
@@ -1285,6 +1253,44 @@ function llmCell(log, column) {
       return log.latency_ms ?? '-';
     case 'created_at':
       return log.created_at;
+    default:
+      return log[column] ?? '-';
+  }
+}
+
+function auditCell(log, column, onRelated) {
+  switch (column) {
+    case 'id':
+      return log.id;
+    case 'conversation_id':
+      return log.conversation_id || '-';
+    case 'request_id':
+      return log.request_id ? (
+        <Button
+          key={`audit-request-${log.id}`}
+          variant="link"
+          className="h-auto p-0 text-[11px] font-mono text-indigo-600"
+          onClick={() => onRelated(log.request_id)}
+        >
+          {log.request_id}
+        </Button>
+      ) : (
+        '-'
+      );
+    case 'actor_type':
+      return log.actor_type || '-';
+    case 'action':
+      return log.action || '-';
+    case 'operation_category':
+      return log.operation_category || '-';
+    case 'status':
+      return log.status || '-';
+    case 'user_id':
+      return log.user_id || '-';
+    case 'ip_address':
+      return log.ip_address || '-';
+    case 'created_at':
+      return log.created_at || '-';
     default:
       return log[column] ?? '-';
   }
