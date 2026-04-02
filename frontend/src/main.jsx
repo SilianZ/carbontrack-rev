@@ -7,6 +7,7 @@ import { QueryClientProvider } from 'react-query';
 import { queryClient } from './lib/react-query';
 import { ThemeProvider } from './components/theme/ThemeProvider.jsx'
 import { Toaster } from './components/ui/sonner.jsx'
+import { bootstrapDevAuthFromEnv } from './lib/auth';
 
 // 首次加载强制重置本地登录态（清一次历史token），确保“默认未登录”
 (() => {
@@ -17,6 +18,9 @@ import { Toaster } from './components/ui/sonner.jsx'
     localStorage.setItem(RESET_FLAG_KEY, '1');
   }
 })();
+
+// 开发环境：可通过 .env 注入 token/user_info 以复用登录态（用于自动化扫描）
+bootstrapDevAuthFromEnv();
 
 // 加载中组件
 const loadingFallback = (
