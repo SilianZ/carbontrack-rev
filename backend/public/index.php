@@ -147,9 +147,9 @@ $errorMiddleware->setDefaultErrorHandler(
         $derivedStatus = null;
         if ($exception instanceof HttpException) {
             $derivedStatus = (int) $exception->getCode();
-        } elseif (method_exists($exception, 'getStatusCode')) {
+        } elseif (is_callable([$exception, 'getStatusCode'])) {
             try {
-                $derivedStatus = (int) $exception->getStatusCode();
+                $derivedStatus = (int) call_user_func([$exception, 'getStatusCode']);
             } catch (\Throwable $statusEx) {
                 $derivedStatus = null;
             }
