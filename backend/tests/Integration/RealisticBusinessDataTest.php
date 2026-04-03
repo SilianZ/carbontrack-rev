@@ -224,7 +224,7 @@ class RealisticBusinessDataTest extends TestCase
         $this->assertEquals(401, $response->getStatusCode());
     }
 
-    public function testProtectedLegacyAliasEndpointsRequireAuthentication(): void
+    public function testProtectedEndpointsRequireAuthentication(): void
     {
         $recordPayload = [
             'activity_id' => '550e8400-e29b-41d4-a716-446655440001',
@@ -241,31 +241,31 @@ class RealisticBusinessDataTest extends TestCase
                 'method' => 'GET',
                 'uri' => '/api/v1/activities',
                 'data' => [],
-                'expected_statuses' => [401],
+                'expected_status' => 401,
             ],
             [
                 'method' => 'GET',
                 'uri' => '/api/v1/activities/categories',
                 'data' => [],
-                'expected_statuses' => [401],
+                'expected_status' => 401,
             ],
             [
                 'method' => 'POST',
                 'uri' => '/api/v1/carbon-track/record',
                 'data' => $recordPayload,
-                'expected_statuses' => [401],
+                'expected_status' => 401,
             ],
             [
                 'method' => 'GET',
                 'uri' => '/api/v1/admin/carbon-activities/pending',
                 'data' => [],
-                'expected_statuses' => [401, 403],
+                'expected_status' => 401,
             ],
             [
                 'method' => 'GET',
                 'uri' => '/api/v1/admin/carbon-records',
                 'data' => [],
-                'expected_statuses' => [401, 403],
+                'expected_status' => 401,
             ],
         ];
 
@@ -273,9 +273,9 @@ class RealisticBusinessDataTest extends TestCase
             $request = $this->createRequest($case['method'], $case['uri'], $case['data']);
             $response = $this->app->handle($request);
 
-            $this->assertContains(
+            $this->assertSame(
+                $case['expected_status'],
                 $response->getStatusCode(),
-                $case['expected_statuses'],
                 sprintf('%s %s should reject unauthenticated access', $case['method'], $case['uri'])
             );
         }

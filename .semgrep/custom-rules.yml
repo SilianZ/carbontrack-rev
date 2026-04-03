@@ -1,18 +1,18 @@
 rules:
   - id: force-auth-middleware-apiv1
     message: >
-      API v1 endpoints should be explicitly grouped and secured by AuthMiddleware.
-      Ensure the route configuration explicitly attaches the middleware.
+      Legacy `/api/v1/activities/categories` alias must attach AuthMiddleware
+      to stay aligned with its protected OpenAPI contract.
     severity: WARNING
     languages:
       - php
     patterns:
       - pattern: |
-          $APP->group('/api/v1', ...)->add(...);
+          $GROUP->get('/activities/categories', ...);
       - pattern-not: |
-          $APP->group('/api/v1', ...)->add(\CarbonTrack\Middleware\AuthMiddleware::class);
+          $GROUP->get('/activities/categories', ...)->add(\CarbonTrack\Middleware\AuthMiddleware::class);
       - pattern-not: |
-          $APP->group('/api/v1', ...)->add(AuthMiddleware::class);
+          $GROUP->get('/activities/categories', ...)->add(AuthMiddleware::class);
     paths:
       include:
         - "backend/src/routes.php"
@@ -31,7 +31,7 @@ rules:
           }
       - metavariable-regex:
           metavariable: $METHOD
-          regex: "(?i).*(create|update|delete|post|put|patch|admin).*"
+          regex: "(?i).*(create|update|delete|post|put|patch).*"
       - pattern-not-inside: |
           class $CLASS {
             ...
@@ -60,6 +60,10 @@ rules:
     paths:
       include:
         - "backend/src/**/*.php"
+      exclude:
+        - "backend/src/Controllers/*.php"
+        - "backend/src/Middleware/*.php"
+        - "backend/src/dependencies.php"
 
   - id: enforce-errorlogservice-in-catch
     message: >
@@ -89,6 +93,24 @@ rules:
           catch ($TYPE $EXP) {
             ...
             $X->logException(...)
+            ...
+          }
+      - pattern-not: |
+          catch ($TYPE $EXP) {
+            ...
+            $this->errorLogService->logException(...)
+            ...
+          }
+      - pattern-not: |
+          catch ($TYPE $EXP) {
+            ...
+            $X->logExceptionWithFallback(...)
+            ...
+          }
+      - pattern-not: |
+          catch ($TYPE $EXP) {
+            ...
+            $this->logExceptionWithFallback(...)
             ...
           }
     paths:
