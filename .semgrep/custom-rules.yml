@@ -1,0 +1,97 @@
+rules:
+  - id: force-auth-middleware-apiv1
+    message: >
+      API v1 endpoints should be explicitly grouped and secured by AuthMiddleware.
+      Ensure the route configuration explicitly attaches the middleware.
+    severity: WARNING
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          $APP->group('/api/v1', ...)->add(...);
+      - pattern-not: |
+          $APP->group('/api/v1', ...)->add(\CarbonTrack\Middleware\AuthMiddleware::class);
+      - pattern-not: |
+          $APP->group('/api/v1', ...)->add(AuthMiddleware::class);
+    paths:
+      include:
+        - "backend/src/routes.php"
+
+  - id: detect-missing-audit-log-on-mutations
+    message: >
+      Controllers containing mutation hints (POST/PUT/DELETE actions or names like create/update/delete)
+      must inject the AuditLogService to maintain an audit trail.
+    severity: ERROR
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          public function $METHOD(Request $req, Response $res, array $args): Response {
+            ...
+          }
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: "(?i).*(create|update|delete|post|put|patch|admin).*"
+      - pattern-not-inside: |
+          class $CLASS {
+            ...
+            public function __construct(..., AuditLogService $X, ...) { ... }
+            ...
+          }
+      - pattern-not-inside: |
+          class $CLASS {
+            ...
+            public function __construct(..., \CarbonTrack\Services\AuditLogService $X, ...) { ... }
+            ...
+          }
+    paths:
+      include:
+        - "backend/src/Controllers/*.php"
+
+  - id: forbid-plain-error-log
+    message: >
+      Do not rely on plain `error_log()`. Expected and unexpected failures 
+      must persist exceptions/errors through ErrorLogService.
+    severity: ERROR
+    languages:
+      - php
+    patterns:
+      - pattern: error_log(...)
+    paths:
+      include:
+        - "backend/src/**/*.php"
+
+  - id: enforce-errorlogservice-in-catch
+    message: >
+      Error handling blocks (catch) must persist exceptions/errors 
+      through ErrorLogService, not just swallow them.
+    severity: WARNING
+    languages:
+      - php
+    patterns:
+      - pattern: |
+          catch ($TYPE $EXP) {
+            ...
+          }
+      - pattern-not: |
+          catch ($TYPE $EXP) {
+            ...
+            $X->error(...)
+            ...
+          }
+      - pattern-not: |
+          catch ($TYPE $EXP) {
+            ...
+            $X->log(...)
+            ...
+          }
+      - pattern-not: |
+          catch ($TYPE $EXP) {
+            ...
+            $X->logException(...)
+            ...
+          }
+    paths:
+      include:
+        - "backend/src/Controllers/*.php"
+        - "backend/src/Jobs/*.php"
