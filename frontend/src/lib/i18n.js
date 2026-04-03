@@ -159,6 +159,32 @@ i18n
     }
   });
 
+const normalizeDocumentLanguage = (lng) => {
+  const shortLng = (lng || defaultLanguage).split('-')[0];
+  if (shortLng === 'zh') {
+    return 'zh-CN';
+  }
+  return shortLng || defaultLanguage;
+};
+
+const syncDocumentLanguage = (lng) => {
+  if (typeof document === 'undefined') {
+    return;
+  }
+
+  document.documentElement.lang = normalizeDocumentLanguage(lng);
+};
+
+if (i18n.isInitialized) {
+  syncDocumentLanguage(i18n.resolvedLanguage || i18n.language);
+} else {
+  i18n.on('initialized', () => {
+    syncDocumentLanguage(i18n.resolvedLanguage || i18n.language);
+  });
+}
+
+i18n.on('languageChanged', syncDocumentLanguage);
+
 // 语言切换函数
 export const changeLanguage = (lng) => {
   return i18n.changeLanguage(lng);

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Mail, Instagram, MessagesSquare, Handshake, ArrowUpRight, Github } from 'lucide-react';
 import { m, useInView, useScroll, useTransform, useSpring, useReducedMotion, LazyMotion, MotionConfig, domAnimation } from 'framer-motion';
 const __FM_USED = m;
@@ -20,6 +20,39 @@ const DEFAULT_ICON = ArrowUpRight;
 const numberFormatter = new Intl.NumberFormat();
 const carbonFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
 const GITHUB_HOSTS = new Set(['github.com', 'www.github.com']);
+
+function useIsMobileViewport() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return false;
+    }
+
+    return window.matchMedia('(max-width: 767px)').matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const handleChange = (event) => {
+      setIsMobile(event.matches);
+    };
+
+    setIsMobile(mediaQuery.matches);
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
+  return isMobile;
+}
 
 const formatNumber = (value) => numberFormatter.format(Math.max(0, Math.round(value || 0)));
 const formatCarbon = (value, t) => {
@@ -44,7 +77,7 @@ const isGithubProfileLink = (value) => {
 };
 
 // Timeline Card Component with Apple-style animations (memoized for perf)
-const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
+const TimelineCard = React.memo(({ member, index, isLeft, t, isMobileViewport }) => {
   const cardRef = useRef(null);
   const isGithubLink = isGithubProfileLink(member.link);
   const isInView = useInView(cardRef, {
@@ -78,13 +111,43 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
   const rotateY = useSpring(rotateYRaw, { stiffness: 100, damping: 18, mass: 0.9 });
   const opacity = useSpring(opacityRaw, { stiffness: 150, damping: 20 });
   const scale = useSpring(scaleRaw, { stiffness: 150, damping: 15 });
+  const motionStyle = isMobileViewport
+    ? {
+        opacity,
+        y,
+        willChange: 'transform, opacity',
+      }
+    : {
+        y,
+        opacity,
+        scale,
+        willChange: 'transform, opacity',
+      };
+  const motionInitial = isMobileViewport
+    ? { opacity: 0, y: 24 }
+    : { opacity: 0, x: isLeft ? -100 : 100, rotateY: isLeft ? 30 : -30 };
+  const motionAnimate = isMobileViewport
+    ? { opacity: 1, y: 0 }
+    : {
+        opacity: 1,
+        x: 0,
+        rotateY: 0,
+      };
+  const motionExit = isMobileViewport
+    ? { opacity: 0, y: -16 }
+    : {
+        opacity: 0,
+        x: isLeft ? -100 : 100,
+        rotateY: isLeft ? 30 : -30,
+      };
 
   return (
     <div
       ref={cardRef}
       className={cn(
-        "relative grid md:grid-cols-2 gap-8 items-center",
-        isLeft ? "md:pr-12" : "md:pl-12"
+        "relative grid gap-8 items-center",
+        isMobileViewport ? "grid-cols-1" : "md:grid-cols-2",
+        !isMobileViewport && (isLeft ? "md:pr-12" : "md:pl-12")
       )}
     >
       {/* Timeline Dot (Syncs with card appearance) */}
@@ -104,25 +167,12 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
       {/* Card positioned on alternating sides */}
       <m.div
         className={cn(
-          "relative",
-          isLeft ? "md:col-start-1 md:text-right" : "md:col-start-2"
+          "relative min-w-0",
+          isMobileViewport ? "text-left" : (isLeft ? "md:col-start-1 md:text-right" : "md:col-start-2")
         )}
-        style={{
-          y,
-          opacity,
-          scale,
-          willChange: 'transform, opacity'
-        }}
-        initial={{ opacity: 0, x: isLeft ? -100 : 100, rotateY: isLeft ? 30 : -30 }}
-        animate={isInView ? {
-          opacity: 1,
-          x: 0,
-          rotateY: 0,
-        } : {
-          opacity: 0,
-          x: isLeft ? -100 : 100,
-          rotateY: isLeft ? 30 : -30,
-        }}
+        style={motionStyle}
+        initial={motionInitial}
+        animate={isInView ? motionAnimate : motionExit}
         transition={{
           duration: 0.6,
           delay: index * 0.1,
@@ -136,7 +186,14 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
             backfaceVisibility: 'hidden',
             willChange: 'transform'
           }}
-          animate={isInView ? {
+          animate={isMobileViewport ? {
+            opacity: isInView ? 1 : 0.98,
+            transition: {
+              duration: 0.4,
+              delay: index * 0.08 + 0.1,
+              ease: [0.22, 1, 0.36, 1]
+            }
+          } : (isInView ? {
             rotateY: prefersReducedMotion ? 0 : [isLeft ? 12 : -12, 0, isLeft ? -3 : 3, 0],
             scale: prefersReducedMotion ? 1 : [0.98, 1.01, 1],
             transition: {
@@ -144,8 +201,8 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
               delay: index * 0.1 + 0.15,
               ease: [0.22, 1, 0.36, 1]
             }
-          } : {}}
-          whileHover={{
+          } : {})}
+          whileHover={isMobileViewport ? undefined : {
             scale: 1.01,
             rotateY: prefersReducedMotion ? 0 : (isLeft ? -3 : 3),
             z: 50,
@@ -156,7 +213,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
           }}
         >
           <Card
-            className="group relative overflow-hidden border border-border/60 bg-card/85 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500"
+            className="group relative w-full overflow-hidden border border-border/60 bg-card/85 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500"
             style={{
               transformStyle: "preserve-3d",
               transform: "translateZ(0)",
@@ -207,11 +264,11 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
                     ease: [0.22, 1, 0.36, 1]
                   }}
                 >
-                  <CardTitle className="text-2xl md:text-3xl text-foreground font-bold mb-2">
+                  <CardTitle className="mb-2 break-words text-balance text-2xl font-bold text-foreground md:text-3xl">
                     {member.name}
                   </CardTitle>
                   {member.role && (
-                    <CardDescription className="text-base md:text-lg bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent font-semibold">
+                    <CardDescription className="break-words bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-base font-semibold text-transparent md:text-lg">
                       {member.role}
                     </CardDescription>
                   )}
@@ -220,7 +277,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
 
               <CardContent className="text-muted-foreground space-y-4">
                 <m.p
-                  className="leading-relaxed text-base md:text-lg"
+                  className="break-words leading-relaxed text-base md:text-lg"
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{
@@ -296,6 +353,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t }) => {
 
 const AboutUsPage = () => {
   const { t } = useTranslation();
+  const isMobileViewport = useIsMobileViewport();
 
   const { data: summaryData } = useQuery(
     ['public-stats-summary'],
@@ -347,7 +405,7 @@ const AboutUsPage = () => {
   return (
     <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion="user" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-        <div className="relative text-foreground">
+        <div className="relative overflow-x-clip text-foreground">
           <div className="absolute inset-0 -z-10 bg-gradient-to-br from-background via-background to-secondary/30" />
           <div className="absolute top-10 right-10 h-72 w-72 rounded-full bg-green-500/15 blur-3xl -z-10" />
           <div className="absolute bottom-10 left-10 h-72 w-72 rounded-full bg-blue-500/15 blur-3xl -z-10" />
@@ -424,6 +482,7 @@ const AboutUsPage = () => {
                       member={member}
                       index={index}
                       isLeft={index % 2 === 0}
+                      isMobileViewport={isMobileViewport}
                       t={t}
                     />
                   ))}

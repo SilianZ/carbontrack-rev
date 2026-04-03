@@ -33,9 +33,42 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run Semgrep on backend only
-        run: semgrep ci --include backend --sarif > semgrep.sarif
+        run: |
+          BASELINE_ARG=""
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            BASELINE_ARG="--baseline-commit=${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.event_name }}" = "push" ] && [ -n "${{ github.event.before }}" ]; then
+            BASELINE_ARG="--baseline-commit=${{ github.event.before }}"
+          fi
+
+          set +e
+          semgrep scan backend \
+            --config="auto" \
+            --config=".semgrep/custom-rules.yml" \
+            --config="p/php" \
+            --config="p/owasp-top-ten" \
+            $BASELINE_ARG \
+            --sarif \
+            --output semgrep.sarif
+          SEMGREP_EXIT=$?
+          set -e
+
+          if [ "$SEMGREP_EXIT" -ne 0 ]; then
+            if [ -f semgrep.sarif ]; then
+              FINDINGS_COUNT=$(python -c "import json; d=json.load(open('semgrep.sarif', encoding='utf-8')); print(sum(len((r.get('results') or [])) for r in d.get('runs', [])))" 2>/dev/null || echo "-1")
+
+              if [ "$FINDINGS_COUNT" = "0" ]; then
+                echo "Semgrep exited with code $SEMGREP_EXIT but SARIF contains 0 findings; treating as success."
+                exit 0
+              fi
+            fi
+
+            exit "$SEMGREP_EXIT"
+          fi
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 

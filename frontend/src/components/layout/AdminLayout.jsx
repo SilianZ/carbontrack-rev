@@ -87,14 +87,31 @@ export default function AdminLayout() {
     return () => target.removeEventListener('keydown', handler);
   }, [navigate]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
+
+    const previousRootOverflowX = document.documentElement.style.overflowX;
+    const previousBodyOverflowX = document.body.style.overflowX;
+
+    document.documentElement.style.overflowX = 'hidden';
+    document.body.style.overflowX = 'hidden';
+
+    return () => {
+      document.documentElement.style.overflowX = previousRootOverflowX;
+      document.body.style.overflowX = previousBodyOverflowX;
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background text-foreground">
         <Navbar />
         <SidebarProvider>
-          <div className="relative flex min-h-[calc(100vh-4rem)] flex-col">
+          <div className="relative flex min-h-[calc(100vh-4rem)] min-w-0 flex-col">
             <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_65%)]" />
-            <div className="flex flex-1">
+            <div className="flex min-w-0 flex-1">
               <Sidebar className="top-16 border-r border-border bg-card shadow-sm md:h-[calc(100svh-4rem)]">
                 <SidebarHeader className="px-5 py-6">
                   <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
@@ -153,22 +170,22 @@ export default function AdminLayout() {
                   </div>
                 </SidebarFooter>
               </Sidebar>
-              <SidebarInset className="relative flex flex-1 flex-col bg-transparent">
-                <header className="top-16 z-30 flex flex-col gap-5 border-b border-transparent px-6 pb-4 pt-6 md:px-10">
-                  <div className="flex flex-wrap items-center gap-4">
-                    <SidebarTrigger className="md:hidden" />
-                    <div className="flex flex-col gap-2">
+              <SidebarInset className="relative flex min-w-0 flex-1 flex-col overflow-x-hidden bg-transparent">
+                <header className="top-16 z-30 flex w-full max-w-full flex-col gap-4 border-b border-transparent px-4 pb-4 pt-4 sm:px-6 md:px-10">
+                  <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                    <SidebarTrigger className="self-start md:hidden" />
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
                       <Badge
                         variant="outline"
-                        className="w-fit rounded-full border-emerald-200 bg-emerald-100/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-700 dark:border-emerald-300/40 dark:bg-emerald-500/18 dark:text-emerald-100 dark:shadow-[0_0_0_1px_rgba(110,231,183,0.08)]"
+                        className="w-fit max-w-full rounded-full border-emerald-200 bg-emerald-100/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-700 dark:border-emerald-300/40 dark:bg-emerald-500/18 dark:text-emerald-100 dark:shadow-[0_0_0_1px_rgba(110,231,183,0.08)]"
                       >
                         {t('admin.header.section')}
                       </Badge>
-                      <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+                      <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl md:text-4xl">
                         {activeLink?.label}
                       </h1>
                     </div>
-                    <div className="ml-auto flex items-center gap-2">
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end md:ml-auto">
                       <Button
                         variant="outline"
                         className="hidden items-center gap-2 rounded-full border-emerald-200 bg-background/80 px-4 md:inline-flex"
@@ -177,12 +194,12 @@ export default function AdminLayout() {
                         <Bot className="h-4 w-4" />
                         {t('admin.command.openWorkspace', { defaultValue: 'AI 工作台 / Ctrl + K' })}
                       </Button>
-                      <Button variant="ghost" className="md:hidden" onClick={() => navigate('/admin/ai')}>
+                      <Button variant="ghost" className="self-start md:hidden" onClick={() => navigate('/admin/ai')}>
                         <Bot className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="default"
-                        className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 sm:w-auto"
                         onClick={() => navigate('/admin/badges?create=1')}
                       >
                         <Award className="h-4 w-4" />
@@ -191,8 +208,8 @@ export default function AdminLayout() {
                     </div>
                   </div>
                 </header>
-                <main className="px-6 pb-10 pt-6 md:px-10">
-                  <div className="mx-auto w-full max-w-7xl space-y-6">
+                <main className="min-w-0 overflow-x-hidden px-4 pb-10 pt-6 sm:px-6 md:px-10">
+                  <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6">
                     <Outlet />
                   </div>
                 </main>

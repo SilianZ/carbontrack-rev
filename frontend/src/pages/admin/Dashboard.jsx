@@ -76,7 +76,8 @@ const safeDivide = (numerator, denominator) => {
 };
 
 export default function AdminDashboardPage() {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
+  const isEnglish = (currentLanguage || '').toLowerCase().startsWith('en');
   const navigate = useNavigate();
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -112,11 +113,11 @@ export default function AdminDashboardPage() {
   const refetch = statsQuery.refetch;
   const isFetching = statsQuery.isFetching;
 
-  const integerFormatter = useMemo(() => new Intl.NumberFormat(), []);
-  const decimalFormatter = useMemo(() => new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }), []);
-  const percentFormatter = useMemo(() => new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 1 }), []);
-  const shortDateFormatter = useMemo(() => new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }), []);
-  const longDateFormatter = useMemo(() => new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }), []);
+  const integerFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
+  const decimalFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { maximumFractionDigits: 2 }), [currentLanguage]);
+  const percentFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { style: 'percent', maximumFractionDigits: 1 }), [currentLanguage]);
+  const shortDateFormatter = useMemo(() => new Intl.DateTimeFormat(currentLanguage, { month: 'short', day: 'numeric' }), [currentLanguage]);
+  const longDateFormatter = useMemo(() => new Intl.DateTimeFormat(currentLanguage, { year: 'numeric', month: 'short', day: 'numeric' }), [currentLanguage]);
 
   const formatDateLabel = (value, formatter) => {
     if (!value) {
@@ -136,7 +137,7 @@ export default function AdminDashboardPage() {
     if (Number.isNaN(date.getTime())) {
       return value;
     }
-    return date.toLocaleString();
+    return date.toLocaleString(currentLanguage);
   };
 
 
@@ -666,27 +667,27 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen space-y-8 pb-8">
+    <div className="min-h-screen min-w-0 w-full max-w-full space-y-8 overflow-x-clip pb-8">
       {/* Hero Header Section */}
-      <Card className="border-2 hover:shadow-lg transition-shadow duration-300">
+      <Card className="min-w-0 overflow-hidden border-2 transition-shadow duration-300 hover:shadow-lg">
         <CardHeader className="space-y-6">
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div className="space-y-3">
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-6">
+            <div className="min-w-0 space-y-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/20">
                   <LineChartIcon className="h-7 w-7 text-white" />
                 </div>
-                <div>
-                  <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                <div className="min-w-0">
+                  <CardTitle className="break-words bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:text-3xl">
                     {t('admin.dashboard.title')}
                   </CardTitle>
-                  <CardDescription className="text-base mt-1">
+                  <CardDescription className="mt-1 break-words text-base">
                     {t('admin.dashboard.description')}
                   </CardDescription>
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
               <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 shadow-sm">
                 <input
                   type="checkbox"
@@ -700,7 +701,7 @@ export default function AdminDashboardPage() {
               </div>
               <Button 
                 size="default" 
-                className="rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200" 
+                className="w-full rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 shadow-md transition-all duration-200 hover:from-green-600 hover:to-emerald-700 hover:shadow-lg sm:w-auto" 
                 onClick={() => refetch()} 
                 disabled={isFetching}
               >
@@ -709,10 +710,10 @@ export default function AdminDashboardPage() {
               </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 rounded-lg px-4 py-2 border border-border">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/30 px-4 py-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4 text-green-600" />
-            <span>
-              {t('admin.dashboard.lastUpdated')}: <span className="font-medium text-foreground">{lastUpdated ? lastUpdated.toLocaleString() : '--'}</span>
+            <span className="break-words">
+              {t('admin.dashboard.lastUpdated')}: <span className="font-medium text-foreground">{lastUpdated ? formatDateTime(lastUpdated) : '--'}</span>
             </span>
           </div>
         </CardHeader>
@@ -1232,7 +1233,9 @@ export default function AdminDashboardPage() {
                     >
                       <div className="flex items-center justify-between gap-3 mb-2">
                         <span className="font-semibold text-sm truncate">
-                          {item.activity_name_en || item.activity_name_zh || item.activity_id || t('admin.dashboard.unknownActivity')}
+                          {(isEnglish
+                            ? item.activity_name_en || item.activity_name_zh
+                            : item.activity_name_zh || item.activity_name_en) || item.activity_id || t('admin.dashboard.unknownActivity')}
                         </span>
                         <div className="flex items-center gap-1.5 font-mono text-sm font-bold text-green-700 dark:text-green-400 whitespace-nowrap">
                           <Leaf className="h-3.5 w-3.5" />

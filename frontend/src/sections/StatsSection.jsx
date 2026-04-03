@@ -4,23 +4,28 @@ import { useTranslation } from '../hooks/useTranslation';
 import { statsAPI } from '../lib/api';
 
 const ACCENT_CLASSES = ['text-green-600', 'text-blue-600', 'text-purple-600', 'text-orange-600'];
-const integerFormatter = new Intl.NumberFormat();
-const compactFormatter = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
-const decimalFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
-
-const formatInteger = (value) => integerFormatter.format(Math.max(0, Math.round(value || 0)));
-const formatCompact = (value) => compactFormatter.format(Math.max(0, value || 0));
-
-const formatCarbon = (value, t) => {
-  const numericValue = Number(value || 0);
-  if (numericValue >= 1000) {
-    return `${decimalFormatter.format(numericValue / 1000)} ${t('units.t')}`;
-  }
-  return `${decimalFormatter.format(numericValue)} ${t('units.kg')}`;
-};
 
 export default function StatsSection() {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
+  const integerFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
+  const compactFormatter = useMemo(
+    () => new Intl.NumberFormat(currentLanguage, { notation: 'compact', maximumFractionDigits: 1 }),
+    [currentLanguage]
+  );
+  const decimalFormatter = useMemo(
+    () => new Intl.NumberFormat(currentLanguage, { maximumFractionDigits: 2 }),
+    [currentLanguage]
+  );
+
+  const formatInteger = (value) => integerFormatter.format(Math.max(0, Math.round(value || 0)));
+  const formatCompact = (value) => compactFormatter.format(Math.max(0, value || 0));
+  const formatCarbon = (value) => {
+    const numericValue = Number(value || 0);
+    if (numericValue >= 1000) {
+      return `${decimalFormatter.format(numericValue / 1000)} ${t('units.t')}`;
+    }
+    return `${decimalFormatter.format(numericValue)} ${t('units.kg')}`;
+  };
 
   const { data: summaryData, isLoading, isError } = useQuery(
     ['public-stats-summary'],
@@ -58,10 +63,10 @@ export default function StatsSection() {
       {
         key: 'carbon',
         label: t('home.stats.carbonSaved'),
-        value: formatCarbon(summary.total_carbon_saved ?? 0, t),
+        value: formatCarbon(summary.total_carbon_saved ?? 0),
         accent: ACCENT_CLASSES[2],
         detail: t('home.stats.carbonLast7Days', {
-          value: formatCarbon(summary.carbon_last7 ?? 0, t),
+          value: formatCarbon(summary.carbon_last7 ?? 0),
         }),
       },
       {
@@ -74,7 +79,7 @@ export default function StatsSection() {
         }),
       },
     ];
-  }, [summaryData, t]);
+  }, [compactFormatter, currentLanguage, decimalFormatter, integerFormatter, summaryData, t]);
 
   const updatedAt = useMemo(() => {
     if (!summaryData?.generated_at) {
@@ -125,7 +130,7 @@ export default function StatsSection() {
         {!isLoading && !isError && renderContent()}
         {updatedAt && (
           <div className="text-muted-foreground/80 mt-6 text-center text-xs">
-            {t('home.stats.updatedAt', { time: updatedAt.toLocaleString() })}
+            {t('home.stats.updatedAt', { time: updatedAt.toLocaleString(currentLanguage) })}
           </div>
         )}
       </div>

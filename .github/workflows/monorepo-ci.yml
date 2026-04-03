@@ -113,7 +113,9 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: composer install --no-interaction --prefer-dist
+        run: |
+          composer install --no-interaction --prefer-dist \
+          || composer install --no-interaction --prefer-source
 
       - name: Run backend tests
         working-directory: backend
@@ -143,4 +145,6 @@ jobs:
 
       - name: Install production backend dependencies
         working-directory: /tmp/backend-mirror
-        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+        run: |
+          composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
+          || composer install --no-dev --no-interaction --prefer-source --optimize-autoloader

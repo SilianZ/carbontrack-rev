@@ -41,12 +41,12 @@ import JsonTreeViewer from '../../components/logs/JsonTreeViewer';
 import RequestIdRelatedDrawer from '../../components/logs/RequestIdRelatedDrawer';
 import { cn } from '../../lib/utils';
 
-const formatNumber = (value) => {
+const formatNumber = (value, locale) => {
   const num = Number(value);
-  return Number.isFinite(num) ? num.toLocaleString() : '-';
+  return Number.isFinite(num) ? num.toLocaleString(locale) : '-';
 };
 
-const safeDate = (value) => (value ? new Date(value).toLocaleString() : '-');
+const safeDate = (value, locale) => (value ? new Date(value).toLocaleString(locale) : '-');
 
 const parseMaybeJson = (value) => {
   if (value == null) return null;
@@ -118,7 +118,7 @@ function InsightCard({ title, value, subtitle, trend }) {
 }
 
 export default function AdminLlmUsagePage() {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
@@ -231,10 +231,24 @@ export default function AdminLlmUsagePage() {
   const canPrev = page > 1;
   const canNext = page < (pagination.total_pages || 1);
 
-  const integerFormatter = useMemo(() => new Intl.NumberFormat(), []);
-  const decimalFormatter = useMemo(() => new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }), []);
-  const percentFormatter = useMemo(() => new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 1 }), []);
-  const shortDateFormatter = useMemo(() => new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }), []);
+  const integerFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
+  const decimalFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { maximumFractionDigits: 2 }), [currentLanguage]);
+  const percentFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage, { style: 'percent', maximumFractionDigits: 1 }), [currentLanguage]);
+  const shortDateFormatter = useMemo(() => new Intl.DateTimeFormat(currentLanguage, { month: 'short', day: 'numeric' }), [currentLanguage]);
+  const chartTooltipContentStyle = useMemo(() => ({
+    backgroundColor: 'var(--popover)',
+    border: '1px solid var(--border)',
+    borderRadius: '12px',
+    boxShadow: '0 16px 40px rgba(0, 0, 0, 0.18)',
+    color: 'var(--popover-foreground)'
+  }), []);
+  const chartTooltipLabelStyle = useMemo(() => ({
+    color: 'var(--muted-foreground)',
+    fontWeight: 600
+  }), []);
+  const chartTooltipItemStyle = useMemo(() => ({
+    color: 'var(--popover-foreground)'
+  }), []);
 
   const modelData = useMemo(
     () => buildTopData(distributions.models, 'model', 6, t('admin.llmUsage.other')),
@@ -339,52 +353,54 @@ export default function AdminLlmUsagePage() {
     () => ([
       {
         title: t('admin.llmUsage.summary.calls24h'),
-        value: formatNumber(summary.calls_24h),
+        value: formatNumber(summary.calls_24h, currentLanguage),
         subtitle: t('admin.llmUsage.summary.calls24hHint'),
         icon: Clock,
         tone: 'border-amber-400'
       },
       {
         title: t('admin.llmUsage.summary.calls7d'),
-        value: formatNumber(summary.calls_7d),
+        value: formatNumber(summary.calls_7d, currentLanguage),
         subtitle: t('admin.llmUsage.summary.calls7dHint'),
         icon: Activity,
         tone: 'border-emerald-400'
       },
       {
         title: t('admin.llmUsage.summary.calls30d'),
-        value: formatNumber(summary.calls_30d),
+        value: formatNumber(summary.calls_30d, currentLanguage),
         subtitle: t('admin.llmUsage.summary.calls30dHint'),
         icon: Sparkles,
         tone: 'border-indigo-400'
       },
       {
         title: t('admin.llmUsage.summary.tokens30d'),
-        value: formatNumber(summary.tokens_30d),
+        value: formatNumber(summary.tokens_30d, currentLanguage),
         subtitle: t('admin.llmUsage.summary.tokens30dHint'),
         icon: ShieldCheck,
         tone: 'border-slate-400'
       },
       {
         title: t('admin.llmUsage.summary.adminCalls'),
-        value: formatNumber(summary.admin_calls_30d),
+        value: formatNumber(summary.admin_calls_30d, currentLanguage),
         subtitle: t('admin.llmUsage.summary.adminCallsHint'),
         icon: Users,
         tone: 'border-blue-400'
       },
       {
         title: t('admin.llmUsage.summary.userCalls'),
-        value: formatNumber(summary.user_calls_30d),
+        value: formatNumber(summary.user_calls_30d, currentLanguage),
         subtitle: t('admin.llmUsage.summary.userCallsHint'),
         icon: Users,
         tone: 'border-green-400'
       }
     ]),
-    [summary, t]
+    [summary, t, currentLanguage]
   );
 
   const openRelated = useCallback(async (requestId) => {
     if (!requestId) return;
+    setSelectedConversationId(null);
+    setSelectedLogId(null);
     setRequestDrawerId(requestId);
     setLoadingRelated(true);
     try {
@@ -476,6 +492,9 @@ export default function AdminLlmUsagePage() {
                   <Tooltip
                     formatter={(value, name) => [value, name === 'tokens' ? t('admin.llmUsage.charts.tokens') : t('admin.llmUsage.charts.calls')]}
                     labelFormatter={formatTrendDate}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
                   />
                   <Legend />
                   <Bar yAxisId="left" dataKey="calls" name={t('admin.llmUsage.charts.calls')} fill={CHART_COLORS[0]} radius={[6, 6, 0, 0]} />
@@ -512,6 +531,9 @@ export default function AdminLlmUsagePage() {
                       return [value, name === 'success_calls' ? t('admin.llmUsage.charts.success') : t('admin.llmUsage.charts.failed')];
                     }}
                     labelFormatter={formatTrendDate}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
                   />
                   <Legend />
                   <Bar yAxisId="left" dataKey="success_calls" stackId="status" name={t('admin.llmUsage.charts.success')} fill={CHART_COLORS[2]} />
@@ -543,7 +565,12 @@ export default function AdminLlmUsagePage() {
                       <Cell key={`model-${entry.model}-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value, name) => [value, name]} />
+                  <Tooltip
+                    formatter={(value, name) => [value, name]}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -567,7 +594,12 @@ export default function AdminLlmUsagePage() {
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" allowDecimals={false} />
                   <YAxis type="category" dataKey="source" width={90} />
-                  <Tooltip formatter={(value) => [value, t('admin.llmUsage.charts.calls')]} />
+                  <Tooltip
+                    formatter={(value) => [value, t('admin.llmUsage.charts.calls')]}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
+                  />
                   <Bar dataKey="calls" fill={CHART_COLORS[1]} radius={[0, 6, 6, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -593,7 +625,12 @@ export default function AdminLlmUsagePage() {
                       <Cell key={`actor-${entry.actor_label || entry.actor_type}-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value, name) => [value, name]} />
+                  <Tooltip
+                    formatter={(value, name) => [value, name]}
+                    contentStyle={chartTooltipContentStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -656,7 +693,7 @@ export default function AdminLlmUsagePage() {
                     {log.status || '-'}
                   </Badge>
                 </div>
-                <div className="text-xs text-muted-foreground">{safeDate(log.created_at)}</div>
+                <div className="text-xs text-muted-foreground">{safeDate(log.created_at, currentLanguage)}</div>
               </div>
 
               <div className="mt-3 grid gap-2 text-xs text-muted-foreground">
@@ -819,7 +856,7 @@ export default function AdminLlmUsagePage() {
                 <span>{t('admin.llmUsage.sessions.calls')}: <span className="font-mono text-foreground">{conversation.llm_calls ?? 0}</span></span>
                 <span>{t('admin.llmUsage.sessions.pendingCount', { defaultValue: 'Pending' })}: <span className="font-mono text-foreground">{conversation.pending_action_count ?? 0}</span></span>
                 <span>{t('admin.llmUsage.sessions.lastModel')}: <span className="font-mono text-foreground">{conversation.last_model || '-'}</span></span>
-                <span>{t('admin.llmUsage.sessions.lastActivity')}: <span className="font-mono text-foreground">{safeDate(conversation.last_activity_at)}</span></span>
+                <span>{t('admin.llmUsage.sessions.lastActivity')}: <span className="font-mono text-foreground">{safeDate(conversation.last_activity_at, currentLanguage)}</span></span>
               </div>
             </div>
           ))}
@@ -881,18 +918,18 @@ export default function AdminLlmUsagePage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-2">{user.group_name || t('common.none')}</td>
-                      <td className="px-4 py-2 text-right">{formatNumber(user.daily_used)}</td>
+                      <td className="px-4 py-2 text-right">{formatNumber(user.daily_used, currentLanguage)}</td>
                       <td className="px-4 py-2 text-right">
-                        {user.daily_limit == null ? t('admin.llmUsage.users.unlimited') : formatNumber(user.daily_limit)}
+                        {user.daily_limit == null ? t('admin.llmUsage.users.unlimited') : formatNumber(user.daily_limit, currentLanguage)}
                       </td>
                       <td className="px-4 py-2 text-right">
-                        {user.daily_remaining == null ? '-' : formatNumber(user.daily_remaining)}
+                        {user.daily_remaining == null ? '-' : formatNumber(user.daily_remaining, currentLanguage)}
                       </td>
                       <td className="px-4 py-2 text-right">
-                        {user.rate_limit == null ? '-' : formatNumber(user.rate_limit)}
+                        {user.rate_limit == null ? '-' : formatNumber(user.rate_limit, currentLanguage)}
                       </td>
-                      <td className="px-4 py-2">{safeDate(user.reset_at)}</td>
-                      <td className="px-4 py-2">{safeDate(user.last_used_at)}</td>
+                      <td className="px-4 py-2">{safeDate(user.reset_at, currentLanguage)}</td>
+                      <td className="px-4 py-2">{safeDate(user.last_used_at, currentLanguage)}</td>
                     </tr>
                   ))}
                   {users.length === 0 && (
@@ -982,7 +1019,7 @@ export default function AdminLlmUsagePage() {
                 <tbody>
                   {llmLogs.map((log) => (
                     <tr key={log.id} className="border-b">
-                      <td className="px-4 py-2 whitespace-nowrap">{safeDate(log.created_at)}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{safeDate(log.created_at, currentLanguage)}</td>
                       <td className="px-4 py-2 max-w-[180px] truncate font-mono text-[11px]" title={log.conversation_id || ''}>
                         {log.conversation_id || '-'}
                       </td>
@@ -1065,7 +1102,7 @@ export default function AdminLlmUsagePage() {
                   <DetailItem label={t('admin.llmUsage.sessions.calls')} value={conversationDetailQuery.data.summary?.llm_calls} />
                   <DetailItem label={t('admin.llmUsage.sessions.lastModel')} value={conversationDetailQuery.data.summary?.last_model || '-'} />
                   <DetailItem label={t('admin.llmUsage.sessions.status')} value={conversationDetailQuery.data.summary?.status || '-'} />
-                  <DetailItem label={t('admin.llmUsage.sessions.lastActivity')} value={safeDate(conversationDetailQuery.data.summary?.last_activity_at)} />
+                  <DetailItem label={t('admin.llmUsage.sessions.lastActivity')} value={safeDate(conversationDetailQuery.data.summary?.last_activity_at, currentLanguage)} />
                 </div>
 
                 <DetailBlock title={t('admin.llmUsage.sessions.timeline')}>
@@ -1080,7 +1117,7 @@ export default function AdminLlmUsagePage() {
                             <span className="font-mono text-[11px] text-muted-foreground">{item.action}</span>
                             {item.status && <Badge variant="outline">{item.status}</Badge>}
                           </div>
-                          <div className="text-[11px] text-muted-foreground">{safeDate(item.created_at)}</div>
+                          <div className="text-[11px] text-muted-foreground">{safeDate(item.created_at, currentLanguage)}</div>
                         </div>
                         {item.content && (
                           <pre className="mt-3 whitespace-pre-wrap rounded bg-slate-900 p-3 text-[11px] text-emerald-200">
@@ -1129,7 +1166,7 @@ export default function AdminLlmUsagePage() {
                   <DetailItem label={t('admin.llmUsage.logs.columns.latency')} value={logDetailQuery.data.latency_ms} />
                   <DetailItem label={t('admin.llmUsage.logs.columns.actor')} value={`${logDetailQuery.data.actor_type} #${logDetailQuery.data.actor_id ?? '-'}`} />
                   <DetailItem label={t('admin.llmUsage.logs.columns.responseId')} value={logDetailQuery.data.response_id || '-'} />
-                  <DetailItem label={t('admin.llmUsage.logs.columns.time')} value={safeDate(logDetailQuery.data.created_at)} />
+                  <DetailItem label={t('admin.llmUsage.logs.columns.time')} value={safeDate(logDetailQuery.data.created_at, currentLanguage)} />
                 </div>
 
                 {logDetailQuery.data.prompt && (
