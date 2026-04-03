@@ -15,7 +15,7 @@ rules:
           $GROUP->get('/activities/categories', ...)->add(AuthMiddleware::class);
     paths:
       include:
-        - "backend/src/routes.php"
+        - "/backend/src/routes.php"
 
   - id: detect-missing-audit-log-on-mutations
     message: >
@@ -46,7 +46,7 @@ rules:
           }
     paths:
       include:
-        - "backend/src/Controllers/*.php"
+        - "/backend/src/Controllers/*.php"
 
   - id: forbid-plain-error-log
     message: >
@@ -59,11 +59,11 @@ rules:
       - pattern: error_log(...)
     paths:
       include:
-        - "backend/src/**/*.php"
+        - "/backend/src/**/*.php"
       exclude:
-        - "backend/src/Controllers/*.php"
-        - "backend/src/Middleware/*.php"
-        - "backend/src/dependencies.php"
+        - "/backend/src/Controllers/*.php"
+        - "/backend/src/Middleware/*.php"
+        - "/backend/src/dependencies.php"
 
   - id: enforce-errorlogservice-in-catch
     message: >
@@ -115,5 +115,5 @@ rules:
           }
     paths:
       include:
-        - "backend/src/Controllers/*.php"
-        - "backend/src/Jobs/*.php"
+        - "/backend/src/Controllers/*.php"
+        - "/backend/src/Jobs/*.php"
