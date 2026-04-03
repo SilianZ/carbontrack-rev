@@ -123,7 +123,7 @@ function normalizeUsersResponse(response) {
 }
 
 export function UserManagement() {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -860,7 +860,7 @@ export function UserManagement() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                          {Number(user.total_carbon_saved || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                          {Number(user.total_carbon_saved || 0).toLocaleString(currentLanguage, { maximumFractionDigits: 2 })}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{user.points}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
@@ -1102,7 +1102,7 @@ export function UserManagement() {
                           <p className="text-xs font-medium uppercase tracking-wide opacity-80">{card.label}</p>
                         </div>
                         <p className="text-2xl font-bold tracking-tight text-foreground text-right mt-1">
-                          {Number(card.value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                          {Number(card.value || 0).toLocaleString(currentLanguage, { maximumFractionDigits: 2 })}
                         </p>
                       </div>
                     );
@@ -1126,7 +1126,7 @@ export function UserManagement() {
                             <p className="text-xs font-medium uppercase tracking-wide opacity-80">{card.label}</p>
                           </div>
                           <p className="text-2xl font-bold tracking-tight text-foreground text-right mt-1">
-                            {Number(card.value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                            {Number(card.value || 0).toLocaleString(currentLanguage, { maximumFractionDigits: 2 })}
                           </p>
                         </div>
                       );
