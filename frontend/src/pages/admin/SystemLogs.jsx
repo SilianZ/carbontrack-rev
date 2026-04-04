@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { FixedSizeList as List } from 'react-window';
 import { RefreshCw, Download, Columns2, X, Loader2 } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
@@ -659,7 +658,7 @@ export default function SystemLogsPage() {
                         <Button
                           key="request"
                           variant="link"
-                          className="h-auto p-0 text-[11px] font-mono text-indigo-600"
+                          className="h-auto p-0 text-[11px] font-mono text-primary"
                           onClick={() => openRelated(log.request_id)}
                         >
                           {log.request_id}
@@ -929,8 +928,6 @@ function SystemLogSection({
   columnLabel,
   t
 }) {
-  const useVirtual = items.length > 120;
-
   const header = (
     <thead className="bg-muted/60">
       <tr>
@@ -949,12 +946,18 @@ function SystemLogSection({
   const renderRow = (log) => {
     const isHighlighted = highlightIds.has(log.id);
     return (
-      <tr key={log.id} className={cn('border-b text-xs transition-colors hover:bg-muted/30', isHighlighted && 'bg-amber-50')}>
+      <tr
+        key={log.id}
+        className={cn(
+          'border-b text-xs transition-colors hover:bg-muted/30',
+          isHighlighted && 'bg-amber-500/10 dark:bg-amber-400/10'
+        )}
+      >
         {columns.includes('id') && <td className="px-3 py-2 font-medium">{log.id}</td>}
         {columns.includes('method') && <td className="px-3 py-2 uppercase">{log.method}</td>}
         {columns.includes('path') && (
           <td className="px-3 py-2">
-            <span className="font-mono text-[11px]" title={log.path}>
+            <span className="block max-w-[420px] truncate font-mono text-[11px]" title={log.path}>
               {log.path}
             </span>
           </td>
@@ -964,8 +967,8 @@ function SystemLogSection({
         {columns.includes('duration_ms') && <td className="px-3 py-2">{log.duration_ms}</td>}
         {columns.includes('created_at') && <td className="px-3 py-2 whitespace-nowrap">{log.created_at}</td>}
         {columns.includes('ops') && (
-          <td className="px-3 py-2">
-            <div className="flex flex-wrap items-center gap-2 text-xs">
+          <td className="min-w-[180px] px-3 py-2 align-top">
+            <div className="flex items-center gap-3 whitespace-nowrap text-xs">
               <Button variant="link" className="h-auto p-0" onClick={() => onDetail(log.id)}>
                 {t('admin.systemLogs.details')}
               </Button>
@@ -973,7 +976,7 @@ function SystemLogSection({
                 {t('admin.systemLogs.copyReqId')}
               </Button>
               {log.request_id && (
-                <Button variant="link" className="h-auto p-0 text-indigo-600" onClick={() => onRelated(log.request_id)}>
+                <Button variant="link" className="h-auto p-0 text-primary" onClick={() => onRelated(log.request_id)}>
                   {t('admin.systemLogs.related')}
                 </Button>
               )}
@@ -996,30 +999,19 @@ function SystemLogSection({
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <table className="w-full border-t text-xs">
+          <table className="w-full border-t border-border bg-transparent text-xs text-foreground">
             {header}
-            {!useVirtual && (
-              <tbody>
-                {items.map((log) => renderRow(log))}
-                {items.length === 0 && (
-                  <tr>
-                    <td className="px-4 py-6 text-center text-muted-foreground" colSpan={columns.length}>
-                      {emptyText}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            )}
-          </table>
-          {useVirtual && (
-            <List height={480} itemCount={items.length} itemSize={44} width="100%">
-              {({ index, style }) => (
-                <table key={items[index].id} style={{ ...style, width: '100%' }} className="table-fixed text-xs">
-                  <tbody>{renderRow(items[index])}</tbody>
-                </table>
+            <tbody>
+              {items.map((log) => renderRow(log))}
+              {items.length === 0 && (
+                <tr>
+                  <td className="px-4 py-6 text-center text-muted-foreground" colSpan={columns.length}>
+                    {emptyText}
+                  </td>
+                </tr>
               )}
-            </List>
-          )}
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>
@@ -1038,7 +1030,7 @@ function LogSection({ title, items, emptyText, renderItem, headers, columnLabel 
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <table className="w-full border-t text-xs">
+          <table className="w-full border-t border-border bg-transparent text-xs text-foreground">
             <thead className="bg-muted/60">
               <tr>
                 {headers.map((header) => (
@@ -1269,7 +1261,7 @@ function auditCell(log, column, onRelated) {
         <Button
           key={`audit-request-${log.id}`}
           variant="link"
-          className="h-auto p-0 text-[11px] font-mono text-indigo-600"
+          className="h-auto p-0 text-[11px] font-mono text-primary"
           onClick={() => onRelated(log.request_id)}
         >
           {log.request_id}

@@ -2531,7 +2531,9 @@
         "llm_status": "LLM 状态",
         "total_tokens": "Tokens",
         "latency_ms": "耗时 (ms)",
-        "response_id": "响应 ID"
+        "response_id": "响应 ID",
+        "conversation_id": "会话 ID",
+        "turn_no": "轮次"
       },
       "drawer": {
         "title": "请求 ID：{{id}}",

@@ -2530,7 +2530,9 @@
         "llm_status": "LLM status",
         "total_tokens": "Tokens",
         "latency_ms": "Latency (ms)",
-        "response_id": "Response ID"
+        "response_id": "Response ID",
+        "conversation_id": "Conversation ID",
+        "turn_no": "Turn No."
       },
       "drawer": {
         "title": "Request ID: {{id}}",

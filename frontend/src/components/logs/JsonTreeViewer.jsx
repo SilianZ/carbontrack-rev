@@ -168,7 +168,12 @@ const JsonNode = React.memo(function JsonNode({
   const countLabel = expandable ? `${entries.length}` : undefined;
 
   return (
-    <div className={cn('group relative border-l border-muted-foreground/20 pl-3', matches && 'bg-amber-50/60')}>
+    <div
+      className={cn(
+        'group relative border-l border-muted-foreground/20 pl-3',
+        matches && 'bg-amber-500/10 dark:bg-amber-400/10'
+      )}
+    >
       <div className="flex items-start gap-2 py-1">
         <button
           type="button"

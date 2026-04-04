@@ -1047,7 +1047,7 @@ export default function AdminLlmUsagePage() {
                         {log.request_id ? (
                           <button
                             type="button"
-                            className="text-blue-600 hover:underline"
+                            className="text-primary hover:underline"
                             onClick={() => openRelated(log.request_id)}
                           >
                             {log.request_id}

@@ -25,13 +25,13 @@ export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
   const getStatusBadge = (is_read) => {
     if (is_read) {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+        <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-foreground">
           <MailOpen className="h-3 w-3 mr-1" /> {t('messages.read')}
         </span>
       );
     } else {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
           <Mail className="h-3 w-3 mr-1" /> {t('messages.unread')}
         </span>
       );
@@ -60,34 +60,34 @@ export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <p className="text-sm font-medium text-gray-500">{t('messages.status')}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('messages.status')}</p>
                 {getStatusBadge(message.is_read)}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">{t('messages.date')}</p>
-                <p className="text-gray-900">{formatDateSafe(message.created_at, 'yyyy-MM-dd HH:mm')}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('messages.date')}</p>
+                <p className="text-foreground">{formatDateSafe(message.created_at, 'yyyy-MM-dd HH:mm')}</p>
               </div>
             </div>
 
             <div>
-              <h4 className="mb-2 flex items-center text-md font-semibold text-gray-700">
+              <h4 className="mb-2 flex items-center text-md font-semibold text-foreground">
                 <MessageSquare className="mr-2 h-4 w-4" />{t('messages.subject')}
               </h4>
-              <p className="rounded-md bg-gray-50 p-3 text-gray-900">{message.title}</p>
+              <p className="rounded-md bg-muted/50 p-3 text-foreground">{message.title}</p>
             </div>
             <div>
-              <h4 className="mb-2 flex items-center text-md font-semibold text-gray-700">
+              <h4 className="mb-2 flex items-center text-md font-semibold text-foreground">
                 <Info className="mr-2 h-4 w-4" />{t('messages.content')}
               </h4>
               {isAnnouncement ? (
                 <AnnouncementContent
                   content={message.content}
                   contentFormat={announcementContentFormat}
-                  className="rounded-md bg-gray-50 p-3"
+                  className="rounded-md bg-muted/50 p-3"
                 />
               ) : (
                 <div
-                  className="rounded-md bg-gray-50 p-3 text-gray-700 whitespace-pre-wrap break-words [&_a]:text-blue-600 [&_a]:underline [&_pre]:overflow-x-auto"
+                  className="rounded-md bg-muted/50 p-3 text-foreground whitespace-pre-wrap break-words [&_a]:text-primary [&_a]:underline [&_pre]:overflow-x-auto"
                   dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                 ></div>
               )}
