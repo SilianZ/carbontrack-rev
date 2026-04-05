@@ -3298,6 +3298,14 @@
     "tooManyFiles": "Too many files selected (maximum {{max}})",
     "singleFileOnly": "Only single file uploads are supported"
   },
+  "routeGuard": {
+    "accessDeniedTitle": "Access denied",
+    "permissionDeniedTitle": "Permission required",
+    "adminRequired": "You do not have permission to access this page.",
+    "supportRequired": "You do not have permission to access the support portal.",
+    "permissionRequired": "You do not have permission to perform this action.",
+    "goBack": "Go back"
+  },
   "notFoundPage": {
     "code": "404",
     "emoji": "🤔",
@@ -3904,7 +3912,7 @@
       "saveWorkflow": "Save workflow",
       "workload": {
         "title": "Support workload",
-        "subtitle": "Managers and support can see each assignee s total load, not started count, and in-progress count at a glance.",
+        "subtitle": "Managers and support can see each assignee's total load, not started count, and in-progress count at a glance.",
         "empty": "No assignees available yet.",
         "assigned": "Assigned",
         "notStarted": "Not started",
@@ -3999,7 +4007,7 @@
     },
     "team": {
       "listTitle": "Assignees",
-      "listSubtitle": "Review each support member s active load and switch into their detailed profile.",
+      "listSubtitle": "Review each support member's active load and switch into their detailed profile.",
       "detailTitle": "Assignee detail",
       "detailSubtitle": "Shows profile data, current workload, and recently assigned tickets.",
       "empty": "Select an assignee.",

@@ -22,6 +22,10 @@ class SupportMiddlewareTest extends TestCase
         );
 
         $this->assertSame(401, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('Authentication required', $payload['message']);
+        $this->assertSame('Authentication required', $payload['error']);
+        $this->assertSame('AUTH_REQUIRED', $payload['code']);
     }
 
     public function testRejectsRegularUsers(): void
@@ -37,6 +41,10 @@ class SupportMiddlewareTest extends TestCase
         );
 
         $this->assertSame(403, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('Support access required', $payload['message']);
+        $this->assertSame('Support access required', $payload['error']);
+        $this->assertSame('SUPPORT_REQUIRED', $payload['code']);
     }
 
     public function testAllowsSupportUsers(): void
