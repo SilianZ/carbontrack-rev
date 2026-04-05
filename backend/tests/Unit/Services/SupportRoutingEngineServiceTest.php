@@ -214,8 +214,8 @@ class SupportRoutingEngineServiceTest extends TestCase
 
         self::$capsule->table('users')->insert([
             ['id' => 1, 'username' => 'requester', 'email' => 'requester@example.com', 'role' => 'user', 'group_id' => 1, 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 2, 'username' => 'junior', 'email' => 'junior@example.com', 'role' => 'support', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 3, 'username' => 'senior', 'email' => 'senior@example.com', 'role' => 'support', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'username' => 'junior', 'email' => 'junior@example.com', 'role' => 'support', 'group_id' => null, 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 3, 'username' => 'senior', 'email' => 'senior@example.com', 'role' => 'support', 'group_id' => null, 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
         self::$capsule->table('support_assignee_profiles')->insert([

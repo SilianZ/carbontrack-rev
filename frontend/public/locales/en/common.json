@@ -3851,6 +3851,12 @@
       "rejected": "Rejected",
       "cancelled": "Cancelled"
     },
+    "slaStatuses": {
+      "pending": "Pending",
+      "breached": "Breached",
+      "escalated": "Escalated",
+      "resolved": "Resolved"
+    },
     "filters": {
       "status": "Status",
       "allStatuses": "All statuses"

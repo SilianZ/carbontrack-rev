@@ -316,7 +316,9 @@ export default function SupportTicketDetailPage() {
           </Badge>
           {ticket.sla_status ? (
             <Badge variant="outline">
-              {t('support.portal.slaBadge', { status: ticket.sla_status })}
+              {t('support.portal.slaBadge', {
+                status: t(`support.slaStatuses.${ticket.sla_status}`, { defaultValue: ticket.sla_status }),
+              })}
             </Badge>
           ) : null}
           <Badge variant="outline">

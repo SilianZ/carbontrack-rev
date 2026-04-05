@@ -1003,7 +1003,9 @@ $__deps_initializer = function (Container $container) {
             $c->get(AuthService::class),
             $c->get(TurnstileService::class),
             $c->get(LoggerInterface::class),
-            $c->get(ErrorLogService::class)
+            $c->get(ErrorLogService::class),
+            $c->get(SupportRoutingEngineService::class),
+            $c->get(AuditLogService::class)
         );
     });
 

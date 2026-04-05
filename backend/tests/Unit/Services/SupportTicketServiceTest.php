@@ -700,12 +700,50 @@ class SupportTicketServiceTest extends TestCase
         $messages = $this->createMock(MessageService::class);
         $email = $this->createMock(EmailService::class);
         $audit->method('log')->willReturn(true);
-        $messages->expects($this->once())
+        $messages->expects($this->exactly(2))
             ->method('sendSystemMessage')
-            ->with((int) $assignee->id, 'Ticket #3 assigned to you', $this->stringContains('An administrator assigned ticket #3 to you.'), 'support_ticket', 'normal', 'support_ticket', 3, false);
-        $email->expects($this->once())
+            ->withConsecutive(
+                [
+                    (int) $requester->id,
+                    'Support ticket #3 updated',
+                    $this->stringContains('Assigned handler'),
+                    'support_ticket',
+                    'normal',
+                    'support_ticket',
+                    3,
+                    false,
+                ],
+                [
+                    (int) $assignee->id,
+                    'Ticket #3 assigned to you',
+                    $this->stringContains('An administrator assigned ticket #3 to you.'),
+                    'support_ticket',
+                    'normal',
+                    'support_ticket',
+                    3,
+                    false,
+                ]
+            );
+        $email->expects($this->exactly(2))
             ->method('sendMessageNotification')
-            ->with('support-b@example.com', 'support-b', 'Ticket #3 assigned to you', $this->stringContains('An administrator assigned ticket #3 to you.'), NotificationPreferenceService::CATEGORY_SUPPORT, 'normal');
+            ->withConsecutive(
+                [
+                    'requester@example.com',
+                    'requester',
+                    'Support ticket #3 updated',
+                    $this->stringContains('Assigned handler'),
+                    NotificationPreferenceService::CATEGORY_SUPPORT,
+                    'normal',
+                ],
+                [
+                    'support-b@example.com',
+                    'support-b',
+                    'Ticket #3 assigned to you',
+                    $this->stringContains('An administrator assigned ticket #3 to you.'),
+                    NotificationPreferenceService::CATEGORY_SUPPORT,
+                    'normal',
+                ]
+            );
 
         $service = new SupportTicketService(
             self::$capsule->getConnection()->getPdo(),

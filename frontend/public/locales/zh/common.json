@@ -3851,6 +3851,12 @@
       "rejected": "已拒绝",
       "cancelled": "已取消"
     },
+    "slaStatuses": {
+      "pending": "进行中",
+      "breached": "已超时",
+      "escalated": "已升级",
+      "resolved": "已达成"
+    },
     "filters": {
       "status": "状态",
       "allStatuses": "全部状态"

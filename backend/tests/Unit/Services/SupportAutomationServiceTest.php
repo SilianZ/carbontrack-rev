@@ -408,6 +408,7 @@ class SupportAutomationServiceTest extends TestCase
                 'assigned_to' => null,
                 'assignment_source' => null,
                 'assigned_rule_id' => null,
+                'sla_status' => 'resolved',
                 'created_at' => $yesterday,
                 'updated_at' => $now,
                 'resolved_at' => $now,
