@@ -3243,6 +3243,10 @@
         "message": {
           "label": "站内信提醒",
           "description": "来自其他用户的站内信邮件副本（始终开启）。"
+        },
+        "support": {
+          "label": "工单更新",
+          "description": "客服修改工单状态、优先级或处理分配时的邮件通知。"
         }
       },
       "testEmail": {
@@ -3671,6 +3675,431 @@
           "content": "如果发生可能对您的权利和自由造成高风险的个人数据泄露，我们将根据 GDPR 和香港立法最佳实践，在获悉泄露后 <strong>72 小时</strong>内通知您和相关监管机构。"
         }
       }
+    }
+  },
+  "contact": {
+    "hero": {
+      "eyebrow": "联系 CarbonTrack",
+      "title": "公开联系渠道",
+      "subtitle": "合作、媒体、一般咨询请直接通过这里联系。",
+      "primaryAction": "发送邮件",
+      "secondaryAction": "前往帮助中心"
+    },
+    "panel": {
+      "title": "需要工单？",
+      "body": "问题排查、账号异常和功能建议请前往帮助中心提交工单。"
+    },
+    "methods": {
+      "emailTitle": "邮箱",
+      "emailDescription": "适合一般咨询、合作沟通和材料发送。",
+      "phoneTitle": "电话",
+      "phoneDescription": "适合需要即时沟通的情况。",
+      "addressTitle": "地址",
+      "addressDescription": "CarbonTrack 团队的协作与运营地址。"
+    },
+    "linksTitle": "更多入口"
+  },
+  "help": {
+    "hero": {
+      "eyebrow": "帮助中心",
+      "title": "提交工单，集中跟进。",
+      "subtitle": "这里处理网站故障、账号问题、功能建议和商务协作。",
+      "primaryAction": "查看我的工单",
+      "loginAction": "登录后提交工单",
+      "secondaryAction": "查看联系方式"
+    },
+    "panel": {
+      "title": "工单处理",
+      "body": "提交后，回复、附件和状态变化都会集中保留在同一条线程。"
+    },
+    "highlights": {
+      "threadTitle": "统一跟进",
+      "threadDescription": "后续补充、客服回复和处理状态都在同一处查看。",
+      "verificationTitle": "受保护提交",
+      "verificationDescription": "提交和回复都需要验证，并校验附件归属。"
+    },
+    "categories": {
+      "title": "常见问题类型",
+      "subtitle": "先选最接近的分类，再补充细节和附件。"
+    },
+    "loginNotice": "登录后可提交工单、上传附件并持续查看回复。",
+    "recentGuest": "登录后可查看最近工单和处理进度。"
+  },
+  "support": {
+    "hero": {
+      "eyebrow": "联系 CarbonTrack",
+      "title": "按事情类型，选择最合适的联系路径。",
+      "subtitle": "合作沟通和一般联系可以直接走公开渠道。登录后，同一页面会额外开放带附件、验证和跟进记录的工单入口。",
+      "primaryAction": "发送支持邮件",
+      "secondaryAction": "合作洽谈",
+      "tertiaryAction": "我的工单",
+      "panelTitle": "支持节奏",
+      "panelValue": "一个入口，两种处理路径",
+      "panelDescription": "公开联系方式保持对外可见，工单处理只对登录用户开放，并把后续回复集中到同一条线程。",
+      "responseTitle": "处理流转",
+      "responseDescription": "工单可在待处理、处理中、等待用户、已解决和已关闭之间流转。",
+      "verificationTitle": "已验证提交",
+      "verificationDescription": "用户每次提交和回复都会经过 Turnstile 与附件归属校验。"
+    },
+    "contactMethods": {
+      "eyebrow": "直接联系",
+      "title": "先走最快的渠道。",
+      "emailTitle": "邮箱",
+      "emailDescription": "适合详细问题、材料说明和异步沟通。",
+      "phoneTitle": "电话",
+      "phoneDescription": "适合需要尽快跟进的紧急情况。",
+      "addressTitle": "地址",
+      "addressDescription": "CarbonTrack 核心团队的协作与运营所在地。"
+    },
+    "scenarios": {
+      "eyebrow": "常见场景",
+      "website_bug": {
+        "title": "网站故障",
+        "description": "页面异常、上传失败、权限错误、视觉回归等问题。"
+      },
+      "business_issue": {
+        "title": "商务事项",
+        "description": "合作沟通、项目落地、运营协调与外部对接。"
+      },
+      "feature_request": {
+        "title": "功能建议",
+        "description": "希望改进日常记录、分析查看或运营流程的建议。"
+      },
+      "account": {
+        "title": "账户问题",
+        "description": "登录、验证、资料、权限或账户状态相关问题。"
+      }
+    },
+    "statuses": {
+      "open": "待处理",
+      "in_progress": "处理中",
+      "waiting_user": "等待用户",
+      "resolved": "已解决",
+      "closed": "已关闭"
+    },
+    "priorities": {
+      "low": "低",
+      "normal": "普通",
+      "high": "高",
+      "urgent": "紧急"
+    },
+    "categories": {
+      "website_bug": "网站故障",
+      "business_issue": "商务事项",
+      "feature_request": "功能建议",
+      "account": "账户问题",
+      "other": "其他"
+    },
+    "senderRoles": {
+      "user": "用户",
+      "support": "客服",
+      "admin": "管理员"
+    },
+    "transferStatuses": {
+      "pending": "待审批",
+      "approved": "已批准",
+      "rejected": "已拒绝",
+      "cancelled": "已取消"
+    },
+    "filters": {
+      "status": "状态",
+      "allStatuses": "全部状态"
+    },
+    "moreWays": "更多联系入口",
+    "feedback": {
+      "title": "提交工单",
+      "subtitle": "创建一次，后续在工单页持续跟进。",
+      "submit": "提交工单",
+      "uploaded": "附件已上传",
+      "created": "工单已创建",
+      "turnstileRequired": "请先完成验证。",
+      "fields": {
+        "subject": "主题",
+        "category": "分类",
+        "priority": "优先级",
+        "content": "详细说明",
+        "attachments": "附件"
+      },
+      "placeholders": {
+        "subject": "一句话概括问题",
+        "content": "描述发生了什么、预期结果，以及希望客服核查的内容。"
+      }
+    },
+    "recent": {
+      "title": "最近工单",
+      "subtitle": "继续回复或查看最新处理进展。",
+      "viewAll": "查看全部",
+      "empty": "你还没有工单。新提交的工单会显示在这里。"
+    },
+    "userList": {
+      "eyebrow": "我的工单",
+      "title": "与你账户绑定的支持线程",
+      "subtitle": "从帮助中心发起问题，然后在这里持续沟通。",
+      "newTicket": "新建工单",
+      "queueTitle": "工单列表",
+      "queueSubtitle": "按最近活动时间排序。",
+      "emptyTitle": "暂无工单",
+      "emptyDescription": "去帮助中心提交第一条请求。",
+      "emptyAction": "前往帮助中心",
+      "replyCount": "{{count}} 条消息"
+    },
+    "thread": {
+      "backToTickets": "返回工单列表",
+      "headerDescription": "所有回复和附件都会保留在同一条线程里。",
+      "summaryTitle": "工单摘要",
+      "summarySubtitle": "快速查看状态与最后处理时间。",
+      "createdAt": "创建时间",
+      "lastReply": "最后回复",
+      "messageCount": "消息数",
+      "replyTitle": "追加回复",
+      "replySubtitle": "新回复会通知支持团队邮箱。",
+      "replyPlaceholder": "补充新的信息、处理结果或客服要求的材料。",
+      "replySubmit": "发送回复",
+      "replyCreated": "回复已发送",
+      "closedHint": "已关闭的工单不能继续由用户回复。",
+      "notFound": "未找到该工单。",
+      "unknownSender": "未知发送者"
+    },
+    "portal": {
+      "title": "客服门户",
+      "subtitle": "在独立支持空间中处理用户请求，不混入管理后台。",
+      "nav": {
+        "queue": "工单队列",
+        "queueDescription": "查看请求、发送回复并推进状态。"
+      },
+      "queueEyebrow": "队列视图",
+      "queueTitle": "按清晰责任处理收件箱",
+      "queueSubtitle": "可按主题或请求人检索，然后进入线程回复、改状态或分配处理人。",
+      "queueListTitle": "工单队列",
+      "queueListSubtitle": "使用接口返回的最近活动顺序。",
+      "searchPlaceholder": "搜索主题、用户名、邮箱",
+      "assigneeFilter": "按客服筛选",
+      "assigneeFilterAll": "全部客服",
+      "assigneeFilterUnassigned": "仅看未分配",
+      "emptyTitle": "没有匹配工单",
+      "emptyDescription": "调整筛选条件或搜索词。",
+      "unknownRequester": "未知请求人",
+      "unassigned": "未分配",
+      "messageCount": "{{count}} 条消息",
+      "backToQueue": "返回队列",
+      "threadSubtitle": "回复请求人、更新处理状态，并保留可审计记录。",
+      "requesterTitle": "请求人",
+      "requesterSubtitle": "工单中保存的身份快照。",
+      "requesterName": "姓名",
+      "requesterEmail": "邮箱",
+      "createdAt": "创建时间",
+      "tagsTitle": "标签结果",
+      "tagsSubtitle": "展示规则命中的标签和来源，方便客服直接核对。",
+      "noTags": "当前没有命中标签。",
+      "tagSource": {
+        "rule": "规则命中",
+        "manual": "人工标记",
+        "system": "系统写入"
+      },
+      "ruleLabel": "规则 #{{id}}",
+      "workflowTitle": "流程设置",
+      "workflowSubtitle": "更新状态、优先级与处理人，并同步查看当前负载。",
+      "assignedTo": "处理人",
+      "assignedToPlaceholder": "留空则清除分配",
+      "saveWorkflow": "保存流程",
+      "workload": {
+        "title": "客服负载",
+        "subtitle": "管理与客服都可直接查看每位客服手上总单量、未开始与处理中数量。",
+        "empty": "暂无可派单客服。",
+        "assigned": "总单量",
+        "notStarted": "未开始",
+        "inProgress": "处理中"
+      },
+      "roles": {
+        "user": "用户",
+        "support": "客服",
+        "admin": "管理员"
+      },
+      "transfer": {
+        "title": "申请转单",
+        "subtitle": "当前处理客服可提交转单申请，由管理员审批。",
+        "target": "目标客服",
+        "targetPlaceholder": "选择目标客服",
+        "targetRequired": "请先选择目标客服。",
+        "reason": "转单原因",
+        "reasonPlaceholder": "说明为什么需要转单，例如规则命中不符、领域不匹配或当前负载过高。",
+        "submit": "提交转单申请",
+        "requestCreated": "转单申请已提交",
+        "reviewSaved": "转单审批已保存",
+        "historyTitle": "转单记录",
+        "historySubtitle": "查看客服之间的转单申请与管理员审批结果。",
+        "empty": "暂无转单记录。",
+        "approve": "批准转单",
+        "reject": "拒绝转单",
+        "pendingHint": "当前有 {{count}} 条待审批转单申请。",
+        "requestedBy": "申请人：{{name}}",
+        "requestLine": "{{from}} -> {{to}}",
+        "reviewNoteLabel": "审批备注",
+        "reviewPlaceholder": "填写审批意见，可选。"
+      },
+      "replyTitle": "回复请求人",
+      "replySubtitle": "客服回复会通过站内信和邮件通知用户。",
+      "replyPlaceholder": "填写下一步说明、解决方案或补充要求。",
+      "replySubmit": "发送客服回复",
+      "ticketUpdated": "工单已更新",
+      "replyCreated": "客服回复已发送",
+      "currentView": "当前视图",
+      "badge": "支持门户",
+      "tipTitle": "操作提示",
+      "tip": "状态、分配和回复会立即同步到用户侧。",
+      "stats": {
+        "total": "当前可见",
+        "open": "待处理",
+        "urgent": "紧急"
+      }
+    }
+  },
+  "adminSupport": {
+    "eyebrow": "支持规则",
+    "title": "支持运营台",
+    "subtitle": "统一查看客服负载、规则命中、标签结果和转单处理，不必来回切换页面。",
+    "tabs": {
+      "team": "客服团队",
+      "rules": "派单规则",
+      "tags": "标签",
+      "reports": "报表"
+    },
+    "summary": {
+      "total": "工单总量",
+      "totalHint": "按所选周期统计支持工单。",
+      "autoAssigned": "自动派单",
+      "autoAssignedHint": "规则自动分配的工单数。",
+      "unassigned": "未分配",
+      "unassignedHint": "仍需人工接手的工单数。",
+      "avgResolution": "平均解决时长",
+      "avgResolutionHint": "已解决工单的平均耗时（小时）。"
+    },
+    "actions": {
+      "saveRule": "保存规则",
+      "saveTag": "保存标签"
+    },
+    "common": {
+      "active": "启用",
+      "inactive": "停用",
+      "noDescription": "暂无描述"
+    },
+    "filters": {
+      "anyCategory": "任意分类",
+      "anyPriority": "任意优先级"
+    },
+    "messages": {
+      "loadFailed": "支持运营数据加载失败。",
+      "ruleSaved": "规则已保存",
+      "tagSaved": "标签已保存"
+    },
+    "roles": {
+      "user": "用户",
+      "support": "客服",
+      "admin": "管理员"
+    },
+    "team": {
+      "listTitle": "客服列表",
+      "listSubtitle": "查看每位客服当前持单情况，并切换查看详细资料。",
+      "detailTitle": "客服详情",
+      "detailSubtitle": "显示基础资料、当前负载与最近处理工单。",
+      "empty": "请选择客服。",
+      "contactTitle": "联系信息",
+      "profileTitle": "资料概览",
+      "notesTitle": "管理备注",
+      "noNotes": "暂无管理备注。",
+      "recentTicketsTitle": "最近处理工单",
+      "recentTicketsSubtitle": "最近分配到该客服的工单，方便核对当前上下文。",
+      "noRecentTickets": "暂无最近工单。",
+      "metrics": {
+        "assigned": "总单量",
+        "notStarted": "未开始",
+        "inProgress": "处理中"
+      },
+      "fields": {
+        "email": "邮箱",
+        "role": "角色",
+        "status": "状态",
+        "school": "学校",
+        "region": "地区",
+        "location": "位置",
+        "group": "分组",
+        "lastLogin": "最后登录",
+        "createdAt": "创建时间"
+      }
+    },
+    "rules": {
+      "listTitle": "规则列表",
+      "listSubtitle": "配置命中条件、自动派单与标签写入。",
+      "newRule": "新建规则",
+      "editorTitle": "规则编辑",
+      "editorSubtitle": "保存后会参与新工单的自动判断。",
+      "noAssignee": "不自动派单",
+      "noTags": "暂无可选标签",
+      "fields": {
+        "name": "名称",
+        "sortOrder": "排序",
+        "description": "描述",
+        "category": "分类",
+        "priority": "优先级",
+        "timeStart": "开始时间",
+        "timeEnd": "结束时间",
+        "timezone": "时区",
+        "weekdays": "命中星期",
+        "assignTo": "派单给",
+        "tags": "命中标签",
+        "active": "启用规则",
+        "stopProcessing": "命中后停止继续匹配"
+      }
+    },
+    "tags": {
+      "listTitle": "标签列表",
+      "listSubtitle": "标签可由规则写入，并同步显示在支持门户。",
+      "newTag": "新建标签",
+      "editorTitle": "标签编辑",
+      "editorSubtitle": "统一定义名称、颜色和说明。",
+      "fields": {
+        "name": "名称",
+        "slug": "标识",
+        "color": "颜色",
+        "description": "描述",
+        "active": "启用标签"
+      }
+    },
+    "reports": {
+      "title": "支持报表",
+      "subtitle": "查看状态、分类、优先级、客服和规则触发分布。",
+      "days": "近 {{count}} 天",
+      "byStatus": "按状态",
+      "byStatusDescription": "当前周期内各状态工单数量。",
+      "byCategory": "按分类",
+      "byCategoryDescription": "当前周期内各分类分布。",
+      "byPriority": "按优先级",
+      "byPriorityDescription": "当前周期内各优先级分布。",
+      "byAssignee": "按客服",
+      "byAssigneeDescription": "当前周期内各客服承接量。",
+      "byTag": "按标签",
+      "byTagDescription": "规则与人工标签的命中情况。",
+      "ruleHits": "规则触发",
+      "ruleHitsDescription": "当前周期内各规则命中次数。",
+      "timelineTitle": "时间线",
+      "timelineSubtitle": "按日查看工单进入量变化。"
+    },
+    "weekdays": {
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六",
+      "sun": "周日"
+    },
+    "colors": {
+      "emerald": "翠绿",
+      "sky": "天蓝",
+      "amber": "琥珀",
+      "rose": "玫红",
+      "violet": "紫罗兰",
+      "slate": "石板灰"
     }
   }
 }

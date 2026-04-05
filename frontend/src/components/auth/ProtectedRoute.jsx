@@ -7,6 +7,7 @@ export function ProtectedRoute({
   children, 
   requireAuth = true, 
   requireAdmin = false,
+  requireSupport = false,
   permission = null,
   fallback = null 
 }) {
@@ -28,6 +29,7 @@ export function ProtectedRoute({
   }
 
   const { isAuthenticated, user } = authState;
+  const hasSupportAccess = Boolean(user?.is_admin || user?.is_support || user?.role === 'support' || user?.role === 'admin');
 
   // 需要认证但未登录
   if (requireAuth && !isAuthenticated) {
@@ -59,7 +61,7 @@ export function ProtectedRoute({
       }
       return <Navigate to={`/auth/verify-email?${params.toString()}`} replace />;
     }
-  const needsOnboarding = !user?.school_id; // class_name 不再作为必填条件
+  const needsOnboarding = !hasSupportAccess && !user?.school_id; // support/admin 不强制补资料
     // 允许本会话临时跳过引导（Onboarding页内点击“暂时跳过”设置的标记）
     const onboardingSkipped = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('onboarding_skipped') === '1';
     const currentPath = location.pathname;
@@ -76,6 +78,24 @@ export function ProtectedRoute({
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">访问被拒绝</h1>
           <p className="text-gray-600 mb-4">您没有权限访问此页面</p>
+          <button
+            onClick={() => window.history.back()}
+            className="text-green-600 hover:text-green-500"
+          >
+            返回上一页
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 需要客服权限但不是客服/管理员
+  if (requireSupport && !hasSupportAccess) {
+    return fallback || (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">访问被拒绝</h1>
+          <p className="text-gray-600 mb-4">您没有权限访问客服门户</p>
           <button
             onClick={() => window.history.back()}
             className="text-green-600 hover:text-green-500"
@@ -117,6 +137,14 @@ export function AdminRoute({ children, fallback = null }) {
   );
 }
 
+export function SupportRoute({ children, fallback = null }) {
+  return (
+    <ProtectedRoute requireAuth={true} requireSupport={true} fallback={fallback}>
+      {children}
+    </ProtectedRoute>
+  );
+}
+
 // 公开路由组件（已登录用户会被重定向）
 export function PublicRoute({ children }) {
   return (
@@ -130,11 +158,17 @@ ProtectedRoute.propTypes = {
   children: PropTypes.node,
   requireAuth: PropTypes.bool,
   requireAdmin: PropTypes.bool,
+  requireSupport: PropTypes.bool,
   permission: PropTypes.string,
   fallback: PropTypes.node,
 };
 
 AdminRoute.propTypes = {
+  children: PropTypes.node,
+  fallback: PropTypes.node,
+};
+
+SupportRoute.propTypes = {
   children: PropTypes.node,
   fallback: PropTypes.node,
 };

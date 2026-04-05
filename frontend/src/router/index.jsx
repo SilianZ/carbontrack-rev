@@ -2,7 +2,8 @@ import React from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Layout, AuthLayout } from '../components/layout/Layout';
 import AdminLayout from '../components/layout/AdminLayout';
-import { ProtectedRoute, PublicRoute, AdminRoute } from '../components/auth/ProtectedRoute';
+import SupportLayout from '../components/layout/SupportLayout';
+import { ProtectedRoute, PublicRoute, AdminRoute, SupportRoute } from '../components/auth/ProtectedRoute';
 
 // Lazy loaded pages
 const HomePage = React.lazy(() => import('../pages/HomePage'));
@@ -22,10 +23,14 @@ const OnboardingPage = React.lazy(() => import('../pages/OnboardingPage'));
 const AchievementsPage = React.lazy(() => import('../pages/AchievementsPage'));
 const NotificationSettingsPage = React.lazy(() => import('../pages/NotificationSettingsPage'));
 const AboutUsPage = React.lazy(() => import('../pages/AboutUsPage'));
+const ContactPage = React.lazy(() => import('../pages/ContactPage'));
+const HelpPage = React.lazy(() => import('../pages/HelpPage'));
 const PrivacyPolicyPage = React.lazy(() => import('../pages/PrivacyPolicyPage'));
 const TermsOfServicePage = React.lazy(() => import('../pages/TermsOfServicePage'));
 const CookiePolicyPage = React.lazy(() => import('../pages/CookiePolicyPage'));
 const SecurityPage = React.lazy(() => import('../pages/SecurityPage'));
+const TicketsPage = React.lazy(() => import('../pages/TicketsPage'));
+const TicketDetailPage = React.lazy(() => import('../pages/TicketDetailPage'));
 // Admin pages
 const AdminDashboardPage = React.lazy(() => import('../pages/admin/Dashboard'));
 const AdminPasskeysPage = React.lazy(() => import('../pages/admin/Passkeys'));
@@ -37,10 +42,13 @@ const AdminAvatarsPage = React.lazy(() => import('../pages/admin/Avatars'));
 const AdminProductsPage = React.lazy(() => import('../pages/admin/Products'));
 const AdminExchangesPage = React.lazy(() => import('../pages/admin/Exchanges'));
 const AdminBroadcastPage = React.lazy(() => import('../pages/admin/Broadcast'));
+const AdminSupportOpsPage = React.lazy(() => import('../pages/admin/SupportOps'));
 const AdminAiWorkspacePage = React.lazy(() => import('../pages/admin/AiWorkspace'));
 const AdminSystemLogsPage = React.lazy(() => import('../pages/admin/SystemLogs'));
 const AdminDiagnosticsPage = React.lazy(() => import('../pages/admin/Diagnostics'));
 const AdminLlmUsagePage = React.lazy(() => import('../pages/admin/LlmUsage'));
+const SupportTicketsPage = React.lazy(() => import('../pages/support/TicketsPage'));
+const SupportTicketDetailPage = React.lazy(() => import('../pages/support/TicketDetailPage'));
 const NotFoundPage = React.lazy(() => import('../pages/NotFoundPage'));
 
 const loadingSpinner = (
@@ -56,10 +64,14 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <React.Suspense fallback={loadingSpinner}><HomePage /></React.Suspense> },
       { path: 'about-us', element: <React.Suspense fallback={loadingSpinner}><AboutUsPage /></React.Suspense> },
+      { path: 'contact', element: <React.Suspense fallback={loadingSpinner}><ContactPage /></React.Suspense> },
+      { path: 'help', element: <React.Suspense fallback={loadingSpinner}><HelpPage /></React.Suspense> },
       { path: 'privacy', element: <React.Suspense fallback={loadingSpinner}><PrivacyPolicyPage /></React.Suspense> },
       { path: 'terms', element: <React.Suspense fallback={loadingSpinner}><TermsOfServicePage /></React.Suspense> },
       { path: 'cookies', element: <React.Suspense fallback={loadingSpinner}><CookiePolicyPage /></React.Suspense> },
       { path: 'security', element: <React.Suspense fallback={loadingSpinner}><SecurityPage /></React.Suspense> },
+      { path: 'tickets', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><TicketsPage /></React.Suspense></ProtectedRoute> },
+      { path: 'tickets/:ticketId', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><TicketDetailPage /></React.Suspense></ProtectedRoute> },
       { path: 'dashboard', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><DashboardPage /></React.Suspense></ProtectedRoute> },
       { path: 'calculate', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><CalculatePage /></React.Suspense></ProtectedRoute> },
       { path: 'activities', element: <ProtectedRoute requireAuth><React.Suspense fallback={loadingSpinner}><ActivitiesPage /></React.Suspense></ProtectedRoute> },
@@ -110,9 +122,19 @@ export const router = createBrowserRouter([
       { path: 'products', element: <React.Suspense fallback={loadingSpinner}><AdminProductsPage /></React.Suspense> },
       { path: 'exchanges', element: <React.Suspense fallback={loadingSpinner}><AdminExchangesPage /></React.Suspense> },
       { path: 'broadcast', element: <React.Suspense fallback={loadingSpinner}><AdminBroadcastPage /></React.Suspense> },
+      { path: 'support', element: <React.Suspense fallback={loadingSpinner}><AdminSupportOpsPage /></React.Suspense> },
       { path: 'llm-usage', element: <React.Suspense fallback={loadingSpinner}><AdminLlmUsagePage /></React.Suspense> },
       { path: 'system-logs', element: <React.Suspense fallback={loadingSpinner}><AdminSystemLogsPage /></React.Suspense> },
       { path: 'diagnostics', element: <React.Suspense fallback={loadingSpinner}><AdminDiagnosticsPage /></React.Suspense> }
+    ]
+  },
+  {
+    path: '/support',
+    element: <SupportRoute><SupportLayout /></SupportRoute>,
+    children: [
+      { index: true, element: <Navigate to="/support/tickets" replace /> },
+      { path: 'tickets', element: <React.Suspense fallback={loadingSpinner}><SupportTicketsPage /></React.Suspense> },
+      { path: 'tickets/:ticketId', element: <React.Suspense fallback={loadingSpinner}><SupportTicketDetailPage /></React.Suspense> }
     ]
   }
 ]);

@@ -226,6 +226,23 @@ export const messageAPI = {
   markAllAsRead: () => api.put('/messages/mark-all-read'),
 };
 
+export const ticketAPI = {
+  createTicket: (data) => api.post('/tickets', data),
+  getTickets: (params = {}) => api.get('/tickets', { params }),
+  getTicket: (ticketId) => api.get(`/tickets/${ticketId}`),
+  replyTicket: (ticketId, data) => api.post(`/tickets/${ticketId}/messages`, data),
+};
+
+export const supportAPI = {
+  getAssignees: () => api.get('/support/assignees'),
+  getTickets: (params = {}) => api.get('/support/tickets', { params }),
+  getTicket: (ticketId) => api.get(`/support/tickets/${ticketId}`),
+  replyTicket: (ticketId, data) => api.post(`/support/tickets/${ticketId}/messages`, data),
+  updateTicket: (ticketId, data) => api.patch(`/support/tickets/${ticketId}`, data),
+  createTransferRequest: (ticketId, data) => api.post(`/support/tickets/${ticketId}/transfer-requests`, data),
+  reviewTransferRequest: (requestId, data) => api.patch(`/support/transfer-requests/${requestId}`, data),
+};
+
 export const schoolAPI = {
   // 获取学校列表
   getSchools: (params = {}) => api.get('/schools', { params }),
@@ -407,6 +424,17 @@ export const adminAPI = {
   getBroadcasts: (params = {}) => api.get('/admin/messages/broadcasts', { params }),
   searchBroadcastRecipients: (params = {}) => api.get('/admin/messages/broadcast/recipients', { params }),
   flushBroadcastQueue: (params = {}) => api.post('/admin/messages/broadcasts/flush', {}, { params }),
+
+  // Support operations
+  getSupportAssignees: () => api.get('/admin/support/assignees'),
+  getSupportAssigneeDetail: (id) => api.get(`/admin/support/assignees/${id}`),
+  getSupportTags: () => api.get('/admin/support/tags'),
+  createSupportTag: (data) => api.post('/admin/support/tags', data),
+  updateSupportTag: (id, data) => api.put(`/admin/support/tags/${id}`, data),
+  getSupportRules: () => api.get('/admin/support/rules'),
+  createSupportRule: (data) => api.post('/admin/support/rules', data),
+  updateSupportRule: (id, data) => api.put(`/admin/support/rules/${id}`, data),
+  getSupportReports: (params = {}) => api.get('/admin/support/reports', { params }),
 
 };
 
