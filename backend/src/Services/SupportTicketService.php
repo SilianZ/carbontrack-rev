@@ -645,7 +645,7 @@ class SupportTicketService
         }
         if ($includeRequester && !empty($query['q'])) {
             $where[] = '(t.subject LIKE :search_subject OR requester.username LIKE :search_username OR requester.email LIKE :search_email)';
-            $searchPattern = '%' . trim((string) $query['q']) . '%';
+            $searchPattern = '%' . addcslashes(trim((string) $query['q']), '%_\\') . '%';
             $params['search_subject'] = $searchPattern;
             $params['search_username'] = $searchPattern;
             $params['search_email'] = $searchPattern;

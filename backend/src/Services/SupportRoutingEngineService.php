@@ -714,13 +714,33 @@ class SupportRoutingEngineService
         return $bestRuleId;
     }
 
+    private const TICKET_UPDATE_ALLOWED_FIELDS = [
+        'assigned_to',
+        'assignment_source',
+        'assigned_rule_id',
+        'assignment_locked',
+        'first_support_response_at',
+        'first_response_due_at',
+        'resolution_due_at',
+        'sla_status',
+        'escalation_level',
+        'last_routing_run_id',
+        'updated_at',
+    ];
+
     private function updateTicket(int $ticketId, array $fields): void
     {
         $assignments = [];
         $params = ['id' => $ticketId];
         foreach ($fields as $field => $value) {
+            if (!in_array($field, self::TICKET_UPDATE_ALLOWED_FIELDS, true)) {
+                continue;
+            }
             $assignments[] = sprintf('%s = :%s', $field, $field);
             $params[$field] = $value;
+        }
+        if ($assignments === []) {
+            return;
         }
         $stmt = $this->db->prepare('UPDATE support_tickets SET ' . implode(', ', $assignments) . ' WHERE id = :id');
         $stmt->execute($params);
