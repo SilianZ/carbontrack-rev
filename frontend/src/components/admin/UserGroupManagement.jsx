@@ -91,7 +91,15 @@ export function UserGroupManagement() {
     const handleEdit = (group) => {
         setEditingGroup({
             ...group,
-            quotaFlat: group.quota_flat || { ...quotaTemplate }
+            quotaFlat: group.quota_flat || { ...quotaTemplate },
+            supportRouting: {
+                first_response_minutes: group.support_routing?.first_response_minutes ?? 240,
+                resolution_minutes: group.support_routing?.resolution_minutes ?? 1440,
+                routing_weight: group.support_routing?.routing_weight ?? 1,
+                min_agent_level: group.support_routing?.min_agent_level ?? 1,
+                overdue_boost: group.support_routing?.overdue_boost ?? 1,
+                tier_label: group.support_routing?.tier_label ?? 'standard',
+            }
         });
         setIsDialogOpen(true);
     };
@@ -102,7 +110,15 @@ export function UserGroupManagement() {
             code: '',
             is_default: false,
             notes: '',
-            quotaFlat: { ...quotaTemplate }
+            quotaFlat: { ...quotaTemplate },
+            supportRouting: {
+                first_response_minutes: 240,
+                resolution_minutes: 1440,
+                routing_weight: 1,
+                min_agent_level: 1,
+                overdue_boost: 1,
+                tier_label: 'standard',
+            }
         });
         setIsDialogOpen(true);
     };
@@ -114,7 +130,8 @@ export function UserGroupManagement() {
             code: editingGroup.code,
             is_default: editingGroup.is_default,
             notes: editingGroup.notes,
-            quota_flat: editingGroup.quotaFlat || {}
+            quota_flat: editingGroup.quotaFlat || {},
+            support_routing: editingGroup.supportRouting || {}
         };
 
         if (editingGroup.id) {
@@ -241,6 +258,78 @@ export function UserGroupManagement() {
                             ) : (
                                 <p className="text-sm text-muted-foreground">{t('admin.groups.noQuotasAvailable')}</p>
                             )}
+                        </div>
+                        <div className="space-y-3 border-b pb-3">
+                            <Label className="text-base font-semibold">{t('admin.groups.supportRoutingTitle')}</Label>
+                            <div>
+                                <Label>{t('admin.groups.supportFirstResponseMinutes')}</Label>
+                                <Input
+                                    type="number"
+                                    value={editingGroup?.supportRouting?.first_response_minutes ?? 240}
+                                    onChange={e => setEditingGroup({
+                                        ...editingGroup,
+                                        supportRouting: { ...editingGroup.supportRouting, first_response_minutes: e.target.value }
+                                    })}
+                                />
+                            </div>
+                            <div>
+                                <Label>{t('admin.groups.supportResolutionMinutes')}</Label>
+                                <Input
+                                    type="number"
+                                    value={editingGroup?.supportRouting?.resolution_minutes ?? 1440}
+                                    onChange={e => setEditingGroup({
+                                        ...editingGroup,
+                                        supportRouting: { ...editingGroup.supportRouting, resolution_minutes: e.target.value }
+                                    })}
+                                />
+                            </div>
+                            <div>
+                                <Label>{t('admin.groups.supportRoutingWeight')}</Label>
+                                <Input
+                                    type="number"
+                                    step="0.1"
+                                    value={editingGroup?.supportRouting?.routing_weight ?? 1}
+                                    onChange={e => setEditingGroup({
+                                        ...editingGroup,
+                                        supportRouting: { ...editingGroup.supportRouting, routing_weight: e.target.value }
+                                    })}
+                                />
+                            </div>
+                            <div>
+                                <Label>{t('admin.groups.supportMinAgentLevel')}</Label>
+                                <Input
+                                    type="number"
+                                    min="1"
+                                    max="5"
+                                    value={editingGroup?.supportRouting?.min_agent_level ?? 1}
+                                    onChange={e => setEditingGroup({
+                                        ...editingGroup,
+                                        supportRouting: { ...editingGroup.supportRouting, min_agent_level: e.target.value }
+                                    })}
+                                />
+                            </div>
+                            <div>
+                                <Label>{t('admin.groups.supportOverdueBoost')}</Label>
+                                <Input
+                                    type="number"
+                                    step="0.1"
+                                    value={editingGroup?.supportRouting?.overdue_boost ?? 1}
+                                    onChange={e => setEditingGroup({
+                                        ...editingGroup,
+                                        supportRouting: { ...editingGroup.supportRouting, overdue_boost: e.target.value }
+                                    })}
+                                />
+                            </div>
+                            <div>
+                                <Label>{t('admin.groups.supportTierLabel')}</Label>
+                                <Input
+                                    value={editingGroup?.supportRouting?.tier_label ?? 'standard'}
+                                    onChange={e => setEditingGroup({
+                                        ...editingGroup,
+                                        supportRouting: { ...editingGroup.supportRouting, tier_label: e.target.value }
+                                    })}
+                                />
+                            </div>
                         </div>
                         <div>
                             <Label>{t('admin.groups.notes')}</Label>

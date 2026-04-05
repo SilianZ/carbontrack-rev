@@ -16097,7 +16097,7 @@
           "Support"
         ],
         "summary": "更新客服工单状态",
-        "description": "客服与管理员可修改状态、优先级和当前分配人。",
+        "description": "客服与管理员可修改状态、优先级；管理员可直接派单并向目标发送通知。",
         "operationId": "supportQueueUpdateTicket",
         "security": [
           {
@@ -16532,8 +16532,8 @@
         "tags": [
           "Support"
         ],
-        "summary": "审批转单申请",
-        "description": "管理员可批准或拒绝客服发起的转单申请。",
+        "summary": "处理转单申请",
+        "description": "目标受让人可批准或拒绝转单申请；原发起人可取消申请。管理员如需改派请直接更新工单 assigned_to。",
         "operationId": "supportReviewTransferRequest",
         "security": [
           {
@@ -16583,7 +16583,7 @@
             }
           },
           "403": {
-            "description": "缺少管理员权限。",
+            "description": "仅目标受让人可批准/拒绝，或仅原发起人可取消。",
             "content": {
               "application/json": {
                 "schema": {
@@ -16604,6 +16604,206 @@
           },
           "422": {
             "description": "审批参数非法。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/routing-settings": {
+      "get": {
+        "tags": [
+          "Support"
+        ],
+        "summary": "获取智能分单设置",
+        "description": "管理员查看统一评分引擎、AI 分诊与默认 SLA 配置。",
+        "operationId": "adminSupportRoutingSettingsGet",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "智能分单设置。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportRoutingSettingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "缺少管理员权限。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Support"
+        ],
+        "summary": "更新智能分单设置",
+        "description": "管理员更新 AI 开关、评分权重、fallback 与默认 SLA。",
+        "operationId": "adminSupportRoutingSettingsUpdate",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportRoutingSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新后的智能分单设置。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportRoutingSettingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "缺少管理员权限。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "参数非法。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/support/assignees/{id}/routing-profile": {
+      "put": {
+        "tags": [
+          "Support"
+        ],
+        "summary": "更新客服路由档案",
+        "description": "管理员更新客服等级、技能、容量、状态与加权覆盖。",
+        "operationId": "adminSupportAssigneeRoutingProfileUpdate",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportRoutingProfile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新后的客服详情。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportAssigneeDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "缺少管理员权限。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "客服不存在。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "参数非法。",
             "content": {
               "application/json": {
                 "schema": {
@@ -18406,6 +18606,25 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quota_flat": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "integer",
+                "string",
+                "null"
+              ]
+            }
+          },
+          "support_routing": {
+            "$ref": "#/components/schemas/SupportGroupRouting"
           }
         }
       },
@@ -18432,6 +18651,25 @@
               "object",
               "null"
             ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quota_flat": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "integer",
+                "string",
+                "null"
+              ]
+            }
+          },
+          "support_routing": {
+            "$ref": "#/components/schemas/SupportGroupRouting"
           }
         }
       },
@@ -18455,6 +18693,25 @@
               "object",
               "null"
             ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quota_flat": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "integer",
+                "string",
+                "null"
+              ]
+            }
+          },
+          "support_routing": {
+            "$ref": "#/components/schemas/SupportGroupRouting"
           }
         }
       },
@@ -26261,6 +26518,81 @@
             "items": {
               "$ref": "#/components/schemas/SupportTicketTag"
             }
+          },
+          "assignment_source": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "smart",
+              "manual",
+              "rule",
+              "transfer",
+              null
+            ]
+          },
+          "assigned_rule_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "assignment_locked": {
+            "type": "boolean"
+          },
+          "first_support_response_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "first_response_due_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "resolution_due_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "sla_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "pending",
+              "breached",
+              "escalated",
+              "resolved",
+              null
+            ]
+          },
+          "escalation_level": {
+            "type": "integer"
+          },
+          "last_routing_run_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "routing_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SupportRoutingSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
@@ -26490,7 +26822,7 @@
               "integer",
               "null"
             ],
-            "description": "客服或管理员用户 ID；传 null 清除分配。仅管理员可手动派单或转单。"
+            "description": "客服或管理员用户 ID；传 null 清除分配。管理员直接派单立即生效并锁定当前归属，无需目标同意。"
           }
         }
       },
@@ -26649,6 +26981,48 @@
           },
           "closed_count": {
             "type": "integer"
+          },
+          "routing_level": {
+            "type": "integer"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "max_active_tickets": {
+            "type": "integer"
+          },
+          "is_auto_assignable": {
+            "type": "boolean"
+          },
+          "routing_status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "backup",
+              "offline"
+            ]
+          },
+          "avg_feedback_rating": {
+            "type": "number"
+          },
+          "rating_count": {
+            "type": "integer"
+          },
+          "available_capacity": {
+            "type": "integer"
+          },
+          "weight_overrides": {
+            "type": "object",
+            "additionalProperties": true
           }
         }
       },
@@ -26722,6 +27096,9 @@
                 "items": {
                   "$ref": "#/components/schemas/SupportAssigneeRecentTicket"
                 }
+              },
+              "routing_profile": {
+                "$ref": "#/components/schemas/SupportRoutingProfile"
               }
             }
           }
@@ -26913,6 +27290,187 @@
           },
           "data": {
             "$ref": "#/components/schemas/SupportTransferRequest"
+          }
+        }
+      },
+      "SupportGroupRouting": {
+        "type": "object",
+        "properties": {
+          "first_response_minutes": {
+            "type": "integer"
+          },
+          "resolution_minutes": {
+            "type": "integer"
+          },
+          "routing_weight": {
+            "type": "number"
+          },
+          "min_agent_level": {
+            "type": "integer"
+          },
+          "overdue_boost": {
+            "type": "number"
+          },
+          "tier_label": {
+            "type": "string"
+          }
+        }
+      },
+      "SupportRoutingProfile": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "integer"
+          },
+          "level": {
+            "type": "integer"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "max_active_tickets": {
+            "type": "integer"
+          },
+          "is_auto_assignable": {
+            "type": "boolean"
+          },
+          "weight_overrides": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "backup",
+              "offline"
+            ]
+          },
+          "avg_feedback_rating": {
+            "type": "number"
+          },
+          "rating_count": {
+            "type": "integer"
+          }
+        }
+      },
+      "SupportRoutingSummary": {
+        "type": "object",
+        "properties": {
+          "locked": {
+            "type": "boolean"
+          },
+          "last_run_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "used_ai": {
+            "type": "boolean"
+          },
+          "fallback_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "matched_rule_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "required_agent_level": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "suggested_skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "winner_score": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "top_factors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "SupportRoutingSettings": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "ai_enabled": {
+            "type": "boolean"
+          },
+          "ai_timeout_ms": {
+            "type": "integer"
+          },
+          "due_soon_minutes": {
+            "type": "integer"
+          },
+          "weights": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "fallback": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "defaults": {
+            "$ref": "#/components/schemas/SupportGroupRouting"
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "SupportRoutingSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SupportRoutingSettings"
           }
         }
       }

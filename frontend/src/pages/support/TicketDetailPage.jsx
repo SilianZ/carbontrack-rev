@@ -314,6 +314,11 @@ export default function SupportTicketDetailPage() {
           <Badge variant={getPriorityVariant(ticket.priority)}>
             {t(`support.priorities.${ticket.priority}`)}
           </Badge>
+          {ticket.sla_status ? (
+            <Badge variant="outline">
+              {t('support.portal.slaBadge', { status: ticket.sla_status })}
+            </Badge>
+          ) : null}
           <Badge variant="outline">
             {t(`support.categories.${ticket.category}`)}
           </Badge>
@@ -406,6 +411,37 @@ export default function SupportTicketDetailPage() {
               <CardDescription>{t('support.portal.workflowSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="grid gap-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm dark:border-slate-800 dark:bg-slate-950/30">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-slate-500 dark:text-slate-400">{t('support.portal.firstResponseDueLabel')}</span>
+                  <span>{ticket.first_response_due_at ? formatSupportDate(ticket.first_response_due_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US') : '--'}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-slate-500 dark:text-slate-400">{t('support.portal.resolutionDueLabel')}</span>
+                  <span>{ticket.resolution_due_at ? formatSupportDate(ticket.resolution_due_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US') : '--'}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-slate-500 dark:text-slate-400">{t('support.portal.assignmentSourceLabel')}</span>
+                  <span>{ticket.assignment_source || '--'}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-slate-500 dark:text-slate-400">{t('support.portal.escalationLevelLabel')}</span>
+                  <span>{ticket.escalation_level ?? 0}</span>
+                </div>
+                {ticket.routing_summary ? (
+                  <>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-slate-500 dark:text-slate-400">{t('support.portal.routingLastRunLabel')}</span>
+                      <span>#{ticket.routing_summary.last_run_id ?? '--'}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-slate-500 dark:text-slate-400">{t('support.portal.routingFallbackLabel')}</span>
+                      <span>{ticket.routing_summary.fallback_reason || '--'}</span>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('support.filters.status')}</label>
                 <Select value={status} onValueChange={setStatus}>
@@ -481,6 +517,11 @@ export default function SupportTicketDetailPage() {
                         <p className="mt-2 text-xl font-semibold">{currentAssignee.in_progress_count ?? 0}</p>
                       </div>
                     </div>
+                  ) : null}
+                  {ticket.assignment_locked ? (
+                    <Alert>
+                      <AlertDescription>{t('support.portal.assignmentLockedHint')}</AlertDescription>
+                    </Alert>
                   ) : null}
                 </div>
               )}
@@ -585,7 +626,7 @@ export default function SupportTicketDetailPage() {
                     ) : null}
                   </div>
 
-                  {isAdmin && request.status === 'pending' ? (
+                  {request.status === 'pending' && Number(request.to_assignee) === Number(currentUser?.id ?? 0) ? (
                     <div className="space-y-3">
                       <Textarea
                         rows={3}
@@ -616,10 +657,22 @@ export default function SupportTicketDetailPage() {
                       </div>
                     </div>
                   ) : null}
+                  {request.status === 'pending' && Number(request.requested_by) === Number(currentUser?.id ?? 0) ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="rounded-full"
+                      onClick={() => handleReviewTransfer(request.id, 'cancelled')}
+                      loading={reviewTransferMutation.isLoading}
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      {t('support.portal.transfer.cancel')}
+                    </Button>
+                  ) : null}
                 </div>
               ))}
 
-              {isAdmin && pendingTransferRequests.length > 0 ? (
+              {pendingTransferRequests.length > 0 ? (
                 <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
                   {t('support.portal.transfer.pendingHint', { count: pendingTransferRequests.length })}
                 </p>

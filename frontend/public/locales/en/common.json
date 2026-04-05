@@ -2145,7 +2145,14 @@
       "updateSuccess": "Group updated",
       "deleteSuccess": "Group deleted",
       "quotaOverride": "Quota Override",
-      "noQuotasAvailable": "No configurable quotas available"
+      "noQuotasAvailable": "No configurable quotas available",
+      "supportRoutingTitle": "Support routing policy",
+      "supportFirstResponseMinutes": "First response SLA (minutes)",
+      "supportResolutionMinutes": "Resolution SLA (minutes)",
+      "supportRoutingWeight": "Routing weight",
+      "supportMinAgentLevel": "Minimum agent level",
+      "supportOverdueBoost": "Overdue boost",
+      "supportTierLabel": "Tier label"
     },
     "products": {
       "title": "Product Management",
@@ -3970,7 +3977,7 @@
       },
       "transfer": {
         "title": "Request transfer",
-        "subtitle": "The current assignee can request a reassignment, and an administrator reviews it.",
+        "subtitle": "The current assignee can request reassignment and the target assignee must accept or reject it.",
         "target": "Target assignee",
         "targetPlaceholder": "Select assignee",
         "targetRequired": "Select a target assignee first.",
@@ -3980,15 +3987,16 @@
         "requestCreated": "Transfer request submitted",
         "reviewSaved": "Transfer review saved",
         "historyTitle": "Transfer history",
-        "historySubtitle": "Review reassignment requests between support staff and the admin decision.",
+        "historySubtitle": "Review reassignment requests and see who accepted, rejected, or cancelled them.",
         "empty": "No transfer requests yet.",
-        "approve": "Approve transfer",
+        "approve": "Accept transfer",
         "reject": "Reject transfer",
-        "pendingHint": "{{count}} transfer request(s) still need review.",
+        "pendingHint": "{{count}} transfer request(s) are still pending.",
         "requestedBy": "Requested by: {{name}}",
         "requestLine": "{{from}} -> {{to}}",
         "reviewNoteLabel": "Review note",
-        "reviewPlaceholder": "Optional review note."
+        "reviewPlaceholder": "Optional review note.",
+        "cancel": "Cancel request"
       },
       "feedbackTitle": "User feedback",
       "feedbackSubtitle": "After a ticket is finished, the requester can rate each handling support agent and leave a comment.",
@@ -4009,7 +4017,19 @@
         "total": "Visible now",
         "open": "Open",
         "urgent": "Urgent"
-      }
+      },
+      "slaBadge": "SLA: {{status}}",
+      "firstResponseDue": "First response due {{value}}",
+      "resolutionDue": "Resolution due {{value}}",
+      "assignmentSource": "Source: {{value}}",
+      "routingFallback": "Fallback: {{value}}",
+      "firstResponseDueLabel": "First response due",
+      "resolutionDueLabel": "Resolution due",
+      "assignmentSourceLabel": "Assignment source",
+      "escalationLevelLabel": "Escalation level",
+      "routingLastRunLabel": "Last routing run",
+      "routingFallbackLabel": "Routing fallback",
+      "assignmentLockedHint": "This ticket is admin-locked. Smart rerouting will not override the current assignee."
     }
   },
   "adminSupport": {
@@ -4020,7 +4040,8 @@
       "settings": "Settings",
       "rules": "Rules",
       "tags": "Tags",
-      "reports": "Reports"
+      "reports": "Reports",
+      "routing": "Routing"
     },
     "summary": {
       "total": "Total tickets",
@@ -4030,11 +4051,17 @@
       "unassigned": "Unassigned",
       "unassignedHint": "Tickets still waiting for manual ownership.",
       "avgResolution": "Avg resolution",
-      "avgResolutionHint": "Average hours to resolution for closed work."
+      "avgResolutionHint": "Average hours to resolution for closed work.",
+      "smartAssigned": "Smart assigned",
+      "smartAssignedHint": "Tickets assigned by the unified routing engine.",
+      "slaBreaches": "SLA breaches",
+      "slaBreachesHint": "Tickets currently breached or escalated."
     },
     "actions": {
       "saveRule": "Save rule",
-      "saveTag": "Save tag"
+      "saveTag": "Save tag",
+      "saveProfile": "Save profile",
+      "saveRoutingSettings": "Save routing settings"
     },
     "common": {
       "active": "Active",
@@ -4048,7 +4075,9 @@
     "messages": {
       "loadFailed": "Failed to load support operations data.",
       "ruleSaved": "Rule saved",
-      "tagSaved": "Tag saved"
+      "tagSaved": "Tag saved",
+      "routingSettingsSaved": "Routing settings saved",
+      "profileSaved": "Routing profile saved"
     },
     "roles": {
       "user": "User",
@@ -4083,6 +4112,21 @@
         "group": "Group",
         "lastLogin": "Last login",
         "createdAt": "Created"
+      },
+      "routingProfileTitle": "Routing profile",
+      "routingFields": {
+        "level": "Agent level",
+        "maxActiveTickets": "Max active tickets",
+        "skills": "Skills",
+        "languages": "Languages",
+        "status": "Routing status",
+        "flatBoost": "Flat boost",
+        "autoAssignable": "Auto assignable"
+      },
+      "routingStatus": {
+        "active": "Active",
+        "backup": "Backup",
+        "offline": "Offline"
       }
     },
     "rules": {
@@ -4106,8 +4150,14 @@
         "assignTo": "Assign to",
         "tags": "Tags",
         "active": "Rule active",
-        "stopProcessing": "Stop on match"
-      }
+        "stopProcessing": "Stop on match",
+        "scoreBoost": "Score boost",
+        "requiredAgentLevel": "Required agent level",
+        "skillHints": "Skill hints"
+      },
+      "scoreBoostBadge": "Boost {{value}}",
+      "noRequiredLevel": "No minimum level",
+      "requiredLevelLabel": "Level {{level}}+"
     },
     "tags": {
       "listTitle": "Tag list",
@@ -4140,7 +4190,12 @@
       "ruleHits": "Rule hits",
       "ruleHitsDescription": "How often each routing rule matched in the selected period.",
       "timelineTitle": "Timeline",
-      "timelineSubtitle": "Daily incoming ticket volume."
+      "timelineSubtitle": "Daily incoming ticket volume.",
+      "byAgentLevel": "By agent level",
+      "byAgentLevelDescription": "Configured routing levels across support assignees.",
+      "agentLevelLabel": "Level {{level}}",
+      "routingOutcomes": "Routing outcomes",
+      "routingOutcomesDescription": "Routing runs grouped by trigger and AI usage."
     },
     "weekdays": {
       "mon": "Mon",
@@ -4158,6 +4213,29 @@
       "rose": "Rose",
       "violet": "Violet",
       "slate": "Slate"
+    },
+    "routing": {
+      "title": "Smart routing settings",
+      "subtitle": "Configure AI triage, SLA defaults, and scoring weights for the unified routing engine.",
+      "fields": {
+        "aiTimeout": "AI timeout (ms)",
+        "dueSoonMinutes": "Due soon threshold (minutes)",
+        "aiEnabled": "Enable AI triage",
+        "defaultFirstResponse": "Default first response SLA (minutes)",
+        "defaultResolution": "Default resolution SLA (minutes)"
+      },
+      "weights": {
+        "group_weight": "Group weight",
+        "priority_weight": "Priority weight",
+        "severity_weight": "Severity weight",
+        "escalation_weight": "Escalation weight",
+        "rule_weight": "Rule weight",
+        "skill_weight": "Skill weight",
+        "level_weight": "Level weight",
+        "feedback_weight": "Feedback weight",
+        "overdue_weight": "Overdue weight",
+        "load_penalty_weight": "Load penalty weight"
+      }
     }
   }
 }

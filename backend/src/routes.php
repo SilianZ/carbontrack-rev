@@ -255,6 +255,10 @@ return function (App $app) {
             $admin->get('/ai/diagnostics', [AdminAiController::class, 'diagnostics']);
             $admin->get('/support/assignees', [AdminSupportController::class, 'listAssignees']);
             $admin->get('/support/assignees/{id:[0-9]+}', [AdminSupportController::class, 'getAssigneeDetail']);
+            $admin->get('/support/assignees/{id:[0-9]+}/routing-profile', [AdminSupportController::class, 'getAssigneeRoutingProfile']);
+            $admin->put('/support/assignees/{id:[0-9]+}/routing-profile', [AdminSupportController::class, 'updateAssigneeRoutingProfile']);
+            $admin->get('/support/routing-settings', [AdminSupportController::class, 'getRoutingSettings']);
+            $admin->put('/support/routing-settings', [AdminSupportController::class, 'updateRoutingSettings']);
             $admin->get('/support/tags', [AdminSupportController::class, 'listTags']);
             $admin->post('/support/tags', [AdminSupportController::class, 'createTag']);
             $admin->put('/support/tags/{id:[0-9]+}', [AdminSupportController::class, 'updateTag']);

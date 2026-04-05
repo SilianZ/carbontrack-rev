@@ -50,8 +50,19 @@ const EMPTY_RULE_FORM = {
   match_time_end: '',
   timezone: 'Asia/Shanghai',
   assign_to: 'none',
+  score_boost: 0,
+  required_agent_level: 'none',
+  skill_hints: '',
   tag_ids: [],
-  stop_processing: true,
+};
+
+const EMPTY_ROUTING_SETTINGS = {
+  ai_enabled: true,
+  ai_timeout_ms: 12000,
+  due_soon_minutes: 30,
+  weights: {},
+  fallback: {},
+  defaults: {},
 };
 
 function MetricCard({ icon, label, value, hint }) {
@@ -119,6 +130,8 @@ export default function AdminSupportOpsPage() {
   const [tagForm, setTagForm] = useState(EMPTY_TAG_FORM);
   const [ruleForm, setRuleForm] = useState(EMPTY_RULE_FORM);
   const [selectedAssigneeId, setSelectedAssigneeId] = useState(null);
+  const [routingSettingsForm, setRoutingSettingsForm] = useState(EMPTY_ROUTING_SETTINGS);
+  const [assigneeProfileForm, setAssigneeProfileForm] = useState(null);
 
   const assigneesQuery = useQuery(['admin-support-assignees'], async () => {
     const res = await adminAPI.getSupportAssignees();
@@ -138,6 +151,11 @@ export default function AdminSupportOpsPage() {
   const reportsQuery = useQuery(['admin-support-reports', reportDays], async () => {
     const res = await adminAPI.getSupportReports({ days: reportDays });
     return res.data?.data ?? {};
+  });
+
+  const routingSettingsQuery = useQuery(['admin-support-routing-settings'], async () => {
+    const res = await adminAPI.getSupportRoutingSettings();
+    return res.data?.data ?? EMPTY_ROUTING_SETTINGS;
   });
 
   const assigneeDetailQuery = useQuery(
@@ -197,6 +215,33 @@ export default function AdminSupportOpsPage() {
     }
   );
 
+  const saveRoutingSettingsMutation = useMutation(
+    async (payload) => adminAPI.updateSupportRoutingSettings(payload),
+    {
+      onSuccess: () => {
+        toast.success(t('adminSupport.messages.routingSettingsSaved'));
+        queryClient.invalidateQueries(['admin-support-routing-settings']);
+      },
+      onError: (error) => {
+        toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
+      },
+    }
+  );
+
+  const saveRoutingProfileMutation = useMutation(
+    async ({ id, payload }) => adminAPI.updateSupportAssigneeRoutingProfile(id, payload),
+    {
+      onSuccess: (_, variables) => {
+        toast.success(t('adminSupport.messages.profileSaved'));
+        queryClient.invalidateQueries(['admin-support-assignees']);
+        queryClient.invalidateQueries(['admin-support-assignee-detail', variables.id]);
+      },
+      onError: (error) => {
+        toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
+      },
+    }
+  );
+
   const summaryCards = useMemo(() => {
     const summary = reports.summary ?? {};
     return [
@@ -208,11 +253,11 @@ export default function AdminSupportOpsPage() {
         hint: t('adminSupport.summary.totalHint'),
       },
       {
-        key: 'autoAssigned',
+        key: 'smartAssigned',
         icon: Wand2,
-        label: t('adminSupport.summary.autoAssigned'),
-        value: summary.auto_assigned ?? 0,
-        hint: t('adminSupport.summary.autoAssignedHint'),
+        label: t('adminSupport.summary.smartAssigned'),
+        value: summary.smart_assignment_count ?? 0,
+        hint: t('adminSupport.summary.smartAssignedHint'),
       },
       {
         key: 'unassigned',
@@ -222,11 +267,11 @@ export default function AdminSupportOpsPage() {
         hint: t('adminSupport.summary.unassignedHint'),
       },
       {
-        key: 'avgResolution',
+        key: 'slaBreaches',
         icon: CheckCircle2,
-        label: t('adminSupport.summary.avgResolution'),
-        value: summary.avg_resolution_hours ?? '--',
-        hint: t('adminSupport.summary.avgResolutionHint'),
+        label: t('adminSupport.summary.slaBreaches'),
+        value: summary.sla_breach_count ?? 0,
+        hint: t('adminSupport.summary.slaBreachesHint'),
       },
     ];
   }, [reports.summary, t]);
@@ -258,6 +303,28 @@ export default function AdminSupportOpsPage() {
     });
   }, [assignees]);
 
+  useEffect(() => {
+    if (routingSettingsQuery.data) {
+      setRoutingSettingsForm(routingSettingsQuery.data);
+    }
+  }, [routingSettingsQuery.data]);
+
+  useEffect(() => {
+    if (assigneeDetail?.routing_profile) {
+      setAssigneeProfileForm({
+        level: assigneeDetail.routing_profile.level ?? 1,
+        skills: Array.isArray(assigneeDetail.routing_profile.skills) ? assigneeDetail.routing_profile.skills.join(', ') : '',
+        languages: Array.isArray(assigneeDetail.routing_profile.languages) ? assigneeDetail.routing_profile.languages.join(', ') : '',
+        max_active_tickets: assigneeDetail.routing_profile.max_active_tickets ?? 10,
+        is_auto_assignable: Boolean(assigneeDetail.routing_profile.is_auto_assignable),
+        status: assigneeDetail.routing_profile.status ?? 'active',
+        flat_boost: assigneeDetail.routing_profile.weight_overrides?.flat_boost ?? 0,
+      });
+    } else {
+      setAssigneeProfileForm(null);
+    }
+  }, [assigneeDetail]);
+
   const handleTagSave = () => {
     saveTagMutation.mutate({
       id: tagForm.id,
@@ -283,8 +350,42 @@ export default function AdminSupportOpsPage() {
       match_time_end: ruleForm.match_time_end || null,
       timezone: ruleForm.timezone.trim() || 'Asia/Shanghai',
       assign_to: ruleForm.assign_to === 'none' ? null : Number(ruleForm.assign_to),
+      score_boost: Number(ruleForm.score_boost || 0),
+      required_agent_level: ruleForm.required_agent_level === 'none' ? null : Number(ruleForm.required_agent_level),
+      skill_hints: ruleForm.skill_hints.split(',').map((item) => item.trim()).filter(Boolean),
       tag_ids: ruleForm.tag_ids,
-      stop_processing: Boolean(ruleForm.stop_processing),
+    });
+  };
+
+  const handleRoutingSettingsSave = () => {
+    saveRoutingSettingsMutation.mutate({
+      ai_enabled: Boolean(routingSettingsForm.ai_enabled),
+      ai_timeout_ms: Number(routingSettingsForm.ai_timeout_ms || 12000),
+      due_soon_minutes: Number(routingSettingsForm.due_soon_minutes || 30),
+      weights: routingSettingsForm.weights ?? {},
+      fallback: routingSettingsForm.fallback ?? {},
+      defaults: routingSettingsForm.defaults ?? {},
+    });
+  };
+
+  const handleAssigneeProfileSave = () => {
+    if (!selectedAssigneeId || !assigneeProfileForm) {
+      return;
+    }
+
+    saveRoutingProfileMutation.mutate({
+      id: selectedAssigneeId,
+      payload: {
+        level: Number(assigneeProfileForm.level || 1),
+        skills: assigneeProfileForm.skills.split(',').map((item) => item.trim()).filter(Boolean),
+        languages: assigneeProfileForm.languages.split(',').map((item) => item.trim()).filter(Boolean),
+        max_active_tickets: Number(assigneeProfileForm.max_active_tickets || 10),
+        is_auto_assignable: Boolean(assigneeProfileForm.is_auto_assignable),
+        status: assigneeProfileForm.status,
+        weight_overrides: {
+          flat_boost: Number(assigneeProfileForm.flat_boost || 0),
+        },
+      },
     });
   };
 
@@ -433,13 +534,62 @@ export default function AdminSupportOpsPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-border px-4 py-4">
-                      <p className="text-sm font-medium">{t('adminSupport.team.notesTitle')}</p>
-                      <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-500 dark:text-slate-400">
-                        {assigneeDetail.admin_notes || t('adminSupport.team.noNotes')}
-                      </p>
+                      <div className="rounded-2xl border border-border px-4 py-4">
+                        <p className="text-sm font-medium">{t('adminSupport.team.notesTitle')}</p>
+                        <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-500 dark:text-slate-400">
+                          {assigneeDetail.admin_notes || t('adminSupport.team.noNotes')}
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl border border-border px-4 py-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium">{t('adminSupport.team.routingProfileTitle')}</p>
+                          <Button className="rounded-full" size="sm" onClick={handleAssigneeProfileSave} loading={saveRoutingProfileMutation.isLoading}>
+                            <Save className="mr-2 h-4 w-4" />
+                            {t('adminSupport.actions.saveProfile')}
+                          </Button>
+                        </div>
+                        {assigneeProfileForm ? (
+                          <div className="mt-4 grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">{t('adminSupport.team.routingFields.level')}</label>
+                              <Input type="number" min="1" max="5" value={assigneeProfileForm.level} onChange={(event) => setAssigneeProfileForm((current) => ({ ...current, level: event.target.value }))} />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">{t('adminSupport.team.routingFields.maxActiveTickets')}</label>
+                              <Input type="number" min="1" value={assigneeProfileForm.max_active_tickets} onChange={(event) => setAssigneeProfileForm((current) => ({ ...current, max_active_tickets: event.target.value }))} />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">{t('adminSupport.team.routingFields.skills')}</label>
+                              <Input value={assigneeProfileForm.skills} onChange={(event) => setAssigneeProfileForm((current) => ({ ...current, skills: event.target.value }))} />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">{t('adminSupport.team.routingFields.languages')}</label>
+                              <Input value={assigneeProfileForm.languages} onChange={(event) => setAssigneeProfileForm((current) => ({ ...current, languages: event.target.value }))} />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">{t('adminSupport.team.routingFields.status')}</label>
+                              <Select value={assigneeProfileForm.status} onValueChange={(value) => setAssigneeProfileForm((current) => ({ ...current, status: value }))}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="active">{t('adminSupport.team.routingStatus.active')}</SelectItem>
+                                  <SelectItem value="backup">{t('adminSupport.team.routingStatus.backup')}</SelectItem>
+                                  <SelectItem value="offline">{t('adminSupport.team.routingStatus.offline')}</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">{t('adminSupport.team.routingFields.flatBoost')}</label>
+                              <Input type="number" step="0.1" value={assigneeProfileForm.flat_boost} onChange={(event) => setAssigneeProfileForm((current) => ({ ...current, flat_boost: event.target.value }))} />
+                            </div>
+                            <label className="flex items-center justify-between rounded-2xl border border-border px-4 py-3 md:col-span-2">
+                              <span className="text-sm font-medium">{t('adminSupport.team.routingFields.autoAssignable')}</span>
+                              <Switch checked={assigneeProfileForm.is_auto_assignable} onCheckedChange={(checked) => setAssigneeProfileForm((current) => ({ ...current, is_auto_assignable: checked }))} />
+                            </label>
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
                 )}
               </CardContent>
             </Card>
@@ -487,6 +637,7 @@ export default function AdminSupportOpsPage() {
               </div>
               <Tabs value={settingsTab} onValueChange={setSettingsTab}>
                 <TabsList className="rounded-2xl border border-border bg-card p-1">
+                  <TabsTrigger value="routing" className="rounded-xl border-r-0">{t('adminSupport.tabs.routing')}</TabsTrigger>
                   <TabsTrigger value="rules" className="rounded-xl border-r-0">{t('adminSupport.tabs.rules')}</TabsTrigger>
                   <TabsTrigger value="tags" className="rounded-xl border-r-0">{t('adminSupport.tabs.tags')}</TabsTrigger>
                   <TabsTrigger value="reports" className="rounded-xl border-r-0">{t('adminSupport.tabs.reports')}</TabsTrigger>
@@ -496,6 +647,56 @@ export default function AdminSupportOpsPage() {
           </Card>
 
           <Tabs value={settingsTab} onValueChange={setSettingsTab} className="space-y-6">
+        <TabsContent value="routing">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('adminSupport.routing.title')}</CardTitle>
+              <CardDescription>{t('adminSupport.routing.subtitle')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('adminSupport.routing.fields.aiTimeout')}</label>
+                  <Input type="number" value={routingSettingsForm.ai_timeout_ms ?? 12000} onChange={(event) => setRoutingSettingsForm((current) => ({ ...current, ai_timeout_ms: event.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('adminSupport.routing.fields.dueSoonMinutes')}</label>
+                  <Input type="number" value={routingSettingsForm.due_soon_minutes ?? 30} onChange={(event) => setRoutingSettingsForm((current) => ({ ...current, due_soon_minutes: event.target.value }))} />
+                </div>
+                <label className="flex items-center justify-between rounded-2xl border border-border px-4 py-3">
+                  <span className="text-sm font-medium">{t('adminSupport.routing.fields.aiEnabled')}</span>
+                  <Switch checked={Boolean(routingSettingsForm.ai_enabled)} onCheckedChange={(checked) => setRoutingSettingsForm((current) => ({ ...current, ai_enabled: checked }))} />
+                </label>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('adminSupport.routing.fields.defaultFirstResponse')}</label>
+                  <Input type="number" value={routingSettingsForm.defaults?.first_response_minutes ?? 240} onChange={(event) => setRoutingSettingsForm((current) => ({ ...current, defaults: { ...current.defaults, first_response_minutes: Number(event.target.value) } }))} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('adminSupport.routing.fields.defaultResolution')}</label>
+                  <Input type="number" value={routingSettingsForm.defaults?.resolution_minutes ?? 1440} onChange={(event) => setRoutingSettingsForm((current) => ({ ...current, defaults: { ...current.defaults, resolution_minutes: Number(event.target.value) } }))} />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {Object.entries(routingSettingsForm.weights ?? {}).map(([key, value]) => (
+                  <div key={key} className="space-y-2">
+                    <label className="text-sm font-medium">{t(`adminSupport.routing.weights.${key}`, key)}</label>
+                    <Input type="number" step="0.1" value={value} onChange={(event) => setRoutingSettingsForm((current) => ({ ...current, weights: { ...current.weights, [key]: Number(event.target.value) } }))} />
+                  </div>
+                ))}
+              </div>
+
+              <Button className="rounded-full" onClick={handleRoutingSettingsSave} loading={saveRoutingSettingsMutation.isLoading}>
+                <Save className="mr-2 h-4 w-4" />
+                {t('adminSupport.actions.saveRoutingSettings')}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="rules" className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
           <Card>
             <CardHeader>
@@ -525,6 +726,7 @@ export default function AdminSupportOpsPage() {
                     {rule.match_category ? <Badge variant="outline">{t(`support.categories.${rule.match_category}`)}</Badge> : null}
                     {rule.match_priority ? <Badge variant="outline">{t(`support.priorities.${rule.match_priority}`)}</Badge> : null}
                     {rule.assign_user?.username ? <Badge variant="outline">{rule.assign_user.username}</Badge> : null}
+                    <Badge variant="outline">{t('adminSupport.rules.scoreBoostBadge', { value: rule.score_boost ?? 0 })}</Badge>
                   </div>
                 </button>
               ))}
@@ -630,6 +832,29 @@ export default function AdminSupportOpsPage() {
                   </Select>
                 </div>
 
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('adminSupport.rules.fields.scoreBoost')}</label>
+                  <Input type="number" step="0.1" value={ruleForm.score_boost} onChange={(event) => setRuleForm((current) => ({ ...current, score_boost: event.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('adminSupport.rules.fields.requiredAgentLevel')}</label>
+                  <Select value={ruleForm.required_agent_level} onValueChange={(value) => setRuleForm((current) => ({ ...current, required_agent_level: value }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">{t('adminSupport.rules.noRequiredLevel')}</SelectItem>
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <SelectItem key={level} value={String(level)}>{t('adminSupport.rules.requiredLevelLabel', { level })}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('adminSupport.rules.fields.skillHints')}</label>
+                  <Input value={ruleForm.skill_hints} onChange={(event) => setRuleForm((current) => ({ ...current, skill_hints: event.target.value }))} />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t('adminSupport.rules.fields.tags')}</label>
                 <div className="grid gap-3 rounded-2xl border border-border px-4 py-3 md:grid-cols-2">
@@ -657,10 +882,6 @@ export default function AdminSupportOpsPage() {
                 <label className="flex items-center justify-between rounded-2xl border border-border px-4 py-3">
                   <span className="text-sm font-medium">{t('adminSupport.rules.fields.active')}</span>
                   <Switch checked={ruleForm.is_active} onCheckedChange={(checked) => setRuleForm((current) => ({ ...current, is_active: checked }))} />
-                </label>
-                <label className="flex items-center justify-between rounded-2xl border border-border px-4 py-3">
-                  <span className="text-sm font-medium">{t('adminSupport.rules.fields.stopProcessing')}</span>
-                  <Switch checked={ruleForm.stop_processing} onCheckedChange={(checked) => setRuleForm((current) => ({ ...current, stop_processing: checked }))} />
                 </label>
               </div>
 
@@ -801,6 +1022,12 @@ export default function AdminSupportOpsPage() {
                     renderLabel={(item) => item.label}
                   />
                   <BreakdownSection
+                    title={t('adminSupport.reports.byAgentLevel')}
+                    description={t('adminSupport.reports.byAgentLevelDescription')}
+                    items={reports.by_agent_level}
+                    renderLabel={(item) => t('adminSupport.reports.agentLevelLabel', { level: item.level })}
+                  />
+                  <BreakdownSection
                     title={t('adminSupport.reports.byTag')}
                     description={t('adminSupport.reports.byTagDescription')}
                     items={reports.by_tag}
@@ -812,6 +1039,13 @@ export default function AdminSupportOpsPage() {
                     items={reports.rule_hits}
                     renderLabel={(item) => item.name}
                     renderMeta={(item) => item.trigger_count}
+                  />
+                  <BreakdownSection
+                    title={t('adminSupport.reports.routingOutcomes')}
+                    description={t('adminSupport.reports.routingOutcomesDescription')}
+                    items={reports.routing_outcomes}
+                    renderLabel={(item) => item.trigger}
+                    renderMeta={(item) => `${item.count} · AI ${item.used_ai_count ?? 0}`}
                   />
                 </div>
               )}
@@ -846,7 +1080,7 @@ export default function AdminSupportOpsPage() {
         </TabsContent>
       </Tabs>
 
-      {(tagsQuery.isError || rulesQuery.isError || reportsQuery.isError || assigneesQuery.isError) && (
+      {(tagsQuery.isError || rulesQuery.isError || reportsQuery.isError || assigneesQuery.isError || routingSettingsQuery.isError) && (
         <Alert variant="destructive">
           <AlertDescription>{t('adminSupport.messages.loadFailed')}</AlertDescription>
         </Alert>
@@ -880,7 +1114,9 @@ function hydrateRuleForm(rule) {
     match_time_end: rule.match_time_end ?? '',
     timezone: rule.timezone ?? 'Asia/Shanghai',
     assign_to: rule.assign_to ? String(rule.assign_to) : 'none',
+    score_boost: rule.score_boost ?? 0,
+    required_agent_level: rule.required_agent_level ? String(rule.required_agent_level) : 'none',
+    skill_hints: Array.isArray(rule.skill_hints) ? rule.skill_hints.join(', ') : '',
     tag_ids: Array.isArray(rule.tag_ids) ? rule.tag_ids : [],
-    stop_processing: Boolean(rule.stop_processing),
   };
 }

@@ -421,6 +421,9 @@ export const adminAPI = {
   // Support operations
   getSupportAssignees: () => api.get('/admin/support/assignees'),
   getSupportAssigneeDetail: (id) => api.get(`/admin/support/assignees/${id}`),
+  updateSupportAssigneeRoutingProfile: (id, data) => api.put(`/admin/support/assignees/${id}/routing-profile`, data),
+  getSupportRoutingSettings: () => api.get('/admin/support/routing-settings'),
+  updateSupportRoutingSettings: (data) => api.put('/admin/support/routing-settings', data),
   getSupportTags: () => api.get('/admin/support/tags'),
   createSupportTag: (data) => api.post('/admin/support/tags', data),
   updateSupportTag: (id, data) => api.put(`/admin/support/tags/${id}`, data),

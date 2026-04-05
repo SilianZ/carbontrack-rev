@@ -81,6 +81,14 @@ const ROUTE_COPY = {
     zh: { label: 'AI 工作台', description: '回到 AI 指挥台，继续治理会话与确认动作。' },
     en: { label: 'AI workspace', description: 'Work inside the dedicated admin AI workspace.' },
   },
+  supportOps: {
+    zh: { label: '客服运营', description: '管理智能分单、客服等级与容量、评分规则、SLA 升级与转单通知。' },
+    en: { label: 'Support operations', description: 'Manage smart routing, agent levels and capacity, scoring rules, SLA escalation, and assignment notifications.' },
+  },
+  supportPortal: {
+    zh: { label: '客服工作台', description: '处理工单队列、查看路由摘要，并完成目标客服转单同意。' },
+    en: { label: 'Support desk', description: 'Work the live ticket queue, inspect routing summaries, and accept transfer requests as the target assignee.' },
+  },
   llmUsage: {
     zh: { label: 'LLM 使用额度', description: '查看模型调用、令牌消耗、会话与提示词审计。' },
     en: { label: 'LLM usage', description: 'Monitor quota usage, token consumption, sessions, and prompt audits.' },

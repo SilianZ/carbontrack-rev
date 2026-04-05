@@ -2146,7 +2146,14 @@
       "updateSuccess": "更新成功",
       "deleteSuccess": "删除成功",
       "quotaOverride": "配额单独设置",
-      "noQuotasAvailable": "暂无可配置的配额项目"
+      "noQuotasAvailable": "暂无可配置的配额项目",
+      "supportRoutingTitle": "客诉分单策略",
+      "supportFirstResponseMinutes": "首响 SLA（分钟）",
+      "supportResolutionMinutes": "解决 SLA（分钟）",
+      "supportRoutingWeight": "路由权重",
+      "supportMinAgentLevel": "最低客服等级",
+      "supportOverdueBoost": "逾期加权",
+      "supportTierLabel": "层级标签"
     },
     "activities": {
       "title": "活动管理",
@@ -3970,7 +3977,7 @@
       },
       "transfer": {
         "title": "申请转单",
-        "subtitle": "当前处理客服可提交转单申请，由管理员审批。",
+        "subtitle": "当前处理人可以发起转单，目标客服需自行接受或拒绝。",
         "target": "目标客服",
         "targetPlaceholder": "选择目标客服",
         "targetRequired": "请先选择目标客服。",
@@ -3980,15 +3987,16 @@
         "requestCreated": "转单申请已提交",
         "reviewSaved": "转单审批已保存",
         "historyTitle": "转单记录",
-        "historySubtitle": "查看客服之间的转单申请与管理员审批结果。",
+        "historySubtitle": "查看转单申请，以及谁接受、拒绝或取消了这次流转。",
         "empty": "暂无转单记录。",
-        "approve": "批准转单",
+        "approve": "接受转单",
         "reject": "拒绝转单",
-        "pendingHint": "当前有 {{count}} 条待审批转单申请。",
+        "pendingHint": "仍有 {{count}} 条转单申请待处理。",
         "requestedBy": "申请人：{{name}}",
         "requestLine": "{{from}} -> {{to}}",
         "reviewNoteLabel": "审批备注",
-        "reviewPlaceholder": "填写审批意见，可选。"
+        "reviewPlaceholder": "填写审批意见，可选。",
+        "cancel": "取消申请"
       },
       "feedbackTitle": "用户评价",
       "feedbackSubtitle": "工单结束后，用户可对参与处理的客服分别打分并留言。",
@@ -4009,7 +4017,19 @@
         "total": "当前可见",
         "open": "待处理",
         "urgent": "紧急"
-      }
+      },
+      "slaBadge": "SLA：{{status}}",
+      "firstResponseDue": "首响截止 {{value}}",
+      "resolutionDue": "解决截止 {{value}}",
+      "assignmentSource": "来源：{{value}}",
+      "routingFallback": "回退：{{value}}",
+      "firstResponseDueLabel": "首响截止",
+      "resolutionDueLabel": "解决截止",
+      "assignmentSourceLabel": "派单来源",
+      "escalationLevelLabel": "升级层级",
+      "routingLastRunLabel": "最近路由",
+      "routingFallbackLabel": "回退原因",
+      "assignmentLockedHint": "此工单已被管理员锁定派单，系统不会自动改派。"
     }
   },
   "adminSupport": {
@@ -4020,7 +4040,8 @@
       "settings": "设置中心",
       "rules": "派单规则",
       "tags": "标签",
-      "reports": "报表"
+      "reports": "报表",
+      "routing": "智能分单"
     },
     "summary": {
       "total": "工单总量",
@@ -4030,11 +4051,17 @@
       "unassigned": "未分配",
       "unassignedHint": "仍需人工接手的工单数。",
       "avgResolution": "平均解决时长",
-      "avgResolutionHint": "已解决工单的平均耗时（小时）。"
+      "avgResolutionHint": "已解决工单的平均耗时（小时）。",
+      "smartAssigned": "智能分单",
+      "smartAssignedHint": "由统一评分引擎自动分派的工单数。",
+      "slaBreaches": "SLA 超时",
+      "slaBreachesHint": "当前已违约或升级中的工单数。"
     },
     "actions": {
       "saveRule": "保存规则",
-      "saveTag": "保存标签"
+      "saveTag": "保存标签",
+      "saveProfile": "保存档案",
+      "saveRoutingSettings": "保存分单设置"
     },
     "common": {
       "active": "启用",
@@ -4048,7 +4075,9 @@
     "messages": {
       "loadFailed": "支持运营数据加载失败。",
       "ruleSaved": "规则已保存",
-      "tagSaved": "标签已保存"
+      "tagSaved": "标签已保存",
+      "routingSettingsSaved": "分单设置已保存",
+      "profileSaved": "客服档案已保存"
     },
     "roles": {
       "user": "用户",
@@ -4083,6 +4112,21 @@
         "group": "分组",
         "lastLogin": "最后登录",
         "createdAt": "创建时间"
+      },
+      "routingProfileTitle": "分单档案",
+      "routingFields": {
+        "level": "客服等级",
+        "maxActiveTickets": "最大处理中工单",
+        "skills": "技能标签",
+        "languages": "语言能力",
+        "status": "分单状态",
+        "flatBoost": "固定加分",
+        "autoAssignable": "允许自动分单"
+      },
+      "routingStatus": {
+        "active": "在线",
+        "backup": "备援",
+        "offline": "离线"
       }
     },
     "rules": {
@@ -4106,8 +4150,14 @@
         "assignTo": "派单给",
         "tags": "命中标签",
         "active": "启用规则",
-        "stopProcessing": "命中后停止继续匹配"
-      }
+        "stopProcessing": "命中后停止继续匹配",
+        "scoreBoost": "命中加分",
+        "requiredAgentLevel": "最低客服等级",
+        "skillHints": "技能提示"
+      },
+      "scoreBoostBadge": "加分 {{value}}",
+      "noRequiredLevel": "不限等级",
+      "requiredLevelLabel": "{{level}} 级及以上"
     },
     "tags": {
       "listTitle": "标签列表",
@@ -4140,7 +4190,12 @@
       "ruleHits": "规则触发",
       "ruleHitsDescription": "当前周期内各规则命中次数。",
       "timelineTitle": "时间线",
-      "timelineSubtitle": "按日查看工单进入量变化。"
+      "timelineSubtitle": "按日查看工单进入量变化。",
+      "byAgentLevel": "按客服等级",
+      "byAgentLevelDescription": "当前客服档案的等级分布。",
+      "agentLevelLabel": "{{level}} 级",
+      "routingOutcomes": "路由结果",
+      "routingOutcomesDescription": "按触发来源与 AI 使用情况统计的路由次数。"
     },
     "weekdays": {
       "mon": "周一",
@@ -4158,6 +4213,29 @@
       "rose": "玫红",
       "violet": "紫罗兰",
       "slate": "石板灰"
+    },
+    "routing": {
+      "title": "智能分单设置",
+      "subtitle": "配置 AI 分诊、默认 SLA 与统一评分权重。",
+      "fields": {
+        "aiTimeout": "AI 超时（毫秒）",
+        "dueSoonMinutes": "临近到期阈值（分钟）",
+        "aiEnabled": "启用 AI 分诊",
+        "defaultFirstResponse": "默认首响 SLA（分钟）",
+        "defaultResolution": "默认解决 SLA（分钟）"
+      },
+      "weights": {
+        "group_weight": "用户组权重",
+        "priority_weight": "优先级权重",
+        "severity_weight": "严重度权重",
+        "escalation_weight": "升级风险权重",
+        "rule_weight": "规则命中权重",
+        "skill_weight": "技能匹配权重",
+        "level_weight": "客服等级权重",
+        "feedback_weight": "反馈表现权重",
+        "overdue_weight": "逾期权重",
+        "load_penalty_weight": "负载惩罚权重"
+      }
     }
   }
 }

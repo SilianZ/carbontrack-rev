@@ -122,7 +122,7 @@ export default function SupportTicketsPage() {
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{assignee.username || assignee.email || `#${assignee.id}`}</p>
                     <p className="truncate text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                      {t(`support.portal.roles.${assignee.role}`)}
+                      {t(`support.portal.roles.${assignee.role}`)} · L{assignee.routing_level ?? 1}
                     </p>
                   </div>
                 </div>
@@ -231,6 +231,11 @@ export default function SupportTicketsPage() {
                   <Badge variant={getPriorityVariant(ticket.priority)}>
                     {t(`support.priorities.${ticket.priority}`)}
                   </Badge>
+                  {ticket.sla_status ? (
+                    <Badge variant="outline">
+                      {t('support.portal.slaBadge', { status: ticket.sla_status })}
+                    </Badge>
+                  ) : null}
                   {(ticket.tags ?? []).map((tag) => (
                     <Badge key={tag.id} variant="outline" className={getTagTone(tag.color)}>
                       {tag.name}
@@ -244,6 +249,10 @@ export default function SupportTicketsPage() {
                 <span>{ticket.requester?.email}</span>
                 <span>{formatSupportDate(ticket.last_replied_at || ticket.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}</span>
                 <span>{t('support.portal.messageCount', { count: ticket.message_count  })}</span>
+                {ticket.first_response_due_at ? <span>{t('support.portal.firstResponseDue', { value: formatSupportDate(ticket.first_response_due_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US') })}</span> : null}
+                {ticket.resolution_due_at ? <span>{t('support.portal.resolutionDue', { value: formatSupportDate(ticket.resolution_due_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US') })}</span> : null}
+                {ticket.assignment_source ? <span>{t('support.portal.assignmentSource', { value: ticket.assignment_source })}</span> : null}
+                {ticket.routing_summary?.fallback_reason ? <span>{t('support.portal.routingFallback', { value: ticket.routing_summary.fallback_reason })}</span> : null}
                 <span className="inline-flex items-center gap-1">
                   {ticket.assigned_user?.username || t('support.portal.unassigned')}
                   <ArrowRight className="h-3.5 w-3.5" />
