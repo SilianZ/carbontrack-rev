@@ -82,7 +82,7 @@ export default function TicketDetailPage() {
         setTurnstileToken('');
         turnstileRef.current?.reset?.();
         queryClient.invalidateQueries(['ticket-detail', ticketId]);
-        queryClient.invalidateQueries('user-tickets');
+        queryClient.invalidateQueries(['user-tickets']);
       },
       onError: (error) => {
         const message = error?.response?.data?.message || error.message || t('errors.operationFailed');

@@ -42,12 +42,13 @@ class SupportMiddleware implements MiddlewareInterface
         }
     }
 
-    private function jsonError(int $status, string $error, string $code): Response
+    private function jsonError(int $status, string $message, string $code): Response
     {
         $response = new \Slim\Psr7\Response();
         $response->getBody()->write(json_encode([
             'success' => false,
-            'error' => $error,
+            'message' => $message,
+            'error' => $message,
             'code' => $code,
         ]));
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { ArrowRight, Clock3, Ticket } from 'lucide-react';
 
@@ -19,6 +19,7 @@ import {
 
 export default function TicketsPage() {
   const { t, currentLanguage } = useTranslation();
+  const navigate = useNavigate();
   const [status, setStatus] = useState('all');
 
   const ticketsQuery = useQuery(
@@ -60,7 +61,7 @@ export default function TicketsPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button className="rounded-full" onClick={() => { window.location.href = '/help'; }}>
+          <Button className="rounded-full" onClick={() => navigate('/help')}>
             <Ticket className="mr-2 h-4 w-4" />
             {t('support.userList.newTicket')}
           </Button>

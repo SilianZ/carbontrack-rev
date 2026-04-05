@@ -94,8 +94,8 @@ export default function HelpPage() {
         setAttachments([]);
         setTurnstileToken('');
         turnstileRef.current?.reset?.();
-        queryClient.invalidateQueries('help-recent-tickets');
-        queryClient.invalidateQueries('user-tickets');
+        queryClient.invalidateQueries(['help-recent-tickets']);
+        queryClient.invalidateQueries(['user-tickets']);
         if (ticket?.id) {
           navigate(`/tickets/${ticket.id}`);
         }
