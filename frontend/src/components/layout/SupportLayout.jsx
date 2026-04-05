@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Headset, Inbox, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 import { Navbar } from './Navbar';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -33,7 +33,7 @@ export default function SupportLayout() {
       <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.18),_transparent_35%),radial-gradient(circle_at_top_right,_rgba(249,115,22,0.2),_transparent_30%),linear-gradient(180deg,_rgba(15,23,42,0.98),_rgba(2,6,23,1))]" />
         <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-8">
-          <motion.aside
+          <Motion.aside
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.28, ease: 'easeOut' }}
@@ -98,9 +98,9 @@ export default function SupportLayout() {
                 {t('support.portal.tip')}
               </p>
             </div>
-          </motion.aside>
+          </Motion.aside>
 
-          <motion.section
+          <Motion.section
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.32, ease: 'easeOut', delay: 0.04 }}
@@ -120,7 +120,7 @@ export default function SupportLayout() {
             <main className="min-w-0 px-6 py-6">
               <Outlet />
             </main>
-          </motion.section>
+          </Motion.section>
         </div>
       </div>
     </div>
