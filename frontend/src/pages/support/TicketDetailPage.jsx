@@ -12,6 +12,7 @@ import {
   Paperclip,
   Save,
   Send,
+  Star,
   Shuffle,
   X,
 } from 'lucide-react';
@@ -86,6 +87,21 @@ function transferStatusTone(status) {
     default:
       return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200';
   }
+}
+
+const FEEDBACK_RATING_VALUES = [1, 2, 3, 4, 5];
+
+function FeedbackStars({ value }) {
+  return (
+    <div className="flex items-center gap-1">
+      {FEEDBACK_RATING_VALUES.map((ratingValue) => (
+        <Star
+          key={ratingValue}
+          className={`h-4 w-4 ${ratingValue <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'}`}
+        />
+      ))}
+    </div>
+  );
 }
 
 export default function SupportTicketDetailPage() {
@@ -211,6 +227,7 @@ export default function SupportTicketDetailPage() {
     [assignees, ticket?.assigned_to]
   );
   const pendingTransferRequests = ticket?.transfer_requests?.filter((entry) => entry.status === 'pending') ?? [];
+  const feedbackEntries = ticket?.feedback ?? [];
 
   useEffect(() => {
     if (!ticket) {
@@ -607,6 +624,49 @@ export default function SupportTicketDetailPage() {
                   {t('support.portal.transfer.pendingHint', { count: pendingTransferRequests.length })}
                 </p>
               ) : null}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('support.portal.feedbackTitle')}</CardTitle>
+              <CardDescription>{t('support.portal.feedbackSubtitle')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {feedbackEntries.length === 0 && (
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.feedbackEmpty')}</p>
+              )}
+
+              {feedbackEntries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="space-y-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/30"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {entry.rated_user?.username || entry.rated_user?.email || `#${entry.rated_user_id}`}
+                      </p>
+                      <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                        {t('support.portal.feedbackRatedBy', {
+                          name: entry.reviewer?.username || entry.reviewer?.email || `#${entry.user_id}`,
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                      <FeedbackStars value={entry.rating} />
+                      <span>
+                        {formatSupportDate(entry.updated_at || entry.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
+                      </span>
+                    </div>
+                  </div>
+                  {entry.comment ? (
+                    <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{entry.comment}</p>
+                  ) : (
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.feedbackNoComment')}</p>
+                  )}
+                </div>
+              ))}
             </CardContent>
           </Card>
 

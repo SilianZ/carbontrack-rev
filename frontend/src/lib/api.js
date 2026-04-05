@@ -231,6 +231,7 @@ export const ticketAPI = {
   getTickets: (params = {}) => api.get('/tickets', { params }),
   getTicket: (ticketId) => api.get(`/tickets/${ticketId}`),
   replyTicket: (ticketId, data) => api.post(`/tickets/${ticketId}/messages`, data),
+  submitFeedback: (ticketId, data) => api.post(`/tickets/${ticketId}/feedback`, data),
 };
 
 export const supportAPI = {
@@ -296,14 +297,6 @@ export const adminAPI = {
         query.q = trimmed;
       }
       delete query.search;
-    }
-    if (typeof query.role === 'string' && query.is_admin === undefined) {
-      if (query.role === 'admin') {
-        query.is_admin = 1;
-      } else if (query.role === 'user') {
-        query.is_admin = 0;
-      }
-      delete query.role;
     }
     if (typeof query.userUuid === 'string') {
       const trimmed = query.userUuid.trim();

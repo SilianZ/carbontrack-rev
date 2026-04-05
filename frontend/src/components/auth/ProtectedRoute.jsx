@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Navigate, useLocation } from 'react-router-dom';
-import { checkAuthStatus, hasPermission } from '../../lib/auth';
+import { checkAuthStatus, getDefaultAuthenticatedRoute, hasPermission, hasSupportPortalAccess } from '../../lib/auth';
 import { useTranslation } from '../../hooks/useTranslation';
 
 function AccessDeniedState({ title, description, backLabel }) {
@@ -54,7 +54,7 @@ export function ProtectedRoute({
   }
 
   const { isAuthenticated, user } = authState;
-  const hasSupportAccess = Boolean(user?.is_admin || user?.is_support || user?.role === 'support' || user?.role === 'admin');
+  const hasSupportAccess = hasSupportPortalAccess(user);
 
   // 需要认证但未登录
   if (requireAuth && !isAuthenticated) {
@@ -65,7 +65,7 @@ export function ProtectedRoute({
 
   // 不需要认证但已登录（如登录页面）
   if (!requireAuth && isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={getDefaultAuthenticatedRoute(user)} replace />;
   }
 
   // 基于资料完整度的引导：如果需要认证且用户资料缺少学校或班级，则跳转到 /onboarding

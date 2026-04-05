@@ -4,6 +4,7 @@ import { useQuery } from 'react-query';
 import { ArrowRight, Search, UserRound } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
+import { useDebouncedValue } from '../../hooks/useLogSearch';
 import { supportAPI } from '../../lib/api';
 import { formatSupportDate, getPriorityVariant, getStatusTone, getTagTone, TICKET_STATUS_OPTIONS } from '../../lib/supportTickets';
 import { Input } from '../../components/ui/Input';
@@ -22,14 +23,15 @@ export default function SupportTicketsPage() {
   const [status, setStatus] = useState('all');
   const [assignee, setAssignee] = useState('all');
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search.trim(), 400);
 
   const ticketsQuery = useQuery(
-    ['support-queue', status, assignee, search],
+    ['support-queue', status, assignee, debouncedSearch],
     () => supportAPI.getTickets({
       limit: 30,
       ...(status !== 'all' ? { status } : {}),
       ...(assignee !== 'all' ? { assigned_to: assignee === 'none' ? 0 : Number(assignee) } : {}),
-      ...(search.trim() ? { q: search.trim() } : {}),
+      ...(debouncedSearch ? { q: debouncedSearch } : {}),
     }),
     {
       keepPreviousData: true,

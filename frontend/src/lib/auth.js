@@ -25,6 +25,13 @@ const hasMinimalDevUserInfoFields = (userInfo) => (
   && userInfo.id != null
 );
 
+export const hasSupportPortalAccess = (user) => Boolean(
+  user?.is_admin
+  || user?.is_support
+  || user?.role === 'support'
+  || user?.role === 'admin'
+);
+
 const parseDevUserInfoFromEnv = () => {
   const rawJson = String(import.meta.env?.VITE_DEV_AUTH_USER_INFO_JSON || '').trim();
   if (rawJson) {
@@ -131,10 +138,13 @@ export const userManager = {
   },
 
   isSupport() {
-    const user = this.getUser();
-    return user?.is_admin || user?.is_support || user?.role === 'support' || user?.role === 'admin' || false;
+    return hasSupportPortalAccess(this.getUser());
   }
 };
+
+export const getDefaultAuthenticatedRoute = (user = userManager.getUser()) => (
+  hasSupportPortalAccess(user) ? '/support/' : '/dashboard'
+);
 
 export const bootstrapDevAuthFromEnv = () => {
   if (!import.meta.env.DEV || !isDevTruthy(import.meta.env?.VITE_ENABLE_DEV_AUTH_FROM_ENV)) {
@@ -310,7 +320,7 @@ export const redirectToLogin = (returnUrl = null) => {
 // 获取返回URL
 export const getReturnUrl = () => {
   const params = new URLSearchParams(window.location.search);
-  return params.get('return') || '/dashboard';
+  return params.get('return') || getDefaultAuthenticatedRoute();
 };
 
 // 权限检查
@@ -453,6 +463,7 @@ export default {
   authAPI,
   checkAuthStatus,
   redirectToLogin,
+  getDefaultAuthenticatedRoute,
   getReturnUrl,
   hasPermission,
   isSupportUser,

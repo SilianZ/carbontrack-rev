@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
-import { ArrowLeft, ImageIcon, MessageSquareMore, Paperclip, Send } from 'lucide-react';
+import { ArrowLeft, ImageIcon, Paperclip, Send, Star } from 'lucide-react';
 
 import { useTranslation } from '../hooks/useTranslation';
 import { ticketAPI } from '../lib/api';
@@ -45,13 +45,45 @@ function AttachmentList({ attachments }) {
   );
 }
 
+const FEEDBACK_RATING_VALUES = [1, 2, 3, 4, 5];
+
+function buildFeedbackDrafts(ticket) {
+  const drafts = {};
+  const feedbackEntries = ticket?.feedback ?? [];
+
+  for (const candidate of ticket?.feedback_candidates ?? []) {
+    const existing = feedbackEntries.find((entry) => Number(entry.rated_user_id) === Number(candidate.id));
+    drafts[candidate.id] = {
+      rating: existing?.rating ?? 0,
+      comment: existing?.comment ?? '',
+    };
+  }
+
+  return drafts;
+}
+
+function FeedbackStars({ value }) {
+  return (
+    <div className="flex items-center gap-1">
+      {FEEDBACK_RATING_VALUES.map((ratingValue) => (
+        <Star
+          key={ratingValue}
+          className={`h-4 w-4 ${ratingValue <= value ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/50'}`}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function TicketDetailPage() {
   const { ticketId } = useParams();
   const { t, currentLanguage } = useTranslation();
   const queryClient = useQueryClient();
   const turnstileRef = useRef(null);
+  const dirtyFeedbackDraftIdsRef = useRef(new Set());
   const [turnstileToken, setTurnstileToken] = useState('');
   const [attachments, setAttachments] = useState([]);
+  const [feedbackDrafts, setFeedbackDrafts] = useState({});
 
   const {
     register,
@@ -93,11 +125,55 @@ export default function TicketDetailPage() {
     }
   );
 
+  const feedbackMutation = useMutation(
+    ({ ratedUserId, rating, comment }) => ticketAPI.submitFeedback(ticketId, {
+      rated_user_id: ratedUserId,
+      rating,
+      comment,
+    }),
+    {
+      onSuccess: (_, variables) => {
+        toast.success(t('support.thread.feedbackSaved'));
+        dirtyFeedbackDraftIdsRef.current.delete(String(variables.ratedUserId));
+        queryClient.invalidateQueries(['ticket-detail', ticketId]);
+        queryClient.invalidateQueries(['user-tickets']);
+        setFeedbackDrafts((current) => ({
+          ...current,
+          [variables.ratedUserId]: {
+            rating: variables.rating,
+            comment: variables.comment,
+          },
+        }));
+      },
+      onError: (error) => {
+        const message = error?.response?.data?.message || error.message || t('errors.operationFailed');
+        toast.error(message);
+      },
+    }
+  );
+
   const ticket = ticketQuery.data?.data?.data;
 
   useEffect(() => {
     setAttachments([]);
+    setFeedbackDrafts({});
+    dirtyFeedbackDraftIdsRef.current.clear();
   }, [ticketId]);
+
+  useEffect(() => {
+    const nextDrafts = buildFeedbackDrafts(ticket);
+    setFeedbackDrafts((current) => {
+      const mergedDrafts = { ...nextDrafts };
+
+      for (const [candidateId, draft] of Object.entries(current)) {
+        if (dirtyFeedbackDraftIdsRef.current.has(candidateId) && nextDrafts[candidateId]) {
+          mergedDrafts[candidateId] = draft;
+        }
+      }
+
+      return mergedDrafts;
+    });
+  }, [ticket]);
 
   const onSubmit = handleSubmit((values) => {
     if (!turnstileToken) {
@@ -133,6 +209,35 @@ export default function TicketDetailPage() {
   }
 
   const isClosed = ticket.status === 'closed';
+  const feedbackCandidates = ticket.feedback_candidates ?? [];
+  const feedbackEntries = ticket.feedback ?? [];
+  const canLeaveFeedback = ['resolved', 'closed'].includes(ticket.status);
+
+  const updateFeedbackDraft = (ratedUserId, patch) => {
+    dirtyFeedbackDraftIdsRef.current.add(String(ratedUserId));
+    setFeedbackDrafts((current) => ({
+      ...current,
+      [ratedUserId]: {
+        rating: current[ratedUserId]?.rating ?? 0,
+        comment: current[ratedUserId]?.comment ?? '',
+        ...patch,
+      },
+    }));
+  };
+
+  const submitFeedback = (candidate) => {
+    const draft = feedbackDrafts[candidate.id] ?? { rating: 0, comment: '' };
+    if (!draft.rating) {
+      toast.error(t('support.thread.feedbackRatingRequired'));
+      return;
+    }
+
+    feedbackMutation.mutate({
+      ratedUserId: candidate.id,
+      rating: draft.rating,
+      comment: draft.comment?.trim() || '',
+    });
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
@@ -145,9 +250,6 @@ export default function TicketDetailPage() {
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">#{ticket.id}</p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight">{ticket.subject}</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-            {t('support.thread.headerDescription')}
-          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Badge className={getStatusTone(ticket.status)} variant="outline">
@@ -211,6 +313,95 @@ export default function TicketDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {(canLeaveFeedback || feedbackEntries.length > 0) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('support.thread.feedbackTitle')}</CardTitle>
+                <CardDescription>{t('support.thread.feedbackSubtitle')}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {feedbackCandidates.length === 0 && (
+                  <Alert>
+                    <AlertDescription>{t('support.thread.feedbackEmpty')}</AlertDescription>
+                  </Alert>
+                )}
+
+                {feedbackCandidates.map((candidate) => {
+                  const draft = feedbackDrafts[candidate.id] ?? { rating: 0, comment: '' };
+                  const existing = feedbackEntries.find((entry) => Number(entry.rated_user_id) === Number(candidate.id));
+
+                  return (
+                    <div key={candidate.id} className="rounded-[1.4rem] border border-border bg-muted/20 p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">
+                            {candidate.username || candidate.email || `#${candidate.id}`}
+                          </p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                            {t(`support.portal.roles.${candidate.role}`)}
+                          </p>
+                        </div>
+                        {existing && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <FeedbackStars value={existing.rating} />
+                            <span>
+                              {t('support.thread.feedbackSavedAt', {
+                                date: formatSupportDate(existing.updated_at || existing.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US'),
+                              })}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {FEEDBACK_RATING_VALUES.map((ratingValue) => (
+                          <button
+                            key={ratingValue}
+                            type="button"
+                            onClick={() => updateFeedbackDraft(candidate.id, { rating: ratingValue })}
+                            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition ${
+                              ratingValue <= draft.rating
+                                ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200'
+                                : 'border-border bg-background text-muted-foreground hover:bg-muted'
+                            }`}
+                          >
+                            <Star className={`h-4 w-4 ${ratingValue <= draft.rating ? 'fill-current' : ''}`} />
+                            <span>{ratingValue}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm font-medium text-foreground">{t('support.thread.feedbackCommentLabel')}</p>
+                        <Textarea
+                          rows={3}
+                          value={draft.comment}
+                          onChange={(event) => updateFeedbackDraft(candidate.id, { comment: event.target.value })}
+                          placeholder={t('support.thread.feedbackCommentPlaceholder')}
+                        />
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                        <span className="text-xs text-muted-foreground">
+                          {existing ? t('support.thread.feedbackUpdateHint') : t('support.thread.feedbackHint')}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-full"
+                          onClick={() => submitFeedback(candidate)}
+                          loading={feedbackMutation.isLoading}
+                        >
+                          {existing ? t('support.thread.feedbackUpdate') : t('support.thread.feedbackSubmit')}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

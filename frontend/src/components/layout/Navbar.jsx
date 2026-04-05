@@ -13,10 +13,11 @@ import {
   LogOut,
   Bell,
   MessageSquare,
-  Info
+  Info,
+  Headset
 } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
-import { checkAuthStatus, authAPI } from '../../lib/auth';
+import { checkAuthStatus, authAPI, hasSupportPortalAccess } from '../../lib/auth';
 import { useUnreadMessagesCount } from '../../hooks/useUnreadMessagesCount';
 import LanguageSwitcher from '../LanguageSwitcher';
 import { ThemeToggle } from '../ThemeToggle';
@@ -124,6 +125,7 @@ export function Navbar() {
   }, [location.pathname]);
 
   const mobilePanelId = 'navbar-mobile-panel';
+  const canAccessSupportPortal = hasSupportPortalAccess(user);
 
   const handleLogout = async () => {
     try {
@@ -268,6 +270,15 @@ export function Navbar() {
       }
     ];
 
+    if (canAccessSupportPortal) {
+      actions.push({
+        key: 'support',
+        label: t('nav.support'),
+        to: '/support/',
+        icon: Headset
+      });
+    }
+
     if (user?.is_admin) {
       actions.push({
         key: 'admin',
@@ -278,7 +289,7 @@ export function Navbar() {
     }
 
     return actions;
-  }, [isAuthenticated, t, unreadCount, unreadLoading, user?.is_admin]);
+  }, [canAccessSupportPortal, isAuthenticated, t, unreadCount, unreadLoading, user?.is_admin]);
 
   const renderUserAvatar = (sizeClass = 'h-8 w-8') => {
     const fallback = (
@@ -632,6 +643,16 @@ export function Navbar() {
                         <Bell className="h-4 w-4" />
                         {t('nav.notifications')}
                       </Link>
+
+                      {canAccessSupportPortal && (
+                        <Link
+                          to="/support/"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                        >
+                          <Headset className="h-4 w-4" />
+                          {t('nav.support')}
+                        </Link>
+                      )}
                       
                       {user?.is_admin && (
                         <Link

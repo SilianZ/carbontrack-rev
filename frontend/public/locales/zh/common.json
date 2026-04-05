@@ -21,6 +21,7 @@
     "activities": "活动记录",
     "products": "积分商城",
     "messages": "站内信",
+    "support": "客服工单",
     "profile": "个人中心",
     "admin": "管理后台",
     "login": "登录",
@@ -1277,6 +1278,8 @@
       "avatars": "头像管理",
       "exchanges": "积分兑换",
       "broadcast": "公告广播",
+      "supportOps": "客服工单",
+      "supportPortal": "进入客服台",
       "llmUsage": "LLM 使用额度",
       "systemLogs": "系统日志",
       "diagnostics": "API 诊断"
@@ -1420,6 +1423,7 @@
     "header": {
       "section": "当前板块",
       "quickBadge": "快速创建徽章",
+      "openSupportPortal": "进入客服工作台",
       "quickActions": "常用操作",
       "quickActionsHint": "在指挥面板中聚合所有常用入口",
       "pending": "待处理提醒",
@@ -1991,6 +1995,7 @@
     },
     "users": {
       "confirmToggleAdmin": "确定要切换用户 {{username}} 的管理员权限吗？",
+      "confirmSetRole": "请为用户 {{username}} 选择新的角色。",
       "updateSuccess": "用户更新成功",
       "updateFailed": "用户更新失败",
       "deleteSuccess": "用户删除成功",
@@ -1998,6 +2003,7 @@
       "confirmDelete": "确定要删除用户 {{username}} 吗？此操作无法撤销。",
       "role": "角色",
       "roleUser": "普通用户",
+      "roleSupport": "客服",
       "roleAdmin": "管理员",
       "status": "状态",
       "statusActive": "激活",
@@ -2050,6 +2056,8 @@
       "selectUser": "选择用户 {{username}}",
       "toggleStatusButton": "切换用户状态",
       "toggleAdminButton": "切换管理员权限",
+      "changeRoleButton": "切换角色",
+      "roleDialogLabel": "目标角色",
       "awardBadgeButton": "授予徽章",
       "editUser": "编辑用户配置",
       "editDetailedButton": "编辑详细配置",
@@ -3096,7 +3104,9 @@
     "validation": "数据验证失败",
     "turnstile": "人机验证失败，请重试",
     "tooManyFiles": "选择的文件过多（最多 {{max}} 个）",
-    "singleFileOnly": "仅支持上传单个文件"
+    "singleFileOnly": "仅支持上传单个文件",
+    "operationFailed": "操作失败，请稍后重试",
+    "uploadFailed": "上传失败，请稍后重试"
   },
   "routeGuard": {
     "accessDeniedTitle": "访问被拒绝",
@@ -3705,6 +3715,7 @@
       "addressTitle": "地址",
       "addressDescription": "CarbonTrack 团队的协作与运营地址。"
     },
+    "linksTitle": "更多入口",
     "links": [
       {
         "type": "email",
@@ -3713,7 +3724,7 @@
       },
       {
         "type": "instagram",
-        "label": "关注我们（Instagram）",
+        "label": "关注 Instagram",
         "href": "https://www.instagram.com/carbontrackorg/",
         "external": true
       },
@@ -3729,8 +3740,7 @@
         "href": "https://carbontrack.org/partners",
         "external": true
       }
-    ],
-    "linksTitle": "更多入口"
+    ]
   },
   "help": {
     "hero": {
@@ -3878,12 +3888,23 @@
     },
     "thread": {
       "backToTickets": "返回工单列表",
-      "headerDescription": "所有回复和附件都会保留在同一条线程里。",
       "summaryTitle": "工单摘要",
       "summarySubtitle": "快速查看状态与最后处理时间。",
       "createdAt": "创建时间",
       "lastReply": "最后回复",
       "messageCount": "消息数",
+      "feedbackTitle": "服务评价",
+      "feedbackSubtitle": "工单结束后，可按处理人分别评分并留下备注。",
+      "feedbackEmpty": "当前没有可评价的处理人。",
+      "feedbackHint": "提交后仍可继续修改评价。",
+      "feedbackUpdateHint": "当前评价已保存，可继续更新。",
+      "feedbackCommentLabel": "评价备注",
+      "feedbackCommentPlaceholder": "补充处理体验、响应速度或改进建议。",
+      "feedbackSubmit": "提交评价",
+      "feedbackUpdate": "更新评价",
+      "feedbackSaved": "评价已保存",
+      "feedbackSavedAt": "已保存于 {{date}}",
+      "feedbackRatingRequired": "请先选择评分。",
       "replyTitle": "追加回复",
       "replySubtitle": "新回复会通知支持团队邮箱。",
       "replyPlaceholder": "补充新的信息、处理结果或客服要求的材料。",
@@ -3937,7 +3958,6 @@
       "saveWorkflow": "保存流程",
       "workload": {
         "title": "客服负载",
-        "subtitle": "管理与客服都可直接查看每位客服手上总单量、未开始与处理中数量。",
         "empty": "暂无可派单客服。",
         "assigned": "总单量",
         "notStarted": "未开始",
@@ -3970,6 +3990,11 @@
         "reviewNoteLabel": "审批备注",
         "reviewPlaceholder": "填写审批意见，可选。"
       },
+      "feedbackTitle": "用户评价",
+      "feedbackSubtitle": "工单结束后，用户可对参与处理的客服分别打分并留言。",
+      "feedbackEmpty": "当前还没有评价。",
+      "feedbackRatedBy": "评价人：{{name}}",
+      "feedbackNoComment": "用户未留下文字备注。",
       "replyTitle": "回复请求人",
       "replySubtitle": "客服回复会通过站内信和邮件通知用户。",
       "replyPlaceholder": "填写下一步说明、解决方案或补充要求。",
@@ -3990,9 +4015,9 @@
   "adminSupport": {
     "eyebrow": "支持规则",
     "title": "支持运营台",
-    "subtitle": "统一查看客服负载、规则命中、标签结果和转单处理，不必来回切换页面。",
     "tabs": {
       "team": "客服团队",
+      "settings": "设置中心",
       "rules": "派单规则",
       "tags": "标签",
       "reports": "报表"

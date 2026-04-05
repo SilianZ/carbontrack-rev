@@ -5,6 +5,7 @@ import {
   Award,
   Bot,
   Fingerprint,
+  Headset,
   LayoutDashboard,
   Leaf,
   PackageCheck,
@@ -52,6 +53,7 @@ const NAV_LINKS = [
   { key: 'exchanges', to: '/admin/exchanges', icon: Repeat2 },
   { key: 'broadcast', to: '/admin/broadcast', icon: Radio },
   { key: 'supportOps', to: '/admin/support', icon: Tags },
+  { key: 'supportPortal', to: '/support/', icon: Headset },
   { key: 'llmUsage', to: '/admin/llm-usage', icon: Sparkles },
   { key: 'systemLogs', to: '/admin/system-logs', icon: ScrollText },
   { key: 'diagnostics', to: '/admin/diagnostics', icon: Stethoscope },
@@ -188,6 +190,14 @@ export default function AdminLayout() {
                       </h1>
                     </div>
                     <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end md:ml-auto">
+                      <Button
+                        variant="outline"
+                        className="hidden items-center gap-2 rounded-full border-emerald-200 bg-background/80 px-4 md:inline-flex"
+                        onClick={() => navigate('/support/')}
+                      >
+                        <Headset className="h-4 w-4" />
+                        {t('admin.header.openSupportPortal')}
+                      </Button>
                       <Button
                         variant="outline"
                         className="hidden items-center gap-2 rounded-full border-emerald-200 bg-background/80 px-4 md:inline-flex"

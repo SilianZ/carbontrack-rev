@@ -22,6 +22,7 @@
     "activities": "Activities",
     "products": "Point Store",
     "messages": "Messages",
+    "support": "Support Tickets",
     "profile": "Profile",
     "notifications": "Notification settings",
     "admin": "Admin",
@@ -1276,6 +1277,8 @@
       "avatars": "Avatars",
       "exchanges": "Exchanges",
       "broadcast": "Broadcast Center",
+      "supportOps": "Support Tickets",
+      "supportPortal": "Support Desk",
       "llmUsage": "LLM Usage",
       "systemLogs": "System Logs",
       "diagnostics": "API Diagnostics"
@@ -1419,6 +1422,7 @@
     "header": {
       "section": "Current section",
       "quickBadge": "Quick create badge",
+      "openSupportPortal": "Open support desk",
       "quickActions": "Quick actions",
       "quickActionsHint": "Use the command palette to access common tasks",
       "pending": "Pending reminders",
@@ -1990,6 +1994,7 @@
     },
     "users": {
       "confirmToggleAdmin": "Are you sure you want to toggle admin rights for {{username}}?",
+      "confirmSetRole": "Choose a new role for {{username}}.",
       "updateSuccess": "User updated successfully",
       "updateFailed": "User update failed",
       "deleteSuccess": "User deleted successfully",
@@ -1997,6 +2002,7 @@
       "confirmDelete": "Are you sure you want to delete user {{username}}? This action cannot be undone.",
       "role": "Role",
       "roleUser": "User",
+      "roleSupport": "Support",
       "roleAdmin": "Admin",
       "status": "Status",
       "statusActive": "Active",
@@ -2053,6 +2059,8 @@
       "selectUser": "Select user {{username}}",
       "toggleStatusButton": "Toggle Status",
       "toggleAdminButton": "Toggle Admin",
+      "changeRoleButton": "Change Role",
+      "roleDialogLabel": "Target role",
       "awardBadgeButton": "Award Badge",
       "deleteButton": "Delete User",
       "confirmToggleStatusTitle": "Confirm Status Change",
@@ -3296,7 +3304,9 @@
     "validation": "Data validation failed",
     "turnstile": "Human verification failed, please try again",
     "tooManyFiles": "Too many files selected (maximum {{max}})",
-    "singleFileOnly": "Only single file uploads are supported"
+    "singleFileOnly": "Only single file uploads are supported",
+    "operationFailed": "Operation failed, please try again later",
+    "uploadFailed": "Upload failed, please try again later"
   },
   "routeGuard": {
     "accessDeniedTitle": "Access denied",
@@ -3705,15 +3715,16 @@
       "addressTitle": "Address",
       "addressDescription": "CarbonTrack team operations and collaboration base."
     },
+    "linksTitle": "More links",
     "links": [
       {
         "type": "email",
-        "label": "Contact Us",
+        "label": "Contact us",
         "href": "mailto:{{email}}"
       },
       {
         "type": "instagram",
-        "label": "Follow Us",
+        "label": "Follow on Instagram",
         "href": "https://www.instagram.com/carbontrackorg/",
         "external": true
       },
@@ -3725,12 +3736,11 @@
       },
       {
         "type": "partnership",
-        "label": "Partnership",
+        "label": "Partnerships",
         "href": "https://carbontrack.org/partners",
         "external": true
       }
-    ],
-    "linksTitle": "More links"
+    ]
   },
   "help": {
     "hero": {
@@ -3878,12 +3888,23 @@
     },
     "thread": {
       "backToTickets": "Back to tickets",
-      "headerDescription": "Every reply and attachment is preserved in one thread.",
       "summaryTitle": "Ticket summary",
       "summarySubtitle": "Scan status and last handling time quickly.",
       "createdAt": "Created",
       "lastReply": "Last reply",
       "messageCount": "Messages",
+      "feedbackTitle": "Service feedback",
+      "feedbackSubtitle": "Once the ticket is finished, rate each handling agent and leave a note.",
+      "feedbackEmpty": "No handling agents are available for feedback on this ticket.",
+      "feedbackHint": "You can submit now and still edit the feedback later.",
+      "feedbackUpdateHint": "Feedback is already saved. You can update it again.",
+      "feedbackCommentLabel": "Comment",
+      "feedbackCommentPlaceholder": "Share response quality, handling speed, or suggestions.",
+      "feedbackSubmit": "Submit feedback",
+      "feedbackUpdate": "Update feedback",
+      "feedbackSaved": "Feedback saved",
+      "feedbackSavedAt": "Saved at {{date}}",
+      "feedbackRatingRequired": "Select a rating first.",
       "replyTitle": "Add reply",
       "replySubtitle": "New replies notify the support mailbox.",
       "replyPlaceholder": "Share the next detail, progress update, or requested evidence.",
@@ -3937,7 +3958,6 @@
       "saveWorkflow": "Save workflow",
       "workload": {
         "title": "Support workload",
-        "subtitle": "Managers and support can see each assignee's total load, not started count, and in-progress count at a glance.",
         "empty": "No assignees available yet.",
         "assigned": "Assigned",
         "notStarted": "Not started",
@@ -3970,6 +3990,11 @@
         "reviewNoteLabel": "Review note",
         "reviewPlaceholder": "Optional review note."
       },
+      "feedbackTitle": "User feedback",
+      "feedbackSubtitle": "After a ticket is finished, the requester can rate each handling support agent and leave a comment.",
+      "feedbackEmpty": "No feedback has been submitted yet.",
+      "feedbackRatedBy": "Rated by: {{name}}",
+      "feedbackNoComment": "The user left no written comment.",
       "replyTitle": "Reply to requester",
       "replySubtitle": "Support replies notify the user by message and email.",
       "replyPlaceholder": "Write the next instruction, resolution step, or requested clarification.",
@@ -3990,9 +4015,9 @@
   "adminSupport": {
     "eyebrow": "Support automation",
     "title": "Support operations",
-    "subtitle": "Keep workload, rule hits, tag results, and transfer handling in one place instead of bouncing between pages.",
     "tabs": {
       "team": "Team",
+      "settings": "Settings",
       "rules": "Rules",
       "tags": "Tags",
       "reports": "Reports"
