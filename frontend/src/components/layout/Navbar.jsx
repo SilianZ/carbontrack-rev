@@ -17,7 +17,7 @@ import {
   Headset
 } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
-import { checkAuthStatus, authAPI } from '../../lib/auth';
+import { checkAuthStatus, authAPI, hasSupportPortalAccess } from '../../lib/auth';
 import { useUnreadMessagesCount } from '../../hooks/useUnreadMessagesCount';
 import LanguageSwitcher from '../LanguageSwitcher';
 import { ThemeToggle } from '../ThemeToggle';
@@ -125,7 +125,7 @@ export function Navbar() {
   }, [location.pathname]);
 
   const mobilePanelId = 'navbar-mobile-panel';
-  const hasSupportPortalAccess = Boolean(user?.is_admin || user?.is_support || user?.role === 'support' || user?.role === 'admin');
+  const canAccessSupportPortal = hasSupportPortalAccess(user);
 
   const handleLogout = async () => {
     try {
@@ -270,7 +270,7 @@ export function Navbar() {
       }
     ];
 
-    if (hasSupportPortalAccess) {
+    if (canAccessSupportPortal) {
       actions.push({
         key: 'support',
         label: t('nav.support'),
@@ -289,7 +289,7 @@ export function Navbar() {
     }
 
     return actions;
-  }, [hasSupportPortalAccess, isAuthenticated, t, unreadCount, unreadLoading, user?.is_admin]);
+  }, [canAccessSupportPortal, isAuthenticated, t, unreadCount, unreadLoading, user?.is_admin]);
 
   const renderUserAvatar = (sizeClass = 'h-8 w-8') => {
     const fallback = (
@@ -644,7 +644,7 @@ export function Navbar() {
                         {t('nav.notifications')}
                       </Link>
 
-                      {hasSupportPortalAccess && (
+                      {canAccessSupportPortal && (
                         <Link
                           to="/support/"
                           className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"

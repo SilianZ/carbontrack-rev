@@ -12,7 +12,7 @@ export default function ContactPage() {
   const { t } = useTranslation();
 
   const contactLinks = useMemo(() => {
-    const translated = t('about.contactLinks', {
+    const translated = t('contact.links', {
       returnObjects: true,
       email: supportEmail,
     });

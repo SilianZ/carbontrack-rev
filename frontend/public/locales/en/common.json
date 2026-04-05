@@ -3715,7 +3715,32 @@
       "addressTitle": "Address",
       "addressDescription": "CarbonTrack team operations and collaboration base."
     },
-    "linksTitle": "More links"
+    "linksTitle": "More links",
+    "links": [
+      {
+        "type": "email",
+        "label": "Contact us",
+        "href": "mailto:{{email}}"
+      },
+      {
+        "type": "instagram",
+        "label": "Follow on Instagram",
+        "href": "https://www.instagram.com/carbontrackorg/",
+        "external": true
+      },
+      {
+        "type": "discord",
+        "label": "Join Discord",
+        "href": "https://discord.gg/nPzMrJAyjY",
+        "external": true
+      },
+      {
+        "type": "partnership",
+        "label": "Partnerships",
+        "href": "https://carbontrack.org/partners",
+        "external": true
+      }
+    ]
   },
   "help": {
     "hero": {

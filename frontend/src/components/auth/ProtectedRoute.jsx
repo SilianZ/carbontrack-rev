@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Navigate, useLocation } from 'react-router-dom';
-import { checkAuthStatus, getDefaultAuthenticatedRoute, hasPermission } from '../../lib/auth';
+import { checkAuthStatus, getDefaultAuthenticatedRoute, hasPermission, hasSupportPortalAccess } from '../../lib/auth';
 import { useTranslation } from '../../hooks/useTranslation';
 
 function AccessDeniedState({ title, description, backLabel }) {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">{title}</h1>
-        <p className="text-gray-600 mb-4">{description}</p>
+        <h1 className="mb-4 text-2xl font-bold text-foreground">{title}</h1>
+        <p className="mb-4 text-muted-foreground">{description}</p>
         <button
           onClick={() => window.history.back()}
           className="text-green-600 hover:text-green-500"
@@ -54,7 +54,7 @@ export function ProtectedRoute({
   }
 
   const { isAuthenticated, user } = authState;
-  const hasSupportAccess = Boolean(user?.is_admin || user?.is_support || user?.role === 'support' || user?.role === 'admin');
+  const hasSupportAccess = hasSupportPortalAccess(user);
 
   // 需要认证但未登录
   if (requireAuth && !isAuthenticated) {

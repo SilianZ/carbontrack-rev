@@ -25,7 +25,7 @@ const hasMinimalDevUserInfoFields = (userInfo) => (
   && userInfo.id != null
 );
 
-const hasSupportPortalAccess = (user) => Boolean(
+export const hasSupportPortalAccess = (user) => Boolean(
   user?.is_admin
   || user?.is_support
   || user?.role === 'support'

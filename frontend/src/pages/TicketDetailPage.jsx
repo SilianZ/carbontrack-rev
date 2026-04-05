@@ -80,6 +80,7 @@ export default function TicketDetailPage() {
   const { t, currentLanguage } = useTranslation();
   const queryClient = useQueryClient();
   const turnstileRef = useRef(null);
+  const dirtyFeedbackDraftIdsRef = useRef(new Set());
   const [turnstileToken, setTurnstileToken] = useState('');
   const [attachments, setAttachments] = useState([]);
   const [feedbackDrafts, setFeedbackDrafts] = useState({});
@@ -133,6 +134,7 @@ export default function TicketDetailPage() {
     {
       onSuccess: (_, variables) => {
         toast.success(t('support.thread.feedbackSaved'));
+        dirtyFeedbackDraftIdsRef.current.delete(String(variables.ratedUserId));
         queryClient.invalidateQueries(['ticket-detail', ticketId]);
         queryClient.invalidateQueries(['user-tickets']);
         setFeedbackDrafts((current) => ({
@@ -154,10 +156,23 @@ export default function TicketDetailPage() {
 
   useEffect(() => {
     setAttachments([]);
+    setFeedbackDrafts({});
+    dirtyFeedbackDraftIdsRef.current.clear();
   }, [ticketId]);
 
   useEffect(() => {
-    setFeedbackDrafts(buildFeedbackDrafts(ticket));
+    const nextDrafts = buildFeedbackDrafts(ticket);
+    setFeedbackDrafts((current) => {
+      const mergedDrafts = { ...nextDrafts };
+
+      for (const [candidateId, draft] of Object.entries(current)) {
+        if (dirtyFeedbackDraftIdsRef.current.has(candidateId) && nextDrafts[candidateId]) {
+          mergedDrafts[candidateId] = draft;
+        }
+      }
+
+      return mergedDrafts;
+    });
   }, [ticket]);
 
   const onSubmit = handleSubmit((values) => {
@@ -199,6 +214,7 @@ export default function TicketDetailPage() {
   const canLeaveFeedback = ['resolved', 'closed'].includes(ticket.status);
 
   const updateFeedbackDraft = (ratedUserId, patch) => {
+    dirtyFeedbackDraftIdsRef.current.add(String(ratedUserId));
     setFeedbackDrafts((current) => ({
       ...current,
       [ratedUserId]: {
