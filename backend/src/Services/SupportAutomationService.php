@@ -20,7 +20,8 @@ class SupportAutomationService
         private PDO $db,
         private LoggerInterface $logger,
         private AuditLogService $auditLogService,
-        private ErrorLogService $errorLogService
+        private ErrorLogService $errorLogService,
+        private UserProfileViewService $userProfileViewService
     ) {
     }
 
@@ -36,9 +37,8 @@ class SupportAutomationService
                 u.is_admin,
                 u.status,
                 u.school_id,
-                u.school,
+                s.name AS school_name,
                 u.region_code,
-                u.location,
                 u.group_id,
                 u.lastlgn,
                 u.created_at,
@@ -50,6 +50,7 @@ class SupportAutomationService
                 SUM(CASE WHEN t.status = 'resolved' THEN 1 ELSE 0 END) AS resolved_count,
                 SUM(CASE WHEN t.status = 'closed' THEN 1 ELSE 0 END) AS closed_count
             FROM users u
+            LEFT JOIN schools s ON s.id = u.school_id
             LEFT JOIN support_tickets t ON t.assigned_to = u.id
             WHERE u.deleted_at IS NULL
               AND (u.is_admin = 1 OR u.role IN ('support', 'admin'))
@@ -62,9 +63,8 @@ class SupportAutomationService
                 u.is_admin,
                 u.status,
                 u.school_id,
-                u.school,
+                s.name,
                 u.region_code,
-                u.location,
                 u.group_id,
                 u.lastlgn,
                 u.created_at,
@@ -87,9 +87,8 @@ class SupportAutomationService
                 u.is_admin,
                 u.status,
                 u.school_id,
-                u.school,
+                s.name AS school_name,
                 u.region_code,
-                u.location,
                 u.group_id,
                 u.lastlgn,
                 u.created_at,
@@ -102,6 +101,7 @@ class SupportAutomationService
                 SUM(CASE WHEN t.status = 'resolved' THEN 1 ELSE 0 END) AS resolved_count,
                 SUM(CASE WHEN t.status = 'closed' THEN 1 ELSE 0 END) AS closed_count
             FROM users u
+            LEFT JOIN schools s ON s.id = u.school_id
             LEFT JOIN support_tickets t ON t.assigned_to = u.id
             WHERE u.id = :id
               AND u.deleted_at IS NULL
@@ -115,9 +115,8 @@ class SupportAutomationService
                 u.is_admin,
                 u.status,
                 u.school_id,
-                u.school,
+                s.name,
                 u.region_code,
-                u.location,
                 u.group_id,
                 u.lastlgn,
                 u.created_at,
@@ -736,6 +735,9 @@ class SupportAutomationService
 
     private function formatAssignableUser(array $row): array
     {
+        $profileFields = $this->userProfileViewService->buildProfileFields($row);
+        $legacyDisplayFields = $this->userProfileViewService->buildLegacyDisplayFields($row, $profileFields);
+
         return [
             'id' => (int) ($row['id'] ?? 0),
             'uuid' => $row['uuid'] ?? null,
@@ -743,10 +745,10 @@ class SupportAutomationService
             'email' => $row['email'] ?? null,
             'role' => !empty($row['is_admin']) ? 'admin' : strtolower((string) ($row['role'] ?? 'support')),
             'status' => $row['status'] ?? null,
-            'school_id' => isset($row['school_id']) ? (int) $row['school_id'] : null,
-            'school' => $row['school'] ?? null,
-            'region_code' => $row['region_code'] ?? null,
-            'location' => $row['location'] ?? null,
+            'school_id' => $profileFields['school_id'] ?? (isset($row['school_id']) ? (int) $row['school_id'] : null),
+            'school' => $legacyDisplayFields['school'] ?? null,
+            'region_code' => $profileFields['region_code'] ?? ($row['region_code'] ?? null),
+            'location' => $legacyDisplayFields['location'] ?? null,
             'group_id' => isset($row['group_id']) ? (int) $row['group_id'] : null,
             'last_login_at' => $row['lastlgn'] ?? null,
             'created_at' => $row['created_at'] ?? null,

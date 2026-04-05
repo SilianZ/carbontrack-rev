@@ -6,13 +6,13 @@ import { useTranslation } from '../../hooks/useTranslation';
 
 function AccessDeniedState({ title, description, backLabel }) {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
+    <div className="min-h-screen bg-background px-4 text-foreground flex items-center justify-center">
+      <div className="max-w-md text-center">
         <h1 className="mb-4 text-2xl font-bold text-foreground">{title}</h1>
         <p className="mb-4 text-muted-foreground">{description}</p>
         <button
           onClick={() => window.history.back()}
-          className="text-green-600 hover:text-green-500"
+          className="text-primary transition-colors hover:text-primary/80"
         >
           {backLabel}
         </button>
