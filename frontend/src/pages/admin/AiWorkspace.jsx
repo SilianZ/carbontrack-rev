@@ -186,6 +186,8 @@ const ROUTE_KEY_BY_PATH = {
   '/admin/avatars': 'avatars',
   '/admin/exchanges': 'exchanges',
   '/admin/broadcast': 'broadcast',
+  '/admin/support': 'supportOps',
+  '/support/': 'supportPortal',
   '/admin/system-logs': 'systemLogs',
   '/admin/ai': 'aiWorkspace',
   '/admin/llm-usage': 'llmUsage',

@@ -77,6 +77,7 @@ function MetricCard({ icon, label, value, hint }) {
 
 function BreakdownSection({ title, description, items = [], renderLabel, renderMeta }) {
   const maxCount = Math.max(1, ...items.map((item) => Number(item.count ?? item.trigger_count ?? 0)));
+  const totalCount = items.reduce((sum, item) => sum + Number(item.count ?? item.trigger_count ?? 0), 0);
 
   return (
     <Card>
@@ -89,12 +90,13 @@ function BreakdownSection({ title, description, items = [], renderLabel, renderM
         {items.map((item, index) => {
           const count = Number(item.count ?? item.trigger_count ?? 0);
           const width = `${Math.max(10, Math.round((count / maxCount) * 100))}%`;
+          const share = totalCount > 0 ? `${Math.round((count / totalCount) * 100)}%` : '0%';
           return (
             <div key={`${title}-${index}`} className="space-y-2">
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0 text-sm font-medium">{renderLabel(item)}</div>
                 <div className="shrink-0 text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                  {renderMeta ? renderMeta(item) : count}
+                  {renderMeta ? renderMeta(item) : `${count} · ${share}`}
                 </div>
               </div>
               <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
@@ -112,6 +114,7 @@ export default function AdminSupportOpsPage() {
   const { t, currentLanguage } = useTranslation();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState('team');
+  const [settingsTab, setSettingsTab] = useState('rules');
   const [reportDays, setReportDays] = useState(14);
   const [tagForm, setTagForm] = useState(EMPTY_TAG_FORM);
   const [ruleForm, setRuleForm] = useState(EMPTY_RULE_FORM);
@@ -292,9 +295,6 @@ export default function AdminSupportOpsPage() {
           {t('adminSupport.eyebrow')}
         </p>
         <h2 className="mt-3 text-3xl font-semibold tracking-tight">{t('adminSupport.title')}</h2>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-emerald-900/70 dark:text-emerald-100/80">
-          {t('adminSupport.subtitle')}
-        </p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -306,9 +306,7 @@ export default function AdminSupportOpsPage() {
       <Tabs value={tab} onValueChange={setTab} className="space-y-6">
         <TabsList className="rounded-2xl border border-border bg-card p-1">
           <TabsTrigger value="team" className="rounded-xl border-r-0">{t('adminSupport.tabs.team')}</TabsTrigger>
-          <TabsTrigger value="rules" className="rounded-xl border-r-0">{t('adminSupport.tabs.rules')}</TabsTrigger>
-          <TabsTrigger value="tags" className="rounded-xl border-r-0">{t('adminSupport.tabs.tags')}</TabsTrigger>
-          <TabsTrigger value="reports" className="rounded-xl border-r-0">{t('adminSupport.tabs.reports')}</TabsTrigger>
+          <TabsTrigger value="settings" className="rounded-xl border-r-0">{t('adminSupport.tabs.settings')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="team" className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
@@ -480,6 +478,24 @@ export default function AdminSupportOpsPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader className="gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <CardTitle>{t('adminSupport.tabs.settings')}</CardTitle>
+                <CardDescription>{t('adminSupport.reports.subtitle')}</CardDescription>
+              </div>
+              <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+                <TabsList className="rounded-2xl border border-border bg-card p-1">
+                  <TabsTrigger value="rules" className="rounded-xl border-r-0">{t('adminSupport.tabs.rules')}</TabsTrigger>
+                  <TabsTrigger value="tags" className="rounded-xl border-r-0">{t('adminSupport.tabs.tags')}</TabsTrigger>
+                  <TabsTrigger value="reports" className="rounded-xl border-r-0">{t('adminSupport.tabs.reports')}</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardHeader>
+          </Card>
+
+          <Tabs value={settingsTab} onValueChange={setSettingsTab} className="space-y-6">
         <TabsContent value="rules" className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
           <Card>
             <CardHeader>
@@ -825,6 +841,8 @@ export default function AdminSupportOpsPage() {
               })}
             </CardContent>
           </Card>
+        </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
 

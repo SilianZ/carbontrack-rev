@@ -231,8 +231,9 @@ const FileUpload = ({
       {/* 上传区域 */}
       <div
         className={cn(
-          'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
-          dragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-gray-400',
+          'rounded-lg border-2 border-dashed p-6 text-center transition-colors',
+          'cursor-pointer border-border bg-background',
+          dragActive ? 'border-primary bg-primary/5' : 'hover:border-foreground/30',
           disabled && 'opacity-50 cursor-not-allowed',
           uploading && 'pointer-events-none'
         )}
@@ -252,8 +253,8 @@ const FileUpload = ({
           disabled={disabled || uploading}
         />
         
-        <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <p className="text-lg font-medium text-gray-900 mb-2 flex items-center justify-center gap-2">
+        <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+        <p className="mb-2 flex items-center justify-center gap-2 text-lg font-medium text-foreground">
           <span>
             {dragActive 
               ? t('upload.dropFiles') 
@@ -263,11 +264,13 @@ const FileUpload = ({
           <span
             onClick={(e) => { e.stopPropagation(); setMode(m => m === 'direct' ? 'legacy' : 'direct'); }}
             className={cn('text-xs px-2 py-0.5 rounded border cursor-pointer select-none',
-              mode === 'direct' ? 'bg-green-50 border-green-300 text-green-700' : 'bg-gray-100 border-gray-300 text-gray-600')}
+              mode === 'direct'
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300'
+                : 'border-border bg-muted text-muted-foreground')}
             title={mode === 'direct' ? '当前：直传（点击切换为旧兼容模式）' : '当前：旧模式（点击切换为直传）'}
           >{mode === 'direct' ? 'Direct' : 'Legacy'}</span>
         </p>
-        <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+        <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <span>
             {multiple 
               ? t('upload.supportMultiple', { max: maxFiles })
@@ -275,7 +278,7 @@ const FileUpload = ({
             }
           </span>
         </p>
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="mt-2 text-xs text-muted-foreground/80">
           {t('upload.supportedFormats')}: {t('upload.supportedFormatsDetail')}
         </p>
       </div>
@@ -304,11 +307,11 @@ const FileUpload = ({
                         className="w-12 h-12 object-cover rounded"
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded bg-muted">
                         {fileUploader.isImageFile(fileItem.file) ? (
-                          <Image className="h-6 w-6 text-gray-400" />
+                          <Image className="h-6 w-6 text-muted-foreground" />
                         ) : (
-                          <File className="h-6 w-6 text-gray-400" />
+                          <File className="h-6 w-6 text-muted-foreground" />
                         )}
                       </div>
                     )}
@@ -316,10 +319,10 @@ const FileUpload = ({
 
                   {/* 文件信息 */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="truncate text-sm font-medium text-foreground">
                       {fileItem.file.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {fileUploader.formatFileSize(fileItem.file.size)}
                     </p>
                     

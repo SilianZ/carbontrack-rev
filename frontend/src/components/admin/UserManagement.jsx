@@ -69,6 +69,19 @@ const DEFAULT_FILTERS = {
   sort: 'created_at_desc',
 };
 
+const USER_ROLE_OPTIONS = ['user', 'support', 'admin'];
+
+const normalizeRole = (user = {}) => {
+  if (user.is_admin === true || user.is_admin === 1 || user.is_admin === '1') {
+    return 'admin';
+  }
+  const role = typeof user.role === 'string' ? user.role.trim().toLowerCase() : '';
+  if (USER_ROLE_OPTIONS.includes(role)) {
+    return role;
+  }
+  return 'user';
+};
+
 const normalizeUser = (user = {}) => {
   const toNumber = (value) => {
     const num = Number(value);
@@ -77,6 +90,7 @@ const normalizeUser = (user = {}) => {
   return {
     ...user,
     is_admin: user.is_admin === true || user.is_admin === 1 || user.is_admin === '1',
+    role: normalizeRole(user),
     checkin_days: toNumber(user.checkin_days),
     makeup_checkins: toNumber(user.makeup_checkins),
   };
@@ -165,10 +179,8 @@ export function UserManagement() {
     if (filters.status) {
       base.status = filters.status;
     }
-    if (filters.role === 'admin') {
-      base.is_admin = 1;
-    } else if (filters.role === 'user') {
-      base.is_admin = 0;
+    if (filters.role) {
+      base.role = filters.role;
     }
     return base;
   }, [filters]);
@@ -480,11 +492,10 @@ export function UserManagement() {
   };
 
   const handleEditUser = (user) => {
-    const makeAdmin = !user.is_admin;
     openConfirmDialog({
       type: 'role',
       user,
-      payload: { makeAdmin },
+      payload: { nextRole: normalizeRole(user) },
     });
   };
 
@@ -540,10 +551,10 @@ export function UserManagement() {
         { onSettled: closeConfirmDialog }
       );
     } else if (confirmDialog.type === 'role') {
-      const makeAdmin = confirmDialog.payload.makeAdmin;
+      const nextRole = confirmDialog.payload?.nextRole || normalizeRole(confirmDialog.user);
       const identifier = getUserIdentifier(confirmDialog.user);
       updateUserMutation.mutate(
-        { identifier, data: { is_admin: makeAdmin } },
+        { identifier, data: { role: nextRole } },
         { onSettled: closeConfirmDialog }
       );
     } else if (confirmDialog.type === 'delete') {
@@ -665,9 +676,15 @@ export function UserManagement() {
         </Badge>
       );
     }
+    const role = normalizeRole(user);
+    const variant = role === 'admin' ? 'default' : role === 'support' ? 'secondary' : 'outline';
     return (
-      <Badge variant={user.is_admin ? 'default' : 'outline'}>
-        {user.is_admin ? t('admin.users.roleAdmin') : t('admin.users.roleUser')}
+      <Badge variant={variant}>
+        {role === 'admin'
+          ? t('admin.users.roleAdmin')
+          : role === 'support'
+            ? t('admin.users.roleSupport')
+            : t('admin.users.roleUser')}
       </Badge>
     );
   };
@@ -704,6 +721,7 @@ export function UserManagement() {
             >
               <option value="">{t('common.all')}</option>
               <option value="user">{t('admin.users.roleUser')}</option>
+              <option value="support">{t('admin.users.roleSupport')}</option>
               <option value="admin">{t('admin.users.roleAdmin')}</option>
             </select>
           </div>
@@ -877,7 +895,7 @@ export function UserManagement() {
                           <Button variant="ghost" size="sm" onClick={() => openDetailedEdit(user)} title={t('admin.users.editUser')}>
                             <Settings className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)} title={t('admin.users.toggleAdminButton')}>
+                          <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)} title={t('admin.users.changeRoleButton')}>
                             <Shield className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => openBulkBadgeDialog([user])} title={t('admin.users.awardBadgeButton')} disabled={badgeOptions.length === 0}>
@@ -922,7 +940,28 @@ export function UserManagement() {
                 })
               )}
               {confirmDialog.type === 'role' && confirmDialog.user && (
-                t('admin.users.confirmToggleAdmin', { username: confirmDialog.user.username })
+                <div className="space-y-3">
+                  <p>{t('admin.users.confirmSetRole', { username: confirmDialog.user.username })}</p>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-role">{t('admin.users.roleDialogLabel')}</Label>
+                    <select
+                      id="confirm-role"
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      value={confirmDialog.payload?.nextRole || normalizeRole(confirmDialog.user)}
+                      onChange={(event) => setConfirmDialog((current) => ({
+                        ...current,
+                        payload: {
+                          ...current.payload,
+                          nextRole: event.target.value,
+                        },
+                      }))}
+                    >
+                      <option value="user">{t('admin.users.roleUser')}</option>
+                      <option value="support">{t('admin.users.roleSupport')}</option>
+                      <option value="admin">{t('admin.users.roleAdmin')}</option>
+                    </select>
+                  </div>
+                </div>
               )}
               {confirmDialog.type === 'delete' && confirmDialog.user && (
                 t('admin.users.confirmDelete', { username: confirmDialog.user.username })
