@@ -28,6 +28,7 @@ const SYSTEM_COLUMNS = ['id', 'method', 'path', 'status_code', 'user_id', 'durat
 const AUDIT_COLUMNS = ['id', 'conversation_id', 'request_id', 'actor_type', 'action', 'operation_category', 'status', 'user_id', 'ip_address', 'created_at', 'ops'];
 const ERROR_COLUMNS = ['id', 'request_id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time', 'ops'];
 const LLM_COLUMNS = ['id', 'conversation_id', 'turn_no', 'actor_type', 'actor_id', 'source', 'model', 'llm_status', 'total_tokens', 'latency_ms', 'created_at', 'ops'];
+const TABLE_RENDER_LIMIT = 120;
 
 const COLUMN_STORAGE_KEYS = {
   system: 'logCols_system',
@@ -617,6 +618,7 @@ export default function SystemLogsPage() {
                 emptyText={t('admin.systemLogs.empty.llm')}
                 headers={llmHeaders}
                 columnLabel={columnLabel}
+                t={t}
                 renderItem={(log) => (
                   <ExpandableRow
                     key={`llm-${log.id}`}
@@ -633,6 +635,7 @@ export default function SystemLogsPage() {
                 emptyText={t('admin.systemLogs.empty.audit')}
                 headers={auditHeaders}
                 columnLabel={columnLabel}
+                t={t}
                 renderItem={(log) => (
                   <ExpandableRow
                     key={`audit-${log.id}`}
@@ -649,6 +652,7 @@ export default function SystemLogsPage() {
                 emptyText={t('admin.systemLogs.empty.error')}
                 headers={['id', 'request_id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time']}
                 columnLabel={columnLabel}
+                t={t}
                 renderItem={(log) => (
                   <ExpandableRow
                     key={`error-${log.id}`}
@@ -928,6 +932,9 @@ function SystemLogSection({
   columnLabel,
   t
 }) {
+  const visibleItems = items.slice(0, TABLE_RENDER_LIMIT);
+  const isTruncated = items.length > visibleItems.length;
+
   const header = (
     <thead className="bg-muted/60">
       <tr>
@@ -996,14 +1003,19 @@ function SystemLogSection({
             {t('admin.systemLogs.recordCount', { count: items.length })}
           </Badge>
         </div>
+        {isTruncated && (
+          <CardDescription className="text-xs text-muted-foreground">
+            {t('admin.systemLogs.renderLimitHint', { visible: visibleItems.length, total: items.length })}
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full border-t border-border bg-transparent text-xs text-foreground">
             {header}
             <tbody>
-              {items.map((log) => renderRow(log))}
-              {items.length === 0 && (
+              {visibleItems.map((log) => renderRow(log))}
+              {visibleItems.length === 0 && (
                 <tr>
                   <td className="px-4 py-6 text-center text-muted-foreground" colSpan={columns.length}>
                     {emptyText}
@@ -1017,7 +1029,10 @@ function SystemLogSection({
     </Card>
   );
 }
-function LogSection({ title, items, emptyText, renderItem, headers, columnLabel }) {
+function LogSection({ title, items, emptyText, renderItem, headers, columnLabel, t }) {
+  const visibleItems = items.slice(0, TABLE_RENDER_LIMIT);
+  const isTruncated = items.length > visibleItems.length;
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -1027,6 +1042,11 @@ function LogSection({ title, items, emptyText, renderItem, headers, columnLabel 
             {items.length}
           </Badge>
         </div>
+        {isTruncated && (
+          <CardDescription className="text-xs text-muted-foreground">
+            {t('admin.systemLogs.renderLimitHint', { visible: visibleItems.length, total: items.length })}
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
@@ -1047,8 +1067,8 @@ function LogSection({ title, items, emptyText, renderItem, headers, columnLabel 
               </tr>
             </thead>
             <tbody>
-              {items.map(renderItem)}
-              {items.length === 0 && (
+              {visibleItems.map(renderItem)}
+              {visibleItems.length === 0 && (
                 <tr>
                   <td className="px-4 py-6 text-center text-muted-foreground" colSpan={headers.length + 1}>
                     {emptyText}

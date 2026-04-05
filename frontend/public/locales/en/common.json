@@ -2491,6 +2491,7 @@
         "llm": "No LLM calls"
       },
       "recordCount": "{{count}} records",
+      "renderLimitHint": "Showing the newest {{visible}} of {{total}} rows in the table. Narrow filters or export to inspect more.",
       "actions": {
         "expand": "Expand",
         "collapse": "Collapse"

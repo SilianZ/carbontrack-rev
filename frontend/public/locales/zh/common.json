@@ -2492,6 +2492,7 @@
         "llm": "暂无 LLM 调用"
       },
       "recordCount": "共 {{count}} 条",
+      "renderLimitHint": "表格仅展示最新 {{visible}} / {{total}} 条记录；如需更多结果，请收窄筛选或导出。",
       "actions": {
         "expand": "展开",
         "collapse": "收起"
