@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { ArrowRight, Clock3, LogIn, MessageSquareMore, ShieldCheck, Ticket, Upload } from 'lucide-react';
 
 import { useTranslation } from '../hooks/useTranslation';
@@ -128,7 +128,7 @@ export default function HelpPage() {
     <div className="bg-background text-foreground">
       <section className="border-b border-border bg-muted/30">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)] lg:px-8 lg:py-18">
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.28, ease: 'easeOut' }}
@@ -158,9 +158,9 @@ export default function HelpPage() {
                 {t('help.hero.secondaryAction')}
               </Button>
             </div>
-          </motion.div>
+          </Motion.div>
 
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}
@@ -187,7 +187,7 @@ export default function HelpPage() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
 

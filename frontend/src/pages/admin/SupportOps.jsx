@@ -54,7 +54,9 @@ const EMPTY_RULE_FORM = {
   stop_processing: true,
 };
 
-function MetricCard({ icon: Icon, label, value, hint }) {
+function MetricCard({ icon, label, value, hint }) {
+  const renderedIcon = React.createElement(icon, { className: 'h-5 w-5' });
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -65,7 +67,7 @@ function MetricCard({ icon: Icon, label, value, hint }) {
             {hint ? <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{hint}</p> : null}
           </div>
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
-            <Icon className="h-5 w-5" />
+            {renderedIcon}
           </span>
         </div>
       </CardContent>

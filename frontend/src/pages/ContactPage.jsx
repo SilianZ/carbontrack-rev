@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { ArrowRight, AtSign, Building2, MapPin, Phone } from 'lucide-react';
 
 import { useTranslation } from '../hooks/useTranslation';
@@ -47,7 +47,7 @@ export default function ContactPage() {
     <div className="bg-background text-foreground">
       <section className="border-b border-border bg-muted/30">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)] lg:px-8 lg:py-18">
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.28, ease: 'easeOut' }}
@@ -77,9 +77,9 @@ export default function ContactPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-          </motion.div>
+          </Motion.div>
 
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}
@@ -90,7 +90,7 @@ export default function ContactPage() {
               <span className="text-sm font-medium">{t('contact.panel.title')}</span>
             </div>
             <p className="mt-4 text-lg font-medium">{t('contact.panel.body')}</p>
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
 
