@@ -222,7 +222,7 @@ class User extends Model
             $errors[] = 'Invalid email format';
         }
 
-        $validRoles = ['user', 'support', 'admin', 'moderator'];
+        $validRoles = ['user', 'support', 'admin'];
         if (!in_array($this->getRole(), $validRoles)) {
             $errors[] = 'Invalid role';
         }

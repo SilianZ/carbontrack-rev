@@ -140,8 +140,8 @@ export default function SupportTicketDetailPage() {
       onSuccess: () => {
         toast.success(t('support.portal.ticketUpdated'));
         queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
-        queryClient.invalidateQueries('support-queue');
-        queryClient.invalidateQueries('support-assignees');
+        queryClient.invalidateQueries(['support-queue']);
+        queryClient.invalidateQueries(['support-assignees']);
       },
       onError: (error) => {
         const message = error?.response?.data?.message || error.message || t('errors.operationFailed');
@@ -158,7 +158,7 @@ export default function SupportTicketDetailPage() {
         reset();
         setAttachments([]);
         queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
-        queryClient.invalidateQueries('support-queue');
+        queryClient.invalidateQueries(['support-queue']);
       },
       onError: (error) => {
         const message = error?.response?.data?.message || error.message || t('errors.operationFailed');
@@ -189,8 +189,8 @@ export default function SupportTicketDetailPage() {
       onSuccess: () => {
         toast.success(t('support.portal.transfer.reviewSaved'));
         queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
-        queryClient.invalidateQueries('support-queue');
-        queryClient.invalidateQueries('support-assignees');
+        queryClient.invalidateQueries(['support-queue']);
+        queryClient.invalidateQueries(['support-assignees']);
       },
       onError: (error) => {
         const message = error?.response?.data?.message || error.message || t('errors.operationFailed');
