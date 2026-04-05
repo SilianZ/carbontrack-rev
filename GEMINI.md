@@ -71,6 +71,7 @@ The frontend is a modern SPA.
 - **Build**: `pnpm build`.
 - **Lint**: `pnpm lint`.
 - **After Frontend Changes (Required)**: After modifying components, hooks, routes, state, or build config:
+    - Run `pnpm lint` and ensure it passes before committing. Treat passing ESLint as a required quality gate alongside backend `composer test`.
     - Run `pnpm build` to validate syntax, type-checking, and bundling issues before committing.
     - Do NOT execute `pnpm dev` within this AI session if terminal output cannot be captured; rely on local/CI builds instead, and keep code lint/type-clean.
     - If new admin UI flows, functions, labels, or session-audit displays are introduced, update any corresponding AI knowledge base entries (e.g., adjust keywords, routes, tools, and confirmation metadata in `backend/config/admin_ai_commands.json`) so the admin AI surfaces them correctly.
