@@ -165,7 +165,7 @@ export default function AdminSupportOpsPage() {
     {
       onSuccess: () => {
         toast.success(t('adminSupport.messages.tagSaved'));
-        queryClient.invalidateQueries('admin-support-tags');
+        queryClient.invalidateQueries(['admin-support-tags']);
         setTagForm(EMPTY_TAG_FORM);
       },
       onError: (error) => {
@@ -184,8 +184,8 @@ export default function AdminSupportOpsPage() {
     {
       onSuccess: () => {
         toast.success(t('adminSupport.messages.ruleSaved'));
-        queryClient.invalidateQueries('admin-support-rules');
-        queryClient.invalidateQueries('admin-support-reports');
+        queryClient.invalidateQueries(['admin-support-rules']);
+        queryClient.invalidateQueries(['admin-support-reports']);
         setRuleForm(EMPTY_RULE_FORM);
       },
       onError: (error) => {
