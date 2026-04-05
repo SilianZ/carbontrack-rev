@@ -734,6 +734,10 @@ class SupportRoutingEngineService
         $params = ['id' => $ticketId];
         foreach ($fields as $field => $value) {
             if (!in_array($field, self::TICKET_UPDATE_ALLOWED_FIELDS, true)) {
+                $this->logger->warning('SupportRoutingEngineService::updateTicket rejected disallowed field', [
+                    'field' => $field,
+                    'ticket_id' => $ticketId,
+                ]);
                 continue;
             }
             $assignments[] = sprintf('%s = :%s', $field, $field);
