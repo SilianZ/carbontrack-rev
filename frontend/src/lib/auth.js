@@ -128,6 +128,11 @@ export const userManager = {
   isAdmin() {
     const user = this.getUser();
     return user?.is_admin || false;
+  },
+
+  isSupport() {
+    const user = this.getUser();
+    return user?.is_admin || user?.is_support || user?.role === 'support' || user?.role === 'admin' || false;
   }
 };
 
@@ -328,6 +333,8 @@ export const hasPermission = (permission) => {
   return permissions[permission] || false;
 };
 
+export const isSupportUser = () => userManager.isSupport();
+
 // 表单验证规则
 export const validationRules = {
   username: {
@@ -448,6 +455,7 @@ export default {
   redirectToLogin,
   getReturnUrl,
   hasPermission,
+  isSupportUser,
   validationRules,
   getValidationRules,
   handleAuthError,

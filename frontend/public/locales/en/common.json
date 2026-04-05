@@ -3421,6 +3421,10 @@
         "message": {
           "label": "Direct messages",
           "description": "Email copies of messages from other users. Always enabled."
+        },
+        "support": {
+          "label": "Ticket updates",
+          "description": "Emails sent when support staff change ticket status, priority, or assignment."
         }
       },
       "testEmail": {
@@ -3671,6 +3675,431 @@
           "content": "In the event of a personal data breach that is likely to result in a high risk to your rights and freedoms, we will notify you and the relevant supervisory authorities within <strong>72 hours</strong> of becoming aware of the breach, in accordance with GDPR and pending Hong Kong legislative best practices."
         }
       }
+    }
+  },
+  "contact": {
+    "hero": {
+      "eyebrow": "Contact CarbonTrack",
+      "title": "Public contact channels",
+      "subtitle": "Use these routes for partnerships, media, and general questions.",
+      "primaryAction": "Send email",
+      "secondaryAction": "Go to help"
+    },
+    "panel": {
+      "title": "Need a ticket?",
+      "body": "For bug reports, account issues, and product requests, use the help center."
+    },
+    "methods": {
+      "emailTitle": "Email",
+      "emailDescription": "Best for general questions, partnerships, and document sharing.",
+      "phoneTitle": "Phone",
+      "phoneDescription": "Best when you need a direct conversation.",
+      "addressTitle": "Address",
+      "addressDescription": "CarbonTrack team operations and collaboration base."
+    },
+    "linksTitle": "More links"
+  },
+  "help": {
+    "hero": {
+      "eyebrow": "Help center",
+      "title": "Open a ticket and keep the thread in one place.",
+      "subtitle": "Use this page for website bugs, account issues, feature requests, and business follow-up.",
+      "primaryAction": "View my tickets",
+      "loginAction": "Log in to open a ticket",
+      "secondaryAction": "View contact info"
+    },
+    "panel": {
+      "title": "Ticket handling",
+      "body": "Once submitted, replies, attachments, and status changes stay together in a single thread."
+    },
+    "highlights": {
+      "threadTitle": "One thread",
+      "threadDescription": "Follow-up details, support replies, and status updates stay in one place.",
+      "verificationTitle": "Protected submission",
+      "verificationDescription": "Submissions and replies are verified, and attachments are ownership-checked."
+    },
+    "categories": {
+      "title": "Common request types",
+      "subtitle": "Pick the closest category first, then add details and attachments."
+    },
+    "loginNotice": "Sign in to create tickets, upload attachments, and keep track of replies.",
+    "recentGuest": "Sign in to view recent tickets and status updates."
+  },
+  "support": {
+    "hero": {
+      "eyebrow": "Contact CarbonTrack",
+      "title": "Choose the route that matches the job.",
+      "subtitle": "Use public channels for partnerships and general contact. Once signed in, the same page reveals a ticket lane with attachments, verification, and follow-up history.",
+      "primaryAction": "Email support",
+      "secondaryAction": "Partnerships",
+      "tertiaryAction": "My tickets",
+      "panelTitle": "Support rhythm",
+      "panelValue": "One inbox, two paths",
+      "panelDescription": "Direct contact stays public. Ticket handling appears only for signed-in users and keeps every reply in one thread.",
+      "responseTitle": "Response handling",
+      "responseDescription": "Tickets can move through open, in progress, waiting for user, resolved, and closed states.",
+      "verificationTitle": "Verified submissions",
+      "verificationDescription": "Every user submission and reply is checked through Turnstile and attachment ownership validation."
+    },
+    "contactMethods": {
+      "eyebrow": "Direct channels",
+      "title": "Start with the fastest route.",
+      "emailTitle": "Email",
+      "emailDescription": "Best for detailed issues, file-based reports, and async coordination.",
+      "phoneTitle": "Phone",
+      "phoneDescription": "Best for urgent follow-up during active support hours.",
+      "addressTitle": "Address",
+      "addressDescription": "CarbonTrack core team operations and collaboration base."
+    },
+    "scenarios": {
+      "eyebrow": "Typical scenarios",
+      "website_bug": {
+        "title": "Website bug",
+        "description": "Broken flows, upload failures, access errors, and visual regressions."
+      },
+      "business_issue": {
+        "title": "Business issue",
+        "description": "Partnership coordination, rollout logistics, and operational follow-up."
+      },
+      "feature_request": {
+        "title": "Feature request",
+        "description": "Ideas that improve daily tracking, review, or operational workflows."
+      },
+      "account": {
+        "title": "Account issue",
+        "description": "Sign-in, verification, profile, permission, or account state questions."
+      }
+    },
+    "statuses": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "waiting_user": "Waiting for user",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "priorities": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "categories": {
+      "website_bug": "Website bug",
+      "business_issue": "Business issue",
+      "feature_request": "Feature request",
+      "account": "Account",
+      "other": "Other"
+    },
+    "senderRoles": {
+      "user": "User",
+      "support": "Support",
+      "admin": "Admin"
+    },
+    "transferStatuses": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "filters": {
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "moreWays": "More ways to reach us",
+    "feedback": {
+      "title": "Open a ticket",
+      "subtitle": "Create it once, then continue from the ticket page.",
+      "submit": "Submit ticket",
+      "uploaded": "Attachment uploaded",
+      "created": "Ticket created",
+      "turnstileRequired": "Complete the verification first.",
+      "fields": {
+        "subject": "Subject",
+        "category": "Category",
+        "priority": "Priority",
+        "content": "Details",
+        "attachments": "Attachments"
+      },
+      "placeholders": {
+        "subject": "Short summary of the issue",
+        "content": "Describe what happened, what you expected, and what support should verify."
+      }
+    },
+    "recent": {
+      "title": "Recent tickets",
+      "subtitle": "Resume the thread or inspect the latest reply.",
+      "viewAll": "View all",
+      "empty": "You do not have any tickets yet. New submissions will appear here."
+    },
+    "userList": {
+      "eyebrow": "My tickets",
+      "title": "Support threads tied to your account",
+      "subtitle": "Open a request from help, then continue the conversation here.",
+      "newTicket": "New ticket",
+      "queueTitle": "Your queue",
+      "queueSubtitle": "Sorted by the latest activity time.",
+      "emptyTitle": "No tickets found",
+      "emptyDescription": "Use the help page to submit the first request.",
+      "emptyAction": "Go to help",
+      "replyCount": "{{count}} messages"
+    },
+    "thread": {
+      "backToTickets": "Back to tickets",
+      "headerDescription": "Every reply and attachment is preserved in one thread.",
+      "summaryTitle": "Ticket summary",
+      "summarySubtitle": "Scan status and last handling time quickly.",
+      "createdAt": "Created",
+      "lastReply": "Last reply",
+      "messageCount": "Messages",
+      "replyTitle": "Add reply",
+      "replySubtitle": "New replies notify the support mailbox.",
+      "replyPlaceholder": "Share the next detail, progress update, or requested evidence.",
+      "replySubmit": "Send reply",
+      "replyCreated": "Reply sent",
+      "closedHint": "Closed tickets no longer accept new user replies.",
+      "notFound": "Ticket not found.",
+      "unknownSender": "Unknown sender"
+    },
+    "portal": {
+      "title": "Support Desk",
+      "subtitle": "Handle community requests in a separate support workspace.",
+      "nav": {
+        "queue": "Ticket queue",
+        "queueDescription": "Review requests, reply, and move status."
+      },
+      "queueEyebrow": "Queue view",
+      "queueTitle": "Work the inbox with clear ownership",
+      "queueSubtitle": "Search by subject or requester, then enter the thread to reply, re-status, or assign.",
+      "queueListTitle": "Ticket queue",
+      "queueListSubtitle": "Ordered by the latest activity from the API.",
+      "searchPlaceholder": "Search subject, username, email",
+      "assigneeFilter": "Filter by assignee",
+      "assigneeFilterAll": "All assignees",
+      "assigneeFilterUnassigned": "Unassigned only",
+      "emptyTitle": "No matching tickets",
+      "emptyDescription": "Adjust filters or search terms.",
+      "unknownRequester": "Unknown requester",
+      "unassigned": "Unassigned",
+      "messageCount": "{{count}} messages",
+      "backToQueue": "Back to queue",
+      "threadSubtitle": "Reply to the requester, update handling state, and preserve an auditable record.",
+      "requesterTitle": "Requester",
+      "requesterSubtitle": "Identity snapshot stored on the ticket.",
+      "requesterName": "Name",
+      "requesterEmail": "Email",
+      "createdAt": "Created",
+      "tagsTitle": "Tag results",
+      "tagsSubtitle": "Show rule hits and tag sources so support can verify the classification without switching back.",
+      "noTags": "No tags matched this ticket yet.",
+      "tagSource": {
+        "rule": "Rule hit",
+        "manual": "Manual tag",
+        "system": "System tag"
+      },
+      "ruleLabel": "Rule #{{id}}",
+      "workflowTitle": "Workflow",
+      "workflowSubtitle": "Update status, priority, and assignee while keeping current workload visible.",
+      "assignedTo": "Assignee",
+      "assignedToPlaceholder": "Leave blank to clear assignment",
+      "saveWorkflow": "Save workflow",
+      "workload": {
+        "title": "Support workload",
+        "subtitle": "Managers and support can see each assignee s total load, not started count, and in-progress count at a glance.",
+        "empty": "No assignees available yet.",
+        "assigned": "Assigned",
+        "notStarted": "Not started",
+        "inProgress": "In progress"
+      },
+      "roles": {
+        "user": "User",
+        "support": "Support",
+        "admin": "Admin"
+      },
+      "transfer": {
+        "title": "Request transfer",
+        "subtitle": "The current assignee can request a reassignment, and an administrator reviews it.",
+        "target": "Target assignee",
+        "targetPlaceholder": "Select assignee",
+        "targetRequired": "Select a target assignee first.",
+        "reason": "Reason",
+        "reasonPlaceholder": "Explain why the ticket should move, such as a bad rule match, domain mismatch, or current overload.",
+        "submit": "Send transfer request",
+        "requestCreated": "Transfer request submitted",
+        "reviewSaved": "Transfer review saved",
+        "historyTitle": "Transfer history",
+        "historySubtitle": "Review reassignment requests between support staff and the admin decision.",
+        "empty": "No transfer requests yet.",
+        "approve": "Approve transfer",
+        "reject": "Reject transfer",
+        "pendingHint": "{{count}} transfer request(s) still need review.",
+        "requestedBy": "Requested by: {{name}}",
+        "requestLine": "{{from}} -> {{to}}",
+        "reviewNoteLabel": "Review note",
+        "reviewPlaceholder": "Optional review note."
+      },
+      "replyTitle": "Reply to requester",
+      "replySubtitle": "Support replies notify the user by message and email.",
+      "replyPlaceholder": "Write the next instruction, resolution step, or requested clarification.",
+      "replySubmit": "Send support reply",
+      "ticketUpdated": "Ticket updated",
+      "replyCreated": "Support reply sent",
+      "currentView": "Current view",
+      "badge": "Support portal",
+      "tipTitle": "Operator note",
+      "tip": "Status, assignment, and replies are reflected on the user side immediately.",
+      "stats": {
+        "total": "Visible now",
+        "open": "Open",
+        "urgent": "Urgent"
+      }
+    }
+  },
+  "adminSupport": {
+    "eyebrow": "Support automation",
+    "title": "Support operations",
+    "subtitle": "Keep workload, rule hits, tag results, and transfer handling in one place instead of bouncing between pages.",
+    "tabs": {
+      "team": "Team",
+      "rules": "Rules",
+      "tags": "Tags",
+      "reports": "Reports"
+    },
+    "summary": {
+      "total": "Total tickets",
+      "totalHint": "Support ticket volume for the selected period.",
+      "autoAssigned": "Auto-assigned",
+      "autoAssignedHint": "Tickets assigned automatically by rules.",
+      "unassigned": "Unassigned",
+      "unassignedHint": "Tickets still waiting for manual ownership.",
+      "avgResolution": "Avg resolution",
+      "avgResolutionHint": "Average hours to resolution for closed work."
+    },
+    "actions": {
+      "saveRule": "Save rule",
+      "saveTag": "Save tag"
+    },
+    "common": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "noDescription": "No description"
+    },
+    "filters": {
+      "anyCategory": "Any category",
+      "anyPriority": "Any priority"
+    },
+    "messages": {
+      "loadFailed": "Failed to load support operations data.",
+      "ruleSaved": "Rule saved",
+      "tagSaved": "Tag saved"
+    },
+    "roles": {
+      "user": "User",
+      "support": "Support",
+      "admin": "Admin"
+    },
+    "team": {
+      "listTitle": "Assignees",
+      "listSubtitle": "Review each support member s active load and switch into their detailed profile.",
+      "detailTitle": "Assignee detail",
+      "detailSubtitle": "Shows profile data, current workload, and recently assigned tickets.",
+      "empty": "Select an assignee.",
+      "contactTitle": "Contact",
+      "profileTitle": "Profile",
+      "notesTitle": "Admin notes",
+      "noNotes": "No admin notes yet.",
+      "recentTicketsTitle": "Recent tickets",
+      "recentTicketsSubtitle": "The latest tickets assigned to this person for quick context.",
+      "noRecentTickets": "No recent tickets.",
+      "metrics": {
+        "assigned": "Assigned",
+        "notStarted": "Not started",
+        "inProgress": "In progress"
+      },
+      "fields": {
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "school": "School",
+        "region": "Region",
+        "location": "Location",
+        "group": "Group",
+        "lastLogin": "Last login",
+        "createdAt": "Created"
+      }
+    },
+    "rules": {
+      "listTitle": "Rule list",
+      "listSubtitle": "Configure match conditions, automatic assignment, and tag writing.",
+      "newRule": "New rule",
+      "editorTitle": "Rule editor",
+      "editorSubtitle": "Saved rules participate in new ticket routing.",
+      "noAssignee": "Do not auto-assign",
+      "noTags": "No tags available",
+      "fields": {
+        "name": "Name",
+        "sortOrder": "Sort order",
+        "description": "Description",
+        "category": "Category",
+        "priority": "Priority",
+        "timeStart": "Start time",
+        "timeEnd": "End time",
+        "timezone": "Timezone",
+        "weekdays": "Weekdays",
+        "assignTo": "Assign to",
+        "tags": "Tags",
+        "active": "Rule active",
+        "stopProcessing": "Stop on match"
+      }
+    },
+    "tags": {
+      "listTitle": "Tag list",
+      "listSubtitle": "Tags can be applied by rules and are shown inside the support portal.",
+      "newTag": "New tag",
+      "editorTitle": "Tag editor",
+      "editorSubtitle": "Define a shared name, color, and description.",
+      "fields": {
+        "name": "Name",
+        "slug": "Slug",
+        "color": "Color",
+        "description": "Description",
+        "active": "Tag active"
+      }
+    },
+    "reports": {
+      "title": "Support reports",
+      "subtitle": "Review distribution by status, category, priority, assignee, and rule hits.",
+      "days": "Last {{count}} days",
+      "byStatus": "By status",
+      "byStatusDescription": "Ticket count by status for the selected period.",
+      "byCategory": "By category",
+      "byCategoryDescription": "Ticket distribution by category for the selected period.",
+      "byPriority": "By priority",
+      "byPriorityDescription": "Ticket distribution by priority for the selected period.",
+      "byAssignee": "By assignee",
+      "byAssigneeDescription": "Ticket ownership distribution for the selected period.",
+      "byTag": "By tag",
+      "byTagDescription": "Rule and manual tag hit counts.",
+      "ruleHits": "Rule hits",
+      "ruleHitsDescription": "How often each routing rule matched in the selected period.",
+      "timelineTitle": "Timeline",
+      "timelineSubtitle": "Daily incoming ticket volume."
+    },
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "colors": {
+      "emerald": "Emerald",
+      "sky": "Sky",
+      "amber": "Amber",
+      "rose": "Rose",
+      "violet": "Violet",
+      "slate": "Slate"
     }
   }
 }
