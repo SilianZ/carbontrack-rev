@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useForm } from 'react-hook-form';
+import { useController, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
@@ -43,6 +43,12 @@ const createTicketSchema = z.object({
 });
 
 const scenarioKeys = ['website_bug', 'business_issue', 'feature_request', 'account'];
+const helpFormDefaults = {
+  subject: '',
+  category: 'website_bug',
+  priority: 'normal',
+  content: '',
+};
 
 export default function HelpPage() {
   const { t, currentLanguage } = useTranslation();
@@ -54,20 +60,17 @@ export default function HelpPage() {
   const { isAuthenticated } = checkAuthStatus();
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
-    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(createTicketSchema),
-    defaultValues: {
-      subject: '',
-      category: 'website_bug',
-      priority: 'normal',
-      content: '',
-    },
+    defaultValues: helpFormDefaults,
   });
+  const { field: categoryField } = useController({ name: 'category', control });
+  const { field: priorityField } = useController({ name: 'priority', control });
 
   const recentTicketsQuery = useQuery(
     ['help-recent-tickets'],
@@ -90,7 +93,7 @@ export default function HelpPage() {
       onSuccess: (response) => {
         const ticket = response?.data?.data;
         toast.success(t('support.feedback.created'));
-        reset();
+        reset(helpFormDefaults);
         setAttachments([]);
         setTurnstileToken('');
         turnstileRef.current?.reset?.();
@@ -237,7 +240,7 @@ export default function HelpPage() {
                       <label className="text-sm font-medium">
                         {t('support.feedback.fields.category')}
                       </label>
-                      <Select defaultValue="website_bug" onValueChange={(value) => setValue('category', value, { shouldValidate: true })}>
+                      <Select value={categoryField.value} onValueChange={categoryField.onChange}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder={t('support.feedback.fields.category')} />
                         </SelectTrigger>
@@ -254,7 +257,7 @@ export default function HelpPage() {
                       <label className="text-sm font-medium">
                         {t('support.feedback.fields.priority')}
                       </label>
-                      <Select defaultValue="normal" onValueChange={(value) => setValue('priority', value, { shouldValidate: true })}>
+                      <Select value={priorityField.value} onValueChange={priorityField.onChange}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder={t('support.feedback.fields.priority')} />
                         </SelectTrigger>

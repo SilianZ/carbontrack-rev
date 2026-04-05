@@ -3705,6 +3705,31 @@
       "addressTitle": "地址",
       "addressDescription": "CarbonTrack 团队的协作与运营地址。"
     },
+    "links": [
+      {
+        "type": "email",
+        "label": "联系我们",
+        "href": "mailto:{{email}}"
+      },
+      {
+        "type": "instagram",
+        "label": "关注我们（Instagram）",
+        "href": "https://www.instagram.com/carbontrackorg/",
+        "external": true
+      },
+      {
+        "type": "discord",
+        "label": "加入 Discord 社群",
+        "href": "https://discord.gg/nPzMrJAyjY",
+        "external": true
+      },
+      {
+        "type": "partnership",
+        "label": "合作洽谈",
+        "href": "https://carbontrack.org/partners",
+        "external": true
+      }
+    ],
     "linksTitle": "更多入口"
   },
   "help": {
