@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace CarbonTrack\Tests\Unit\Services;
 
 use CarbonTrack\Services\AuditLogService;
+use CarbonTrack\Services\EmailService;
 use CarbonTrack\Services\ErrorLogService;
+use CarbonTrack\Services\MessageService;
 use CarbonTrack\Services\SupportRoutingEngineService;
 use CarbonTrack\Services\SupportRoutingTriageService;
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -272,5 +274,53 @@ class SupportRoutingEngineServiceTest extends TestCase
         $this->assertSame('smart', $ticket->assignment_source);
         $this->assertSame(3, (int) $ticket->assigned_to);
         $this->assertNotNull($ticket->last_routing_run_id);
+    }
+
+    public function testNotifyAssigneeLogsFailedWhenNoChannelSucceeds(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->exactly(2))->method('warning');
+
+        $loggedPayloads = [];
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->exactly(3))
+            ->method('log')
+            ->willReturnCallback(static function (array $payload) use (&$loggedPayloads): bool {
+                $loggedPayloads[] = $payload;
+                return true;
+            });
+
+        $messageService = $this->createMock(MessageService::class);
+        $messageService->method('sendSystemMessage')->willThrowException(new \RuntimeException('message failed'));
+
+        $emailService = $this->createMock(EmailService::class);
+        $emailService->method('sendMessageNotification')->willThrowException(new \RuntimeException('email failed'));
+
+        $engine = new SupportRoutingEngineService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $audit,
+            $this->createMock(ErrorLogService::class),
+            new SupportRoutingTriageService(null, $this->createMock(LoggerInterface::class)),
+            $messageService,
+            $emailService
+        );
+
+        $method = new \ReflectionMethod($engine, 'notifyAssignee');
+        $method->setAccessible(true);
+        $method->invoke($engine, ['id' => 99, 'username' => 'supporter', 'email' => 'support@example.com'], 'Subject', 'Body', 123);
+
+        $finalNotificationLog = null;
+        foreach ($loggedPayloads as $payload) {
+            if (($payload['action'] ?? null) === 'support_routing_assignee_notified') {
+                $finalNotificationLog = $payload;
+                break;
+            }
+        }
+
+        $this->assertNotNull($finalNotificationLog);
+        $this->assertSame('failed', $finalNotificationLog['status'] ?? null);
+        $this->assertFalse($finalNotificationLog['data']['message_sent'] ?? true);
+        $this->assertFalse($finalNotificationLog['data']['email_sent'] ?? true);
     }
 }
