@@ -23,7 +23,7 @@ class SystemLogControllerTest extends TestCase
         $countStmt = $this->createMock(\PDOStatement::class);
         $countStmt->expects($this->exactly(9))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, int $type = null) use (&$bound) {
+            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$bound) {
                 $bound['count'][$key] = [$value, $type];
                 return true;
             });
@@ -33,7 +33,7 @@ class SystemLogControllerTest extends TestCase
         $listStmt = $this->createMock(\PDOStatement::class);
         $listStmt->expects($this->exactly(11))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, int $type = null) use (&$bound) {
+            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$bound) {
                 $bound['list'][$key] = [$value, $type];
                 return true;
             });

@@ -101,7 +101,7 @@ class MessageControllerTest extends TestCase
         $listStmt = $this->createMock(\PDOStatement::class);
         $listStmt->expects($this->exactly(5))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, int $type = null) use (&$listBound) {
+            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$listBound) {
                 $listBound[$key] = [$value, $type];
                 return true;
             });
@@ -904,7 +904,7 @@ class MessageControllerTest extends TestCase
         $stmt = $this->createMock(\PDOStatement::class);
         $stmt->expects($this->exactly(6))
             ->method('bindValue')
-            ->willReturnCallback(function ($key, $value, int $type = null) use (&$bound) {
+            ->willReturnCallback(function ($key, $value, ?int $type = null) use (&$bound) {
                 $bound[$key] = [$value, $type];
                 return true;
             });

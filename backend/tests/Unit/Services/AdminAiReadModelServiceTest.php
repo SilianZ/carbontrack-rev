@@ -88,7 +88,7 @@ class AdminAiReadModelServiceTest extends TestCase
         $listStmt = $this->createMock(\PDOStatement::class);
         $listStmt->expects($this->exactly(4))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, int $type = null) use (&$listBound) {
+            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$listBound) {
                 $listBound[$key] = [$value, $type];
                 return true;
             });
@@ -98,7 +98,7 @@ class AdminAiReadModelServiceTest extends TestCase
         $countStmt = $this->createMock(\PDOStatement::class);
         $countStmt->expects($this->exactly(3))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, int $type = null) use (&$countBound) {
+            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$countBound) {
                 $countBound[$key] = [$value, $type];
                 return true;
             });
@@ -138,7 +138,7 @@ class AdminAiReadModelServiceTest extends TestCase
         $stmt = $this->createMock(\PDOStatement::class);
         $stmt->expects($this->exactly(3))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, int $type = null) use (&$bound) {
+            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$bound) {
                 $bound[$key] = [$value, $type];
                 return true;
             });

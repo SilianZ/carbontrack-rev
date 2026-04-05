@@ -91,7 +91,7 @@ class ProductControllerTest extends TestCase
         $listStmt = $this->createMock(\PDOStatement::class);
         $listStmt->expects($this->exactly(4))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, int $type = null) use (&$listBound) {
+            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$listBound) {
                 $listBound[$key] = [$value, $type];
                 return true;
             });
@@ -193,7 +193,7 @@ class ProductControllerTest extends TestCase
         $stmt = $this->createMock(\PDOStatement::class);
         $stmt->expects($this->exactly(3))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, int $type = null) use (&$bound) {
+            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$bound) {
                 $bound[$key] = [$value, $type];
                 return true;
             });
@@ -767,7 +767,7 @@ class ProductControllerTest extends TestCase
         $categoryStmt = $this->createMock(\PDOStatement::class);
         $categoryStmt->expects($this->exactly(3))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, int $type = null) use (&$categoryBound) {
+            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$categoryBound) {
                 $categoryBound[$key] = [$value, $type];
                 return true;
             });
