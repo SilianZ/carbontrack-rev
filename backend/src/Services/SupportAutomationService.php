@@ -736,7 +736,7 @@ class SupportAutomationService
     private function formatAssignableUser(array $row): array
     {
         $profileFields = $this->userProfileViewService->buildProfileFields($row);
-        $legacyDisplayFields = $this->userProfileViewService->buildLegacyDisplayFields($row);
+        $legacyDisplayFields = $this->userProfileViewService->buildLegacyDisplayFields($row, $profileFields);
 
         return [
             'id' => (int) ($row['id'] ?? 0),
