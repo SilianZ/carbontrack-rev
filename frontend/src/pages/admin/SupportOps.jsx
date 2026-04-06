@@ -128,6 +128,7 @@ function TicketQueueCard({ ticket, selected, onSelect, t, locale }) {
     <button
       type="button"
       onClick={() => onSelect(ticket.id)}
+      aria-pressed={selected}
       className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
         selected
           ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10'

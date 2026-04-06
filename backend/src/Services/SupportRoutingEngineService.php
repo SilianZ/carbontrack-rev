@@ -14,6 +14,8 @@ use Psr\Log\LoggerInterface;
 
 class SupportRoutingEngineService
 {
+    private ?array $routingSettingsCache = null;
+
     public function __construct(
         private PDO $db,
         private LoggerInterface $logger,
@@ -396,6 +398,10 @@ class SupportRoutingEngineService
 
     private function loadRoutingSettings(): array
     {
+        if ($this->routingSettingsCache !== null) {
+            return $this->routingSettingsCache;
+        }
+
         $stmt = $this->db->query('SELECT * FROM support_routing_settings ORDER BY id ASC LIMIT 1');
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -425,7 +431,7 @@ class SupportRoutingEngineService
         ];
 
         if (!$row) {
-            return [
+            $this->routingSettingsCache = [
                 'id' => null,
                 'ai_enabled' => false,
                 'ai_timeout_ms' => 12000,
@@ -434,9 +440,10 @@ class SupportRoutingEngineService
                 'fallback' => $fallback,
                 'defaults' => $defaults,
             ];
+            return $this->routingSettingsCache;
         }
 
-        return [
+        $this->routingSettingsCache = [
             'id' => (int) ($row['id'] ?? 0),
             'ai_enabled' => !empty($row['ai_enabled']),
             'ai_timeout_ms' => (int) ($row['ai_timeout_ms'] ?? 12000),
@@ -445,6 +452,7 @@ class SupportRoutingEngineService
             'fallback' => array_replace($fallback, $this->decodeJsonObject($row['fallback_json'] ?? null) ?? []),
             'defaults' => array_replace($defaults, $this->decodeJsonObject($row['defaults_json'] ?? null) ?? []),
         ];
+        return $this->routingSettingsCache;
     }
 
     private function resolveGroupRouting(array $ticket, array $defaults): array

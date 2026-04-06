@@ -108,7 +108,10 @@ export default function SupportWorkbenchPage() {
   const viewModel = useMemo(() => {
     const openTickets = tickets.filter((ticket) => !['resolved', 'closed'].includes(ticket.status));
     const urgentFocus = [...openTickets]
-      .filter((ticket) => ticket.priority === 'urgent' || ['breached', 'escalated'].includes(ticket.sla_status))
+      .filter((ticket) => {
+        const slaState = getSlaMeta(ticket, locale).state;
+        return ticket.priority === 'urgent' || ['due_soon', 'breached', 'escalated'].includes(slaState);
+      })
       .sort((left, right) => String(right.last_replied_at || right.created_at).localeCompare(String(left.last_replied_at || left.created_at)))
       .slice(0, 5);
     const waitingFirstResponse = [...openTickets]
@@ -131,7 +134,7 @@ export default function SupportWorkbenchPage() {
       unassigned,
       activeAssignees: assignees.filter((entry) => entry.routing_status === 'active').slice(0, 8),
     };
-  }, [tickets, assignees, currentUser?.id]);
+  }, [tickets, assignees, currentUser?.id, locale]);
 
   return (
     <div className="space-y-6">

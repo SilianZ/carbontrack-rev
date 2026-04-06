@@ -25,6 +25,7 @@ function QueueItem({ ticket, selected, onSelect, t, locale }) {
     <button
       type="button"
       onClick={() => onSelect(ticket.id)}
+      aria-pressed={selected}
       className={`w-full rounded-[1.5rem] border px-4 py-4 text-left transition ${
         selected
           ? 'border-sky-300 bg-sky-50/80 dark:border-sky-400/40 dark:bg-sky-500/10'
