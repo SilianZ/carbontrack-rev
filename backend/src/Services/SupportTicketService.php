@@ -767,6 +767,9 @@ class SupportTicketService
             'message_count' => (int) ($row['message_count'] ?? 0),
             'latest_message_preview' => $row['latest_message_preview'] ?? null,
         ];
+        if ($this->supportRoutingEngineService !== null) {
+            $summary['sla_summary'] = $this->supportRoutingEngineService->buildSlaSummaryForTicket($row);
+        }
         if ($includeRequester) {
             $summary['requester'] = [
                 'id' => (int) ($row['user_id'] ?? 0),

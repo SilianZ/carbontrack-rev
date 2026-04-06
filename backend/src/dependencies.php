@@ -774,7 +774,11 @@ $__deps_initializer = function (Container $container) {
     // Models
     $container->set(Avatar::class, function (ContainerInterface $c) {
         $db = $c->get(DatabaseService::class)->getConnection()->getPdo();
-        return new Avatar($db);
+        return new Avatar(
+            $db,
+            $c->get(ErrorLogService::class),
+            $c->get(LoggerInterface::class)
+        );
     });
 
     // Controllers
@@ -1012,6 +1016,8 @@ $__deps_initializer = function (Container $container) {
     $container->set(AdminSupportController::class, function (ContainerInterface $c) {
         return new AdminSupportController(
             $c->get(SupportAutomationService::class),
+            $c->get(SupportTicketService::class),
+            $c->get(SupportRoutingEngineService::class),
             $c->get(AuthService::class),
             $c->get(LoggerInterface::class),
             $c->get(ErrorLogService::class)

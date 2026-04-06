@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
@@ -16,6 +16,7 @@ const FileUpload = ({
   entityId = null,
   onUploadSuccess = () => {},
   onUploadError = () => {},
+  onStateChange = () => {},
   className = '',
   accept = 'image/*',
   maxFiles = 5,
@@ -225,6 +226,22 @@ const FileUpload = ({
     // 重置input值，允许重复选择同一文件
     e.target.value = '';
   }, [handleFileSelect]);
+
+  useEffect(() => {
+    const pendingCount = files.filter((file) => file.status === 'pending').length;
+    const successCount = files.filter((file) => file.status === 'success').length;
+    const errorCount = files.filter((file) => file.status === 'error').length;
+
+    onStateChange({
+      totalCount: files.length,
+      pendingCount,
+      successCount,
+      errorCount,
+      uploading,
+      mode,
+      hasBlockingSelection: uploading || pendingCount > 0 || errorCount > 0,
+    });
+  }, [files, uploading, mode, onStateChange]);
 
   return (
     <div className={cn('space-y-4', className)}>

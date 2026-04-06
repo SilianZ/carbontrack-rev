@@ -7,6 +7,8 @@ namespace CarbonTrack\Controllers;
 use CarbonTrack\Services\AuthService;
 use CarbonTrack\Services\ErrorLogService;
 use CarbonTrack\Services\SupportAutomationService;
+use CarbonTrack\Services\SupportRoutingEngineService;
+use CarbonTrack\Services\SupportTicketService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -15,6 +17,8 @@ class AdminSupportController
 {
     public function __construct(
         private SupportAutomationService $supportAutomationService,
+        private SupportTicketService $supportTicketService,
+        private SupportRoutingEngineService $supportRoutingEngineService,
         private AuthService $authService,
         private LoggerInterface $logger,
         private ErrorLogService $errorLogService
@@ -144,6 +148,35 @@ class AdminSupportController
             return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
         } catch (\Throwable $e) {
             return $this->error($request, $response, $e, 'Failed to load support reports');
+        }
+    }
+
+    public function listTickets(Request $request, Response $response): Response
+    {
+        try {
+            return $this->json($response, [
+                'success' => true,
+                'data' => $this->supportTicketService->listSupportTickets($this->currentUser($request), $request->getQueryParams()),
+            ]);
+        } catch (\Throwable $e) {
+            return $this->error($request, $response, $e, 'Failed to load support tickets');
+        }
+    }
+
+    public function getTicketDetail(Request $request, Response $response, array $args): Response
+    {
+        try {
+            $ticketId = $this->numericId($args, 'id');
+            $detail = $this->supportTicketService->getTicketDetailForSupport($this->currentUser($request), $ticketId);
+            $limit = (int) ($_ENV['SUPPORT_ROUTING_AUDIT_LIMIT'] ?? 10);
+            $detail['routing_runs'] = $this->supportRoutingEngineService->getRoutingRunsForTicket($ticketId, max(1, $limit));
+            return $this->json($response, ['success' => true, 'data' => $detail]);
+        } catch (\RuntimeException $e) {
+            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'TICKET_NOT_FOUND'], 404);
+        } catch (\InvalidArgumentException $e) {
+            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $e) {
+            return $this->error($request, $response, $e, 'Failed to load support ticket detail');
         }
     }
 
