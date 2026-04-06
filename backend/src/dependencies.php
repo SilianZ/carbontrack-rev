@@ -776,8 +776,8 @@ $__deps_initializer = function (Container $container) {
         $db = $c->get(DatabaseService::class)->getConnection()->getPdo();
         return new Avatar(
             $db,
-            $c->get(ErrorLogService::class),
-            $c->get(LoggerInterface::class)
+            $c->get(LoggerInterface::class),
+            $c->get(ErrorLogService::class)
         );
     });
 
