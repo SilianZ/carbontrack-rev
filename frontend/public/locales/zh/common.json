@@ -3946,7 +3946,7 @@
       },
       "queueEyebrow": "队列视图",
       "queueTitle": "按清晰责任处理收件箱",
-      "queueSubtitle": "可按主题或请求人检索，然后进入线程回复、改状态或分配处理人。",
+      "queueSubtitle": "仅展示当前分配给你的工单，可按主题或请求人检索后直接进入线程处理。",
       "queueListTitle": "工单队列",
       "queueListSubtitle": "使用接口返回的最近活动顺序。",
       "searchPlaceholder": "搜索主题、用户名、邮箱",

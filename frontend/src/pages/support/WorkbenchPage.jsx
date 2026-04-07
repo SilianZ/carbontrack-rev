@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { AlertTriangle, ArrowRight, Clock3, Inbox, LifeBuoy, TimerReset } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Clock3, LifeBuoy, TimerReset } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { supportAPI } from '../../lib/api';
@@ -87,22 +87,9 @@ export default function SupportWorkbenchPage() {
     { refetchOnWindowFocus: false }
   );
 
-  const assigneesQuery = useQuery(
-    ['support-workbench-assignees'],
-    async () => {
-      const response = await supportAPI.getAssignees();
-      return response.data?.data ?? [];
-    },
-    { refetchOnWindowFocus: false }
-  );
-
   const tickets = useMemo(
     () => ticketsQuery.data?.data?.data?.items ?? [],
     [ticketsQuery.data]
-  );
-  const assignees = useMemo(
-    () => assigneesQuery.data ?? [],
-    [assigneesQuery.data]
   );
 
   const viewModel = useMemo(() => {
@@ -122,64 +109,31 @@ export default function SupportWorkbenchPage() {
       .filter((ticket) => Number(ticket.assigned_to) === Number(currentUser?.id ?? 0))
       .sort((left, right) => String(right.last_replied_at || right.created_at).localeCompare(String(left.last_replied_at || left.created_at)))
       .slice(0, 6);
-    const unassigned = [...openTickets]
-      .filter((ticket) => !ticket.assigned_to)
-      .sort((left, right) => String(right.created_at).localeCompare(String(left.created_at)))
-      .slice(0, 6);
 
     return {
       urgentFocus,
       waitingFirstResponse,
       mine,
-      unassigned,
-      activeAssignees: assignees.filter((entry) => entry.routing_status === 'active').slice(0, 8),
     };
-  }, [tickets, assignees, currentUser?.id, locale]);
+  }, [tickets, currentUser?.id, locale]);
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f4fbff_100%)] px-6 py-6 shadow-sm dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.94)_0%,rgba(8,47,73,0.85)_100%)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-sky-600/80 dark:text-sky-300/80">
-            {t('support.portal.workbenchEyebrow')}
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight">{t('support.portal.workbenchTitle')}</h2>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button asChild className="rounded-full">
-              <Link to="/support/tickets">{t('support.portal.goToQueue')}</Link>
+      <section className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f4fbff_100%)] px-6 py-6 shadow-sm dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.94)_0%,rgba(8,47,73,0.85)_100%)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-sky-600/80 dark:text-sky-300/80">
+          {t('support.portal.workbenchEyebrow')}
+        </p>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight">{t('support.portal.workbenchTitle')}</h2>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button asChild className="rounded-full">
+            <Link to="/support/tickets">{t('support.portal.goToQueue')}</Link>
+          </Button>
+          {viewModel.urgentFocus[0] ? (
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to={`/support/tickets/${viewModel.urgentFocus[0].id}`}>{t('support.portal.openTopPriority')}</Link>
             </Button>
-            {viewModel.urgentFocus[0] ? (
-              <Button asChild variant="outline" className="rounded-full">
-                <Link to={`/support/tickets/${viewModel.urgentFocus[0].id}`}>{t('support.portal.openTopPriority')}</Link>
-              </Button>
-            ) : null}
-          </div>
+          ) : null}
         </div>
-
-        <Card className="border-slate-200/80 shadow-sm dark:border-white/10">
-          <CardHeader>
-            <CardTitle>{t('support.portal.activeAssigneesTitle')}</CardTitle>
-            <CardDescription>{t('support.portal.activeAssigneesSubtitle')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {viewModel.activeAssignees.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.emptyLane')}</p>
-            ) : (
-              viewModel.activeAssignees.map((assignee) => (
-                <div key={assignee.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-white/10 dark:bg-white/5">
-                  <div>
-                    <p className="text-sm font-semibold">{assignee.username || assignee.email || `#${assignee.id}`}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">L{assignee.routing_level ?? 1}</p>
-                  </div>
-                  <div className="text-right text-sm">
-                    <p>{t('support.portal.workload.assigned')}: {assignee.assigned_total_count ?? 0}</p>
-                    <p className="text-slate-500 dark:text-slate-400">{t('support.portal.availableCapacity', { count: assignee.available_capacity ?? 0 })}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
       </section>
 
       <div className="grid gap-6 xl:grid-cols-2">
@@ -204,14 +158,6 @@ export default function SupportWorkbenchPage() {
           description={t('support.portal.myQueueLaneSubtitle')}
           icon={<LifeBuoy className="h-4 w-4" />}
           tickets={viewModel.mine}
-          t={t}
-          locale={locale}
-        />
-        <Lane
-          title={t('support.portal.unassignedLaneTitle')}
-          description={t('support.portal.unassignedLaneSubtitle')}
-          icon={<Inbox className="h-4 w-4" />}
-          tickets={viewModel.unassigned}
           t={t}
           locale={locale}
         />

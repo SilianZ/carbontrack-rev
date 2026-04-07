@@ -290,7 +290,7 @@ class SupportTicketService
 
     public function listSupportTickets(array $actor, array $query = []): array
     {
-        $result = $this->listTickets(true, [], $query);
+        $result = $this->listTickets(true, $this->supportTicketBaseFilters($actor), $this->supportTicketQuery($actor, $query));
         $this->auditLogService->log([
             'user_id' => (int) ($actor['id'] ?? 0),
             'action' => 'support_ticket_queue_viewed',
@@ -320,7 +320,7 @@ class SupportTicketService
 
     public function getTicketDetailForSupport(array $actor, int $ticketId): array
     {
-        $ticket = $this->findTicketForSupport($ticketId);
+        $ticket = $this->findTicketForSupport($actor, $ticketId);
         if ($ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
@@ -339,7 +339,7 @@ class SupportTicketService
 
     public function addSupportMessage(array $actor, int $ticketId, array $payload): array
     {
-        $ticket = $this->findTicketForSupport($ticketId);
+        $ticket = $this->findTicketForSupport($actor, $ticketId);
         if ($ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
@@ -398,7 +398,7 @@ class SupportTicketService
 
     public function updateTicketFromSupport(array $actor, int $ticketId, array $payload): array
     {
-        $ticket = $this->findTicketForSupport($ticketId);
+        $ticket = $this->findTicketForSupport($actor, $ticketId);
         if ($ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
@@ -481,7 +481,7 @@ class SupportTicketService
             throw new \DomainException('Administrators can manually transfer tickets without creating a request');
         }
 
-        $ticket = $this->findTicketForSupport($ticketId);
+        $ticket = $this->findTicketForSupport($actor, $ticketId);
         if ($ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
@@ -576,7 +576,7 @@ class SupportTicketService
         $now = $this->now();
 
         if ($decision === self::TRANSFER_STATUS_APPROVED) {
-            $ticket = $this->findTicketForSupport((int) $requestRow['ticket_id']);
+            $ticket = $this->findTicket((int) $requestRow['ticket_id']);
             if ($ticket === null) {
                 throw new \RuntimeException('Ticket not found');
             }
@@ -625,6 +625,15 @@ class SupportTicketService
         if (isset($baseFilters['user_id'])) {
             $where[] = 't.user_id = :user_id';
             $params['user_id'] = (int) $baseFilters['user_id'];
+        }
+        if (array_key_exists('assigned_to', $baseFilters)) {
+            $assignedTo = $baseFilters['assigned_to'];
+            if ($assignedTo === null) {
+                $where[] = 't.assigned_to IS NULL';
+            } else {
+                $where[] = 't.assigned_to = :base_assigned_to';
+                $params['base_assigned_to'] = (int) $assignedTo;
+            }
         }
         if (!empty($query['status'])) {
             $where[] = 't.status = :status';
@@ -715,9 +724,18 @@ class SupportTicketService
         return $this->findTicket($ticketId, 'AND t.user_id = :user_id', ['user_id' => $userId]);
     }
 
-    private function findTicketForSupport(int $ticketId): ?array
+    private function findTicketForSupport(array $actor, int $ticketId): ?array
     {
-        return $this->findTicket($ticketId);
+        if ($this->isAdminActor($actor)) {
+            return $this->findTicket($ticketId);
+        }
+
+        $actorId = (int) ($actor['id'] ?? 0);
+        if ($actorId <= 0) {
+            return null;
+        }
+
+        return $this->findTicket($ticketId, 'AND t.assigned_to = :assigned_to', ['assigned_to' => $actorId]);
     }
 
     private function findTicket(int $ticketId, string $extraWhere = '', array $params = []): ?array
@@ -1463,6 +1481,31 @@ class SupportTicketService
             return 'support';
         }
         return 'user';
+    }
+
+    private function isAdminActor(array $actor): bool
+    {
+        return !empty($actor['is_admin']) || (($actor['role'] ?? null) === 'admin');
+    }
+
+    private function supportTicketBaseFilters(array $actor): array
+    {
+        if ($this->isAdminActor($actor)) {
+            return [];
+        }
+
+        $actorId = (int) ($actor['id'] ?? 0);
+        return $actorId > 0 ? ['assigned_to' => $actorId] : ['assigned_to' => -1];
+    }
+
+    private function supportTicketQuery(array $actor, array $query): array
+    {
+        if ($this->isAdminActor($actor)) {
+            return $query;
+        }
+
+        unset($query['assigned_to']);
+        return $query;
     }
 
     private function recordFailure(\Throwable $e, string $action, array $actor, ?int $ticketId): void

@@ -246,7 +246,7 @@ class SupportTicketServiceTest extends TestCase
             'category' => 'website_bug',
             'status' => 'open',
             'priority' => 'normal',
-            'assigned_to' => null,
+            'assigned_to' => (int) $supportUser->id,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -384,6 +384,153 @@ class SupportTicketServiceTest extends TestCase
 
         $this->assertCount(1, $result['items']);
         $this->assertSame(1, $result['items'][0]['id']);
+    }
+
+    public function testSupportUserOnlySeesAssignedTickets(): void
+    {
+        $now = date('Y-m-d H:i:s');
+        $requester = User::create([
+            'username' => 'requester',
+            'email' => 'requester@example.com',
+            'role' => 'user',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $supportA = User::create([
+            'username' => 'support-a',
+            'email' => 'support-a@example.com',
+            'role' => 'support',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $supportB = User::create([
+            'username' => 'support-b',
+            'email' => 'support-b@example.com',
+            'role' => 'support',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        self::$capsule->table('support_tickets')->insert([
+            [
+                'id' => 1,
+                'user_id' => (int) $requester->id,
+                'subject' => 'Mine',
+                'category' => 'website_bug',
+                'status' => 'open',
+                'priority' => 'normal',
+                'assigned_to' => (int) $supportA->id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => 2,
+                'user_id' => (int) $requester->id,
+                'subject' => 'Not mine',
+                'category' => 'account',
+                'status' => 'open',
+                'priority' => 'normal',
+                'assigned_to' => (int) $supportB->id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => 3,
+                'user_id' => (int) $requester->id,
+                'subject' => 'Unassigned',
+                'category' => 'other',
+                'status' => 'open',
+                'priority' => 'normal',
+                'assigned_to' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ]);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $audit = $this->createMock(AuditLogService::class);
+        $errorLog = $this->createMock(ErrorLogService::class);
+        $fileMetadata = $this->createMock(FileMetadataService::class);
+        $automation = $this->createMock(SupportAutomationService::class);
+        $audit->method('log')->willReturn(true);
+        $automation->method('getTagsForTicketIds')->willReturn([]);
+
+        $service = new SupportTicketService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $audit,
+            $errorLog,
+            $fileMetadata,
+            null,
+            null,
+            null,
+            $automation
+        );
+
+        $result = $service->listSupportTickets(
+            ['id' => (int) $supportA->id, 'role' => 'support', 'is_support' => true],
+            ['assigned_to' => 0]
+        );
+
+        $this->assertCount(1, $result['items']);
+        $this->assertSame(1, $result['items'][0]['id']);
+    }
+
+    public function testSupportUserCannotViewOtherAssigneeTicketDetail(): void
+    {
+        $now = date('Y-m-d H:i:s');
+        $requester = User::create([
+            'username' => 'requester',
+            'email' => 'requester@example.com',
+            'role' => 'user',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $supportA = User::create([
+            'username' => 'support-a',
+            'email' => 'support-a@example.com',
+            'role' => 'support',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $supportB = User::create([
+            'username' => 'support-b',
+            'email' => 'support-b@example.com',
+            'role' => 'support',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        self::$capsule->table('support_tickets')->insert([
+            'id' => 10,
+            'user_id' => (int) $requester->id,
+            'subject' => 'Other assignee ticket',
+            'category' => 'website_bug',
+            'status' => 'open',
+            'priority' => 'normal',
+            'assigned_to' => (int) $supportB->id,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $audit = $this->createMock(AuditLogService::class);
+        $errorLog = $this->createMock(ErrorLogService::class);
+        $fileMetadata = $this->createMock(FileMetadataService::class);
+        $audit->method('log')->willReturn(true);
+
+        $service = new SupportTicketService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $audit,
+            $errorLog,
+            $fileMetadata
+        );
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Ticket not found');
+
+        $service->getTicketDetailForSupport(['id' => (int) $supportA->id, 'role' => 'support', 'is_support' => true], 10);
     }
 
     public function testCreateTransferRequestCreatesPendingEntry(): void

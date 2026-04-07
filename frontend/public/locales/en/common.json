@@ -3946,7 +3946,7 @@
       },
       "queueEyebrow": "Queue view",
       "queueTitle": "Work the inbox with clear ownership",
-      "queueSubtitle": "Search by subject or requester, then enter the thread to reply, re-status, or assign.",
+      "queueSubtitle": "Only tickets currently assigned to you are shown here; search by subject or requester and jump straight into the thread.",
       "queueListTitle": "Ticket queue",
       "queueListSubtitle": "Ordered by the latest activity from the API.",
       "searchPlaceholder": "Search subject, username, email",
