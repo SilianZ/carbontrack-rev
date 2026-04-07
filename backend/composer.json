@@ -40,6 +40,12 @@
             "CarbonTrack\\Tests\\": "tests/"
         }
     },
+    "repositories": {
+        "packagist.org": {
+            "type": "composer",
+            "url": "https://repo.packagist.org"
+        }
+    },
     "scripts": {
         "start": "php -S localhost:8080 -t public",
         "test": "php vendor/bin/phpunit --configuration phpunit.xml"
