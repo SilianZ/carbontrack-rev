@@ -327,37 +327,11 @@ class SupportRoutingEngineService
         $stmt->bindValue(':ticket_id', $ticketId, PDO::PARAM_INT);
         $stmt->bindValue(':limit', max(1, $limit), PDO::PARAM_INT);
         $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $candidateScoresByRun = [];
-        $userIds = [];
-
-        foreach ($rows as $index => $row) {
+        return array_map(function (array $row): array {
             $candidateScores = json_decode((string) ($row['candidate_scores_json'] ?? '[]'), true);
-            $candidateScoresByRun[$index] = is_array($candidateScores) ? $candidateScores : [];
-
-            foreach ($candidateScoresByRun[$index] as $candidateScore) {
-                $candidateId = (int) ($candidateScore['candidate']['id'] ?? $candidateScore['candidate_id'] ?? 0);
-                if ($candidateId > 0) {
-                    $userIds[$candidateId] = $candidateId;
-                }
-            }
-
-            $winnerUserId = isset($row['winner_user_id']) ? (int) $row['winner_user_id'] : 0;
-            if ($winnerUserId > 0) {
-                $userIds[$winnerUserId] = $winnerUserId;
-            }
-        }
-
-        $userMap = $this->loadUsersByIds(array_values($userIds));
-
-        return array_map(function (array $row, int $index) use ($candidateScoresByRun, $userMap): array {
-            $candidateScores = $this->hydrateCandidateScores($candidateScoresByRun[$index] ?? [], $userMap);
             $summary = $this->decodeJsonObject($row['summary_json'] ?? null) ?? [];
             $summary['top_factors'] = $this->normalizeTopFactors($summary['top_factors'] ?? []);
             $winnerUserId = isset($row['winner_user_id']) ? (int) $row['winner_user_id'] : null;
-            if (($summary['winner_label'] ?? null) === null && $winnerUserId !== null && isset($userMap[$winnerUserId])) {
-                $summary['winner_label'] = $userMap[$winnerUserId]['username'] ?? $userMap[$winnerUserId]['email'] ?? ('User #' . $winnerUserId);
-            }
 
             return [
                 'id' => (int) ($row['id'] ?? 0),
@@ -367,14 +341,14 @@ class SupportRoutingEngineService
                 'fallback_reason' => $row['fallback_reason'] ?? null,
                 'triage' => $this->decodeJsonObject($row['triage_json'] ?? null) ?? [],
                 'matched_rule_ids' => array_map('intval', $this->decodeJsonList($row['matched_rule_ids_json'] ?? null)),
-                'candidate_scores' => $candidateScores,
+                'candidate_scores' => is_array($candidateScores) ? $candidateScores : [],
                 'winner_user_id' => $winnerUserId,
                 'winner_score' => isset($row['winner_score']) ? (float) $row['winner_score'] : null,
                 'summary' => $summary,
                 'created_at' => $row['created_at'] ?? null,
                 'updated_at' => $row['updated_at'] ?? null,
             ];
-        }, $rows, array_keys($rows));
+        }, $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
     private function buildLockedResult(array $ticket, string $trigger): array
@@ -954,50 +928,6 @@ class SupportRoutingEngineService
         $stmt->execute(['id' => $userId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
-    }
-
-    private function loadUsersByIds(array $userIds): array
-    {
-        if ($userIds === []) {
-            return [];
-        }
-
-        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-        $stmt = $this->db->prepare("SELECT id, username, email FROM users WHERE id IN ({$placeholders})");
-        $stmt->execute(array_values($userIds));
-
-        $result = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-            $userId = (int) ($row['id'] ?? 0);
-            if ($userId > 0) {
-                $result[$userId] = $row;
-            }
-        }
-
-        return $result;
-    }
-
-    private function hydrateCandidateScores(array $candidateScores, array $userMap): array
-    {
-        return array_map(static function (array $candidateScore) use ($userMap): array {
-            $candidateId = (int) ($candidateScore['candidate']['id'] ?? $candidateScore['candidate_id'] ?? 0);
-            $candidate = is_array($candidateScore['candidate'] ?? null) ? $candidateScore['candidate'] : [];
-
-            if ($candidateId > 0) {
-                $candidate['id'] = $candidateId;
-                if (($candidate['username'] ?? null) === null && isset($userMap[$candidateId])) {
-                    $candidate['username'] = $userMap[$candidateId]['username'] ?? null;
-                }
-                if (($candidate['email'] ?? null) === null && isset($userMap[$candidateId])) {
-                    $candidate['email'] = $userMap[$candidateId]['email'] ?? null;
-                }
-            }
-
-            $candidateScore['candidate'] = $candidate;
-            $candidateScore['candidate_id'] = $candidateId > 0 ? $candidateId : null;
-
-            return $candidateScore;
-        }, $candidateScores);
     }
 
     private function notifyAssignee(array $user, string $subject, string $body, int $ticketId): void
