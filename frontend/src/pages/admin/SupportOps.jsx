@@ -204,6 +204,27 @@ function RoutingRunCard({ run, t, locale }) {
   );
 }
 
+function topFactorsLabel(value) {
+  if (Array.isArray(value)) {
+    return value.join(' / ');
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.entries(value)
+      .filter(([, score]) => typeof score === 'number')
+      .sort((left, right) => Math.abs(right[1]) - Math.abs(left[1]))
+      .slice(0, 4)
+      .map(([label, score]) => `${label} ${Number(score).toFixed(2)}`)
+      .join(' / ');
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  return '';
+}
+
 export default function AdminSupportOpsPage() {
   const { t, currentLanguage } = useTranslation();
   const queryClient = useQueryClient();
@@ -940,7 +961,7 @@ export default function AdminSupportOpsPage() {
                     <div className="mt-3 grid gap-3 md:grid-cols-2 text-sm">
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
                         <p className="font-medium">{t('adminSupport.tickets.topFactors')}</p>
-                        <p className="mt-2 text-slate-500 dark:text-slate-400">{(ticketDetail.routing_summary?.top_factors || []).join(' / ') || '--'}</p>
+                        <p className="mt-2 text-slate-500 dark:text-slate-400">{topFactorsLabel(ticketDetail.routing_summary?.top_factors) || '--'}</p>
                       </div>
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
                         <p className="font-medium">{t('adminSupport.tickets.routingFallbackLabel')}</p>

@@ -138,12 +138,12 @@ const FileUpload = ({
       }
 
       // 更新文件状态
-      setFiles(prevFiles => 
-        prevFiles.map(f => ({
-          ...f,
-          status: 'success',
-          progress: 100
-        }))
+      setFiles(prevFiles =>
+        prevFiles.map((file) => (
+          pendingFiles.some((pending) => pending.id === file.id)
+            ? { ...file, status: 'success', progress: 100, error: null }
+            : file
+        ))
       );
 
       onUploadSuccess(result);
@@ -163,12 +163,12 @@ const FileUpload = ({
 
     } catch (uploadError) {
       setError(uploadError.message);
-      setFiles(prevFiles => 
-        prevFiles.map(f => ({
-          ...f,
-          status: 'error',
-          error: uploadError.message
-        }))
+      setFiles(prevFiles =>
+        prevFiles.map((file) => (
+          pendingFiles.some((pending) => pending.id === file.id)
+            ? { ...file, status: 'error', error: uploadError.message }
+            : file
+        ))
       );
       onUploadError(uploadError);
     } finally {
