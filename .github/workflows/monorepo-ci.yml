@@ -111,12 +111,6 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      - name: Normalize backend lock metadata for CI
-        working-directory: backend
-        run: |
-          composer config -g repos.packagist composer https://repo.packagist.org
-          composer update --lock --no-interaction --no-install --no-audit
-
       - name: Install backend dependencies
         working-directory: backend
         run: |
@@ -148,12 +142,6 @@ jobs:
           rm -rf /tmp/backend-mirror
           mkdir -p /tmp/backend-mirror
           cp -a backend/. /tmp/backend-mirror/
-
-      - name: Normalize mirrored backend lock metadata for CI
-        working-directory: /tmp/backend-mirror
-        run: |
-          composer config -g repos.packagist composer https://repo.packagist.org
-          composer update --lock --no-interaction --no-install --no-audit
 
       - name: Install production backend dependencies
         working-directory: /tmp/backend-mirror
