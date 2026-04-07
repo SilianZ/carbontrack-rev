@@ -3886,7 +3886,8 @@
       }
     },
     "attachments": {
-      "uploadRequired": "If you selected files, upload them before submitting the ticket or reply."
+      "uploadRequired": "If you selected files, upload them before submitting the ticket or reply.",
+      "uploadFailedBlocking": "Some attachments failed to upload. Retry or remove them before submitting."
     },
     "recent": {
       "title": "Recent tickets",

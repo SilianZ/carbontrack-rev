@@ -167,7 +167,7 @@ export default function SupportTicketDetailPage() {
   const queryClient = useQueryClient();
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
   const [attachments, setAttachments] = useState([]);
-  const [attachmentGate, setAttachmentGate] = useState({ hasBlockingSelection: false });
+  const [attachmentGate, setAttachmentGate] = useState({ hasPendingUploads: false, hasUploadErrors: false, isSubmissionBlocked: false });
   const [status, setStatus] = useState('open');
   const [priority, setPriority] = useState('normal');
   const [assignedTo, setAssignedTo] = useState('none');
@@ -315,7 +315,11 @@ export default function SupportTicketDetailPage() {
   };
 
   const onReplySubmit = handleSubmit((values) => {
-    if (attachmentGate.hasBlockingSelection) {
+    if (attachmentGate.hasUploadErrors) {
+      toast.error(t('support.attachments.uploadFailedBlocking'));
+      return;
+    }
+    if (attachmentGate.hasPendingUploads) {
       toast.error(t('support.attachments.uploadRequired'));
       return;
     }
@@ -479,7 +483,12 @@ export default function SupportTicketDetailPage() {
                     ))}
                   </div>
                 )}
-                {attachmentGate.hasBlockingSelection ? (
+                {attachmentGate.hasUploadErrors ? (
+                  <Alert>
+                    <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
+                  </Alert>
+                ) : null}
+                {attachmentGate.hasPendingUploads ? (
                   <Alert>
                     <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
                   </Alert>
@@ -489,7 +498,7 @@ export default function SupportTicketDetailPage() {
                   type="submit"
                   className="w-full rounded-full"
                   loading={replyMutation.isLoading}
-                  disabled={attachmentGate.hasBlockingSelection}
+                  disabled={attachmentGate.isSubmissionBlocked}
                 >
                   <Send className="mr-2 h-4 w-4" />
                   {t('support.portal.replySubmit')}

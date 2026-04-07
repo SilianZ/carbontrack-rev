@@ -3886,7 +3886,8 @@
       }
     },
     "attachments": {
-      "uploadRequired": "若已选择附件，请先完成上传，再提交工单或回复。"
+      "uploadRequired": "若已选择附件，请先完成上传，再提交工单或回复。",
+      "uploadFailedBlocking": "存在上传失败的附件，请重试上传或移除后再提交。"
     },
     "recent": {
       "title": "最近工单",

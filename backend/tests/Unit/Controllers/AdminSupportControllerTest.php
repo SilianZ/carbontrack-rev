@@ -6,6 +6,7 @@ namespace CarbonTrack\Tests\Unit\Controllers;
 
 use CarbonTrack\Controllers\AdminSupportController;
 use CarbonTrack\Services\AuthService;
+use CarbonTrack\Services\AuditLogService;
 use CarbonTrack\Services\ErrorLogService;
 use CarbonTrack\Services\SupportRoutingEngineService;
 use CarbonTrack\Services\SupportAutomationService;
@@ -19,13 +20,15 @@ class AdminSupportControllerTest extends TestCase
         ?SupportAutomationService $automationService = null,
         ?AuthService $authService = null,
         ?SupportTicketService $ticketService = null,
-        ?SupportRoutingEngineService $routingEngineService = null
+        ?SupportRoutingEngineService $routingEngineService = null,
+        ?AuditLogService $auditLogService = null
     ): AdminSupportController {
         return new AdminSupportController(
             $automationService ?? $this->createMock(SupportAutomationService::class),
             $ticketService ?? $this->createMock(SupportTicketService::class),
             $routingEngineService ?? $this->createMock(SupportRoutingEngineService::class),
             $authService ?? $this->createMock(AuthService::class),
+            $auditLogService ?? $this->createMock(AuditLogService::class),
             $this->createMock(LoggerInterface::class),
             $this->createMock(ErrorLogService::class)
         );
@@ -127,13 +130,15 @@ class AdminSupportControllerTest extends TestCase
 
     public function testListTicketsReturnsQueuePayload(): void
     {
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->once())->method('logAdminOperation');
         $ticketService = $this->createMock(SupportTicketService::class);
         $ticketService->expects($this->once())
             ->method('listSupportTickets')
             ->with([], [])
             ->willReturn(['items' => [['id' => 7]], 'pagination' => ['page' => 1, 'limit' => 20, 'total' => 1]]);
 
-        $controller = $this->makeController(ticketService: $ticketService);
+        $controller = $this->makeController(ticketService: $ticketService, auditLogService: $audit);
         $response = $controller->listTickets(
             makeRequest('GET', '/api/v1/admin/support/tickets'),
             new \Slim\Psr7\Response()
@@ -145,6 +150,8 @@ class AdminSupportControllerTest extends TestCase
     public function testGetTicketDetailIncludesRoutingRuns(): void
     {
         $_ENV['SUPPORT_ROUTING_AUDIT_LIMIT'] = '4';
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->once())->method('logAdminOperation');
 
         $ticketService = $this->createMock(SupportTicketService::class);
         $ticketService->expects($this->once())
@@ -160,7 +167,8 @@ class AdminSupportControllerTest extends TestCase
 
         $controller = $this->makeController(
             ticketService: $ticketService,
-            routingEngineService: $routingEngine
+            routingEngineService: $routingEngine,
+            auditLogService: $audit
         );
 
         $response = $controller->getTicketDetail(

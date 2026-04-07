@@ -58,7 +58,7 @@ export default function HelpPage() {
   const turnstileRef = useRef(null);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [attachments, setAttachments] = useState([]);
-  const [attachmentGate, setAttachmentGate] = useState({ hasBlockingSelection: false });
+  const [attachmentGate, setAttachmentGate] = useState({ hasPendingUploads: false, hasUploadErrors: false, isSubmissionBlocked: false });
   const { isAuthenticated } = checkAuthStatus();
 
   const {
@@ -121,7 +121,11 @@ export default function HelpPage() {
       toast.error(t('support.feedback.turnstileRequired'));
       return;
     }
-    if (attachmentGate.hasBlockingSelection) {
+    if (attachmentGate.hasUploadErrors) {
+      toast.error(t('support.attachments.uploadFailedBlocking'));
+      return;
+    }
+    if (attachmentGate.hasPendingUploads) {
       toast.error(t('support.attachments.uploadRequired'));
       return;
     }
@@ -289,7 +293,12 @@ export default function HelpPage() {
                         ))}
                       </div>
                     )}
-                    {attachmentGate.hasBlockingSelection ? (
+                    {attachmentGate.hasUploadErrors ? (
+                      <Alert className="rounded-[1.2rem]">
+                        <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
+                      </Alert>
+                    ) : null}
+                    {attachmentGate.hasPendingUploads ? (
                       <Alert className="rounded-[1.2rem] border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
                         <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
                       </Alert>
@@ -309,7 +318,7 @@ export default function HelpPage() {
                     type="submit"
                     className="w-full rounded-full bg-emerald-600 text-white hover:bg-emerald-500"
                     loading={createTicketMutation.isLoading}
-                    disabled={attachmentGate.hasBlockingSelection}
+                    disabled={attachmentGate.isSubmissionBlocked}
                   >
                     <MessageSquareMore className="mr-2 h-4 w-4" />
                     {t('support.feedback.submit')}

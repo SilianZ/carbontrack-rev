@@ -120,7 +120,7 @@ export default function TicketDetailPage() {
   const dirtyFeedbackDraftIdsRef = useRef(new Set());
   const [turnstileToken, setTurnstileToken] = useState('');
   const [attachments, setAttachments] = useState([]);
-  const [attachmentGate, setAttachmentGate] = useState({ hasBlockingSelection: false });
+  const [attachmentGate, setAttachmentGate] = useState({ hasPendingUploads: false, hasUploadErrors: false, isSubmissionBlocked: false });
   const [feedbackDrafts, setFeedbackDrafts] = useState({});
 
   const {
@@ -218,7 +218,11 @@ export default function TicketDetailPage() {
       toast.error(t('support.feedback.turnstileRequired'));
       return;
     }
-    if (attachmentGate.hasBlockingSelection) {
+    if (attachmentGate.hasUploadErrors) {
+      toast.error(t('support.attachments.uploadFailedBlocking'));
+      return;
+    }
+    if (attachmentGate.hasPendingUploads) {
       toast.error(t('support.attachments.uploadRequired'));
       return;
     }
@@ -520,7 +524,12 @@ export default function TicketDetailPage() {
                       ))}
                     </div>
                   )}
-                  {attachmentGate.hasBlockingSelection ? (
+                  {attachmentGate.hasUploadErrors ? (
+                    <Alert>
+                      <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {attachmentGate.hasPendingUploads ? (
                     <Alert>
                       <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
                     </Alert>
@@ -539,7 +548,7 @@ export default function TicketDetailPage() {
                     type="submit"
                     className="w-full rounded-full"
                     loading={replyMutation.isLoading}
-                    disabled={attachmentGate.hasBlockingSelection}
+                    disabled={attachmentGate.isSubmissionBlocked}
                   >
                     <Send className="mr-2 h-4 w-4" />
                     {t('support.thread.replySubmit')}

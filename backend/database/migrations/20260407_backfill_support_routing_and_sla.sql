@@ -48,12 +48,38 @@ SET
       INTERVAL COALESCE(
         CASE
           WHEN `u`.`quota_override` IS NOT NULL AND LOCATE('"first_response_minutes":', `u`.`quota_override`) > 0 THEN
-            NULLIF(CAST(TRIM(SUBSTRING(`u`.`quota_override`, LOCATE('"first_response_minutes":', `u`.`quota_override`) + 25, 12)) AS UNSIGNED), 0)
+            NULLIF(CAST(TRIM(
+              SUBSTRING_INDEX(
+                SUBSTRING_INDEX(
+                  SUBSTRING(
+                    `u`.`quota_override`,
+                    LOCATE('"first_response_minutes":', `u`.`quota_override`) + CHAR_LENGTH('"first_response_minutes":')
+                  ),
+                  ',',
+                  1
+                ),
+                '}',
+                1
+              )
+            ) AS UNSIGNED), 0)
           ELSE NULL
         END,
         CASE
           WHEN `g`.`config` IS NOT NULL AND LOCATE('"first_response_minutes":', `g`.`config`) > 0 THEN
-            NULLIF(CAST(TRIM(SUBSTRING(`g`.`config`, LOCATE('"first_response_minutes":', `g`.`config`) + 25, 12)) AS UNSIGNED), 0)
+            NULLIF(CAST(TRIM(
+              SUBSTRING_INDEX(
+                SUBSTRING_INDEX(
+                  SUBSTRING(
+                    `g`.`config`,
+                    LOCATE('"first_response_minutes":', `g`.`config`) + CHAR_LENGTH('"first_response_minutes":')
+                  ),
+                  ',',
+                  1
+                ),
+                '}',
+                1
+              )
+            ) AS UNSIGNED), 0)
           ELSE NULL
         END,
         240
@@ -67,12 +93,38 @@ SET
       INTERVAL COALESCE(
         CASE
           WHEN `u`.`quota_override` IS NOT NULL AND LOCATE('"resolution_minutes":', `u`.`quota_override`) > 0 THEN
-            NULLIF(CAST(TRIM(SUBSTRING(`u`.`quota_override`, LOCATE('"resolution_minutes":', `u`.`quota_override`) + 21, 12)) AS UNSIGNED), 0)
+            NULLIF(CAST(TRIM(
+              SUBSTRING_INDEX(
+                SUBSTRING_INDEX(
+                  SUBSTRING(
+                    `u`.`quota_override`,
+                    LOCATE('"resolution_minutes":', `u`.`quota_override`) + CHAR_LENGTH('"resolution_minutes":')
+                  ),
+                  ',',
+                  1
+                ),
+                '}',
+                1
+              )
+            ) AS UNSIGNED), 0)
           ELSE NULL
         END,
         CASE
           WHEN `g`.`config` IS NOT NULL AND LOCATE('"resolution_minutes":', `g`.`config`) > 0 THEN
-            NULLIF(CAST(TRIM(SUBSTRING(`g`.`config`, LOCATE('"resolution_minutes":', `g`.`config`) + 21, 12)) AS UNSIGNED), 0)
+            NULLIF(CAST(TRIM(
+              SUBSTRING_INDEX(
+                SUBSTRING_INDEX(
+                  SUBSTRING(
+                    `g`.`config`,
+                    LOCATE('"resolution_minutes":', `g`.`config`) + CHAR_LENGTH('"resolution_minutes":')
+                  ),
+                  ',',
+                  1
+                ),
+                '}',
+                1
+              )
+            ) AS UNSIGNED), 0)
           ELSE NULL
         END,
         1440
