@@ -2,17 +2,18 @@ name: Semgrep
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "main", "dev" ]
     paths:
       - "backend/**"
       - ".github/workflows/semgrep.yml"
       - ".semgrepignore"
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "main", "dev" ]
     paths:
       - "backend/**"
       - ".github/workflows/semgrep.yml"
       - ".semgrepignore"
+  workflow_dispatch:
   schedule:
     - cron: "44 11 * * 1"
 
@@ -23,7 +24,7 @@ permissions:
 
 jobs:
   semgrep:
-    name: Scan backend
+    name: semgrep/ci
     runs-on: ubuntu-latest
     container:
       image: semgrep/semgrep
@@ -36,24 +37,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Semgrep on backend only
+      - name: Run Semgrep PRO
         run: |
-          BASELINE_ARG=""
-          if [ "${{ github.event_name }}" = "pull_request" ] && [ -n "${{ github.event.pull_request.base.sha }}" ]; then
-            BASELINE_ARG="--baseline-commit=${{ github.event.pull_request.base.sha }}"
-          elif [ "${{ github.event_name }}" = "push" ] && [ -n "${{ github.event.before }}" ]; then
-            BASELINE_ARG="--baseline-commit=${{ github.event.before }}"
-          fi
-
           set +e
-          semgrep scan backend \
-            --config="auto" \
-            --config=".semgrep/custom-rules.yml" \
-            --config="p/php" \
-            --config="p/owasp-top-ten" \
-            $BASELINE_ARG \
-            --sarif \
-            --output semgrep.sarif
+          SEMGREP_REPO_DISPLAY_NAME="${{ github.repository }}/backend" \
+          semgrep ci --pro-languages --include=backend/ --sarif > semgrep.sarif
           SEMGREP_EXIT=$?
           set -e
 

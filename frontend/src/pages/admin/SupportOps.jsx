@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { toast } from 'react-hot-toast';
-import { BarChart3, CheckCircle2, Clock3, Loader2, Mail, Save, Shield, UserRound, Wand2 } from 'lucide-react';
+import { BarChart3, CheckCircle2, Clock3, Loader2, Mail, Save, Shield, Ticket, UserRound, Wand2 } from 'lucide-react';
 
 import { adminAPI } from '../../lib/api';
 import { useTranslation } from '../../hooks/useTranslation';
-import { TICKET_CATEGORY_OPTIONS, TICKET_PRIORITY_OPTIONS, formatSupportDate, getPriorityVariant, getStatusTone, getTagTone } from '../../lib/supportTickets';
+import { TICKET_CATEGORY_OPTIONS, TICKET_PRIORITY_OPTIONS, formatSupportDate, getPriorityVariant, getSlaMeta, getSlaMilestoneMeta, getSlaTone, getStatusTone, getTagTone } from '../../lib/supportTickets';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -121,6 +121,89 @@ function BreakdownSection({ title, description, items = [], renderLabel, renderM
   );
 }
 
+function TicketQueueCard({ ticket, selected, onSelect, t, locale }) {
+  const slaMeta = getSlaMeta(ticket, locale);
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(ticket.id)}
+      aria-pressed={selected}
+      className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
+        selected
+          ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10'
+          : 'border-border bg-background hover:border-emerald-200 dark:hover:border-emerald-500/20'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">#{ticket.id}</p>
+          <p className="mt-2 truncate font-medium">{ticket.subject}</p>
+          <p className="mt-2 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">{ticket.latest_message_preview || '--'}</p>
+        </div>
+        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
+          <Ticket className="h-4 w-4" />
+        </span>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Badge variant="outline" className={getStatusTone(ticket.status)}>{t(`support.statuses.${ticket.status}`)}</Badge>
+        <Badge variant={getPriorityVariant(ticket.priority)}>{t(`support.priorities.${ticket.priority}`)}</Badge>
+        {slaMeta.state ? <Badge variant="outline" className={getSlaTone(slaMeta.state)}>{t(`support.slaStatuses.${slaMeta.state}`, { defaultValue: slaMeta.state })}</Badge> : null}
+      </div>
+
+      <p className="mt-3 text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+        {formatSupportDate(ticket.last_replied_at || ticket.created_at, locale)} · {slaMeta.relativeLabel}
+      </p>
+    </button>
+  );
+}
+
+function RoutingRunCard({ run, t, locale }) {
+  const topCandidates = Array.isArray(run.candidate_scores) ? run.candidate_scores.slice(0, 5) : [];
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-border px-4 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline">{run.trigger}</Badge>
+          <Badge variant="outline">{run.used_ai ? t('adminSupport.tickets.usedAi') : t('adminSupport.tickets.fallbackOnly')}</Badge>
+        </div>
+        <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+          {formatSupportDate(run.created_at, locale)}
+        </span>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 text-sm">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.routingWinner')}</p>
+          <p className="mt-2 font-medium">{run.summary?.winner_label || run.winner_user_id || '--'}</p>
+          <p className="mt-1 text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.winnerScore', { value: run.winner_score ?? '--' })}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.routingDecision')}</p>
+          <p className="mt-2 font-medium">{run.triage?.summary || '--'}</p>
+          <p className="mt-1 text-slate-500 dark:text-slate-400">{run.fallback_reason || '--'}</p>
+        </div>
+      </div>
+
+      {topCandidates.length > 0 ? (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.candidateScores')}</p>
+          <div className="space-y-2">
+            {topCandidates.map((candidate, index) => (
+              <div key={`${run.id}-${index}`} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+                <span>{candidate.candidate?.username || `#${candidate.candidate?.id ?? '--'}`}</span>
+                <span className="font-medium">{candidate.total_score}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function AdminSupportOpsPage() {
   const { t, currentLanguage } = useTranslation();
   const queryClient = useQueryClient();
@@ -129,7 +212,11 @@ export default function AdminSupportOpsPage() {
   const [reportDays, setReportDays] = useState(14);
   const [tagForm, setTagForm] = useState(EMPTY_TAG_FORM);
   const [ruleForm, setRuleForm] = useState(EMPTY_RULE_FORM);
+  const [isTagDraft, setIsTagDraft] = useState(false);
+  const [isRuleDraft, setIsRuleDraft] = useState(false);
   const [selectedAssigneeId, setSelectedAssigneeId] = useState(null);
+  const [selectedTicketId, setSelectedTicketId] = useState(null);
+  const [ticketStatusFilter, setTicketStatusFilter] = useState('all');
   const [routingSettingsForm, setRoutingSettingsForm] = useState(EMPTY_ROUTING_SETTINGS);
   const [assigneeProfileForm, setAssigneeProfileForm] = useState(null);
 
@@ -153,6 +240,14 @@ export default function AdminSupportOpsPage() {
     return res.data?.data ?? {};
   });
 
+  const ticketsQuery = useQuery(['admin-support-tickets', ticketStatusFilter], async () => {
+    const res = await adminAPI.getSupportTickets({
+      limit: 25,
+      ...(ticketStatusFilter !== 'all' ? { status: ticketStatusFilter } : {}),
+    });
+    return res.data?.data ?? {};
+  });
+
   const routingSettingsQuery = useQuery(['admin-support-routing-settings'], async () => {
     const res = await adminAPI.getSupportRoutingSettings();
     return res.data?.data ?? EMPTY_ROUTING_SETTINGS;
@@ -170,11 +265,25 @@ export default function AdminSupportOpsPage() {
     }
   );
 
-  const tags = tagsQuery.data ?? [];
-  const rules = rulesQuery.data ?? [];
-  const assignees = assigneesQuery.data ?? [];
+  const ticketDetailQuery = useQuery(
+    ['admin-support-ticket-detail', selectedTicketId],
+    async () => {
+      const res = await adminAPI.getSupportTicketDetail(selectedTicketId);
+      return res.data?.data ?? null;
+    },
+    {
+      enabled: Boolean(selectedTicketId),
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const tags = useMemo(() => tagsQuery.data ?? [], [tagsQuery.data]);
+  const rules = useMemo(() => rulesQuery.data ?? [], [rulesQuery.data]);
+  const assignees = useMemo(() => assigneesQuery.data ?? [], [assigneesQuery.data]);
   const reports = reportsQuery.data ?? {};
   const assigneeDetail = assigneeDetailQuery.data;
+  const tickets = useMemo(() => ticketsQuery.data?.items ?? [], [ticketsQuery.data]);
+  const ticketDetail = ticketDetailQuery.data;
 
   const saveTagMutation = useMutation(
     async (payload) => {
@@ -188,6 +297,7 @@ export default function AdminSupportOpsPage() {
         toast.success(t('adminSupport.messages.tagSaved'));
         queryClient.invalidateQueries(['admin-support-tags']);
         setTagForm(EMPTY_TAG_FORM);
+        setIsTagDraft(false);
       },
       onError: (error) => {
         toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
@@ -208,6 +318,7 @@ export default function AdminSupportOpsPage() {
         queryClient.invalidateQueries(['admin-support-rules']);
         queryClient.invalidateQueries(['admin-support-reports']);
         setRuleForm(EMPTY_RULE_FORM);
+        setIsRuleDraft(false);
       },
       onError: (error) => {
         toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
@@ -277,18 +388,18 @@ export default function AdminSupportOpsPage() {
   }, [reports.summary, t]);
 
   useEffect(() => {
-    if (!rules.length || ruleForm.id !== null) {
+    if (!rules.length || ruleForm.id !== null || isRuleDraft) {
       return;
     }
     setRuleForm((current) => current.id === null ? hydrateRuleForm(rules[0]) : current);
-  }, [rules, ruleForm.id]);
+  }, [rules, ruleForm.id, isRuleDraft]);
 
   useEffect(() => {
-    if (!tags.length || tagForm.id !== null) {
+    if (!tags.length || tagForm.id !== null || isTagDraft) {
       return;
     }
     setTagForm((current) => current.id === null ? hydrateTagForm(tags[0]) : current);
-  }, [tags, tagForm.id]);
+  }, [tags, tagForm.id, isTagDraft]);
 
   useEffect(() => {
     if (!assignees.length) {
@@ -302,6 +413,20 @@ export default function AdminSupportOpsPage() {
       return assignees[0].id;
     });
   }, [assignees]);
+
+  useEffect(() => {
+    if (!tickets.length) {
+      setSelectedTicketId(null);
+      return;
+    }
+
+    setSelectedTicketId((current) => {
+      if (current && tickets.some((ticket) => ticket.id === current)) {
+        return current;
+      }
+      return tickets[0].id;
+    });
+  }, [tickets]);
 
   useEffect(() => {
     if (routingSettingsQuery.data) {
@@ -407,6 +532,7 @@ export default function AdminSupportOpsPage() {
       <Tabs value={tab} onValueChange={setTab} className="space-y-6">
         <TabsList className="rounded-2xl border border-border bg-card p-1">
           <TabsTrigger value="team" className="rounded-xl border-r-0">{t('adminSupport.tabs.team')}</TabsTrigger>
+          <TabsTrigger value="tickets" className="rounded-xl border-r-0">{t('adminSupport.tabs.tickets')}</TabsTrigger>
           <TabsTrigger value="settings" className="rounded-xl border-r-0">{t('adminSupport.tabs.settings')}</TabsTrigger>
         </TabsList>
 
@@ -628,6 +754,221 @@ export default function AdminSupportOpsPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="tickets" className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+          <Card>
+            <CardHeader className="space-y-4">
+              <div>
+                <CardTitle>{t('adminSupport.tickets.listTitle')}</CardTitle>
+                <CardDescription>{t('adminSupport.tickets.listSubtitle')}</CardDescription>
+              </div>
+              <Select value={ticketStatusFilter} onValueChange={setTicketStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('support.filters.allStatuses')}</SelectItem>
+                  {['open', 'in_progress', 'waiting_user', 'resolved', 'closed'].map((statusValue) => (
+                    <SelectItem key={statusValue} value={statusValue}>
+                      {t(`support.statuses.${statusValue}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {ticketsQuery.isLoading ? (
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('common.loading')}
+                </div>
+              ) : null}
+              {ticketsQuery.error ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{t('adminSupport.messages.loadFailed')}</AlertDescription>
+                </Alert>
+              ) : null}
+              {!ticketsQuery.isLoading && tickets.length === 0 ? (
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.empty')}</p>
+              ) : null}
+              {tickets.map((ticket) => (
+                <TicketQueueCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  selected={ticket.id === selectedTicketId}
+                  onSelect={setSelectedTicketId}
+                  t={t}
+                  locale={currentLanguage === 'zh' ? 'zh-CN' : 'en-US'}
+                />
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('adminSupport.tickets.detailTitle')}</CardTitle>
+              <CardDescription>{t('adminSupport.tickets.detailSubtitle')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {ticketDetailQuery.isLoading ? (
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('common.loading')}
+                </div>
+              ) : ticketDetailQuery.error ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{t('adminSupport.messages.loadFailed')}</AlertDescription>
+                </Alert>
+              ) : !ticketDetail ? (
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.emptyDetail')}</p>
+              ) : (
+                (() => {
+                  const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
+                  const slaMeta = getSlaMeta(ticketDetail, locale);
+                  const firstResponseMeta = getSlaMilestoneMeta(ticketDetail, 'first_response', locale);
+                  const resolutionMeta = getSlaMilestoneMeta(ticketDetail, 'resolution', locale);
+
+                  return <div className="space-y-5">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">#{ticketDetail.id}</p>
+                      <h3 className="mt-2 text-2xl font-semibold">{ticketDetail.subject}</h3>
+                      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{ticketDetail.latest_message_preview || '--'}</p>
+                    </div>
+                    <Link to={`/support/tickets/${ticketDetail.id}`} className="inline-flex items-center rounded-full border border-border px-4 py-2 text-sm font-medium hover:bg-muted">
+                      {t('adminSupport.tickets.openInPortal')}
+                    </Link>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className={getStatusTone(ticketDetail.status)}>{t(`support.statuses.${ticketDetail.status}`)}</Badge>
+                    <Badge variant={getPriorityVariant(ticketDetail.priority)}>{t(`support.priorities.${ticketDetail.priority}`)}</Badge>
+                    {slaMeta.state ? <Badge variant="outline" className={getSlaTone(slaMeta.state)}>{t(`support.slaStatuses.${slaMeta.state}`, { defaultValue: slaMeta.state })}</Badge> : null}
+                    <Badge variant="outline">{t(`support.categories.${ticketDetail.category}`)}</Badge>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="rounded-2xl border border-border px-4 py-4 text-sm">
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.identityTitle')}</p>
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-500 dark:text-slate-400">{t('support.portal.requesterName')}</span>
+                          <span>{ticketDetail.requester?.username || '--'}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-500 dark:text-slate-400">{t('support.portal.requesterEmail')}</span>
+                          <span className="truncate">{ticketDetail.requester?.email || '--'}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-500 dark:text-slate-400">{t('support.portal.assignedTo')}</span>
+                          <span>{ticketDetail.assigned_user?.username || t('support.portal.unassigned')}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="rounded-2xl border border-border px-4 py-4 text-sm">
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.slaTitle')}</p>
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-500 dark:text-slate-400">{t('support.portal.firstResponseDueLabel')}</span>
+                          <div className="text-right">
+                            <div>{firstResponseMeta.dueAtLabel}</div>
+                            <div className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{firstResponseMeta.relativeLabel}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-500 dark:text-slate-400">{t('support.portal.resolutionDueLabel')}</span>
+                          <div className="text-right">
+                            <div>{resolutionMeta.dueAtLabel}</div>
+                            <div className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{resolutionMeta.relativeLabel}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-500 dark:text-slate-400">{t('support.portal.assignmentSourceLabel')}</span>
+                          <span>{ticketDetail.assignment_source || '--'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {(ticketDetail.tags ?? []).length > 0 ? (
+                    <div className="rounded-2xl border border-border px-4 py-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('support.portal.tagsTitle')}</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {(ticketDetail.tags ?? []).map((tag) => (
+                          <Badge key={tag.id} variant="outline" className={getTagTone(tag.color)}>
+                            {tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">{t('adminSupport.tickets.messagesTitle')}</p>
+                    {(ticketDetail.messages ?? []).map((message) => (
+                      <div key={message.id} className="rounded-2xl border border-border px-4 py-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="font-medium">{message.sender_name || '--'}</p>
+                            <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t(`support.senderRoles.${message.sender_role}`)}</p>
+                          </div>
+                          <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                            {formatSupportDate(message.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
+                          </p>
+                        </div>
+                        <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600 dark:text-slate-300">{message.body}</p>
+                        {(message.attachments ?? []).length > 0 ? (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {message.attachments.map((attachment) => (
+                              <a
+                                key={attachment.id}
+                                href={attachment.download_url || attachment.file_path}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900"
+                              >
+                                {attachment.original_name}
+                              </a>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-2xl border border-border px-4 py-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.routingSummaryTitle')}</p>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2 text-sm">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+                        <p className="font-medium">{t('adminSupport.tickets.topFactors')}</p>
+                        <p className="mt-2 text-slate-500 dark:text-slate-400">{(ticketDetail.routing_summary?.top_factors || []).join(' / ') || '--'}</p>
+                      </div>
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+                        <p className="font-medium">{t('adminSupport.tickets.routingFallbackLabel')}</p>
+                        <p className="mt-2 text-slate-500 dark:text-slate-400">{ticketDetail.routing_summary?.fallback_reason || '--'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium">{t('adminSupport.tickets.routingRunsTitle')}</p>
+                      <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{ticketDetail.routing_runs?.length ?? 0}</span>
+                    </div>
+                    {(ticketDetail.routing_runs ?? []).length === 0 ? (
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.noRoutingRuns')}</p>
+                    ) : (
+                      ticketDetail.routing_runs.map((run) => (
+                        <RoutingRunCard key={run.id} run={run} t={t} locale={locale} />
+                      ))
+                    )}
+                  </div>
+                </div>;
+                })()
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader className="gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -704,7 +1045,14 @@ export default function AdminSupportOpsPage() {
               <CardDescription>{t('adminSupport.rules.listSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full rounded-full" onClick={() => setRuleForm(EMPTY_RULE_FORM)}>
+              <Button
+                variant="outline"
+                className="w-full rounded-full"
+                onClick={() => {
+                  setIsRuleDraft(true);
+                  setRuleForm(EMPTY_RULE_FORM);
+                }}
+              >
                 {t('adminSupport.rules.newRule')}
               </Button>
               {rulesQuery.isLoading && <p className="text-sm text-slate-500 dark:text-slate-400">{t('common.loading')}</p>}
@@ -712,7 +1060,10 @@ export default function AdminSupportOpsPage() {
                 <button
                   key={rule.id}
                   type="button"
-                  onClick={() => setRuleForm(hydrateRuleForm(rule))}
+                  onClick={() => {
+                    setIsRuleDraft(false);
+                    setRuleForm(hydrateRuleForm(rule));
+                  }}
                   className={`w-full rounded-2xl border px-4 py-4 text-left transition ${ruleForm.id === rule.id ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10' : 'border-border bg-background hover:border-emerald-200 dark:hover:border-emerald-500/20'}`}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -900,14 +1251,24 @@ export default function AdminSupportOpsPage() {
               <CardDescription>{t('adminSupport.tags.listSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full rounded-full" onClick={() => setTagForm(EMPTY_TAG_FORM)}>
+              <Button
+                variant="outline"
+                className="w-full rounded-full"
+                onClick={() => {
+                  setIsTagDraft(true);
+                  setTagForm(EMPTY_TAG_FORM);
+                }}
+              >
                 {t('adminSupport.tags.newTag')}
               </Button>
               {tags.map((tag) => (
                 <button
                   key={tag.id}
                   type="button"
-                  onClick={() => setTagForm(hydrateTagForm(tag))}
+                  onClick={() => {
+                    setIsTagDraft(false);
+                    setTagForm(hydrateTagForm(tag));
+                  }}
                   className={`w-full rounded-2xl border px-4 py-4 text-left transition ${tagForm.id === tag.id ? 'border-emerald-300 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10' : 'border-border bg-background hover:border-emerald-200 dark:hover:border-emerald-500/20'}`}
                 >
                   <div className="flex items-center justify-between gap-3">

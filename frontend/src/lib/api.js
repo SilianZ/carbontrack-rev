@@ -430,6 +430,8 @@ export const adminAPI = {
   getSupportRules: () => api.get('/admin/support/rules'),
   createSupportRule: (data) => api.post('/admin/support/rules', data),
   updateSupportRule: (id, data) => api.put(`/admin/support/rules/${id}`, data),
+  getSupportTickets: (params = {}) => api.get('/admin/support/tickets', { params }),
+  getSupportTicketDetail: (id) => api.get(`/admin/support/tickets/${id}`),
   getSupportReports: (params = {}) => api.get('/admin/support/reports', { params }),
 
 };

@@ -5,8 +5,7 @@ import { useController, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
-import { motion as Motion } from 'framer-motion';
-import { ArrowRight, Clock3, LogIn, MessageSquareMore, ShieldCheck, Ticket, Upload } from 'lucide-react';
+import { ArrowRight, LogIn, MessageSquareMore, Ticket, Upload } from 'lucide-react';
 
 import { useTranslation } from '../hooks/useTranslation';
 import { checkAuthStatus } from '../lib/auth';
@@ -17,6 +16,8 @@ import {
   TICKET_PRIORITY_OPTIONS,
   formatSupportDate,
   getPriorityVariant,
+  getSlaMeta,
+  getSlaTone,
   getStatusTone,
 } from '../lib/supportTickets';
 import Turnstile from '../components/common/Turnstile';
@@ -57,6 +58,7 @@ export default function HelpPage() {
   const turnstileRef = useRef(null);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [attachments, setAttachments] = useState([]);
+  const [attachmentGate, setAttachmentGate] = useState({ hasPendingUploads: false, hasUploadErrors: false, isSubmissionBlocked: false });
   const { isAuthenticated } = checkAuthStatus();
 
   const {
@@ -119,6 +121,14 @@ export default function HelpPage() {
       toast.error(t('support.feedback.turnstileRequired'));
       return;
     }
+    if (attachmentGate.hasUploadErrors) {
+      toast.error(t('support.attachments.uploadFailedBlocking'));
+      return;
+    }
+    if (attachmentGate.hasPendingUploads) {
+      toast.error(t('support.attachments.uploadRequired'));
+      return;
+    }
 
     createTicketMutation.mutate({
       ...values,
@@ -129,72 +139,37 @@ export default function HelpPage() {
 
   return (
     <div className="bg-background text-foreground">
-      <section className="border-b border-border bg-muted/30">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)] lg:px-8 lg:py-18">
-          <Motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.28, ease: 'easeOut' }}
-          >
+      <section className="border-b border-border bg-background">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
+          <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-300">
               {t('help.hero.eyebrow')}
             </p>
-            <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-              {t('help.hero.title')}
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight">{t('help.hero.title')}</h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
               {t('help.hero.subtitle')}
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {isAuthenticated ? (
-                <Button className="rounded-full bg-emerald-600 text-white hover:bg-emerald-500" onClick={() => navigate('/tickets')}>
-                  <Ticket className="mr-2 h-4 w-4" />
-                  {t('help.hero.primaryAction')}
-                </Button>
-              ) : (
-                <Button className="rounded-full bg-emerald-600 text-white hover:bg-emerald-500" onClick={() => navigate('/auth/login')}>
-                  <LogIn className="mr-2 h-4 w-4" />
-                  {t('help.hero.loginAction')}
-                </Button>
-              )}
-              <Button variant="outline" className="rounded-full border-border text-foreground hover:bg-muted" onClick={() => navigate('/contact')}>
-                {t('help.hero.secondaryAction')}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {isAuthenticated ? (
+              <Button className="rounded-full bg-emerald-600 text-white hover:bg-emerald-500" onClick={() => navigate('/tickets')}>
+                <Ticket className="mr-2 h-4 w-4" />
+                {t('help.hero.primaryAction')}
               </Button>
-            </div>
-          </Motion.div>
-
-          <Motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}
-            className="rounded-[2rem] border border-border bg-card p-6 shadow-sm"
-          >
-            <div className="flex items-center gap-3 text-emerald-700 dark:text-emerald-300">
-              <Ticket className="h-5 w-5" />
-              <span className="text-sm font-medium">{t('help.panel.title')}</span>
-            </div>
-            <p className="mt-4 text-lg font-medium">{t('help.panel.body')}</p>
-            <div className="mt-6 space-y-3">
-              <div className="flex items-start gap-3 rounded-[1.4rem] border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
-                <Clock3 className="mt-0.5 h-4 w-4 text-emerald-700 dark:text-emerald-300" />
-                <div>
-                  <p className="text-sm font-medium">{t('help.highlights.threadTitle')}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{t('help.highlights.threadDescription')}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 rounded-[1.4rem] border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
-                <ShieldCheck className="mt-0.5 h-4 w-4 text-emerald-700 dark:text-emerald-300" />
-                <div>
-                  <p className="text-sm font-medium">{t('help.highlights.verificationTitle')}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{t('help.highlights.verificationDescription')}</p>
-                </div>
-              </div>
-            </div>
-          </Motion.div>
+            ) : (
+              <Button className="rounded-full bg-emerald-600 text-white hover:bg-emerald-500" onClick={() => navigate('/auth/login')}>
+                <LogIn className="mr-2 h-4 w-4" />
+                {t('help.hero.loginAction')}
+              </Button>
+            )}
+            <Button variant="outline" className="rounded-full border-border text-foreground hover:bg-muted" onClick={() => navigate('/contact')}>
+              {t('help.hero.secondaryAction')}
+            </Button>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)] lg:px-8">
+      <section className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)] lg:px-8">
         <div className="space-y-6">
           <Card className="rounded-[1.8rem] border border-border/80 bg-card/70 shadow-sm">
             <CardHeader className="border-b border-border/70 bg-muted/20">
@@ -297,6 +272,7 @@ export default function HelpPage() {
                       entityType="support_ticket"
                       accept="image/*"
                       compressImages
+                      onStateChange={setAttachmentGate}
                       onUploadSuccess={(result) => {
                         setAttachments((current) => mergeUploadedFiles(current, result));
                         toast.success(t('support.feedback.uploaded'));
@@ -317,6 +293,16 @@ export default function HelpPage() {
                         ))}
                       </div>
                     )}
+                    {attachmentGate.hasUploadErrors ? (
+                      <Alert className="rounded-[1.2rem]">
+                        <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
+                      </Alert>
+                    ) : null}
+                    {attachmentGate.hasPendingUploads ? (
+                      <Alert className="rounded-[1.2rem] border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+                        <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
+                      </Alert>
+                    ) : null}
                   </div>
 
                   <Turnstile
@@ -332,6 +318,7 @@ export default function HelpPage() {
                     type="submit"
                     className="w-full rounded-full bg-emerald-600 text-white hover:bg-emerald-500"
                     loading={createTicketMutation.isLoading}
+                    disabled={attachmentGate.isSubmissionBlocked}
                   >
                     <MessageSquareMore className="mr-2 h-4 w-4" />
                     {t('support.feedback.submit')}
@@ -379,25 +366,37 @@ export default function HelpPage() {
               </Alert>
             )}
             {isAuthenticated && recentTickets.map((ticket) => (
-              <Link
-                key={ticket.id}
-                to={`/tickets/${ticket.id}`}
-                className="block rounded-[1.5rem] border border-border/80 bg-muted/20 px-4 py-4 transition hover:border-emerald-300 hover:bg-card"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-medium text-foreground">#{ticket.id} {ticket.subject}</p>
-                  <Badge className={getStatusTone(ticket.status)} variant="outline">
-                    {t(`support.statuses.${ticket.status}`)}
-                  </Badge>
-                  <Badge variant={getPriorityVariant(ticket.priority)}>
-                    {t(`support.priorities.${ticket.priority}`)}
-                  </Badge>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">{ticket.latest_message_preview}</p>
-                <p className="mt-3 text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  {formatSupportDate(ticket.last_replied_at || ticket.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
-                </p>
-              </Link>
+              (() => {
+                const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
+                const slaMeta = getSlaMeta(ticket, locale);
+
+                return (
+                  <Link
+                    key={ticket.id}
+                    to={`/tickets/${ticket.id}`}
+                    className="block rounded-[1.5rem] border border-border/80 bg-muted/20 px-4 py-4 transition hover:border-emerald-300 hover:bg-card"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-medium text-foreground">#{ticket.id} {ticket.subject}</p>
+                      <Badge className={getStatusTone(ticket.status)} variant="outline">
+                        {t(`support.statuses.${ticket.status}`)}
+                      </Badge>
+                      <Badge variant={getPriorityVariant(ticket.priority)}>
+                        {t(`support.priorities.${ticket.priority}`)}
+                      </Badge>
+                      {slaMeta.state ? (
+                        <Badge variant="outline" className={getSlaTone(slaMeta.state)}>
+                          {t(`support.slaStatuses.${slaMeta.state}`, { defaultValue: slaMeta.state })}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">{ticket.latest_message_preview}</p>
+                    <p className="mt-3 text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                      {formatSupportDate(ticket.last_replied_at || ticket.created_at, locale)} · {slaMeta.relativeLabel}
+                    </p>
+                  </Link>
+                );
+              })()
             ))}
           </CardContent>
         </Card>

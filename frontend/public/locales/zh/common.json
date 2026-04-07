@@ -1998,6 +1998,9 @@
       "confirmSetRole": "请为用户 {{username}} 选择新的角色。",
       "updateSuccess": "用户更新成功",
       "updateFailed": "用户更新失败",
+      "supportRoutingOverrideTitle": "客诉 SLA 单独设置",
+      "supportRoutingOverrideHint": "留空则继承所属用户组的 SLA 与分单策略。",
+      "inheritGroupDefault": "继承用户组默认值",
       "deleteSuccess": "用户删除成功",
       "deleteFailed": "用户删除失败",
       "confirmDelete": "确定要删除用户 {{username}} 吗？此操作无法撤销。",
@@ -3853,6 +3856,7 @@
     },
     "slaStatuses": {
       "pending": "进行中",
+      "due_soon": "即将超时",
       "breached": "已超时",
       "escalated": "已升级",
       "resolved": "已达成"
@@ -3880,6 +3884,10 @@
         "subject": "一句话概括问题",
         "content": "描述发生了什么、预期结果，以及希望客服核查的内容。"
       }
+    },
+    "attachments": {
+      "uploadRequired": "若已选择附件，请先完成上传，再提交工单或回复。",
+      "uploadFailedBlocking": "存在上传失败的附件，请重试上传或移除后再提交。"
     },
     "recent": {
       "title": "最近工单",
@@ -3928,11 +3936,13 @@
       "unknownSender": "未知发送者"
     },
     "portal": {
-      "title": "客服门户",
-      "subtitle": "在独立支持空间中处理用户请求，不混入管理后台。",
+      "title": "客服工作台",
+      "subtitle": "直接处理队列、回复对话，并持续盯住 SLA 关键工单。",
       "nav": {
         "queue": "工单队列",
-        "queueDescription": "查看请求、发送回复并推进状态。"
+        "queueDescription": "搜索、筛选并查看当前收件箱。",
+        "workbench": "工作台",
+        "workbenchDescription": "先看现在最该处理的事。"
       },
       "queueEyebrow": "队列视图",
       "queueTitle": "按清晰责任处理收件箱",
@@ -4035,7 +4045,37 @@
       "escalationLevelLabel": "升级层级",
       "routingLastRunLabel": "最近路由",
       "routingFallbackLabel": "回退原因",
-      "assignmentLockedHint": "此工单已被管理员锁定派单，系统不会自动改派。"
+      "assignmentLockedHint": "此工单已被管理员锁定派单，系统不会自动改派。",
+      "workbenchEyebrow": "值班交接",
+      "workbenchTitle": "先从现在需要动作的工单开始",
+      "workbenchSubtitle": "首屏直接看到高优先级、首响缺口、我负责的工单和未分配工单，而不是先看报表。",
+      "goToQueue": "进入完整队列",
+      "openTopPriority": "打开最高优先级工单",
+      "focusLaneTitle": "优先关注",
+      "focusLaneSubtitle": "紧急或存在 SLA 风险的工单，应该优先处理。",
+      "firstResponseLaneTitle": "等待首响",
+      "firstResponseLaneSubtitle": "还没有收到第一条客服回复的工单。",
+      "myQueueLaneTitle": "我的处理中队列",
+      "myQueueLaneSubtitle": "当前分配给你且仍在流转中的工单。",
+      "unassignedLaneTitle": "未分配工单",
+      "unassignedLaneSubtitle": "还没有明确处理人的开放工单。",
+      "activeAssigneesTitle": "在线处理人",
+      "activeAssigneesSubtitle": "快速看谁还有接单余量。",
+      "availableCapacity": "剩余 {{count}} 个名额",
+      "openTicket": "打开工单",
+      "noPreview": "暂时没有消息预览。",
+      "previewEmptyTitle": "先选择一条工单",
+      "previewEmptySubtitle": "从左侧队列选中后，就能先看请求人、SLA 和派单情况，再决定是否进入完整对话。",
+      "previewRequester": "请求人",
+      "previewAssignee": "处理人",
+      "ticketMetaTitle": "工单概览",
+      "ticketMetaSubtitle": "在处理对话时，始终把身份、标签、SLA 和归属保持在视线里。",
+      "conversationTitle": "对话记录",
+      "conversationSubtitle": "先看清上下文，再在同一块区域里直接回复。",
+      "workflowTab": "流程",
+      "transferTab": "转单",
+      "feedbackTab": "评价",
+      "emptyLane": "这里当前没有待处理项。"
     }
   },
   "adminSupport": {
@@ -4043,6 +4083,7 @@
     "title": "支持运营台",
     "tabs": {
       "team": "客服团队",
+      "tickets": "工单审计",
       "settings": "设置中心",
       "rules": "派单规则",
       "tags": "标签",
@@ -4062,6 +4103,29 @@
       "smartAssignedHint": "由统一评分引擎自动分派的工单数。",
       "slaBreaches": "SLA 超时",
       "slaBreachesHint": "当前已违约或升级中的工单数。"
+    },
+    "tickets": {
+      "listTitle": "工单审计队列",
+      "listSubtitle": "按工单查看消息、SLA 与智能派单证据链。",
+      "detailTitle": "工单详情与审计",
+      "detailSubtitle": "直接查看请求上下文、分配结果与每次智能路由的打分细节。",
+      "empty": "当前没有可查看的工单。",
+      "emptyDetail": "从左侧选择一条工单后，这里会显示完整审计视图。",
+      "identityTitle": "身份与归属",
+      "messagesTitle": "消息与附件证据",
+      "slaTitle": "SLA 与派单",
+      "routingSummaryTitle": "本次派单摘要",
+      "routingRunsTitle": "智能派单记录",
+      "noRoutingRuns": "该工单还没有智能派单记录。",
+      "usedAi": "AI 分诊",
+      "fallbackOnly": "确定性回退",
+      "routingWinner": "最终命中客服",
+      "winnerScore": "得分 {{value}}",
+      "routingDecision": "分诊结论",
+      "candidateScores": "候选得分",
+      "topFactors": "主要因素",
+      "routingFallbackLabel": "回退原因",
+      "openInPortal": "在客服工作台中打开"
     },
     "actions": {
       "saveRule": "保存规则",

@@ -159,11 +159,16 @@ export function UserManagement() {
     user: null,
     notes: '',
     groupId: '',
-    quotaFlat: {}
+    quotaFlat: {},
+    supportRouting: {}
   });
 
   const { data: groups } = useQuery('adminUserGroups', () =>
     adminAPI.getUserGroups().then(res => res.data?.data || [])
+  );
+
+  const { data: groupMeta } = useQuery('adminUserGroupMeta', () =>
+    adminAPI.getUserGroupMeta().then(res => res.data?.data || {})
   );
 
   const apiFilterParams = useMemo(() => {
@@ -354,6 +359,38 @@ export function UserManagement() {
   }, [searchParams, detailState.open, detailState.userId, detailState.userUuid, setSearchParams, setShowRevokedBadges]);
 
   const { users, pagination } = useMemo(() => normalizeUsersResponse(usersQuery.data), [usersQuery.data]);
+  const quotaKeys = useMemo(() => {
+    const definitions = groupMeta?.quota_definitions;
+    if (Array.isArray(definitions) && definitions.length > 0) {
+      return definitions;
+    }
+    const sample = users.find((entry) => entry?.quota_flat) || null;
+    return Object.keys(sample?.quota_flat || {});
+  }, [groupMeta, users]);
+  const quotaTemplate = useMemo(
+    () => quotaKeys.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
+    [quotaKeys]
+  );
+  const supportRoutingFields = useMemo(() => {
+    const fields = groupMeta?.support_routing_fields;
+    if (Array.isArray(fields) && fields.length > 0) {
+      return fields;
+    }
+    return [
+      { key: 'first_response_minutes', type: 'number', default: 240, label_key: 'admin.groups.supportFirstResponseMinutes' },
+      { key: 'resolution_minutes', type: 'number', default: 1440, label_key: 'admin.groups.supportResolutionMinutes' },
+      { key: 'routing_weight', type: 'number', default: 1, step: 0.1, label_key: 'admin.groups.supportRoutingWeight' },
+      { key: 'min_agent_level', type: 'number', default: 1, min: 1, max: 5, label_key: 'admin.groups.supportMinAgentLevel' },
+      { key: 'overdue_boost', type: 'number', default: 1, step: 0.1, label_key: 'admin.groups.supportOverdueBoost' },
+      { key: 'tier_label', type: 'text', default: 'standard', label_key: 'admin.groups.supportTierLabel' },
+    ];
+  }, [groupMeta]);
+  const buildSupportRoutingOverrideState = (source = {}) => (
+    supportRoutingFields.reduce((acc, field) => {
+      acc[field.key] = source?.[field.key] ?? '';
+      return acc;
+    }, {})
+  );
   const isInitialUsersLoading = usersQuery.isLoading && !usersQuery.data;
   const isRefetchingUsers = usersQuery.isFetching && !!usersQuery.data;
   const selectedUser = useMemo(() => {
@@ -592,12 +629,13 @@ export function UserManagement() {
       user,
       groupId: user.group_id || '',
       notes: user.admin_notes || '',
-      quotaFlat: user.quota_flat || {}
+      quotaFlat: { ...quotaTemplate, ...(user.quota_flat || {}) },
+      supportRouting: buildSupportRoutingOverrideState(user.support_routing_override || {})
     });
   };
 
   const closeDetailedEdit = () => {
-    setEditDialog({ open: false, user: null, notes: '', groupId: '', quotaFlat: {} });
+    setEditDialog({ open: false, user: null, notes: '', groupId: '', quotaFlat: {}, supportRouting: {} });
   };
 
   const handleQuotaChange = (key, value) => {
@@ -610,6 +648,16 @@ export function UserManagement() {
     }));
   };
 
+  const handleSupportRoutingChange = (key, value) => {
+    setEditDialog((prev) => ({
+      ...prev,
+      supportRouting: {
+        ...prev.supportRouting,
+        [key]: value,
+      },
+    }));
+  };
+
   const handleSubmitDetailedEdit = (e) => {
     e.preventDefault();
     if (!editDialog.user) return;
@@ -617,7 +665,8 @@ export function UserManagement() {
     const payload = {
       group_id: editDialog.groupId || '',
       admin_notes: editDialog.notes,
-      quota_flat: editDialog.quotaFlat
+      quota_flat: editDialog.quotaFlat,
+      support_routing: editDialog.supportRouting
     };
 
     updateUserMutation.mutate(
@@ -1042,21 +1091,39 @@ export function UserManagement() {
             {/* Dynamic Quota Usage Inputs - Render inputs for each flattened quota key */}
             <div className="space-y-3 border-t pt-3 border-b pb-3">
               <Label className="text-base font-semibold">{t('admin.groups.quotaOverride')}</Label>
-              {Object.keys(editDialog.quotaFlat || {}).length > 0 ? (
-                Object.entries(editDialog.quotaFlat).map(([key, value]) => (
+              {quotaKeys.length > 0 ? (
+                quotaKeys.map((key) => (
                   <div key={key}>
-                          <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
+                    <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
                     <Input
                       type="number"
-                      value={value ?? ''}
+                      value={editDialog.quotaFlat?.[key] ?? ''}
                       onChange={e => handleQuotaChange(key, e.target.value)}
-                            placeholder={t('common.default')}
+                      placeholder={t('common.default')}
                     />
                   </div>
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground">{t('admin.groups.noQuotasAvailable')}</p>
               )}
+            </div>
+            <div className="space-y-3 border-b pb-3">
+              <Label className="text-base font-semibold">{t('admin.users.supportRoutingOverrideTitle')}</Label>
+              <p className="text-sm text-muted-foreground">{t('admin.users.supportRoutingOverrideHint')}</p>
+              {supportRoutingFields.map((field) => (
+                <div key={field.key}>
+                  <Label>{t(field.label_key, field.key)}</Label>
+                  <Input
+                    type={field.type === 'number' ? 'number' : 'text'}
+                    min={field.min}
+                    max={field.max}
+                    step={field.step}
+                    value={editDialog.supportRouting?.[field.key] ?? ''}
+                    onChange={(event) => handleSupportRoutingChange(field.key, event.target.value)}
+                    placeholder={t('admin.users.inheritGroupDefault')}
+                  />
+                </div>
+              ))}
             </div>
             <div>
               <Label>{t('admin.groups.notes')}</Label>

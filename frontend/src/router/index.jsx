@@ -47,6 +47,7 @@ const AdminAiWorkspacePage = React.lazy(() => import('../pages/admin/AiWorkspace
 const AdminSystemLogsPage = React.lazy(() => import('../pages/admin/SystemLogs'));
 const AdminDiagnosticsPage = React.lazy(() => import('../pages/admin/Diagnostics'));
 const AdminLlmUsagePage = React.lazy(() => import('../pages/admin/LlmUsage'));
+const SupportWorkbenchPage = React.lazy(() => import('../pages/support/WorkbenchPage'));
 const SupportTicketsPage = React.lazy(() => import('../pages/support/TicketsPage'));
 const SupportTicketDetailPage = React.lazy(() => import('../pages/support/TicketDetailPage'));
 const NotFoundPage = React.lazy(() => import('../pages/NotFoundPage'));
@@ -132,7 +133,8 @@ export const router = createBrowserRouter([
     path: '/support',
     element: <SupportRoute><SupportLayout /></SupportRoute>,
     children: [
-      { index: true, element: <Navigate to="/support/tickets" replace /> },
+      { index: true, element: <React.Suspense fallback={loadingSpinner}><SupportWorkbenchPage /></React.Suspense> },
+      { path: 'workbench', element: <Navigate to="/support" replace /> },
       { path: 'tickets', element: <React.Suspense fallback={loadingSpinner}><SupportTicketsPage /></React.Suspense> },
       { path: 'tickets/:ticketId', element: <React.Suspense fallback={loadingSpinner}><SupportTicketDetailPage /></React.Suspense> }
     ]

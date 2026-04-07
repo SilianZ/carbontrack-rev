@@ -9,7 +9,7 @@ import { ArrowLeft, ImageIcon, Paperclip, Send, Star } from 'lucide-react';
 
 import { useTranslation } from '../hooks/useTranslation';
 import { ticketAPI } from '../lib/api';
-import { formatSupportDate, getPriorityVariant, getStatusTone, isImageAttachment, mergeUploadedFiles } from '../lib/supportTickets';
+import { formatSupportDate, getPriorityVariant, getSlaMeta, getSlaMilestoneMeta, getSlaTone, getStatusTone, isImageAttachment, mergeUploadedFiles } from '../lib/supportTickets';
 import Turnstile from '../components/common/Turnstile';
 import FileUpload from '../components/FileUpload';
 import { Button } from '../components/ui/Button';
@@ -27,20 +27,57 @@ function AttachmentList({ attachments }) {
     return null;
   }
 
+  const imageAttachments = attachments.filter((attachment) => isImageAttachment(attachment));
+  const fileAttachments = attachments.filter((attachment) => !isImageAttachment(attachment));
+
   return (
-    <div className="mt-4 flex flex-wrap gap-2">
-      {attachments.map((attachment) => (
-        <a
-          key={attachment.id ?? attachment.file_path}
-          href={attachment.download_url || attachment.file_path}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
-        >
-          {isImageAttachment(attachment) ? <ImageIcon className="h-3.5 w-3.5" /> : <Paperclip className="h-3.5 w-3.5" />}
-          {attachment.original_name}
-        </a>
-      ))}
+    <div className="mt-4 space-y-3">
+      {imageAttachments.length > 0 ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {imageAttachments.map((attachment) => {
+            const href = attachment.download_url || attachment.public_url || attachment.file_path;
+            return (
+              <a
+                key={attachment.id ?? attachment.file_path}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group overflow-hidden rounded-2xl border border-border bg-background transition hover:border-emerald-300 hover:shadow-sm"
+              >
+                <div className="aspect-square bg-muted/30">
+                  <img
+                    src={href}
+                    alt={attachment.original_name}
+                    className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.02]"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
+                  <ImageIcon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{attachment.original_name}</span>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {fileAttachments.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {fileAttachments.map((attachment) => (
+            <a
+              key={attachment.id ?? attachment.file_path}
+              href={attachment.download_url || attachment.public_url || attachment.file_path}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
+            >
+              <Paperclip className="h-3.5 w-3.5" />
+              {attachment.original_name}
+            </a>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -83,6 +120,7 @@ export default function TicketDetailPage() {
   const dirtyFeedbackDraftIdsRef = useRef(new Set());
   const [turnstileToken, setTurnstileToken] = useState('');
   const [attachments, setAttachments] = useState([]);
+  const [attachmentGate, setAttachmentGate] = useState({ hasPendingUploads: false, hasUploadErrors: false, isSubmissionBlocked: false });
   const [feedbackDrafts, setFeedbackDrafts] = useState({});
 
   const {
@@ -180,6 +218,14 @@ export default function TicketDetailPage() {
       toast.error(t('support.feedback.turnstileRequired'));
       return;
     }
+    if (attachmentGate.hasUploadErrors) {
+      toast.error(t('support.attachments.uploadFailedBlocking'));
+      return;
+    }
+    if (attachmentGate.hasPendingUploads) {
+      toast.error(t('support.attachments.uploadRequired'));
+      return;
+    }
 
     replyMutation.mutate({
       content: values.content,
@@ -212,6 +258,10 @@ export default function TicketDetailPage() {
   const feedbackCandidates = ticket.feedback_candidates ?? [];
   const feedbackEntries = ticket.feedback ?? [];
   const canLeaveFeedback = ['resolved', 'closed'].includes(ticket.status);
+  const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
+  const slaMeta = getSlaMeta(ticket, locale);
+  const firstResponseMeta = getSlaMilestoneMeta(ticket, 'first_response', locale);
+  const resolutionMeta = getSlaMilestoneMeta(ticket, 'resolution', locale);
 
   const updateFeedbackDraft = (ratedUserId, patch) => {
     dirtyFeedbackDraftIdsRef.current.add(String(ratedUserId));
@@ -261,6 +311,11 @@ export default function TicketDetailPage() {
           <Badge variant="outline">
             {t(`support.categories.${ticket.category}`)}
           </Badge>
+          {slaMeta.state ? (
+            <Badge variant="outline" className={getSlaTone(slaMeta.state)}>
+              {t(`support.slaStatuses.${slaMeta.state}`, { defaultValue: slaMeta.state })}
+            </Badge>
+          ) : null}
         </div>
       </div>
 
@@ -301,15 +356,29 @@ export default function TicketDetailPage() {
             <CardContent className="space-y-3 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t('support.thread.createdAt')}</span>
-                <span>{formatSupportDate(ticket.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}</span>
+                <span>{formatSupportDate(ticket.created_at, locale)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t('support.thread.lastReply')}</span>
-                <span>{formatSupportDate(ticket.last_replied_at || ticket.updated_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}</span>
+                <span>{formatSupportDate(ticket.last_replied_at || ticket.updated_at, locale)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t('support.thread.messageCount')}</span>
                 <span>{ticket.messages?.length ?? 0}</span>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-muted-foreground">{t('support.portal.firstResponseDueLabel')}</span>
+                <div className="text-right">
+                  <div>{firstResponseMeta.dueAtLabel}</div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{firstResponseMeta.relativeLabel}</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-muted-foreground">{t('support.portal.resolutionDueLabel')}</span>
+                <div className="text-right">
+                  <div>{resolutionMeta.dueAtLabel}</div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{resolutionMeta.relativeLabel}</div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -433,6 +502,7 @@ export default function TicketDetailPage() {
                     entityType="support_ticket_message"
                     accept="image/*"
                     compressImages
+                    onStateChange={setAttachmentGate}
                     onUploadSuccess={(result) => {
                       setAttachments((current) => mergeUploadedFiles(current, result));
                       toast.success(t('support.feedback.uploaded'));
@@ -454,6 +524,16 @@ export default function TicketDetailPage() {
                       ))}
                     </div>
                   )}
+                  {attachmentGate.hasUploadErrors ? (
+                    <Alert>
+                      <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {attachmentGate.hasPendingUploads ? (
+                    <Alert>
+                      <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
+                    </Alert>
+                  ) : null}
 
                   <Turnstile
                     ref={turnstileRef}
@@ -464,7 +544,12 @@ export default function TicketDetailPage() {
                     onError={() => setTurnstileToken('')}
                   />
 
-                  <Button type="submit" className="w-full rounded-full" loading={replyMutation.isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full rounded-full"
+                    loading={replyMutation.isLoading}
+                    disabled={attachmentGate.isSubmissionBlocked}
+                  >
                     <Send className="mr-2 h-4 w-4" />
                     {t('support.thread.replySubmit')}
                   </Button>

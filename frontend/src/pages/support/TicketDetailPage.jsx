@@ -23,6 +23,9 @@ import { checkAuthStatus } from '../../lib/auth';
 import {
   formatSupportDate,
   getPriorityVariant,
+  getSlaMeta,
+  getSlaMilestoneMeta,
+  getSlaTone,
   getStatusTone,
   getTagTone,
   isImageAttachment,
@@ -36,6 +39,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/badge';
 import { Alert, AlertDescription } from '../../components/ui/Alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import {
   Select,
   SelectContent,
@@ -53,20 +57,57 @@ function SupportAttachmentList({ attachments }) {
     return null;
   }
 
+  const imageAttachments = attachments.filter((attachment) => isImageAttachment(attachment));
+  const fileAttachments = attachments.filter((attachment) => !isImageAttachment(attachment));
+
   return (
-    <div className="mt-4 flex flex-wrap gap-2">
-      {attachments.map((attachment) => (
-        <a
-          key={attachment.id ?? attachment.file_path}
-          href={attachment.download_url || attachment.file_path}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-        >
-          {isImageAttachment(attachment) ? <ImageIcon className="h-3.5 w-3.5" /> : <Paperclip className="h-3.5 w-3.5" />}
-          {attachment.original_name}
-        </a>
-      ))}
+    <div className="mt-4 space-y-3">
+      {imageAttachments.length > 0 ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {imageAttachments.map((attachment) => {
+            const href = attachment.download_url || attachment.public_url || attachment.file_path;
+            return (
+              <a
+                key={attachment.id ?? attachment.file_path}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-sky-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900"
+              >
+                <div className="aspect-square bg-slate-100 dark:bg-slate-800">
+                  <img
+                    src={href}
+                    alt={attachment.original_name}
+                    className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.02]"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
+                  <ImageIcon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{attachment.original_name}</span>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {fileAttachments.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {fileAttachments.map((attachment) => (
+            <a
+              key={attachment.id ?? attachment.file_path}
+              href={attachment.download_url || attachment.public_url || attachment.file_path}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              <Paperclip className="h-3.5 w-3.5" />
+              {attachment.original_name}
+            </a>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -89,6 +130,22 @@ function transferStatusTone(status) {
   }
 }
 
+function messageTone(senderRole) {
+  if (senderRole === 'support' || senderRole === 'admin') {
+    return {
+      align: 'justify-end',
+      surface:
+        'border-sky-200 bg-sky-50/80 text-slate-900 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-slate-100',
+    };
+  }
+
+  return {
+    align: 'justify-start',
+    surface:
+      'border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-100',
+  };
+}
+
 const FEEDBACK_RATING_VALUES = [1, 2, 3, 4, 5];
 
 function FeedbackStars({ value }) {
@@ -108,13 +165,16 @@ export default function SupportTicketDetailPage() {
   const { ticketId } = useParams();
   const { t, currentLanguage } = useTranslation();
   const queryClient = useQueryClient();
+  const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
   const [attachments, setAttachments] = useState([]);
+  const [attachmentGate, setAttachmentGate] = useState({ hasPendingUploads: false, hasUploadErrors: false, isSubmissionBlocked: false });
   const [status, setStatus] = useState('open');
   const [priority, setPriority] = useState('normal');
   const [assignedTo, setAssignedTo] = useState('none');
   const [transferTo, setTransferTo] = useState('none');
   const [transferReason, setTransferReason] = useState('');
   const [reviewNotes, setReviewNotes] = useState({});
+  const [sidePanelTab, setSidePanelTab] = useState('workflow');
 
   const authState = useMemo(() => checkAuthStatus(), []);
   const currentUser = authState.user;
@@ -216,7 +276,10 @@ export default function SupportTicketDetailPage() {
   );
 
   const ticket = ticketQuery.data?.data?.data;
-  const assignees = assigneesQuery.data ?? [];
+  const assignees = useMemo(
+    () => assigneesQuery.data ?? [],
+    [assigneesQuery.data]
+  );
   const currentAssignee = useMemo(
     () => assignees.find((entry) => String(entry.id) === String(ticket?.assigned_to ?? '')),
     [assignees, ticket?.assigned_to]
@@ -252,6 +315,15 @@ export default function SupportTicketDetailPage() {
   };
 
   const onReplySubmit = handleSubmit((values) => {
+    if (attachmentGate.hasUploadErrors) {
+      toast.error(t('support.attachments.uploadFailedBlocking'));
+      return;
+    }
+    if (attachmentGate.hasPendingUploads) {
+      toast.error(t('support.attachments.uploadRequired'));
+      return;
+    }
+
     replyMutation.mutate({
       content: values.content,
       attachments: attachments.map((file) => file.file_path),
@@ -292,6 +364,10 @@ export default function SupportTicketDetailPage() {
     );
   }
 
+  const slaMeta = getSlaMeta(ticket, locale);
+  const firstResponseMeta = getSlaMilestoneMeta(ticket, 'first_response', locale);
+  const resolutionMeta = getSlaMilestoneMeta(ticket, 'resolution', locale);
+
   return (
     <div className="space-y-6">
       <Link to="/support/tickets" className="inline-flex items-center gap-2 text-sm font-medium text-sky-600 dark:text-sky-300">
@@ -314,10 +390,10 @@ export default function SupportTicketDetailPage() {
           <Badge variant={getPriorityVariant(ticket.priority)}>
             {t(`support.priorities.${ticket.priority}`)}
           </Badge>
-          {ticket.sla_status ? (
-            <Badge variant="outline">
+          {slaMeta.state ? (
+            <Badge variant="outline" className={getSlaTone(slaMeta.state)}>
               {t('support.portal.slaBadge', {
-                status: t(`support.slaStatuses.${ticket.sla_status}`, { defaultValue: ticket.sla_status }),
+                status: t(`support.slaStatuses.${slaMeta.state}`, { defaultValue: slaMeta.state }),
               })}
             </Badge>
           ) : null}
@@ -329,403 +405,42 @@ export default function SupportTicketDetailPage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4">
-          <Card>
+          <Card className="border-slate-200/80 shadow-sm dark:border-white/10">
             <CardHeader>
-              <CardTitle>{t('support.portal.tagsTitle')}</CardTitle>
-              <CardDescription>{t('support.portal.tagsSubtitle')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {(ticket.tags ?? []).length === 0 && (
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.noTags')}</p>
-              )}
-              {(ticket.tags ?? []).map((tag) => (
-                <div
-                  key={tag.id}
-                  className="flex flex-col gap-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/30"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline" className={getTagTone(tag.color)}>
-                      {tag.name}
-                    </Badge>
-                    <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                      {t(`support.portal.tagSource.${tag.source_type || 'rule'}`)}
-                    </span>
-                    {tag.rule_id ? (
-                      <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                        {t('support.portal.ruleLabel', { id: tag.rule_id })}
-                      </span>
-                    ) : null}
-                  </div>
-                  {tag.description ? (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{tag.description}</p>
-                  ) : null}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {ticket.messages?.map((message) => (
-            <Card key={message.id}>
-              <CardContent className="pt-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium">{message.sender_name || t('support.thread.unknownSender')}</p>
-                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                      {t(`support.senderRoles.${message.sender_role}`)}
-                    </p>
-                  </div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                    {formatSupportDate(message.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
-                  </p>
-                </div>
-                <p className="mt-4 whitespace-pre-wrap text-sm leading-7">{message.body}</p>
-                <SupportAttachmentList attachments={message.attachments} />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('support.portal.requesterTitle')}</CardTitle>
-              <CardDescription>{t('support.portal.requesterSubtitle')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-slate-500 dark:text-slate-400">{t('support.portal.requesterName')}</span>
-                <span>{ticket.requester?.username || '--'}</span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-slate-500 dark:text-slate-400">{t('support.portal.requesterEmail')}</span>
-                <span className="truncate">{ticket.requester?.email || '--'}</span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-slate-500 dark:text-slate-400">{t('support.portal.createdAt')}</span>
-                <span>{formatSupportDate(ticket.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('support.portal.workflowTitle')}</CardTitle>
-              <CardDescription>{t('support.portal.workflowSubtitle')}</CardDescription>
+              <CardTitle>{t('support.portal.conversationTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm dark:border-slate-800 dark:bg-slate-950/30">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-slate-500 dark:text-slate-400">{t('support.portal.firstResponseDueLabel')}</span>
-                  <span>{ticket.first_response_due_at ? formatSupportDate(ticket.first_response_due_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US') : '--'}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-slate-500 dark:text-slate-400">{t('support.portal.resolutionDueLabel')}</span>
-                  <span>{ticket.resolution_due_at ? formatSupportDate(ticket.resolution_due_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US') : '--'}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-slate-500 dark:text-slate-400">{t('support.portal.assignmentSourceLabel')}</span>
-                  <span>{ticket.assignment_source || '--'}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-slate-500 dark:text-slate-400">{t('support.portal.escalationLevelLabel')}</span>
-                  <span>{ticket.escalation_level ?? 0}</span>
-                </div>
-                {ticket.routing_summary ? (
-                  <>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-slate-500 dark:text-slate-400">{t('support.portal.routingLastRunLabel')}</span>
-                      <span>#{ticket.routing_summary.last_run_id ?? '--'}</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-slate-500 dark:text-slate-400">{t('support.portal.routingFallbackLabel')}</span>
-                      <span>{ticket.routing_summary.fallback_reason || '--'}</span>
-                    </div>
-                  </>
-                ) : null}
-              </div>
+              {(ticket.messages ?? []).map((message) => {
+                const tone = messageTone(message.sender_role);
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">{t('support.filters.status')}</label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TICKET_STATUS_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {t(option.labelKey)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">{t('support.feedback.fields.priority')}</label>
-                <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TICKET_PRIORITY_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {t(option.labelKey)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {isAdmin ? (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t('support.portal.assignedTo')}</label>
-                  <Select value={assignedTo} onValueChange={setAssignedTo}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">{t('support.portal.unassigned')}</SelectItem>
-                      {assignees.map((assignee) => (
-                        <SelectItem key={assignee.id} value={String(assignee.id)}>
-                          {assigneeLabel(assignee, t)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
-                <div className="space-y-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/30">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-sm font-medium">{t('support.portal.assignedTo')}</span>
-                    <span className="text-sm">{currentAssignee?.username || currentAssignee?.email || t('support.portal.unassigned')}</span>
-                  </div>
-                  {currentAssignee ? (
-                    <div className="grid grid-cols-3 gap-3 text-center">
-                      <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                          {t('support.portal.workload.assigned')}
-                        </p>
-                        <p className="mt-2 text-xl font-semibold">{currentAssignee.assigned_total_count ?? 0}</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                          {t('support.portal.workload.notStarted')}
-                        </p>
-                        <p className="mt-2 text-xl font-semibold">{currentAssignee.open_count ?? 0}</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                          {t('support.portal.workload.inProgress')}
-                        </p>
-                        <p className="mt-2 text-xl font-semibold">{currentAssignee.in_progress_count ?? 0}</p>
-                      </div>
-                    </div>
-                  ) : null}
-                  {ticket.assignment_locked ? (
-                    <Alert>
-                      <AlertDescription>{t('support.portal.assignmentLockedHint')}</AlertDescription>
-                    </Alert>
-                  ) : null}
-                </div>
-              )}
-
-              <Button type="button" className="w-full rounded-full" onClick={handleWorkflowSave} loading={updateMutation.isLoading}>
-                <Save className="mr-2 h-4 w-4" />
-                {t('support.portal.saveWorkflow')}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {!isAdmin && isCurrentAssignee && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('support.portal.transfer.title')}</CardTitle>
-                <CardDescription>{t('support.portal.transfer.subtitle')}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t('support.portal.transfer.target')}</label>
-                  <Select value={transferTo} onValueChange={setTransferTo}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('support.portal.transfer.targetPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">{t('support.portal.transfer.targetPlaceholder')}</SelectItem>
-                      {transferableAssignees.map((assignee) => (
-                        <SelectItem key={assignee.id} value={String(assignee.id)}>
-                          {assigneeLabel(assignee, t)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t('support.portal.transfer.reason')}</label>
-                  <Textarea
-                    rows={4}
-                    value={transferReason}
-                    onChange={(event) => setTransferReason(event.target.value)}
-                    placeholder={t('support.portal.transfer.reasonPlaceholder')}
-                  />
-                </div>
-
-                <Button type="button" className="w-full rounded-full" onClick={handleCreateTransferRequest} loading={transferRequestMutation.isLoading}>
-                  <Shuffle className="mr-2 h-4 w-4" />
-                  {t('support.portal.transfer.submit')}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('support.portal.transfer.historyTitle')}</CardTitle>
-              <CardDescription>{t('support.portal.transfer.historySubtitle')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {(ticket.transfer_requests ?? []).length === 0 && (
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.transfer.empty')}</p>
-              )}
-
-              {(ticket.transfer_requests ?? []).map((request) => (
-                <div
-                  key={request.id}
-                  className="space-y-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/30"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="outline" className={transferStatusTone(request.status)}>
-                        {t(`support.transferStatuses.${request.status}`)}
-                      </Badge>
-                      <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                        {formatSupportDate(request.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
-                      </span>
-                    </div>
-                    <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                      #{request.id}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    <p>
-                      {t('support.portal.transfer.requestLine', {
-                        from: request.from_user?.username || request.from_user?.email || t('support.portal.unassigned'),
-                        to: request.to_user?.username || request.to_user?.email || `#${request.to_assignee}`,
-                      })}
-                    </p>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      {t('support.portal.transfer.requestedBy', {
-                        name: request.requester?.username || request.requester?.email || `#${request.requested_by}`,
-                      })}
-                    </p>
-                    {request.reason ? (
-                      <p className="whitespace-pre-wrap text-slate-500 dark:text-slate-400">{request.reason}</p>
-                    ) : null}
-                    {request.review_note ? (
-                      <p className="whitespace-pre-wrap text-slate-500 dark:text-slate-400">
-                        {t('support.portal.transfer.reviewNoteLabel')}: {request.review_note}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  {request.status === 'pending' && Number(request.to_assignee) === Number(currentUser?.id ?? 0) ? (
-                    <div className="space-y-3">
-                      <Textarea
-                        rows={3}
-                        value={reviewNotes[request.id] ?? ''}
-                        onChange={(event) => setReviewNotes((current) => ({ ...current, [request.id]: event.target.value }))}
-                        placeholder={t('support.portal.transfer.reviewPlaceholder')}
-                      />
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          className="rounded-full"
-                          onClick={() => handleReviewTransfer(request.id, 'approved')}
-                          loading={reviewTransferMutation.isLoading}
-                        >
-                          <Check className="mr-2 h-4 w-4" />
-                          {t('support.portal.transfer.approve')}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="rounded-full"
-                          onClick={() => handleReviewTransfer(request.id, 'rejected')}
-                          loading={reviewTransferMutation.isLoading}
-                        >
-                          <X className="mr-2 h-4 w-4" />
-                          {t('support.portal.transfer.reject')}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : null}
-                  {request.status === 'pending' && Number(request.requested_by) === Number(currentUser?.id ?? 0) ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="rounded-full"
-                      onClick={() => handleReviewTransfer(request.id, 'cancelled')}
-                      loading={reviewTransferMutation.isLoading}
+                return (
+                  <div key={message.id} className={`flex ${tone.align}`}>
+                    <div
+                      className={`w-full max-w-[92%] rounded-[1.6rem] border px-5 py-4 shadow-sm ${tone.surface}`}
                     >
-                      <X className="mr-2 h-4 w-4" />
-                      {t('support.portal.transfer.cancel')}
-                    </Button>
-                  ) : null}
-                </div>
-              ))}
-
-              {pendingTransferRequests.length > 0 ? (
-                <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                  {t('support.portal.transfer.pendingHint', { count: pendingTransferRequests.length })}
-                </p>
-              ) : null}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('support.portal.feedbackTitle')}</CardTitle>
-              <CardDescription>{t('support.portal.feedbackSubtitle')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {feedbackEntries.length === 0 && (
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.feedbackEmpty')}</p>
-              )}
-
-              {feedbackEntries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="space-y-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/30"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium">
-                        {entry.rated_user?.username || entry.rated_user?.email || `#${entry.rated_user_id}`}
-                      </p>
-                      <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                        {t('support.portal.feedbackRatedBy', {
-                          name: entry.reviewer?.username || entry.reviewer?.email || `#${entry.user_id}`,
-                        })}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                      <FeedbackStars value={entry.rating} />
-                      <span>
-                        {formatSupportDate(entry.updated_at || entry.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
-                      </span>
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold">
+                            {message.sender_name || t('support.thread.unknownSender')}
+                          </p>
+                          <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                            {t(`support.senderRoles.${message.sender_role}`)}
+                          </p>
+                        </div>
+                        <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                          {formatSupportDate(message.created_at, locale)}
+                        </p>
+                      </div>
+                      <p className="mt-4 whitespace-pre-wrap text-sm leading-7">{message.body}</p>
+                      <SupportAttachmentList attachments={message.attachments} />
                     </div>
                   </div>
-                  {entry.comment ? (
-                    <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{entry.comment}</p>
-                  ) : (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.feedbackNoComment')}</p>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-slate-200/80 shadow-sm dark:border-white/10">
             <CardHeader>
               <CardTitle>{t('support.portal.replyTitle')}</CardTitle>
               <CardDescription>{t('support.portal.replySubtitle')}</CardDescription>
@@ -746,6 +461,7 @@ export default function SupportTicketDetailPage() {
                   entityType="support_ticket_message"
                   accept="image/*"
                   compressImages
+                  onStateChange={setAttachmentGate}
                   onUploadSuccess={(result) => {
                     setAttachments((current) => mergeUploadedFiles(current, result));
                     toast.success(t('support.feedback.uploaded'));
@@ -767,14 +483,387 @@ export default function SupportTicketDetailPage() {
                     ))}
                   </div>
                 )}
+                {attachmentGate.hasUploadErrors ? (
+                  <Alert>
+                    <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
+                  </Alert>
+                ) : null}
+                {attachmentGate.hasPendingUploads ? (
+                  <Alert>
+                    <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
+                  </Alert>
+                ) : null}
 
-                <Button type="submit" className="w-full rounded-full" loading={replyMutation.isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full rounded-full"
+                  loading={replyMutation.isLoading}
+                  disabled={attachmentGate.isSubmissionBlocked}
+                >
                   <Send className="mr-2 h-4 w-4" />
                   {t('support.portal.replySubmit')}
                 </Button>
               </form>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="space-y-4 xl:sticky xl:top-6 xl:self-start">
+          <Card className="border-slate-200/80 shadow-sm dark:border-white/10">
+            <CardHeader>
+              <CardTitle>{t('support.portal.ticketMetaTitle', { defaultValue: t('support.portal.requesterTitle') })}</CardTitle>
+              <CardDescription>{t('support.portal.ticketMetaSubtitle', { defaultValue: t('support.portal.requesterSubtitle') })}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-slate-500 dark:text-slate-400">{t('support.portal.requesterName')}</span>
+                <span>{ticket.requester?.username || '--'}</span>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-slate-500 dark:text-slate-400">{t('support.portal.requesterEmail')}</span>
+                <span className="truncate">{ticket.requester?.email || '--'}</span>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-slate-500 dark:text-slate-400">{t('support.portal.createdAt')}</span>
+                <span>{formatSupportDate(ticket.created_at, locale)}</span>
+              </div>
+              {(ticket.tags ?? []).length > 0 && (
+                <div className="pt-2">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{t('support.portal.tagsTitle')}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(ticket.tags ?? []).map((tag) => (
+                      <Badge key={tag.id} variant="outline" className={getTagTone(tag.color)}>
+                        {tag.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200/80 shadow-sm dark:border-white/10">
+            <CardContent className="pt-6">
+              <Tabs value={sidePanelTab} onValueChange={setSidePanelTab} className="space-y-5">
+                <TabsList className="grid w-full grid-cols-3 overflow-hidden rounded-[1.2rem] border-slate-200 bg-slate-100/90 dark:border-white/10 dark:bg-white/5">
+                  <TabsTrigger value="workflow" className="border-r-slate-200 dark:border-r-white/10">
+                    {t('support.portal.workflowTab')}
+                  </TabsTrigger>
+                  <TabsTrigger value="transfer" className="border-r-slate-200 dark:border-r-white/10">
+                    {t('support.portal.transferTab')}
+                  </TabsTrigger>
+                  <TabsTrigger value="feedback">{t('support.portal.feedbackTab')}</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="workflow" className="space-y-4">
+                  <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
+                    <div className="grid gap-3 text-sm">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-slate-500 dark:text-slate-400">{t('support.portal.firstResponseDueLabel')}</span>
+                        <div className="text-right">
+                          <div>{firstResponseMeta.dueAtLabel}</div>
+                          <div className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{firstResponseMeta.relativeLabel}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-slate-500 dark:text-slate-400">{t('support.portal.resolutionDueLabel')}</span>
+                        <div className="text-right">
+                          <div>{resolutionMeta.dueAtLabel}</div>
+                          <div className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{resolutionMeta.relativeLabel}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-slate-500 dark:text-slate-400">{t('support.portal.assignmentSourceLabel')}</span>
+                        <span>{ticket.assignment_source || '--'}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-slate-500 dark:text-slate-400">{t('support.portal.escalationLevelLabel')}</span>
+                        <span>{ticket.escalation_level ?? 0}</span>
+                      </div>
+                      {ticket.routing_summary ? (
+                        <>
+                          <div className="flex items-center justify-between gap-4">
+                            <span className="text-slate-500 dark:text-slate-400">{t('support.portal.routingLastRunLabel')}</span>
+                            <span>#{ticket.routing_summary.last_run_id ?? '--'}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-4">
+                            <span className="text-slate-500 dark:text-slate-400">{t('support.portal.routingFallbackLabel')}</span>
+                            <span className="text-right">{ticket.routing_summary.fallback_reason || '--'}</span>
+                          </div>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">{t('support.filters.status')}</label>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TICKET_STATUS_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {t(option.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">{t('support.feedback.fields.priority')}</label>
+                    <Select value={priority} onValueChange={setPriority}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TICKET_PRIORITY_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {t(option.labelKey)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {isAdmin ? (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">{t('support.portal.assignedTo')}</label>
+                      <Select value={assignedTo} onValueChange={setAssignedTo}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">{t('support.portal.unassigned')}</SelectItem>
+                          {assignees.map((assignee) => (
+                            <SelectItem key={assignee.id} value={String(assignee.id)}>
+                              {assigneeLabel(assignee, t)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm font-medium">{t('support.portal.assignedTo')}</span>
+                        <span className="text-right text-sm">{currentAssignee?.username || currentAssignee?.email || t('support.portal.unassigned')}</span>
+                      </div>
+                      {currentAssignee ? (
+                        <div className="grid grid-cols-3 gap-3 text-center">
+                          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                              {t('support.portal.workload.assigned')}
+                            </p>
+                            <p className="mt-2 text-xl font-semibold">{currentAssignee.assigned_total_count ?? 0}</p>
+                          </div>
+                          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                              {t('support.portal.workload.notStarted')}
+                            </p>
+                            <p className="mt-2 text-xl font-semibold">{currentAssignee.open_count ?? 0}</p>
+                          </div>
+                          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                              {t('support.portal.workload.inProgress')}
+                            </p>
+                            <p className="mt-2 text-xl font-semibold">{currentAssignee.in_progress_count ?? 0}</p>
+                          </div>
+                        </div>
+                      ) : null}
+                      {ticket.assignment_locked ? (
+                        <Alert>
+                          <AlertDescription>{t('support.portal.assignmentLockedHint')}</AlertDescription>
+                        </Alert>
+                      ) : null}
+                    </div>
+                  )}
+
+                  <Button type="button" className="w-full rounded-full" onClick={handleWorkflowSave} loading={updateMutation.isLoading}>
+                    <Save className="mr-2 h-4 w-4" />
+                    {t('support.portal.saveWorkflow')}
+                  </Button>
+                </TabsContent>
+
+                <TabsContent value="transfer" className="space-y-4">
+                  {!isAdmin && isCurrentAssignee ? (
+                    <div className="space-y-4 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
+                      <div>
+                        <p className="text-sm font-semibold">{t('support.portal.transfer.title')}</p>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('support.portal.transfer.subtitle')}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">{t('support.portal.transfer.target')}</label>
+                        <Select value={transferTo} onValueChange={setTransferTo}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={t('support.portal.transfer.targetPlaceholder')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">{t('support.portal.transfer.targetPlaceholder')}</SelectItem>
+                            {transferableAssignees.map((assignee) => (
+                              <SelectItem key={assignee.id} value={String(assignee.id)}>
+                                {assigneeLabel(assignee, t)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">{t('support.portal.transfer.reason')}</label>
+                        <Textarea
+                          rows={4}
+                          value={transferReason}
+                          onChange={(event) => setTransferReason(event.target.value)}
+                          placeholder={t('support.portal.transfer.reasonPlaceholder')}
+                        />
+                      </div>
+                      <Button type="button" className="w-full rounded-full" onClick={handleCreateTransferRequest} loading={transferRequestMutation.isLoading}>
+                        <Shuffle className="mr-2 h-4 w-4" />
+                        {t('support.portal.transfer.submit')}
+                      </Button>
+                    </div>
+                  ) : null}
+
+                  <div className="space-y-3">
+                    {(ticket.transfer_requests ?? []).length === 0 ? (
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.transfer.empty')}</p>
+                    ) : null}
+
+                    {(ticket.transfer_requests ?? []).map((request) => (
+                      <div
+                        key={request.id}
+                        className="space-y-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="outline" className={transferStatusTone(request.status)}>
+                              {t(`support.transferStatuses.${request.status}`)}
+                            </Badge>
+                            <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                              {formatSupportDate(request.created_at, locale)}
+                            </span>
+                          </div>
+                          <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                            #{request.id}
+                          </span>
+                        </div>
+
+                        <div className="space-y-2 text-sm">
+                          <p>
+                            {t('support.portal.transfer.requestLine', {
+                              from: request.from_user?.username || request.from_user?.email || t('support.portal.unassigned'),
+                              to: request.to_user?.username || request.to_user?.email || `#${request.to_assignee}`,
+                            })}
+                          </p>
+                          <p className="text-slate-500 dark:text-slate-400">
+                            {t('support.portal.transfer.requestedBy', {
+                              name: request.requester?.username || request.requester?.email || `#${request.requested_by}`,
+                            })}
+                          </p>
+                          {request.reason ? (
+                            <p className="whitespace-pre-wrap text-slate-500 dark:text-slate-400">{request.reason}</p>
+                          ) : null}
+                          {request.review_note ? (
+                            <p className="whitespace-pre-wrap text-slate-500 dark:text-slate-400">
+                              {t('support.portal.transfer.reviewNoteLabel')}: {request.review_note}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        {request.status === 'pending' && Number(request.to_assignee) === Number(currentUser?.id ?? 0) ? (
+                          <div className="space-y-3">
+                            <Textarea
+                              rows={3}
+                              value={reviewNotes[request.id] ?? ''}
+                              onChange={(event) => setReviewNotes((current) => ({ ...current, [request.id]: event.target.value }))}
+                              placeholder={t('support.portal.transfer.reviewPlaceholder')}
+                            />
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                type="button"
+                                className="rounded-full"
+                                onClick={() => handleReviewTransfer(request.id, 'approved')}
+                                loading={reviewTransferMutation.isLoading}
+                              >
+                                <Check className="mr-2 h-4 w-4" />
+                                {t('support.portal.transfer.approve')}
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="rounded-full"
+                                onClick={() => handleReviewTransfer(request.id, 'rejected')}
+                                loading={reviewTransferMutation.isLoading}
+                              >
+                                <X className="mr-2 h-4 w-4" />
+                                {t('support.portal.transfer.reject')}
+                              </Button>
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {request.status === 'pending' && Number(request.requested_by) === Number(currentUser?.id ?? 0) ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="rounded-full"
+                            onClick={() => handleReviewTransfer(request.id, 'cancelled')}
+                            loading={reviewTransferMutation.isLoading}
+                          >
+                            <X className="mr-2 h-4 w-4" />
+                            {t('support.portal.transfer.cancel')}
+                          </Button>
+                        ) : null}
+                      </div>
+                    ))}
+
+                    {pendingTransferRequests.length > 0 ? (
+                      <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                        {t('support.portal.transfer.pendingHint', { count: pendingTransferRequests.length })}
+                      </p>
+                    ) : null}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="feedback" className="space-y-3">
+                  {feedbackEntries.length === 0 ? (
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.feedbackEmpty')}</p>
+                  ) : null}
+
+                  {feedbackEntries.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="space-y-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-medium">
+                            {entry.rated_user?.username || entry.rated_user?.email || `#${entry.rated_user_id}`}
+                          </p>
+                          <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                            {t('support.portal.feedbackRatedBy', {
+                              name: entry.reviewer?.username || entry.reviewer?.email || `#${entry.user_id}`,
+                            })}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                          <FeedbackStars value={entry.rating} />
+                          <span>{formatSupportDate(entry.updated_at || entry.created_at, locale)}</span>
+                        </div>
+                      </div>
+                      {entry.comment ? (
+                        <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{entry.comment}</p>
+                      ) : (
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.feedbackNoComment')}</p>
+                      )}
+                    </div>
+                  ))}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+
         </div>
       </div>
     </div>

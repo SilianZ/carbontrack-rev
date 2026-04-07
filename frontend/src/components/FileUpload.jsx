@@ -1,5 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
-import { Button } from '@/components/ui/Button';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -16,6 +15,7 @@ const FileUpload = ({
   entityId = null,
   onUploadSuccess = () => {},
   onUploadError = () => {},
+  onStateChange = () => {},
   className = '',
   accept = 'image/*',
   maxFiles = 5,
@@ -85,15 +85,17 @@ const FileUpload = ({
   }, [multiple, maxFiles, compressImages, showPreview, t]);
 
   // 处理文件上传
-  const handleUpload = useCallback(async () => {
-    if (files.length === 0 || uploading) return;
+  const handleUpload = useCallback(async (overrideFiles = null) => {
+    const sourceFiles = overrideFiles ?? files;
+    const pendingFiles = sourceFiles.filter((file) => file.status === 'pending');
+    if (pendingFiles.length === 0 || uploading) return;
 
     setUploading(true);
     setUploadProgress(0);
     setError('');
 
     try {
-  const filesToUpload = files.map(f => f.file);
+      const filesToUpload = pendingFiles.map(f => f.file);
       
       const uploadOptions = {
         directory,
@@ -147,7 +149,7 @@ const FileUpload = ({
       onUploadSuccess(result);
       
       // 清理预览URL
-      files.forEach(f => {
+      sourceFiles.forEach(f => {
         if (f.preview) {
           fileUploader.revokePreviewUrl(f.preview);
         }
@@ -173,6 +175,12 @@ const FileUpload = ({
       setUploading(false);
     }
   }, [files, uploading, directory, entityType, entityId, mode, multiple, onUploadSuccess, onUploadError]);
+
+  useEffect(() => {
+    if (!uploading && files.some((file) => file.status === 'pending')) {
+      void handleUpload(files);
+    }
+  }, [files, uploading, handleUpload]);
 
   // 移除文件
   const removeFile = useCallback((fileId) => {
@@ -225,6 +233,24 @@ const FileUpload = ({
     // 重置input值，允许重复选择同一文件
     e.target.value = '';
   }, [handleFileSelect]);
+
+  useEffect(() => {
+    const pendingCount = files.filter((file) => file.status === 'pending').length;
+    const successCount = files.filter((file) => file.status === 'success').length;
+    const errorCount = files.filter((file) => file.status === 'error').length;
+
+    onStateChange({
+      totalCount: files.length,
+      pendingCount,
+      successCount,
+      errorCount,
+      uploading,
+      mode,
+      hasPendingUploads: uploading || pendingCount > 0,
+      hasUploadErrors: errorCount > 0,
+      isSubmissionBlocked: uploading || pendingCount > 0 || errorCount > 0,
+    });
+  }, [files, uploading, mode, onStateChange]);
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -384,20 +410,6 @@ const FileUpload = ({
         </div>
       )}
 
-      {/* 上传按钮 */}
-      {files.length > 0 && !uploading && files.some(f => f.status === 'pending') && (
-        <Button 
-          onClick={handleUpload}
-          disabled={disabled || uploading}
-          className="w-full"
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          {multiple && files.length > 1 
-            ? t('upload.uploadFiles', { count: files.length })
-            : t('upload.uploadFile')
-          }
-        </Button>
-      )}
     </div>
   );
 };

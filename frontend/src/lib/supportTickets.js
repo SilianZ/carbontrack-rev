@@ -71,6 +71,94 @@ export function formatSupportDate(value, locale = 'zh-CN', fallback = '--') {
   }).format(date);
 }
 
+export function formatSlaDuration(minutes, locale = 'zh-CN') {
+  const absolute = Math.max(0, Math.abs(Math.trunc(minutes)));
+  const days = Math.floor(absolute / 1440);
+  const hours = Math.floor((absolute % 1440) / 60);
+  const mins = absolute % 60;
+
+  if (locale.startsWith('zh')) {
+    const parts = [];
+    if (days > 0) parts.push(`${days}天`);
+    if (hours > 0) parts.push(`${hours}小时`);
+    if (mins > 0 || parts.length === 0) parts.push(`${mins}分钟`);
+    return parts.join('');
+  }
+
+  const parts = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (mins > 0 || parts.length === 0) parts.push(`${mins}m`);
+  return parts.join(' ');
+}
+
+export function getSlaTone(state) {
+  switch (state) {
+    case 'due_soon':
+      return 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200';
+    case 'breached':
+      return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200';
+    case 'escalated':
+      return 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200';
+    case 'resolved':
+      return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200';
+    default:
+      return 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200';
+  }
+}
+
+export function getSlaMeta(ticket, locale = 'zh-CN') {
+  const summary = ticket?.sla_summary;
+  const state = summary?.display_state || ticket?.sla_status || 'pending';
+  const dueAt = summary?.active_due_at || null;
+  const minutesDelta = typeof summary?.active_minutes_delta === 'number' ? summary.active_minutes_delta : null;
+
+  let relativeLabel = '--';
+  if (state === 'resolved') {
+    relativeLabel = locale.startsWith('zh') ? '已完成' : 'Completed';
+  } else if (minutesDelta !== null) {
+    const duration = formatSlaDuration(minutesDelta, locale);
+    relativeLabel = minutesDelta < 0
+      ? (locale.startsWith('zh') ? `超时 ${duration}` : `Overdue ${duration}`)
+      : (locale.startsWith('zh') ? `剩余 ${duration}` : `${duration} remaining`);
+  }
+
+  return {
+    state,
+    dueAt,
+    dueAtLabel: formatSupportDate(dueAt, locale),
+    relativeLabel,
+    activeTarget: summary?.active_target || null,
+  };
+}
+
+export function getSlaMilestoneMeta(ticket, key, locale = 'zh-CN') {
+  const milestone = ticket?.sla_summary?.[key];
+  if (!milestone?.due_at) {
+    return {
+      dueAtLabel: '--',
+      relativeLabel: '--',
+      state: 'not_configured',
+    };
+  }
+
+  let relativeLabel = '--';
+  if (milestone.state === 'met') {
+    relativeLabel = locale.startsWith('zh') ? '已完成' : 'Completed';
+  } else if (typeof milestone.minutes_delta === 'number') {
+    const duration = formatSlaDuration(milestone.minutes_delta, locale);
+    relativeLabel = milestone.minutes_delta < 0
+      ? (locale.startsWith('zh') ? `超时 ${duration}` : `Overdue ${duration}`)
+      : (locale.startsWith('zh') ? `剩余 ${duration}` : `${duration} remaining`);
+  }
+
+  return {
+    dueAtLabel: formatSupportDate(milestone.due_at, locale),
+    relativeLabel,
+    state: milestone.state || 'pending',
+  };
+}
+
 export function isImageAttachment(attachment) {
   const mimeType = String(attachment?.mime_type ?? '');
   const filePath = String(attachment?.file_path ?? '').toLowerCase();

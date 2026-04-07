@@ -1997,6 +1997,9 @@
       "confirmSetRole": "Choose a new role for {{username}}.",
       "updateSuccess": "User updated successfully",
       "updateFailed": "User update failed",
+      "supportRoutingOverrideTitle": "Support SLA override",
+      "supportRoutingOverrideHint": "Leave blank to inherit the user's group SLA and routing policy.",
+      "inheritGroupDefault": "Inherit group default",
       "deleteSuccess": "User deleted successfully",
       "deleteFailed": "User deletion failed",
       "confirmDelete": "Are you sure you want to delete user {{username}}? This action cannot be undone.",
@@ -3853,6 +3856,7 @@
     },
     "slaStatuses": {
       "pending": "Pending",
+      "due_soon": "Due soon",
       "breached": "Breached",
       "escalated": "Escalated",
       "resolved": "Resolved"
@@ -3880,6 +3884,10 @@
         "subject": "Short summary of the issue",
         "content": "Describe what happened, what you expected, and what support should verify."
       }
+    },
+    "attachments": {
+      "uploadRequired": "If you selected files, upload them before submitting the ticket or reply.",
+      "uploadFailedBlocking": "Some attachments failed to upload. Retry or remove them before submitting."
     },
     "recent": {
       "title": "Recent tickets",
@@ -3928,11 +3936,13 @@
       "unknownSender": "Unknown sender"
     },
     "portal": {
-      "title": "Support Desk",
-      "subtitle": "Handle community requests in a separate support workspace.",
+      "title": "Support workbench",
+      "subtitle": "Work the live queue, answer conversations, and keep SLA-critical tickets in view.",
       "nav": {
-        "queue": "Ticket queue",
-        "queueDescription": "Review requests, reply, and move status."
+        "queue": "Queue",
+        "queueDescription": "Search, filter, and inspect the active inbox.",
+        "workbench": "Workbench",
+        "workbenchDescription": "Start from what needs attention now."
       },
       "queueEyebrow": "Queue view",
       "queueTitle": "Work the inbox with clear ownership",
@@ -4035,7 +4045,37 @@
       "escalationLevelLabel": "Escalation level",
       "routingLastRunLabel": "Last routing run",
       "routingFallbackLabel": "Routing fallback",
-      "assignmentLockedHint": "This ticket is admin-locked. Smart rerouting will not override the current assignee."
+      "assignmentLockedHint": "This ticket is admin-locked. Smart rerouting will not override the current assignee.",
+      "workbenchEyebrow": "Shift handoff",
+      "workbenchTitle": "Start from the tickets that need action now",
+      "workbenchSubtitle": "See urgent tickets, first-response gaps, your queue, and unassigned work without opening a report page first.",
+      "goToQueue": "Open full queue",
+      "openTopPriority": "Open top priority ticket",
+      "focusLaneTitle": "Priority focus",
+      "focusLaneSubtitle": "Urgent or SLA-risk tickets that should be handled first.",
+      "firstResponseLaneTitle": "Waiting for first response",
+      "firstResponseLaneSubtitle": "Tickets still missing the first support reply.",
+      "myQueueLaneTitle": "My active queue",
+      "myQueueLaneSubtitle": "Tickets currently assigned to you and still in motion.",
+      "unassignedLaneTitle": "Unassigned work",
+      "unassignedLaneSubtitle": "Open items that still need an owner.",
+      "activeAssigneesTitle": "Active assignees",
+      "activeAssigneesSubtitle": "Quick glance at who can still take more work.",
+      "availableCapacity": "{{count}} slots free",
+      "openTicket": "Open thread",
+      "noPreview": "No message preview yet.",
+      "previewEmptyTitle": "Choose a ticket",
+      "previewEmptySubtitle": "Select an item from the queue to inspect its requester, SLA, and assignment before opening the full thread.",
+      "previewRequester": "Requester",
+      "previewAssignee": "Assignee",
+      "ticketMetaTitle": "Ticket overview",
+      "ticketMetaSubtitle": "Keep identity, tags, SLA, and current owner visible while you work the thread.",
+      "conversationTitle": "Conversation",
+      "conversationSubtitle": "Read the thread first, then answer from the same workspace.",
+      "workflowTab": "Workflow",
+      "transferTab": "Transfer",
+      "feedbackTab": "Feedback",
+      "emptyLane": "Nothing waiting here right now."
     }
   },
   "adminSupport": {
@@ -4043,6 +4083,7 @@
     "title": "Support operations",
     "tabs": {
       "team": "Team",
+      "tickets": "Ticket audit",
       "settings": "Settings",
       "rules": "Rules",
       "tags": "Tags",
@@ -4062,6 +4103,29 @@
       "smartAssignedHint": "Tickets assigned by the unified routing engine.",
       "slaBreaches": "SLA breaches",
       "slaBreachesHint": "Tickets currently breached or escalated."
+    },
+    "tickets": {
+      "listTitle": "Ticket audit queue",
+      "listSubtitle": "Inspect messages, SLA, and smart-routing evidence per ticket.",
+      "detailTitle": "Ticket detail and audit",
+      "detailSubtitle": "Review context, assignment outcome, and per-run routing scores in one place.",
+      "empty": "No tickets available right now.",
+      "emptyDetail": "Select a ticket on the left to load the audit view.",
+      "identityTitle": "Identity and ownership",
+      "messagesTitle": "Message and attachment evidence",
+      "slaTitle": "SLA and assignment",
+      "routingSummaryTitle": "Latest routing summary",
+      "routingRunsTitle": "Routing history",
+      "noRoutingRuns": "This ticket has no smart-routing history yet.",
+      "usedAi": "AI triage",
+      "fallbackOnly": "Deterministic fallback",
+      "routingWinner": "Winning assignee",
+      "winnerScore": "Score {{value}}",
+      "routingDecision": "Triage decision",
+      "candidateScores": "Candidate scores",
+      "topFactors": "Top factors",
+      "routingFallbackLabel": "Fallback reason",
+      "openInPortal": "Open in support portal"
     },
     "actions": {
       "saveRule": "Save rule",
