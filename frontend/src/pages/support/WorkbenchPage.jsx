@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { AlertTriangle, ArrowRight, Clock3, LifeBuoy, TimerReset } from 'lucide-react';
+import { AlertTriangle, ArrowRight, LifeBuoy, TimerReset } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { supportAPI } from '../../lib/api';
 import { checkAuthStatus } from '../../lib/auth';
 import { formatSupportDate, getPriorityVariant, getSlaMeta, getSlaTone, getStatusTone } from '../../lib/supportTickets';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/Button';
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { ArrowRight, Clock3, Search, UserRound } from 'lucide-react';
+import { ArrowRight, Clock3, Search } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useDebouncedValue } from '../../hooks/useLogSearch';

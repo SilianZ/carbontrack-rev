@@ -477,7 +477,7 @@ class SupportTicketService
 
     public function createTransferRequest(array $actor, int $ticketId, array $payload): array
     {
-        if (!empty($actor['is_admin'])) {
+        if ($this->isAdminActor($actor)) {
             throw new \DomainException('Administrators can manually transfer tickets without creating a request');
         }
 
@@ -1492,7 +1492,7 @@ class SupportTicketService
 
     private function actorType(array $actor): string
     {
-        if (!empty($actor['is_admin'])) {
+        if ($this->isAdminActor($actor)) {
             return 'admin';
         }
         if (!empty($actor['is_support']) || (($actor['role'] ?? null) === 'support')) {
