@@ -10,7 +10,7 @@ export function ActivityFilters({
   categories = [],
   isLoading = false
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'common']);
 
   // 将 categories 归一化为数组，兼容多种返回结构：
   // - 数组: 直接使用

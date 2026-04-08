@@ -259,7 +259,7 @@ const JsonNode = React.memo(function JsonNode({
 JsonNode.displayName = 'JsonNode';
 
 export function JsonTreeViewer({ value, collapsed = false, maxHeight = '20rem', className }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'jsonViewer', 'messages']);
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState(new Set([ROOT_KEY]));
   const [feedback, setFeedback] = useState('');

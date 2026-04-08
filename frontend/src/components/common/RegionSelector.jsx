@@ -9,7 +9,7 @@ export function RegionSelector({
   onStateChange, 
   errors = {} 
 }) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['auth', 'errors']);
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [loading, setLoading] = useState(true);

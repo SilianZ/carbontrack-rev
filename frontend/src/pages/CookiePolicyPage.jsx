@@ -33,7 +33,7 @@ Section.propTypes = {
 };
 
 const CookiePolicyPage = () => {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['legal']);
     const currentDate = new Date().toLocaleDateString();
 
     const thirdPartyItems = t('legal.cookies.sections.thirdParty.items', { returnObjects: true });

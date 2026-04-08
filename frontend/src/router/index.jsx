@@ -1,8 +1,6 @@
 import React from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Layout, AuthLayout } from '../components/layout/Layout';
-import AdminLayout from '../components/layout/AdminLayout';
-import SupportLayout from '../components/layout/SupportLayout';
 import { ProtectedRoute, PublicRoute, AdminRoute, SupportRoute } from '../components/auth/ProtectedRoute';
 
 // Lazy loaded pages
@@ -31,6 +29,8 @@ const CookiePolicyPage = React.lazy(() => import('../pages/CookiePolicyPage'));
 const SecurityPage = React.lazy(() => import('../pages/SecurityPage'));
 const TicketsPage = React.lazy(() => import('../pages/TicketsPage'));
 const TicketDetailPage = React.lazy(() => import('../pages/TicketDetailPage'));
+const AdminLayout = React.lazy(() => import('../components/layout/AdminLayout'));
+const SupportLayout = React.lazy(() => import('../components/layout/SupportLayout'));
 // Admin pages
 const AdminDashboardPage = React.lazy(() => import('../pages/admin/Dashboard'));
 const AdminPasskeysPage = React.lazy(() => import('../pages/admin/Passkeys'));
@@ -109,7 +109,13 @@ export const router = createBrowserRouter([
   { path: '/reset-password', element: <React.Suspense fallback={loadingSpinner}><ResetPasswordPage /></React.Suspense> },
   {
     path: '/admin',
-    element: <AdminRoute><AdminLayout /></AdminRoute>,
+    element: (
+      <AdminRoute>
+        <React.Suspense fallback={loadingSpinner}>
+          <AdminLayout />
+        </React.Suspense>
+      </AdminRoute>
+    ),
     children: [
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: 'dashboard', element: <React.Suspense fallback={loadingSpinner}><AdminDashboardPage /></React.Suspense> },
@@ -131,7 +137,13 @@ export const router = createBrowserRouter([
   },
   {
     path: '/support',
-    element: <SupportRoute><SupportLayout /></SupportRoute>,
+    element: (
+      <SupportRoute>
+        <React.Suspense fallback={loadingSpinner}>
+          <SupportLayout />
+        </React.Suspense>
+      </SupportRoute>
+    ),
     children: [
       { index: true, element: <React.Suspense fallback={loadingSpinner}><SupportWorkbenchPage /></React.Suspense> },
       { path: 'workbench', element: <Navigate to="/support" replace /> },

@@ -114,7 +114,7 @@ function TransferRequestRow({ ticket, request, t, locale }) {
 }
 
 export default function SupportWorkbenchPage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['date', 'support']);
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
   const currentUser = useMemo(() => checkAuthStatus().user, []);
 

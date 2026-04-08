@@ -28,7 +28,7 @@ import {
 } from '../ui/alert-dialog';
 
 export function UserGroupManagement() {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['admin', 'common']);
     const queryClient = useQueryClient();
     const [editingGroup, setEditingGroup] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);

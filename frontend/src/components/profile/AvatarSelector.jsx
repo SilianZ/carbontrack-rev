@@ -9,7 +9,7 @@ import R2Image from '../common/R2Image';
 import { buildAvatarDisplayProps } from '../../lib/avatarUtils';
 
 export function AvatarSelector({ currentAvatarId, onAvatarChange }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'profile']);
   const queryClient = useQueryClient();
   const [selectedAvatar, setSelectedAvatar] = useState(currentAvatarId);
 

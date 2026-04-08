@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import api from '../../lib/api';
 
 export function PasswordChangeForm() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['errors', 'profile', 'validation']);
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
 
   const onSubmit = async (data) => {

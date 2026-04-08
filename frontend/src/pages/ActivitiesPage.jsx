@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '../components/ui/Alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
 export default function ActivitiesPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'common', 'errors', 'pagination']);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     search: '',

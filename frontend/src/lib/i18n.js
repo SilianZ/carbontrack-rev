@@ -2,6 +2,8 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
+import zhHome from '../locales-generated/zh/home.json';
+import zhNav from '../locales-generated/zh/nav.json';
 
 // 支持的语言列表
 export const supportedLanguages = {
@@ -19,6 +21,11 @@ export const supportedLanguages = {
 
 // 默认语言
 export const defaultLanguage = 'zh';
+
+const bundledDefaultLanguageResources = {
+  home: zhHome,
+  nav: zhNav,
+};
 
 // 语言检测配置
 const detectionOptions = {
@@ -49,7 +56,7 @@ const backendOptions = {
   
   // 请求超时时间
   requestOptions: {
-    cache: 'default'
+    cache: 'force-cache'
   }
 };
 
@@ -63,28 +70,39 @@ i18n
   .use(initReactI18next)
   // 初始化配置
   .init({
+    resources: {
+      [defaultLanguage]: bundledDefaultLanguageResources,
+    },
+
     // 默认优先使用设备语言（由 LanguageDetector 按 detection.order 自动检测）
     // 未命中支持语言时回退到 defaultLanguage
-    
+
     // 回退语言
     fallbackLng: defaultLanguage,
-    
+
     // 支持的语言白名单
     supportedLngs: Object.keys(supportedLanguages),
-    
+
+    // 允许默认语言只打包关键 namespace，其余按需走后端加载
+    partialBundledLanguages: true,
+
+    // 统一按语言主标签加载，避免 zh-CN / en-US 额外请求不存在的目录
+    load: 'languageOnly',
+    nonExplicitSupportedLngs: true,
+
     // 非生产环境显示调试信息
     debug: import.meta.env.DEV,
-    
+
     // 命名空间
     ns: ['common'],
     defaultNS: 'common',
-    
+
     // 语言检测配置
     detection: detectionOptions,
-    
+
     // 后端加载配置
     backend: backendOptions,
-    
+
     // 插值配置
     interpolation: {
       // React 已经默认转义了，不需要额外转义
@@ -135,6 +153,9 @@ i18n
     react: {
       // 使用 Suspense 进行异步加载
       useSuspense: true,
+
+      // 允许 t('home.xxx') 这类键在多 namespace 场景下回退查询
+      nsMode: 'fallback',
       
       // 绑定 i18n 实例到组件
       bindI18n: 'languageChanged',

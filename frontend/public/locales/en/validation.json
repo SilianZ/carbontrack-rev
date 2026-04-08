@@ -1,0 +1,16 @@
+{
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email address",
+    "password": "Password must be at least 8 characters",
+    "confirmPassword": "Passwords do not match",
+    "minLength": "Minimum {{min}} characters required",
+    "maxLength": "Maximum {{max}} characters allowed",
+    "min": "Minimum value is {{min}}",
+    "max": "Maximum value is {{max}}",
+    "numeric": "Please enter a number",
+    "positive": "Please enter a positive number",
+    "integer": "Please enter an integer",
+    "passwordMismatch": "Passwords do not match"
+  }
+}

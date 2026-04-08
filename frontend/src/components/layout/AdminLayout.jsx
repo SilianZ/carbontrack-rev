@@ -60,7 +60,7 @@ const NAV_LINKS = [
 ];
 
 export default function AdminLayout() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'footer', 'nav']);
   const navigate = useNavigate();
   const location = useLocation();
 

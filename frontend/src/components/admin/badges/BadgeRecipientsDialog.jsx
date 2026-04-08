@@ -24,7 +24,7 @@ const STATUS_OPTIONS = [
 ];
 
 function BadgeRecipientsDialog({ open, onOpenChange, badge }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common', 'pagination']);
   const [filters, setFilters] = useState({ search: '', status: 'awarded', page: 1 });
 
   useEffect(() => {

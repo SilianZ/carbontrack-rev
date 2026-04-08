@@ -1,0 +1,58 @@
+{
+  "settings": {
+    "notifications": {
+      "title": "邮件通知偏好",
+      "subtitle": "选择需要接收的邮件通知，修改后立即生效。",
+      "emailHeading": "邮件提醒",
+      "emailDescription": "开启或关闭需要接收的邮件类型。站内信和安全提醒将始终发送。",
+      "locked": "该通知为必选项，无法关闭。",
+      "reset": "重置",
+      "save": "保存设置",
+      "saving": "保存中...",
+      "saveSuccess": "通知偏好已更新。",
+      "saveFailed": "通知偏好更新失败。",
+      "categories": {
+        "verification": {
+          "label": "账号验证",
+          "description": "用于验证邮箱的验证码和链接。"
+        },
+        "security": {
+          "label": "安全提醒",
+          "description": "密码重置等重要安全通知。"
+        },
+        "system": {
+          "label": "系统提示与引导",
+          "description": "欢迎信息以及重要账号提示。"
+        },
+        "transaction": {
+          "label": "兑换相关通知",
+          "description": "积分兑换与领取状态提醒。"
+        },
+        "activity": {
+          "label": "活动审核通知",
+          "description": "碳减排行为审核结果与反馈。"
+        },
+        "announcement": {
+          "label": "平台公告",
+          "description": "平台公告、维护通知与简报。"
+        },
+        "message": {
+          "label": "站内信提醒",
+          "description": "来自其他用户的站内信邮件副本（始终开启）。"
+        },
+        "support": {
+          "label": "工单更新",
+          "description": "客服修改工单状态、优先级或处理分配时的邮件通知。"
+        }
+      },
+      "testEmail": {
+        "title": "发送测试邮件",
+        "description": "我们将向您的邮箱发送一封示例通知，以确认可达性和垃圾邮件规则。",
+        "button": "发送测试邮件",
+        "sending": "正在发送测试邮件…",
+        "success": "测试通知邮件已发送，请检查收件箱。",
+        "error": "测试邮件发送失败，请稍后再试。"
+      }
+    }
+  }
+}

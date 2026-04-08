@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 
 export default function HowItWorksSection(){
-  const { t } = useTranslation();
+  const { t } = useTranslation(['home']);
   return (
     <section className="bg-muted/35 py-20 px-4">
       <div className="max-w-7xl mx-auto">

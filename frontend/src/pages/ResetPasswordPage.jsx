@@ -21,7 +21,7 @@ const TogglePasswordButton = ({ visible, onClick }) => (
 );
 
 export default function ResetPasswordPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'auth', 'errors']);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';

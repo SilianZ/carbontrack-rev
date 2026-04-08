@@ -76,7 +76,7 @@ const safeDivide = (numerator, denominator) => {
 };
 
 export default function AdminDashboardPage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['activities', 'admin', 'common', 'dashboard', 'date', 'errors', 'messages', 'units']);
   const isEnglish = (currentLanguage || '').toLowerCase().startsWith('en');
   const navigate = useNavigate();
   const [autoRefresh, setAutoRefresh] = useState(true);

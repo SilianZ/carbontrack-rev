@@ -1,0 +1,30 @@
+{
+  "footer": {
+    "description": "CarbonTrack 致力于通过可行的环保活动，帮助个人和社区追踪并减少碳足迹。",
+    "address": "美国宾夕法尼亚州匹兹堡市福布斯大道5000号",
+    "platform": "平台",
+    "support": "支持",
+    "legal": "法律",
+    "about": "关于我们",
+    "howItWorks": "如何使用",
+    "features": "功能特点",
+    "pricing": "价格方案",
+    "help": "帮助中心",
+    "faq": "常见问题",
+    "contact": "联系我们",
+    "feedback": "意见反馈",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "cookies": "Cookie 政策",
+    "security": "安全中心",
+    "followUs": "关注我们",
+    "users": "活跃用户",
+    "activities": "累计记录",
+    "carbonSaved": "累计减排",
+    "allRightsReserved": "保留所有权利。",
+    "poweredBy": "Powered by",
+    "version": "版本",
+    "versionLabel": "版本 {{version}}",
+    "buildLabel": "构建 {{id}}"
+  }
+}

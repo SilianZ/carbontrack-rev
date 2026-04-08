@@ -1,0 +1,10 @@
+{
+  "notFoundPage": {
+    "code": "404",
+    "emoji": "🤔",
+    "message": "很抱歉！出错了，但我们做对了。",
+    "submessage": "请尝试刷新或稍后返回",
+    "refresh": "刷新",
+    "home": "返回首页"
+  }
+}

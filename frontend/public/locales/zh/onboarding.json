@@ -1,0 +1,15 @@
+{
+  "onboarding": {
+    "title": "完善学校与班级信息",
+    "subtitle": "您可先跳过，之后也能在个人资料中补充",
+    "schoolPlaceholder": "输入关键字搜索，或直接输入新学校名称",
+    "noSchoolMatches": "无匹配学校，可直接输入名称创建",
+    "classLabel": "班级（可选）",
+    "classPlaceholder": "输入关键字搜索或新建",
+    "noClassMatches": "无匹配班级，可直接输入名称创建",
+    "leastOneField": "请至少选择学校或填写学校/班级信息",
+    "saved": "信息已保存",
+    "saveAndContinue": "保存并继续",
+    "skipForNow": "暂时跳过"
+  }
+}

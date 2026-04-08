@@ -1,5 +1,4 @@
 import { useQuery } from 'react-query';
-import { messageAPI } from '../lib/api';
 import { checkAuthStatus } from '../lib/auth';
 
 /**
@@ -10,20 +9,22 @@ import { checkAuthStatus } from '../lib/auth';
  */
 export function useUnreadMessagesCount(options = {}) {
   const { isAuthenticated } = checkAuthStatus();
+  const { enabled = true, ...queryOptions } = options;
 
   const query = useQuery(
     ['unreadCount'],
     async () => {
+      const { messageAPI } = await import('../lib/api');
       const res = await messageAPI.getUnreadCount();
       // 后端响应结构: { success: true, data: { total_unread: number, ... } }
       return res?.data?.data?.total_unread ?? 0;
     },
     {
-      enabled: !!isAuthenticated,
+      enabled: !!isAuthenticated && enabled,
       staleTime: 30 * 1000,
       refetchInterval: 60 * 1000,
       refetchOnWindowFocus: true,
-      ...options,
+      ...queryOptions,
     }
   );
 

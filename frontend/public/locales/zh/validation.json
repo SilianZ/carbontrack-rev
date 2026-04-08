@@ -1,0 +1,16 @@
+{
+  "validation": {
+    "required": "此字段为必填项",
+    "email": "请输入有效的邮箱地址",
+    "password": "密码至少需要8个字符",
+    "confirmPassword": "两次输入的密码不一致",
+    "minLength": "至少需要{{min}}个字符",
+    "maxLength": "最多{{max}}个字符",
+    "min": "最小值为{{min}}",
+    "max": "最大值为{{max}}",
+    "numeric": "请输入数字",
+    "positive": "请输入正数",
+    "integer": "请输入整数",
+    "passwordMismatch": "两次输入的密码不一致"
+  }
+}

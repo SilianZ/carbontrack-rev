@@ -164,7 +164,7 @@ function PreviewPanel({ ticket, t, locale }) {
 }
 
 export default function SupportTicketsPage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['common', 'date', 'support']);
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
   const [status, setStatus] = useState('all');
   const [search, setSearch] = useState('');

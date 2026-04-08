@@ -1,0 +1,232 @@
+{
+  "adminSupport": {
+    "eyebrow": "Support automation",
+    "title": "Support operations",
+    "tabs": {
+      "team": "Team",
+      "tickets": "Ticket audit",
+      "settings": "Settings",
+      "rules": "Rules",
+      "tags": "Tags",
+      "reports": "Reports",
+      "routing": "Routing"
+    },
+    "summary": {
+      "total": "Total tickets",
+      "totalHint": "Support ticket volume for the selected period.",
+      "autoAssigned": "Auto-assigned",
+      "autoAssignedHint": "Tickets assigned automatically by rules.",
+      "unassigned": "Unassigned",
+      "unassignedHint": "Tickets still waiting for manual ownership.",
+      "avgResolution": "Avg resolution",
+      "avgResolutionHint": "Average hours to resolution for closed work.",
+      "smartAssigned": "Smart assigned",
+      "smartAssignedHint": "Tickets assigned by the unified routing engine.",
+      "slaBreaches": "SLA breaches",
+      "slaBreachesHint": "Tickets currently breached or escalated."
+    },
+    "tickets": {
+      "listTitle": "Ticket audit queue",
+      "listSubtitle": "Inspect messages, SLA, and smart-routing evidence per ticket.",
+      "detailTitle": "Ticket detail and audit",
+      "detailSubtitle": "Review context, assignment outcome, and per-run routing scores in one place.",
+      "empty": "No tickets available right now.",
+      "emptyDetail": "Select a ticket on the left to load the audit view.",
+      "identityTitle": "Identity and ownership",
+      "messagesTitle": "Message and attachment evidence",
+      "slaTitle": "SLA and assignment",
+      "routingSummaryTitle": "Latest routing summary",
+      "routingRunsTitle": "Routing history",
+      "noRoutingRuns": "This ticket has no smart-routing history yet.",
+      "usedAi": "AI triage",
+      "fallbackOnly": "Deterministic fallback",
+      "routingWinner": "Winning assignee",
+      "winnerScore": "Score {{value}}",
+      "routingDecision": "Triage decision",
+      "candidateScores": "Candidate scores",
+      "topFactors": "Top factors",
+      "routingFallbackLabel": "Fallback reason",
+      "openInPortal": "Open in support portal"
+    },
+    "actions": {
+      "saveRule": "Save rule",
+      "saveTag": "Save tag",
+      "saveProfile": "Save profile",
+      "saveRoutingSettings": "Save routing settings"
+    },
+    "common": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "noDescription": "No description"
+    },
+    "filters": {
+      "anyCategory": "Any category",
+      "anyPriority": "Any priority"
+    },
+    "messages": {
+      "loadFailed": "Failed to load support operations data.",
+      "ruleSaved": "Rule saved",
+      "tagSaved": "Tag saved",
+      "routingSettingsSaved": "Routing settings saved",
+      "profileSaved": "Routing profile saved"
+    },
+    "roles": {
+      "user": "User",
+      "support": "Support",
+      "admin": "Admin"
+    },
+    "team": {
+      "listTitle": "Assignees",
+      "listSubtitle": "Review each support member's active load and switch into their detailed profile.",
+      "detailTitle": "Assignee detail",
+      "detailSubtitle": "Shows profile data, current workload, and recently assigned tickets.",
+      "empty": "Select an assignee.",
+      "contactTitle": "Contact",
+      "profileTitle": "Profile",
+      "notesTitle": "Admin notes",
+      "noNotes": "No admin notes yet.",
+      "recentTicketsTitle": "Recent tickets",
+      "recentTicketsSubtitle": "The latest tickets assigned to this person for quick context.",
+      "noRecentTickets": "No recent tickets.",
+      "metrics": {
+        "assigned": "Assigned",
+        "notStarted": "Not started",
+        "inProgress": "In progress"
+      },
+      "fields": {
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "school": "School",
+        "region": "Region",
+        "location": "Location",
+        "group": "Group",
+        "lastLogin": "Last login",
+        "createdAt": "Created"
+      },
+      "routingProfileTitle": "Routing profile",
+      "routingFields": {
+        "level": "Agent level",
+        "maxActiveTickets": "Max active tickets",
+        "skills": "Skills",
+        "languages": "Languages",
+        "status": "Routing status",
+        "flatBoost": "Flat boost",
+        "autoAssignable": "Auto assignable"
+      },
+      "routingStatus": {
+        "active": "Active",
+        "backup": "Backup",
+        "offline": "Offline"
+      }
+    },
+    "rules": {
+      "listTitle": "Rule list",
+      "listSubtitle": "Configure match conditions, automatic assignment, and tag writing.",
+      "newRule": "New rule",
+      "editorTitle": "Rule editor",
+      "editorSubtitle": "Saved rules participate in new ticket routing.",
+      "noAssignee": "Do not auto-assign",
+      "noTags": "No tags available",
+      "fields": {
+        "name": "Name",
+        "sortOrder": "Sort order",
+        "description": "Description",
+        "category": "Category",
+        "priority": "Priority",
+        "timeStart": "Start time",
+        "timeEnd": "End time",
+        "timezone": "Timezone",
+        "weekdays": "Weekdays",
+        "assignTo": "Assign to",
+        "tags": "Tags",
+        "active": "Rule active",
+        "stopProcessing": "Stop on match",
+        "scoreBoost": "Score boost",
+        "requiredAgentLevel": "Required agent level",
+        "skillHints": "Skill hints"
+      },
+      "scoreBoostBadge": "Boost {{value}}",
+      "noRequiredLevel": "No minimum level",
+      "requiredLevelLabel": "Level {{level}}+"
+    },
+    "tags": {
+      "listTitle": "Tag list",
+      "listSubtitle": "Tags can be applied by rules and are shown inside the support portal.",
+      "newTag": "New tag",
+      "editorTitle": "Tag editor",
+      "editorSubtitle": "Define a shared name, color, and description.",
+      "fields": {
+        "name": "Name",
+        "slug": "Slug",
+        "color": "Color",
+        "description": "Description",
+        "active": "Tag active"
+      }
+    },
+    "reports": {
+      "title": "Support reports",
+      "subtitle": "Review distribution by status, category, priority, assignee, and rule hits.",
+      "days": "Last {{count}} days",
+      "byStatus": "By status",
+      "byStatusDescription": "Ticket count by status for the selected period.",
+      "byCategory": "By category",
+      "byCategoryDescription": "Ticket distribution by category for the selected period.",
+      "byPriority": "By priority",
+      "byPriorityDescription": "Ticket distribution by priority for the selected period.",
+      "byAssignee": "By assignee",
+      "byAssigneeDescription": "Ticket ownership distribution for the selected period.",
+      "byTag": "By tag",
+      "byTagDescription": "Rule and manual tag hit counts.",
+      "ruleHits": "Rule hits",
+      "ruleHitsDescription": "How often each routing rule matched in the selected period.",
+      "timelineTitle": "Timeline",
+      "timelineSubtitle": "Daily incoming ticket volume.",
+      "byAgentLevel": "By agent level",
+      "byAgentLevelDescription": "Configured routing levels across support assignees.",
+      "agentLevelLabel": "Level {{level}}",
+      "routingOutcomes": "Routing outcomes",
+      "routingOutcomesDescription": "Routing runs grouped by trigger and AI usage."
+    },
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "colors": {
+      "emerald": "Emerald",
+      "sky": "Sky",
+      "amber": "Amber",
+      "rose": "Rose",
+      "violet": "Violet",
+      "slate": "Slate"
+    },
+    "routing": {
+      "title": "Smart routing settings",
+      "subtitle": "Configure AI triage, SLA defaults, and scoring weights for the unified routing engine.",
+      "fields": {
+        "aiTimeout": "AI timeout (ms)",
+        "dueSoonMinutes": "Due soon threshold (minutes)",
+        "aiEnabled": "Enable AI triage",
+        "defaultFirstResponse": "Default first response SLA (minutes)",
+        "defaultResolution": "Default resolution SLA (minutes)"
+      },
+      "weights": {
+        "group_weight": "Group weight",
+        "priority_weight": "Priority weight",
+        "severity_weight": "Severity weight",
+        "escalation_weight": "Escalation weight",
+        "rule_weight": "Rule weight",
+        "skill_weight": "Skill weight",
+        "level_weight": "Level weight",
+        "feedback_weight": "Feedback weight",
+        "overdue_weight": "Overdue weight",
+        "load_penalty_weight": "Load penalty weight"
+      }
+    }
+  }
+}

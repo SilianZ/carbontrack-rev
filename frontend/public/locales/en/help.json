@@ -1,0 +1,28 @@
+{
+  "help": {
+    "hero": {
+      "eyebrow": "Help center",
+      "title": "Open a ticket and keep the thread in one place.",
+      "subtitle": "Use this page for website bugs, account issues, feature requests, and business follow-up.",
+      "primaryAction": "View my tickets",
+      "loginAction": "Log in to open a ticket",
+      "secondaryAction": "View contact info"
+    },
+    "panel": {
+      "title": "Ticket handling",
+      "body": "Once submitted, replies, attachments, and status changes stay together in a single thread."
+    },
+    "highlights": {
+      "threadTitle": "One thread",
+      "threadDescription": "Follow-up details, support replies, and status updates stay in one place.",
+      "verificationTitle": "Protected submission",
+      "verificationDescription": "Submissions and replies are verified, and attachments are ownership-checked."
+    },
+    "categories": {
+      "title": "Common request types",
+      "subtitle": "Pick the closest category first, then add details and attachments."
+    },
+    "loginNotice": "Sign in to create tickets, upload attachments, and keep track of replies.",
+    "recentGuest": "Sign in to view recent tickets and status updates."
+  }
+}

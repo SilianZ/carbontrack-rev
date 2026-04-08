@@ -78,7 +78,7 @@ const resolveAvatarImage = (avatar = {}) => resolveR2ImageSource({
 
 
 export function AvatarManagement() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common']);
   const [avatars, setAvatars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

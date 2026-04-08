@@ -137,7 +137,7 @@ function normalizeUsersResponse(response) {
 }
 
 export function UserManagement() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['admin', 'common', 'errors', 'pagination', 'securityActivity']);
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [searchParams, setSearchParams] = useSearchParams();

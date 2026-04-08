@@ -201,7 +201,7 @@ function StatTile({ label, value }) {
 }
 
 export default function ExchangeHistoryPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'errors', 'images', 'pagination', 'store']);
   const [exchanges, setExchanges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

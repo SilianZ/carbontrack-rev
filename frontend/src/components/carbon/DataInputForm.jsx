@@ -24,7 +24,7 @@ export default function DataInputForm({
   initialData,
   checkinDate
 }) {
-  const { t, currentLanguage, tFileSize } = useTranslation();
+  const { t, currentLanguage, tFileSize } = useTranslation(['activities', 'common', 'date', 'errors', 'units', 'validation']);
   // 选中的本地文件（未立即上传）
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadError, setUploadError] = useState(null);

@@ -1,0 +1,311 @@
+{
+  "support": {
+    "hero": {
+      "eyebrow": "Contact CarbonTrack",
+      "title": "Choose the route that matches the job.",
+      "subtitle": "Use public channels for partnerships and general contact. Once signed in, the same page reveals a ticket lane with attachments, verification, and follow-up history.",
+      "primaryAction": "Email support",
+      "secondaryAction": "Partnerships",
+      "tertiaryAction": "My tickets",
+      "panelTitle": "Support rhythm",
+      "panelValue": "One inbox, two paths",
+      "panelDescription": "Direct contact stays public. Ticket handling appears only for signed-in users and keeps every reply in one thread.",
+      "responseTitle": "Response handling",
+      "responseDescription": "Tickets can move through open, in progress, waiting for user, resolved, and closed states.",
+      "verificationTitle": "Verified submissions",
+      "verificationDescription": "Every user submission and reply is checked through Turnstile and attachment ownership validation."
+    },
+    "contactMethods": {
+      "eyebrow": "Direct channels",
+      "title": "Start with the fastest route.",
+      "emailTitle": "Email",
+      "emailDescription": "Best for detailed issues, file-based reports, and async coordination.",
+      "phoneTitle": "Phone",
+      "phoneDescription": "Best for urgent follow-up during active support hours.",
+      "addressTitle": "Address",
+      "addressDescription": "CarbonTrack core team operations and collaboration base."
+    },
+    "scenarios": {
+      "eyebrow": "Typical scenarios",
+      "website_bug": {
+        "title": "Website bug",
+        "description": "Broken flows, upload failures, access errors, and visual regressions."
+      },
+      "business_issue": {
+        "title": "Business issue",
+        "description": "Partnership coordination, rollout logistics, and operational follow-up."
+      },
+      "feature_request": {
+        "title": "Feature request",
+        "description": "Ideas that improve daily tracking, review, or operational workflows."
+      },
+      "account": {
+        "title": "Account issue",
+        "description": "Sign-in, verification, profile, permission, or account state questions."
+      }
+    },
+    "statuses": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "waiting_user": "Waiting for user",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "priorities": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "categories": {
+      "website_bug": "Website bug",
+      "business_issue": "Business issue",
+      "feature_request": "Feature request",
+      "account": "Account",
+      "other": "Other"
+    },
+    "senderRoles": {
+      "user": "User",
+      "support": "Support",
+      "admin": "Admin"
+    },
+    "transferStatuses": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "slaStatuses": {
+      "pending": "Pending",
+      "due_soon": "Due soon",
+      "breached": "Breached",
+      "escalated": "Escalated",
+      "resolved": "Resolved"
+    },
+    "filters": {
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "moreWays": "More ways to reach us",
+    "feedback": {
+      "title": "Open a ticket",
+      "subtitle": "Create it once, then continue from the ticket page.",
+      "submit": "Submit ticket",
+      "uploaded": "Attachment uploaded",
+      "created": "Ticket created",
+      "turnstileRequired": "Complete the verification first.",
+      "fields": {
+        "subject": "Subject",
+        "category": "Category",
+        "priority": "Priority",
+        "content": "Details",
+        "attachments": "Attachments"
+      },
+      "placeholders": {
+        "subject": "Short summary of the issue",
+        "content": "Describe what happened, what you expected, and what support should verify."
+      }
+    },
+    "attachments": {
+      "uploadRequired": "If you selected files, upload them before submitting the ticket or reply.",
+      "uploadFailedBlocking": "Some attachments failed to upload. Retry or remove them before submitting."
+    },
+    "recent": {
+      "title": "Recent tickets",
+      "subtitle": "Resume the thread or inspect the latest reply.",
+      "viewAll": "View all",
+      "empty": "You do not have any tickets yet. New submissions will appear here."
+    },
+    "userList": {
+      "eyebrow": "My tickets",
+      "title": "Support threads tied to your account",
+      "subtitle": "Open a request from help, then continue the conversation here.",
+      "newTicket": "New ticket",
+      "queueTitle": "Your queue",
+      "queueSubtitle": "Sorted by the latest activity time.",
+      "emptyTitle": "No tickets found",
+      "emptyDescription": "Use the help page to submit the first request.",
+      "emptyAction": "Go to help",
+      "replyCount": "{{count}} messages"
+    },
+    "thread": {
+      "backToTickets": "Back to tickets",
+      "summaryTitle": "Ticket summary",
+      "summarySubtitle": "Scan status and last handling time quickly.",
+      "createdAt": "Created",
+      "lastReply": "Last reply",
+      "messageCount": "Messages",
+      "feedbackTitle": "Service feedback",
+      "feedbackSubtitle": "Once the ticket is finished, rate each handling agent and leave a note.",
+      "feedbackEmpty": "No handling agents are available for feedback on this ticket.",
+      "feedbackHint": "You can submit now and still edit the feedback later.",
+      "feedbackUpdateHint": "Feedback is already saved. You can update it again.",
+      "feedbackCommentLabel": "Comment",
+      "feedbackCommentPlaceholder": "Share response quality, handling speed, or suggestions.",
+      "feedbackSubmit": "Submit feedback",
+      "feedbackUpdate": "Update feedback",
+      "feedbackSaved": "Feedback saved",
+      "feedbackSavedAt": "Saved at {{date}}",
+      "feedbackRatingRequired": "Select a rating first.",
+      "replyTitle": "Add reply",
+      "replySubtitle": "New replies notify the support mailbox.",
+      "replyPlaceholder": "Share the next detail, progress update, or requested evidence.",
+      "replySubmit": "Send reply",
+      "replyCreated": "Reply sent",
+      "closedHint": "Closed tickets no longer accept new user replies.",
+      "notFound": "Ticket not found.",
+      "unknownSender": "Unknown sender"
+    },
+    "portal": {
+      "title": "Support workbench",
+      "subtitle": "Work the live queue, answer conversations, and keep SLA-critical tickets in view.",
+      "nav": {
+        "queue": "Queue",
+        "queueDescription": "Search, filter, and inspect the active inbox.",
+        "workbench": "Workbench",
+        "workbenchDescription": "Start from what needs attention now."
+      },
+      "queueEyebrow": "Queue view",
+      "queueTitle": "Work the inbox with clear ownership",
+      "queueSubtitle": "Only tickets currently assigned to you are shown here; search by subject or requester and jump straight into the thread.",
+      "queueListTitle": "Ticket queue",
+      "queueListSubtitle": "Ordered by the latest activity from the API.",
+      "searchPlaceholder": "Search subject, username, email",
+      "assigneeFilter": "Filter by assignee",
+      "assigneeFilterAll": "All assignees",
+      "assigneeFilterUnassigned": "Unassigned only",
+      "emptyTitle": "No matching tickets",
+      "emptyDescription": "Adjust filters or search terms.",
+      "unknownRequester": "Unknown requester",
+      "unassigned": "Unassigned",
+      "messageCount": "{{count}} messages",
+      "backToQueue": "Back to queue",
+      "threadSubtitle": "Reply to the requester, update handling state, and preserve an auditable record.",
+      "requesterTitle": "Requester",
+      "requesterSubtitle": "Identity snapshot stored on the ticket.",
+      "requesterName": "Name",
+      "requesterEmail": "Email",
+      "createdAt": "Created",
+      "tagsTitle": "Tag results",
+      "tagsSubtitle": "Show rule hits and tag sources so support can verify the classification without switching back.",
+      "noTags": "No tags matched this ticket yet.",
+      "tagSource": {
+        "rule": "Rule hit",
+        "manual": "Manual tag",
+        "system": "System tag"
+      },
+      "ruleLabel": "Rule #{{id}}",
+      "workflowTitle": "Workflow",
+      "workflowSubtitle": "Update status, priority, and assignee while keeping current workload visible.",
+      "assignedTo": "Assignee",
+      "assignedToPlaceholder": "Leave blank to clear assignment",
+      "saveWorkflow": "Save workflow",
+      "workload": {
+        "title": "Support workload",
+        "empty": "No assignees available yet.",
+        "assigned": "Assigned",
+        "notStarted": "Not started",
+        "inProgress": "In progress"
+      },
+      "roles": {
+        "user": "User",
+        "support": "Support",
+        "admin": "Admin"
+      },
+      "transfer": {
+        "title": "Request transfer",
+        "subtitle": "The current assignee can request reassignment and the target assignee must accept or reject it.",
+        "target": "Target assignee",
+        "targetPlaceholder": "Select assignee",
+        "targetRequired": "Select a target assignee first.",
+        "reason": "Reason",
+        "reasonPlaceholder": "Explain why the ticket should move, such as a bad rule match, domain mismatch, or current overload.",
+        "submit": "Send transfer request",
+        "requestCreated": "Transfer request submitted",
+        "reviewSaved": "Transfer review saved",
+        "historyTitle": "Transfer history",
+        "historySubtitle": "Review reassignment requests and see who accepted, rejected, or cancelled them.",
+        "empty": "No transfer requests yet.",
+        "approve": "Accept transfer",
+        "reject": "Reject transfer",
+        "pendingHint": "{{count}} transfer request(s) are still pending.",
+        "requestedBy": "Requested by: {{name}}",
+        "requestLine": "{{from}} -> {{to}}",
+        "reviewNoteLabel": "Review note",
+        "reviewPlaceholder": "Optional review note.",
+        "cancel": "Cancel request"
+      },
+      "feedbackTitle": "User feedback",
+      "feedbackSubtitle": "After a ticket is finished, the requester can rate each handling support agent and leave a comment.",
+      "feedbackEmpty": "No feedback has been submitted yet.",
+      "feedbackRatedBy": "Rated by: {{name}}",
+      "feedbackNoComment": "The user left no written comment.",
+      "replyTitle": "Reply to requester",
+      "replySubtitle": "Support replies notify the user by message and email.",
+      "replyPlaceholder": "Write the next instruction, resolution step, or requested clarification.",
+      "replySubmit": "Send support reply",
+      "ticketUpdated": "Ticket updated",
+      "replyCreated": "Support reply sent",
+      "currentView": "Current view",
+      "badge": "Support portal",
+      "tipTitle": "Operator note",
+      "tip": "Status, assignment, and replies are reflected on the user side immediately.",
+      "stats": {
+        "total": "Visible now",
+        "open": "Open",
+        "urgent": "Urgent"
+      },
+      "slaBadge": "SLA: {{status}}",
+      "firstResponseDue": "First response due {{value}}",
+      "resolutionDue": "Resolution due {{value}}",
+      "assignmentSource": "Source: {{value}}",
+      "routingFallback": "Fallback: {{value}}",
+      "firstResponseDueLabel": "First response due",
+      "resolutionDueLabel": "Resolution due",
+      "assignmentSourceLabel": "Assignment source",
+      "assignmentSourceHelp": "This shows how the current assignee got the ticket. Common values include smart (automatically assigned by the routing score) and manual (assigned by an administrator); -- means there is no confirmed assignee yet.",
+      "escalationLevelLabel": "Escalation level",
+      "escalationLevelHelp": "This shows how many times the system has escalated the ticket because of SLA risk or a missed deadline. Higher numbers mean the ticket has already been reprioritized or rerouted multiple times.",
+      "routingLastRunLabel": "Last routing run",
+      "routingFallbackLabel": "Routing fallback",
+      "assignmentLockedHint": "This ticket is admin-locked. Smart rerouting will not override the current assignee.",
+      "workbenchEyebrow": "Shift handoff",
+      "workbenchTitle": "Start from the tickets that need action now",
+      "workbenchSubtitle": "Prioritize urgent tickets, first-response risk, and the work already assigned to you without digging through reports first.",
+      "goToQueue": "Open full queue",
+      "openTopPriority": "Open top priority ticket",
+      "transferWorkbench": {
+        "eyebrow": "Pending your decision",
+        "title": "Transfer requests",
+        "subtitle": "You have {{count}} transfer request(s) waiting for review. Confirm them early so tickets do not stall.",
+        "countBadge": "{{count}} awaiting review",
+        "requestedBy": "Transfer requested by {{name}}",
+        "reviewAction": "Review request",
+        "noReason": "No transfer reason was provided."
+      },
+      "focusLaneTitle": "Priority focus",
+      "focusLaneSubtitle": "Urgent or SLA-risk tickets that should be handled first.",
+      "firstResponseLaneTitle": "Waiting for first response",
+      "firstResponseLaneSubtitle": "Tickets still missing the first support reply.",
+      "myQueueLaneTitle": "My active queue",
+      "myQueueLaneSubtitle": "Tickets currently assigned to you and still in motion.",
+      "activeAssigneesTitle": "Active assignees",
+      "activeAssigneesSubtitle": "Quick glance at who can still take more work.",
+      "availableCapacity": "{{count}} slots free",
+      "openTicket": "Open thread",
+      "noPreview": "No message preview yet.",
+      "previewEmptyTitle": "Choose a ticket",
+      "previewEmptySubtitle": "Select an item from the queue to inspect its requester, SLA, and assignment before opening the full thread.",
+      "previewRequester": "Requester",
+      "previewAssignee": "Assignee",
+      "ticketMetaTitle": "Ticket overview",
+      "ticketMetaSubtitle": "Keep identity, tags, SLA, and current owner visible while you work the thread.",
+      "conversationTitle": "Conversation",
+      "conversationSubtitle": "Read the thread first, then answer from the same workspace.",
+      "workflowTab": "Workflow",
+      "transferTab": "Transfer",
+      "feedbackTab": "Feedback",
+      "emptyLane": "Nothing waiting here right now."
+    }
+  }
+}

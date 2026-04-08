@@ -1,0 +1,45 @@
+{
+  "achievements": {
+    "title": "我的成就",
+    "subtitle": "查看您已经解锁的徽章和解锁进度。",
+    "refresh": "刷新",
+    "loadError": "成就数据加载失败",
+    "summary": {
+      "totalBadges": "徽章总数",
+      "totalBadgesHint": "平台目前提供的全部成就徽章数量。",
+      "unlocked": "已解锁",
+      "unlockedHint": "您已经达成的徽章数量。",
+      "pointsFromBadges": "共获得 {{points}} 积分",
+      "locked": "待解锁",
+      "lockedHint": "继续完成环保行动即可解锁更多徽章。",
+      "completion": "完成度",
+      "completionHint": "当前徽章解锁进度百分比。"
+    },
+    "labels": {
+      "unnamedBadge": "未命名徽章"
+    },
+    "unlocked": {
+      "title": "已获得徽章",
+      "description": "恭喜，您已经解锁了以下成就徽章。",
+      "empty": "暂时还没有解锁任何徽章，快去参与环保行动吧！",
+      "awardedAt": "解锁时间"
+    },
+    "locked": {
+      "title": "待解锁徽章",
+      "description": "完成更多环保行动来解锁这些徽章。",
+      "empty": "太棒了，您已经解锁了所有徽章！",
+      "requirements": "解锁条件"
+    },
+    "timeline": {
+      "title": "成就时间线",
+      "description": "回顾每一次重要的成就时刻。",
+      "empty": "暂时还没有成就记录，先去完成一些环保行动吧。"
+    },
+    "monthly": {
+      "description": "本月新增的徽章与积分奖励。"
+    },
+    "leaderboard": {
+      "description": "看看社区中的优秀环保达人。"
+    }
+  }
+}

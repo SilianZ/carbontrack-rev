@@ -118,7 +118,7 @@ function InsightCard({ title, value, subtitle, trend }) {
 }
 
 export default function AdminLlmUsagePage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['admin', 'common', 'date', 'errors', 'pagination']);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(20);

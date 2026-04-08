@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '../ui/Alert';
 import { carbonAPI } from '../../lib/api';
 
 export function SmartActivityInput({ onSuggestion }) {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['activities', 'common', 'errors']);
     const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');

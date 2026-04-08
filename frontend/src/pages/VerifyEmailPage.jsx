@@ -23,7 +23,7 @@ const getSessionValue = (key) => {
 };
 
 const VerifyEmailPage = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'auth', 'errors']);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tokenParam = searchParams.get('token');

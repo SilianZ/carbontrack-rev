@@ -1,0 +1,10 @@
+{
+  "routeGuard": {
+    "accessDeniedTitle": "Access denied",
+    "permissionDeniedTitle": "Permission required",
+    "adminRequired": "You do not have permission to access this page.",
+    "supportRequired": "You do not have permission to access the support portal.",
+    "permissionRequired": "You do not have permission to perform this action.",
+    "goBack": "Go back"
+  }
+}

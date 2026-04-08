@@ -328,7 +328,7 @@ function ReceiptFallback({ summary, onRestart, onGoDashboard }) {
 }
 
 export function InteractiveReceipt({ receipt, onRestart, onGoDashboard }) {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['activities', 'date', 'images', 'units']);
   const stageRef = useRef(null);
   const motionCardRef = useRef(null);
   const [webglUnavailable, setWebglUnavailable] = useState(false);
@@ -438,7 +438,7 @@ export function InteractiveReceipt({ receipt, onRestart, onGoDashboard }) {
         { label: isZh ? '活动日期' : 'Activity date', value: activityDate },
       ],
     };
-  }, [currentLanguage, isZh, locale, receipt, t]);
+  }, [isZh, locale, receipt, t]);
 
   useEffect(() => {
     const motionCard = motionCardRef.current;

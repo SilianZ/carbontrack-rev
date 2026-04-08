@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import PropTypes from 'prop-types';
 
 export function MessageDetailModal({ message, isOpen, onClose, onMarkRead }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'messages']);
   const sanitizedContent = useMemo(() => sanitizeMessageHtml(message?.content), [message?.content]);
   const isAnnouncement = useMemo(() => isAnnouncementMessage(message), [message]);
   const announcementContentFormat = useMemo(

@@ -1,0 +1,25 @@
+{
+  "jsonViewer": {
+    "root": "root",
+    "searchPlaceholder": "Search keys or values",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "copyJson": "Copy JSON",
+    "copyPath": "Copy path",
+    "copyValue": "Copy value",
+    "expandNode": "Expand node",
+    "collapseNode": "Collapse node",
+    "copied": "Copied",
+    "noData": "No data",
+    "typeLabels": {
+      "object": "Object",
+      "array": "Array",
+      "string": "String",
+      "number": "Number",
+      "boolean": "Boolean",
+      "null": "Null",
+      "undefined": "Undefined",
+      "unknown": "Unknown"
+    }
+  }
+}

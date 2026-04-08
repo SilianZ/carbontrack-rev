@@ -114,7 +114,7 @@ function FeedbackStars({ value }) {
 
 export default function TicketDetailPage() {
   const { ticketId } = useParams();
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['common', 'date', 'errors', 'support']);
   const queryClient = useQueryClient();
   const turnstileRef = useRef(null);
   const dirtyFeedbackDraftIdsRef = useRef(new Set());

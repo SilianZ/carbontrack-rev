@@ -8,7 +8,7 @@ import { Badge } from '../ui/badge';
 import { isAnnouncementMessage } from '../../lib/messageAnnouncement';
 
 export function MessageList({ messages, onRowClick, onMarkRead, onDelete }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'messages']);
 
   const getStatusIcon = (is_read) => {
     if (is_read) {

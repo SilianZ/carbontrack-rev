@@ -179,7 +179,7 @@ function sortStatusCodes(codes) {
   });
 }
 export default function AdminDiagnosticsPage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['admin', 'errors', 'messages']);
   const [searchTerm, setSearchTerm] = useState('');
   const [methodFilter, setMethodFilter] = useState('all');
   const [tagFilter, setTagFilter] = useState('all');

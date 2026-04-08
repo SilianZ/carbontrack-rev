@@ -1,0 +1,311 @@
+{
+  "support": {
+    "hero": {
+      "eyebrow": "联系 CarbonTrack",
+      "title": "按事情类型，选择最合适的联系路径。",
+      "subtitle": "合作沟通和一般联系可以直接走公开渠道。登录后，同一页面会额外开放带附件、验证和跟进记录的工单入口。",
+      "primaryAction": "发送支持邮件",
+      "secondaryAction": "合作洽谈",
+      "tertiaryAction": "我的工单",
+      "panelTitle": "支持节奏",
+      "panelValue": "一个入口，两种处理路径",
+      "panelDescription": "公开联系方式保持对外可见，工单处理只对登录用户开放，并把后续回复集中到同一条线程。",
+      "responseTitle": "处理流转",
+      "responseDescription": "工单可在待处理、处理中、等待用户、已解决和已关闭之间流转。",
+      "verificationTitle": "已验证提交",
+      "verificationDescription": "用户每次提交和回复都会经过 Turnstile 与附件归属校验。"
+    },
+    "contactMethods": {
+      "eyebrow": "直接联系",
+      "title": "先走最快的渠道。",
+      "emailTitle": "邮箱",
+      "emailDescription": "适合详细问题、材料说明和异步沟通。",
+      "phoneTitle": "电话",
+      "phoneDescription": "适合需要尽快跟进的紧急情况。",
+      "addressTitle": "地址",
+      "addressDescription": "CarbonTrack 核心团队的协作与运营所在地。"
+    },
+    "scenarios": {
+      "eyebrow": "常见场景",
+      "website_bug": {
+        "title": "网站故障",
+        "description": "页面异常、上传失败、权限错误、视觉回归等问题。"
+      },
+      "business_issue": {
+        "title": "商务事项",
+        "description": "合作沟通、项目落地、运营协调与外部对接。"
+      },
+      "feature_request": {
+        "title": "功能建议",
+        "description": "希望改进日常记录、分析查看或运营流程的建议。"
+      },
+      "account": {
+        "title": "账户问题",
+        "description": "登录、验证、资料、权限或账户状态相关问题。"
+      }
+    },
+    "statuses": {
+      "open": "待处理",
+      "in_progress": "处理中",
+      "waiting_user": "等待用户",
+      "resolved": "已解决",
+      "closed": "已关闭"
+    },
+    "priorities": {
+      "low": "低",
+      "normal": "普通",
+      "high": "高",
+      "urgent": "紧急"
+    },
+    "categories": {
+      "website_bug": "网站故障",
+      "business_issue": "商务事项",
+      "feature_request": "功能建议",
+      "account": "账户问题",
+      "other": "其他"
+    },
+    "senderRoles": {
+      "user": "用户",
+      "support": "客服",
+      "admin": "管理员"
+    },
+    "transferStatuses": {
+      "pending": "待审批",
+      "approved": "已批准",
+      "rejected": "已拒绝",
+      "cancelled": "已取消"
+    },
+    "slaStatuses": {
+      "pending": "进行中",
+      "due_soon": "即将超时",
+      "breached": "已超时",
+      "escalated": "已升级",
+      "resolved": "已达成"
+    },
+    "filters": {
+      "status": "状态",
+      "allStatuses": "全部状态"
+    },
+    "moreWays": "更多联系入口",
+    "feedback": {
+      "title": "提交工单",
+      "subtitle": "创建一次，后续在工单页持续跟进。",
+      "submit": "提交工单",
+      "uploaded": "附件已上传",
+      "created": "工单已创建",
+      "turnstileRequired": "请先完成验证。",
+      "fields": {
+        "subject": "主题",
+        "category": "分类",
+        "priority": "优先级",
+        "content": "详细说明",
+        "attachments": "附件"
+      },
+      "placeholders": {
+        "subject": "一句话概括问题",
+        "content": "描述发生了什么、预期结果，以及希望客服核查的内容。"
+      }
+    },
+    "attachments": {
+      "uploadRequired": "若已选择附件，请先完成上传，再提交工单或回复。",
+      "uploadFailedBlocking": "存在上传失败的附件，请重试上传或移除后再提交。"
+    },
+    "recent": {
+      "title": "最近工单",
+      "subtitle": "继续回复或查看最新处理进展。",
+      "viewAll": "查看全部",
+      "empty": "你还没有工单。新提交的工单会显示在这里。"
+    },
+    "userList": {
+      "eyebrow": "我的工单",
+      "title": "与你账户绑定的支持线程",
+      "subtitle": "从帮助中心发起问题，然后在这里持续沟通。",
+      "newTicket": "新建工单",
+      "queueTitle": "工单列表",
+      "queueSubtitle": "按最近活动时间排序。",
+      "emptyTitle": "暂无工单",
+      "emptyDescription": "去帮助中心提交第一条请求。",
+      "emptyAction": "前往帮助中心",
+      "replyCount": "{{count}} 条消息"
+    },
+    "thread": {
+      "backToTickets": "返回工单列表",
+      "summaryTitle": "工单摘要",
+      "summarySubtitle": "快速查看状态与最后处理时间。",
+      "createdAt": "创建时间",
+      "lastReply": "最后回复",
+      "messageCount": "消息数",
+      "feedbackTitle": "服务评价",
+      "feedbackSubtitle": "工单结束后，可按处理人分别评分并留下备注。",
+      "feedbackEmpty": "当前没有可评价的处理人。",
+      "feedbackHint": "提交后仍可继续修改评价。",
+      "feedbackUpdateHint": "当前评价已保存，可继续更新。",
+      "feedbackCommentLabel": "评价备注",
+      "feedbackCommentPlaceholder": "补充处理体验、响应速度或改进建议。",
+      "feedbackSubmit": "提交评价",
+      "feedbackUpdate": "更新评价",
+      "feedbackSaved": "评价已保存",
+      "feedbackSavedAt": "已保存于 {{date}}",
+      "feedbackRatingRequired": "请先选择评分。",
+      "replyTitle": "追加回复",
+      "replySubtitle": "新回复会通知支持团队邮箱。",
+      "replyPlaceholder": "补充新的信息、处理结果或客服要求的材料。",
+      "replySubmit": "发送回复",
+      "replyCreated": "回复已发送",
+      "closedHint": "已关闭的工单不能继续由用户回复。",
+      "notFound": "未找到该工单。",
+      "unknownSender": "未知发送者"
+    },
+    "portal": {
+      "title": "客服工作台",
+      "subtitle": "直接处理队列、回复对话，并持续盯住 SLA 关键工单。",
+      "nav": {
+        "queue": "工单队列",
+        "queueDescription": "搜索、筛选并查看当前收件箱。",
+        "workbench": "工作台",
+        "workbenchDescription": "先看现在最该处理的事。"
+      },
+      "queueEyebrow": "队列视图",
+      "queueTitle": "按清晰责任处理收件箱",
+      "queueSubtitle": "仅展示当前分配给你的工单，可按主题或请求人检索后直接进入线程处理。",
+      "queueListTitle": "工单队列",
+      "queueListSubtitle": "使用接口返回的最近活动顺序。",
+      "searchPlaceholder": "搜索主题、用户名、邮箱",
+      "assigneeFilter": "按客服筛选",
+      "assigneeFilterAll": "全部客服",
+      "assigneeFilterUnassigned": "仅看未分配",
+      "emptyTitle": "没有匹配工单",
+      "emptyDescription": "调整筛选条件或搜索词。",
+      "unknownRequester": "未知请求人",
+      "unassigned": "未分配",
+      "messageCount": "{{count}} 条消息",
+      "backToQueue": "返回队列",
+      "threadSubtitle": "回复请求人、更新处理状态，并保留可审计记录。",
+      "requesterTitle": "请求人",
+      "requesterSubtitle": "工单中保存的身份快照。",
+      "requesterName": "姓名",
+      "requesterEmail": "邮箱",
+      "createdAt": "创建时间",
+      "tagsTitle": "标签结果",
+      "tagsSubtitle": "展示规则命中的标签和来源，方便客服直接核对。",
+      "noTags": "当前没有命中标签。",
+      "tagSource": {
+        "rule": "规则命中",
+        "manual": "人工标记",
+        "system": "系统写入"
+      },
+      "ruleLabel": "规则 #{{id}}",
+      "workflowTitle": "流程设置",
+      "workflowSubtitle": "更新状态、优先级与处理人，并同步查看当前负载。",
+      "assignedTo": "处理人",
+      "assignedToPlaceholder": "留空则清除分配",
+      "saveWorkflow": "保存流程",
+      "workload": {
+        "title": "客服负载",
+        "empty": "暂无可派单客服。",
+        "assigned": "总单量",
+        "notStarted": "未开始",
+        "inProgress": "处理中"
+      },
+      "roles": {
+        "user": "用户",
+        "support": "客服",
+        "admin": "管理员"
+      },
+      "transfer": {
+        "title": "申请转单",
+        "subtitle": "当前处理人可以发起转单，目标客服需自行接受或拒绝。",
+        "target": "目标客服",
+        "targetPlaceholder": "选择目标客服",
+        "targetRequired": "请先选择目标客服。",
+        "reason": "转单原因",
+        "reasonPlaceholder": "说明为什么需要转单，例如规则命中不符、领域不匹配或当前负载过高。",
+        "submit": "提交转单申请",
+        "requestCreated": "转单申请已提交",
+        "reviewSaved": "转单审批已保存",
+        "historyTitle": "转单记录",
+        "historySubtitle": "查看转单申请，以及谁接受、拒绝或取消了这次流转。",
+        "empty": "暂无转单记录。",
+        "approve": "接受转单",
+        "reject": "拒绝转单",
+        "pendingHint": "仍有 {{count}} 条转单申请待处理。",
+        "requestedBy": "申请人：{{name}}",
+        "requestLine": "{{from}} -> {{to}}",
+        "reviewNoteLabel": "审批备注",
+        "reviewPlaceholder": "填写审批意见，可选。",
+        "cancel": "取消申请"
+      },
+      "feedbackTitle": "用户评价",
+      "feedbackSubtitle": "工单结束后，用户可对参与处理的客服分别打分并留言。",
+      "feedbackEmpty": "当前还没有评价。",
+      "feedbackRatedBy": "评价人：{{name}}",
+      "feedbackNoComment": "用户未留下文字备注。",
+      "replyTitle": "回复请求人",
+      "replySubtitle": "客服回复会通过站内信和邮件通知用户。",
+      "replyPlaceholder": "填写下一步说明、解决方案或补充要求。",
+      "replySubmit": "发送客服回复",
+      "ticketUpdated": "工单已更新",
+      "replyCreated": "客服回复已发送",
+      "currentView": "当前视图",
+      "badge": "支持门户",
+      "tipTitle": "操作提示",
+      "tip": "状态、分配和回复会立即同步到用户侧。",
+      "stats": {
+        "total": "当前可见",
+        "open": "待处理",
+        "urgent": "紧急"
+      },
+      "slaBadge": "SLA：{{status}}",
+      "firstResponseDue": "首响截止 {{value}}",
+      "resolutionDue": "解决截止 {{value}}",
+      "assignmentSource": "来源：{{value}}",
+      "routingFallback": "回退：{{value}}",
+      "firstResponseDueLabel": "首响截止",
+      "resolutionDueLabel": "解决截止",
+      "assignmentSourceLabel": "派单来源",
+      "assignmentSourceHelp": "这表示工单是如何被分配给当前处理人的。常见来源包括 smart（智能评分自动派单）和 manual（管理员手动指派）；显示 -- 代表当前还没有明确处理人。",
+      "escalationLevelLabel": "升级层级",
+      "escalationLevelHelp": "这表示工单因 SLA 风险或超时被系统自动升级过多少次。数字越高，说明它已经被多次提升优先级或重新派单。",
+      "routingLastRunLabel": "最近路由",
+      "routingFallbackLabel": "回退原因",
+      "assignmentLockedHint": "此工单已被管理员锁定派单，系统不会自动改派。",
+      "workbenchEyebrow": "值班交接",
+      "workbenchTitle": "先从现在需要动作的工单开始",
+      "workbenchSubtitle": "优先处理高优先级、首响风险和分配给你的工单，不必先翻报表。",
+      "goToQueue": "进入完整队列",
+      "openTopPriority": "打开最高优先级工单",
+      "transferWorkbench": {
+        "eyebrow": "待你确认",
+        "title": "转单请求",
+        "subtitle": "你有 {{count}} 条转单申请待处理，优先确认是否接手，避免工单悬空。",
+        "countBadge": "待审批 {{count}} 条",
+        "requestedBy": "由 {{name}} 发起转单",
+        "reviewAction": "去审批",
+        "noReason": "申请人未填写转单原因。"
+      },
+      "focusLaneTitle": "优先关注",
+      "focusLaneSubtitle": "紧急或存在 SLA 风险的工单，应该优先处理。",
+      "firstResponseLaneTitle": "等待首响",
+      "firstResponseLaneSubtitle": "还没有收到第一条客服回复的工单。",
+      "myQueueLaneTitle": "我的处理中队列",
+      "myQueueLaneSubtitle": "当前分配给你且仍在流转中的工单。",
+      "activeAssigneesTitle": "在线处理人",
+      "activeAssigneesSubtitle": "快速看谁还有接单余量。",
+      "availableCapacity": "剩余 {{count}} 个名额",
+      "openTicket": "打开工单",
+      "noPreview": "暂时没有消息预览。",
+      "previewEmptyTitle": "先选择一条工单",
+      "previewEmptySubtitle": "从左侧队列选中后，就能先看请求人、SLA 和派单情况，再决定是否进入完整对话。",
+      "previewRequester": "请求人",
+      "previewAssignee": "处理人",
+      "ticketMetaTitle": "工单概览",
+      "ticketMetaSubtitle": "在处理对话时，始终把身份、标签、SLA 和归属保持在视线里。",
+      "conversationTitle": "对话记录",
+      "conversationSubtitle": "先看清上下文，再在同一块区域里直接回复。",
+      "workflowTab": "流程",
+      "transferTab": "转单",
+      "feedbackTab": "评价",
+      "emptyLane": "这里当前没有待处理项。"
+    }
+  }
+}

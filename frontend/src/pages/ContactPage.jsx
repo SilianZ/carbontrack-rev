@@ -9,7 +9,7 @@ const supportEmail = import.meta.env?.VITE_SUPPORT_EMAIL || 'support@carbontrack
 const supportPhone = '+1 475-280-7571';
 
 export default function ContactPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['contact', 'footer']);
 
   const contactLinks = useMemo(() => {
     const translated = t('contact.links', {

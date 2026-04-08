@@ -26,7 +26,7 @@ const resolveBadgeImage = (badge = {}) => resolveR2ImageSource({
 });
 
 export default function AchievementsPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['achievements', 'common', 'dashboard']);
 
   const {
     data: badgeListData,

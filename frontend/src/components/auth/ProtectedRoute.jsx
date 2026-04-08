@@ -35,7 +35,7 @@ export function ProtectedRoute({
   permission = null,
   fallback = null 
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['routeGuard']);
   const location = useLocation();
   const [authState, setAuthState] = useState(null);
 

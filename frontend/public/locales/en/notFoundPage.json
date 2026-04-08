@@ -1,0 +1,10 @@
+{
+  "notFoundPage": {
+    "code": "404",
+    "emoji": "🤔",
+    "message": "Sorry about that! Something went wrong.",
+    "submessage": "We’re making it right. Try refreshing or come back later.",
+    "refresh": "Refresh",
+    "home": "Go to Home"
+  }
+}

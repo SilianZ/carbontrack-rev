@@ -186,7 +186,7 @@ function WorkflowLabelWithTooltip({ label, help }) {
 
 export default function SupportTicketDetailPage() {
   const { ticketId } = useParams();
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['activities', 'common', 'date', 'errors', 'messages', 'support']);
   const queryClient = useQueryClient();
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
   const [attachments, setAttachments] = useState([]);

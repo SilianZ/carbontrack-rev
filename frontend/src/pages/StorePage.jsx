@@ -46,7 +46,7 @@ const normalizeStoreCategory = (item) => {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 
 export default function StorePage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'common', 'errors', 'pagination', 'products', 'store', 'success']);
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);

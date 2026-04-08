@@ -1,0 +1,17 @@
+{
+  "app": {
+    "name": "CarbonTrack",
+    "tagline": "Carbon Reduction Tracking Platform",
+    "description": "Record your environmental actions and earn reward points",
+    "welcome": "Welcome to CarbonTrack",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "features": {
+      "title": "Key Features",
+      "carbonTracking": "Carbon Footprint Tracking",
+      "pointsSystem": "Reward Points System",
+      "community": "Community Engagement",
+      "rewards": "Eco-friendly Rewards"
+    }
+  }
+}

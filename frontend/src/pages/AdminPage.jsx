@@ -30,7 +30,7 @@ import {
 const MESSAGE_COLORS = ['#22c55e', '#38bdf8'];
 
 export default function AdminPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common', 'dashboard', 'errors', 'messages', 'pagination', 'units']);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);

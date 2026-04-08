@@ -9,7 +9,7 @@ export function Pagination({
   totalItems,
   className = '' 
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'pagination']);
 
   // 兜底处理，避免 undefined 导致 NaN 或键名显示问题
   const safeCurrent = Number.isFinite(currentPage) ? currentPage : 1;

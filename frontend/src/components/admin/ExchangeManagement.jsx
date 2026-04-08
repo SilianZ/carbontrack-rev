@@ -73,7 +73,7 @@ function renderExchangeStatusBadge(status, t) {
 }
 
 export function ExchangeManagement() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common', 'errors', 'pagination']);
   const queryClient = useQueryClient();
   const location = useLocation();
   const [filters, setFilters] = useState({

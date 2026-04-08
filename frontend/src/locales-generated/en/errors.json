@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "loadFailed": "Failed to load",
+    "network": "Network connection error",
+    "unexpected": "Something went wrong",
+    "tryAgain": "Please try again",
+    "server": "Server error",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden",
+    "notFound": "Page not found",
+    "timeout": "Request timeout",
+    "unknown": "Unknown error",
+    "validation": "Data validation failed",
+    "turnstile": "Human verification failed, please try again",
+    "tooManyFiles": "Too many files selected (maximum {{max}})",
+    "singleFileOnly": "Only single file uploads are supported",
+    "operationFailed": "Operation failed, please try again later",
+    "uploadFailed": "Upload failed, please try again later"
+  }
+}

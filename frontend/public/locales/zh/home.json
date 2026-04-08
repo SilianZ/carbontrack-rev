@@ -1,0 +1,173 @@
+{
+  "home": {
+    "hero": {
+      "title": "追踪您的碳足迹，创造绿色未来",
+      "subtitle": "记录您的环保行动，计算碳减排量，获得积分奖励，与全球用户一起为地球环保贡献力量。",
+      "getStarted": "立即开始",
+      "signIn": "立即登录",
+      "goToDashboard": "进入仪表板",
+      "recordActivity": "记录活动",
+      "activeHighlight": "当前亮点",
+      "switchHighlight": "切换亮点",
+      "carouselPrevious": "上一张",
+      "carouselNext": "下一张",
+      "carouselPlay": "继续播放",
+      "carouselPause": "暂停播放",
+      "carouselGoTo": "跳转到第 {{index}} 张",
+      "highlights": [
+        {
+          "title": "实时了解你的减排贡献",
+          "description": "将每一次环保行动转换为看得见的碳减排数据。"
+        },
+        {
+          "title": "收获多样化的激励",
+          "description": "累计碳积分、解锁证书与徽章，收获来自社区的认可。"
+        },
+        {
+          "title": "带动身边的伙伴",
+          "description": "邀请同学、朋友一起养成可持续习惯，放大集体影响力。"
+        }
+      ]
+    },
+    "stats": {
+      "users": "注册用户数",
+      "activities": "碳记录总数",
+      "carbonSaved": "累计减排",
+      "rewards": "累计积分",
+      "newUsers30d": "30 天新增 {{value}}",
+      "approvedRecords": "已审核 {{value}} 条记录",
+      "carbonLast7Days": "近 7 天：{{value}}",
+      "transactionsLast7": "近 7 天提交 {{value}} 次",
+      "updatedAt": "更新时间 {{time}}",
+      "loadError": "无法加载最新的社区统计信息，请稍后重试。"
+    },
+    "features": {
+      "title": "为什么选择CarbonTrack？",
+      "subtitle": "我们提供完整的碳足迹追踪解决方案，让环保行动变得简单有趣。",
+      "calculate": {
+        "title": "精准计算",
+        "description": "基于科学算法精确计算您的碳减排量"
+      },
+      "rewards": {
+        "title": "积分奖励",
+        "description": "环保行动获得积分，兑换丰富奖品"
+      },
+      "tracking": {
+        "title": "数据追踪",
+        "description": "可视化展示您的环保成就和进步"
+      },
+      "community": {
+        "title": "社区互动",
+        "description": "与全球环保爱好者分享经验和成果"
+      }
+    },
+    "howItWorks": {
+      "title": "如何使用？",
+      "subtitle": "三个简单步骤，开始您的环保之旅",
+      "step1": {
+        "title": "记录活动",
+        "description": "记录您的日常环保行动，如步行、骑行、节能等"
+      },
+      "step2": {
+        "title": "计算减排",
+        "description": "系统自动计算您的碳减排量并给予积分奖励"
+      },
+      "step3": {
+        "title": "兑换奖励",
+        "description": "使用积分兑换环保商品或参与公益活动"
+      }
+    },
+    "cta": {
+      "title": "准备好开始您的环保之旅了吗？",
+      "subtitle": "加入我们的社区，与全球用户一起为地球环保贡献力量。",
+      "joinNow": "立即加入"
+    },
+    "trust": {
+      "secure": "安全可靠",
+      "secureDescription": "数据安全，隐私保护",
+      "verified": "数据验证",
+      "verifiedDescription": "科学验证，权威认证",
+      "community": "活跃社区",
+      "communityDescription": "活跃社区，共同成长"
+    },
+    "announcements": {
+      "title": "CarbonTrack 最新动态",
+      "subtitle": "关注平台公告，第一时间了解社区最新活动与功能。",
+      "items": [
+        {
+          "id": "feedback",
+          "title": "欢迎反馈建议",
+          "description": "发送邮件至 carbontrack666@gmail.com，与我们一起打造更好的减排工具。"
+        },
+        {
+          "id": "rewards",
+          "title": "碳积分奖励上线",
+          "description": "记录低碳行动即可获得积分、证书与感谢信，坚持就有惊喜。"
+        },
+        {
+          "id": "community",
+          "title": "欢迎所有热爱环保的人",
+          "description": "项目以学生为主导，同时欢迎所有关注可持续生活的伙伴加入。"
+        },
+        {
+          "id": "integrity",
+          "title": "公平透明的碳账户",
+          "description": "平台会核验记录真实性，确保每一份碳积分都值得被骄傲。"
+        }
+      ]
+    },
+    "featureShowcase": {
+      "title": "面向校园的全流程碳账户体验",
+      "subtitle": "让减碳行动变得清晰、可追踪、可激励。",
+      "cards": [
+        {
+          "id": "footprint",
+          "title": "看见你的碳足迹",
+          "subtitle": "日常行动可量化",
+          "description": "CarbonTrack 依据科学模型换算 CO₂ 减排量，让你明确哪类行动最有成效。",
+          "highlights": [
+            "针对校园场景优化的减排系数",
+            "提交即反馈，及时看到效果",
+            "阶段性成果一目了然"
+          ]
+        },
+        {
+          "id": "analytics",
+          "title": "生动的数据故事",
+          "subtitle": "看得见的趋势分析",
+          "description": "互动图表呈现周/月/班级趋势，为校园环保报告或展示提供有力数据。",
+          "highlights": [
+            "多维度对比，轻松发现亮点",
+            "自动生成趋势解读",
+            "支持导出展示"
+          ]
+        },
+        {
+          "id": "rewards",
+          "title": "多元激励体系",
+          "subtitle": "积分、徽章、荣誉",
+          "description": "通过 gamification 机制激发动力，兑换奖品、解锁徽章、收获仪式感。",
+          "highlights": [
+            "适配学校的灵活奖品库",
+            "数字徽章展示环保领导力",
+            "全流程记录可追溯"
+          ]
+        },
+        {
+          "id": "community",
+          "title": "打造低碳社群",
+          "subtitle": "分享促成改变",
+          "description": "公告、挑战、集体致谢，营造互相鼓励的可持续文化。",
+          "highlights": [
+            "发起挑战与排行榜活动",
+            "为优秀成员点名表扬",
+            "分享故事带动更多行动"
+          ]
+        }
+      ]
+    },
+    "fab": {
+      "label": "记录行动"
+    }
+  }
+}

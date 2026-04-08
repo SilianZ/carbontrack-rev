@@ -22,7 +22,7 @@ import {
 } from '../components/ui/alert-dialog';
 
 export default function MessagesPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'errors', 'messages', 'pagination']);
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({
     search: '',

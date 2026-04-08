@@ -14,7 +14,7 @@ export function ActivityChart({
   color = '#10b981',
   loading = false 
 }) {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['activities', 'dashboard', 'date']);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const axisColor = isDark ? 'rgba(244, 244, 245, 0.72)' : '#666';

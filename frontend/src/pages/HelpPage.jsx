@@ -52,7 +52,7 @@ const helpFormDefaults = {
 };
 
 export default function HelpPage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['common', 'date', 'errors', 'help', 'support']);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const turnstileRef = useRef(null);

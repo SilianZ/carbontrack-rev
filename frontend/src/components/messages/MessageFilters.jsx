@@ -9,7 +9,7 @@ export function MessageFilters({
   onFiltersChange,
   isLoading = false
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'messages']);
 
   const handleFilterChange = (key, value) => {
     onFiltersChange({

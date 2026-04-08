@@ -1,0 +1,9 @@
+{
+  "images": {
+    "none": "无图片",
+    "clickToPreview": "点击预览",
+    "prev": "上一张",
+    "next": "下一张",
+    "counter": "{{current}} / {{total}}"
+  }
+}
