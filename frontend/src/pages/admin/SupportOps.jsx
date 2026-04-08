@@ -193,7 +193,7 @@ function RoutingRunCard({ run, t, locale }) {
           <div className="space-y-2">
             {topCandidates.map((candidate, index) => (
               <div key={`${run.id}-${index}`} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
-                <span>{candidate.candidate?.username || `#${candidate.candidate?.id ?? '--'}`}</span>
+                <span>{candidate.candidate?.username || candidate.candidate?.email || `#${candidate.candidate?.id ?? candidate.candidate_id ?? '--'}`}</span>
                 <span className="font-medium">{candidate.total_score}</span>
               </div>
             ))}

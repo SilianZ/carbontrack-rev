@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { ArrowRight, Clock3, Search, UserRound } from 'lucide-react';
+import { ArrowRight, Clock3, Search } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { useDebouncedValue } from '../../hooks/useLogSearch';
@@ -167,17 +167,15 @@ export default function SupportTicketsPage() {
   const { t, currentLanguage } = useTranslation();
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
   const [status, setStatus] = useState('all');
-  const [assignee, setAssignee] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const debouncedSearch = useDebouncedValue(search.trim(), 400);
 
   const ticketsQuery = useQuery(
-    ['support-queue', status, assignee, debouncedSearch],
+    ['support-queue', status, debouncedSearch],
     () => supportAPI.getTickets({
       limit: 30,
       ...(status !== 'all' ? { status } : {}),
-      ...(assignee !== 'all' ? { assigned_to: assignee === 'none' ? 0 : Number(assignee) } : {}),
       ...(debouncedSearch ? { q: debouncedSearch } : {}),
     }),
     {
@@ -186,22 +184,9 @@ export default function SupportTicketsPage() {
     }
   );
 
-  const assigneesQuery = useQuery(
-    ['support-assignees'],
-    async () => {
-      const response = await supportAPI.getAssignees();
-      return response.data?.data ?? [];
-    },
-    { refetchOnWindowFocus: false }
-  );
-
   const tickets = useMemo(
     () => ticketsQuery.data?.data?.data?.items ?? [],
     [ticketsQuery.data]
-  );
-  const assignees = useMemo(
-    () => assigneesQuery.data ?? [],
-    [assigneesQuery.data]
   );
 
   useEffect(() => {
@@ -254,20 +239,6 @@ export default function SupportTicketsPage() {
               {TICKET_STATUS_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {t(option.labelKey)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={assignee} onValueChange={setAssignee}>
-            <SelectTrigger className="min-w-[240px]">
-              <SelectValue placeholder={t('support.portal.assigneeFilter')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('support.portal.assigneeFilterAll')}</SelectItem>
-              <SelectItem value="none">{t('support.portal.assigneeFilterUnassigned')}</SelectItem>
-              {assignees.map((entry) => (
-                <SelectItem key={entry.id} value={String(entry.id)}>
-                  {entry.username || entry.email || `#${entry.id}`}
                 </SelectItem>
               ))}
             </SelectContent>
