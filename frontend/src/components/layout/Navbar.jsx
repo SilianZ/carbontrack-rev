@@ -60,15 +60,16 @@ export function Navbar() {
     }
 
     let cancelled = false;
-    hasRefreshedUserRef.current = true;
 
     (async () => {
       try {
         const freshUser = await authAPI.getCurrentUser();
         if (!cancelled && freshUser) {
+          hasRefreshedUserRef.current = true;
           setUser(freshUser);
         }
       } catch (error) {
+        hasRefreshedUserRef.current = false;
         console.error('Failed to refresh current user information', error);
       }
     })();

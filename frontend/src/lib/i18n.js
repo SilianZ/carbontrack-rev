@@ -93,8 +93,8 @@ i18n
     // 非生产环境显示调试信息
     debug: import.meta.env.DEV,
 
-    // 命名空间
-    ns: ['common'],
+    // 命名空间按组件按需加载，避免首页默认拉取非必要文案包
+    ns: [],
     defaultNS: 'common',
 
     // 语言检测配置
