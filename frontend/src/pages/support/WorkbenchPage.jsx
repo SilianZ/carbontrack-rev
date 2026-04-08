@@ -117,7 +117,6 @@ export default function SupportWorkbenchPage() {
   const { t, currentLanguage } = useTranslation();
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
   const currentUser = useMemo(() => checkAuthStatus().user, []);
-  const isAdmin = Boolean(currentUser?.is_admin || currentUser?.role === 'admin');
 
   const ticketsQuery = useQuery(
     ['support-workbench-tickets'],
@@ -127,10 +126,7 @@ export default function SupportWorkbenchPage() {
   const pendingTransfersQuery = useQuery(
     ['support-workbench-pending-transfers'],
     () => supportAPI.getTickets({ limit: 6, pending_transfer_target: 1 }),
-    {
-      enabled: !isAdmin,
-      refetchOnWindowFocus: false,
-    }
+    { refetchOnWindowFocus: false }
   );
 
   const tickets = useMemo(

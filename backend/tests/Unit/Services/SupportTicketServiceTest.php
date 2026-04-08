@@ -697,6 +697,99 @@ class SupportTicketServiceTest extends TestCase
         $this->assertSame((int) $supportA->id, $result['items'][0]['pending_transfer_request']['from_assignee']);
     }
 
+    public function testAdminCanListPendingTransferTicketsAddressedToSelf(): void
+    {
+        $now = date('Y-m-d H:i:s');
+        $requester = User::create([
+            'username' => 'requester',
+            'email' => 'requester@example.com',
+            'role' => 'user',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $supportA = User::create([
+            'username' => 'support-a',
+            'email' => 'support-a@example.com',
+            'role' => 'support',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $admin = User::create([
+            'username' => 'admin-user',
+            'email' => 'admin@example.com',
+            'role' => 'admin',
+            'is_admin' => 1,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        self::$capsule->table('support_tickets')->insert([
+            [
+                'id' => 40,
+                'user_id' => (int) $requester->id,
+                'subject' => 'Pending transfer to admin',
+                'category' => 'business_issue',
+                'status' => 'open',
+                'priority' => 'high',
+                'assigned_to' => (int) $supportA->id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => 41,
+                'user_id' => (int) $requester->id,
+                'subject' => 'Another queue ticket',
+                'category' => 'account',
+                'status' => 'open',
+                'priority' => 'normal',
+                'assigned_to' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ]);
+
+        self::$capsule->table('support_ticket_transfer_requests')->insert([
+            'ticket_id' => 40,
+            'requested_by' => (int) $supportA->id,
+            'from_assignee' => (int) $supportA->id,
+            'to_assignee' => (int) $admin->id,
+            'reason' => 'Admin review needed',
+            'status' => SupportTicketService::TRANSFER_STATUS_PENDING,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $audit = $this->createMock(AuditLogService::class);
+        $errorLog = $this->createMock(ErrorLogService::class);
+        $fileMetadata = $this->createMock(FileMetadataService::class);
+        $automation = $this->createMock(SupportAutomationService::class);
+        $audit->method('log')->willReturn(true);
+        $automation->method('getTagsForTicketIds')->willReturn([]);
+
+        $service = new SupportTicketService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $audit,
+            $errorLog,
+            $fileMetadata,
+            null,
+            null,
+            null,
+            $automation
+        );
+
+        $result = $service->listSupportTickets(
+            ['id' => (int) $admin->id, 'role' => 'admin', 'is_admin' => true],
+            ['pending_transfer_target' => 1]
+        );
+
+        $this->assertCount(1, $result['items']);
+        $this->assertSame(40, $result['items'][0]['id']);
+        $this->assertSame('Admin review needed', $result['items'][0]['pending_transfer_request']['reason']);
+        $this->assertSame((int) $admin->id, $result['items'][0]['pending_transfer_request']['to_assignee']);
+    }
+
     public function testCreateTransferRequestCreatesPendingEntry(): void
     {
         $now = date('Y-m-d H:i:s');

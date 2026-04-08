@@ -1532,10 +1532,6 @@ class SupportTicketService
 
     private function supportTicketBaseFilters(array $actor, array $query = []): array
     {
-        if ($this->isAdminActor($actor)) {
-            return [];
-        }
-
         $actorId = (int) ($actor['id'] ?? 0);
         if ($actorId <= 0) {
             return ['assigned_to' => -1];
@@ -1543,6 +1539,10 @@ class SupportTicketService
 
         if ($this->isPendingTransferTargetQuery($actor, $query)) {
             return ['transfer_target' => $actorId];
+        }
+
+        if ($this->isAdminActor($actor)) {
+            return [];
         }
 
         return ['assigned_to' => $actorId];
@@ -1561,10 +1561,6 @@ class SupportTicketService
 
     private function isPendingTransferTargetQuery(array $actor, array $query): bool
     {
-        if ($this->isAdminActor($actor)) {
-            return false;
-        }
-
         $raw = $query['pending_transfer_target'] ?? null;
         if (is_bool($raw)) {
             return $raw;
