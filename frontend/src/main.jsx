@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import './lib/i18n.js'
+import { i18nReady } from './lib/i18n.js'
 import RootShell from './RootShell.jsx'
 import { bootstrapDevAuthFromEnv } from './lib/auth';
 
@@ -16,8 +16,24 @@ import { bootstrapDevAuthFromEnv } from './lib/auth';
 
 bootstrapDevAuthFromEnv();
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <RootShell />
-  </StrictMode>,
-)
+const root = createRoot(document.getElementById('root'));
+
+const renderApp = () => {
+  root.render(
+    <StrictMode>
+      <RootShell />
+    </StrictMode>,
+  );
+};
+
+const bootstrapApp = async () => {
+  try {
+    await i18nReady;
+  } catch (error) {
+    console.error('Failed to initialize i18n before app render', error);
+  }
+
+  renderApp();
+};
+
+void bootstrapApp();

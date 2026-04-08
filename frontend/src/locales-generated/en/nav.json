@@ -1,0 +1,42 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "dashboard": "Dashboard",
+    "calculate": "Record Activity",
+    "activities": "Activities",
+    "products": "Point Store",
+    "messages": "Messages",
+    "support": "Support Tickets",
+    "profile": "Profile",
+    "notifications": "Notification settings",
+    "admin": "Admin",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menuTitle": "Navigate CarbonTrack",
+    "menuSubtitle": "Jump between key areas effortlessly",
+    "languageSection": "Language",
+    "languageDescription": "Switch the interface language",
+    "accountSignedIn": "Signed in account",
+    "getStarted": "Get started with CarbonTrack",
+    "accountDescription": "Create an account to save progress across devices.",
+    "sections": {
+      "overview": "Overview",
+      "overviewDesc": "Get to know the platform quickly",
+      "insights": "Tracking",
+      "insightsDesc": "Manage calculations and dashboards",
+      "marketplace": "Marketplace",
+      "marketplaceDesc": "Redeem credits and eco products"
+    },
+    "hints": {
+      "home": "Return to the overview and hero content",
+      "about": "Learn more about our purpose and team",
+      "calculate": "Estimate your carbon emissions in minutes",
+      "dashboard": "Monitor historic trends and live targets",
+      "products": "Redeem climate rewards and eco products"
+    }
+  }
+}
