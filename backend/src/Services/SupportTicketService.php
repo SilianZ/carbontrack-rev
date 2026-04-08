@@ -320,7 +320,7 @@ class SupportTicketService
 
     public function getTicketDetailForSupport(array $actor, int $ticketId): array
     {
-        $ticket = $this->findTicketForSupport($actor, $ticketId);
+        $ticket = $this->findTicketForSupport($actor, $ticketId, true);
         if ($ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
@@ -724,7 +724,7 @@ class SupportTicketService
         return $this->findTicket($ticketId, 'AND t.user_id = :user_id', ['user_id' => $userId]);
     }
 
-    private function findTicketForSupport(array $actor, int $ticketId): ?array
+    private function findTicketForSupport(array $actor, int $ticketId, bool $allowPendingTransferTarget = false): ?array
     {
         if ($this->isAdminActor($actor)) {
             return $this->findTicket($ticketId);
@@ -735,7 +735,25 @@ class SupportTicketService
             return null;
         }
 
-        return $this->findTicket($ticketId, 'AND t.assigned_to = :assigned_to', ['assigned_to' => $actorId]);
+        $assignedTicket = $this->findTicket($ticketId, 'AND t.assigned_to = :assigned_to', ['assigned_to' => $actorId]);
+        if ($assignedTicket !== null || !$allowPendingTransferTarget) {
+            return $assignedTicket;
+        }
+
+        return $this->findTicket(
+            $ticketId,
+            'AND EXISTS (
+                SELECT 1
+                FROM support_ticket_transfer_requests tr
+                WHERE tr.ticket_id = t.id
+                  AND tr.to_assignee = :transfer_target
+                  AND tr.status = :transfer_status
+            )',
+            [
+                'transfer_target' => $actorId,
+                'transfer_status' => self::TRANSFER_STATUS_PENDING,
+            ]
+        );
     }
 
     private function findTicket(int $ticketId, string $extraWhere = '', array $params = []): ?array

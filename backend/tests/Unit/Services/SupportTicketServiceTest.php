@@ -533,6 +533,78 @@ class SupportTicketServiceTest extends TestCase
         $service->getTicketDetailForSupport(['id' => (int) $supportA->id, 'role' => 'support', 'is_support' => true], 10);
     }
 
+    public function testTransferTargetCanViewPendingTransferTicketDetail(): void
+    {
+        $now = date('Y-m-d H:i:s');
+        $requester = User::create([
+            'username' => 'requester',
+            'email' => 'requester@example.com',
+            'role' => 'user',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $supportA = User::create([
+            'username' => 'support-a',
+            'email' => 'support-a@example.com',
+            'role' => 'support',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $supportB = User::create([
+            'username' => 'support-b',
+            'email' => 'support-b@example.com',
+            'role' => 'support',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        self::$capsule->table('support_tickets')->insert([
+            'id' => 20,
+            'user_id' => (int) $requester->id,
+            'subject' => 'Pending transfer ticket',
+            'category' => 'website_bug',
+            'status' => 'open',
+            'priority' => 'normal',
+            'assigned_to' => (int) $supportA->id,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        self::$capsule->table('support_ticket_transfer_requests')->insert([
+            'ticket_id' => 20,
+            'requested_by' => (int) $supportA->id,
+            'from_assignee' => (int) $supportA->id,
+            'to_assignee' => (int) $supportB->id,
+            'reason' => 'Need database expertise',
+            'status' => SupportTicketService::TRANSFER_STATUS_PENDING,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $audit = $this->createMock(AuditLogService::class);
+        $errorLog = $this->createMock(ErrorLogService::class);
+        $fileMetadata = $this->createMock(FileMetadataService::class);
+        $audit->method('log')->willReturn(true);
+
+        $service = new SupportTicketService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $audit,
+            $errorLog,
+            $fileMetadata
+        );
+
+        $detail = $service->getTicketDetailForSupport(
+            ['id' => (int) $supportB->id, 'role' => 'support', 'is_support' => true],
+            20
+        );
+
+        $this->assertSame(20, $detail['id']);
+        $this->assertCount(1, $detail['transfer_requests']);
+        $this->assertSame((int) $supportB->id, $detail['transfer_requests'][0]['to_assignee']);
+    }
+
     public function testCreateTransferRequestCreatesPendingEntry(): void
     {
         $now = date('Y-m-d H:i:s');

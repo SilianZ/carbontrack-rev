@@ -27849,6 +27849,12 @@
               "null"
             ]
           },
+          "winner_label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "top_factors": {
             "oneOf": [
               {
