@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { AlertTriangle, ArrowRight, LifeBuoy, TimerReset } from 'lucide-react';
+import { AlertTriangle, ArrowRight, LifeBuoy, Shuffle, TimerReset } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { supportAPI } from '../../lib/api';
@@ -75,6 +75,44 @@ function Lane({ title, description, icon, tickets, t, locale }) {
   );
 }
 
+function TransferRequestRow({ ticket, request, t, locale }) {
+  const fromLabel = request?.from_user?.username || request?.requester?.username || request?.from_user?.email || request?.requester?.email || '--';
+
+  return (
+    <Link
+      to={`/support/tickets/${ticket.id}`}
+      className="rounded-[1.6rem] border border-amber-300/70 bg-white/90 px-5 py-4 shadow-sm transition hover:border-amber-400 hover:bg-white dark:border-amber-400/30 dark:bg-slate-950/40 dark:hover:border-amber-300/50 dark:hover:bg-slate-950/70"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700 dark:text-amber-300">#{ticket.id}</span>
+            <p className="truncate text-base font-semibold text-slate-900 dark:text-slate-50">{ticket.subject}</p>
+          </div>
+          <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+            {t('support.portal.transferWorkbench.requestedBy', { name: fromLabel })}
+          </p>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            {request?.reason?.trim() || t('support.portal.transferWorkbench.noReason')}
+          </p>
+        </div>
+        <div className="shrink-0 text-right">
+          <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
+            {t('support.transferStatuses.pending')}
+          </Badge>
+          <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+            {formatSupportDate(request?.created_at || ticket.updated_at || ticket.created_at, locale)}
+          </p>
+          <div className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-amber-700 dark:text-amber-200">
+            {t('support.portal.transferWorkbench.reviewAction')}
+            <ArrowRight className="h-4 w-4" />
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function SupportWorkbenchPage() {
   const { t, currentLanguage } = useTranslation();
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
@@ -85,10 +123,19 @@ export default function SupportWorkbenchPage() {
     () => supportAPI.getTickets({ limit: 50 }),
     { refetchOnWindowFocus: false }
   );
+  const pendingTransfersQuery = useQuery(
+    ['support-workbench-pending-transfers'],
+    () => supportAPI.getTickets({ limit: 6, pending_transfer_target: 1 }),
+    { refetchOnWindowFocus: false }
+  );
 
   const tickets = useMemo(
     () => ticketsQuery.data?.data?.data?.items ?? [],
     [ticketsQuery.data]
+  );
+  const pendingTransferTickets = useMemo(
+    () => pendingTransfersQuery.data?.data?.data?.items ?? [],
+    [pendingTransfersQuery.data]
   );
 
   const viewModel = useMemo(() => {
@@ -113,8 +160,9 @@ export default function SupportWorkbenchPage() {
       urgentFocus,
       waitingFirstResponse,
       mine,
+      pendingTransfers: pendingTransferTickets,
     };
-  }, [tickets, currentUser?.id, locale]);
+  }, [tickets, pendingTransferTickets, currentUser?.id, locale]);
 
   return (
     <div className="space-y-6">
@@ -134,6 +182,36 @@ export default function SupportWorkbenchPage() {
           ) : null}
         </div>
       </section>
+
+      {viewModel.pendingTransfers.length > 0 ? (
+        <section className="rounded-[2rem] border border-amber-300 bg-[linear-gradient(135deg,#fff7d6_0%,#fffdf3_100%)] px-6 py-6 shadow-sm dark:border-amber-400/30 dark:bg-[linear-gradient(135deg,rgba(120,53,15,0.45)_0%,rgba(15,23,42,0.92)_100%)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-700/90 dark:text-amber-200/90">
+                {t('support.portal.transferWorkbench.eyebrow')}
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight">{t('support.portal.transferWorkbench.title')}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700 dark:text-slate-300">
+                {t('support.portal.transferWorkbench.subtitle', { count: viewModel.pendingTransfers.length })}
+              </p>
+            </div>
+            <Badge variant="outline" className="w-fit border-amber-400/70 bg-white/80 px-3 py-1 text-sm text-amber-800 dark:border-amber-400/40 dark:bg-amber-400/10 dark:text-amber-100">
+              {t('support.portal.transferWorkbench.countBadge', { count: viewModel.pendingTransfers.length })}
+            </Badge>
+          </div>
+          <div className="mt-5 grid gap-4 xl:grid-cols-2">
+            {viewModel.pendingTransfers.map((ticket) => (
+              <TransferRequestRow
+                key={`transfer-${ticket.id}`}
+                ticket={ticket}
+                request={ticket.pending_transfer_request}
+                t={t}
+                locale={locale}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Lane

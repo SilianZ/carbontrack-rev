@@ -290,7 +290,20 @@ class SupportTicketService
 
     public function listSupportTickets(array $actor, array $query = []): array
     {
-        $result = $this->listTickets(true, $this->supportTicketBaseFilters($actor), $this->supportTicketQuery($actor, $query));
+        $pendingTransferTargetView = $this->isPendingTransferTargetQuery($actor, $query);
+        $result = $this->listTickets(true, $this->supportTicketBaseFilters($actor, $query), $this->supportTicketQuery($actor, $query));
+
+        if ($pendingTransferTargetView && !$this->isAdminActor($actor) && !empty($result['items'])) {
+            $pendingTransferMap = $this->pendingTransferRequestsForTarget(
+                array_map(static fn (array $item): int => (int) ($item['id'] ?? 0), $result['items']),
+                (int) ($actor['id'] ?? 0)
+            );
+            $result['items'] = array_map(static function (array $item) use ($pendingTransferMap): array {
+                $item['pending_transfer_request'] = $pendingTransferMap[(int) ($item['id'] ?? 0)] ?? null;
+                return $item;
+            }, $result['items']);
+        }
+
         $this->auditLogService->log([
             'user_id' => (int) ($actor['id'] ?? 0),
             'action' => 'support_ticket_queue_viewed',
@@ -634,6 +647,17 @@ class SupportTicketService
                 $where[] = 't.assigned_to = :base_assigned_to';
                 $params['base_assigned_to'] = (int) $assignedTo;
             }
+        }
+        if (array_key_exists('transfer_target', $baseFilters)) {
+            $where[] = 'EXISTS (
+                SELECT 1
+                FROM support_ticket_transfer_requests tr
+                WHERE tr.ticket_id = t.id
+                  AND tr.to_assignee = :transfer_target
+                  AND tr.status = :transfer_status
+            )';
+            $params['transfer_target'] = (int) $baseFilters['transfer_target'];
+            $params['transfer_status'] = self::TRANSFER_STATUS_PENDING;
         }
         if (!empty($query['status'])) {
             $where[] = 't.status = :status';
@@ -1506,14 +1530,22 @@ class SupportTicketService
         return !empty($actor['is_admin']) || (($actor['role'] ?? null) === 'admin');
     }
 
-    private function supportTicketBaseFilters(array $actor): array
+    private function supportTicketBaseFilters(array $actor, array $query = []): array
     {
         if ($this->isAdminActor($actor)) {
             return [];
         }
 
         $actorId = (int) ($actor['id'] ?? 0);
-        return $actorId > 0 ? ['assigned_to' => $actorId] : ['assigned_to' => -1];
+        if ($actorId <= 0) {
+            return ['assigned_to' => -1];
+        }
+
+        if ($this->isPendingTransferTargetQuery($actor, $query)) {
+            return ['transfer_target' => $actorId];
+        }
+
+        return ['assigned_to' => $actorId];
     }
 
     private function supportTicketQuery(array $actor, array $query): array
@@ -1523,7 +1555,74 @@ class SupportTicketService
         }
 
         unset($query['assigned_to']);
+        unset($query['pending_transfer_target']);
         return $query;
+    }
+
+    private function isPendingTransferTargetQuery(array $actor, array $query): bool
+    {
+        if ($this->isAdminActor($actor)) {
+            return false;
+        }
+
+        $raw = $query['pending_transfer_target'] ?? null;
+        if (is_bool($raw)) {
+            return $raw;
+        }
+        if (is_int($raw) || is_float($raw) || (is_string($raw) && is_numeric($raw))) {
+            return (int) $raw === 1;
+        }
+        if (is_string($raw)) {
+            return in_array(strtolower(trim($raw)), ['true', 'yes', 'on'], true);
+        }
+
+        return false;
+    }
+
+    private function pendingTransferRequestsForTarget(array $ticketIds, int $targetUserId): array
+    {
+        $ticketIds = array_values(array_filter(array_map('intval', $ticketIds), static fn (int $id): bool => $id > 0));
+        if ($ticketIds === [] || $targetUserId <= 0) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ticketIds), '?'));
+        $stmt = $this->db->prepare("
+            SELECT
+                tr.*,
+                requester.username AS requester_username,
+                requester.email AS requester_email,
+                from_user.username AS from_username,
+                from_user.email AS from_email,
+                to_user.username AS to_username,
+                to_user.email AS to_email,
+                reviewer.username AS reviewer_username,
+                reviewer.email AS reviewer_email
+            FROM support_ticket_transfer_requests tr
+            INNER JOIN users requester ON requester.id = tr.requested_by
+            LEFT JOIN users from_user ON from_user.id = tr.from_assignee
+            LEFT JOIN users to_user ON to_user.id = tr.to_assignee
+            LEFT JOIN users reviewer ON reviewer.id = tr.reviewed_by
+            WHERE tr.ticket_id IN ({$placeholders})
+              AND tr.to_assignee = ?
+              AND tr.status = ?
+            ORDER BY tr.id DESC
+        ");
+        $stmt->execute([
+            ...$ticketIds,
+            $targetUserId,
+            self::TRANSFER_STATUS_PENDING,
+        ]);
+
+        $result = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
+            $ticketId = (int) ($row['ticket_id'] ?? 0);
+            if ($ticketId > 0 && !isset($result[$ticketId])) {
+                $result[$ticketId] = $this->formatTransferRequest($row);
+            }
+        }
+
+        return $result;
     }
 
     private function recordFailure(\Throwable $e, string $action, array $actor, ?int $ticketId): void
