@@ -40,6 +40,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Badge } from '../../components/ui/badge';
 import { Alert, AlertDescription } from '../../components/ui/Alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/tooltip';
 import {
   Select,
   SelectContent,
@@ -158,6 +159,28 @@ function FeedbackStars({ value }) {
         />
       ))}
     </div>
+  );
+}
+
+function WorkflowLabelWithTooltip({ label, help }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+      <span>{label}</span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 text-[10px] font-semibold text-slate-500 transition hover:border-sky-300 hover:text-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400/50 dark:border-slate-600 dark:text-slate-300 dark:hover:border-sky-400/40 dark:hover:text-sky-200"
+            aria-label={label}
+          >
+            ?
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" sideOffset={8} className="max-w-[220px] leading-5">
+          {help}
+        </TooltipContent>
+      </Tooltip>
+    </span>
   );
 }
 
@@ -573,11 +596,17 @@ export default function SupportTicketDetailPage() {
                         </div>
                       </div>
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-slate-500 dark:text-slate-400">{t('support.portal.assignmentSourceLabel')}</span>
+                        <WorkflowLabelWithTooltip
+                          label={t('support.portal.assignmentSourceLabel')}
+                          help={t('support.portal.assignmentSourceHelp')}
+                        />
                         <span>{ticket.assignment_source || '--'}</span>
                       </div>
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-slate-500 dark:text-slate-400">{t('support.portal.escalationLevelLabel')}</span>
+                        <WorkflowLabelWithTooltip
+                          label={t('support.portal.escalationLevelLabel')}
+                          help={t('support.portal.escalationLevelHelp')}
+                        />
                         <span>{ticket.escalation_level ?? 0}</span>
                       </div>
                       {ticket.routing_summary ? (
