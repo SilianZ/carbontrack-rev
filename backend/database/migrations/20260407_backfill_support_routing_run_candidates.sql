@@ -81,11 +81,15 @@ BEGIN
         SET `candidate_delimiter` = SUBSTRING(`new_candidate_scores`, `value_end`, 1);
 
         IF `candidate_id` > 0 THEN
-          SELECT COALESCE(`username`, `email`, CONCAT('User #', `candidate_id`))
-          INTO `candidate_username`
-          FROM `users`
-          WHERE `id` = `candidate_id`
-          LIMIT 1;
+          SET `candidate_username` = COALESCE(
+            (
+              SELECT COALESCE(`username`, `email`)
+              FROM `users`
+              WHERE `id` = `candidate_id`
+              LIMIT 1
+            ),
+            CONCAT('User #', `candidate_id`)
+          );
 
           IF `candidate_username` IS NULL OR TRIM(`candidate_username`) = '' THEN
             SET `candidate_username` = CONCAT('User #', `candidate_id`);
@@ -108,11 +112,15 @@ BEGIN
         OR TRIM(`new_summary`) = ''
         OR `new_summary` NOT LIKE '%"winner_label"%'
       ) THEN
-      SELECT COALESCE(`username`, `email`, CONCAT('User #', `winner_user_id`))
-      INTO `winner_label`
-      FROM `users`
-      WHERE `id` = `winner_user_id`
-      LIMIT 1;
+      SET `winner_label` = COALESCE(
+        (
+          SELECT COALESCE(`username`, `email`)
+          FROM `users`
+          WHERE `id` = `winner_user_id`
+          LIMIT 1
+        ),
+        CONCAT('User #', `winner_user_id`)
+      );
 
       IF `winner_label` IS NULL OR TRIM(`winner_label`) = '' THEN
         SET `winner_label` = CONCAT('User #', `winner_user_id`);

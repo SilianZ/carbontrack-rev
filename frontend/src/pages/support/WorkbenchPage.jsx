@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { AlertTriangle, ArrowRight, LifeBuoy, Shuffle, TimerReset } from 'lucide-react';
+import { AlertTriangle, ArrowRight, LifeBuoy, TimerReset } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { supportAPI } from '../../lib/api';
@@ -117,6 +117,7 @@ export default function SupportWorkbenchPage() {
   const { t, currentLanguage } = useTranslation();
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
   const currentUser = useMemo(() => checkAuthStatus().user, []);
+  const isAdmin = Boolean(currentUser?.is_admin || currentUser?.role === 'admin');
 
   const ticketsQuery = useQuery(
     ['support-workbench-tickets'],
@@ -126,7 +127,10 @@ export default function SupportWorkbenchPage() {
   const pendingTransfersQuery = useQuery(
     ['support-workbench-pending-transfers'],
     () => supportAPI.getTickets({ limit: 6, pending_transfer_target: 1 }),
-    { refetchOnWindowFocus: false }
+    {
+      enabled: !isAdmin,
+      refetchOnWindowFocus: false,
+    }
   );
 
   const tickets = useMemo(

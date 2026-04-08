@@ -108,7 +108,7 @@ class SupportRoutingEngineService
             'required_agent_level' => $requiredLevel,
             'suggested_skills' => $skillHints,
             'winner_score' => $winnerScore,
-            'winner_label' => $winner !== null ? ($winner['candidate']['username'] ?? ('User #' . (int) ($winner['candidate']['id'] ?? 0))) : null,
+            'winner_label' => $winner !== null ? ($winner['candidate']['username'] ?? $winner['candidate']['email'] ?? ('User #' . (int) ($winner['candidate']['id'] ?? 0))) : null,
             'top_factors' => $topFactors,
         ];
 
@@ -744,6 +744,7 @@ class SupportRoutingEngineService
             'candidate' => [
                 'id' => (int) ($candidate['id'] ?? 0),
                 'username' => $candidate['username'] ?? null,
+                'email' => $candidate['email'] ?? null,
             ],
             'total_score' => round($total, 2),
             'breakdown' => [
