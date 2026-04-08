@@ -293,7 +293,7 @@ class SupportTicketService
         $pendingTransferTargetView = $this->isPendingTransferTargetQuery($actor, $query);
         $result = $this->listTickets(true, $this->supportTicketBaseFilters($actor, $query), $this->supportTicketQuery($actor, $query));
 
-        if ($pendingTransferTargetView && !$this->isAdminActor($actor) && !empty($result['items'])) {
+        if ($pendingTransferTargetView && !empty($result['items'])) {
             $pendingTransferMap = $this->pendingTransferRequestsForTarget(
                 array_map(static fn (array $item): int => (int) ($item['id'] ?? 0), $result['items']),
                 (int) ($actor['id'] ?? 0)
