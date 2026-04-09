@@ -20,11 +20,24 @@ export const supportedLanguages = {
 // 默认语言
 export const defaultLanguage = 'zh';
 
-export const bundledCriticalNamespaces = ['home', 'nav'];
+const bundledCriticalNamespaces = ['home', 'nav'];
+
+const pickBundledCriticalNamespaces = (resources, language) => {
+  const resolvedResources = resources?.default ?? resources;
+
+  return bundledCriticalNamespaces.reduce((accumulator, namespace) => {
+    if (!(namespace in resolvedResources)) {
+      throw new Error(`Missing bundled critical namespace "${namespace}" for language "${language}"`);
+    }
+
+    accumulator[namespace] = resolvedResources[namespace];
+    return accumulator;
+  }, {});
+};
 
 const bundledCriticalResourceLoaders = {
-  zh: () => import('../locales-generated/zh/index.js'),
-  en: () => import('../locales-generated/en/index.js'),
+  zh: () => import('../locales-generated/zh/index.js').then((resources) => pickBundledCriticalNamespaces(resources, 'zh')),
+  en: () => import('../locales-generated/en/index.js').then((resources) => pickBundledCriticalNamespaces(resources, 'en')),
 };
 
 // 语言检测配置
@@ -149,10 +162,9 @@ const loadBundledLanguageResources = async (lng) => {
   }
 
   try {
-    const module = await loader();
-    return module.default || null;
+    return await loader();
   } catch (error) {
-    console.error(`Failed to preload bundled i18n resources for language: ${normalizedLanguage}`, error);
+    console.error('Failed to preload bundled i18n resources for language', normalizedLanguage, error);
     return null;
   }
 };
@@ -215,15 +227,16 @@ export const initializeI18n = async () => {
   }
 
   i18nInitializationPromise = (async () => {
-    const initialLanguage = detectInitialLanguage();
-    const bundledResourceMap = await loadBundledResourceMap([
-      initialLanguage,
-      initialLanguage === defaultLanguage ? null : defaultLanguage,
-    ]);
+    try {
+      const initialLanguage = detectInitialLanguage();
+      const bundledResourceMap = await loadBundledResourceMap([
+        initialLanguage,
+        initialLanguage === defaultLanguage ? null : defaultLanguage,
+      ]);
 
-    await i18n.init({
-      lng: initialLanguage,
-      resources: bundledResourceMap,
+      await i18n.init({
+        lng: initialLanguage,
+        resources: bundledResourceMap,
 
       // 默认优先使用设备语言（由 detectInitialLanguage 预先计算）
       // 未命中支持语言时回退到 defaultLanguage
@@ -320,22 +333,26 @@ export const initializeI18n = async () => {
       },
       
       // 缺失键处理
-      saveMissing: import.meta.env.DEV,
-      missingKeyHandler: import.meta.env.DEV ? (lng, ns, key) => {
-        console.warn(`Missing translation key: ${ns}:${key} for language: ${lng}`);
-      } : undefined,
+        saveMissing: import.meta.env.DEV,
+        missingKeyHandler: import.meta.env.DEV ? (lng, ns, key) => {
+          console.warn('Missing translation key', { lng, ns, key });
+        } : undefined,
       
       // 解析缺失键
-      parseMissingKeyHandler: (key) => {
-        return key;
-      }
-    });
+        parseMissingKeyHandler: (key) => {
+          return key;
+        }
+      });
 
-    Object.entries(bundledResourceMap).forEach(([language, resources]) => {
-      applyBundledResources(language, resources);
-    });
-    syncDocumentLanguage(i18n.resolvedLanguage || i18n.language || initialLanguage);
-    return i18n;
+      Object.entries(bundledResourceMap).forEach(([language, resources]) => {
+        applyBundledResources(language, resources);
+      });
+      syncDocumentLanguage(i18n.resolvedLanguage || i18n.language || initialLanguage);
+      return i18n;
+    } catch (error) {
+      i18nInitializationPromise = null;
+      throw error;
+    }
   })();
 
   return i18nInitializationPromise;

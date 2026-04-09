@@ -66,7 +66,7 @@ The frontend is a modern SPA.
 - **Data Fetching**: Use the pre-configured `axios` instance for API requests, integrated with TanStack Query.
 - **Forms**: Use **React Hook Form** with **Zod** for schema-based validation.
 - **I18n**: The frontend uses **i18next** with namespace-based locale files. Treat `frontend/public/locales/<lng>/<namespace>.json` as the runtime translation source, keep translation keys namespaced (for example `home.hero.title`), and use page/component-specific `useTranslation([...])` calls instead of relying on a single global namespace. The previous monolithic locale layout is no longer the maintenance target.
-- **Bundled Critical Language Namespaces**: The homepage-critical namespaces (`home`, `nav`) are mirrored under `frontend/src/locales-generated/<lng>/` for supported languages and are preloaded only for the detected current language during i18n bootstrap. Keep those generated mirrors aligned with `frontend/public/locales/<lng>/`.
+- **Bundled Critical Language Namespaces**: The homepage-critical namespaces (`home`, `nav`) are mirrored under `frontend/src/locales-generated/<lng>/` for supported languages and may be preloaded during i18n bootstrap for the detected current language and, when different, the fallback/default language to avoid extra fallback HTTP requests. Keep those generated mirrors aligned with `frontend/public/locales/<lng>/`.
 
 ### Developer Workflow
 - **Setup**: Run `pnpm install` in the `frontend` directory.
