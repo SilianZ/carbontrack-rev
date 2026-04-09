@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import { i18nReady } from './lib/i18n.js'
+import { initializeI18n } from './lib/i18n'
 import RootShell from './RootShell.jsx'
 import { bootstrapDevAuthFromEnv } from './lib/auth';
 
@@ -28,7 +28,7 @@ const renderApp = () => {
 
 const bootstrapApp = async () => {
   try {
-    await i18nReady;
+    await initializeI18n();
   } catch (error) {
     console.error('Failed to initialize i18n before app render', error);
   }

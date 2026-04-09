@@ -332,10 +332,10 @@ export const initializeI18n = async () => {
       },
       
       // 缺失键处理
-        saveMissing: import.meta.env.DEV,
-        missingKeyHandler: import.meta.env.DEV ? (lng, ns, key) => {
-          console.warn('Missing translation key', { lng, ns, key });
-        } : undefined,
+      saveMissing: import.meta.env.DEV,
+      missingKeyHandler: import.meta.env.DEV ? (lng, ns, key) => {
+        console.warn('Missing translation key', { lng, ns, key });
+      } : undefined,
       
       // 解析缺失键
       parseMissingKeyHandler: (key) => {
@@ -351,14 +351,12 @@ export const initializeI18n = async () => {
   })();
 
   i18nInitializationPromise = initializePromise.catch((error) => {
-      i18nInitializationPromise = null;
-      throw error;
-    });
+    i18nInitializationPromise = null;
+    throw error;
+  });
 
   return i18nInitializationPromise;
 };
-
-export const i18nReady = initializeI18n();
 
 // 语言切换函数
 export const changeLanguage = async (lng) => {
