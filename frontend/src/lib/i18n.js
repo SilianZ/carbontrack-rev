@@ -226,17 +226,16 @@ export const initializeI18n = async () => {
     return i18nInitializationPromise;
   }
 
-  i18nInitializationPromise = (async () => {
-    try {
-      const initialLanguage = detectInitialLanguage();
-      const bundledResourceMap = await loadBundledResourceMap([
-        initialLanguage,
-        initialLanguage === defaultLanguage ? null : defaultLanguage,
-      ]);
+  const initializePromise = (async () => {
+    const initialLanguage = detectInitialLanguage();
+    const bundledResourceMap = await loadBundledResourceMap([
+      initialLanguage,
+      initialLanguage === defaultLanguage ? null : defaultLanguage,
+    ]);
 
-      await i18n.init({
-        lng: initialLanguage,
-        resources: bundledResourceMap,
+    await i18n.init({
+      lng: initialLanguage,
+      resources: bundledResourceMap,
 
       // 默认优先使用设备语言（由 detectInitialLanguage 预先计算）
       // 未命中支持语言时回退到 defaultLanguage
@@ -339,21 +338,22 @@ export const initializeI18n = async () => {
         } : undefined,
       
       // 解析缺失键
-        parseMissingKeyHandler: (key) => {
-          return key;
-        }
-      });
+      parseMissingKeyHandler: (key) => {
+        return key;
+      }
+    });
 
-      Object.entries(bundledResourceMap).forEach(([language, resources]) => {
-        applyBundledResources(language, resources);
-      });
-      syncDocumentLanguage(i18n.resolvedLanguage || i18n.language || initialLanguage);
-      return i18n;
-    } catch (error) {
+    Object.entries(bundledResourceMap).forEach(([language, resources]) => {
+      applyBundledResources(language, resources);
+    });
+    syncDocumentLanguage(i18n.resolvedLanguage || i18n.language || initialLanguage);
+    return i18n;
+  })();
+
+  i18nInitializationPromise = initializePromise.catch((error) => {
       i18nInitializationPromise = null;
       throw error;
-    }
-  })();
+    });
 
   return i18nInitializationPromise;
 };
