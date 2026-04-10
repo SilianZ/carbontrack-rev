@@ -77,6 +77,19 @@ export default function AdminCronPage() {
   const tasks = useMemo(() => tasksQuery.data ?? [], [tasksQuery.data]);
   const runs = useMemo(() => runsQuery.data?.items ?? [], [runsQuery.data]);
 
+  const saveTaskMutation = useMutation(
+    ({ taskKey, payload }) => adminAPI.updateCronTask(taskKey, payload),
+    {
+      onSuccess: () => {
+        toast.success(t('admin.cron.messages.saved'));
+        queryClient.invalidateQueries(['admin-cron-tasks']);
+      },
+      onError: (error) => {
+        toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
+      },
+    }
+  );
+
   useEffect(() => {
     if (!tasks.length) {
       return;
@@ -99,19 +112,6 @@ export default function AdminCronPage() {
       return next;
     });
   }, [runTaskMutation.variables, saveTaskMutation.variables, tasks]);
-
-  const saveTaskMutation = useMutation(
-    ({ taskKey, payload }) => adminAPI.updateCronTask(taskKey, payload),
-    {
-      onSuccess: () => {
-        toast.success(t('admin.cron.messages.saved'));
-        queryClient.invalidateQueries(['admin-cron-tasks']);
-      },
-      onError: (error) => {
-        toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
-      },
-    }
-  );
 
   const runTaskMutation = useMutation(
     (taskKey) => adminAPI.runCronTask(taskKey),
