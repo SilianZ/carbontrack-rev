@@ -238,6 +238,35 @@ class CronSchedulerServiceTest extends TestCase
         $service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, ['interval_minutes' => '1.9']);
     }
 
+    public function testSuccessfulRunUsesLatestTaskSettingsForNextRunAt(): void
+    {
+        $now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $now);
+
+        $leaderboard = $this->createMock(LeaderboardService::class);
+        $leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
+            'generated_at' => '2026-04-10T00:00:00Z',
+            'expires_at' => '2026-04-10T00:10:00Z',
+            'global' => [],
+            'regions' => [],
+            'schools' => [],
+        ]);
+
+        $service = $this->makeService(
+            $this->createMock(SupportRoutingEngineService::class),
+            $this->createMock(BadgeService::class),
+            $leaderboard,
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $service->updateTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, ['interval_minutes' => 30]);
+        $result = $service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-5']);
+
+        $this->assertSame('success', $result['status']);
+        $this->assertNotNull($result['next_run_at']);
+        $this->assertSame($result['next_run_at'], CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('next_run_at'));
+    }
+
     private function seedTask(string $taskKey, string $taskName, int $intervalMinutes, bool $enabled, ?string $nextRunAt, array $overrides = []): void
     {
         CronTask::query()->create(array_merge([

@@ -64,6 +64,7 @@ class CronSchedulerService
 
     public function updateTask(string $taskKey, array $payload): array
     {
+        $taskKey = $this->normalizeTaskKey($taskKey);
         $task = $this->findTask($taskKey);
         if ($task === null) {
             throw new \RuntimeException('Cron task not found');
@@ -224,19 +225,28 @@ class CronSchedulerService
             $result = $this->normalizeTaskResult($taskKey, $rawResult);
             $finishedAt = $this->now();
             $durationMs = $this->diffMilliseconds($startedAt, $finishedAt);
-            $nextRunAt = $task->enabled ? $this->addMinutes($startedAt, (int) $task->interval_minutes) : null;
-
             $this->completeTaskRun($taskKey, $lockToken, [
                 'last_finished_at' => $finishedAt,
                 'last_status' => self::TASK_STATUS_SUCCESS,
                 'last_error' => null,
                 'last_duration_ms' => $durationMs,
                 'consecutive_failures' => 0,
-                'next_run_at' => $nextRunAt,
                 'lock_token' => null,
                 'locked_at' => null,
                 'updated_at' => $finishedAt,
             ]);
+
+            $freshTask = $this->findTask($taskKey);
+            $nextRunAt = null;
+            if ($freshTask?->enabled) {
+                $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
+                CronTask::query()
+                    ->where('task_key', $taskKey)
+                    ->update([
+                        'next_run_at' => $nextRunAt,
+                        'updated_at' => $finishedAt,
+                    ]);
+            }
 
             $run = CronRun::create([
                 'task_key' => $taskKey,
@@ -277,7 +287,6 @@ class CronSchedulerService
         } catch (\Throwable $exception) {
             $finishedAt = $this->now();
             $durationMs = $this->diffMilliseconds($startedAt, $finishedAt);
-            $nextRunAt = $task->enabled ? $this->addMinutes($startedAt, (int) $task->interval_minutes) : null;
             $errorMessage = trim($exception->getMessage()) !== '' ? $exception->getMessage() : 'Unknown cron task error';
 
             $this->completeTaskRun($taskKey, $lockToken, [
@@ -286,11 +295,22 @@ class CronSchedulerService
                 'last_error' => $errorMessage,
                 'last_duration_ms' => $durationMs,
                 'consecutive_failures' => (int) ($task->consecutive_failures ?? 0) + 1,
-                'next_run_at' => $nextRunAt,
                 'lock_token' => null,
                 'locked_at' => null,
                 'updated_at' => $finishedAt,
             ]);
+
+            $freshTask = $this->findTask($taskKey);
+            $nextRunAt = null;
+            if ($freshTask?->enabled) {
+                $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
+                CronTask::query()
+                    ->where('task_key', $taskKey)
+                    ->update([
+                        'next_run_at' => $nextRunAt,
+                        'updated_at' => $finishedAt,
+                    ]);
+            }
 
             $run = CronRun::create([
                 'task_key' => $taskKey,
@@ -349,7 +369,7 @@ class CronSchedulerService
         ]);
 
         $this->auditLogService->logSystemEvent('cron_task_run_skipped', 'cron_scheduler', [
-            'status' => 'pending',
+            'status' => 'skipped',
             'request_method' => 'SYSTEM',
             'endpoint' => '/internal/cron/' . $task->task_key,
             'request_id' => $context['request_id'] ?? null,

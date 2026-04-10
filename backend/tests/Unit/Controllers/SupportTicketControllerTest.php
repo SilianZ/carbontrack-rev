@@ -300,7 +300,15 @@ class SupportTicketControllerTest extends TestCase
         $_GET['key'] = 'expected-secret';
 
         $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logSystemEvent');
+        $audit->expects($this->once())
+            ->method('logSystemEvent')
+            ->with(
+                'support_sla_sweep_endpoint_triggered',
+                'support_sla_sweep',
+                $this->callback(static function (array $context): bool {
+                    return ($context['request_id'] ?? null) === null || is_string($context['request_id'] ?? null);
+                })
+            );
 
         $scheduler = $this->createMock(CronSchedulerService::class);
         $scheduler->expects($this->once())

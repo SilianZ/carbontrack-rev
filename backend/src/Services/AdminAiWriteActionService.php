@@ -124,6 +124,10 @@ class AdminAiWriteActionService
             'status' => ($result['status'] ?? null) === 'success' ? 'success' : 'failed',
         ]);
 
+        if (($result['status'] ?? null) !== 'success') {
+            throw new \RuntimeException($result['error_message'] ?? 'Cron task did not complete successfully.');
+        }
+
         return [
             'action' => 'run_cron_task',
             'task_run' => $result,

@@ -88,4 +88,38 @@ class AdminAiCronActionsTest extends TestCase
         $this->assertSame('run_cron_task', $runResult['action']);
         $this->assertSame('success', $runResult['task_run']['status']);
     }
+
+    public function testWriteModelThrowsWhenCronRunIsNotSuccessful(): void
+    {
+        $scheduler = $this->createMock(CronSchedulerService::class);
+        $scheduler->expects($this->once())
+            ->method('runTaskNow')
+            ->willReturn([
+                'task_key' => 'support_sla_sweep',
+                'status' => 'failed',
+                'error_message' => 'task_failed',
+            ]);
+
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->once())->method('logAdminOperation');
+
+        $service = new AdminAiWriteActionService(
+            new \PDO('sqlite::memory:'),
+            $audit,
+            $this->createMock(MessageService::class),
+            $this->createMock(BadgeService::class),
+            $scheduler
+        );
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('task_failed');
+
+        $service->execute('run_cron_task', [
+            'task_key' => 'support_sla_sweep',
+        ], [
+            'actor_id' => 1,
+            'request_id' => 'req-3',
+            'conversation_id' => 'conv-3',
+        ]);
+    }
 }
