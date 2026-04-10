@@ -97,8 +97,7 @@ class CronSchedulerService
         if ($task->enabled) {
             $task->next_run_at = $this->addMinutes($now, (int) $task->interval_minutes);
         } else {
-            $task->lock_token = null;
-            $task->locked_at = null;
+            $task->next_run_at = null;
         }
 
         $task->updated_at = $now;
@@ -182,7 +181,7 @@ class CronSchedulerService
 
         $this->auditLogService->logSystemEvent('cron_scheduler_batch_completed', 'cron_scheduler', [
             'status' => empty($response['failed']) ? 'success' : 'failed',
-            'request_method' => strtoupper($triggerSource),
+            'request_method' => 'SYSTEM',
             'endpoint' => '/cron/run',
             'request_id' => $context['request_id'] ?? null,
             'request_data' => [
@@ -225,7 +224,7 @@ class CronSchedulerService
             $result = $this->normalizeTaskResult($taskKey, $rawResult);
             $finishedAt = $this->now();
             $durationMs = $this->diffMilliseconds($startedAt, $finishedAt);
-            $nextRunAt = $this->addMinutes($startedAt, (int) $task->interval_minutes);
+            $nextRunAt = $task->enabled ? $this->addMinutes($startedAt, (int) $task->interval_minutes) : null;
 
             $this->completeTaskRun($taskKey, $lockToken, [
                 'last_finished_at' => $finishedAt,
@@ -253,7 +252,7 @@ class CronSchedulerService
 
             $this->auditLogService->logSystemEvent('cron_task_run_completed', 'cron_scheduler', [
                 'status' => 'success',
-                'request_method' => strtoupper($triggerSource),
+                'request_method' => 'SYSTEM',
                 'endpoint' => '/internal/cron/' . $taskKey,
                 'request_id' => $context['request_id'] ?? null,
                 'request_data' => [
@@ -278,7 +277,7 @@ class CronSchedulerService
         } catch (\Throwable $exception) {
             $finishedAt = $this->now();
             $durationMs = $this->diffMilliseconds($startedAt, $finishedAt);
-            $nextRunAt = $this->addMinutes($startedAt, (int) $task->interval_minutes);
+            $nextRunAt = $task->enabled ? $this->addMinutes($startedAt, (int) $task->interval_minutes) : null;
             $errorMessage = trim($exception->getMessage()) !== '' ? $exception->getMessage() : 'Unknown cron task error';
 
             $this->completeTaskRun($taskKey, $lockToken, [
@@ -308,7 +307,7 @@ class CronSchedulerService
             $this->logTaskException($taskKey, $triggerSource, $context, $exception);
             $this->auditLogService->logSystemEvent('cron_task_run_failed', 'cron_scheduler', [
                 'status' => 'failed',
-                'request_method' => strtoupper($triggerSource),
+                'request_method' => 'SYSTEM',
                 'endpoint' => '/internal/cron/' . $taskKey,
                 'request_id' => $context['request_id'] ?? null,
                 'request_data' => [
@@ -351,7 +350,7 @@ class CronSchedulerService
 
         $this->auditLogService->logSystemEvent('cron_task_run_skipped', 'cron_scheduler', [
             'status' => 'pending',
-            'request_method' => strtoupper($triggerSource),
+            'request_method' => 'SYSTEM',
             'endpoint' => '/internal/cron/' . $task->task_key,
             'request_id' => $context['request_id'] ?? null,
             'request_data' => [
@@ -513,7 +512,10 @@ class CronSchedulerService
             'lock_token' => $task->lock_token,
             'locked_at' => $lockedAt,
             'settings' => $settings,
-            'is_due' => is_string($task->next_run_at) && $task->next_run_at !== '' && $task->next_run_at <= $now,
+            'is_due' => (bool) $task->enabled
+                && is_string($task->next_run_at)
+                && $task->next_run_at !== ''
+                && $task->next_run_at <= $now,
             'is_locked' => $lockedAt !== null && $lockedAt >= $this->addSeconds($now, -self::LOCK_TIMEOUT_SECONDS),
         ];
     }
@@ -680,7 +682,7 @@ class CronSchedulerService
 
         $request = SyntheticRequestFactory::fromContext(
             '/internal/cron/' . $taskKey,
-            strtoupper($triggerSource),
+            'SYSTEM',
             is_string($context['request_id'] ?? null) ? (string) $context['request_id'] : null,
             [],
             $context + [
@@ -730,7 +732,16 @@ class CronSchedulerService
         try {
             return bin2hex(random_bytes(16));
         } catch (\Throwable) {
-            return bin2hex(openssl_random_pseudo_bytes(16));
+            if (!function_exists('openssl_random_pseudo_bytes')) {
+                throw new \RuntimeException('Unable to generate cron lock token');
+            }
+
+            $bytes = openssl_random_pseudo_bytes(16);
+            if (!is_string($bytes) || $bytes === '') {
+                throw new \RuntimeException('Unable to generate cron lock token');
+            }
+
+            return bin2hex($bytes);
         }
     }
 }

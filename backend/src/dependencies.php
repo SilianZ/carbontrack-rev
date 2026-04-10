@@ -456,7 +456,8 @@ $__deps_initializer = function (Container $container) {
     $container->set(AdminAiReadModelService::class, function (ContainerInterface $c) {
         return new AdminAiReadModelService(
             $c->get(PDO::class),
-            $c->get(StatisticsService::class)
+            $c->get(StatisticsService::class),
+            $c->get(CronSchedulerService::class)
         );
     });
 
@@ -473,7 +474,8 @@ $__deps_initializer = function (Container $container) {
             $c->get(PDO::class),
             $c->get(AuditLogService::class),
             $c->get(MessageService::class),
-            $c->get(BadgeService::class)
+            $c->get(BadgeService::class),
+            $c->get(CronSchedulerService::class)
         );
     });
 

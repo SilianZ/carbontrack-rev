@@ -269,6 +269,8 @@ export default function AdminCronPage() {
                       <Button
                         type="button"
                         variant="outline"
+                        aria-label={t('admin.cron.actions.runNow')}
+                        title={t('admin.cron.actions.runNow')}
                         onClick={() => runTaskMutation.mutate(task.task_key)}
                         loading={runTaskMutation.isLoading}
                       >

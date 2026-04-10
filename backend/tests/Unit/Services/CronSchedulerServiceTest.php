@@ -168,6 +168,7 @@ class CronSchedulerServiceTest extends TestCase
         $result = $service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-3']);
 
         $this->assertSame('success', $result['status']);
+        $this->assertNull($result['next_run_at']);
         $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('last_status'));
         $this->assertSame('success', CronRun::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('status'));
     }
@@ -195,6 +196,29 @@ class CronSchedulerServiceTest extends TestCase
         $this->assertCount(1, $result['skipped']);
         $this->assertSame('task_locked', $result['skipped'][0]['error_message']);
         $this->assertSame('skipped', CronRun::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('status'));
+    }
+
+    public function testUpdateTaskDisablesFutureRunWithoutClearingActiveLock(): void
+    {
+        $now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $now, [
+            'lock_token' => 'existing-lock',
+            'locked_at' => $now,
+        ]);
+
+        $service = $this->makeService(
+            $this->createMock(SupportRoutingEngineService::class),
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, ['enabled' => false]);
+
+        $this->assertFalse($result['enabled']);
+        $this->assertNull($result['next_run_at']);
+        $this->assertFalse($result['is_due']);
+        $this->assertSame('existing-lock', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('lock_token'));
     }
 
     private function seedTask(string $taskKey, string $taskName, int $intervalMinutes, bool $enabled, ?string $nextRunAt, array $overrides = []): void

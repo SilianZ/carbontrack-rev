@@ -55,6 +55,19 @@ class LeaderboardController
                 $taskRun = $this->cronSchedulerService->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'legacy_endpoint', [
                     'request_id' => $request->getAttribute('request_id'),
                 ]);
+                if (($taskRun['status'] ?? null) !== 'success') {
+                    $status = ($taskRun['status'] ?? null) === 'skipped' ? 409 : 503;
+                    $message = $taskRun['error_message'] ?? 'Leaderboard refresh did not complete successfully';
+                    $this->logSystemAudit('leaderboard_refresh_failed', $request, [
+                        'data' => $taskRun,
+                    ], 'failed');
+
+                    return $this->json($response, [
+                        'success' => false,
+                        'message' => $message,
+                        'data' => $taskRun,
+                    ], $status);
+                }
                 $meta = $taskRun['result'] ?? [];
             } else {
                 $snapshot = $this->leaderboardService->rebuildCache('manual-trigger');

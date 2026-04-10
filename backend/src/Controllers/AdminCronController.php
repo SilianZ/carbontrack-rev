@@ -102,10 +102,21 @@ class AdminCronController
             $this->auditLogService->logAdminOperation('admin_cron_task_triggered', $this->actorId($actor), 'admin_cron', [
                 'table' => 'cron_tasks',
                 'request_id' => $request->getAttribute('request_id'),
-                'status' => $result['status'] === 'failed' ? 'failed' : 'success',
+                'status' => ($result['status'] ?? null) === 'success' ? 'success' : 'failed',
                 'request_data' => ['task_key' => $taskKey],
                 'new_data' => $result,
             ]);
+
+            if (($result['status'] ?? null) !== 'success') {
+                $status = ($result['status'] ?? null) === 'skipped' ? 409 : 503;
+
+                return $this->json($response, [
+                    'success' => false,
+                    'message' => $result['error_message'] ?? 'Cron task did not complete successfully',
+                    'code' => 'CRON_TASK_FAILED',
+                    'data' => $result,
+                ], $status);
+            }
 
             return $this->json($response, ['success' => true, 'data' => $result]);
         } catch (\RuntimeException $exception) {

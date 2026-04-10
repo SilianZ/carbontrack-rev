@@ -69,6 +69,24 @@ class SupportTicketController
                     'request_id' => $request->getAttribute('request_id'),
                     'remote_addr' => $this->clientIp($request),
                 ]);
+                if (($taskRun['status'] ?? null) !== 'success') {
+                    $status = ($taskRun['status'] ?? null) === 'skipped' ? 409 : 503;
+                    $message = $taskRun['error_message'] ?? 'SLA sweep did not complete successfully';
+                    $this->auditLogService?->logSystemEvent('support_sla_sweep_endpoint_triggered', 'support_sla_sweep', [
+                        'status' => 'failed',
+                        'request_method' => 'GET',
+                        'endpoint' => (string) $request->getUri()->getPath(),
+                        'request_data' => ['remote_addr' => $this->clientIp($request)],
+                        'new_data' => $taskRun,
+                    ]);
+
+                    return $this->json($response, [
+                        'success' => false,
+                        'message' => $message,
+                        'code' => 'SLA_SWEEP_FAILED',
+                        'data' => $taskRun,
+                    ], $status);
+                }
                 $result = $taskRun['result'] ?? [];
             } else {
                 $result = $this->supportRoutingEngineService->runSlaSweep();

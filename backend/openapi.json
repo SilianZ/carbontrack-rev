@@ -12728,6 +12728,16 @@
               }
             }
           },
+          "409": {
+            "description": "榜单刷新任务当前被锁定或跳过。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Refreshing the leaderboard cache failed.",
             "content": {
@@ -15977,6 +15987,16 @@
               }
             }
           },
+          "409": {
+            "description": "SLA 巡检任务当前被锁定或跳过。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "503": {
             "description": "服务未配置或暂不可用。",
             "content": {
@@ -17413,6 +17433,16 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "筛选参数非法。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -17452,6 +17482,36 @@
           },
           "404": {
             "description": "任务不存在。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "任务当前被锁定或被跳过。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "参数非法。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "任务执行失败。",
             "content": {
               "application/json": {
                 "schema": {

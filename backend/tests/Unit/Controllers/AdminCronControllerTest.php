@@ -117,4 +117,33 @@ class AdminCronControllerTest extends TestCase
 
         $this->assertSame(200, $response->getStatusCode());
     }
+
+    public function testRunTaskReturnsFailureWhenTaskRunFails(): void
+    {
+        $auth = $this->createMock(AuthService::class);
+        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'role' => 'admin', 'is_admin' => true]);
+
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->once())->method('logAdminOperation');
+
+        $scheduler = $this->createMock(CronSchedulerService::class);
+        $scheduler->expects($this->once())
+            ->method('runTaskNow')
+            ->willReturn([
+                'task_key' => 'support_sla_sweep',
+                'status' => 'failed',
+                'error_message' => 'task_failed',
+            ]);
+
+        $controller = $this->makeController($scheduler, $auth, $audit);
+        $response = $controller->runTask(
+            makeRequest('POST', '/api/v1/admin/cron/tasks/support_sla_sweep/run'),
+            new \Slim\Psr7\Response(),
+            ['taskKey' => 'support_sla_sweep']
+        );
+
+        $this->assertSame(503, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertFalse($payload['success']);
+    }
 }
