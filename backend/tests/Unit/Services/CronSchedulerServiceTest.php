@@ -267,6 +267,56 @@ class CronSchedulerServiceTest extends TestCase
         $this->assertSame($result['next_run_at'], CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('next_run_at'));
     }
 
+    public function testNextRunAtUpdateDoesNotOverrideNewLock(): void
+    {
+        $now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $now);
+
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_task_release_relock');
+        self::$capsule->getConnection()->statement("
+            CREATE TRIGGER cron_task_release_relock
+            AFTER UPDATE ON cron_tasks
+            WHEN NEW.task_key = '" . CronSchedulerService::TASK_LEADERBOARD_REFRESH . "'
+              AND OLD.lock_token IS NOT NULL
+              AND NEW.lock_token IS NULL
+            BEGIN
+                UPDATE cron_tasks
+                SET lock_token = 'new-lock',
+                    locked_at = '" . $this->now() . "'
+                WHERE task_key = '" . CronSchedulerService::TASK_LEADERBOARD_REFRESH . "';
+            END;
+        ");
+
+        $leaderboard = $this->createMock(LeaderboardService::class);
+        $leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
+            'generated_at' => '2026-04-10T00:00:00Z',
+            'expires_at' => '2026-04-10T00:10:00Z',
+            'global' => [],
+            'regions' => [],
+            'schools' => [],
+        ]);
+
+        $service = new CronSchedulerService(
+            self::$capsule->getConnection()->getPdo(),
+            $this->createMock(LoggerInterface::class),
+            $this->createMock(AuditLogService::class),
+            $this->createMock(ErrorLogService::class),
+            $this->createMock(SupportRoutingEngineService::class),
+            $this->createMock(BadgeService::class),
+            $leaderboard,
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-6']);
+
+        $this->assertSame('success', $result['status']);
+        $this->assertSame($now, $result['next_run_at']);
+        $this->assertSame($now, CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('next_run_at'));
+        $this->assertSame('new-lock', CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('lock_token'));
+
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_task_release_relock');
+    }
+
     private function seedTask(string $taskKey, string $taskName, int $intervalMinutes, bool $enabled, ?string $nextRunAt, array $overrides = []): void
     {
         CronTask::query()->create(array_merge([

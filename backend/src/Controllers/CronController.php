@@ -68,7 +68,7 @@ class CronController
             ]);
 
             $this->auditLogService->logSystemEvent('cron_run_endpoint_triggered', 'cron_scheduler', [
-                'status' => empty($result['failed']) ? 'success' : 'failed',
+                'status' => !empty($result['failed']) || !empty($result['skipped']) ? 'failed' : 'success',
                 'request_method' => 'GET',
                 'endpoint' => (string) $request->getUri()->getPath(),
                 'request_id' => $request->getAttribute('request_id'),

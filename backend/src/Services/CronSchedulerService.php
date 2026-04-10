@@ -240,12 +240,9 @@ class CronSchedulerService
             $nextRunAt = null;
             if ($freshTask?->enabled) {
                 $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
-                CronTask::query()
-                    ->where('task_key', $taskKey)
-                    ->update([
-                        'next_run_at' => $nextRunAt,
-                        'updated_at' => $finishedAt,
-                    ]);
+                $this->updateNextRunAtIfUnlocked($taskKey, $nextRunAt, $finishedAt);
+                $freshTask = $this->findTask($taskKey);
+                $nextRunAt = $freshTask?->next_run_at;
             }
 
             $run = CronRun::create([
@@ -304,12 +301,9 @@ class CronSchedulerService
             $nextRunAt = null;
             if ($freshTask?->enabled) {
                 $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
-                CronTask::query()
-                    ->where('task_key', $taskKey)
-                    ->update([
-                        'next_run_at' => $nextRunAt,
-                        'updated_at' => $finishedAt,
-                    ]);
+                $this->updateNextRunAtIfUnlocked($taskKey, $nextRunAt, $finishedAt);
+                $freshTask = $this->findTask($taskKey);
+                $nextRunAt = $freshTask?->next_run_at;
             }
 
             $run = CronRun::create([
@@ -462,6 +456,22 @@ class CronSchedulerService
         $sql = 'UPDATE cron_tasks SET ' . implode(', ', $set) . ' WHERE task_key = :task_key AND lock_token = :lock_token_match';
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
+    }
+
+    private function updateNextRunAtIfUnlocked(string $taskKey, string $nextRunAt, string $updatedAt): void
+    {
+        $stmt = $this->db->prepare('
+            UPDATE cron_tasks
+            SET next_run_at = :next_run_at, updated_at = :updated_at
+            WHERE task_key = :task_key
+              AND lock_token IS NULL
+              AND locked_at IS NULL
+        ');
+        $stmt->execute([
+            'next_run_at' => $nextRunAt,
+            'updated_at' => $updatedAt,
+            'task_key' => $taskKey,
+        ]);
     }
 
     private function executeTaskHandler(string $taskKey, string $triggerSource): array

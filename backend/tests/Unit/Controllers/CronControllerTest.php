@@ -162,7 +162,16 @@ class CronControllerTest extends TestCase
             ]);
 
         $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $audit->expects($this->once())
+            ->method('logSystemEvent')
+            ->with(
+                'cron_run_endpoint_triggered',
+                'cron_scheduler',
+                $this->callback(static function (array $context): bool {
+                    return ($context['status'] ?? null) === 'failed';
+                })
+            )
+            ->willReturn(true);
 
         $controller = new CronController(
             $scheduler,
