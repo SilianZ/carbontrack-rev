@@ -10,7 +10,7 @@ import { Button } from '../components/ui/Button';
 import { Alert, AlertDescription } from '../components/ui/Alert';
 
 const NotificationSettingsPage = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'common', 'settings']);
   const queryClient = useQueryClient();
   const [localPrefs, setLocalPrefs] = useState([]);
   const [status, setStatus] = useState(null);

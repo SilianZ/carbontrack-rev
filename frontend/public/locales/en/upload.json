@@ -1,0 +1,16 @@
+{
+  "upload": {
+    "dropFiles": "Drop files here",
+    "clickOrDrag": "Click to upload or drag files here",
+    "supportMultiple": "Supports uploading up to {{max}} files",
+    "supportSingle": "Supports single file upload",
+    "supportedFormats": "Supported formats",
+    "supportedFormatsDetail": "JPG, PNG, GIF, WebP (max 5MB)",
+    "pending": "Uploading",
+    "success": "Upload successful",
+    "error": "Upload failed",
+    "uploading": "Uploading...",
+    "uploadFiles": "Upload {{count}} files",
+    "uploadFile": "Upload file"
+  }
+}

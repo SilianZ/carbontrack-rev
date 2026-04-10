@@ -92,7 +92,7 @@ const resolveBadgeImage = (badge = {}) => resolveR2ImageSource({
 });
 
 export default function BadgeManagement() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common']);
   const [searchParams, setSearchParams] = useSearchParams();
   const [badges, setBadges] = useState([]);
   const [loading, setLoading] = useState(true);

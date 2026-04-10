@@ -29,7 +29,7 @@ import { toast } from 'react-hot-toast';
 import { formatDateSafe } from '../../lib/utils';
 
 export function PasskeyManagement() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'profile']);
   const queryClient = useQueryClient();
   const [passkeySupport, setPasskeySupport] = useState(null);
   const [editingPasskey, setEditingPasskey] = useState(null);

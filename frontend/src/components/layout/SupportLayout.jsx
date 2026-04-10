@@ -21,7 +21,7 @@ const NAV_LINKS = [
 ];
 
 export default function SupportLayout() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['nav', 'support']);
   const location = useLocation();
 
   const translatedLinks = useMemo(() => NAV_LINKS.map((link) => ({

@@ -49,7 +49,7 @@ function loadStoredColumns(key, fallback) {
 }
 
 export default function SystemLogsPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common', 'errors']);
 
   const [q, setQ] = useState('');
   const [dateFrom, setDateFrom] = useState('');

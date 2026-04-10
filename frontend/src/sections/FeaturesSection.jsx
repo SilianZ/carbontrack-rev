@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Calculator, Award, TrendingUp, Users } from 'lucide-react';
 
 export default function FeaturesSection(){
-  const { t } = useTranslation();
+  const { t } = useTranslation(['home']);
   return (
     <section className="py-20 px-4">
       <div className="max-w-7xl mx-auto">

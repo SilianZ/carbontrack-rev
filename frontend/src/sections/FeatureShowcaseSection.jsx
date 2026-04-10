@@ -12,7 +12,7 @@ const ICONS = {
 };
 
 export default function FeatureShowcaseSection() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['home']);
   const cards = t('home.featureShowcase.cards', { returnObjects: true }) || [];
 
   return (

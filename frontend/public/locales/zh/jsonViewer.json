@@ -1,0 +1,25 @@
+{
+  "jsonViewer": {
+    "root": "根",
+    "searchPlaceholder": "搜索键或值",
+    "expandAll": "全部展开",
+    "collapseAll": "全部折叠",
+    "copyJson": "复制 JSON",
+    "copyPath": "复制路径",
+    "copyValue": "复制值",
+    "expandNode": "展开节点",
+    "collapseNode": "折叠节点",
+    "copied": "已复制",
+    "noData": "暂无数据",
+    "typeLabels": {
+      "object": "对象",
+      "array": "数组",
+      "string": "字符串",
+      "number": "数字",
+      "boolean": "布尔",
+      "null": "空",
+      "undefined": "未定义",
+      "unknown": "未知"
+    }
+  }
+}

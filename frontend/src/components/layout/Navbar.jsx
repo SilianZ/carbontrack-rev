@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -19,21 +19,26 @@ import {
 import { useTranslation } from '../../hooks/useTranslation';
 import { checkAuthStatus, authAPI, hasSupportPortalAccess } from '../../lib/auth';
 import { useUnreadMessagesCount } from '../../hooks/useUnreadMessagesCount';
-import LanguageSwitcher from '../LanguageSwitcher';
-import { ThemeToggle } from '../ThemeToggle';
 import { Button } from '../ui/Button';
-import R2Image from '../common/R2Image';
+
+const LanguageSwitcher = React.lazy(() => import('../LanguageSwitcher'));
+const ThemeToggle = React.lazy(() => import('../ThemeToggle').then((module) => ({ default: module.ThemeToggle })));
+const R2Image = React.lazy(() => import('../common/R2Image'));
 
 const NAV_SECTION_ORDER = ['overview', 'insights', 'marketplace'];
 
 export function Navbar() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['nav']);
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const hasRefreshedUserRef = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { count: unreadCount, isLoading: unreadLoading } = useUnreadMessagesCount();
+  const [showSecondaryControls, setShowSecondaryControls] = useState(false);
+  const { count: unreadCount, isLoading: unreadLoading } = useUnreadMessagesCount({
+    enabled: location.pathname !== '/',
+  });
   const navigate = useNavigate();
   const getIsPortrait = () => {
     if (typeof window === 'undefined' || !window.matchMedia) {
@@ -50,25 +55,29 @@ export function Navbar() {
     setIsAuthenticated(authStatus);
     setUser(currentUser);
 
+    if (!authStatus || hasRefreshedUserRef.current || location.pathname === '/') {
+      return undefined;
+    }
+
     let cancelled = false;
 
-    if (authStatus) {
-      (async () => {
-        try {
-          const freshUser = await authAPI.getCurrentUser();
-          if (!cancelled && freshUser) {
-            setUser(freshUser);
-          }
-        } catch (error) {
-          console.error('Failed to refresh current user information', error);
+    (async () => {
+      try {
+        const freshUser = await authAPI.getCurrentUser();
+        if (!cancelled && freshUser) {
+          hasRefreshedUserRef.current = true;
+          setUser(freshUser);
         }
-      })();
-    }
+      } catch (error) {
+        hasRefreshedUserRef.current = false;
+        console.error('Failed to refresh current user information', error);
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {
@@ -123,6 +132,44 @@ export function Navbar() {
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (showSecondaryControls) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    let idleHandle = null;
+    const timeoutHandle = window.setTimeout(() => {
+      const activate = () => {
+        if (cancelled) {
+          return;
+        }
+
+        if (typeof React.startTransition === 'function') {
+          React.startTransition(() => setShowSecondaryControls(true));
+          return;
+        }
+
+        setShowSecondaryControls(true);
+      };
+
+      if (typeof window.requestIdleCallback === 'function') {
+        idleHandle = window.requestIdleCallback(activate, { timeout: 1500 });
+        return;
+      }
+
+      activate();
+    }, 1200);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutHandle);
+      if (idleHandle != null && typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(idleHandle);
+      }
+    };
+  }, [showSecondaryControls]);
 
   const mobilePanelId = 'navbar-mobile-panel';
   const canAccessSupportPortal = hasSupportPortalAccess(user);
@@ -309,13 +356,15 @@ export function Navbar() {
     const resolvedFilePath = avatarPath || (!isAbsoluteUrl ? avatarUrl : undefined);
 
     return (
-      <R2Image
-        filePath={resolvedFilePath}
-        src={isAbsoluteUrl ? avatarUrl : undefined}
-        alt={user?.username || 'avatar'}
-        className={`${sizeClass} rounded-full border border-border object-cover`}
-        fallback={fallback}
-      />
+      <React.Suspense fallback={fallback}>
+        <R2Image
+          filePath={resolvedFilePath}
+          src={isAbsoluteUrl ? avatarUrl : undefined}
+          alt={user?.username || 'avatar'}
+          className={`${sizeClass} rounded-full border border-border object-cover`}
+          fallback={fallback}
+        />
+      </React.Suspense>
     );
   };
 
@@ -445,17 +494,26 @@ export function Navbar() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <LanguageSwitcher
-                        variant="outline"
-                        size="sm"
-                        showText={false}
-                        className="border-border bg-background/80 text-foreground hover:bg-accent"
-                      />
-                      <ThemeToggle
-                        variant="outline"
-                        size="icon"
-                        className="border-border bg-background/80 text-foreground hover:bg-accent"
-                      />
+                      {showSecondaryControls ? (
+                        <React.Suspense fallback={null}>
+                          <LanguageSwitcher
+                            variant="outline"
+                            size="sm"
+                            showText={false}
+                            className="border-border bg-background/80 text-foreground hover:bg-accent"
+                          />
+                          <ThemeToggle
+                            variant="outline"
+                            size="icon"
+                            className="border-border bg-background/80 text-foreground hover:bg-accent"
+                          />
+                        </React.Suspense>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <div className="h-9 w-9 rounded-md border border-border bg-background/80" />
+                          <div className="h-9 w-9 rounded-md border border-border bg-background/80" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -592,14 +650,23 @@ export function Navbar() {
 
           {/* Desktop User Menu */}
           <div className="hidden md:flex items-center space-x-2">
-            <LanguageSwitcher
-              variant="outline"
-              className="rounded-xl border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
-            />
-            <ThemeToggle
-              variant="outline"
-              className="rounded-xl border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
-            />
+            {showSecondaryControls ? (
+              <React.Suspense fallback={null}>
+                <LanguageSwitcher
+                  variant="outline"
+                  className="rounded-xl border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
+                />
+                <ThemeToggle
+                  variant="outline"
+                  className="rounded-xl border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
+                />
+              </React.Suspense>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <div className="h-10 w-[88px] rounded-xl border border-border bg-background" />
+                <div className="h-10 w-10 rounded-xl border border-border bg-background" />
+              </div>
+            )}
             
             {isAuthenticated ? (
               <div className="flex items-center space-x-3">

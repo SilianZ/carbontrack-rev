@@ -1,0 +1,14 @@
+{
+  "success": {
+    "login": "Login successful",
+    "register": "Registration successful",
+    "logout": "Logout successful",
+    "save": "Save successful",
+    "delete": "Delete successful",
+    "update": "Update successful",
+    "create": "Create successful",
+    "upload": "Upload successful",
+    "send": "Send successful",
+    "verify": "Verification successful"
+  }
+}

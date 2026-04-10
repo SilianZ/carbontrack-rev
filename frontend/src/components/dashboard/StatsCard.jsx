@@ -13,7 +13,7 @@ export function StatsCard({
   color = 'blue',
   loading = false 
 }) {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['dashboard']);
   const colorClasses = {
     blue: {
       bg: 'bg-blue-500/12',

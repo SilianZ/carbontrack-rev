@@ -19,7 +19,7 @@ export function RequestIdRelatedDrawer({
   error,
   llm
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common', 'errors']);
   const [systemDetails, setSystemDetails] = useState({});
   const [llmDetails, setLlmDetails] = useState({});
   const [detailLoading, setDetailLoading] = useState({ system: {}, llm: {} });

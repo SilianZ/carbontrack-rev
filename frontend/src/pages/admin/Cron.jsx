@@ -52,7 +52,7 @@ function taskStatusTone(status) {
 }
 
 export default function AdminCronPage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['admin', 'common', 'errors']);
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
   const queryClient = useQueryClient();
   const [taskFilter, setTaskFilter] = useState('all');
@@ -98,7 +98,7 @@ export default function AdminCronPage() {
     ({ taskKey, payload }) => adminAPI.updateCronTask(taskKey, payload),
     {
       onSuccess: () => {
-        toast.success(t('adminCron.messages.saved'));
+        toast.success(t('admin.cron.messages.saved'));
         queryClient.invalidateQueries(['admin-cron-tasks']);
       },
       onError: (error) => {
@@ -111,7 +111,7 @@ export default function AdminCronPage() {
     (taskKey) => adminAPI.runCronTask(taskKey),
     {
       onSuccess: () => {
-        toast.success(t('adminCron.messages.executed'));
+        toast.success(t('admin.cron.messages.executed'));
         queryClient.invalidateQueries(['admin-cron-tasks']);
         queryClient.invalidateQueries(['admin-cron-runs']);
       },
@@ -132,28 +132,28 @@ export default function AdminCronPage() {
     <div className="space-y-6">
       <section className="rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f5fbff_100%)] px-6 py-6 shadow-sm dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.95)_0%,rgba(14,116,144,0.18)_100%)]">
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-600/80 dark:text-sky-300/80">
-          {t('adminCron.eyebrow')}
+          {t('admin.cron.eyebrow')}
         </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{t('adminCron.title')}</h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">{t('adminCron.subtitle')}</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{t('admin.cron.title')}</h1>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">{t('admin.cron.subtitle')}</p>
       </section>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t('adminCron.summary.enabled')}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t('admin.cron.summary.enabled')}</p>
             <p className="mt-3 text-3xl font-semibold">{summary.enabled}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t('adminCron.summary.due')}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t('admin.cron.summary.due')}</p>
             <p className="mt-3 text-3xl font-semibold">{summary.due}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t('adminCron.summary.failed')}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t('admin.cron.summary.failed')}</p>
             <p className="mt-3 text-3xl font-semibold">{summary.failed}</p>
           </CardContent>
         </Card>
@@ -162,12 +162,12 @@ export default function AdminCronPage() {
       <Card>
         <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <CardTitle>{t('adminCron.tasks.title')}</CardTitle>
-            <CardDescription>{t('adminCron.tasks.subtitle')}</CardDescription>
+            <CardTitle>{t('admin.cron.tasks.title')}</CardTitle>
+            <CardDescription>{t('admin.cron.tasks.subtitle')}</CardDescription>
           </div>
           <Button type="button" variant="outline" onClick={() => queryClient.invalidateQueries(['admin-cron-tasks'])}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            {t('adminCron.actions.refresh')}
+            {t('admin.cron.actions.refresh')}
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -195,26 +195,26 @@ export default function AdminCronPage() {
                       </Badge>
                       {task.is_due ? (
                         <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-                          {t('adminCron.tasks.dueNow')}
+                          {t('admin.cron.tasks.dueNow')}
                         </Badge>
                       ) : null}
                     </div>
                     <p className="text-sm text-slate-600 dark:text-slate-300">{task.description || '--'}</p>
                     <div className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('adminCron.tasks.nextRun')}</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('admin.cron.tasks.nextRun')}</p>
                         <p className="mt-2">{formatDateTime(task.next_run_at, locale)}</p>
                       </div>
                       <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('adminCron.tasks.lastFinished')}</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('admin.cron.tasks.lastFinished')}</p>
                         <p className="mt-2">{formatDateTime(task.last_finished_at, locale)}</p>
                       </div>
                       <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('adminCron.tasks.duration')}</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('admin.cron.tasks.duration')}</p>
                         <p className="mt-2">{task.last_duration_ms ?? '--'} ms</p>
                       </div>
                       <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('adminCron.tasks.failures')}</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('admin.cron.tasks.failures')}</p>
                         <p className="mt-2">{task.consecutive_failures ?? 0}</p>
                       </div>
                     </div>
@@ -227,7 +227,7 @@ export default function AdminCronPage() {
 
                   <div className="grid gap-3 sm:grid-cols-[140px_160px_auto] xl:w-[420px]">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">{t('adminCron.tasks.enabled')}</label>
+                      <label className="text-sm font-medium">{t('admin.cron.tasks.enabled')}</label>
                       <div className="flex h-10 items-center rounded-xl border border-slate-200 bg-white px-3 dark:border-white/10 dark:bg-slate-950/70">
                         <Switch
                           checked={Boolean(draft.enabled)}
@@ -239,7 +239,7 @@ export default function AdminCronPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">{t('adminCron.tasks.intervalMinutes')}</label>
+                      <label className="text-sm font-medium">{t('admin.cron.tasks.intervalMinutes')}</label>
                       <Input
                         type="number"
                         min="1"
@@ -264,7 +264,7 @@ export default function AdminCronPage() {
                         })}
                         loading={saveTaskMutation.isLoading}
                       >
-                        {t('adminCron.actions.save')}
+                        {t('admin.cron.actions.save')}
                       </Button>
                       <Button
                         type="button"
@@ -286,16 +286,16 @@ export default function AdminCronPage() {
       <Card>
         <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <CardTitle>{t('adminCron.runs.title')}</CardTitle>
-            <CardDescription>{t('adminCron.runs.subtitle')}</CardDescription>
+            <CardTitle>{t('admin.cron.runs.title')}</CardTitle>
+            <CardDescription>{t('admin.cron.runs.subtitle')}</CardDescription>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Select value={taskFilter} onValueChange={setTaskFilter}>
               <SelectTrigger className="min-w-[220px]">
-                <SelectValue placeholder={t('adminCron.filters.task')} />
+                <SelectValue placeholder={t('admin.cron.filters.task')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('adminCron.filters.allTasks')}</SelectItem>
+                <SelectItem value="all">{t('admin.cron.filters.allTasks')}</SelectItem>
                 {tasks.map((task) => (
                   <SelectItem key={task.task_key} value={task.task_key}>
                     {task.task_name}
@@ -305,13 +305,13 @@ export default function AdminCronPage() {
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="min-w-[180px]">
-                <SelectValue placeholder={t('adminCron.filters.status')} />
+                <SelectValue placeholder={t('admin.cron.filters.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('adminCron.filters.allStatuses')}</SelectItem>
-                <SelectItem value="success">{t('adminCron.status.success')}</SelectItem>
-                <SelectItem value="failed">{t('adminCron.status.failed')}</SelectItem>
-                <SelectItem value="skipped">{t('adminCron.status.skipped')}</SelectItem>
+                <SelectItem value="all">{t('admin.cron.filters.allStatuses')}</SelectItem>
+                <SelectItem value="success">{t('admin.cron.status.success')}</SelectItem>
+                <SelectItem value="failed">{t('admin.cron.status.failed')}</SelectItem>
+                <SelectItem value="skipped">{t('admin.cron.status.skipped')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -325,7 +325,7 @@ export default function AdminCronPage() {
           ) : null}
 
           {!runs.length && !runsQuery.isLoading ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">{t('adminCron.runs.empty')}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{t('admin.cron.runs.empty')}</p>
           ) : null}
 
           {runs.map((run) => (

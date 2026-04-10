@@ -7,7 +7,7 @@ import { Button } from '../ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 
 export function ActivityDetailModal({ activity, isOpen, onClose }) {
-   const { t } = useTranslation();
+   const { t } = useTranslation(['activities', 'common', 'date', 'units']);
 
   if (!isOpen || !activity) return null;
 

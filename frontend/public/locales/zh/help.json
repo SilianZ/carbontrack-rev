@@ -1,0 +1,28 @@
+{
+  "help": {
+    "hero": {
+      "eyebrow": "帮助中心",
+      "title": "提交工单，集中跟进。",
+      "subtitle": "这里处理网站故障、账号问题、功能建议和商务协作。",
+      "primaryAction": "查看我的工单",
+      "loginAction": "登录后提交工单",
+      "secondaryAction": "查看联系方式"
+    },
+    "panel": {
+      "title": "工单处理",
+      "body": "提交后，回复、附件和状态变化都会集中保留在同一条线程。"
+    },
+    "highlights": {
+      "threadTitle": "统一跟进",
+      "threadDescription": "后续补充、客服回复和处理状态都在同一处查看。",
+      "verificationTitle": "受保护提交",
+      "verificationDescription": "提交和回复都需要验证，并校验附件归属。"
+    },
+    "categories": {
+      "title": "常见问题类型",
+      "subtitle": "先选最接近的分类，再补充细节和附件。"
+    },
+    "loginNotice": "登录后可提交工单、上传附件并持续查看回复。",
+    "recentGuest": "登录后可查看最近工单和处理进度。"
+  }
+}

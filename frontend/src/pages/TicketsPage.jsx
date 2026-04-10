@@ -144,7 +144,7 @@ function TicketPreview({ ticket, t, locale }) {
 }
 
 export default function TicketsPage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['common', 'date', 'support']);
   const navigate = useNavigate();
   const [status, setStatus] = useState('all');
   const [selectedTicketId, setSelectedTicketId] = useState(null);

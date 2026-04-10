@@ -34,7 +34,7 @@ const useDebouncedValue = (value, delay = 350) => {
 };
 
 export function ProfileForm({ user }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'profile']);
   const queryClient = useQueryClient();
   const turnstileRef = useRef(null);
 

@@ -1,0 +1,173 @@
+{
+  "home": {
+    "hero": {
+      "title": "Track Your Carbon Footprint, Create a Green Future",
+      "subtitle": "Record your environmental actions, calculate carbon reduction, earn reward points, and contribute to Earth's environmental protection together with global users.",
+      "getStarted": "Get Started",
+      "signIn": "Sign In",
+      "goToDashboard": "Go to Dashboard",
+      "recordActivity": "Record Activity",
+      "activeHighlight": "Current highlight",
+      "switchHighlight": "Switch highlight",
+      "carouselPrevious": "Previous slide",
+      "carouselNext": "Next slide",
+      "carouselPlay": "Resume autoplay",
+      "carouselPause": "Pause autoplay",
+      "carouselGoTo": "Go to slide {{index}}",
+      "highlights": [
+        {
+          "title": "Track Your Impact",
+          "description": "Measure how every action translates into tangible carbon reductions."
+        },
+        {
+          "title": "Earn Meaningful Rewards",
+          "description": "Collect credits and unlock badges, certificates, and community recognition."
+        },
+        {
+          "title": "Lead Your Community",
+          "description": "Inspire classmates and friends to build sustainable habits together."
+        }
+      ]
+    },
+    "stats": {
+      "users": "Registered Users",
+      "activities": "Carbon Records Logged",
+      "carbonSaved": "Carbon Saved",
+      "rewards": "Points Awarded",
+      "newUsers30d": "{{value}} new in 30 days",
+      "approvedRecords": "{{value}} approved records",
+      "carbonLast7Days": "Last 7 days: {{value}}",
+      "transactionsLast7": "{{value}} transactions in 7 days",
+      "updatedAt": "Updated {{time}}",
+      "loadError": "We couldn't load the latest community statistics. Please try again."
+    },
+    "features": {
+      "title": "Why Choose CarbonTrack?",
+      "subtitle": "We provide a complete carbon footprint tracking solution, making environmental actions simple and fun.",
+      "calculate": {
+        "title": "Precise Calculation",
+        "description": "Based on scientific algorithms to accurately calculate your carbon reduction"
+      },
+      "rewards": {
+        "title": "Points Rewards",
+        "description": "Earn points for environmental actions and exchange for rich prizes"
+      },
+      "tracking": {
+        "title": "Data Tracking",
+        "description": "Visualize your environmental achievements and progress"
+      },
+      "community": {
+        "title": "Community Interaction",
+        "description": "Share experiences and achievements with global environmental enthusiasts"
+      }
+    },
+    "howItWorks": {
+      "title": "How to Use?",
+      "subtitle": "Three simple steps to start your environmental journey",
+      "step1": {
+        "title": "Record Activity",
+        "description": "Record your daily environmental actions, such as walking, cycling, energy saving, etc."
+      },
+      "step2": {
+        "title": "Calculate Reduction",
+        "description": "The system automatically calculates your carbon reduction and gives point rewards"
+      },
+      "step3": {
+        "title": "Exchange Rewards",
+        "description": "Use points to exchange for environmental products or participate in public welfare activities"
+      }
+    },
+    "cta": {
+      "title": "Ready to Start Your Environmental Journey?",
+      "subtitle": "Join our community and contribute to Earth's environmental protection together with global users.",
+      "joinNow": "Join Now"
+    },
+    "trust": {
+      "secure": "Secure and Reliable",
+      "secureDescription": "Data security, privacy protection",
+      "verified": "Data Verification",
+      "verifiedDescription": "Scientific verification, authoritative certification",
+      "community": "Active Community",
+      "communityDescription": "Active community, grow together"
+    },
+    "announcements": {
+      "title": "What's New at CarbonTrack",
+      "subtitle": "Stay updated with the latest announcements from our sustainability community.",
+      "items": [
+        {
+          "id": "feedback",
+          "title": "We love hearing from you",
+          "description": "Share suggestions at carbontrack666@gmail.com so we can keep improving your experience."
+        },
+        {
+          "id": "rewards",
+          "title": "Carbon rewards are live",
+          "description": "Log eco-friendly activities to earn credits, certificates, and surprise thank-you notes."
+        },
+        {
+          "id": "community",
+          "title": "Open to every changemaker",
+          "description": "Students lead the way, but anyone passionate about sustainability can join the movement."
+        },
+        {
+          "id": "integrity",
+          "title": "Fair play matters",
+          "description": "Verified records keep the carbon marketplace transparent—no shortcuts, just authentic impact."
+        }
+      ]
+    },
+    "featureShowcase": {
+      "title": "Designed for a modern carbon journey",
+      "subtitle": "Powerful tools that make climate action personal, trackable, and rewarding.",
+      "cards": [
+        {
+          "id": "footprint",
+          "title": "Understand your footprint",
+          "subtitle": "Everyday actions, measurable outcomes",
+          "description": "CarbonTrack translates daily activities into accurate CO2 reductions so you can see where you create the biggest impact.",
+          "highlights": [
+            "Science-based factors tailored for campus life",
+            "Instant feedback every time you submit a record",
+            "Progress snapshots to celebrate milestones"
+          ]
+        },
+        {
+          "id": "analytics",
+          "title": "Beautiful insights",
+          "subtitle": "Dashboards built for storytelling",
+          "description": "Interactive charts surface trends across weeks, months, and classes—perfect for sustainability reports or school showcases.",
+          "highlights": [
+            "Compare team performance at a glance",
+            "Automatic trend analysis highlights successes",
+            "Export-ready metrics for presentations"
+          ]
+        },
+        {
+          "id": "rewards",
+          "title": "Motivate with rewards",
+          "subtitle": "Credits, badges, recognition",
+          "description": "Gamified incentives keep students excited—redeem points, unlock achievements, and build momentum together.",
+          "highlights": [
+            "Flexible reward catalog for schools",
+            "Digital badges that showcase leadership",
+            "Verified records maintain program integrity"
+          ]
+        },
+        {
+          "id": "community",
+          "title": "Grow a climate community",
+          "subtitle": "Where ideas spark action",
+          "description": "Announcements, challenges, and team shout-outs nurture a culture of collaboration across campuses.",
+          "highlights": [
+            "Host challenges and leaderboard events",
+            "Spotlight outstanding contributors",
+            "Share stories that inspire new habits"
+          ]
+        }
+      ]
+    },
+    "fab": {
+      "label": "Log an activity"
+    }
+  }
+}

@@ -65,6 +65,8 @@ The frontend is a modern SPA.
 - **Routing**: `react-router-dom` is used for client-side routing. Page components are in `frontend/src/pages/`.
 - **Data Fetching**: Use the pre-configured `axios` instance for API requests, integrated with TanStack Query.
 - **Forms**: Use **React Hook Form** with **Zod** for schema-based validation.
+- **I18n**: The frontend uses **i18next** with namespace-based locale files. Treat `frontend/public/locales/<lng>/<namespace>.json` as the runtime translation source, keep translation keys namespaced (for example `home.hero.title`), and use page/component-specific `useTranslation([...])` calls instead of relying on a single global namespace. The previous monolithic locale layout is no longer the maintenance target.
+- **Bundled Critical Language Namespaces**: The homepage-critical namespaces (`home`, `nav`) are mirrored under `frontend/src/locales-generated/<lng>/` for supported languages and may be preloaded during i18n bootstrap for the detected current language and, when it differs, the fallback/default language. Keep those generated mirrors aligned with `frontend/public/locales/<lng>/`.
 
 ### Developer Workflow
 - **Setup**: Run `pnpm install` in the `frontend` directory.
@@ -74,6 +76,8 @@ The frontend is a modern SPA.
     - Run `pnpm lint` and ensure it passes before committing. Treat passing ESLint as a required quality gate alongside backend `composer test`.
     - Run `pnpm build` to validate syntax, type-checking, and bundling issues before committing.
     - Do NOT execute `pnpm dev` within this AI session if terminal output cannot be captured; rely on local/CI builds instead, and keep code lint/type-clean.
+    - If you add or change UI copy, translation keys, or namespaces, update the relevant locale namespace files for both `frontend/public/locales/zh/` and `frontend/public/locales/en/`. Do not reintroduce new strings into a catch-all `common.json` pattern when a more specific namespace exists.
+    - If the copy change touches bundled homepage namespaces (`home`, `nav`), also update the mirrored files in `frontend/src/locales-generated/<lng>/` for each supported language you changed.
     - If new admin UI flows, functions, labels, or session-audit displays are introduced, update any corresponding AI knowledge base entries (e.g., adjust keywords, routes, tools, and confirmation metadata in `backend/config/admin_ai_commands.json`) so the admin AI surfaces them correctly.
 
 ## Admin AI Maintenance

@@ -1,6 +1,14 @@
-import api from './api';
-
 const DEV_AUTH_TRUTHY_VALUES = new Set(['1', 'true', 'yes', 'on']);
+
+let apiPromise;
+
+const getApi = async () => {
+  if (!apiPromise) {
+    apiPromise = import('./api').then((module) => module.default);
+  }
+
+  return apiPromise;
+};
 
 const isDevTruthy = (value) => DEV_AUTH_TRUTHY_VALUES.has(String(value || '').toLowerCase());
 
@@ -184,6 +192,7 @@ export const bootstrapDevAuthFromEnv = () => {
 // 认证API (注意：这些方法也在 api.js 中的 authAPI 对象中定义了，建议统一使用)
 export const authAPI = {
   async login(credentials) {
+    const api = await getApi();
     const response = await api.post('/auth/login', credentials);
     
     if (response.data.success) {
@@ -196,6 +205,7 @@ export const authAPI = {
   },
 
   async loginWithPasskey(data) {
+    const api = await getApi();
     const response = await api.post('/auth/passkey/login/verify', data);
     
     if (response.data.success) {
@@ -208,6 +218,7 @@ export const authAPI = {
   },
 
   async register(userData) {
+    const api = await getApi();
     const response = await api.post('/auth/register', userData);
     
     if (response.data.success && response.data.data) {
@@ -225,6 +236,7 @@ export const authAPI = {
 
   async logout() {
     try {
+      const api = await getApi();
       await api.post('/auth/logout');
     } catch (error) {
       console.warn('Logout API call failed:', error);
@@ -236,6 +248,7 @@ export const authAPI = {
 
   async getCurrentUser() {
     try {
+      const api = await getApi();
       const response = await api.get('/users/me');
       if (response.data.success) {
         userManager.setUser(response.data.data);
@@ -249,12 +262,14 @@ export const authAPI = {
   },
 
   async forgotPassword(payload) {
+    const api = await getApi();
     const body = typeof payload === 'string' ? { email: payload } : payload;
     const response = await api.post('/auth/forgot-password', body);
     return response.data;
   },
 
   async resetPassword(token, password, confirmPassword) {
+    const api = await getApi();
     const response = await api.post('/auth/reset-password', {
       token,
       password,
@@ -264,6 +279,7 @@ export const authAPI = {
   },
 
   async changePassword(currentPassword, newPassword, confirmPassword) {
+    const api = await getApi();
     const response = await api.post('/auth/change-password', {
       current_password: currentPassword,
       new_password: newPassword,
@@ -273,12 +289,14 @@ export const authAPI = {
   },
 
   async sendVerificationCode(payload) {
+    const api = await getApi();
     const body = typeof payload === 'string' ? { email: payload } : payload;
     const response = await api.post('/auth/send-verification-code', body);
     return response.data;
   },
 
   async verifyEmail(data) {
+    const api = await getApi();
     const response = await api.post('/auth/verify-email', data);
     if (response.data?.success && response.data?.data) {
       const { token, user } = response.data.data;
@@ -432,8 +450,9 @@ export const setupTokenRefresh = () => {
 };
 
 // 初始化认证
-export const initAuth = () => {
-  // 设置API拦截器
+export const initAuth = async () => {
+  const api = await getApi();
+
   api.interceptors.request.use((config) => {
     const token = tokenManager.getToken();
     if (token) {
@@ -453,7 +472,6 @@ export const initAuth = () => {
     }
   );
 
-  // 启动token自动刷新
   setupTokenRefresh();
 };
 

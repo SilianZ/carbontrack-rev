@@ -226,7 +226,7 @@ function topFactorsLabel(value) {
 }
 
 export default function AdminSupportOpsPage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['adminSupport', 'common', 'date', 'errors', 'messages', 'profile', 'support']);
   const queryClient = useQueryClient();
   const [tab, setTab] = useState('team');
   const [settingsTab, setSettingsTab] = useState('rules');

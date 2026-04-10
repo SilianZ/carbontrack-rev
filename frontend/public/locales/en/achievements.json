@@ -1,0 +1,45 @@
+{
+  "achievements": {
+    "title": "My Achievements",
+    "subtitle": "Review the badges you've unlocked and your progress.",
+    "refresh": "Refresh",
+    "loadError": "Failed to load achievements",
+    "summary": {
+      "totalBadges": "Total badges",
+      "totalBadgesHint": "Total number of achievement badges currently available.",
+      "unlocked": "Unlocked",
+      "unlockedHint": "Number of badges you have already earned.",
+      "pointsFromBadges": "Earned {{points}} points",
+      "locked": "Locked",
+      "lockedHint": "Keep completing eco actions to unlock more badges.",
+      "completion": "Completion",
+      "completionHint": "Current badge unlock progress in percent."
+    },
+    "labels": {
+      "unnamedBadge": "Unnamed badge"
+    },
+    "unlocked": {
+      "title": "Unlocked badges",
+      "description": "Great job! You've unlocked these achievement badges.",
+      "empty": "No badges unlocked yet. Complete more eco actions to get started.",
+      "awardedAt": "Unlocked on"
+    },
+    "locked": {
+      "title": "Locked badges",
+      "description": "Complete more environmental actions to unlock these badges.",
+      "empty": "Awesome! You have unlocked every badge.",
+      "requirements": "Requirements"
+    },
+    "timeline": {
+      "title": "Achievement timeline",
+      "description": "Relive each memorable milestone.",
+      "empty": "No achievement records yet—complete some eco actions first."
+    },
+    "monthly": {
+      "description": "New badges and point rewards earned this month."
+    },
+    "leaderboard": {
+      "description": "See the top eco champions in the community."
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "contact": {
+    "hero": {
+      "eyebrow": "Contact CarbonTrack",
+      "title": "Public contact channels",
+      "subtitle": "Use these routes for partnerships, media, and general questions.",
+      "primaryAction": "Send email",
+      "secondaryAction": "Go to help"
+    },
+    "panel": {
+      "title": "Need a ticket?",
+      "body": "For bug reports, account issues, and product requests, use the help center."
+    },
+    "methods": {
+      "emailTitle": "Email",
+      "emailDescription": "Best for general questions, partnerships, and document sharing.",
+      "phoneTitle": "Phone",
+      "phoneDescription": "Best when you need a direct conversation.",
+      "addressTitle": "Address",
+      "addressDescription": "CarbonTrack team operations and collaboration base."
+    },
+    "linksTitle": "More links",
+    "links": [
+      {
+        "type": "email",
+        "label": "Contact us",
+        "href": "mailto:{{email}}"
+      },
+      {
+        "type": "instagram",
+        "label": "Follow on Instagram",
+        "href": "https://www.instagram.com/carbontrackorg/",
+        "external": true
+      },
+      {
+        "type": "discord",
+        "label": "Join Discord",
+        "href": "https://discord.gg/nPzMrJAyjY",
+        "external": true
+      },
+      {
+        "type": "partnership",
+        "label": "Partnerships",
+        "href": "https://carbontrack.org/partners",
+        "external": true
+      }
+    ]
+  }
+}

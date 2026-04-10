@@ -17,19 +17,21 @@ const formatCarbon = (value, t) => {
   return `${carbonFormatter.format(numericValue)} ${t('units.kg')}`;
 };
 
-export function Footer() {
-  const { t } = useTranslation();
-  const { data: summaryData } = useQuery(
+export function Footer({ summaryData = null, enableLiveSummary = true }) {
+  const { t } = useTranslation(['footer', 'units']);
+  const { data: liveSummaryData } = useQuery(
     ['public-stats-summary'],
     async () => {
       const response = await statsAPI.getPublicSummary();
       return response.data?.data ?? null;
     },
     {
+      enabled: enableLiveSummary && summaryData == null,
       staleTime: 60_000,
       refetchOnWindowFocus: false,
     }
   );
+  const effectiveSummaryData = summaryData ?? liveSummaryData ?? null;
 
   const currentYear = new Date().getFullYear();
   const appVersion = useMemo(() => {
@@ -182,19 +184,19 @@ export function Footer() {
             <div className="flex items-center gap-6 text-sm text-gray-300">
               <div className="text-center">
                 <div className="font-semibold text-white">
-                  {summaryData ? formatNumber(summaryData.total_users ?? 0) : '...'}
+                  {effectiveSummaryData ? formatNumber(effectiveSummaryData.total_users ?? 0) : '...'}
                 </div>
                 <div>{t('footer.users')}</div>
               </div>
               <div className="text-center">
                 <div className="font-semibold text-white">
-                  {summaryData ? formatNumber(summaryData.total_records ?? 0) : '...'}
+                  {effectiveSummaryData ? formatNumber(effectiveSummaryData.total_records ?? 0) : '...'}
                 </div>
                 <div>{t('footer.activities')}</div>
               </div>
               <div className="text-center">
                 <div className="font-semibold text-white">
-                  {summaryData ? formatCarbon(summaryData.total_carbon_saved ?? 0, t) : '...'}
+                  {effectiveSummaryData ? formatCarbon(effectiveSummaryData.total_carbon_saved ?? 0, t) : '...'}
                 </div>
                 <div>{t('footer.carbonSaved')}</div>
               </div>

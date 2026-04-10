@@ -1,0 +1,21 @@
+{
+  "products": {
+    "title": "积分商城",
+    "exchange": "兑换",
+    "points": "积分",
+    "stock": "库存",
+    "description": "描述",
+    "exchangeHistory": "兑换历史",
+    "confirmExchange": "确认兑换",
+    "exchangeSuccess": "兑换成功",
+    "insufficientPoints": "积分不足",
+    "outOfStock": "缺货",
+    "name": "商品名称",
+    "price": "价格",
+    "category": "分类",
+    "carbonOffset": "碳抵消",
+    "sustainableProduct": "可持续产品",
+    "greenLifestyle": "绿色生活方式",
+    "images": "商品图片"
+  }
+}

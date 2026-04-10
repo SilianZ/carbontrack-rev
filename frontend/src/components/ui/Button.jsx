@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/cn';
 import { baseButtonClasses, buttonSizeClasses, buttonVariantClasses } from './button-variants';
 
 const Button = React.forwardRef(({ 
@@ -53,4 +53,3 @@ const Button = React.forwardRef(({
 Button.displayName = "Button";
 
 export { Button };
-

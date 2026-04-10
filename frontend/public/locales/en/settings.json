@@ -1,0 +1,58 @@
+{
+  "settings": {
+    "notifications": {
+      "title": "Email notification preferences",
+      "subtitle": "Choose which emails CarbonTrack should send you. Updates take effect immediately.",
+      "emailHeading": "Email alerts",
+      "emailDescription": "Toggle the email notifications you would like to receive. Direct messages and security alerts are always delivered.",
+      "locked": "This notification is required and cannot be disabled.",
+      "reset": "Reset",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "saveSuccess": "Notification preferences updated.",
+      "saveFailed": "Failed to update notification preferences.",
+      "categories": {
+        "verification": {
+          "label": "Account verification",
+          "description": "Codes and links required to verify your email address."
+        },
+        "security": {
+          "label": "Security alerts",
+          "description": "Password reset links and other important security updates."
+        },
+        "system": {
+          "label": "System tips & onboarding",
+          "description": "Welcome guidance and important account announcements."
+        },
+        "transaction": {
+          "label": "Point exchanges",
+          "description": "Updates about your reward redemptions and exchange status."
+        },
+        "activity": {
+          "label": "Activity reviews",
+          "description": "Results and feedback for your submitted carbon-saving activities."
+        },
+        "announcement": {
+          "label": "Announcements",
+          "description": "Platform-wide news, maintenance notices, and newsletters."
+        },
+        "message": {
+          "label": "Direct messages",
+          "description": "Email copies of messages from other users. Always enabled."
+        },
+        "support": {
+          "label": "Ticket updates",
+          "description": "Emails sent when support staff change ticket status, priority, or assignment."
+        }
+      },
+      "testEmail": {
+        "title": "Send a test email",
+        "description": "We will email a sample notification so you can confirm delivery and spam filter rules.",
+        "button": "Send test email",
+        "sending": "Sending test email...",
+        "success": "A test notification email is on its way to your inbox.",
+        "error": "Unable to send the test email. Please try again later."
+      }
+    }
+  }
+}

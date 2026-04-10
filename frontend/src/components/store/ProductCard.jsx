@@ -8,7 +8,7 @@ import R2Image from '../common/R2Image';
 import { Badge } from '../ui/badge';
 
 export function ProductCard({ product, onExchange, userPoints = 0 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'date', 'images', 'store']);
 
   const canAfford = userPoints >= product.points_required;
   const isAvailable = product.is_available;

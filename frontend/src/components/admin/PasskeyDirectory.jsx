@@ -52,7 +52,7 @@ function getBackupBadge(t, passkey) {
 }
 
 export function PasskeyDirectory() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common', 'pagination']);
   const navigate = useNavigate();
   const [filters, setFilters] = React.useState(DEFAULT_FILTERS);
 

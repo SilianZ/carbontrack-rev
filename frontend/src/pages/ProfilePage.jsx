@@ -14,7 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from '../components/ui/Alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'profile']);
   const queryClient = useQueryClient();
 
   const { data: userData, isLoading, error } = useQuery(

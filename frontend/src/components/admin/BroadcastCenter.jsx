@@ -297,7 +297,7 @@ function UserChips({ users, onViewUser, t }) {
 }
 
 export function BroadcastCenter() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['admin', 'common', 'date', 'errors', 'messages', 'pagination', 'validation']);
   const numberFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
   const percentFormatter = useMemo(
     () =>

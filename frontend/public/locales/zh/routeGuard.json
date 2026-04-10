@@ -1,0 +1,10 @@
+{
+  "routeGuard": {
+    "accessDeniedTitle": "访问被拒绝",
+    "permissionDeniedTitle": "权限不足",
+    "adminRequired": "您没有权限访问此页面。",
+    "supportRequired": "您没有权限访问客服门户。",
+    "permissionRequired": "您没有执行此操作的权限。",
+    "goBack": "返回上一页"
+  }
+}

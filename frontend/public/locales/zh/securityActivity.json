@@ -1,0 +1,67 @@
+{
+  "securityActivity": {
+    "title": "安全活动",
+    "description": "查看最近登录、密码与通行密钥相关安全事件。",
+    "loadError": "加载安全活动失败，请稍后重试。",
+    "empty": "暂无安全活动记录。",
+    "filters": {
+      "typeLabel": "活动类型",
+      "periodLabel": "时间范围",
+      "types": {
+        "all": "全部活动",
+        "signIns": "登录记录",
+        "passkeyChanges": "通行密钥变更",
+        "passwordChanges": "密码变更",
+        "logouts": "退出记录"
+      },
+      "periods": {
+        "all": "全部时间",
+        "last7Days": "最近 7 天",
+        "last30Days": "最近 30 天",
+        "last90Days": "最近 90 天"
+      }
+    },
+    "status": {
+      "success": "成功",
+      "other": "其他"
+    },
+    "meta": {
+      "ipAddress": "IP {{ip}}",
+      "requestId": "请求 {{id}}"
+    },
+    "actions": {
+      "login": {
+        "title": "密码登录",
+        "description": "已使用账户密码完成登录。"
+      },
+      "passkey_login": {
+        "title": "通行密钥登录",
+        "description": "已使用通行密钥完成登录。",
+        "descriptionWithLabel": "已使用“{{label}}”完成通行密钥登录。"
+      },
+      "logout": {
+        "title": "退出登录",
+        "description": "当前会话已退出。"
+      },
+      "password_change": {
+        "title": "修改密码",
+        "description": "账户密码已更新。"
+      },
+      "passkey_registered": {
+        "title": "添加通行密钥",
+        "description": "已注册新的通行密钥。",
+        "descriptionWithLabel": "已注册新的通行密钥“{{label}}”。"
+      },
+      "passkey_deleted": {
+        "title": "删除通行密钥",
+        "description": "已删除一枚通行密钥。",
+        "descriptionWithLabel": "已删除通行密钥“{{label}}”。"
+      },
+      "passkey_label_updated": {
+        "title": "更新通行密钥备注",
+        "description": "已更新通行密钥备注。",
+        "descriptionWithLabel": "已将通行密钥备注更新为“{{label}}”。"
+      }
+    }
+  }
+}

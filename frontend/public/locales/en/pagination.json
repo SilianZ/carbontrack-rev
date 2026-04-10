@@ -1,0 +1,11 @@
+{
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{current}} of {{total}}",
+    "total": "{{total}} total records",
+    "pageSize": "Show",
+    "items": "items per page",
+    "showing": "Showing {{start}}-{{end}} of {{total}} items"
+  }
+}

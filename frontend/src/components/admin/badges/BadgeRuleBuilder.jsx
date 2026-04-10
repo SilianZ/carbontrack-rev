@@ -123,7 +123,7 @@ const ensureRule = (rule = {}) => ({
 });
 
 export function BadgeRuleBuilder({ value, onChange }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin']);
   const safeValue = useMemo(() => {
     if (!value || typeof value !== 'object') {
       return { all: true, rules: [] };

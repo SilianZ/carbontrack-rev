@@ -6,10 +6,16 @@ import { getCurrentLanguage, formatNumber, formatDate, formatDateTime, formatRel
  * 提供了额外的格式化函数和便捷方法
  */
 export const useTranslation = (ns = 'common') => {
-  const { t, i18n, ready } = useI18nTranslation(ns);
+  const namespaces = Array.isArray(ns) ? ns : [ns];
+  const activeNamespaces = Array.from(new Set(namespaces.filter(Boolean)));
+  const { t, i18n, ready } = useI18nTranslation(activeNamespaces);
   
   // 获取当前语言
   const currentLanguage = getCurrentLanguage();
+
+  const helperNamespaces = (primaryNamespace) => Array.from(
+    new Set([primaryNamespace, ...activeNamespaces].filter(Boolean))
+  );
   
   // 直接使用 react-i18next 提供的 t，避免每次渲染创建新函数导致依赖 [t] 的 useEffect 反复触发
   
@@ -48,17 +54,19 @@ export const useTranslation = (ns = 'common') => {
   
   // 获取翻译键的存在性
   const exists = (key) => {
-    return i18n.exists(key);
+    return i18n.exists(key, { ns: activeNamespaces });
   };
   
   // 获取嵌套对象的所有翻译
   const getTranslations = (keyPrefix) => {
     const translations = {};
-    const resourceBundle = i18n.getResourceBundle(currentLanguage, ns) || {};
     const segments = keyPrefix.split('.').filter(Boolean);
-    const subtree = segments.reduce((acc, segment) => (
-      acc && typeof acc === 'object' ? acc[segment] : undefined
-    ), resourceBundle);
+    const subtree = activeNamespaces
+      .map((namespace) => i18n.getResourceBundle(currentLanguage, namespace) || {})
+      .map((resourceBundle) => segments.reduce((acc, segment) => (
+        acc && typeof acc === 'object' ? acc[segment] : undefined
+      ), resourceBundle))
+      .find((node) => node !== undefined);
 
     const collectTranslations = (node, prefix = '') => {
       if (Array.isArray(node) || node == null) {
@@ -92,24 +100,30 @@ export const useTranslation = (ns = 'common') => {
   // 格式化错误消息
   const tError = (errorKey, fallback = 'errors.unknown') => {
     const key = `errors.${errorKey}`;
-    return exists(key) ? t(key) : t(fallback);
+    const nsForErrors = helperNamespaces('errors');
+    return i18n.exists(key, { ns: nsForErrors })
+      ? i18n.t(key, { ns: nsForErrors })
+      : i18n.t(fallback, { ns: nsForErrors });
   };
   
   // 格式化成功消息
   const tSuccess = (successKey, fallback = 'success.save') => {
     const key = `success.${successKey}`;
-    return exists(key) ? t(key) : t(fallback);
+    const nsForSuccess = helperNamespaces('success');
+    return i18n.exists(key, { ns: nsForSuccess })
+      ? i18n.t(key, { ns: nsForSuccess })
+      : i18n.t(fallback, { ns: nsForSuccess });
   };
   
   // 格式化验证消息
   const tValidation = (validationKey, options = {}) => {
     const key = `validation.${validationKey}`;
-    return t(key, options);
+    return i18n.t(key, { ns: helperNamespaces('validation'), ...options });
   };
   
   // 获取单位翻译
   const tUnit = (unit) => {
-    return t(`units.${unit}`, { defaultValue: unit });
+    return i18n.t(`units.${unit}`, { ns: helperNamespaces('units'), defaultValue: unit });
   };
   
   // 获取状态翻译

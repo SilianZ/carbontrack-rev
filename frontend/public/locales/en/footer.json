@@ -1,0 +1,30 @@
+{
+  "footer": {
+    "description": "CarbonTrack is dedicated to helping individuals and communities track and reduce their carbon footprint through actionable environmental activities.",
+    "address": "5000 Forbes Ave, Pittsburgh, PA 15213",
+    "platform": "Platform",
+    "support": "Support",
+    "legal": "Legal",
+    "about": "About Us",
+    "howItWorks": "How It Works",
+    "features": "Features",
+    "pricing": "Pricing",
+    "help": "Help Center",
+    "faq": "FAQ",
+    "contact": "Contact Us",
+    "feedback": "Feedback",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "security": "Security",
+    "followUs": "Follow Us",
+    "users": "Active Users",
+    "activities": "Recorded Activities",
+    "carbonSaved": "CO₂ Saved",
+    "allRightsReserved": "All rights reserved.",
+    "poweredBy": "Powered by",
+    "version": "Version",
+    "versionLabel": "Version {{version}}",
+    "buildLabel": "Build {{id}}"
+  }
+}

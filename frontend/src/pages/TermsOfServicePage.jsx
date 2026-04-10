@@ -24,7 +24,7 @@ const Section = ({ title, icon: Icon, children }) => (
 );
 
 const TermsOfServicePage = () => {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['contact', 'legal']);
     const currentDate = new Date().toLocaleDateString();
 
     const responsibilityItems = t('legal.terms.sections.responsibility.items', { returnObjects: true });

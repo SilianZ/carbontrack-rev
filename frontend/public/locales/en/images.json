@@ -1,0 +1,9 @@
+{
+  "images": {
+    "none": "No images",
+    "clickToPreview": "Click to preview",
+    "prev": "Previous",
+    "next": "Next",
+    "counter": "{{current}} / {{total}}"
+  }
+}

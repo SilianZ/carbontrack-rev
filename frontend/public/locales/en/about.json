@@ -1,0 +1,202 @@
+{
+  "about": {
+    "hero": {
+      "title": "About CarbonTrack",
+      "subtitle": "We are a group of young people passionate about environmental protection and technology, teaming up to build a sustainable, low-carbon future."
+    },
+    "contactLinks": [
+      {
+        "type": "email",
+        "label": "Contact Us",
+        "href": "mailto:{{email}}"
+      },
+      {
+        "type": "instagram",
+        "label": "Follow Us",
+        "href": "https://www.instagram.com/carbontrackorg/",
+        "external": true
+      },
+      {
+        "type": "discord",
+        "label": "Join Discord",
+        "href": "https://discord.gg/nPzMrJAyjY",
+        "external": true
+      },
+      {
+        "type": "partnership",
+        "label": "Partnership",
+        "href": "https://carbontrack.org/partners",
+        "external": true
+      }
+    ],
+    "team": {
+      "title": "Our Team",
+      "intro": "Meet the dedicated members behind CarbonTrack who pour their creativity, technical expertise, and passion for environmental action into everything we do.",
+      "learnMore": "Learn More",
+      "members": [
+        {
+          "name": "Yuanzheng (Jack) Yu",
+          "role": "Founder & Project Lead",
+          "bio": "Jack leads CarbonTrack, coordinating collaboration, defining the roadmap, and keeping our product experience polished. He believes the internet can connect more people with meaningful climate action.",
+          "link": "https://yuanzhengjackyu.com/",
+          "linkLabel": "Portfolio"
+        },
+        {
+          "name": "Zining (Jeffery) Lyu",
+          "role": "Co-founder & Full-stack Engineer",
+          "bio": "Jeffery is our core technology partner and full-stack engineer. He is responsible for the architecture, development, and maintenance of the CarbonTrack web experience.",
+          "link": "https://github.com/Jeffery2008",
+          "linkLabel": "GitHub"
+        },
+        {
+          "name": "Minghan (Loren) Li",
+          "role": "Product Designer & Researcher",
+          "bio": "Loren combines environmental science research with thoughtful design. He brings our mission to life through storytelling, photography, and a love for the outdoors.",
+          "link": "https://lorenlmh.com/",
+          "linkLabel": "Portfolio"
+        },
+        {
+          "name": "Smiley Ni",
+          "role": "Creative Lead",
+          "bio": "Smiley drives our creative direction, from campaign visuals to community storytelling. A passionate dancer and artist, she wants CarbonTrack to spread joy along with climate awareness.",
+          "link": "https://smileyn327.com/",
+          "linkLabel": "Portfolio"
+        },
+        {
+          "name": "Lan Liu",
+          "role": "Product Designer",
+          "bio": "Lan shapes our product operations and interface flows. She loves hiking, pottery, and bringing sustainable lifestyle ideas to the CarbonTrack community."
+        },
+        {
+          "name": "Jack Shi",
+          "role": "Product Designer",
+          "bio": "Jack focuses on user journeys and community experience. A lifelong ocean advocate, he volunteers with conservation groups and champions environmental literacy."
+        },
+        {
+          "name": "Tony Li",
+          "role": "Full-stack Engineer",
+          "bio": "Tony helps deliver new features, performance improvements, and smooth interactions that make CarbonTrack both powerful and approachable."
+        },
+        {
+          "name": "Eddie Peng",
+          "role": "Content Strategist",
+          "bio": "Eddie crafts copy, educational resources, and onboarding content. He keeps our tone friendly and supportive for everyone exploring low-carbon living."
+        },
+        {
+          "name": "Michael Jiang",
+          "role": "Frontend Engineer",
+          "bio": "Michael develops new user interface patterns and features. He cares deeply about accessible, joyful interaction design for climate products."
+        },
+        {
+          "name": "Peter Zhao",
+          "role": "Content & Visual Design",
+          "bio": "Peter blends storytelling with visual design. He enjoys travel, sports, and video games, and hopes to inspire a broader environmental movement."
+        },
+        {
+          "name": "Kiana Jin",
+          "role": "Marketing Lead",
+          "bio": "Kiana leads marketing, events, and external partnerships. She brings diverse voices into our community and builds meaningful collaborations."
+        },
+        {
+          "name": "Kelly Du",
+          "role": "Environmental Science Consultant",
+          "bio": "Kelly validates the scientific accuracy of our programs and writes accessible climate explainers. She leverages scuba diving experience and climate research to deepen public understanding."
+        },
+        {
+          "name": "Thomas Lu",
+          "role": "Quality Engineer",
+          "bio": "Thomas tests new features, finds edge cases, and helps us ship with confidence. He believes that \"Attention is all you need\" and champions thoughtful iteration.",
+          "link": "https://www.thomas-hub.com/",
+          "linkLabel": "Portfolio"
+        },
+        {
+          "name": "Benson Zhou",
+          "role": "Operations & Community Support",
+          "bio": "Benson co-created our early design language and now reviews user submissions, manages shared inboxes, and keeps community feedback flowing."
+        },
+        {
+          "name": "Arya Chen",
+          "role": "UI Designer",
+          "bio": "Arya contributes interface concepts and visual systems using tools like Photoshop and Audition. She is excited to deliver creative, user-friendly experiences."
+        },
+        {
+          "name": "Amily Gao",
+          "role": "Co-founder & Research Lead",
+          "bio": "Amily leads background research and carbon accounting. She ensures our content stays evidence-based and approachable for students."
+        },
+        {
+          "name": "Jerry Tang",
+          "role": "Co-founder & Carbon Analyst",
+          "bio": "Jerry supports the carbon accounting model and conducts preliminary research that grounds our product decisions."
+        },
+        {
+          "name": "Yangyang Zhou",
+          "role": "Co-founder",
+          "bio": "Yangyang enjoys economics, mathematics, and basketball. He helped launch CarbonTrack and continues to advise on strategy."
+        },
+        {
+          "name": "Dora Xu",
+          "role": "Co-founder & Researcher",
+          "bio": "Dora leads literature reviews and coordinates content production. She hopes to motivate more students to adopt low-carbon habits."
+        },
+        {
+          "name": "Hannah Zhang",
+          "role": "Co-founder & Media Lead",
+          "bio": "Hannah curates reading lists, produces media assets, and encourages small, everyday actions that add up to big impact."
+        },
+        {
+          "name": "Richard Hu",
+          "role": "Co-founder & Engineer",
+          "bio": "Richard supports web development and cross-team collaboration. He wants to spread climate awareness and energy-saving tips widely."
+        },
+        {
+          "name": "Mandy Yu",
+          "role": "Co-founder & Art Designer",
+          "bio": "Mandy contributes illustrations and visual concepts. She hopes her art sparks curiosity and inspires greener lifestyles."
+        }
+      ]
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "CarbonTrack uses digital carbon accounts to make climate action personal, trackable, and rewarding.",
+      "items": [
+        "Engage students and young people in conversations about climate change and carbon emissions.",
+        "Offer simple tools to log daily carbon footprints and celebrate low-carbon habits.",
+        "Raise awareness of the importance of energy conservation through storytelling and community challenges.",
+        "Support environmental and social initiatives that protect our shared planet."
+      ]
+    },
+    "achievements": {
+      "title": "Our Achievements",
+      "description": "Together with the CarbonTrack community, we are turning carbon accounting into a shared, uplifting journey.",
+      "stats": [
+        {
+          "label": "Carbon Reduction",
+          "value": "12,000+ kg",
+          "highlight": "CO₂ saved",
+          "description": "CarbonTrack members regularly record low-carbon actions, turning everyday decisions into measurable climate impact."
+        },
+        {
+          "label": "Community Growth",
+          "value": "3,500+",
+          "highlight": "Active members",
+          "description": "Our low-carbon community grows through workshops, social media, and peer encouragement."
+        },
+        {
+          "label": "Carbon Account Records",
+          "value": "45,000+",
+          "highlight": "Activity logs",
+          "description": "Consistent habit tracking helps us validate our system and showcase the stability of our platform."
+        }
+      ]
+    },
+    "specialThanks": {
+      "title": "Special Thanks",
+      "subtitle": "Celebrating the partners who lift our creativity.",
+      "description": "We are grateful to \"San Zuo Xue Shan\" for providing design consultation and artwork that continue to inspire our visual identity.",
+      "visit": "Visit website",
+      "linkLabel": "Visit Website",
+      "link": "https://www.whensnowone.com/"
+    }
+  }
+}

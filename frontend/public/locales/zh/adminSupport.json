@@ -1,0 +1,232 @@
+{
+  "adminSupport": {
+    "eyebrow": "支持规则",
+    "title": "支持运营台",
+    "tabs": {
+      "team": "客服团队",
+      "tickets": "工单审计",
+      "settings": "设置中心",
+      "rules": "派单规则",
+      "tags": "标签",
+      "reports": "报表",
+      "routing": "智能分单"
+    },
+    "summary": {
+      "total": "工单总量",
+      "totalHint": "按所选周期统计支持工单。",
+      "autoAssigned": "自动派单",
+      "autoAssignedHint": "规则自动分配的工单数。",
+      "unassigned": "未分配",
+      "unassignedHint": "仍需人工接手的工单数。",
+      "avgResolution": "平均解决时长",
+      "avgResolutionHint": "已解决工单的平均耗时（小时）。",
+      "smartAssigned": "智能分单",
+      "smartAssignedHint": "由统一评分引擎自动分派的工单数。",
+      "slaBreaches": "SLA 超时",
+      "slaBreachesHint": "当前已违约或升级中的工单数。"
+    },
+    "tickets": {
+      "listTitle": "工单审计队列",
+      "listSubtitle": "按工单查看消息、SLA 与智能派单证据链。",
+      "detailTitle": "工单详情与审计",
+      "detailSubtitle": "直接查看请求上下文、分配结果与每次智能路由的打分细节。",
+      "empty": "当前没有可查看的工单。",
+      "emptyDetail": "从左侧选择一条工单后，这里会显示完整审计视图。",
+      "identityTitle": "身份与归属",
+      "messagesTitle": "消息与附件证据",
+      "slaTitle": "SLA 与派单",
+      "routingSummaryTitle": "本次派单摘要",
+      "routingRunsTitle": "智能派单记录",
+      "noRoutingRuns": "该工单还没有智能派单记录。",
+      "usedAi": "AI 分诊",
+      "fallbackOnly": "确定性回退",
+      "routingWinner": "最终命中客服",
+      "winnerScore": "得分 {{value}}",
+      "routingDecision": "分诊结论",
+      "candidateScores": "候选得分",
+      "topFactors": "主要因素",
+      "routingFallbackLabel": "回退原因",
+      "openInPortal": "在客服工作台中打开"
+    },
+    "actions": {
+      "saveRule": "保存规则",
+      "saveTag": "保存标签",
+      "saveProfile": "保存档案",
+      "saveRoutingSettings": "保存分单设置"
+    },
+    "common": {
+      "active": "启用",
+      "inactive": "停用",
+      "noDescription": "暂无描述"
+    },
+    "filters": {
+      "anyCategory": "任意分类",
+      "anyPriority": "任意优先级"
+    },
+    "messages": {
+      "loadFailed": "支持运营数据加载失败。",
+      "ruleSaved": "规则已保存",
+      "tagSaved": "标签已保存",
+      "routingSettingsSaved": "分单设置已保存",
+      "profileSaved": "客服档案已保存"
+    },
+    "roles": {
+      "user": "用户",
+      "support": "客服",
+      "admin": "管理员"
+    },
+    "team": {
+      "listTitle": "客服列表",
+      "listSubtitle": "查看每位客服当前持单情况，并切换查看详细资料。",
+      "detailTitle": "客服详情",
+      "detailSubtitle": "显示基础资料、当前负载与最近处理工单。",
+      "empty": "请选择客服。",
+      "contactTitle": "联系信息",
+      "profileTitle": "资料概览",
+      "notesTitle": "管理备注",
+      "noNotes": "暂无管理备注。",
+      "recentTicketsTitle": "最近处理工单",
+      "recentTicketsSubtitle": "最近分配到该客服的工单，方便核对当前上下文。",
+      "noRecentTickets": "暂无最近工单。",
+      "metrics": {
+        "assigned": "总单量",
+        "notStarted": "未开始",
+        "inProgress": "处理中"
+      },
+      "fields": {
+        "email": "邮箱",
+        "role": "角色",
+        "status": "状态",
+        "school": "学校",
+        "region": "地区",
+        "location": "位置",
+        "group": "分组",
+        "lastLogin": "最后登录",
+        "createdAt": "创建时间"
+      },
+      "routingProfileTitle": "分单档案",
+      "routingFields": {
+        "level": "客服等级",
+        "maxActiveTickets": "最大处理中工单",
+        "skills": "技能标签",
+        "languages": "语言能力",
+        "status": "分单状态",
+        "flatBoost": "固定加分",
+        "autoAssignable": "允许自动分单"
+      },
+      "routingStatus": {
+        "active": "在线",
+        "backup": "备援",
+        "offline": "离线"
+      }
+    },
+    "rules": {
+      "listTitle": "规则列表",
+      "listSubtitle": "配置命中条件、自动派单与标签写入。",
+      "newRule": "新建规则",
+      "editorTitle": "规则编辑",
+      "editorSubtitle": "保存后会参与新工单的自动判断。",
+      "noAssignee": "不自动派单",
+      "noTags": "暂无可选标签",
+      "fields": {
+        "name": "名称",
+        "sortOrder": "排序",
+        "description": "描述",
+        "category": "分类",
+        "priority": "优先级",
+        "timeStart": "开始时间",
+        "timeEnd": "结束时间",
+        "timezone": "时区",
+        "weekdays": "命中星期",
+        "assignTo": "派单给",
+        "tags": "命中标签",
+        "active": "启用规则",
+        "stopProcessing": "命中后停止继续匹配",
+        "scoreBoost": "命中加分",
+        "requiredAgentLevel": "最低客服等级",
+        "skillHints": "技能提示"
+      },
+      "scoreBoostBadge": "加分 {{value}}",
+      "noRequiredLevel": "不限等级",
+      "requiredLevelLabel": "{{level}} 级及以上"
+    },
+    "tags": {
+      "listTitle": "标签列表",
+      "listSubtitle": "标签可由规则写入，并同步显示在支持门户。",
+      "newTag": "新建标签",
+      "editorTitle": "标签编辑",
+      "editorSubtitle": "统一定义名称、颜色和说明。",
+      "fields": {
+        "name": "名称",
+        "slug": "标识",
+        "color": "颜色",
+        "description": "描述",
+        "active": "启用标签"
+      }
+    },
+    "reports": {
+      "title": "支持报表",
+      "subtitle": "查看状态、分类、优先级、客服和规则触发分布。",
+      "days": "近 {{count}} 天",
+      "byStatus": "按状态",
+      "byStatusDescription": "当前周期内各状态工单数量。",
+      "byCategory": "按分类",
+      "byCategoryDescription": "当前周期内各分类分布。",
+      "byPriority": "按优先级",
+      "byPriorityDescription": "当前周期内各优先级分布。",
+      "byAssignee": "按客服",
+      "byAssigneeDescription": "当前周期内各客服承接量。",
+      "byTag": "按标签",
+      "byTagDescription": "规则与人工标签的命中情况。",
+      "ruleHits": "规则触发",
+      "ruleHitsDescription": "当前周期内各规则命中次数。",
+      "timelineTitle": "时间线",
+      "timelineSubtitle": "按日查看工单进入量变化。",
+      "byAgentLevel": "按客服等级",
+      "byAgentLevelDescription": "当前客服档案的等级分布。",
+      "agentLevelLabel": "{{level}} 级",
+      "routingOutcomes": "路由结果",
+      "routingOutcomesDescription": "按触发来源与 AI 使用情况统计的路由次数。"
+    },
+    "weekdays": {
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六",
+      "sun": "周日"
+    },
+    "colors": {
+      "emerald": "翠绿",
+      "sky": "天蓝",
+      "amber": "琥珀",
+      "rose": "玫红",
+      "violet": "紫罗兰",
+      "slate": "石板灰"
+    },
+    "routing": {
+      "title": "智能分单设置",
+      "subtitle": "配置 AI 分诊、默认 SLA 与统一评分权重。",
+      "fields": {
+        "aiTimeout": "AI 超时（毫秒）",
+        "dueSoonMinutes": "临近到期阈值（分钟）",
+        "aiEnabled": "启用 AI 分诊",
+        "defaultFirstResponse": "默认首响 SLA（分钟）",
+        "defaultResolution": "默认解决 SLA（分钟）"
+      },
+      "weights": {
+        "group_weight": "用户组权重",
+        "priority_weight": "优先级权重",
+        "severity_weight": "严重度权重",
+        "escalation_weight": "升级风险权重",
+        "rule_weight": "规则命中权重",
+        "skill_weight": "技能匹配权重",
+        "level_weight": "客服等级权重",
+        "feedback_weight": "反馈表现权重",
+        "overdue_weight": "逾期权重",
+        "load_penalty_weight": "负载惩罚权重"
+      }
+    }
+  }
+}

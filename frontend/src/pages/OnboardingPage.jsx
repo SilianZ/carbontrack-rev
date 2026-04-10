@@ -11,7 +11,7 @@ import { useTranslation } from '../hooks/useTranslation';
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'common', 'errors', 'onboarding', 'success']);
   const user = userManager.getUser();
   const currentSchoolId = user?.school_id;
   const [schools, setSchools] = useState([]);

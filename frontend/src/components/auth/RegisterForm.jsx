@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from '../ui/Alert';
 import Turnstile from '../common/Turnstile';
 
 export function RegisterForm() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'common', 'errors', 'success']);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

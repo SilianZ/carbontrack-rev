@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle, Clock, XCircle, Eye } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 export function ActivityTable({ activities, onRowClick }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'common', 'units']);
   const getName = (a) => a.activity_name || a.activity_name_zh || a.activity_name_en || a.activity || '';
   const getCategory = (a) => a.activity_category || a.category || 'unknown';
   const getUnit = (a) => a.activity_unit || a.unit || '';

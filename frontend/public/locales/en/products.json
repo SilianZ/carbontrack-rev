@@ -1,0 +1,21 @@
+{
+  "products": {
+    "title": "Point Store",
+    "exchange": "Exchange",
+    "points": "Points",
+    "stock": "Stock",
+    "description": "Description",
+    "exchangeHistory": "Exchange History",
+    "confirmExchange": "Confirm Exchange",
+    "exchangeSuccess": "Exchange Successful",
+    "insufficientPoints": "Insufficient Points",
+    "outOfStock": "Out of Stock",
+    "name": "Product Name",
+    "price": "Price",
+    "category": "Category",
+    "carbonOffset": "Carbon Offset",
+    "sustainableProduct": "Sustainable Product",
+    "greenLifestyle": "Green Lifestyle",
+    "images": "Product Images"
+  }
+}
