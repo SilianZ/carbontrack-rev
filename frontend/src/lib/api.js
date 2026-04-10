@@ -434,6 +434,12 @@ export const adminAPI = {
   getSupportTicketDetail: (id) => api.get(`/admin/support/tickets/${id}`),
   getSupportReports: (params = {}) => api.get('/admin/support/reports', { params }),
 
+  // Cron scheduler
+  getCronTasks: () => api.get('/admin/cron/tasks'),
+  updateCronTask: (taskKey, data) => api.put(`/admin/cron/tasks/${taskKey}`, data),
+  getCronRuns: (params = {}) => api.get('/admin/cron/runs', { params }),
+  runCronTask: (taskKey) => api.post(`/admin/cron/tasks/${taskKey}/run`),
+
 };
 
 // 工具函数

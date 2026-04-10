@@ -1281,7 +1281,8 @@
       "supportPortal": "Support Desk",
       "llmUsage": "LLM Usage",
       "systemLogs": "System Logs",
-      "diagnostics": "API Diagnostics"
+      "diagnostics": "API Diagnostics",
+      "cron": "Cron Scheduler"
     },
     "command": {
       "placeholder": "Quickly jump or run an action",
@@ -4315,6 +4316,52 @@
         "overdue_weight": "Overdue weight",
         "load_penalty_weight": "Load penalty weight"
       }
+    }
+  },
+  "adminCron": {
+    "eyebrow": "Unified scheduling",
+    "title": "Cron scheduler",
+    "subtitle": "Manage task enablement, frequency, next run time, and recent execution results in one place.",
+    "summary": {
+      "enabled": "Enabled tasks",
+      "due": "Due now",
+      "failed": "Recently failed"
+    },
+    "tasks": {
+      "title": "Task configuration",
+      "subtitle": "Admins can adjust enablement and frequency, then manually trigger a single task.",
+      "enabled": "Enabled",
+      "intervalMinutes": "Interval (minutes)",
+      "nextRun": "Next run",
+      "lastFinished": "Last finished",
+      "duration": "Last duration",
+      "failures": "Consecutive failures",
+      "dueNow": "Due now"
+    },
+    "runs": {
+      "title": "Run history",
+      "subtitle": "Inspect recent execution results, trigger source, and error details.",
+      "empty": "No cron runs yet."
+    },
+    "filters": {
+      "task": "Filter by task",
+      "status": "Filter by status",
+      "allTasks": "All tasks",
+      "allStatuses": "All statuses"
+    },
+    "status": {
+      "success": "Success",
+      "failed": "Failed",
+      "skipped": "Skipped"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "save": "Save",
+      "runNow": "Run now"
+    },
+    "messages": {
+      "saved": "Cron task settings saved",
+      "executed": "Cron task triggered"
     }
   }
 }

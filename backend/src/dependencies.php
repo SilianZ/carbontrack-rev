@@ -24,6 +24,7 @@ use CarbonTrack\Services\LlmLogService;
 use CarbonTrack\Services\NotificationPreferenceService;
 use CarbonTrack\Services\MultipartUploadService;
 use CarbonTrack\Services\SupportAutomationService;
+use CarbonTrack\Services\CronSchedulerService;
 use CarbonTrack\Services\SupportRoutingEngineService;
 use CarbonTrack\Services\SupportRoutingTriageService;
 use CarbonTrack\Services\SupportTicketService;
@@ -64,6 +65,8 @@ use CarbonTrack\Controllers\StatsController;
 use CarbonTrack\Services\Ai\OpenAiClientAdapter;
 use CarbonTrack\Controllers\AdminAiController;
 use CarbonTrack\Controllers\AdminSupportController;
+use CarbonTrack\Controllers\AdminCronController;
+use CarbonTrack\Controllers\CronController;
 use CarbonTrack\Controllers\UserAiController;
 use CarbonTrack\Controllers\SupportTicketController;
 use CarbonTrack\Services\AdminAiCommandRepository;
@@ -665,6 +668,19 @@ $__deps_initializer = function (Container $container) {
         );
     });
 
+    $container->set(CronSchedulerService::class, function (ContainerInterface $c) {
+        return new CronSchedulerService(
+            $c->get(PDO::class),
+            $c->get(LoggerInterface::class),
+            $c->get(AuditLogService::class),
+            $c->get(ErrorLogService::class),
+            $c->get(SupportRoutingEngineService::class),
+            $c->get(BadgeService::class),
+            $c->get(LeaderboardService::class),
+            $c->get(StreakLeaderboardService::class)
+        );
+    });
+
     $container->set(SupportRoutingTriageService::class, function (ContainerInterface $c) {
         /** @var \CarbonTrack\Services\Ai\LlmClientInterface|null $llmClient */
         $llmClient = $c->get('ai.llmClient');
@@ -911,7 +927,8 @@ $__deps_initializer = function (Container $container) {
             $c->get(LeaderboardService::class),
             $c->get(Logger::class),
             $c->get(AuditLogService::class),
-            $c->get(ErrorLogService::class)
+            $c->get(ErrorLogService::class),
+            $c->get(CronSchedulerService::class)
         );
     });
 
@@ -1009,7 +1026,8 @@ $__deps_initializer = function (Container $container) {
             $c->get(LoggerInterface::class),
             $c->get(ErrorLogService::class),
             $c->get(SupportRoutingEngineService::class),
-            $c->get(AuditLogService::class)
+            $c->get(AuditLogService::class),
+            $c->get(CronSchedulerService::class)
         );
     });
 
@@ -1018,6 +1036,25 @@ $__deps_initializer = function (Container $container) {
             $c->get(SupportAutomationService::class),
             $c->get(SupportTicketService::class),
             $c->get(SupportRoutingEngineService::class),
+            $c->get(AuthService::class),
+            $c->get(AuditLogService::class),
+            $c->get(LoggerInterface::class),
+            $c->get(ErrorLogService::class)
+        );
+    });
+
+    $container->set(CronController::class, function (ContainerInterface $c) {
+        return new CronController(
+            $c->get(CronSchedulerService::class),
+            $c->get(LoggerInterface::class),
+            $c->get(ErrorLogService::class),
+            $c->get(AuditLogService::class)
+        );
+    });
+
+    $container->set(AdminCronController::class, function (ContainerInterface $c) {
+        return new AdminCronController(
+            $c->get(CronSchedulerService::class),
             $c->get(AuthService::class),
             $c->get(AuditLogService::class),
             $c->get(LoggerInterface::class),
