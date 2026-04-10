@@ -17249,6 +17249,16 @@
               }
             }
           },
+          "409": {
+            "description": "当前到点的任务均被跳过或锁定。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "503": {
             "description": "未配置 cron 密钥。",
             "content": {

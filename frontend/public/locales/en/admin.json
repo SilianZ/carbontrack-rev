@@ -1810,7 +1810,8 @@
       },
       "messages": {
         "saved": "Cron task updated",
-        "executed": "Cron task triggered"
+        "executed": "Cron task triggered",
+        "invalidInterval": "Enter an integer between 1 and 1440 minutes."
       }
     }
   }

@@ -775,7 +775,7 @@ class AdminAiReadModelService
                 'lock_token' => $row['lock_token'] ?? null,
                 'locked_at' => $row['locked_at'] ?? null,
                 'settings' => $settings,
-                'is_due' => !empty($row['enabled']) && !empty($row['next_run_at']) && ($row['next_run_at'] <= gmdate('Y-m-d H:i:s')),
+                'is_due' => !empty($row['enabled']) && !empty($row['next_run_at']) && ($row['next_run_at'] <= $this->currentCronNow()),
                 'is_locked' => !empty($row['lock_token']) && !empty($row['locked_at']),
             ];
         }
@@ -1219,6 +1219,11 @@ class AdminAiReadModelService
         }
 
         return preg_match('/^[A-Za-z0-9._:-]{8,64}$/', $normalized) === 1 ? $normalized : null;
+    }
+
+    private function currentCronNow(): string
+    {
+        return (new \DateTimeImmutable('now', new \DateTimeZone('Asia/Shanghai')))->format('Y-m-d H:i:s');
     }
 
     /**

@@ -128,6 +128,36 @@ export default function AdminCronPage() {
     return { enabled, due, failed };
   }, [tasks]);
 
+  const parseIntervalMinutes = (rawValue) => {
+    const normalized = String(rawValue ?? '').trim();
+    if (normalized === '') {
+      return null;
+    }
+
+    const parsed = Number(normalized);
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1440) {
+      return null;
+    }
+
+    return parsed;
+  };
+
+  const saveDraftForTask = (taskKey, draft) => {
+    const intervalMinutes = parseIntervalMinutes(draft.interval_minutes);
+    if (intervalMinutes === null) {
+      toast.error(t('admin.cron.messages.invalidInterval'));
+      return;
+    }
+
+    saveTaskMutation.mutate({
+      taskKey,
+      payload: {
+        enabled: draft.enabled,
+        interval_minutes: intervalMinutes,
+      },
+    });
+  };
+
   return (
     <div className="space-y-6">
       <section className="rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f5fbff_100%)] px-6 py-6 shadow-sm dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.95)_0%,rgba(14,116,144,0.18)_100%)]">
@@ -183,6 +213,9 @@ export default function AdminCronPage() {
               enabled: Boolean(task.enabled),
               interval_minutes: String(task.interval_minutes ?? ''),
             };
+            const intervalMinutes = parseIntervalMinutes(draft.interval_minutes);
+            const saveLoading = saveTaskMutation.isLoading && saveTaskMutation.variables?.taskKey === task.task_key;
+            const runLoading = runTaskMutation.isLoading && runTaskMutation.variables === task.task_key;
 
             return (
               <div key={task.task_key} className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-5 py-5 dark:border-white/10 dark:bg-white/5">
@@ -244,6 +277,7 @@ export default function AdminCronPage() {
                         type="number"
                         min="1"
                         max="1440"
+                        aria-invalid={intervalMinutes === null}
                         value={draft.interval_minutes}
                         onChange={(event) => setDrafts((current) => ({
                           ...current,
@@ -255,14 +289,9 @@ export default function AdminCronPage() {
                       <Button
                         type="button"
                         className="flex-1"
-                        onClick={() => saveTaskMutation.mutate({
-                          taskKey: task.task_key,
-                          payload: {
-                            enabled: draft.enabled,
-                            interval_minutes: Number(draft.interval_minutes),
-                          },
-                        })}
-                        loading={saveTaskMutation.isLoading}
+                        onClick={() => saveDraftForTask(task.task_key, draft)}
+                        disabled={intervalMinutes === null || runLoading}
+                        loading={saveLoading}
                       >
                         {t('admin.cron.actions.save')}
                       </Button>
@@ -272,7 +301,8 @@ export default function AdminCronPage() {
                         aria-label={t('admin.cron.actions.runNow')}
                         title={t('admin.cron.actions.runNow')}
                         onClick={() => runTaskMutation.mutate(task.task_key)}
-                        loading={runTaskMutation.isLoading}
+                        disabled={saveLoading}
+                        loading={runLoading}
                       >
                         <Play className="h-4 w-4" />
                       </Button>

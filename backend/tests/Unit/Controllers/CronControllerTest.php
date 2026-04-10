@@ -70,4 +70,78 @@ class CronControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
         unset($_GET['key']);
     }
+
+    public function testRunReturnsFailureWhenDueTaskFails(): void
+    {
+        $_ENV['CRON_RUN_KEY'] = 'expected-secret';
+        $_GET['key'] = 'expected-secret';
+
+        $scheduler = $this->createMock(CronSchedulerService::class);
+        $scheduler->expects($this->once())
+            ->method('runDueTasks')
+            ->willReturn([
+                'triggered_at' => '2026-04-10 12:00:00',
+                'due' => ['support_sla_sweep'],
+                'executed' => [],
+                'failed' => [['task_key' => 'support_sla_sweep', 'status' => 'failed']],
+                'skipped' => [],
+            ]);
+
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
+
+        $controller = new CronController(
+            $scheduler,
+            $this->createMock(LoggerInterface::class),
+            $this->createMock(ErrorLogService::class),
+            $audit
+        );
+
+        $response = $controller->run(
+            makeRequest('GET', '/api/v1/cron/run?key=expected-secret'),
+            new \Slim\Psr7\Response()
+        );
+
+        $this->assertSame(503, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertFalse($payload['success']);
+        unset($_GET['key']);
+    }
+
+    public function testRunReturnsConflictWhenAllDueTasksAreSkipped(): void
+    {
+        $_ENV['CRON_RUN_KEY'] = 'expected-secret';
+        $_GET['key'] = 'expected-secret';
+
+        $scheduler = $this->createMock(CronSchedulerService::class);
+        $scheduler->expects($this->once())
+            ->method('runDueTasks')
+            ->willReturn([
+                'triggered_at' => '2026-04-10 12:00:00',
+                'due' => ['support_sla_sweep'],
+                'executed' => [],
+                'failed' => [],
+                'skipped' => [['task_key' => 'support_sla_sweep', 'status' => 'skipped']],
+            ]);
+
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
+
+        $controller = new CronController(
+            $scheduler,
+            $this->createMock(LoggerInterface::class),
+            $this->createMock(ErrorLogService::class),
+            $audit
+        );
+
+        $response = $controller->run(
+            makeRequest('GET', '/api/v1/cron/run?key=expected-secret'),
+            new \Slim\Psr7\Response()
+        );
+
+        $this->assertSame(409, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertFalse($payload['success']);
+        unset($_GET['key']);
+    }
 }

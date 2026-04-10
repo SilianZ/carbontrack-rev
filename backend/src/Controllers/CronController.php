@@ -81,6 +81,28 @@ class CronController
                 ],
             ]);
 
+            $failedCount = count($result['failed'] ?? []);
+            $skippedCount = count($result['skipped'] ?? []);
+            $executedCount = count($result['executed'] ?? []);
+
+            if ($failedCount > 0) {
+                return $this->json($response, [
+                    'success' => false,
+                    'message' => 'One or more cron tasks failed',
+                    'code' => 'CRON_RUN_FAILED',
+                    'data' => $result,
+                ], 503);
+            }
+
+            if ($skippedCount > 0 && $executedCount === 0) {
+                return $this->json($response, [
+                    'success' => false,
+                    'message' => 'All due cron tasks were skipped',
+                    'code' => 'CRON_RUN_SKIPPED',
+                    'data' => $result,
+                ], 409);
+            }
+
             return $this->json($response, ['success' => true, 'data' => $result]);
         } catch (\Throwable $exception) {
             return $this->error($request, $response, $exception, 'Failed to run scheduled cron tasks');

@@ -1810,7 +1810,8 @@
       },
       "messages": {
         "saved": "定时任务设置已保存",
-        "executed": "定时任务已触发"
+        "executed": "定时任务已触发",
+        "invalidInterval": "请输入 1 到 1440 之间的整数分钟数。"
       }
     }
   }
