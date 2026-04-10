@@ -290,6 +290,14 @@ export default function AdminLlmUsagePage() {
     [integerFormatter, percentFormatter]
   );
 
+  const trendMetricLabels = useMemo(() => ({
+    calls: t('admin.llmUsage.charts.calls'),
+    tokens: t('admin.llmUsage.charts.tokens'),
+    success_calls: t('admin.llmUsage.charts.success'),
+    failed_calls: t('admin.llmUsage.charts.failed'),
+    avg_latency_ms: t('admin.llmUsage.charts.latency')
+  }), [t]);
+
   const insightCards = useMemo(() => ([
     {
       key: 'successRate',
@@ -490,7 +498,10 @@ export default function AdminLlmUsagePage() {
                   <YAxis yAxisId="left" allowDecimals={false} />
                   <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
                   <Tooltip
-                    formatter={(value, name) => [value, name === 'tokens' ? t('admin.llmUsage.charts.tokens') : t('admin.llmUsage.charts.calls')]}
+                    formatter={(value, _name, item) => {
+                      const label = trendMetricLabels[item?.dataKey] || item?.name || item?.dataKey;
+                      return [value, label];
+                    }}
                     labelFormatter={formatTrendDate}
                     contentStyle={chartTooltipContentStyle}
                     labelStyle={chartTooltipLabelStyle}
@@ -523,12 +534,13 @@ export default function AdminLlmUsagePage() {
                   <YAxis yAxisId="left" allowDecimals={false} />
                   <YAxis yAxisId="right" orientation="right" />
                   <Tooltip
-                    formatter={(value, name) => {
-                      if (name === 'avg_latency_ms') {
+                    formatter={(value, _name, item) => {
+                      const dataKey = item?.dataKey;
+                      if (dataKey === 'avg_latency_ms') {
                         const display = value == null ? '-' : `${decimalFormatter.format(value)} ms`;
-                        return [display, t('admin.llmUsage.charts.latency')];
+                        return [display, trendMetricLabels.avg_latency_ms];
                       }
-                      return [value, name === 'success_calls' ? t('admin.llmUsage.charts.success') : t('admin.llmUsage.charts.failed')];
+                      return [value, trendMetricLabels[dataKey] || item?.name || dataKey];
                     }}
                     labelFormatter={formatTrendDate}
                     contentStyle={chartTooltipContentStyle}
