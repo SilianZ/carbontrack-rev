@@ -30,35 +30,35 @@ class CronController
         $configuredKey = trim((string) ($_ENV['CRON_RUN_KEY'] ?? getenv('CRON_RUN_KEY') ?: ''));
 
         if ($configuredKey === '') {
-            $this->auditLogService->logSystemEvent('cron_run_endpoint_unconfigured', 'cron_scheduler', [
+            $this->auditSafely('cron_run_endpoint_unconfigured', [
                 'status' => 'failed',
                 'request_method' => 'GET',
                 'endpoint' => (string) $request->getUri()->getPath(),
                 'request_data' => ['remote_addr' => $this->clientIp($request)],
                 'request_id' => $request->getAttribute('request_id'),
-            ]);
+            ], $request);
 
-                return $this->json($request, $response, [
-                    'success' => false,
-                    'message' => 'Cron key is not configured',
-                    'code' => 'CRON_UNAVAILABLE',
-                ], 503);
+            return $this->json($request, $response, [
+                'success' => false,
+                'message' => 'Cron key is not configured',
+                'code' => 'CRON_UNAVAILABLE',
+            ], 503);
         }
 
         if ($providedKey === '' || !hash_equals($configuredKey, $providedKey)) {
-            $this->auditLogService->logSystemEvent('cron_run_endpoint_denied', 'cron_scheduler', [
+            $this->auditSafely('cron_run_endpoint_denied', [
                 'status' => 'failed',
                 'request_method' => 'GET',
                 'endpoint' => (string) $request->getUri()->getPath(),
                 'request_data' => ['remote_addr' => $this->clientIp($request)],
                 'request_id' => $request->getAttribute('request_id'),
-            ]);
+            ], $request);
 
-                return $this->json($request, $response, [
-                    'success' => false,
-                    'message' => 'Invalid cron key',
-                    'code' => 'FORBIDDEN',
-                ], 403);
+            return $this->json($request, $response, [
+                'success' => false,
+                'message' => 'Invalid cron key',
+                'code' => 'FORBIDDEN',
+            ], 403);
         }
 
         try {
@@ -67,7 +67,7 @@ class CronController
                 'remote_addr' => $this->clientIp($request),
             ]);
 
-            $this->auditLogService->logSystemEvent('cron_run_endpoint_triggered', 'cron_scheduler', [
+            $this->auditSafely('cron_run_endpoint_triggered', [
                 'status' => !empty($result['failed']) || !empty($result['skipped']) ? 'failed' : 'success',
                 'request_method' => 'GET',
                 'endpoint' => (string) $request->getUri()->getPath(),
@@ -79,7 +79,7 @@ class CronController
                     'failed_count' => count($result['failed'] ?? []),
                     'skipped_count' => count($result['skipped'] ?? []),
                 ],
-            ]);
+            ], $request);
 
             $failedCount = count($result['failed'] ?? []);
             $skippedCount = count($result['skipped'] ?? []);
@@ -123,6 +123,19 @@ class CronController
         }
 
         return null;
+    }
+
+    private function auditSafely(string $action, array $payload, Request $request): void
+    {
+        try {
+            $this->auditLogService->logSystemEvent($action, 'cron_scheduler', $payload);
+        } catch (\Throwable $exception) {
+            $this->logger->warning('Cron endpoint audit logging failed', [
+                'action' => $action,
+                'path' => (string) $request->getUri()->getPath(),
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private function error(Request $request, Response $response, \Throwable $exception, string $message): Response

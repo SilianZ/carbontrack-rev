@@ -37,6 +37,33 @@ class CronControllerTest extends TestCase
         $this->assertArrayHasKey('request_id', $payload);
     }
 
+    public function testRunStillReturnsForbiddenWhenAuditLogFails(): void
+    {
+        $_ENV['CRON_RUN_KEY'] = 'expected-secret';
+
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->once())
+            ->method('logSystemEvent')
+            ->willThrowException(new \RuntimeException('audit down'));
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('warning');
+
+        $controller = new CronController(
+            $this->createMock(CronSchedulerService::class),
+            $logger,
+            $this->createMock(ErrorLogService::class),
+            $audit
+        );
+
+        $response = $controller->run(
+            makeRequest('GET', '/api/v1/cron/run?key=bad'),
+            new \Slim\Psr7\Response()
+        );
+
+        $this->assertSame(403, $response->getStatusCode());
+    }
+
     public function testRunReturnsSchedulerSummaryForValidKey(): void
     {
         $_ENV['CRON_RUN_KEY'] = 'expected-secret';
