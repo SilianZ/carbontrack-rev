@@ -90,13 +90,27 @@ export default function AdminCronPage() {
     }
   );
 
+  const runTaskMutation = useMutation(
+    (taskKey) => adminAPI.runCronTask(taskKey),
+    {
+      onSuccess: () => {
+        toast.success(t('admin.cron.messages.executed'));
+        queryClient.invalidateQueries(['admin-cron-tasks']);
+        queryClient.invalidateQueries(['admin-cron-runs']);
+      },
+      onError: (error) => {
+        toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
+      },
+    }
+  );
+
   useEffect(() => {
     if (!tasks.length) {
       return;
     }
 
-    const activeSaveTaskKey = saveTaskMutation.variables?.taskKey ?? null;
-    const activeRunTaskKey = runTaskMutation.variables ?? null;
+    const activeSaveTaskKey = saveTaskMutation.isLoading ? (saveTaskMutation.variables?.taskKey ?? null) : null;
+    const activeRunTaskKey = runTaskMutation.isLoading ? (runTaskMutation.variables ?? null) : null;
 
     setDrafts((current) => {
       const next = {};
@@ -111,21 +125,7 @@ export default function AdminCronPage() {
       }
       return next;
     });
-  }, [runTaskMutation.variables, saveTaskMutation.variables, tasks]);
-
-  const runTaskMutation = useMutation(
-    (taskKey) => adminAPI.runCronTask(taskKey),
-    {
-      onSuccess: () => {
-        toast.success(t('admin.cron.messages.executed'));
-        queryClient.invalidateQueries(['admin-cron-tasks']);
-        queryClient.invalidateQueries(['admin-cron-runs']);
-      },
-      onError: (error) => {
-        toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
-      },
-    }
-  );
+  }, [runTaskMutation.isLoading, runTaskMutation.variables, saveTaskMutation.isLoading, saveTaskMutation.variables, tasks]);
 
   const summary = useMemo(() => {
     const enabled = tasks.filter((task) => task.enabled).length;

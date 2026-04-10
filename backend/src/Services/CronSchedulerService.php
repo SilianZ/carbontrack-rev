@@ -258,18 +258,26 @@ class CronSchedulerService
                 'error_message' => null,
             ]);
 
-            $this->auditLogService->logSystemEvent('cron_task_run_completed', 'cron_scheduler', [
-                'status' => 'success',
-                'request_method' => 'SYSTEM',
-                'endpoint' => '/internal/cron/' . $taskKey,
-                'request_id' => $context['request_id'] ?? null,
-                'request_data' => [
+            try {
+                $this->auditLogService->logSystemEvent('cron_task_run_completed', 'cron_scheduler', [
+                    'status' => 'success',
+                    'request_method' => 'SYSTEM',
+                    'endpoint' => '/internal/cron/' . $taskKey,
+                    'request_id' => $context['request_id'] ?? null,
+                    'request_data' => [
+                        'task_key' => $taskKey,
+                        'trigger_source' => $triggerSource,
+                        'duration_ms' => $durationMs,
+                    ],
+                    'new_data' => $result,
+                ]);
+            } catch (\Throwable $loggingException) {
+                $this->logger->warning('Cron task completion audit logging failed', [
                     'task_key' => $taskKey,
                     'trigger_source' => $triggerSource,
-                    'duration_ms' => $durationMs,
-                ],
-                'new_data' => $result,
-            ]);
+                    'error' => $loggingException->getMessage(),
+                ]);
+            }
 
             return [
                 'task_key' => $taskKey,
