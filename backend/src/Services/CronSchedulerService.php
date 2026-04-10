@@ -114,7 +114,11 @@ class CronSchedulerService
 
         $runsQuery = CronRun::query()->orderByDesc('id');
         if (!empty($query['task_key'])) {
-            $runsQuery->where('task_key', $this->normalizeTaskKey((string) $query['task_key']));
+            $taskKey = strtolower(trim((string) $query['task_key']));
+            if ($taskKey === '') {
+                throw new \InvalidArgumentException('Invalid cron task key filter');
+            }
+            $runsQuery->where('task_key', $taskKey);
         }
         if (!empty($query['status'])) {
             $status = strtolower(trim((string) $query['status']));

@@ -58,6 +58,7 @@ export default function AdminCronPage() {
   const [taskFilter, setTaskFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [drafts, setDrafts] = useState({});
+  const [dirtyTaskKeys, setDirtyTaskKeys] = useState({});
 
   const tasksQuery = useQuery(['admin-cron-tasks'], async () => {
     const response = await adminAPI.getCronTasks();
@@ -80,7 +81,12 @@ export default function AdminCronPage() {
   const saveTaskMutation = useMutation(
     ({ taskKey, payload }) => adminAPI.updateCronTask(taskKey, payload),
     {
-      onSuccess: () => {
+      onSuccess: (_, variables) => {
+        setDirtyTaskKeys((current) => {
+          const next = { ...current };
+          delete next[variables.taskKey];
+          return next;
+        });
         toast.success(t('admin.cron.messages.saved'));
         queryClient.invalidateQueries(['admin-cron-tasks']);
       },
@@ -115,7 +121,8 @@ export default function AdminCronPage() {
     setDrafts((current) => {
       const next = {};
       for (const task of tasks) {
-        const shouldPreserveDraft = task.task_key === activeSaveTaskKey || task.task_key === activeRunTaskKey;
+        const isDirty = Boolean(dirtyTaskKeys[task.task_key]);
+        const shouldPreserveDraft = isDirty || task.task_key === activeSaveTaskKey || task.task_key === activeRunTaskKey;
         next[task.task_key] = shouldPreserveDraft && current[task.task_key]
           ? current[task.task_key]
           : {
@@ -125,7 +132,7 @@ export default function AdminCronPage() {
       }
       return next;
     });
-  }, [runTaskMutation.isLoading, runTaskMutation.variables, saveTaskMutation.isLoading, saveTaskMutation.variables, tasks]);
+  }, [dirtyTaskKeys, runTaskMutation.isLoading, runTaskMutation.variables, saveTaskMutation.isLoading, saveTaskMutation.variables, tasks]);
 
   const summary = useMemo(() => {
     const enabled = tasks.filter((task) => task.enabled).length;
@@ -270,10 +277,13 @@ export default function AdminCronPage() {
                       <div className="flex h-10 items-center rounded-xl border border-slate-200 bg-white px-3 dark:border-white/10 dark:bg-slate-950/70">
                         <Switch
                           checked={Boolean(draft.enabled)}
-                          onCheckedChange={(checked) => setDrafts((current) => ({
-                            ...current,
-                            [task.task_key]: { ...draft, enabled: checked },
-                          }))}
+                          onCheckedChange={(checked) => {
+                            setDrafts((current) => ({
+                              ...current,
+                              [task.task_key]: { ...draft, enabled: checked },
+                            }));
+                            setDirtyTaskKeys((current) => ({ ...current, [task.task_key]: true }));
+                          }}
                         />
                       </div>
                     </div>
@@ -285,10 +295,13 @@ export default function AdminCronPage() {
                         max="1440"
                         aria-invalid={intervalMinutes === null}
                         value={draft.interval_minutes}
-                        onChange={(event) => setDrafts((current) => ({
-                          ...current,
-                          [task.task_key]: { ...draft, interval_minutes: event.target.value },
-                        }))}
+                        onChange={(event) => {
+                          setDrafts((current) => ({
+                            ...current,
+                            [task.task_key]: { ...draft, interval_minutes: event.target.value },
+                          }));
+                          setDirtyTaskKeys((current) => ({ ...current, [task.task_key]: true }));
+                        }}
                       />
                     </div>
                     <div className="flex items-end gap-2">

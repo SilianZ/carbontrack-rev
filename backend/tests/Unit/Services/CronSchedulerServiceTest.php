@@ -340,6 +340,34 @@ class CronSchedulerServiceTest extends TestCase
         $this->assertGreaterThan(0, (int) CronRun::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('duration_ms'));
     }
 
+    public function testListRunsAllowsHistoricalUnknownTaskKeyFilter(): void
+    {
+        CronRun::query()->create([
+            'task_key' => 'legacy_removed_task',
+            'trigger_source' => 'legacy_endpoint',
+            'request_id' => 'req-legacy',
+            'status' => 'success',
+            'started_at' => $this->now(),
+            'finished_at' => $this->now(),
+            'duration_ms' => 12,
+            'result_json' => '{}',
+            'error_message' => null,
+            'created_at' => $this->now(),
+        ]);
+
+        $service = $this->makeService(
+            $this->createMock(SupportRoutingEngineService::class),
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->listRuns(['task_key' => 'legacy_removed_task']);
+
+        $this->assertSame(1, $result['pagination']['total']);
+        $this->assertSame('legacy_removed_task', $result['items'][0]['task_key']);
+    }
+
     public function testCompletionAuditFailureDoesNotFlipSuccessfulRun(): void
     {
         $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());

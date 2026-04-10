@@ -17259,6 +17259,16 @@
               }
             }
           },
+          "500": {
+            "description": "服务器内部错误。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "503": {
             "description": "未配置 cron 密钥。",
             "content": {
@@ -17291,6 +17301,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CronTaskListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -17353,6 +17373,16 @@
           },
           "422": {
             "description": "参数非法。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误。",
             "content": {
               "application/json": {
                 "schema": {
@@ -17453,6 +17483,16 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "服务器内部错误。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -17512,6 +17552,16 @@
           },
           "422": {
             "description": "参数非法。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误。",
             "content": {
               "application/json": {
                 "schema": {
