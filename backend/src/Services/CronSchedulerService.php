@@ -623,11 +623,13 @@ class CronSchedulerService
 
     private function normalizeIntervalMinutes(mixed $value): int
     {
-        if (!is_numeric($value)) {
+        if (is_int($value)) {
+            $interval = $value;
+        } elseif (is_string($value) && preg_match('/^\d+$/', trim($value)) === 1) {
+            $interval = (int) trim($value);
+        } else {
             throw new \InvalidArgumentException('interval_minutes must be an integer');
         }
-
-        $interval = (int) $value;
         if ($interval < 1 || $interval > 1440) {
             throw new \InvalidArgumentException('interval_minutes must be between 1 and 1440');
         }

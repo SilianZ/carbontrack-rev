@@ -94,10 +94,12 @@ class CronController
                 ], 503);
             }
 
-            if ($skippedCount > 0 && $executedCount === 0) {
+            if ($skippedCount > 0) {
                 return $this->json($response, [
                     'success' => false,
-                    'message' => 'All due cron tasks were skipped',
+                    'message' => $executedCount > 0
+                        ? 'One or more cron tasks were skipped'
+                        : 'All due cron tasks were skipped',
                     'code' => 'CRON_RUN_SKIPPED',
                     'data' => $result,
                 ], 409);

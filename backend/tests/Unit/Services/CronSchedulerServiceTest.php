@@ -221,6 +221,23 @@ class CronSchedulerServiceTest extends TestCase
         $this->assertSame('existing-lock', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('lock_token'));
     }
 
+    public function testUpdateTaskRejectsNonIntegerInterval(): void
+    {
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());
+
+        $service = $this->makeService(
+            $this->createMock(SupportRoutingEngineService::class),
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('interval_minutes must be an integer');
+
+        $service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, ['interval_minutes' => '1.9']);
+    }
+
     private function seedTask(string $taskKey, string $taskName, int $intervalMinutes, bool $enabled, ?string $nextRunAt, array $overrides = []): void
     {
         CronTask::query()->create(array_merge([
