@@ -447,6 +447,117 @@ class CronSchedulerServiceTest extends TestCase
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail');
     }
 
+    public function testFailedRunHistoryPersistenceFailureDoesNotAbortBatch(): void
+    {
+        $this->seedTask(CronSchedulerService::TASK_BADGE_AUTO_AWARD, 'Badge Auto Award', 5, true, $this->now());
+
+        $badge = $this->createMock(BadgeService::class);
+        $badge->expects($this->once())->method('runAutoGrant')->willThrowException(new \RuntimeException('badge_failed'));
+
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail_failed');
+        self::$capsule->getConnection()->statement("
+            CREATE TRIGGER cron_run_insert_fail_failed
+            BEFORE INSERT ON cron_runs
+            WHEN NEW.task_key = '" . CronSchedulerService::TASK_BADGE_AUTO_AWARD . "'
+            BEGIN
+                SELECT RAISE(FAIL, 'cron failed run insert failed');
+            END;
+        ");
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->atLeastOnce())->method('warning');
+
+        $service = new CronSchedulerService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $this->createMock(AuditLogService::class),
+            $this->createMock(ErrorLogService::class),
+            $this->createMock(SupportRoutingEngineService::class),
+            $badge,
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-10']);
+
+        $this->assertCount(1, $result['failed']);
+        $this->assertNull($result['failed'][0]['run_id']);
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail_failed');
+    }
+
+    public function testSkippedRunPersistenceFailureDoesNotAbortBatch(): void
+    {
+        $now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $now, [
+            'lock_token' => 'existing-lock',
+            'locked_at' => $now,
+        ]);
+
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail_skipped');
+        self::$capsule->getConnection()->statement("
+            CREATE TRIGGER cron_run_insert_fail_skipped
+            BEFORE INSERT ON cron_runs
+            WHEN NEW.task_key = '" . CronSchedulerService::TASK_SUPPORT_SLA_SWEEP . "'
+            BEGIN
+                SELECT RAISE(FAIL, 'cron skipped run insert failed');
+            END;
+        ");
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->atLeastOnce())->method('warning');
+
+        $service = new CronSchedulerService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $this->createMock(AuditLogService::class),
+            $this->createMock(ErrorLogService::class),
+            $this->createMock(SupportRoutingEngineService::class),
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-11']);
+
+        $this->assertCount(1, $result['skipped']);
+        $this->assertNull($result['skipped'][0]['run_id']);
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail_skipped');
+    }
+
+    public function testBatchAuditFailureDoesNotAbortRunDueTasks(): void
+    {
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());
+
+        $support = $this->createMock(SupportRoutingEngineService::class);
+        $support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
+
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->method('logSystemEvent')->willReturnCallback(function (string $action) {
+            if ($action === 'cron_scheduler_batch_completed') {
+                throw new \RuntimeException('batch_audit_failed');
+            }
+            return true;
+        });
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('warning');
+
+        $service = new CronSchedulerService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $audit,
+            $this->createMock(ErrorLogService::class),
+            $support,
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-12']);
+
+        $this->assertCount(1, $result['executed']);
+    }
+
     private function seedTask(string $taskKey, string $taskName, int $intervalMinutes, bool $enabled, ?string $nextRunAt, array $overrides = []): void
     {
         CronTask::query()->create(array_merge([

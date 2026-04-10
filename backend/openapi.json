@@ -17270,7 +17270,7 @@
             }
           },
           "503": {
-            "description": "未配置 cron 密钥。",
+            "description": "Cron 密钥未配置，或当前到点任务存在执行失败。",
             "content": {
               "application/json": {
                 "schema": {
@@ -28456,7 +28456,10 @@
             ]
           },
           "run_id": {
-            "type": "integer"
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "started_at": {
             "type": [
