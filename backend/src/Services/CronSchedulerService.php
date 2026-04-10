@@ -250,17 +250,23 @@ class CronSchedulerService
                 $nextRunAt = $freshTask?->next_run_at;
             }
 
-            $run = CronRun::create([
-                'task_key' => $taskKey,
-                'trigger_source' => $triggerSource,
-                'request_id' => $context['request_id'] ?? null,
-                'status' => self::RUN_STATUS_SUCCESS,
-                'started_at' => $startedAt,
-                'finished_at' => $finishedAt,
-                'duration_ms' => $durationMs,
-                'result_json' => $this->encodeJson($result),
-                'error_message' => null,
-            ]);
+            $runId = null;
+            try {
+                $run = CronRun::create([
+                    'task_key' => $taskKey,
+                    'trigger_source' => $triggerSource,
+                    'request_id' => $context['request_id'] ?? null,
+                    'status' => self::RUN_STATUS_SUCCESS,
+                    'started_at' => $startedAt,
+                    'finished_at' => $finishedAt,
+                    'duration_ms' => $durationMs,
+                    'result_json' => $this->encodeJson($result),
+                    'error_message' => null,
+                ]);
+                $runId = (int) $run->id;
+            } catch (\Throwable $persistenceException) {
+                $this->logNonCriticalPostRunFailure('Cron task run-history persistence failed', $taskKey, $triggerSource, $context, $persistenceException);
+            }
 
             try {
                 $this->auditLogService->logSystemEvent('cron_task_run_completed', 'cron_scheduler', [
@@ -287,7 +293,7 @@ class CronSchedulerService
                 'task_key' => $taskKey,
                 'task_name' => $task->task_name,
                 'status' => self::RUN_STATUS_SUCCESS,
-                'run_id' => (int) $run->id,
+                'run_id' => $runId,
                 'started_at' => $startedAt,
                 'finished_at' => $finishedAt,
                 'duration_ms' => $durationMs,
@@ -742,6 +748,36 @@ class CronSchedulerService
             'task_key' => $taskKey,
             'trigger_source' => $triggerSource,
         ]);
+    }
+
+    private function logNonCriticalPostRunFailure(string $message, string $taskKey, string $triggerSource, array $context, \Throwable $exception): void
+    {
+        $this->logger->warning($message, [
+            'task_key' => $taskKey,
+            'trigger_source' => $triggerSource,
+            'error' => $exception->getMessage(),
+        ]);
+
+        try {
+            $request = SyntheticRequestFactory::fromContext(
+                '/internal/cron/' . $taskKey,
+                'SYSTEM',
+                is_string($context['request_id'] ?? null) ? (string) $context['request_id'] : null,
+                [],
+                $context + [
+                    'task_key' => $taskKey,
+                    'trigger_source' => $triggerSource,
+                ],
+                ['PHP_SAPI' => PHP_SAPI]
+            );
+
+            $this->errorLogService->logException($exception, $request, [
+                'context_message' => 'cron_task_post_run_recording_failed',
+                'task_key' => $taskKey,
+                'trigger_source' => $triggerSource,
+            ]);
+        } catch (\Throwable) {
+        }
     }
 
     private function now(): string

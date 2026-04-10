@@ -59,7 +59,10 @@ class AdminCronController
 
             return $this->json($request, $response, ['success' => true, 'data' => $result]);
         } catch (\RuntimeException $exception) {
-            return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'CRON_TASK_NOT_FOUND'], 404);
+            if ($this->isTaskNotFoundException($exception)) {
+                return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'CRON_TASK_NOT_FOUND'], 404);
+            }
+            return $this->error($request, $response, $exception, 'Failed to update cron task');
         } catch (\InvalidArgumentException $exception) {
             return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
         } catch (\Throwable $exception) {
@@ -120,7 +123,10 @@ class AdminCronController
 
             return $this->json($request, $response, ['success' => true, 'data' => $result]);
         } catch (\RuntimeException $exception) {
-            return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'CRON_TASK_NOT_FOUND'], 404);
+            if ($this->isTaskNotFoundException($exception)) {
+                return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'CRON_TASK_NOT_FOUND'], 404);
+            }
+            return $this->error($request, $response, $exception, 'Failed to trigger cron task');
         } catch (\InvalidArgumentException $exception) {
             return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
         } catch (\Throwable $exception) {
@@ -152,6 +158,11 @@ class AdminCronController
             throw new \InvalidArgumentException('Invalid cron task key');
         }
         return $taskKey;
+    }
+
+    private function isTaskNotFoundException(\RuntimeException $exception): bool
+    {
+        return $exception->getMessage() === 'Cron task not found';
     }
 
     private function error(Request $request, Response $response, \Throwable $exception, string $message): Response

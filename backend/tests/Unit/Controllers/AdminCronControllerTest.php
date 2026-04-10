@@ -148,4 +148,24 @@ class AdminCronControllerTest extends TestCase
         $payload = json_decode((string) $response->getBody(), true);
         $this->assertFalse($payload['success']);
     }
+
+    public function testRunTaskReturnsServerErrorForUnexpectedRuntimeException(): void
+    {
+        $auth = $this->createMock(AuthService::class);
+        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'role' => 'admin', 'is_admin' => true]);
+
+        $scheduler = $this->createMock(CronSchedulerService::class);
+        $scheduler->expects($this->once())
+            ->method('runTaskNow')
+            ->willThrowException(new \RuntimeException('database offline'));
+
+        $controller = $this->makeController($scheduler, $auth, $this->createMock(AuditLogService::class));
+        $response = $controller->runTask(
+            makeRequest('POST', '/api/v1/admin/cron/tasks/support_sla_sweep/run'),
+            new \Slim\Psr7\Response(),
+            ['taskKey' => 'support_sla_sweep']
+        );
+
+        $this->assertSame(500, $response->getStatusCode());
+    }
 }

@@ -404,6 +404,49 @@ class CronSchedulerServiceTest extends TestCase
         $this->assertSame('success', CronRun::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('status'));
     }
 
+    public function testRunHistoryPersistenceFailureDoesNotFlipSuccessfulRun(): void
+    {
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());
+
+        $support = $this->createMock(SupportRoutingEngineService::class);
+        $support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
+
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->method('logSystemEvent')->willReturn(true);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('warning');
+
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail');
+        self::$capsule->getConnection()->statement("
+            CREATE TRIGGER cron_run_insert_fail
+            BEFORE INSERT ON cron_runs
+            WHEN NEW.task_key = '" . CronSchedulerService::TASK_SUPPORT_SLA_SWEEP . "'
+            BEGIN
+                SELECT RAISE(FAIL, 'cron run insert failed');
+            END;
+        ");
+
+        $service = new CronSchedulerService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $audit,
+            $this->createMock(ErrorLogService::class),
+            $support,
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-9']);
+
+        $this->assertSame('success', $result['status']);
+        $this->assertNull($result['run_id']);
+        $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('last_status'));
+
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail');
+    }
+
     private function seedTask(string $taskKey, string $taskName, int $intervalMinutes, bool $enabled, ?string $nextRunAt, array $overrides = []): void
     {
         CronTask::query()->create(array_merge([
