@@ -181,7 +181,7 @@ class CronSchedulerService
         }
 
         $this->auditLogService->logSystemEvent('cron_scheduler_batch_completed', 'cron_scheduler', [
-            'status' => empty($response['failed']) ? 'success' : 'failed',
+            'status' => !empty($response['failed']) || !empty($response['skipped']) ? 'failed' : 'success',
             'request_method' => 'SYSTEM',
             'endpoint' => '/cron/run',
             'request_id' => $context['request_id'] ?? null,
@@ -220,11 +220,12 @@ class CronSchedulerService
         }
 
         $startedAt = $lockNow;
+        $startedAtMicro = microtime(true);
         try {
             $rawResult = $this->executeTaskHandler($taskKey, $triggerSource);
             $result = $this->normalizeTaskResult($taskKey, $rawResult);
             $finishedAt = $this->now();
-            $durationMs = $this->diffMilliseconds($startedAt, $finishedAt);
+            $durationMs = $this->diffMilliseconds($startedAtMicro, microtime(true));
             $this->completeTaskRun($taskKey, $lockToken, [
                 'last_finished_at' => $finishedAt,
                 'last_status' => self::TASK_STATUS_SUCCESS,
@@ -283,7 +284,7 @@ class CronSchedulerService
             ];
         } catch (\Throwable $exception) {
             $finishedAt = $this->now();
-            $durationMs = $this->diffMilliseconds($startedAt, $finishedAt);
+            $durationMs = $this->diffMilliseconds($startedAtMicro, microtime(true));
             $errorMessage = trim($exception->getMessage()) !== '' ? $exception->getMessage() : 'Unknown cron task error';
 
             $this->completeTaskRun($taskKey, $lockToken, [
@@ -751,12 +752,9 @@ class CronSchedulerService
             ->format('Y-m-d H:i:s');
     }
 
-    private function diffMilliseconds(string $startedAt, string $finishedAt): int
+    private function diffMilliseconds(float $startedAt, float $finishedAt): int
     {
-        $start = new DateTimeImmutable($startedAt, new DateTimeZone('Asia/Shanghai'));
-        $finish = new DateTimeImmutable($finishedAt, new DateTimeZone('Asia/Shanghai'));
-
-        return max(0, ((int) $finish->format('U')) - ((int) $start->format('U'))) * 1000;
+        return (int) max(0, round(($finishedAt - $startedAt) * 1000));
     }
 
     private function generateLockToken(): string

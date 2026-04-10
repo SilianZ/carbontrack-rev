@@ -38,11 +38,11 @@ class CronController
                 'request_id' => $request->getAttribute('request_id'),
             ]);
 
-            return $this->json($response, [
-                'success' => false,
-                'message' => 'Cron key is not configured',
-                'code' => 'CRON_UNAVAILABLE',
-            ], 503);
+                return $this->json($request, $response, [
+                    'success' => false,
+                    'message' => 'Cron key is not configured',
+                    'code' => 'CRON_UNAVAILABLE',
+                ], 503);
         }
 
         if ($providedKey === '' || !hash_equals($configuredKey, $providedKey)) {
@@ -54,11 +54,11 @@ class CronController
                 'request_id' => $request->getAttribute('request_id'),
             ]);
 
-            return $this->json($response, [
-                'success' => false,
-                'message' => 'Invalid cron key',
-                'code' => 'FORBIDDEN',
-            ], 403);
+                return $this->json($request, $response, [
+                    'success' => false,
+                    'message' => 'Invalid cron key',
+                    'code' => 'FORBIDDEN',
+                ], 403);
         }
 
         try {
@@ -86,7 +86,7 @@ class CronController
             $executedCount = count($result['executed'] ?? []);
 
             if ($failedCount > 0) {
-                return $this->json($response, [
+                return $this->json($request, $response, [
                     'success' => false,
                     'message' => 'One or more cron tasks failed',
                     'code' => 'CRON_RUN_FAILED',
@@ -95,7 +95,7 @@ class CronController
             }
 
             if ($skippedCount > 0) {
-                return $this->json($response, [
+                return $this->json($request, $response, [
                     'success' => false,
                     'message' => $executedCount > 0
                         ? 'One or more cron tasks were skipped'
@@ -105,7 +105,7 @@ class CronController
                 ], 409);
             }
 
-            return $this->json($response, ['success' => true, 'data' => $result]);
+            return $this->json($request, $response, ['success' => true, 'data' => $result]);
         } catch (\Throwable $exception) {
             return $this->error($request, $response, $exception, 'Failed to run scheduled cron tasks');
         }
@@ -134,15 +134,18 @@ class CronController
             $this->logger->error('Cron endpoint error logging failed', ['error' => $loggingError->getMessage()]);
         }
 
-        return $this->json($response, [
+        return $this->json($request, $response, [
             'success' => false,
             'message' => $message,
             'code' => 'INTERNAL_ERROR',
         ], 500);
     }
 
-    private function json(Response $response, array $payload, int $status = 200): Response
+    private function json(Request $request, Response $response, array $payload, int $status = 200): Response
     {
+        if ($status >= 400 && !array_key_exists('request_id', $payload)) {
+            $payload['request_id'] = $request->getAttribute('request_id');
+        }
         $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         return $response->withStatus($status)->withHeader('Content-Type', 'application/json');
     }

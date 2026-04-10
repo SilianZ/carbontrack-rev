@@ -33,6 +33,8 @@ class CronControllerTest extends TestCase
         );
 
         $this->assertSame(403, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertArrayHasKey('request_id', $payload);
     }
 
     public function testRunReturnsSchedulerSummaryForValidKey(): void

@@ -82,17 +82,23 @@ export default function AdminCronPage() {
       return;
     }
 
+    const activeSaveTaskKey = saveTaskMutation.variables?.taskKey ?? null;
+    const activeRunTaskKey = runTaskMutation.variables ?? null;
+
     setDrafts((current) => {
-      const next = { ...current };
+      const next = {};
       for (const task of tasks) {
-        next[task.task_key] = next[task.task_key] ?? {
-          enabled: Boolean(task.enabled),
-          interval_minutes: String(task.interval_minutes ?? ''),
-        };
+        const shouldPreserveDraft = task.task_key === activeSaveTaskKey || task.task_key === activeRunTaskKey;
+        next[task.task_key] = shouldPreserveDraft && current[task.task_key]
+          ? current[task.task_key]
+          : {
+              enabled: Boolean(task.enabled),
+              interval_minutes: String(task.interval_minutes ?? ''),
+            };
       }
       return next;
     });
-  }, [tasks]);
+  }, [runTaskMutation.variables, saveTaskMutation.variables, tasks]);
 
   const saveTaskMutation = useMutation(
     ({ taskKey, payload }) => adminAPI.updateCronTask(taskKey, payload),

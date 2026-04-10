@@ -35,7 +35,7 @@ class AdminCronController
                 'new_data' => ['count' => count($result)],
             ]);
 
-            return $this->json($response, ['success' => true, 'data' => $result]);
+            return $this->json($request, $response, ['success' => true, 'data' => $result]);
         } catch (\Throwable $exception) {
             return $this->error($request, $response, $exception, 'Failed to load cron tasks');
         }
@@ -57,11 +57,11 @@ class AdminCronController
                 'new_data' => $result,
             ]);
 
-            return $this->json($response, ['success' => true, 'data' => $result]);
+            return $this->json($request, $response, ['success' => true, 'data' => $result]);
         } catch (\RuntimeException $exception) {
-            return $this->json($response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'CRON_TASK_NOT_FOUND'], 404);
+            return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'CRON_TASK_NOT_FOUND'], 404);
         } catch (\InvalidArgumentException $exception) {
-            return $this->json($response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+            return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
         } catch (\Throwable $exception) {
             return $this->error($request, $response, $exception, 'Failed to update cron task');
         }
@@ -81,9 +81,9 @@ class AdminCronController
                 'new_data' => ['count' => count($result['items'] ?? [])],
             ]);
 
-            return $this->json($response, ['success' => true, 'data' => $result]);
+            return $this->json($request, $response, ['success' => true, 'data' => $result]);
         } catch (\InvalidArgumentException $exception) {
-            return $this->json($response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+            return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
         } catch (\Throwable $exception) {
             return $this->error($request, $response, $exception, 'Failed to load cron runs');
         }
@@ -110,7 +110,7 @@ class AdminCronController
             if (($result['status'] ?? null) !== 'success') {
                 $status = ($result['status'] ?? null) === 'skipped' ? 409 : 503;
 
-                return $this->json($response, [
+                return $this->json($request, $response, [
                     'success' => false,
                     'message' => $result['error_message'] ?? 'Cron task did not complete successfully',
                     'code' => 'CRON_TASK_FAILED',
@@ -118,11 +118,11 @@ class AdminCronController
                 ], $status);
             }
 
-            return $this->json($response, ['success' => true, 'data' => $result]);
+            return $this->json($request, $response, ['success' => true, 'data' => $result]);
         } catch (\RuntimeException $exception) {
-            return $this->json($response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'CRON_TASK_NOT_FOUND'], 404);
+            return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'CRON_TASK_NOT_FOUND'], 404);
         } catch (\InvalidArgumentException $exception) {
-            return $this->json($response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+            return $this->json($request, $response, ['success' => false, 'message' => $exception->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
         } catch (\Throwable $exception) {
             return $this->error($request, $response, $exception, 'Failed to trigger cron task');
         }
@@ -163,11 +163,14 @@ class AdminCronController
             $this->logger->error('Admin cron logging failed', ['error' => $loggingError->getMessage()]);
         }
 
-        return $this->json($response, ['success' => false, 'message' => $message, 'code' => 'INTERNAL_ERROR'], 500);
+        return $this->json($request, $response, ['success' => false, 'message' => $message, 'code' => 'INTERNAL_ERROR'], 500);
     }
 
-    private function json(Response $response, array $payload, int $status = 200): Response
+    private function json(Request $request, Response $response, array $payload, int $status = 200): Response
     {
+        if ($status >= 400 && !array_key_exists('request_id', $payload)) {
+            $payload['request_id'] = $request->getAttribute('request_id');
+        }
         $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         return $response->withStatus($status)->withHeader('Content-Type', 'application/json');
     }

@@ -69,6 +69,8 @@ class AdminCronControllerTest extends TestCase
         );
 
         $this->assertSame(422, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertArrayHasKey('request_id', $payload);
     }
 
     public function testListRunsReturnsPayload(): void
