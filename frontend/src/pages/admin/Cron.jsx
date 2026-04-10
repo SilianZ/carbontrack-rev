@@ -101,11 +101,13 @@ export default function AdminCronPage() {
     {
       onSuccess: () => {
         toast.success(t('admin.cron.messages.executed'));
-        queryClient.invalidateQueries(['admin-cron-tasks']);
-        queryClient.invalidateQueries(['admin-cron-runs']);
       },
       onError: (error) => {
         toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(['admin-cron-tasks']);
+        queryClient.invalidateQueries(['admin-cron-runs']);
       },
     }
   );
