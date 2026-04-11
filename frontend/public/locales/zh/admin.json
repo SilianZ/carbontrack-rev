@@ -1805,6 +1805,11 @@
         "idle": "空闲",
         "running": "运行中"
       },
+      "triggerSources": {
+        "cron_endpoint": "定时入口",
+        "legacy_endpoint": "兼容入口",
+        "admin_manual": "管理员手动触发"
+      },
       "actions": {
         "refresh": "刷新",
         "save": "保存",

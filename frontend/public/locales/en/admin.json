@@ -1805,6 +1805,11 @@
         "idle": "Idle",
         "running": "Running"
       },
+      "triggerSources": {
+        "cron_endpoint": "Cron endpoint",
+        "legacy_endpoint": "Legacy endpoint",
+        "admin_manual": "Admin manual"
+      },
       "actions": {
         "refresh": "Refresh",
         "save": "Save",

@@ -59,6 +59,14 @@ function translateCronStatus(t, status) {
   return status || 'idle';
 }
 
+function translateTriggerSource(t, triggerSource) {
+  if (triggerSource === 'cron_endpoint' || triggerSource === 'legacy_endpoint' || triggerSource === 'admin_manual') {
+    return t(`admin.cron.triggerSources.${triggerSource}`);
+  }
+
+  return triggerSource || '--';
+}
+
 export default function AdminCronPage() {
   const { t, currentLanguage } = useTranslation(['admin', 'common', 'errors']);
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
@@ -398,7 +406,7 @@ export default function AdminCronPage() {
                     <Badge variant="outline" className={taskStatusTone(run.status)}>
                       {translateCronStatus(t, run.status)}
                     </Badge>
-                    <Badge variant="outline">{run.trigger_source}</Badge>
+                    <Badge variant="outline">{translateTriggerSource(t, run.trigger_source)}</Badge>
                   </div>
                   <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                     {formatDateTime(run.started_at, locale)} · {run.duration_ms ?? '--'} ms

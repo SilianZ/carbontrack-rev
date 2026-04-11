@@ -272,9 +272,9 @@ return function (App $app) {
             $admin->get('/support/tickets/{id:[0-9]+}', [AdminSupportController::class, 'getTicketDetail']);
             $admin->get('/support/reports', [AdminSupportController::class, 'reports']);
             $admin->get('/cron/tasks', [AdminCronController::class, 'listTasks']);
-            $admin->put('/cron/tasks/{taskKey:[a-z_]+}', [AdminCronController::class, 'updateTask']);
+            $admin->put('/cron/tasks/{taskKey:[^/]+}', [AdminCronController::class, 'updateTask']);
             $admin->get('/cron/runs', [AdminCronController::class, 'listRuns']);
-            $admin->post('/cron/tasks/{taskKey:[a-z_]+}/run', [AdminCronController::class, 'runTask']);
+            $admin->post('/cron/tasks/{taskKey:[^/]+}/run', [AdminCronController::class, 'runTask']);
             $admin->post(PATH_SCHOOLS, [SchoolController::class, 'store']);
             $admin->put(PATH_SCHOOLS . PATTERN_ID_NUMERIC, [SchoolController::class, 'update']);
             $admin->delete(PATH_SCHOOLS . PATTERN_ID_NUMERIC, [SchoolController::class, 'delete']);

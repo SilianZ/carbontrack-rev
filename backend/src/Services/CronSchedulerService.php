@@ -753,15 +753,15 @@ class CronSchedulerService
     private function assertOnlyDisableForUnregisteredTask(array $payload): void
     {
         if (!array_key_exists('enabled', $payload)) {
-            throw new \RuntimeException('Unregistered cron tasks can only be disabled');
+            throw new \InvalidArgumentException('Unregistered cron tasks can only be disabled');
         }
 
         if ($this->normalizeBoolean($payload['enabled'], 'enabled')) {
-            throw new \RuntimeException('Unregistered cron tasks can only be disabled');
+            throw new \InvalidArgumentException('Unregistered cron tasks can only be disabled');
         }
 
         if (array_key_exists('interval_minutes', $payload) || array_key_exists('settings', $payload)) {
-            throw new \RuntimeException('Unregistered cron tasks can only be disabled');
+            throw new \InvalidArgumentException('Unregistered cron tasks can only be disabled');
         }
     }
 

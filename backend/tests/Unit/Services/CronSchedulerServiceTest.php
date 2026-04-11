@@ -267,6 +267,38 @@ class CronSchedulerServiceTest extends TestCase
         $this->assertNull($result['next_run_at']);
     }
 
+    public function testUpdateTaskRejectsUnsupportedFieldsForUnregisteredTaskAsValidationError(): void
+    {
+        CronTask::query()->create([
+            'task_key' => 'legacy_removed_task',
+            'task_name' => 'Legacy Removed Task',
+            'description' => 'Legacy',
+            'interval_minutes' => 5,
+            'enabled' => true,
+            'next_run_at' => $this->now(),
+            'last_status' => 'idle',
+            'consecutive_failures' => 0,
+            'settings_json' => '{}',
+            'created_at' => $this->now(),
+            'updated_at' => $this->now(),
+        ]);
+
+        $service = $this->makeService(
+            $this->createMock(SupportRoutingEngineService::class),
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unregistered cron tasks can only be disabled');
+
+        $service->updateTask('legacy_removed_task', [
+            'enabled' => false,
+            'interval_minutes' => 15,
+        ]);
+    }
+
     public function testUpdateTaskKeepsNextRunWhenOnlySettingsChange(): void
     {
         $nextRunAt = $this->now();

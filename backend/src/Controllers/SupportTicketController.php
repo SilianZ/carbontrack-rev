@@ -42,6 +42,7 @@ class SupportTicketController
                 'status' => 'failed',
                 'request_method' => 'GET',
                 'endpoint' => (string) $request->getUri()->getPath(),
+                'request_id' => $request->getAttribute('request_id'),
                 'request_data' => ['remote_addr' => $this->clientIp($request)],
             ]);
 
@@ -53,6 +54,7 @@ class SupportTicketController
                 'status' => 'failed',
                 'request_method' => 'GET',
                 'endpoint' => (string) $request->getUri()->getPath(),
+                'request_id' => $request->getAttribute('request_id'),
                 'request_data' => ['remote_addr' => $this->clientIp($request)],
             ]);
 
@@ -96,6 +98,7 @@ class SupportTicketController
                 'status' => 'success',
                 'request_method' => 'GET',
                 'endpoint' => (string) $request->getUri()->getPath(),
+                'request_id' => $request->getAttribute('request_id'),
                 'request_data' => $result + ['remote_addr' => $this->clientIp($request)],
             ]);
 
