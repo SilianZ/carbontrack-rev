@@ -37,4 +37,20 @@ class UserGroupServiceTest extends TestCase
         $this->assertTrue($normalizedTrue['is_default']);
         $this->assertFalse($normalizedIndeterminate['is_default']);
     }
+
+    public function testPreparePayloadRejectsInvalidDefaultFlag(): void
+    {
+        $service = new UserGroupService(new QuotaConfigService());
+        $method = new \ReflectionMethod($service, 'preparePayload');
+        $method->setAccessible(true);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('is_default must be a boolean');
+
+        $method->invoke($service, [
+            'name' => 'Broken',
+            'code' => 'broken',
+            'is_default' => 'maybe',
+        ], null);
+    }
 }

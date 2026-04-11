@@ -546,7 +546,7 @@ class SchoolController extends BaseController
     private function sanitizeSchoolPayload(mixed $payload): array
     {
         if (!is_array($payload)) {
-            return [];
+            throw new \InvalidArgumentException('Request body must be a JSON object');
         }
 
         if (array_key_exists('is_active', $payload)) {

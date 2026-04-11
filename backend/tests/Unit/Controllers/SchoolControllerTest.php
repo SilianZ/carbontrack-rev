@@ -66,6 +66,23 @@ class SchoolControllerTest extends TestCase
         ]);
     }
 
+    public function testSanitizeSchoolPayloadRejectsNonObjectPayload(): void
+    {
+        $controller = new SchoolController(
+            $this->createMock(AuditLogService::class),
+            $this->createMock(ErrorLogService::class),
+            $this->createMock(\PDO::class)
+        );
+
+        $method = new \ReflectionMethod($controller, 'sanitizeSchoolPayload');
+        $method->setAccessible(true);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Request body must be a JSON object');
+
+        $method->invoke($controller, null);
+    }
+
     public function testStoreRejectsNonObjectRequestBody(): void
     {
         $controller = new SchoolController(
