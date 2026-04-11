@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 
 import { adminAPI } from '../../lib/api';
 import { userManager } from '../../lib/auth';
+import { useTranslation } from '../../hooks/useTranslation';
 import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/badge';
@@ -1169,13 +1170,14 @@ export default function AdminAiWorkspacePage() {
   const queryClient = useQueryClient();
   const composerRef = useRef(null);
   const [searchParams] = useSearchParams();
+  const { currentLanguage } = useTranslation();
 
   const currentAdminId = useMemo(() => {
     const user = userManager.getUser();
     return user?.id ?? null;
   }, []);
 
-  const locale = typeof navigator !== 'undefined' && navigator.language ? navigator.language : 'zh-CN';
+  const locale = currentLanguage || 'zh-CN';
   const isZh = locale.toLowerCase().startsWith('zh');
 
   const [selectedConversationId, setSelectedConversationId] = useState(null);
