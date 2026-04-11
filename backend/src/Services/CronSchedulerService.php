@@ -646,6 +646,7 @@ class CronSchedulerService
             'task_key' => (string) $task->task_key,
             'task_name' => (string) $task->task_name,
             'description' => $task->description,
+            'is_registered' => $this->isRegisteredTaskKey((string) $task->task_key),
             'interval_minutes' => (int) ($task->interval_minutes ?? 0),
             'enabled' => (bool) $task->enabled,
             'next_run_at' => $task->next_run_at,

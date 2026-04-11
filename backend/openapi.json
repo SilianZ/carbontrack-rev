@@ -17250,7 +17250,7 @@
             }
           },
           "409": {
-            "description": "当前到点的任务均被跳过或锁定。",
+            "description": "当前至少一个到点任务被跳过或锁定，即使其他任务已执行成功。",
             "content": {
               "application/json": {
                 "schema": {
@@ -28356,15 +28356,19 @@
           "task_name": {
             "type": "string"
           },
-          "description": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "interval_minutes": {
-            "type": "integer"
-          },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "is_registered": {
+          "type": "boolean",
+          "description": "该任务键是否仍由当前调度器注册支持。未注册任务只允许在管理端被禁用。"
+        },
+        "interval_minutes": {
+          "type": "integer"
+        },
           "enabled": {
             "type": "boolean"
           },

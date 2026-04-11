@@ -174,18 +174,26 @@ export default function AdminCronPage() {
   };
 
   const saveDraftForTask = (taskKey, draft) => {
-    const intervalMinutes = parseIntervalMinutes(draft.interval_minutes);
-    if (intervalMinutes === null) {
+    const task = tasks.find((item) => item.task_key === taskKey);
+    const isDisableUnregisteredTask = task?.is_registered === false && draft.enabled === false;
+    const intervalMinutes = isDisableUnregisteredTask ? null : parseIntervalMinutes(draft.interval_minutes);
+
+    if (!isDisableUnregisteredTask && intervalMinutes === null) {
       toast.error(t('admin.cron.messages.invalidInterval'));
       return;
     }
 
+    const payload = {
+      enabled: draft.enabled,
+    };
+
+    if (!isDisableUnregisteredTask) {
+      payload.interval_minutes = intervalMinutes;
+    }
+
     saveTaskMutation.mutate({
       taskKey,
-      payload: {
-        enabled: draft.enabled,
-        interval_minutes: intervalMinutes,
-      },
+      payload,
     });
   };
 
@@ -245,8 +253,10 @@ export default function AdminCronPage() {
               interval_minutes: String(task.interval_minutes ?? ''),
             };
             const intervalMinutes = parseIntervalMinutes(draft.interval_minutes);
+            const canDisableUnregisteredTask = task.is_registered === false && draft.enabled === false;
             const saveLoading = saveTaskMutation.isLoading && saveTaskMutation.variables?.taskKey === task.task_key;
             const runLoading = runTaskMutation.isLoading && runTaskMutation.variables === task.task_key;
+            const saveDisabled = runLoading || (task.is_registered === false ? !canDisableUnregisteredTask : intervalMinutes === null);
 
             return (
               <div key={task.task_key} className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-5 py-5 dark:border-white/10 dark:bg-white/5">
@@ -327,7 +337,7 @@ export default function AdminCronPage() {
                         type="button"
                         className="flex-1"
                         onClick={() => saveDraftForTask(task.task_key, draft)}
-                        disabled={intervalMinutes === null || runLoading}
+                        disabled={saveDisabled}
                         loading={saveLoading}
                       >
                         {t('admin.cron.actions.save')}

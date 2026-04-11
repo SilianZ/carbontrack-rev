@@ -264,6 +264,7 @@ class CronSchedulerServiceTest extends TestCase
         $result = $service->updateTask('legacy_removed_task', ['enabled' => false]);
 
         $this->assertFalse($result['enabled']);
+        $this->assertFalse($result['is_registered']);
         $this->assertNull($result['next_run_at']);
     }
 
