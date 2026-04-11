@@ -148,6 +148,7 @@ class Avatar
     public function createAvatar(array $data): int
     {
         $uuid = $this->generateUUID();
+        $data = $this->normalizePersistenceData($data);
         
         $stmt = $this->db->prepare("
             INSERT INTO avatars (
@@ -177,6 +178,7 @@ class Avatar
      */
     public function updateAvatar(int $avatarId, array $data): bool
     {
+        $data = $this->normalizePersistenceData($data);
         $fields = [];
         $params = [];
         
@@ -203,6 +205,58 @@ class Avatar
         $stmt = $this->db->prepare($sql);
         
         return $stmt->execute($params);
+    }
+
+    /**
+     * Normalize controller/input payload before persisting to integer-backed columns.
+     *
+     * @param array<string,mixed> $data
+     * @return array<string,mixed>
+     */
+    private function normalizePersistenceData(array $data): array
+    {
+        foreach (['sort_order', 'is_active', 'is_default'] as $field) {
+            if (!array_key_exists($field, $data)) {
+                continue;
+            }
+
+            $data[$field] = $this->normalizeIntegerLikeValue($data[$field]);
+        }
+
+        return $data;
+    }
+
+    private function normalizeIntegerLikeValue(mixed $value, int $default = 0): int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+
+        if (is_float($value)) {
+            return (int) $value;
+        }
+
+        if (is_string($value)) {
+            $trimmed = trim($value);
+            if ($trimmed === '') {
+                return $default;
+            }
+
+            $booleanValue = filter_var($trimmed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($booleanValue !== null) {
+                return $booleanValue ? 1 : 0;
+            }
+
+            if (is_numeric($trimmed)) {
+                return (int) $trimmed;
+            }
+        }
+
+        return $default;
     }
 
     /**

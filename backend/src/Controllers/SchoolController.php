@@ -108,11 +108,12 @@ class SchoolController extends BaseController
     // Admin: Create a new school
     public function store(Request $request, Response $response, array $args)
     {
-        $data = $request->getParsedBody();
+        $data = $this->sanitizeSchoolPayload($request->getParsedBody());
         $this->validate($data, [
             "name" => "required|string|max:255",
             "location" => "required|string|max:255",
-            "is_active" => "boolean"
+            "is_active" => "boolean",
+            "sort_order" => "integer"
         ]);
 
         $school = School::create($data);
@@ -229,11 +230,12 @@ class SchoolController extends BaseController
             ], 404);
         }
 
-        $data = $request->getParsedBody();
+        $data = $this->sanitizeSchoolPayload($request->getParsedBody());
         $this->validate($data, [
             "name" => "string|max:255",
             "location" => "string|max:255",
-            "is_active" => "boolean"
+            "is_active" => "boolean",
+            "sort_order" => "integer"
         ]);
 
         $oldData = $school->toArray();
@@ -498,6 +500,84 @@ class SchoolController extends BaseController
         } else {
             error_log($exception->getMessage());
         }
+    }
+
+    /**
+     * @param mixed $payload
+     * @return array<string,mixed>
+     */
+    private function sanitizeSchoolPayload(mixed $payload): array
+    {
+        if (!is_array($payload)) {
+            return [];
+        }
+
+        if (array_key_exists('is_active', $payload)) {
+            $payload['is_active'] = $this->normalizeBooleanValue($payload['is_active']);
+        }
+
+        if (array_key_exists('sort_order', $payload)) {
+            $payload['sort_order'] = $this->normalizeIntegerValue($payload['sort_order']);
+        }
+
+        return $payload;
+    }
+
+    private function normalizeBooleanValue(mixed $value, bool $default = false): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (int) $value !== 0;
+        }
+
+        if (is_string($value)) {
+            $trimmed = trim($value);
+            if ($trimmed === '') {
+                return $default;
+            }
+
+            $booleanValue = filter_var($trimmed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($booleanValue !== null) {
+                return $booleanValue;
+            }
+
+            if (is_numeric($trimmed)) {
+                return (int) $trimmed !== 0;
+            }
+        }
+
+        return $default;
+    }
+
+    private function normalizeIntegerValue(mixed $value, int $default = 0): int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+
+        if (is_float($value)) {
+            return (int) $value;
+        }
+
+        if (is_string($value)) {
+            $trimmed = trim($value);
+            if ($trimmed === '') {
+                return $default;
+            }
+
+            if (is_numeric($trimmed)) {
+                return (int) $trimmed;
+            }
+        }
+
+        return $default;
     }
 
 }

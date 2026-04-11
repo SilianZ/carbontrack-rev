@@ -191,7 +191,7 @@ class AvatarController
                 ], 403);
             }
 
-            $data = $request->getParsedBody();
+            $data = $this->normalizeAvatarPayload($request->getParsedBody());
 
             // 验证必需字段
             $requiredFields = ['name', 'file_path'];
@@ -289,7 +289,7 @@ class AvatarController
             }
 
             $avatarId = (int)$args['id'];
-            $data = $request->getParsedBody();
+            $data = $this->normalizeAvatarPayload($request->getParsedBody());
 
             // 检查头像是否存在
             $existingAvatar = $this->avatarModel->getAvatarById($avatarId);
@@ -888,6 +888,86 @@ class AvatarController
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($status);
+    }
+
+    /**
+     * @param mixed $payload
+     * @return array<string,mixed>
+     */
+    private function normalizeAvatarPayload(mixed $payload): array
+    {
+        if (!is_array($payload)) {
+            return [];
+        }
+
+        foreach (['is_active', 'is_default'] as $field) {
+            if (array_key_exists($field, $payload)) {
+                $payload[$field] = $this->normalizeBooleanValue($payload[$field]);
+            }
+        }
+
+        if (array_key_exists('sort_order', $payload)) {
+            $payload['sort_order'] = $this->normalizeIntegerValue($payload['sort_order']);
+        }
+
+        return $payload;
+    }
+
+    private function normalizeBooleanValue(mixed $value, bool $default = false): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (int) $value !== 0;
+        }
+
+        if (is_string($value)) {
+            $trimmed = trim($value);
+            if ($trimmed === '') {
+                return $default;
+            }
+
+            $booleanValue = filter_var($trimmed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($booleanValue !== null) {
+                return $booleanValue;
+            }
+
+            if (is_numeric($trimmed)) {
+                return (int) $trimmed !== 0;
+            }
+        }
+
+        return $default;
+    }
+
+    private function normalizeIntegerValue(mixed $value, int $default = 0): int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+
+        if (is_float($value)) {
+            return (int) $value;
+        }
+
+        if (is_string($value)) {
+            $trimmed = trim($value);
+            if ($trimmed === '') {
+                return $default;
+            }
+
+            if (is_numeric($trimmed)) {
+                return (int) $trimmed;
+            }
+        }
+
+        return $default;
     }
 }
 

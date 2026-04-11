@@ -136,6 +136,10 @@ class UserGroupService
         unset($payload['quota_flat']);
         unset($payload['support_routing']);
 
+        if (array_key_exists('is_default', $payload)) {
+            $payload['is_default'] = $this->normalizeBooleanValue($payload['is_default']);
+        }
+
         $config = $this->quotaConfigService->decodeJsonToArray($data['config'] ?? null);
         $current = $this->quotaConfigService->decodeJsonToArray($currentConfig);
 
@@ -155,6 +159,35 @@ class UserGroupService
         }
 
         return $payload;
+    }
+
+    private function normalizeBooleanValue(mixed $value, bool $default = false): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (int) $value !== 0;
+        }
+
+        if (is_string($value)) {
+            $trimmed = trim($value);
+            if ($trimmed === '' || strtolower($trimmed) === 'indeterminate') {
+                return $default;
+            }
+
+            $booleanValue = filter_var($trimmed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($booleanValue !== null) {
+                return $booleanValue;
+            }
+
+            if (is_numeric($trimmed)) {
+                return (int) $trimmed !== 0;
+            }
+        }
+
+        return $default;
     }
 
     private function normalizeSupportRouting(mixed $value): array
