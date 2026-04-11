@@ -43,6 +43,7 @@ const AdminProductsPage = React.lazy(() => import('../pages/admin/Products'));
 const AdminExchangesPage = React.lazy(() => import('../pages/admin/Exchanges'));
 const AdminBroadcastPage = React.lazy(() => import('../pages/admin/Broadcast'));
 const AdminSupportOpsPage = React.lazy(() => import('../pages/admin/SupportOps'));
+const AdminCronPage = React.lazy(() => import('../pages/admin/Cron'));
 const AdminAiWorkspacePage = React.lazy(() => import('../pages/admin/AiWorkspace'));
 const AdminSystemLogsPage = React.lazy(() => import('../pages/admin/SystemLogs'));
 const AdminDiagnosticsPage = React.lazy(() => import('../pages/admin/Diagnostics'));
@@ -130,6 +131,7 @@ export const router = createBrowserRouter([
       { path: 'exchanges', element: <React.Suspense fallback={loadingSpinner}><AdminExchangesPage /></React.Suspense> },
       { path: 'broadcast', element: <React.Suspense fallback={loadingSpinner}><AdminBroadcastPage /></React.Suspense> },
       { path: 'support', element: <React.Suspense fallback={loadingSpinner}><AdminSupportOpsPage /></React.Suspense> },
+      { path: 'cron', element: <React.Suspense fallback={loadingSpinner}><AdminCronPage /></React.Suspense> },
       { path: 'llm-usage', element: <React.Suspense fallback={loadingSpinner}><AdminLlmUsagePage /></React.Suspense> },
       { path: 'system-logs', element: <React.Suspense fallback={loadingSpinner}><AdminSystemLogsPage /></React.Suspense> },
       { path: 'diagnostics', element: <React.Suspense fallback={loadingSpinner}><AdminDiagnosticsPage /></React.Suspense> }

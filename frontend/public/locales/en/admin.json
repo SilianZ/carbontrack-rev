@@ -29,7 +29,8 @@
       "supportPortal": "Support Desk",
       "llmUsage": "LLM Usage",
       "systemLogs": "System Logs",
-      "diagnostics": "API Diagnostics"
+      "diagnostics": "API Diagnostics",
+      "cron": "Cron Scheduler"
     },
     "command": {
       "placeholder": "Quickly jump or run an action",
@@ -1764,6 +1765,60 @@
       },
       "checkin_makeup": {
         "monthly_limit": "Check-in makeup monthly limit"
+      }
+    },
+    "cron": {
+      "eyebrow": "Unified scheduler",
+      "title": "Cron Scheduler",
+      "subtitle": "Review task cadence, due state, last execution results, and trigger single runs without leaving admin.",
+      "summary": {
+        "enabled": "Enabled tasks",
+        "due": "Due now",
+        "failed": "Recently failed"
+      },
+      "tasks": {
+        "title": "Task configuration",
+        "subtitle": "Adjust enablement, edit the interval in minutes, and run a single task when you need an immediate refresh.",
+        "enabled": "Enabled",
+        "intervalMinutes": "Interval (minutes)",
+        "nextRun": "Next run",
+        "lastFinished": "Last finished",
+        "duration": "Last duration",
+        "failures": "Consecutive failures",
+        "dueNow": "Due now"
+      },
+      "runs": {
+        "title": "Run history",
+        "subtitle": "Inspect the latest cron executions, trigger sources, durations, and error details.",
+        "empty": "No run history yet."
+      },
+      "filters": {
+        "task": "Filter by task",
+        "status": "Filter by status",
+        "allTasks": "All tasks",
+        "allStatuses": "All statuses"
+      },
+      "status": {
+        "success": "Success",
+        "failed": "Failed",
+        "skipped": "Skipped",
+        "idle": "Idle",
+        "running": "Running"
+      },
+      "triggerSources": {
+        "cron_endpoint": "Cron endpoint",
+        "legacy_endpoint": "Legacy endpoint",
+        "admin_manual": "Admin manual"
+      },
+      "actions": {
+        "refresh": "Refresh",
+        "save": "Save",
+        "runNow": "Run now"
+      },
+      "messages": {
+        "saved": "Cron task updated",
+        "executed": "Cron task triggered",
+        "invalidInterval": "Enter an integer between 1 and 1440 minutes."
       }
     }
   }

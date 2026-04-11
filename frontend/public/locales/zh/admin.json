@@ -29,7 +29,8 @@
       "supportPortal": "进入客服台",
       "llmUsage": "LLM 使用额度",
       "systemLogs": "系统日志",
-      "diagnostics": "API 诊断"
+      "diagnostics": "API 诊断",
+      "cron": "定时调度"
     },
     "command": {
       "placeholder": "快速跳转或执行操作",
@@ -1764,6 +1765,60 @@
       },
       "checkin_makeup": {
         "monthly_limit": "补打卡月度限额"
+      }
+    },
+    "cron": {
+      "eyebrow": "统一调度",
+      "title": "Cron 调度台",
+      "subtitle": "集中查看任务频率、到点状态、最近执行结果，并支持单任务即时触发。",
+      "summary": {
+        "enabled": "启用任务",
+        "due": "当前到点",
+        "failed": "最近失败"
+      },
+      "tasks": {
+        "title": "任务配置",
+        "subtitle": "管理员可调整启停、修改分钟频率，并在需要时手动执行单个任务。",
+        "enabled": "启用",
+        "intervalMinutes": "频率（分钟）",
+        "nextRun": "下次执行",
+        "lastFinished": "上次完成",
+        "duration": "最近耗时",
+        "failures": "连续失败",
+        "dueNow": "已到点"
+      },
+      "runs": {
+        "title": "运行历史",
+        "subtitle": "查看最近 cron 执行记录、触发来源、耗时和错误详情。",
+        "empty": "当前还没有运行记录。"
+      },
+      "filters": {
+        "task": "按任务筛选",
+        "status": "按状态筛选",
+        "allTasks": "全部任务",
+        "allStatuses": "全部状态"
+      },
+      "status": {
+        "success": "成功",
+        "failed": "失败",
+        "skipped": "跳过",
+        "idle": "空闲",
+        "running": "运行中"
+      },
+      "triggerSources": {
+        "cron_endpoint": "定时入口",
+        "legacy_endpoint": "兼容入口",
+        "admin_manual": "管理员手动触发"
+      },
+      "actions": {
+        "refresh": "刷新",
+        "save": "保存",
+        "runNow": "立即执行"
+      },
+      "messages": {
+        "saved": "定时任务设置已保存",
+        "executed": "定时任务已触发",
+        "invalidInterval": "请输入 1 到 1440 之间的整数分钟数。"
       }
     }
   }
