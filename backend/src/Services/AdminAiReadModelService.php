@@ -772,7 +772,6 @@ class AdminAiReadModelService
                 'last_error' => $row['last_error'] ?? null,
                 'last_duration_ms' => isset($row['last_duration_ms']) ? (int) $row['last_duration_ms'] : null,
                 'consecutive_failures' => isset($row['consecutive_failures']) ? (int) $row['consecutive_failures'] : 0,
-                'lock_token' => $row['lock_token'] ?? null,
                 'locked_at' => $row['locked_at'] ?? null,
                 'settings' => $settings,
                 'is_due' => !empty($row['enabled']) && !empty($row['next_run_at']) && ($row['next_run_at'] <= $this->currentCronNow()),

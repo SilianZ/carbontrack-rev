@@ -638,7 +638,6 @@ class CronSchedulerService
             'last_error' => $task->last_error,
             'last_duration_ms' => $task->last_duration_ms !== null ? (int) $task->last_duration_ms : null,
             'consecutive_failures' => (int) ($task->consecutive_failures ?? 0),
-            'lock_token' => $task->lock_token,
             'locked_at' => $lockedAt,
             'settings' => $settings,
             'is_due' => (bool) $task->enabled

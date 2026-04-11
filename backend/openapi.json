@@ -28372,22 +28372,19 @@
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           },
           "last_started_at": {
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           },
           "last_finished_at": {
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           },
           "last_status": {
             "type": "string",
@@ -28413,18 +28410,11 @@
           "consecutive_failures": {
             "type": "integer"
           },
-          "lock_token": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
           "locked_at": {
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           },
           "settings": {
             "type": "object",
@@ -28465,15 +28455,13 @@
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           },
           "finished_at": {
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           },
           "duration_ms": {
             "type": [
@@ -28495,8 +28483,7 @@
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           }
         }
       },
@@ -28535,15 +28522,13 @@
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           },
           "finished_at": {
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           },
           "duration_ms": {
             "type": [
@@ -28565,8 +28550,7 @@
             "type": [
               "string",
               "null"
-            ],
-            "format": "date-time"
+            ]
           }
         }
       },
@@ -28641,8 +28625,7 @@
             "type": "object",
             "properties": {
               "triggered_at": {
-                "type": "string",
-                "format": "date-time"
+                "type": "string"
               },
               "due": {
                 "type": "array",
