@@ -73,6 +73,27 @@ class AdminCronControllerTest extends TestCase
         $this->assertArrayHasKey('request_id', $payload);
     }
 
+    public function testUpdateTaskReturnsNotFoundForUnknownTask(): void
+    {
+        $auth = $this->createMock(AuthService::class);
+        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'role' => 'admin', 'is_admin' => true]);
+
+        $scheduler = $this->createMock(CronSchedulerService::class);
+        $scheduler->expects($this->once())
+            ->method('updateTask')
+            ->with('missing_task', [])
+            ->willThrowException(new \RuntimeException('Cron task not found'));
+
+        $controller = $this->makeController($scheduler, $auth, $this->createMock(AuditLogService::class));
+        $response = $controller->updateTask(
+            makeRequest('PUT', '/api/v1/admin/cron/tasks/missing_task', []),
+            new \Slim\Psr7\Response(),
+            ['taskKey' => 'missing_task']
+        );
+
+        $this->assertSame(404, $response->getStatusCode());
+    }
+
     public function testListRunsReturnsPayload(): void
     {
         $auth = $this->createMock(AuthService::class);

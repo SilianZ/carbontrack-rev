@@ -238,6 +238,28 @@ class CronSchedulerServiceTest extends TestCase
         $service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, ['interval_minutes' => '1.9']);
     }
 
+    public function testUpdateTaskKeepsNextRunWhenOnlySettingsChange(): void
+    {
+        $nextRunAt = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $nextRunAt, [
+            'settings_json' => '{"foo":"bar"}',
+        ]);
+
+        $service = $this->makeService(
+            $this->createMock(SupportRoutingEngineService::class),
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, [
+            'settings' => ['foo' => 'baz'],
+        ]);
+
+        $this->assertSame($nextRunAt, $result['next_run_at']);
+        $this->assertSame($nextRunAt, CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('next_run_at'));
+    }
+
     public function testSuccessfulRunUsesLatestTaskSettingsForNextRunAt(): void
     {
         $now = $this->now();

@@ -64,21 +64,25 @@ class CronSchedulerService
 
     public function updateTask(string $taskKey, array $payload): array
     {
-        $taskKey = $this->normalizeTaskKey($taskKey);
+        $taskKey = $this->normalizeLookupTaskKey($taskKey);
         $task = $this->findTask($taskKey);
         if ($task === null) {
             throw new \RuntimeException('Cron task not found');
         }
+        $this->ensureRegisteredTaskKey($taskKey);
 
         $changed = false;
+        $scheduleChanged = false;
         if (array_key_exists('enabled', $payload)) {
             $task->enabled = $this->normalizeBoolean($payload['enabled'], 'enabled');
             $changed = true;
+            $scheduleChanged = true;
         }
 
         if (array_key_exists('interval_minutes', $payload)) {
             $task->interval_minutes = $this->normalizeIntervalMinutes($payload['interval_minutes']);
             $changed = true;
+            $scheduleChanged = true;
         }
 
         if (array_key_exists('settings', $payload)) {
@@ -95,10 +99,12 @@ class CronSchedulerService
         }
 
         $now = $this->now();
-        if ($task->enabled) {
-            $task->next_run_at = $this->addMinutes($now, (int) $task->interval_minutes);
-        } else {
-            $task->next_run_at = null;
+        if ($scheduleChanged) {
+            if ($task->enabled) {
+                $task->next_run_at = $this->addMinutes($now, (int) $task->interval_minutes);
+            } else {
+                $task->next_run_at = null;
+            }
         }
 
         $task->updated_at = $now;
@@ -215,7 +221,14 @@ class CronSchedulerService
 
     public function runTaskNow(string $taskKey, string $triggerSource = 'admin_manual', array $context = []): array
     {
-        return $this->runTaskInternal($this->normalizeTaskKey($taskKey), true, $this->normalizeTriggerSource($triggerSource), $context);
+        $taskKey = $this->normalizeLookupTaskKey($taskKey);
+        $task = $this->findTask($taskKey);
+        if ($task === null) {
+            throw new \RuntimeException('Cron task not found');
+        }
+        $this->ensureRegisteredTaskKey($taskKey);
+
+        return $this->runTaskInternal($taskKey, true, $this->normalizeTriggerSource($triggerSource), $context);
     }
 
     private function runTaskInternal(string $taskKey, bool $forceRun, string $triggerSource, array $context): array
@@ -712,11 +725,20 @@ class CronSchedulerService
         if ($normalized === '') {
             throw new \InvalidArgumentException('Cron task key is required');
         }
-        $definitions = $this->taskDefinitions();
-        if (!isset($definitions[$normalized])) {
-            throw new \InvalidArgumentException('Unknown cron task key');
-        }
         return $normalized;
+    }
+
+    private function ensureRegisteredTaskKey(string $taskKey): void
+    {
+        $definitions = $this->taskDefinitions();
+        if (!isset($definitions[$taskKey])) {
+            throw new \RuntimeException('Cron task not found');
+        }
+    }
+
+    private function normalizeLookupTaskKey(string $taskKey): string
+    {
+        return $this->normalizeTaskKey($taskKey);
     }
 
     private function normalizeTriggerSource(string $triggerSource): string
