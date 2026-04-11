@@ -340,6 +340,47 @@ class CronSchedulerServiceTest extends TestCase
         $this->assertGreaterThan(0, (int) CronRun::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('duration_ms'));
     }
 
+    public function testNextRunUpdateFailureDoesNotFlipSuccessfulRun(): void
+    {
+        $now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $now);
+
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_task_next_run_fail');
+        self::$capsule->getConnection()->statement("
+            CREATE TRIGGER cron_task_next_run_fail
+            BEFORE UPDATE ON cron_tasks
+            WHEN NEW.task_key = '" . CronSchedulerService::TASK_SUPPORT_SLA_SWEEP . "'
+              AND NEW.next_run_at IS NOT OLD.next_run_at
+            BEGIN
+                SELECT RAISE(FAIL, 'next run update failed');
+            END;
+        ");
+
+        $support = $this->createMock(SupportRoutingEngineService::class);
+        $support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->atLeastOnce())->method('warning');
+
+        $service = new CronSchedulerService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $this->createMock(AuditLogService::class),
+            $this->createMock(ErrorLogService::class),
+            $support,
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-13']);
+
+        $this->assertSame('success', $result['status']);
+        $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('last_status'));
+
+        self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_task_next_run_fail');
+    }
+
     public function testListRunsAllowsHistoricalUnknownTaskKeyFilter(): void
     {
         CronRun::query()->create([
@@ -445,6 +486,36 @@ class CronSchedulerServiceTest extends TestCase
         $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('last_status'));
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail');
+    }
+
+    public function testFailureExceptionLoggingFailureDoesNotAbortBatch(): void
+    {
+        $this->seedTask(CronSchedulerService::TASK_BADGE_AUTO_AWARD, 'Badge Auto Award', 5, true, $this->now());
+
+        $badge = $this->createMock(BadgeService::class);
+        $badge->expects($this->once())->method('runAutoGrant')->willThrowException(new \RuntimeException('badge_failed'));
+
+        $errorLogService = $this->createMock(ErrorLogService::class);
+        $errorLogService->expects($this->once())->method('logException')->willThrowException(new \RuntimeException('error log failed'));
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->atLeastOnce())->method('warning');
+
+        $service = new CronSchedulerService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $this->createMock(AuditLogService::class),
+            $errorLogService,
+            $this->createMock(SupportRoutingEngineService::class),
+            $badge,
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-14']);
+
+        $this->assertCount(1, $result['failed']);
+        $this->assertSame('failed', $result['failed'][0]['status']);
     }
 
     public function testFailedRunHistoryPersistenceFailureDoesNotAbortBatch(): void

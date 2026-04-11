@@ -256,10 +256,21 @@ class CronSchedulerService
             $freshTask = $this->findTask($taskKey);
             $nextRunAt = null;
             if ($freshTask?->enabled) {
-                $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
-                $this->updateNextRunAtIfUnlocked($taskKey, $nextRunAt, $finishedAt);
-                $freshTask = $this->findTask($taskKey);
-                $nextRunAt = $freshTask?->next_run_at;
+                $nextRunAt = $freshTask->next_run_at;
+                try {
+                    $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
+                    $this->updateNextRunAtIfUnlocked($taskKey, $nextRunAt, $finishedAt);
+                    $freshTask = $this->findTask($taskKey);
+                    $nextRunAt = $freshTask?->next_run_at;
+                } catch (\Throwable $nextRunException) {
+                    $this->logNonCriticalPostRunFailure(
+                        'Cron task next-run update failed',
+                        $taskKey,
+                        $triggerSource,
+                        $context,
+                        $nextRunException
+                    );
+                }
             }
 
             $runId = null;
@@ -333,10 +344,21 @@ class CronSchedulerService
             $freshTask = $this->findTask($taskKey);
             $nextRunAt = null;
             if ($freshTask?->enabled) {
-                $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
-                $this->updateNextRunAtIfUnlocked($taskKey, $nextRunAt, $finishedAt);
-                $freshTask = $this->findTask($taskKey);
-                $nextRunAt = $freshTask?->next_run_at;
+                $nextRunAt = $freshTask->next_run_at;
+                try {
+                    $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
+                    $this->updateNextRunAtIfUnlocked($taskKey, $nextRunAt, $finishedAt);
+                    $freshTask = $this->findTask($taskKey);
+                    $nextRunAt = $freshTask?->next_run_at;
+                } catch (\Throwable $nextRunException) {
+                    $this->logNonCriticalPostRunFailure(
+                        'Cron task next-run update failed',
+                        $taskKey,
+                        $triggerSource,
+                        $context,
+                        $nextRunException
+                    );
+                }
             }
 
             $runId = null;
@@ -789,23 +811,31 @@ class CronSchedulerService
             'error' => $exception->getMessage(),
         ]);
 
-        $request = SyntheticRequestFactory::fromContext(
-            '/internal/cron/' . $taskKey,
-            'SYSTEM',
-            is_string($context['request_id'] ?? null) ? (string) $context['request_id'] : null,
-            [],
-            $context + [
+        try {
+            $request = SyntheticRequestFactory::fromContext(
+                '/internal/cron/' . $taskKey,
+                'SYSTEM',
+                is_string($context['request_id'] ?? null) ? (string) $context['request_id'] : null,
+                [],
+                $context + [
+                    'task_key' => $taskKey,
+                    'trigger_source' => $triggerSource,
+                ],
+                ['PHP_SAPI' => PHP_SAPI]
+            );
+
+            $this->errorLogService->logException($exception, $request, [
+                'context_message' => 'cron_task_run_failed',
                 'task_key' => $taskKey,
                 'trigger_source' => $triggerSource,
-            ],
-            ['PHP_SAPI' => PHP_SAPI]
-        );
-
-        $this->errorLogService->logException($exception, $request, [
-            'context_message' => 'cron_task_run_failed',
-            'task_key' => $taskKey,
-            'trigger_source' => $triggerSource,
-        ]);
+            ]);
+        } catch (\Throwable $loggingException) {
+            $this->logger->warning('Cron task exception logging failed', [
+                'task_key' => $taskKey,
+                'trigger_source' => $triggerSource,
+                'error' => $loggingException->getMessage(),
+            ]);
+        }
     }
 
     private function logNonCriticalPostRunFailure(
