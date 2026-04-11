@@ -1219,9 +1219,7 @@
         "method": "PUT",
         "path": "/api/v1/admin/cron/tasks/{taskKey}",
         "payloadTemplate": {
-          "task_key": null,
-          "enabled": true,
-          "interval_minutes": 5
+          "task_key": null
         }
       },
       "requires": [

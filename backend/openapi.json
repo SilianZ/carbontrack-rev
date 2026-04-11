@@ -18712,6 +18712,14 @@
           "error": {
             "type": "string",
             "description": "旧接口错误字段（部分控制器仍返回）"
+          },
+          "data": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": true,
+            "description": "可选的结构化错误上下文，例如 cron 跳过或失败时的执行详情。"
           }
         },
         "description": "统一错误响应结构；所有4xx/5xx响应都会包含 request_id。生产环境仅返回 code；开发/测试环境会附带 message。"
