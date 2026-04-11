@@ -7,6 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use CarbonTrack\Models\School;
 use CarbonTrack\Services\AuditLogService;
 use CarbonTrack\Services\ErrorLogService;
+use CarbonTrack\Support\InputValueNormalizer;
 use PDO;
 use Illuminate\Database\QueryException;
 
@@ -108,7 +109,25 @@ class SchoolController extends BaseController
     // Admin: Create a new school
     public function store(Request $request, Response $response, array $args)
     {
-        $data = $this->sanitizeSchoolPayload($request->getParsedBody());
+        $payload = $request->getParsedBody();
+        if (!is_array($payload)) {
+            return $this->response($response, [
+                'success' => false,
+                'message' => 'Request body must be a JSON object',
+                'code' => 'INVALID_REQUEST_BODY',
+            ], 400);
+        }
+
+        try {
+            $data = $this->sanitizeSchoolPayload($payload);
+        } catch (\InvalidArgumentException $exception) {
+            return $this->response($response, [
+                'success' => false,
+                'message' => $exception->getMessage(),
+                'code' => 'VALIDATION_ERROR',
+            ], 400);
+        }
+
         $this->validate($data, [
             "name" => "required|string|max:255",
             "location" => "required|string|max:255",
@@ -230,7 +249,25 @@ class SchoolController extends BaseController
             ], 404);
         }
 
-        $data = $this->sanitizeSchoolPayload($request->getParsedBody());
+        $payload = $request->getParsedBody();
+        if (!is_array($payload)) {
+            return $this->response($response, [
+                'success' => false,
+                'message' => 'Request body must be a JSON object',
+                'code' => 'INVALID_REQUEST_BODY',
+            ], 400);
+        }
+
+        try {
+            $data = $this->sanitizeSchoolPayload($payload);
+        } catch (\InvalidArgumentException $exception) {
+            return $this->response($response, [
+                'success' => false,
+                'message' => $exception->getMessage(),
+                'code' => 'VALIDATION_ERROR',
+            ], 400);
+        }
+
         $this->validate($data, [
             "name" => "string|max:255",
             "location" => "string|max:255",
@@ -513,71 +550,14 @@ class SchoolController extends BaseController
         }
 
         if (array_key_exists('is_active', $payload)) {
-            $payload['is_active'] = $this->normalizeBooleanValue($payload['is_active']);
+            $payload['is_active'] = InputValueNormalizer::boolean($payload['is_active'], 'is_active');
         }
 
         if (array_key_exists('sort_order', $payload)) {
-            $payload['sort_order'] = $this->normalizeIntegerValue($payload['sort_order']);
+            $payload['sort_order'] = InputValueNormalizer::integer($payload['sort_order'], 'sort_order');
         }
 
         return $payload;
-    }
-
-    private function normalizeBooleanValue(mixed $value, bool $default = false): bool
-    {
-        if (is_bool($value)) {
-            return $value;
-        }
-
-        if (is_int($value) || is_float($value)) {
-            return (int) $value !== 0;
-        }
-
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '') {
-                return $default;
-            }
-
-            $booleanValue = filter_var($trimmed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            if ($booleanValue !== null) {
-                return $booleanValue;
-            }
-
-            if (is_numeric($trimmed)) {
-                return (int) $trimmed !== 0;
-            }
-        }
-
-        return $default;
-    }
-
-    private function normalizeIntegerValue(mixed $value, int $default = 0): int
-    {
-        if (is_int($value)) {
-            return $value;
-        }
-
-        if (is_bool($value)) {
-            return $value ? 1 : 0;
-        }
-
-        if (is_float($value)) {
-            return (int) $value;
-        }
-
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '') {
-                return $default;
-            }
-
-            if (is_numeric($trimmed)) {
-                return (int) $trimmed;
-            }
-        }
-
-        return $default;
     }
 
 }

@@ -45,6 +45,46 @@ class SchoolControllerTest extends TestCase
         $this->assertFalse($payload['is_active']);
         $this->assertSame(0, $payload['sort_order']);
     }
+
+    public function testSanitizeSchoolPayloadRejectsInvalidStringValues(): void
+    {
+        $controller = new SchoolController(
+            $this->createMock(AuditLogService::class),
+            $this->createMock(ErrorLogService::class),
+            $this->createMock(\PDO::class)
+        );
+
+        $method = new \ReflectionMethod($controller, 'sanitizeSchoolPayload');
+        $method->setAccessible(true);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('sort_order must be an integer');
+
+        $method->invoke($controller, [
+            'name' => 'Test School',
+            'sort_order' => 'abc',
+        ]);
+    }
+
+    public function testStoreRejectsNonObjectRequestBody(): void
+    {
+        $controller = new SchoolController(
+            $this->createMock(AuditLogService::class),
+            $this->createMock(ErrorLogService::class),
+            $this->createMock(\PDO::class)
+        );
+
+        $response = $controller->store(
+            makeRequest('POST', '/api/v1/admin/schools', null),
+            new \Slim\Psr7\Response(),
+            []
+        );
+
+        $this->assertSame(400, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertFalse($payload['success']);
+        $this->assertSame('INVALID_REQUEST_BODY', $payload['code']);
+    }
 }
 
 

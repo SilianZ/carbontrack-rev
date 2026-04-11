@@ -125,6 +125,23 @@ class AvatarTest extends TestCase
 
         $this->assertTrue($result);
     }
+
+    public function testCreateAvatarRejectsInvalidNonEmptyNumericStrings(): void
+    {
+        $pdo = $this->createMock(\PDO::class);
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $model = new Avatar($pdo, $logger);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('sort_order must be an integer');
+
+        $model->createAvatar([
+            'name' => 'Demo Avatar',
+            'file_path' => '/avatars/demo.png',
+            'sort_order' => 'abc',
+        ]);
+    }
 }
 
 

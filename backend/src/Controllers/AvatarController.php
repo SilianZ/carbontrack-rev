@@ -11,6 +11,7 @@ use CarbonTrack\Services\AuthService;
 use CarbonTrack\Services\AuditLogService;
 use CarbonTrack\Services\CloudflareR2Service;
 use CarbonTrack\Services\ErrorLogService;
+use CarbonTrack\Support\InputValueNormalizer;
 use Monolog\Logger;
 
 class AvatarController
@@ -258,6 +259,12 @@ class AvatarController
                 'data' => $createdAvatar
             ], 201);
 
+        } catch (\InvalidArgumentException $e) {
+            return $this->jsonResponse($response, [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'code' => 'VALIDATION_ERROR',
+            ], 400);
         } catch (\Exception $e) {
             try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
             $this->logger->error('Create avatar failed', [
@@ -378,6 +385,12 @@ class AvatarController
                 'data' => $updatedAvatar
             ]);
 
+        } catch (\InvalidArgumentException $e) {
+            return $this->jsonResponse($response, [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'code' => 'VALIDATION_ERROR',
+            ], 400);
         } catch (\Exception $e) {
             try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
             $this->logger->error('Update avatar failed', [
@@ -902,72 +915,15 @@ class AvatarController
 
         foreach (['is_active', 'is_default'] as $field) {
             if (array_key_exists($field, $payload)) {
-                $payload[$field] = $this->normalizeBooleanValue($payload[$field]);
+                $payload[$field] = InputValueNormalizer::boolean($payload[$field], $field);
             }
         }
 
         if (array_key_exists('sort_order', $payload)) {
-            $payload['sort_order'] = $this->normalizeIntegerValue($payload['sort_order']);
+            $payload['sort_order'] = InputValueNormalizer::integer($payload['sort_order'], 'sort_order');
         }
 
         return $payload;
-    }
-
-    private function normalizeBooleanValue(mixed $value, bool $default = false): bool
-    {
-        if (is_bool($value)) {
-            return $value;
-        }
-
-        if (is_int($value) || is_float($value)) {
-            return (int) $value !== 0;
-        }
-
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '') {
-                return $default;
-            }
-
-            $booleanValue = filter_var($trimmed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            if ($booleanValue !== null) {
-                return $booleanValue;
-            }
-
-            if (is_numeric($trimmed)) {
-                return (int) $trimmed !== 0;
-            }
-        }
-
-        return $default;
-    }
-
-    private function normalizeIntegerValue(mixed $value, int $default = 0): int
-    {
-        if (is_int($value)) {
-            return $value;
-        }
-
-        if (is_bool($value)) {
-            return $value ? 1 : 0;
-        }
-
-        if (is_float($value)) {
-            return (int) $value;
-        }
-
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '') {
-                return $default;
-            }
-
-            if (is_numeric($trimmed)) {
-                return (int) $trimmed;
-            }
-        }
-
-        return $default;
     }
 }
 

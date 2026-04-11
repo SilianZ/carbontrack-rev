@@ -6,6 +6,7 @@ namespace CarbonTrack\Models;
 
 use PDO;
 use CarbonTrack\Services\ErrorLogService;
+use CarbonTrack\Support\InputValueNormalizer;
 use Psr\Log\LoggerInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
 
@@ -215,48 +216,19 @@ class Avatar
      */
     private function normalizePersistenceData(array $data): array
     {
-        foreach (['sort_order', 'is_active', 'is_default'] as $field) {
+        if (array_key_exists('sort_order', $data)) {
+            $data['sort_order'] = InputValueNormalizer::integer($data['sort_order'], 'sort_order');
+        }
+
+        foreach (['is_active', 'is_default'] as $field) {
             if (!array_key_exists($field, $data)) {
                 continue;
             }
 
-            $data[$field] = $this->normalizeIntegerLikeValue($data[$field]);
+            $data[$field] = InputValueNormalizer::booleanFlagInteger($data[$field], $field);
         }
 
         return $data;
-    }
-
-    private function normalizeIntegerLikeValue(mixed $value, int $default = 0): int
-    {
-        if (is_int($value)) {
-            return $value;
-        }
-
-        if (is_bool($value)) {
-            return $value ? 1 : 0;
-        }
-
-        if (is_float($value)) {
-            return (int) $value;
-        }
-
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '') {
-                return $default;
-            }
-
-            $booleanValue = filter_var($trimmed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            if ($booleanValue !== null) {
-                return $booleanValue ? 1 : 0;
-            }
-
-            if (is_numeric($trimmed)) {
-                return (int) $trimmed;
-            }
-        }
-
-        return $default;
     }
 
     /**
