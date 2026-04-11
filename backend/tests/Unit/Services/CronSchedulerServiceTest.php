@@ -238,6 +238,35 @@ class CronSchedulerServiceTest extends TestCase
         $service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, ['interval_minutes' => '1.9']);
     }
 
+    public function testUpdateTaskAllowsDisablingUnregisteredTask(): void
+    {
+        CronTask::query()->create([
+            'task_key' => 'legacy_removed_task',
+            'task_name' => 'Legacy Removed Task',
+            'description' => 'Legacy',
+            'interval_minutes' => 5,
+            'enabled' => true,
+            'next_run_at' => $this->now(),
+            'last_status' => 'idle',
+            'consecutive_failures' => 0,
+            'settings_json' => '{}',
+            'created_at' => $this->now(),
+            'updated_at' => $this->now(),
+        ]);
+
+        $service = $this->makeService(
+            $this->createMock(SupportRoutingEngineService::class),
+            $this->createMock(BadgeService::class),
+            $this->createMock(LeaderboardService::class),
+            $this->createMock(StreakLeaderboardService::class)
+        );
+
+        $result = $service->updateTask('legacy_removed_task', ['enabled' => false]);
+
+        $this->assertFalse($result['enabled']);
+        $this->assertNull($result['next_run_at']);
+    }
+
     public function testUpdateTaskKeepsNextRunWhenOnlySettingsChange(): void
     {
         $nextRunAt = $this->now();

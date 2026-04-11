@@ -69,7 +69,11 @@ class CronSchedulerService
         if ($task === null) {
             throw new \RuntimeException('Cron task not found');
         }
-        $this->ensureRegisteredTaskKey($taskKey);
+
+        $isRegisteredTask = $this->isRegisteredTaskKey($taskKey);
+        if (!$isRegisteredTask) {
+            $this->assertOnlyDisableForUnregisteredTask($payload);
+        }
 
         $changed = false;
         $scheduleChanged = false;
@@ -730,15 +734,35 @@ class CronSchedulerService
 
     private function ensureRegisteredTaskKey(string $taskKey): void
     {
-        $definitions = $this->taskDefinitions();
-        if (!isset($definitions[$taskKey])) {
+        if (!$this->isRegisteredTaskKey($taskKey)) {
             throw new \RuntimeException('Cron task not found');
         }
+    }
+
+    private function isRegisteredTaskKey(string $taskKey): bool
+    {
+        $definitions = $this->taskDefinitions();
+        return isset($definitions[$taskKey]);
     }
 
     private function normalizeLookupTaskKey(string $taskKey): string
     {
         return $this->normalizeTaskKey($taskKey);
+    }
+
+    private function assertOnlyDisableForUnregisteredTask(array $payload): void
+    {
+        if (!array_key_exists('enabled', $payload)) {
+            throw new \RuntimeException('Unregistered cron tasks can only be disabled');
+        }
+
+        if ($this->normalizeBoolean($payload['enabled'], 'enabled')) {
+            throw new \RuntimeException('Unregistered cron tasks can only be disabled');
+        }
+
+        if (array_key_exists('interval_minutes', $payload) || array_key_exists('settings', $payload)) {
+            throw new \RuntimeException('Unregistered cron tasks can only be disabled');
+        }
     }
 
     private function normalizeTriggerSource(string $triggerSource): string

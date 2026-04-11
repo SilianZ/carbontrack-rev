@@ -1801,7 +1801,9 @@
       "status": {
         "success": "成功",
         "failed": "失败",
-        "skipped": "跳过"
+        "skipped": "跳过",
+        "idle": "空闲",
+        "running": "运行中"
       },
       "actions": {
         "refresh": "刷新",

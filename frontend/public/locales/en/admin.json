@@ -1801,7 +1801,9 @@
       "status": {
         "success": "Success",
         "failed": "Failed",
-        "skipped": "Skipped"
+        "skipped": "Skipped",
+        "idle": "Idle",
+        "running": "Running"
       },
       "actions": {
         "refresh": "Refresh",

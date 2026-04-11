@@ -51,6 +51,14 @@ function taskStatusTone(status) {
   }
 }
 
+function translateCronStatus(t, status) {
+  if (status === 'idle' || status === 'running' || status === 'success' || status === 'failed' || status === 'skipped') {
+    return t(`admin.cron.status.${status}`);
+  }
+
+  return status || 'idle';
+}
+
 export default function AdminCronPage() {
   const { t, currentLanguage } = useTranslation(['admin', 'common', 'errors']);
   const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
@@ -239,7 +247,7 @@ export default function AdminCronPage() {
                     <div className="flex flex-wrap items-center gap-3">
                       <h2 className="text-lg font-semibold">{task.task_name}</h2>
                       <Badge variant="outline" className={taskStatusTone(task.last_status)}>
-                        {task.last_status || 'idle'}
+                        {translateCronStatus(t, task.last_status || 'idle')}
                       </Badge>
                       {task.is_due ? (
                         <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
@@ -388,7 +396,7 @@ export default function AdminCronPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-medium">{run.task_key}</p>
                     <Badge variant="outline" className={taskStatusTone(run.status)}>
-                      {run.status}
+                      {translateCronStatus(t, run.status)}
                     </Badge>
                     <Badge variant="outline">{run.trigger_source}</Badge>
                   </div>
