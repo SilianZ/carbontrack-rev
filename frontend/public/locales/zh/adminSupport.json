@@ -123,6 +123,30 @@
         "active": "在线",
         "backup": "备援",
         "offline": "离线"
+      },
+      "detailTabs": {
+        "overview": "评分总览",
+        "feedback": "评价明细"
+      },
+      "feedback": {
+        "title": "评分与评价",
+        "summaryLine": "{{rating}} 分 · {{count}} 条评价",
+        "noRatings": "暂无评价",
+        "routingHint": "当前客服评分会参与智能分单总分计算。",
+        "averageLabel": "平均评分",
+        "averageHint": "按用户对该客服的所有工单评价计算。",
+        "countLabel": "评价数量",
+        "countHint": "当前累计可用于分单参考的评价条数。",
+        "lastLabel": "最近评价",
+        "lastHint": "最后一次收到用户评价的时间。",
+        "distributionTitle": "评分分布",
+        "countValue": "{{count}} 条",
+        "detailTitle": "评价明细",
+        "detailCount": "{{count}} 条记录",
+        "empty": "该客服暂时还没有收到用户评价。",
+        "byLine": "工单 #{{ticketId}} · {{subject}}",
+        "noComment": "用户未留下文字备注。",
+        "openTicket": "打开工单"
       }
     },
     "rules": {

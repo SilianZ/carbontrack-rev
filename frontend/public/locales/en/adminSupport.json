@@ -123,6 +123,30 @@
         "active": "Active",
         "backup": "Backup",
         "offline": "Offline"
+      },
+      "detailTabs": {
+        "overview": "Rating summary",
+        "feedback": "Review detail"
+      },
+      "feedback": {
+        "title": "Ratings and reviews",
+        "summaryLine": "{{rating}} avg · {{count}} reviews",
+        "noRatings": "No reviews yet",
+        "routingHint": "This support rating is already part of the smart-routing score.",
+        "averageLabel": "Average rating",
+        "averageHint": "Calculated from all user feedback for this assignee.",
+        "countLabel": "Review count",
+        "countHint": "Total feedback entries currently available for routing reference.",
+        "lastLabel": "Last review",
+        "lastHint": "When the latest user feedback arrived.",
+        "distributionTitle": "Rating distribution",
+        "countValue": "{{count}} review(s)",
+        "detailTitle": "Review detail",
+        "detailCount": "{{count}} entries",
+        "empty": "This assignee has not received user feedback yet.",
+        "byLine": "Ticket #{{ticketId}} · {{subject}}",
+        "noComment": "The user left no written comment.",
+        "openTicket": "Open ticket"
       }
     },
     "rules": {

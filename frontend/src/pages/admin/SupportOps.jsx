@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { toast } from 'react-hot-toast';
-import { BarChart3, CheckCircle2, Clock3, Loader2, Mail, Save, Shield, Ticket, UserRound, Wand2 } from 'lucide-react';
+import { BarChart3, CheckCircle2, Clock3, Loader2, Mail, Save, Shield, Star, Ticket, UserRound, Wand2 } from 'lucide-react';
 
 import { adminAPI } from '../../lib/api';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -225,6 +225,53 @@ function topFactorsLabel(value) {
   return '';
 }
 
+function formatRatingValue(value) {
+  const numeric = Number(value ?? 0);
+  return Number.isFinite(numeric) ? numeric.toFixed(1) : '0.0';
+}
+
+function RatingStars({ value = 0, className = '' }) {
+  const normalized = Math.max(0, Math.min(5, Number(value) || 0));
+
+  return (
+    <div className={`flex items-center gap-1 ${className}`}>
+      {[1, 2, 3, 4, 5].map((rating) => {
+        const active = normalized >= rating - 0.25;
+        return (
+          <Star
+            key={rating}
+            className={`h-3.5 w-3.5 ${active ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-600'}`}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function FeedbackSnapshot({ averageRating, ratingCount, t, compact = false }) {
+  const count = Number(ratingCount ?? 0);
+
+  if (count <= 0) {
+    return (
+      <p className={`text-slate-500 dark:text-slate-400 ${compact ? 'text-xs' : 'text-sm'}`}>
+        {t('adminSupport.team.feedback.noRatings')}
+      </p>
+    );
+  }
+
+  return (
+    <div className={`flex items-center gap-2 ${compact ? 'text-xs' : 'text-sm'}`}>
+      <RatingStars value={averageRating} />
+      <span className="font-medium text-slate-900 dark:text-slate-100">
+        {t('adminSupport.team.feedback.summaryLine', {
+          rating: formatRatingValue(averageRating),
+          count,
+        })}
+      </span>
+    </div>
+  );
+}
+
 export default function AdminSupportOpsPage() {
   const { t, currentLanguage } = useTranslation(['adminSupport', 'common', 'date', 'errors', 'messages', 'profile', 'support']);
   const queryClient = useQueryClient();
@@ -239,6 +286,7 @@ export default function AdminSupportOpsPage() {
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [ticketStatusFilter, setTicketStatusFilter] = useState('all');
   const [ticketWorkflowStatus, setTicketWorkflowStatus] = useState('open');
+  const [assigneeDetailTab, setAssigneeDetailTab] = useState('overview');
   const [routingSettingsForm, setRoutingSettingsForm] = useState(EMPTY_ROUTING_SETTINGS);
   const [assigneeProfileForm, setAssigneeProfileForm] = useState(null);
 
@@ -455,6 +503,10 @@ export default function AdminSupportOpsPage() {
   }, [assignees]);
 
   useEffect(() => {
+    setAssigneeDetailTab('overview');
+  }, [selectedAssigneeId]);
+
+  useEffect(() => {
     if (!tickets.length) {
       setSelectedTicketId(null);
       return;
@@ -616,6 +668,14 @@ export default function AdminSupportOpsPage() {
                       <p className="mt-1 truncate text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
                         {t(`adminSupport.roles.${assignee.role}`)}
                       </p>
+                      <div className="mt-3">
+                        <FeedbackSnapshot
+                          averageRating={assignee.avg_feedback_rating}
+                          ratingCount={assignee.rating_count}
+                          t={t}
+                          compact
+                        />
+                      </div>
                     </div>
                     <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
                       <UserRound className="h-4 w-4" />
@@ -775,6 +835,154 @@ export default function AdminSupportOpsPage() {
                         ) : null}
                       </div>
                     </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('adminSupport.team.feedback.title')}</CardTitle>
+                <CardDescription>{t('adminSupport.team.routingProfileTitle')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!assigneeDetail ? (
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t('adminSupport.team.empty')}</p>
+                ) : (
+                  <Tabs value={assigneeDetailTab} onValueChange={setAssigneeDetailTab} className="space-y-5">
+                    <TabsList className="grid w-full grid-cols-2 overflow-hidden rounded-[1.2rem] border-slate-200 bg-slate-100/90 dark:border-white/10 dark:bg-white/5">
+                      <TabsTrigger value="overview" className="border-r-slate-200 dark:border-r-white/10">
+                        {t('adminSupport.team.detailTabs.overview')}
+                      </TabsTrigger>
+                      <TabsTrigger value="feedback">
+                        {t('adminSupport.team.detailTabs.feedback')}
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="overview" className="space-y-6">
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <MetricCard
+                          icon={Star}
+                          label={t('adminSupport.team.feedback.averageLabel')}
+                          value={assigneeDetail.feedback_summary?.average_rating !== null && assigneeDetail.feedback_summary?.average_rating !== undefined
+                            ? formatRatingValue(assigneeDetail.feedback_summary.average_rating)
+                            : '--'}
+                          hint={t('adminSupport.team.feedback.averageHint')}
+                        />
+                        <MetricCard
+                          icon={UserRound}
+                          label={t('adminSupport.team.feedback.countLabel')}
+                          value={assigneeDetail.feedback_summary?.rating_count ?? 0}
+                          hint={t('adminSupport.team.feedback.countHint')}
+                        />
+                        <MetricCard
+                          icon={Clock3}
+                          label={t('adminSupport.team.feedback.lastLabel')}
+                          value={formatSupportDate(assigneeDetail.feedback_summary?.last_feedback_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
+                          hint={t('adminSupport.team.feedback.lastHint')}
+                        />
+                      </div>
+
+                      <div className="rounded-2xl border border-border px-4 py-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium">{t('adminSupport.team.feedback.distributionTitle')}</p>
+                          <FeedbackSnapshot
+                            averageRating={assigneeDetail.feedback_summary?.average_rating}
+                            ratingCount={assigneeDetail.feedback_summary?.rating_count}
+                            t={t}
+                          />
+                        </div>
+                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                          {t('adminSupport.team.feedback.routingHint')}
+                        </p>
+                        <div className="mt-4 space-y-3">
+                          {(assigneeDetail.feedback_summary?.distribution ?? []).map((bucket) => {
+                            const total = Math.max(1, Number(assigneeDetail.feedback_summary?.rating_count ?? 0));
+                            const bucketCount = Number(bucket.count ?? 0);
+                            const width = `${Math.max(bucketCount > 0 ? 10 : 0, Math.round((bucketCount / total) * 100))}%`;
+
+                            return (
+                              <div key={`rating-${bucket.rating}`} className="space-y-2">
+                                <div className="flex items-center justify-between gap-3 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">{bucket.rating}</span>
+                                    <RatingStars value={bucket.rating} />
+                                  </div>
+                                  <span className="text-slate-500 dark:text-slate-400">
+                                    {t('adminSupport.team.feedback.countValue', { count: bucketCount })}
+                                  </span>
+                                </div>
+                                <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
+                                  <div className="h-2 rounded-full bg-amber-400" style={{ width }} />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="feedback" className="space-y-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium">{t('adminSupport.team.feedback.detailTitle')}</p>
+                        <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                          {t('adminSupport.team.feedback.detailCount', { count: assigneeDetail.feedback_entries?.length ?? 0 })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        {t('adminSupport.team.feedback.routingHint')}
+                      </p>
+
+                      {(assigneeDetail.feedback_entries ?? []).length === 0 ? (
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          {t('adminSupport.team.feedback.empty')}
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {(assigneeDetail.feedback_entries ?? []).map((entry) => (
+                            <div key={entry.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
+                              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0">
+                                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                    {entry.reviewer?.username || entry.reviewer?.email || `#${entry.reviewer?.id ?? '--'}`}
+                                  </p>
+                                  <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                                    {t('adminSupport.team.feedback.byLine', {
+                                      ticketId: entry.ticket?.id ?? 0,
+                                      subject: entry.ticket?.subject || '--',
+                                    })}
+                                  </p>
+                                </div>
+                                <div className="text-left sm:text-right">
+                                  <RatingStars value={entry.rating} className="justify-start sm:justify-end" />
+                                  <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                                    {formatSupportDate(entry.updated_at || entry.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <Badge variant="outline" className={getStatusTone(entry.ticket?.status)}>{t(`support.statuses.${entry.ticket?.status}`)}</Badge>
+                                <Badge variant={getPriorityVariant(entry.ticket?.priority)}>{t(`support.priorities.${entry.ticket?.priority}`)}</Badge>
+                              </div>
+
+                              <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600 dark:text-slate-300">
+                                {entry.comment || t('adminSupport.team.feedback.noComment')}
+                              </p>
+
+                              <div className="mt-4">
+                                <Link
+                                  to={`/support/tickets/${entry.ticket?.id}`}
+                                  className="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-950"
+                                >
+                                  {t('adminSupport.team.feedback.openTicket')}
+                                </Link>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
                 )}
               </CardContent>
             </Card>
