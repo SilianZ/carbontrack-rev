@@ -8,59 +8,62 @@ import { Badge } from '../ui/badge';
 import { isAnnouncementMessage } from '../../lib/messageAnnouncement';
 
 export function MessageList({ messages, onRowClick, onMarkRead, onDelete }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'messages']);
 
   const getStatusIcon = (is_read) => {
     if (is_read) {
-      return <MailOpen className="h-4 w-4 text-gray-500" />;
+      return <MailOpen className="h-4 w-4 text-muted-foreground" />;
     } else {
-      return <Mail className="h-4 w-4 text-blue-500" />;
+      return <Mail className="h-4 w-4 text-primary" />;
     }
   };
   return (
-    <div className="overflow-x-auto bg-white rounded-lg shadow-sm border">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="overflow-x-auto rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+      <table className="min-w-full divide-y divide-border">
+        <thead className="bg-muted/60">
           <tr>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('messages.subject')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('messages.content')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('messages.status')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('messages.date')}
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
               {t('common.actions')}
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="divide-y divide-border bg-transparent">
           {messages.map((message) => (
-            <tr key={message.id} className={`hover:bg-gray-50 ${!message.is_read ? 'bg-blue-50' : ''}`}>
+            <tr
+              key={message.id}
+              className={`transition-colors hover:bg-muted/40 ${!message.is_read ? 'bg-primary/5' : ''}`}
+            >
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
                   {getStatusIcon(message.is_read)}
-                  <span className="ml-2 text-sm font-medium text-gray-900 line-clamp-1">
+                  <span className="ml-2 line-clamp-1 text-sm font-medium text-foreground">
                     {message.title}
                   </span>
                   {message.priority && (
@@ -79,14 +82,14 @@ export function MessageList({ messages, onRowClick, onMarkRead, onDelete }) {
                 </div>
               </td>
               <td className="px-6 py-4">
-                <div className="text-sm text-gray-900 line-clamp-1">
+                <div className="line-clamp-1 text-sm text-foreground">
                   {message.content?.slice(0, 120)}
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                 {message.is_read ? t('messages.read') : t('messages.unread')}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                 {formatDateSafe(message.created_at, 'yyyy-MM-dd HH:mm')}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -112,7 +115,7 @@ export function MessageList({ messages, onRowClick, onMarkRead, onDelete }) {
                   variant="ghost"
                   size="sm"
                   onClick={() => onDelete(message.id)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-1" /> {t('common.delete')}
                 </Button>
@@ -139,4 +142,3 @@ MessageList.propTypes = {
   onMarkRead: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
 };
-

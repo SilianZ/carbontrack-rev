@@ -6,7 +6,7 @@ import { statsAPI } from '../lib/api';
 const ACCENT_CLASSES = ['text-green-600', 'text-blue-600', 'text-purple-600', 'text-orange-600'];
 
 export default function StatsSection() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['home', 'units']);
   const integerFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
   const compactFormatter = useMemo(
     () => new Intl.NumberFormat(currentLanguage, { notation: 'compact', maximumFractionDigits: 1 }),
@@ -39,47 +39,45 @@ export default function StatsSection() {
     }
   );
 
-  const metrics = useMemo(() => {
-    const summary = summaryData || {};
-    return [
-      {
-        key: 'users',
-        label: t('home.stats.users'),
-        value: formatCompact(summary.total_users ?? 0),
-        accent: ACCENT_CLASSES[0],
-        detail: t('home.stats.newUsers30d', {
-          value: formatInteger(summary.new_users_30d ?? 0),
-        }),
-      },
-      {
-        key: 'records',
-        label: t('home.stats.activities'),
-        value: formatCompact(summary.total_records ?? 0),
-        accent: ACCENT_CLASSES[1],
-        detail: t('home.stats.approvedRecords', {
-          value: formatInteger(summary.approved_records ?? 0),
-        }),
-      },
-      {
-        key: 'carbon',
-        label: t('home.stats.carbonSaved'),
-        value: formatCarbon(summary.total_carbon_saved ?? 0),
-        accent: ACCENT_CLASSES[2],
-        detail: t('home.stats.carbonLast7Days', {
-          value: formatCarbon(summary.carbon_last7 ?? 0),
-        }),
-      },
-      {
-        key: 'points',
-        label: t('home.stats.rewards'),
-        value: `${formatCompact(summary.total_points_awarded ?? 0)} ${t('units.points')}`,
-        accent: ACCENT_CLASSES[3],
-        detail: t('home.stats.transactionsLast7', {
-          value: formatInteger(summary.transactions_last7 ?? 0),
-        }),
-      },
-    ];
-  }, [compactFormatter, currentLanguage, decimalFormatter, integerFormatter, summaryData, t]);
+  const summary = summaryData || {};
+  const metrics = [
+    {
+      key: 'users',
+      label: t('home.stats.users'),
+      value: formatCompact(summary.total_users ?? 0),
+      accent: ACCENT_CLASSES[0],
+      detail: t('home.stats.newUsers30d', {
+        value: formatInteger(summary.new_users_30d ?? 0),
+      }),
+    },
+    {
+      key: 'records',
+      label: t('home.stats.activities'),
+      value: formatCompact(summary.total_records ?? 0),
+      accent: ACCENT_CLASSES[1],
+      detail: t('home.stats.approvedRecords', {
+        value: formatInteger(summary.approved_records ?? 0),
+      }),
+    },
+    {
+      key: 'carbon',
+      label: t('home.stats.carbonSaved'),
+      value: formatCarbon(summary.total_carbon_saved ?? 0),
+      accent: ACCENT_CLASSES[2],
+      detail: t('home.stats.carbonLast7Days', {
+        value: formatCarbon(summary.carbon_last7 ?? 0),
+      }),
+    },
+    {
+      key: 'points',
+      label: t('home.stats.rewards'),
+      value: `${formatCompact(summary.total_points_awarded ?? 0)} ${t('units.points')}`,
+      accent: ACCENT_CLASSES[3],
+      detail: t('home.stats.transactionsLast7', {
+        value: formatInteger(summary.transactions_last7 ?? 0),
+      }),
+    },
+  ];
 
   const updatedAt = useMemo(() => {
     if (!summaryData?.generated_at) {

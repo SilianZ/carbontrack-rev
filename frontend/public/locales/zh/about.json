@@ -1,0 +1,202 @@
+{
+  "about": {
+    "hero": {
+      "title": "关于 CarbonTrack",
+      "subtitle": "我们是一群热爱环保与科技的年轻人，希望携手构建一个可持续的低碳未来。"
+    },
+    "contactLinks": [
+      {
+        "type": "email",
+        "label": "联系我们",
+        "href": "mailto:carbontrack666@gmail.com"
+      },
+      {
+        "type": "instagram",
+        "label": "关注我们（Instagram）",
+        "href": "https://www.instagram.com/carbontrackorg/",
+        "external": true
+      },
+      {
+        "type": "discord",
+        "label": "加入 Discord 社群",
+        "href": "https://discord.gg/nPzMrJAyjY",
+        "external": true
+      },
+      {
+        "type": "partnership",
+        "label": "合作洽谈",
+        "href": "https://carbontrack.org/partners",
+        "external": true
+      }
+    ],
+    "team": {
+      "title": "核心团队",
+      "intro": "认识 CarbonTrack 背后的伙伴们，他们把创意、技术与热情倾注到每一次低碳行动之中。",
+      "learnMore": "了解更多",
+      "members": [
+        {
+          "name": "Yuanzheng (Jack) Yu",
+          "role": "创始人兼项目负责人",
+          "bio": "Jack 负责团队协作、长期规划与产品体验，希望通过互联网连接更多人共同参与减排行动。",
+          "link": "https://yuanzhengjackyu.com/",
+          "linkLabel": "个人主页"
+        },
+        {
+          "name": "Zining (Jeffery) Lyu",
+          "role": "联合创始人 & 全栈工程师",
+          "bio": "Jeffery 是核心技术负责人，负责 CarbonTrack 网站的架构、开发与维护。",
+          "link": "https://github.com/Jeffery2008",
+          "linkLabel": "GitHub"
+        },
+        {
+          "name": "Minghan (Loren) Li",
+          "role": "产品设计师 & 研究员",
+          "bio": "Loren 将环境科学研究与设计结合，为用户呈现更具故事性的低碳体验，热爱摄影与户外探索。",
+          "link": "https://lorenlmh.com/",
+          "linkLabel": "个人主页"
+        },
+        {
+          "name": "Smiley Ni",
+          "role": "创意负责人",
+          "bio": "Smiley 主导品牌视觉与内容创作，热爱舞蹈与艺术，希望让 CarbonTrack 在传播环保理念的同时带来快乐。",
+          "link": "https://smileyn327.com/",
+          "linkLabel": "个人主页"
+        },
+        {
+          "name": "Lan Liu",
+          "role": "产品设计师",
+          "bio": "刘澜负责产品运营与界面流程设计，喜欢徒步、陶艺，致力于推广可持续生活方式。"
+        },
+        {
+          "name": "Jack Shi",
+          "role": "产品设计师",
+          "bio": "石杰关注用户旅程与社区体验，长期参与海洋保护志愿行动，希望提升大众的环保意识。"
+        },
+        {
+          "name": "Tony Li",
+          "role": "全栈工程师",
+          "bio": "Tony 负责新功能开发、性能优化与交互体验迭代，让 CarbonTrack 更高效、更易用。"
+        },
+        {
+          "name": "Eddie Peng",
+          "role": "内容策划",
+          "bio": "Eddie 编写文案与教育内容，让每位探索低碳生活的伙伴都能获得清晰、友好的引导。"
+        },
+        {
+          "name": "Michael Jiang",
+          "role": "前端工程师",
+          "bio": "Michael 专注于用户界面与功能开发，关注可访问性与愉悦的交互体验。"
+        },
+        {
+          "name": "Peter Zhao",
+          "role": "内容与视觉设计",
+          "bio": "Peter 擅长故事化表达与视觉设计，热爱旅行、运动与游戏，希望号召更多人关注环保。"
+        },
+        {
+          "name": "Kiana Jin",
+          "role": "市场负责人",
+          "bio": "Kiana 统筹活动、社交媒体与外部合作，把多元声音带入 CarbonTrack 社群。"
+        },
+        {
+          "name": "Kelly Du",
+          "role": "环境科学顾问",
+          "bio": "Kelly 审核项目的科学严谨度，撰写通俗易懂的气候科普文章，分享对海洋与气候议题的热爱。"
+        },
+        {
+          "name": "Thomas Lu",
+          "role": "质量工程师",
+          "bio": "Thomas 专注功能测试与用户体验优化，相信\"Attention is all you need\"，坚持细致迭代。",
+          "link": "https://www.thomas-hub.com/",
+          "linkLabel": "个人主页"
+        },
+        {
+          "name": "Benson Zhou",
+          "role": "运营与社区支持",
+          "bio": "Benson 参与早期视觉风格共创，如今负责审核用户提交、维护邮箱与社区反馈。"
+        },
+        {
+          "name": "Arya Chen",
+          "role": "界面设计师",
+          "bio": "Arya 擅长 Adobe Ps/Au 等设计工具，期待持续为 CarbonTrack 打造创意与易用兼顾的体验。"
+        },
+        {
+          "name": "Amily Gao",
+          "role": "联合创始人 & 研究负责人",
+          "bio": "Amily 负责背景调研与碳核算，确保内容既严谨又易于理解。"
+        },
+        {
+          "name": "Jerry Tang",
+          "role": "联合创始人 & 碳排分析师",
+          "bio": "Jerry 搭建碳核算模型并进行前期研究，为产品决策提供数据支撑。"
+        },
+        {
+          "name": "Yangyang Zhou",
+          "role": "联合创始人",
+          "bio": "杨扬热爱经济学、数学与篮球，为 CarbonTrack 的启动与战略方向提供支持。"
+        },
+        {
+          "name": "Dora Xu",
+          "role": "联合创始人 & 研究员",
+          "bio": "Dora 负责文献综述与内容协调，希望激励更多同学从日常小事开始实现减排。"
+        },
+        {
+          "name": "Hannah Zhang",
+          "role": "联合创始人 & 媒体主理",
+          "bio": "Hannah 策划阅读材料、制作媒体内容，倡导用点滴行动守护环境。"
+        },
+        {
+          "name": "Richard Hu",
+          "role": "联合创始人 & 工程师",
+          "bio": "Richard 支持网站开发与跨团队协作，希望通过互联网传播更多节能减排理念。"
+        },
+        {
+          "name": "Mandy Yu",
+          "role": "联合创始人 & 艺术设计",
+          "bio": "Mandy 负责插画与视觉创意，期待用作品激发好奇心与绿色生活灵感。"
+        }
+      ]
+    },
+    "mission": {
+      "title": "我们的使命",
+      "description": "CarbonTrack 通过数字化碳账户，让气候行动变得可记录、可奖励，也更贴近每个人的日常生活。",
+      "items": [
+        "让更多学生与青年关注气候变化与碳排放议题。",
+        "提供简单易用的工具，记录每日碳足迹并奖励低碳习惯。",
+        "通过故事与社区挑战，持续提升节能减排意识。",
+        "支持环保与公益项目，与伙伴们一起守护地球。"
+      ]
+    },
+    "achievements": {
+      "title": "我们的成果",
+      "description": "在 CarbonTrack 社群的共同努力下，我们把碳账户变成一段积极、有趣且可衡量的旅程。",
+      "stats": [
+        {
+          "label": "碳减排成效",
+          "value": "12,000+ 公斤",
+          "highlight": "二氧化碳减排量",
+          "description": "成员持续记录低碳行动，把日常选择转化为看得见的气候影响。"
+        },
+        {
+          "label": "社群规模",
+          "value": "3,500+",
+          "highlight": "活跃成员",
+          "description": "通过工作坊、社交媒体与朋辈互助，我们的低碳社区不断壮大。"
+        },
+        {
+          "label": "碳账户记录",
+          "value": "45,000+",
+          "highlight": "累计记录",
+          "description": "坚持记录帮助我们验证系统、展示平台的稳定与价值。"
+        }
+      ]
+    },
+    "specialThanks": {
+      "title": "特别鸣谢",
+      "subtitle": "感谢一路相伴的创意伙伴。",
+      "description": "特别鸣谢“三座雪山_”，为我们提供网页设计咨询与艺术创作支持。",
+      "visit": "访问网站",
+      "linkLabel": "访问网站",
+      "link": "https://www.whensnowone.com/"
+    }
+  }
+}

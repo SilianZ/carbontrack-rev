@@ -226,6 +226,24 @@ export const messageAPI = {
   markAllAsRead: () => api.put('/messages/mark-all-read'),
 };
 
+export const ticketAPI = {
+  createTicket: (data) => api.post('/tickets', data),
+  getTickets: (params = {}) => api.get('/tickets', { params }),
+  getTicket: (ticketId) => api.get(`/tickets/${ticketId}`),
+  replyTicket: (ticketId, data) => api.post(`/tickets/${ticketId}/messages`, data),
+  submitFeedback: (ticketId, data) => api.post(`/tickets/${ticketId}/feedback`, data),
+};
+
+export const supportAPI = {
+  getAssignees: () => api.get('/support/assignees'),
+  getTickets: (params = {}) => api.get('/support/tickets', { params }),
+  getTicket: (ticketId) => api.get(`/support/tickets/${ticketId}`),
+  replyTicket: (ticketId, data) => api.post(`/support/tickets/${ticketId}/messages`, data),
+  updateTicket: (ticketId, data) => api.patch(`/support/tickets/${ticketId}`, data),
+  createTransferRequest: (ticketId, data) => api.post(`/support/tickets/${ticketId}/transfer-requests`, data),
+  reviewTransferRequest: (requestId, data) => api.patch(`/support/transfer-requests/${requestId}`, data),
+};
+
 export const schoolAPI = {
   // 获取学校列表
   getSchools: (params = {}) => api.get('/schools', { params }),
@@ -279,14 +297,6 @@ export const adminAPI = {
         query.q = trimmed;
       }
       delete query.search;
-    }
-    if (typeof query.role === 'string' && query.is_admin === undefined) {
-      if (query.role === 'admin') {
-        query.is_admin = 1;
-      } else if (query.role === 'user') {
-        query.is_admin = 0;
-      }
-      delete query.role;
     }
     if (typeof query.userUuid === 'string') {
       const trimmed = query.userUuid.trim();
@@ -407,6 +417,28 @@ export const adminAPI = {
   getBroadcasts: (params = {}) => api.get('/admin/messages/broadcasts', { params }),
   searchBroadcastRecipients: (params = {}) => api.get('/admin/messages/broadcast/recipients', { params }),
   flushBroadcastQueue: (params = {}) => api.post('/admin/messages/broadcasts/flush', {}, { params }),
+
+  // Support operations
+  getSupportAssignees: () => api.get('/admin/support/assignees'),
+  getSupportAssigneeDetail: (id) => api.get(`/admin/support/assignees/${id}`),
+  updateSupportAssigneeRoutingProfile: (id, data) => api.put(`/admin/support/assignees/${id}/routing-profile`, data),
+  getSupportRoutingSettings: () => api.get('/admin/support/routing-settings'),
+  updateSupportRoutingSettings: (data) => api.put('/admin/support/routing-settings', data),
+  getSupportTags: () => api.get('/admin/support/tags'),
+  createSupportTag: (data) => api.post('/admin/support/tags', data),
+  updateSupportTag: (id, data) => api.put(`/admin/support/tags/${id}`, data),
+  getSupportRules: () => api.get('/admin/support/rules'),
+  createSupportRule: (data) => api.post('/admin/support/rules', data),
+  updateSupportRule: (id, data) => api.put(`/admin/support/rules/${id}`, data),
+  getSupportTickets: (params = {}) => api.get('/admin/support/tickets', { params }),
+  getSupportTicketDetail: (id) => api.get(`/admin/support/tickets/${id}`),
+  getSupportReports: (params = {}) => api.get('/admin/support/reports', { params }),
+
+  // Cron scheduler
+  getCronTasks: () => api.get('/admin/cron/tasks'),
+  updateCronTask: (taskKey, data) => api.put(`/admin/cron/tasks/${taskKey}`, data),
+  getCronRuns: (params = {}) => api.get('/admin/cron/runs', { params }),
+  runCronTask: (taskKey) => api.post(`/admin/cron/tasks/${taskKey}/run`),
 
 };
 

@@ -231,7 +231,7 @@ const buildProductPayload = (form) => {
   };
 };
 export function ProductManagement() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common', 'errors', 'images', 'pagination', 'products', 'validation']);
   const queryClient = useQueryClient();
 
   const [filters, setFilters] = useState({

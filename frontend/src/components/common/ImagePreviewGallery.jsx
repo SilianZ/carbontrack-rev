@@ -12,7 +12,7 @@ import R2Image from './R2Image';
  *  size?: 'sm'|'md'
  */
 export function ImagePreviewGallery({ images, maxThumbnails = 3, size = 'sm', className = '' }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'images']);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
 
   const normalized = useMemo(() => {

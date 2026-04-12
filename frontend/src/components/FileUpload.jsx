@@ -1,8 +1,8 @@
-import { useState, useRef, useCallback } from 'react';
-import { Button } from '@/components/ui/Button';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/Alert';
 import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
 import { Upload, X, File, Image, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { fileUploader } from '@/lib/upload';
@@ -16,6 +16,7 @@ const FileUpload = ({
   entityId = null,
   onUploadSuccess = () => {},
   onUploadError = () => {},
+  onStateChange = () => {},
   className = '',
   accept = 'image/*',
   maxFiles = 5,
@@ -23,7 +24,7 @@ const FileUpload = ({
   showPreview = true,
   compressImages = false
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['errors', 'upload', 'validation']);
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -85,15 +86,17 @@ const FileUpload = ({
   }, [multiple, maxFiles, compressImages, showPreview, t]);
 
   // 处理文件上传
-  const handleUpload = useCallback(async () => {
-    if (files.length === 0 || uploading) return;
+  const handleUpload = useCallback(async (overrideFiles = null) => {
+    const sourceFiles = overrideFiles ?? files;
+    const pendingFiles = sourceFiles.filter((file) => file.status === 'pending');
+    if (pendingFiles.length === 0 || uploading) return;
 
     setUploading(true);
     setUploadProgress(0);
     setError('');
 
     try {
-  const filesToUpload = files.map(f => f.file);
+      const filesToUpload = pendingFiles.map(f => f.file);
       
       const uploadOptions = {
         directory,
@@ -136,18 +139,18 @@ const FileUpload = ({
       }
 
       // 更新文件状态
-      setFiles(prevFiles => 
-        prevFiles.map(f => ({
-          ...f,
-          status: 'success',
-          progress: 100
-        }))
+      setFiles(prevFiles =>
+        prevFiles.map((file) => (
+          pendingFiles.some((pending) => pending.id === file.id)
+            ? { ...file, status: 'success', progress: 100, error: null }
+            : file
+        ))
       );
 
       onUploadSuccess(result);
       
       // 清理预览URL
-      files.forEach(f => {
+      sourceFiles.forEach(f => {
         if (f.preview) {
           fileUploader.revokePreviewUrl(f.preview);
         }
@@ -161,18 +164,24 @@ const FileUpload = ({
 
     } catch (uploadError) {
       setError(uploadError.message);
-      setFiles(prevFiles => 
-        prevFiles.map(f => ({
-          ...f,
-          status: 'error',
-          error: uploadError.message
-        }))
+      setFiles(prevFiles =>
+        prevFiles.map((file) => (
+          pendingFiles.some((pending) => pending.id === file.id)
+            ? { ...file, status: 'error', error: uploadError.message }
+            : file
+        ))
       );
       onUploadError(uploadError);
     } finally {
       setUploading(false);
     }
   }, [files, uploading, directory, entityType, entityId, mode, multiple, onUploadSuccess, onUploadError]);
+
+  useEffect(() => {
+    if (!uploading && files.some((file) => file.status === 'pending')) {
+      void handleUpload(files);
+    }
+  }, [files, uploading, handleUpload]);
 
   // 移除文件
   const removeFile = useCallback((fileId) => {
@@ -226,13 +235,32 @@ const FileUpload = ({
     e.target.value = '';
   }, [handleFileSelect]);
 
+  useEffect(() => {
+    const pendingCount = files.filter((file) => file.status === 'pending').length;
+    const successCount = files.filter((file) => file.status === 'success').length;
+    const errorCount = files.filter((file) => file.status === 'error').length;
+
+    onStateChange({
+      totalCount: files.length,
+      pendingCount,
+      successCount,
+      errorCount,
+      uploading,
+      mode,
+      hasPendingUploads: uploading || pendingCount > 0,
+      hasUploadErrors: errorCount > 0,
+      isSubmissionBlocked: uploading || pendingCount > 0 || errorCount > 0,
+    });
+  }, [files, uploading, mode, onStateChange]);
+
   return (
     <div className={cn('space-y-4', className)}>
       {/* 上传区域 */}
       <div
         className={cn(
-          'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
-          dragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-gray-400',
+          'rounded-lg border-2 border-dashed p-6 text-center transition-colors',
+          'cursor-pointer border-border bg-background',
+          dragActive ? 'border-primary bg-primary/5' : 'hover:border-foreground/30',
           disabled && 'opacity-50 cursor-not-allowed',
           uploading && 'pointer-events-none'
         )}
@@ -252,8 +280,8 @@ const FileUpload = ({
           disabled={disabled || uploading}
         />
         
-        <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <p className="text-lg font-medium text-gray-900 mb-2 flex items-center justify-center gap-2">
+        <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+        <p className="mb-2 flex items-center justify-center gap-2 text-lg font-medium text-foreground">
           <span>
             {dragActive 
               ? t('upload.dropFiles') 
@@ -263,11 +291,13 @@ const FileUpload = ({
           <span
             onClick={(e) => { e.stopPropagation(); setMode(m => m === 'direct' ? 'legacy' : 'direct'); }}
             className={cn('text-xs px-2 py-0.5 rounded border cursor-pointer select-none',
-              mode === 'direct' ? 'bg-green-50 border-green-300 text-green-700' : 'bg-gray-100 border-gray-300 text-gray-600')}
+              mode === 'direct'
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300'
+                : 'border-border bg-muted text-muted-foreground')}
             title={mode === 'direct' ? '当前：直传（点击切换为旧兼容模式）' : '当前：旧模式（点击切换为直传）'}
           >{mode === 'direct' ? 'Direct' : 'Legacy'}</span>
         </p>
-        <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+        <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <span>
             {multiple 
               ? t('upload.supportMultiple', { max: maxFiles })
@@ -275,7 +305,7 @@ const FileUpload = ({
             }
           </span>
         </p>
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="mt-2 text-xs text-muted-foreground/80">
           {t('upload.supportedFormats')}: {t('upload.supportedFormatsDetail')}
         </p>
       </div>
@@ -304,11 +334,11 @@ const FileUpload = ({
                         className="w-12 h-12 object-cover rounded"
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded bg-muted">
                         {fileUploader.isImageFile(fileItem.file) ? (
-                          <Image className="h-6 w-6 text-gray-400" />
+                          <Image className="h-6 w-6 text-muted-foreground" />
                         ) : (
-                          <File className="h-6 w-6 text-gray-400" />
+                          <File className="h-6 w-6 text-muted-foreground" />
                         )}
                       </div>
                     )}
@@ -316,10 +346,10 @@ const FileUpload = ({
 
                   {/* 文件信息 */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="truncate text-sm font-medium text-foreground">
                       {fileItem.file.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {fileUploader.formatFileSize(fileItem.file.size)}
                     </p>
                     
@@ -381,20 +411,6 @@ const FileUpload = ({
         </div>
       )}
 
-      {/* 上传按钮 */}
-      {files.length > 0 && !uploading && files.some(f => f.status === 'pending') && (
-        <Button 
-          onClick={handleUpload}
-          disabled={disabled || uploading}
-          className="w-full"
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          {multiple && files.length > 1 
-            ? t('upload.uploadFiles', { count: files.length })
-            : t('upload.uploadFile')
-          }
-        </Button>
-      )}
     </div>
   );
 };

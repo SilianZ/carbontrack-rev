@@ -35,7 +35,7 @@ Section.propTypes = {
 };
 
 const PrivacyPolicyPage = () => {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['contact', 'legal']);
     const currentDate = new Date().toLocaleDateString();
 
     const collectionItems = t('legal.privacy.sections.collection.items', { returnObjects: true });

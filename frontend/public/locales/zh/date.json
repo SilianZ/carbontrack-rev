@@ -1,0 +1,14 @@
+{
+  "date": {
+    "today": "今天",
+    "yesterday": "昨天",
+    "tomorrow": "明天",
+    "thisWeek": "本周",
+    "lastWeek": "上周",
+    "thisMonth": "本月",
+    "lastMonth": "上月",
+    "thisYear": "今年",
+    "lastYear": "去年",
+    "daysAgo": "天前"
+  }
+}

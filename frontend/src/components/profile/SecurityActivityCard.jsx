@@ -10,7 +10,7 @@ import { Pagination } from '../ui/Pagination';
 import SecurityActivityList from '../security/SecurityActivityList';
 
 export function SecurityActivityCard() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'pagination', 'securityActivity']);
   const [page, setPage] = React.useState(1);
   const [filters, setFilters] = React.useState({
     type: 'all',

@@ -3,6 +3,44 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
+function createManualChunks(id) {
+  if (!id.includes('node_modules')) {
+    return undefined
+  }
+
+  if (
+    id.includes('i18next') ||
+    id.includes('react-i18next') ||
+    id.includes('i18next-browser-languagedetector') ||
+    id.includes('i18next-http-backend')
+  ) {
+    return 'i18n-vendor'
+  }
+
+  if (
+    id.includes('@radix-ui') ||
+    id.includes('next-themes') ||
+    id.includes('sonner') ||
+    id.includes('lucide-react') ||
+    id.includes('clsx') ||
+    id.includes('class-variance-authority') ||
+    id.includes('tailwind-merge')
+  ) {
+    return 'shared-vendor'
+  }
+
+  if (
+    id.includes('react-query') ||
+    id.includes('@tanstack/react-query') ||
+    id.includes('axios') ||
+    id.includes('date-fns')
+  ) {
+    return 'shared-vendor'
+  }
+
+  return undefined
+}
+
 function normalizeApiBaseUrl(value) {
   const raw = typeof value === 'string' ? value.trim() : ''
   if (!raw) return ''
@@ -52,12 +90,7 @@ export default defineConfig(async ({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-            'charts-vendor': ['recharts'],
-            'motion-vendor': ['framer-motion'],
-            'i18n-vendor': ['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'i18next-http-backend'],
-          },
+          manualChunks: createManualChunks,
         },
       },
     },

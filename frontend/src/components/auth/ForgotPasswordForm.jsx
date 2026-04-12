@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '../ui/Alert';
 import Turnstile from '../common/Turnstile';
 
 export function ForgotPasswordForm() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'errors', 'success']);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);

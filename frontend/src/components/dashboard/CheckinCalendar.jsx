@@ -20,7 +20,7 @@ export function CheckinCalendar({
   onMonthChange,
   onMakeup,
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['dashboard']);
   const [selectedDay, setSelectedDay] = useState(null);
 
   const checkinMap = useMemo(() => {

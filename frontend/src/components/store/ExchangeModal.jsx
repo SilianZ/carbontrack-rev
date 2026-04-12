@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import R2Image from '../common/R2Image';
 
 export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose, onConfirm, isLoading }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'date', 'errors', 'images', 'store']);
   const isHttpUrl = (value) => typeof value === 'string' && /^https?:\/\//.test(value);
 
   const resolveImageCandidate = (candidate) => {

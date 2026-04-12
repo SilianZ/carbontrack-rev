@@ -118,7 +118,7 @@ function InsightCard({ title, value, subtitle, trend }) {
 }
 
 export default function AdminLlmUsagePage() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['admin', 'common', 'date', 'errors', 'pagination']);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
@@ -289,6 +289,14 @@ export default function AdminLlmUsagePage() {
     },
     [integerFormatter, percentFormatter]
   );
+
+  const trendMetricLabels = useMemo(() => ({
+    calls: t('admin.llmUsage.charts.calls'),
+    tokens: t('admin.llmUsage.charts.tokens'),
+    success_calls: t('admin.llmUsage.charts.success'),
+    failed_calls: t('admin.llmUsage.charts.failed'),
+    avg_latency_ms: t('admin.llmUsage.charts.latency')
+  }), [t]);
 
   const insightCards = useMemo(() => ([
     {
@@ -490,7 +498,10 @@ export default function AdminLlmUsagePage() {
                   <YAxis yAxisId="left" allowDecimals={false} />
                   <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
                   <Tooltip
-                    formatter={(value, name) => [value, name === 'tokens' ? t('admin.llmUsage.charts.tokens') : t('admin.llmUsage.charts.calls')]}
+                    formatter={(value, _name, item) => {
+                      const label = trendMetricLabels[item?.dataKey] || item?.name || item?.dataKey;
+                      return [value, label];
+                    }}
                     labelFormatter={formatTrendDate}
                     contentStyle={chartTooltipContentStyle}
                     labelStyle={chartTooltipLabelStyle}
@@ -523,12 +534,13 @@ export default function AdminLlmUsagePage() {
                   <YAxis yAxisId="left" allowDecimals={false} />
                   <YAxis yAxisId="right" orientation="right" />
                   <Tooltip
-                    formatter={(value, name) => {
-                      if (name === 'avg_latency_ms') {
+                    formatter={(value, _name, item) => {
+                      const dataKey = item?.dataKey;
+                      if (dataKey === 'avg_latency_ms') {
                         const display = value == null ? '-' : `${decimalFormatter.format(value)} ms`;
-                        return [display, t('admin.llmUsage.charts.latency')];
+                        return [display, trendMetricLabels.avg_latency_ms];
                       }
-                      return [value, name === 'success_calls' ? t('admin.llmUsage.charts.success') : t('admin.llmUsage.charts.failed')];
+                      return [value, trendMetricLabels[dataKey] || item?.name || dataKey];
                     }}
                     labelFormatter={formatTrendDate}
                     contentStyle={chartTooltipContentStyle}
@@ -1047,7 +1059,7 @@ export default function AdminLlmUsagePage() {
                         {log.request_id ? (
                           <button
                             type="button"
-                            className="text-blue-600 hover:underline"
+                            className="text-primary hover:underline"
                             onClick={() => openRelated(log.request_id)}
                           >
                             {log.request_id}

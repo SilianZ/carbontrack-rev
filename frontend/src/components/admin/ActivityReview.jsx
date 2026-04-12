@@ -25,7 +25,7 @@ import { toast } from 'react-hot-toast';
 // merged into utils import above
 
 export function ActivityReview() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'admin', 'common', 'errors', 'pagination', 'units']);
   const queryClient = useQueryClient();
   const location = useLocation();
   const [filters, setFilters] = useState({

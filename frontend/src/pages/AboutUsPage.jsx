@@ -352,7 +352,7 @@ const TimelineCard = React.memo(({ member, index, isLeft, t, isMobileViewport })
 });
 
 const AboutUsPage = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['about', 'achievements', 'units']);
   const isMobileViewport = useIsMobileViewport();
 
   const { data: summaryData } = useQuery(

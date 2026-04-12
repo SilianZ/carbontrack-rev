@@ -40,7 +40,7 @@ const DEFAULT_FORM = {
 const UNIT_OPTIONS = ['times', 'km', 'kg', 'hours', 'kWh', 'liters', 'days', 'minutes', 'sheets'];
 
 export default function ActivityLibrary() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'admin', 'common', 'pagination']);
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({ search: '', category: '', status: 'active', page: 1, limit: 10 });
   const [formState, setFormState] = useState(DEFAULT_FORM);

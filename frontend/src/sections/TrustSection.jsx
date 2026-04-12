@@ -3,7 +3,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { Shield, Award, Users } from 'lucide-react';
 
 export default function TrustSection(){
-  const { t } = useTranslation();
+  const { t } = useTranslation(['home']);
   return (
     <section className="bg-card/65 py-16 px-4 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto">

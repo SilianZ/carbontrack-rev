@@ -1,0 +1,49 @@
+{
+  "contact": {
+    "hero": {
+      "eyebrow": "联系 CarbonTrack",
+      "title": "公开联系渠道",
+      "subtitle": "合作、媒体、一般咨询请直接通过这里联系。",
+      "primaryAction": "发送邮件",
+      "secondaryAction": "前往帮助中心"
+    },
+    "panel": {
+      "title": "需要工单？",
+      "body": "问题排查、账号异常和功能建议请前往帮助中心提交工单。"
+    },
+    "methods": {
+      "emailTitle": "邮箱",
+      "emailDescription": "适合一般咨询、合作沟通和材料发送。",
+      "phoneTitle": "电话",
+      "phoneDescription": "适合需要即时沟通的情况。",
+      "addressTitle": "地址",
+      "addressDescription": "CarbonTrack 团队的协作与运营地址。"
+    },
+    "linksTitle": "更多入口",
+    "links": [
+      {
+        "type": "email",
+        "label": "联系我们",
+        "href": "mailto:{{email}}"
+      },
+      {
+        "type": "instagram",
+        "label": "关注 Instagram",
+        "href": "https://www.instagram.com/carbontrackorg/",
+        "external": true
+      },
+      {
+        "type": "discord",
+        "label": "加入 Discord 社群",
+        "href": "https://discord.gg/nPzMrJAyjY",
+        "external": true
+      },
+      {
+        "type": "partnership",
+        "label": "合作洽谈",
+        "href": "https://carbontrack.org/partners",
+        "external": true
+      }
+    ]
+  }
+}

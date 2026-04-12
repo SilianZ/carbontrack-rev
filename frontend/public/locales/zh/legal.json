@@ -1,0 +1,192 @@
+{
+  "legal": {
+    "lastUpdated": "最后更新：{{date}}",
+    "privacy": {
+      "title": "隐私政策",
+      "intro": "CarbonTrack 致力于保护您的隐私。本政策概述了我们如何根据<strong>香港《个人资料（私隐）条例》（第486章）（“PDPO”）</strong>和<strong>《欧盟通用数据保护条例》（“GDPR”）</strong>收集、使用和保护您的数据。",
+      "sections": {
+        "identity": {
+          "title": "1. 身份与范围",
+          "content1": "本隐私政策适用于由 <strong>中国香港特别行政区</strong> 的 CarbonTrack 运营的 CarbonTrack 平台（“服务”）。我们向全球用户提供服务。",
+          "content2": "根据 GDPR，CarbonTrack 是您个人信息的<strong>数据控制者</strong>。"
+        },
+        "collection": {
+          "title": "2. 我们收集的信息",
+          "intro": "我们仅在“合法且公平”（PDPO DPP1）且对我们的服务必要时收集信息：",
+          "items": [
+            "<strong>账户信息：</strong>用户名、电子邮件地址和加密密码（用于账户创建和认证）。",
+            "<strong>活动数据：</strong>您的碳减排活动详情、上传图片（用户提交）和影响计算。",
+            "<strong>技术数据：</strong>IP 地址、浏览器类型、设备信息和使用统计（通过 Cookie 和分析工具）以优化我们的平台。"
+          ]
+        },
+        "usage": {
+          "title": "3. 我们如何使用您的数据",
+          "intro": "我们基于以下法律依据处理您的数据（GDPR 第 6 条）：",
+          "items": [
+            "<strong>合同必要性：</strong>提供碳追踪功能、计算您的影响并维护您的账户。",
+            "<strong>合法利益：</strong>改进我们的服务，确保安全并防止欺诈。",
+            "<strong>同意：</strong>用于可选功能（例如营销通讯、自愿调查）。您可以随时撤回同意。"
+          ],
+          "marketing": "<strong>直接营销：</strong>未经您的明确同意或请求，我们要不会将您的个人数据用于直接营销（PDPO 第 6A 部分）。"
+        },
+        "storage": {
+          "title": "4. 数据存储与国际传输",
+          "content1": "CarbonTrack 总部位于香港。您的数据主要在位于<strong>香港</strong>的安全服务器以及全球云服务提供商（例如 Cloudflare）上进行处理和存储。",
+          "content2": "对于国际数据传输（包括来自欧盟/欧洲经济区的传输），我们采取相应的防护措施以确保您的数据安全，符合适用法律的要求。",
+          "items": []
+        },
+        "rights": {
+          "title": "5. 您的权利",
+          "intro": "无论您身在何处，我们都授予您以下权利，结合了 PDPO 和 GDPR 的保护：",
+          "items": [
+            "<strong>访问权与更正权：</strong>您可以请求获取您的数据副本并更正不准确之处（PDPO DPP6）。",
+            "<strong>删除权（“被遗忘权”）：</strong>您可以请求删除您的账户和数据（GDPR）。",
+            "<strong>限制处理权：</strong>在特定情况下，您可以要求我们暂停处理您的数据。",
+            "<strong>数据可携带权：</strong>您可以请求以结构化、常用格式获取您的数据。",
+            "<strong>反对权：</strong>您可以反对基于合法利益的处理或直接营销。"
+          ],
+          "contact": "要行使这些权利，请联系我们的数据保护官：<a href=\"mailto:{{email}}\" class=\"text-blue-600 hover:underline\">{{email}}</a>。我们将在法定时间内（PDPO 通常为 40 天，GDPR 为 30 天）回复有效请求。"
+        },
+        "retention": {
+          "title": "6. 数据保留与安全",
+          "content1": "我们仅在实现收集目的所需的时间内保留您的个人数据，或按法律要求保留。",
+          "content2": "我们采用行业标准的安全措施（加密、传输层安全）来防止未经授权的访问、处理或丢失（PDPO DPP4）。虽然没有任何系统是 100% 安全的，但我们承诺根据最佳实践和适用法律及时处理和报告任何安全漏洞。"
+        },
+        "contact": {
+          "title": "7. 联系我们",
+          "intro": "如果您对本隐私政策或我们的数据实践有任何疑问，请联系我们：",
+          "details": "<strong>CarbonTrack 隐私团队</strong><br/>电子邮件：<a href=\"mailto:{{email}}\" class=\"text-blue-600 hover:underline\">{{email}}</a>"
+        }
+      }
+    },
+    "terms": {
+      "title": "服务条款",
+      "intro": "使用 CarbonTrack 平台前请仔细阅读这些条款。访问或使用我们的服务即表示您同意受这些条款的约束。",
+      "sections": {
+        "agreement": {
+          "title": "1. 协议条款",
+          "content1": "这些服务条款（“条款”）构成您（无论是个人还是代表实体）与 <strong>CarbonTrack</strong>（“我们”）之间关于您访问和使用我们网站及服务的具有法律约束力的协议。",
+          "content2": "CarbonTrack 在<strong>中国香港特别行政区</strong>运营。"
+        },
+        "responsibility": {
+          "title": "2. 用户责任与行为规范",
+          "intro": "您同意仅出于合法目的使用本服务。您被严格禁止：",
+          "items": [
+            "违反任何适用的当地、州、国家或国际法律或法规。",
+            "<strong>起底（Doxxing）与骚扰：</strong>从事任何形式的网络欺凌、骚扰或“起底”（未经同意泄露他人隐私信息）。我们对此类行为采取零容忍政策，符合<strong>《2021年个人资料（私隐）（修订）条例》</strong>。",
+            "冒充任何人或实体，或虚假陈述您的隶属关系。",
+            "干扰或破坏服务的安全性、完整性或性能。"
+          ]
+        },
+        "ip": {
+          "title": "3. 知识产权",
+          "content": "本服务及其原始内容（不包括用户提供的内容）、功能和功能是并将继续是 CarbonTrack 及其许可方的专有财产。本服务受香港及外国的版权、商标和其他法律保护。"
+        },
+        "liability": {
+          "title": "4. 责任限制",
+          "content": "在适用法律允许的最大范围内，CarbonTrack 不对任何间接的、附带的、特殊的、后果性的或惩罚性的损害承担责任，包括但不限于因 (i) 您访问或使用或无法访问或使用本服务；(ii) 本服务上任何第三方的任何行为或内容而导致的利润、数据、使用、商誉或其他无形损失。"
+        },
+        "law": {
+          "title": "5. 管辖法律与争议解决",
+          "content1": "本条款应受<strong>中国香港特别行政区</strong>法律管辖并据其解释，不考虑其法律冲突规定。",
+          "content2": "因本协议引起的或与之相关的任何争议、纠纷、分歧或索赔，包括其存在、有效性、解释、履行、违约或终止，均应提交香港仲裁或香港特别行政区法院的专属管辖权解决。"
+        },
+        "changes": {
+          "title": "6. 条款变更",
+          "content": "我们保留随时自行决定修改或替换这些条款的权利。如果修改是实质性的，我们将尝试就在任何新条款生效前提供至少 30 天的通知。何种变更构成实质性变更由我们要自行决定。"
+        },
+        "contact": {
+          "title": "7. 联系我们",
+          "content": "如果您对这些条款有任何疑问，请联系我们：<a href=\"mailto:{{email}}\" class=\"text-blue-600 hover:underline\">{{email}}</a>。"
+        }
+      }
+    },
+    "cookies": {
+      "title": "Cookie 政策",
+      "intro": "本 Cookie 政策解释了 CarbonTrack 如何在您访问我们的网站时使用 Cookie 和类似技术来识别您的身份。",
+      "sections": {
+        "what": {
+          "title": "1. 什么是 Cookie？",
+          "content": "Cookie 是您访问网站时放置在您的计算机或移动设备上的小数据文件。网站所有者广泛使用它们是为了使其网站运行，或运行得更有效率，以及提供报告信息。"
+        },
+        "how": {
+          "title": "2. 我们如何使用 Cookie",
+          "intro": "我们将 Cookie 用于以下目的：",
+          "types": {
+            "essential": {
+              "title": "必要 Cookie",
+              "desc": "这些 Cookie 对于向您提供我们网站可用的服务以及使用其部分功能（例如访问安全区域，如登录会话）是严格必要的。"
+            },
+            "performance": {
+              "title": "性能与分析 Cookie",
+              "desc": "这些 Cookie 收集用于汇总形式的信息，以帮助我们了解我们的网站是如何被使用的，或者我们的营销活动有多有效，或者帮助我们为您定制我们的网站。"
+            },
+            "functionality": {
+              "title": "功能 Cookie",
+              "desc": "这些 Cookie 允许我们的网站记住您所做的选择（例如您的用户名、语言或您所在的地区），并提供增强的、更个性化的功能。"
+            }
+          }
+        },
+        "thirdParty": {
+          "title": "3. 第三方 Cookie",
+          "intro": "除了我们自己的 Cookie 外，我们还可能使用各种第三方 Cookie 来报告服务的统计信息、在服务上和通过服务投放广告等。",
+          "items": [
+            "<strong>Google Analytics：</strong>我们使用 Google Analytics 来衡量您如何与我们的网站互动，以改善您的体验。",
+            "<strong>Cloudflare：</strong>用于安全和性能优化。"
+          ]
+        },
+        "managing": {
+          "title": "4. 管理 Cookie",
+          "content1": "您有权决定是否接受或拒绝 Cookie。您可以通过设置浏览器控件来行使您的 Cookie 权利，以接受或拒绝 Cookie。如果您选择拒绝 Cookie，您仍然可以使用我们的网站，尽管您对我们网站的某些功能和区域的访问可能会受到限制。",
+          "content2": "由于通过网络浏览器控件拒绝 Cookie 的方式因浏览器而异，您应访问浏览器的帮助菜单以获取更多信息。"
+        },
+        "updates": {
+          "title": "5. 本政策的更新",
+          "content": "我们可能会不时更新本 Cookie 政策，以反映（例如）我们要使用的 Cookie 的变化，或者是出于其他运营、法律或监管原因。因此，请定期重新访问本 Cookie 政策，以随时了解我们对 Cookie 和相关技术的使用情况。"
+        }
+      }
+    },
+    "security": {
+      "title": "安全概览",
+      "subtitle": "您的安全是我们的首要任务。",
+      "sections": {
+        "commitment": {
+          "title": "1. 我们的承诺",
+          "content": "CarbonTrack 致力于保护您的数据。我们采用行业标准的技术和组织措施来保护您的信息免受未经授权的访问、披露、篡改和破坏。"
+        },
+        "infrastructure": {
+          "title": "2. 基础设施安全",
+          "intro": "我们的基础设施建立在拥有严格安全认证（如 ISO 27001, SOC 2）的世界级云提供商之上。",
+          "items": [
+            "<strong>数据中心安全：</strong>我们使用具有 24/7 全天候监控的安全数据中心。",
+            "<strong>加密：</strong>数据在传输过程中使用 TLS 1.2+ 加密，在静态时使用 AES-256 加密。",
+            "<strong>DDoS 保护：</strong>我们利用 Cloudflare 来防止分布式拒绝服务 (DDoS) 攻击。"
+          ]
+        },
+        "app": {
+          "title": "3. 应用安全",
+          "items": [
+            "<strong>账户保护：</strong>我们使用强算法（如 Argon2/Bcrypt）对密码进行哈希处理。我们绝不以明文形式存储密码。",
+            "<strong>访问控制：</strong>内部对数据的访问严格限制在需要知道的基础上授权的人员。",
+            "<strong>定期审计：</strong>我们定期进行代码审查和安全审计，以识别和修复漏洞。"
+          ]
+        },
+        "vuln": {
+          "title": "4. 漏洞报告",
+          "intro": "如果您认为您在 CarbonTrack 中发现了安全漏洞，请立即告知我们。我们感谢您协助我们使平台更安全。",
+          "policyTitle": "负责任披露政策",
+          "contact": "请将您的报告提交至 <a href=\"mailto:{{email}}\" class=\"underline font-semibold\">{{email}}</a>。",
+          "items": [
+            "不要利用漏洞访问不属于您的数据。",
+            "我们将及时确认收到您的报告。",
+            "我们的目标是在 72 小时内解决关键问题。"
+          ]
+        },
+        "breach": {
+          "title": "5. 数据泄露通知",
+          "content": "如果发生可能对您的权利和自由造成高风险的个人数据泄露，我们将根据 GDPR 和香港立法最佳实践，在获悉泄露后 <strong>72 小时</strong>内通知您和相关监管机构。"
+        }
+      }
+    }
+  }
+}

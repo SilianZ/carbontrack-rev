@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 
 const LanguageSwitcher = ({ variant = 'default', size = 'default', showText = true, className }) => {
   // i18n instance is initialized globally; we don't use t() here directly.
-  useTranslation();
+  useTranslation(['common']);
   const [isChanging, setIsChanging] = useState(false);
   const currentLanguage = getCurrentLanguage();
 

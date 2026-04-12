@@ -10,7 +10,7 @@ import { Button } from '../components/ui/Button';
 import { Alert, AlertDescription } from '../components/ui/Alert';
 
 const NotificationSettingsPage = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'common', 'settings']);
   const queryClient = useQueryClient();
   const [localPrefs, setLocalPrefs] = useState([]);
   const [status, setStatus] = useState(null);
@@ -159,14 +159,10 @@ const NotificationSettingsPage = () => {
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-sm font-medium text-foreground">
-                  {t(`settings.notifications.categories.${pref.category}.label`, {
-                    defaultValue: pref.label,
-                  })}
+                            {t(`settings.notifications.categories.${pref.category}.label`)}
                           </p>
                           <p className="mt-1 text-xs text-muted-foreground">
-                  {t(`settings.notifications.categories.${pref.category}.description`, {
-                    defaultValue: pref.label,
-                  })}
+                            {t(`settings.notifications.categories.${pref.category}.description`)}
                           </p>
                           {pref.locked && (
                             <p className="text-xs text-amber-600 mt-2">

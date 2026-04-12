@@ -1,0 +1,17 @@
+{
+  "app": {
+    "name": "CarbonTrack",
+    "tagline": "碳减排追踪平台",
+    "description": "记录您的环保行动，获得积分奖励",
+    "welcome": "欢迎使用CarbonTrack",
+    "getStarted": "立即开始",
+    "learnMore": "了解更多",
+    "features": {
+      "title": "主要功能",
+      "carbonTracking": "碳足迹追踪",
+      "pointsSystem": "积分奖励系统",
+      "community": "社区参与",
+      "rewards": "环保奖励"
+    }
+  }
+}

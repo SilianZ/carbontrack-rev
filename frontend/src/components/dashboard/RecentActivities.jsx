@@ -7,7 +7,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { formatNumber } from '../../lib/utils';
 
 export function RecentActivities({ activities = [], loading = false, onViewAll }) {
-  const { t, tUnit, currentLanguage } = useTranslation();
+  const { t, tUnit, currentLanguage } = useTranslation(['activities', 'dashboard', 'date', 'units']);
   const navigate = useNavigate();
   const carbonUnit = t('dashboard.carbonUnit');
   const isChineseLocale = currentLanguage?.toLowerCase().startsWith('zh');

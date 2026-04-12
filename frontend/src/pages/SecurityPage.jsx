@@ -35,7 +35,7 @@ Section.propTypes = {
 };
 
 const SecurityPage = () => {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['app', 'legal']);
 
     const infraItems = t('legal.security.sections.infrastructure.items', { returnObjects: true });
     const appItems = t('legal.security.sections.app.items', { returnObjects: true });

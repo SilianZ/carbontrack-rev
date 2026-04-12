@@ -12,7 +12,7 @@ const ICONS = {
 };
 
 export default function AnnouncementSection() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['home']);
   const announcements = t('home.announcements.items', { returnObjects: true }) || [];
 
   return (

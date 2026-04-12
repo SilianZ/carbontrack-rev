@@ -5,8 +5,9 @@ import { useTranslation } from '../hooks/useTranslation';
 import { checkAuthStatus } from '../lib/auth';
 import { Button } from '../components/ui/Button';
 import FloatingActionButton from '../components/common/FloatingActionButton';
-import HeroCarousel from '../components/home/HeroCarousel';
+import ViewportDeferred from '../components/common/ViewportDeferred';
 
+const HeroCarousel = React.lazy(() => import('../components/home/HeroCarousel'));
 const StatsSection = React.lazy(() => import('../sections/StatsSection'));
 const FeaturesSection = React.lazy(() => import('../sections/FeaturesSection'));
 const HowItWorksSection = React.lazy(() => import('../sections/HowItWorksSection'));
@@ -24,18 +25,118 @@ function SectionSkeleton() { return (
   </div></div>
 ); }
 
+function StaticHeroShowcase({ item }) {
+  if (!item) {
+    return null;
+  }
+
+  return (
+    <div className="relative w-full max-w-4xl mx-auto">
+      <div className="relative min-h-[280px] overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-secondary/35 shadow-2xl md:min-h-[320px]">
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-400 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10 px-8 py-12 text-center md:px-16 md:py-16">
+          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-emerald-600 mb-4 leading-tight">
+            {item.title}
+          </h3>
+          <p className="text-muted-foreground mx-auto max-w-2xl text-base leading-relaxed md:text-lg lg:text-xl">
+            {item.description}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function scheduleIdleTask(callback, delayMs = 0) {
+  if (typeof window === 'undefined') {
+    callback();
+    return () => {};
+  }
+
+  let idleHandle = null;
+  const timeoutHandle = window.setTimeout(() => {
+    if (typeof window.requestIdleCallback === 'function') {
+      idleHandle = window.requestIdleCallback(callback, { timeout: 1500 });
+      return;
+    }
+
+    callback();
+  }, delayMs);
+
+  return () => {
+    window.clearTimeout(timeoutHandle);
+    if (idleHandle != null && typeof window.cancelIdleCallback === 'function') {
+      window.cancelIdleCallback(idleHandle);
+    }
+  };
+}
+
 export default function HomePage() {
-  const { t } = useTranslation();
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const heroHighlights = t('home.hero.highlights', { returnObjects: true }) || [];
+  const { t } = useTranslation(['home']);
+  const heroContainerRef = React.useRef(null);
+  const [isHeroVisible, setIsHeroVisible] = React.useState(false);
+  const [shouldEnhanceHero, setShouldEnhanceHero] = React.useState(false);
+  const [isAuthenticated] = React.useState(() => checkAuthStatus().isAuthenticated);
+  const heroHighlights = React.useMemo(() => {
+    const result = t('home.hero.highlights', { returnObjects: true });
+    return Array.isArray(result) ? result : [];
+  }, [t]);
+  const primaryHeroHighlight = heroHighlights[0] ?? null;
 
   React.useEffect(() => {
-    const checkAuth = async () => {
-      const authStatus = await checkAuthStatus();
-      setIsAuthenticated(authStatus.isAuthenticated);
-    };
-    checkAuth();
+    const node = heroContainerRef.current;
+    if (!node) {
+      return undefined;
+    }
+
+    if (typeof window === 'undefined' || typeof window.IntersectionObserver !== 'function') {
+      setIsHeroVisible(true);
+      return undefined;
+    }
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setIsHeroVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px 0px' }
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
   }, []);
+
+  React.useEffect(() => {
+    if (shouldEnhanceHero || !isHeroVisible || heroHighlights.length === 0) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    const cancelIdleTask = scheduleIdleTask(() => {
+      if (cancelled) {
+        return;
+      }
+
+      if (typeof React.startTransition === 'function') {
+        React.startTransition(() => setShouldEnhanceHero(true));
+        return;
+      }
+
+      setShouldEnhanceHero(true);
+    }, 1200);
+
+    return () => {
+      cancelled = true;
+      cancelIdleTask();
+    };
+  }, [heroHighlights.length, isHeroVisible, shouldEnhanceHero]);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
@@ -57,8 +158,14 @@ export default function HomePage() {
           
           {/* 新的轮播图组件 */}
           {heroHighlights.length > 0 && (
-            <div className="mb-12">
-              <HeroCarousel items={heroHighlights} interval={5000} />
+            <div className="mb-12" ref={heroContainerRef}>
+              {shouldEnhanceHero ? (
+                <Suspense fallback={<StaticHeroShowcase item={primaryHeroHighlight} />}>
+                  <HeroCarousel items={heroHighlights} interval={5000} />
+                </Suspense>
+              ) : (
+                <StaticHeroShowcase item={primaryHeroHighlight} />
+              )}
             </div>
           )}
 
@@ -94,25 +201,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <StatsSection />
-      </Suspense>
+      <ViewportDeferred fallback={<SectionSkeleton />}>
+        <Suspense fallback={<SectionSkeleton />}>
+          <StatsSection />
+        </Suspense>
+      </ViewportDeferred>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <AnnouncementSection />
-      </Suspense>
+      <ViewportDeferred fallback={<SectionSkeleton />}>
+        <Suspense fallback={<SectionSkeleton />}>
+          <AnnouncementSection />
+        </Suspense>
+      </ViewportDeferred>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <FeatureShowcaseSection />
-      </Suspense>
+      <ViewportDeferred fallback={<SectionSkeleton />}>
+        <Suspense fallback={<SectionSkeleton />}>
+          <FeatureShowcaseSection />
+        </Suspense>
+      </ViewportDeferred>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <FeaturesSection />
-      </Suspense>
+      <ViewportDeferred fallback={<SectionSkeleton />}>
+        <Suspense fallback={<SectionSkeleton />}>
+          <FeaturesSection />
+        </Suspense>
+      </ViewportDeferred>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <HowItWorksSection />
-      </Suspense>
+      <ViewportDeferred fallback={<SectionSkeleton />}>
+        <Suspense fallback={<SectionSkeleton />}>
+          <HowItWorksSection />
+        </Suspense>
+      </ViewportDeferred>
 
       {/* CTA Section */}
       <section className="py-24 px-4 relative overflow-hidden">
@@ -136,9 +253,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <TrustSection />
-      </Suspense>
+      <ViewportDeferred fallback={<SectionSkeleton />}>
+        <Suspense fallback={<SectionSkeleton />}>
+          <TrustSection />
+        </Suspense>
+      </ViewportDeferred>
 
       <FloatingActionButton />
     </div>

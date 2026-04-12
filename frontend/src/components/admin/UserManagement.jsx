@@ -69,6 +69,19 @@ const DEFAULT_FILTERS = {
   sort: 'created_at_desc',
 };
 
+const USER_ROLE_OPTIONS = ['user', 'support', 'admin'];
+
+const normalizeRole = (user = {}) => {
+  if (user.is_admin === true || user.is_admin === 1 || user.is_admin === '1') {
+    return 'admin';
+  }
+  const role = typeof user.role === 'string' ? user.role.trim().toLowerCase() : '';
+  if (USER_ROLE_OPTIONS.includes(role)) {
+    return role;
+  }
+  return 'user';
+};
+
 const normalizeUser = (user = {}) => {
   const toNumber = (value) => {
     const num = Number(value);
@@ -77,6 +90,7 @@ const normalizeUser = (user = {}) => {
   return {
     ...user,
     is_admin: user.is_admin === true || user.is_admin === 1 || user.is_admin === '1',
+    role: normalizeRole(user),
     checkin_days: toNumber(user.checkin_days),
     makeup_checkins: toNumber(user.makeup_checkins),
   };
@@ -123,7 +137,7 @@ function normalizeUsersResponse(response) {
 }
 
 export function UserManagement() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['admin', 'common', 'errors', 'pagination', 'securityActivity']);
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -145,11 +159,16 @@ export function UserManagement() {
     user: null,
     notes: '',
     groupId: '',
-    quotaFlat: {}
+    quotaFlat: {},
+    supportRouting: {}
   });
 
   const { data: groups } = useQuery('adminUserGroups', () =>
     adminAPI.getUserGroups().then(res => res.data?.data || [])
+  );
+
+  const { data: groupMeta } = useQuery('adminUserGroupMeta', () =>
+    adminAPI.getUserGroupMeta().then(res => res.data?.data || {})
   );
 
   const apiFilterParams = useMemo(() => {
@@ -165,10 +184,8 @@ export function UserManagement() {
     if (filters.status) {
       base.status = filters.status;
     }
-    if (filters.role === 'admin') {
-      base.is_admin = 1;
-    } else if (filters.role === 'user') {
-      base.is_admin = 0;
+    if (filters.role) {
+      base.role = filters.role;
     }
     return base;
   }, [filters]);
@@ -342,6 +359,38 @@ export function UserManagement() {
   }, [searchParams, detailState.open, detailState.userId, detailState.userUuid, setSearchParams, setShowRevokedBadges]);
 
   const { users, pagination } = useMemo(() => normalizeUsersResponse(usersQuery.data), [usersQuery.data]);
+  const quotaKeys = useMemo(() => {
+    const definitions = groupMeta?.quota_definitions;
+    if (Array.isArray(definitions) && definitions.length > 0) {
+      return definitions;
+    }
+    const sample = users.find((entry) => entry?.quota_flat) || null;
+    return Object.keys(sample?.quota_flat || {});
+  }, [groupMeta, users]);
+  const quotaTemplate = useMemo(
+    () => quotaKeys.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
+    [quotaKeys]
+  );
+  const supportRoutingFields = useMemo(() => {
+    const fields = groupMeta?.support_routing_fields;
+    if (Array.isArray(fields) && fields.length > 0) {
+      return fields;
+    }
+    return [
+      { key: 'first_response_minutes', type: 'number', default: 240, label_key: 'admin.groups.supportFirstResponseMinutes' },
+      { key: 'resolution_minutes', type: 'number', default: 1440, label_key: 'admin.groups.supportResolutionMinutes' },
+      { key: 'routing_weight', type: 'number', default: 1, step: 0.1, label_key: 'admin.groups.supportRoutingWeight' },
+      { key: 'min_agent_level', type: 'number', default: 1, min: 1, max: 5, label_key: 'admin.groups.supportMinAgentLevel' },
+      { key: 'overdue_boost', type: 'number', default: 1, step: 0.1, label_key: 'admin.groups.supportOverdueBoost' },
+      { key: 'tier_label', type: 'text', default: 'standard', label_key: 'admin.groups.supportTierLabel' },
+    ];
+  }, [groupMeta]);
+  const buildSupportRoutingOverrideState = (source = {}) => (
+    supportRoutingFields.reduce((acc, field) => {
+      acc[field.key] = source?.[field.key] ?? '';
+      return acc;
+    }, {})
+  );
   const isInitialUsersLoading = usersQuery.isLoading && !usersQuery.data;
   const isRefetchingUsers = usersQuery.isFetching && !!usersQuery.data;
   const selectedUser = useMemo(() => {
@@ -480,11 +529,10 @@ export function UserManagement() {
   };
 
   const handleEditUser = (user) => {
-    const makeAdmin = !user.is_admin;
     openConfirmDialog({
       type: 'role',
       user,
-      payload: { makeAdmin },
+      payload: { nextRole: normalizeRole(user) },
     });
   };
 
@@ -540,10 +588,10 @@ export function UserManagement() {
         { onSettled: closeConfirmDialog }
       );
     } else if (confirmDialog.type === 'role') {
-      const makeAdmin = confirmDialog.payload.makeAdmin;
+      const nextRole = confirmDialog.payload?.nextRole || normalizeRole(confirmDialog.user);
       const identifier = getUserIdentifier(confirmDialog.user);
       updateUserMutation.mutate(
-        { identifier, data: { is_admin: makeAdmin } },
+        { identifier, data: { role: nextRole } },
         { onSettled: closeConfirmDialog }
       );
     } else if (confirmDialog.type === 'delete') {
@@ -581,12 +629,13 @@ export function UserManagement() {
       user,
       groupId: user.group_id || '',
       notes: user.admin_notes || '',
-      quotaFlat: user.quota_flat || {}
+      quotaFlat: { ...quotaTemplate, ...(user.quota_flat || {}) },
+      supportRouting: buildSupportRoutingOverrideState(user.support_routing_override || {})
     });
   };
 
   const closeDetailedEdit = () => {
-    setEditDialog({ open: false, user: null, notes: '', groupId: '', quotaFlat: {} });
+    setEditDialog({ open: false, user: null, notes: '', groupId: '', quotaFlat: {}, supportRouting: {} });
   };
 
   const handleQuotaChange = (key, value) => {
@@ -599,6 +648,16 @@ export function UserManagement() {
     }));
   };
 
+  const handleSupportRoutingChange = (key, value) => {
+    setEditDialog((prev) => ({
+      ...prev,
+      supportRouting: {
+        ...prev.supportRouting,
+        [key]: value,
+      },
+    }));
+  };
+
   const handleSubmitDetailedEdit = (e) => {
     e.preventDefault();
     if (!editDialog.user) return;
@@ -606,7 +665,8 @@ export function UserManagement() {
     const payload = {
       group_id: editDialog.groupId || '',
       admin_notes: editDialog.notes,
-      quota_flat: editDialog.quotaFlat
+      quota_flat: editDialog.quotaFlat,
+      support_routing: editDialog.supportRouting
     };
 
     updateUserMutation.mutate(
@@ -665,9 +725,15 @@ export function UserManagement() {
         </Badge>
       );
     }
+    const role = normalizeRole(user);
+    const variant = role === 'admin' ? 'default' : role === 'support' ? 'secondary' : 'outline';
     return (
-      <Badge variant={user.is_admin ? 'default' : 'outline'}>
-        {user.is_admin ? t('admin.users.roleAdmin') : t('admin.users.roleUser')}
+      <Badge variant={variant}>
+        {role === 'admin'
+          ? t('admin.users.roleAdmin')
+          : role === 'support'
+            ? t('admin.users.roleSupport')
+            : t('admin.users.roleUser')}
       </Badge>
     );
   };
@@ -704,6 +770,7 @@ export function UserManagement() {
             >
               <option value="">{t('common.all')}</option>
               <option value="user">{t('admin.users.roleUser')}</option>
+              <option value="support">{t('admin.users.roleSupport')}</option>
               <option value="admin">{t('admin.users.roleAdmin')}</option>
             </select>
           </div>
@@ -877,7 +944,7 @@ export function UserManagement() {
                           <Button variant="ghost" size="sm" onClick={() => openDetailedEdit(user)} title={t('admin.users.editUser')}>
                             <Settings className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)} title={t('admin.users.toggleAdminButton')}>
+                          <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)} title={t('admin.users.changeRoleButton')}>
                             <Shield className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => openBulkBadgeDialog([user])} title={t('admin.users.awardBadgeButton')} disabled={badgeOptions.length === 0}>
@@ -922,7 +989,28 @@ export function UserManagement() {
                 })
               )}
               {confirmDialog.type === 'role' && confirmDialog.user && (
-                t('admin.users.confirmToggleAdmin', { username: confirmDialog.user.username })
+                <div className="space-y-3">
+                  <p>{t('admin.users.confirmSetRole', { username: confirmDialog.user.username })}</p>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-role">{t('admin.users.roleDialogLabel')}</Label>
+                    <select
+                      id="confirm-role"
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      value={confirmDialog.payload?.nextRole || normalizeRole(confirmDialog.user)}
+                      onChange={(event) => setConfirmDialog((current) => ({
+                        ...current,
+                        payload: {
+                          ...current.payload,
+                          nextRole: event.target.value,
+                        },
+                      }))}
+                    >
+                      <option value="user">{t('admin.users.roleUser')}</option>
+                      <option value="support">{t('admin.users.roleSupport')}</option>
+                      <option value="admin">{t('admin.users.roleAdmin')}</option>
+                    </select>
+                  </div>
+                </div>
               )}
               {confirmDialog.type === 'delete' && confirmDialog.user && (
                 t('admin.users.confirmDelete', { username: confirmDialog.user.username })
@@ -1003,21 +1091,39 @@ export function UserManagement() {
             {/* Dynamic Quota Usage Inputs - Render inputs for each flattened quota key */}
             <div className="space-y-3 border-t pt-3 border-b pb-3">
               <Label className="text-base font-semibold">{t('admin.groups.quotaOverride')}</Label>
-              {Object.keys(editDialog.quotaFlat || {}).length > 0 ? (
-                Object.entries(editDialog.quotaFlat).map(([key, value]) => (
+              {quotaKeys.length > 0 ? (
+                quotaKeys.map((key) => (
                   <div key={key}>
-                          <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
+                    <Label className="capitalize">{t(`admin.quotas.${key}`, key.replace('.', ' '))}</Label>
                     <Input
                       type="number"
-                      value={value ?? ''}
+                      value={editDialog.quotaFlat?.[key] ?? ''}
                       onChange={e => handleQuotaChange(key, e.target.value)}
-                            placeholder={t('common.default')}
+                      placeholder={t('common.default')}
                     />
                   </div>
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground">{t('admin.groups.noQuotasAvailable')}</p>
               )}
+            </div>
+            <div className="space-y-3 border-b pb-3">
+              <Label className="text-base font-semibold">{t('admin.users.supportRoutingOverrideTitle')}</Label>
+              <p className="text-sm text-muted-foreground">{t('admin.users.supportRoutingOverrideHint')}</p>
+              {supportRoutingFields.map((field) => (
+                <div key={field.key}>
+                  <Label>{t(field.label_key, field.key)}</Label>
+                  <Input
+                    type={field.type === 'number' ? 'number' : 'text'}
+                    min={field.min}
+                    max={field.max}
+                    step={field.step}
+                    value={editDialog.supportRouting?.[field.key] ?? ''}
+                    onChange={(event) => handleSupportRoutingChange(field.key, event.target.value)}
+                    placeholder={t('admin.users.inheritGroupDefault')}
+                  />
+                </div>
+              ))}
             </div>
             <div>
               <Label>{t('admin.groups.notes')}</Label>

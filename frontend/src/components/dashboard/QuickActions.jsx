@@ -5,7 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export function QuickActions({ userStats = {}, onActionClick }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['dashboard']);
   const pointsBalance = Number(userStats.points_balance ?? 0);
   const rawMinExchangePoints = userStats.min_exchange_points;
   const minExchangePoints = rawMinExchangePoints === null || rawMinExchangePoints === undefined

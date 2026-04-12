@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export default function FloatingActionButton({ to = '/calculate' }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['home']);
 
   return (
     <Link

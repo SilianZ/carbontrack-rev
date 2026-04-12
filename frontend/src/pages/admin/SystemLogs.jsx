@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { FixedSizeList as List } from 'react-window';
 import { RefreshCw, Download, Columns2, X, Loader2 } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
@@ -29,6 +28,7 @@ const SYSTEM_COLUMNS = ['id', 'method', 'path', 'status_code', 'user_id', 'durat
 const AUDIT_COLUMNS = ['id', 'conversation_id', 'request_id', 'actor_type', 'action', 'operation_category', 'status', 'user_id', 'ip_address', 'created_at', 'ops'];
 const ERROR_COLUMNS = ['id', 'request_id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time', 'ops'];
 const LLM_COLUMNS = ['id', 'conversation_id', 'turn_no', 'actor_type', 'actor_id', 'source', 'model', 'llm_status', 'total_tokens', 'latency_ms', 'created_at', 'ops'];
+const TABLE_RENDER_LIMIT = 120;
 
 const COLUMN_STORAGE_KEYS = {
   system: 'logCols_system',
@@ -49,7 +49,7 @@ function loadStoredColumns(key, fallback) {
 }
 
 export default function SystemLogsPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common', 'errors']);
 
   const [q, setQ] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -618,6 +618,7 @@ export default function SystemLogsPage() {
                 emptyText={t('admin.systemLogs.empty.llm')}
                 headers={llmHeaders}
                 columnLabel={columnLabel}
+                t={t}
                 renderItem={(log) => (
                   <ExpandableRow
                     key={`llm-${log.id}`}
@@ -634,6 +635,7 @@ export default function SystemLogsPage() {
                 emptyText={t('admin.systemLogs.empty.audit')}
                 headers={auditHeaders}
                 columnLabel={columnLabel}
+                t={t}
                 renderItem={(log) => (
                   <ExpandableRow
                     key={`audit-${log.id}`}
@@ -650,6 +652,7 @@ export default function SystemLogsPage() {
                 emptyText={t('admin.systemLogs.empty.error')}
                 headers={['id', 'request_id', 'error_type', 'error_message', 'error_file', 'error_line', 'error_time']}
                 columnLabel={columnLabel}
+                t={t}
                 renderItem={(log) => (
                   <ExpandableRow
                     key={`error-${log.id}`}
@@ -659,7 +662,7 @@ export default function SystemLogsPage() {
                         <Button
                           key="request"
                           variant="link"
-                          className="h-auto p-0 text-[11px] font-mono text-indigo-600"
+                          className="h-auto p-0 text-[11px] font-mono text-primary"
                           onClick={() => openRelated(log.request_id)}
                         >
                           {log.request_id}
@@ -929,7 +932,8 @@ function SystemLogSection({
   columnLabel,
   t
 }) {
-  const useVirtual = items.length > 120;
+  const visibleItems = items.slice(0, TABLE_RENDER_LIMIT);
+  const isTruncated = items.length > visibleItems.length;
 
   const header = (
     <thead className="bg-muted/60">
@@ -949,12 +953,18 @@ function SystemLogSection({
   const renderRow = (log) => {
     const isHighlighted = highlightIds.has(log.id);
     return (
-      <tr key={log.id} className={cn('border-b text-xs transition-colors hover:bg-muted/30', isHighlighted && 'bg-amber-50')}>
+      <tr
+        key={log.id}
+        className={cn(
+          'border-b text-xs transition-colors hover:bg-muted/30',
+          isHighlighted && 'bg-amber-500/10 dark:bg-amber-400/10'
+        )}
+      >
         {columns.includes('id') && <td className="px-3 py-2 font-medium">{log.id}</td>}
         {columns.includes('method') && <td className="px-3 py-2 uppercase">{log.method}</td>}
         {columns.includes('path') && (
           <td className="px-3 py-2">
-            <span className="font-mono text-[11px]" title={log.path}>
+            <span className="block max-w-[420px] truncate font-mono text-[11px]" title={log.path}>
               {log.path}
             </span>
           </td>
@@ -964,8 +974,8 @@ function SystemLogSection({
         {columns.includes('duration_ms') && <td className="px-3 py-2">{log.duration_ms}</td>}
         {columns.includes('created_at') && <td className="px-3 py-2 whitespace-nowrap">{log.created_at}</td>}
         {columns.includes('ops') && (
-          <td className="px-3 py-2">
-            <div className="flex flex-wrap items-center gap-2 text-xs">
+          <td className="min-w-[180px] px-3 py-2 align-top">
+            <div className="flex items-center gap-3 whitespace-nowrap text-xs">
               <Button variant="link" className="h-auto p-0" onClick={() => onDetail(log.id)}>
                 {t('admin.systemLogs.details')}
               </Button>
@@ -973,7 +983,7 @@ function SystemLogSection({
                 {t('admin.systemLogs.copyReqId')}
               </Button>
               {log.request_id && (
-                <Button variant="link" className="h-auto p-0 text-indigo-600" onClick={() => onRelated(log.request_id)}>
+                <Button variant="link" className="h-auto p-0 text-primary" onClick={() => onRelated(log.request_id)}>
                   {t('admin.systemLogs.related')}
                 </Button>
               )}
@@ -993,39 +1003,36 @@ function SystemLogSection({
             {t('admin.systemLogs.recordCount', { count: items.length })}
           </Badge>
         </div>
+        {isTruncated && (
+          <CardDescription className="text-xs text-muted-foreground">
+            {t('admin.systemLogs.renderLimitHint', { visible: visibleItems.length, total: items.length })}
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <table className="w-full border-t text-xs">
+          <table className="w-full border-t border-border bg-transparent text-xs text-foreground">
             {header}
-            {!useVirtual && (
-              <tbody>
-                {items.map((log) => renderRow(log))}
-                {items.length === 0 && (
-                  <tr>
-                    <td className="px-4 py-6 text-center text-muted-foreground" colSpan={columns.length}>
-                      {emptyText}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            )}
-          </table>
-          {useVirtual && (
-            <List height={480} itemCount={items.length} itemSize={44} width="100%">
-              {({ index, style }) => (
-                <table key={items[index].id} style={{ ...style, width: '100%' }} className="table-fixed text-xs">
-                  <tbody>{renderRow(items[index])}</tbody>
-                </table>
+            <tbody>
+              {visibleItems.map((log) => renderRow(log))}
+              {visibleItems.length === 0 && (
+                <tr>
+                  <td className="px-4 py-6 text-center text-muted-foreground" colSpan={columns.length}>
+                    {emptyText}
+                  </td>
+                </tr>
               )}
-            </List>
-          )}
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>
   );
 }
-function LogSection({ title, items, emptyText, renderItem, headers, columnLabel }) {
+function LogSection({ title, items, emptyText, renderItem, headers, columnLabel, t }) {
+  const visibleItems = items.slice(0, TABLE_RENDER_LIMIT);
+  const isTruncated = items.length > visibleItems.length;
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -1035,10 +1042,15 @@ function LogSection({ title, items, emptyText, renderItem, headers, columnLabel 
             {items.length}
           </Badge>
         </div>
+        {isTruncated && (
+          <CardDescription className="text-xs text-muted-foreground">
+            {t('admin.systemLogs.renderLimitHint', { visible: visibleItems.length, total: items.length })}
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <table className="w-full border-t text-xs">
+          <table className="w-full border-t border-border bg-transparent text-xs text-foreground">
             <thead className="bg-muted/60">
               <tr>
                 {headers.map((header) => (
@@ -1055,8 +1067,8 @@ function LogSection({ title, items, emptyText, renderItem, headers, columnLabel 
               </tr>
             </thead>
             <tbody>
-              {items.map(renderItem)}
-              {items.length === 0 && (
+              {visibleItems.map(renderItem)}
+              {visibleItems.length === 0 && (
                 <tr>
                   <td className="px-4 py-6 text-center text-muted-foreground" colSpan={headers.length + 1}>
                     {emptyText}
@@ -1269,7 +1281,7 @@ function auditCell(log, column, onRelated) {
         <Button
           key={`audit-request-${log.id}`}
           variant="link"
-          className="h-auto p-0 text-[11px] font-mono text-indigo-600"
+          className="h-auto p-0 text-[11px] font-mono text-primary"
           onClick={() => onRelated(log.request_id)}
         >
           {log.request_id}

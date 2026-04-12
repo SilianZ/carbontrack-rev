@@ -37,7 +37,7 @@ export function StoreFilters({
   categories = [],
   isLoading = false,
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'store']);
   const [basicSearch, setBasicSearch] = useState(filters.search ?? '');
   const [advancedOpen, setAdvancedOpen] = useState(Boolean(
     filters.category || filters.min_points || filters.max_points || (Array.isArray(filters.tags) && filters.tags.length)

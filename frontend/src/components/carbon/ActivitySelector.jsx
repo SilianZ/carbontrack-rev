@@ -19,7 +19,7 @@ const categoryIcons = {
 };
 
 export function ActivitySelector({ onActivitySelect, selectedActivity }) {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['activities', 'common', 'errors', 'units']);
   const [activities, setActivities] = useState([]);
   const [filteredActivities, setFilteredActivities] = useState([]);
   const [categories, setCategories] = useState([]);

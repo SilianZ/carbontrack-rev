@@ -29,12 +29,22 @@ export default function AuditDiffViewer({ oldData, newData }) {
   const diff = useMemo(()=> buildDiff(oldParsed||{}, newParsed||{}), [oldParsed, newParsed]);
 
   return (
-    <div className="border rounded bg-white text-xs">
-      <div className="flex items-center gap-2 p-2 border-b bg-gray-50">
+    <div className="rounded border border-border bg-card text-xs text-card-foreground">
+      <div className="flex items-center gap-2 border-b border-border bg-muted/50 p-2">
         <strong>变更 Diff</strong>
         <div className="ml-auto flex gap-1">
           {['inline','side','tree'].map(m => (
-            <button key={m} onClick={()=>setMode(m)} className={`px-2 py-0.5 rounded ${mode===m?'bg-blue-600 text-white':'bg-gray-200'}`}>{m}</button>
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`rounded px-2 py-0.5 transition-colors ${
+                mode === m
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+              }`}
+            >
+              {m}
+            </button>
           ))}
         </div>
       </div>
@@ -53,14 +63,14 @@ export default function AuditDiffViewer({ oldData, newData }) {
       {mode === 'side' && (
         <div className="p-2 overflow-auto">
           <table className="w-full text-[11px]">
-            <thead><tr className="bg-gray-100"><th className="p-1 text-left">字段</th><th className="p-1 text-left">旧</th><th className="p-1 text-left">新</th></tr></thead>
+            <thead><tr className="bg-muted"><th className="p-1 text-left">字段</th><th className="p-1 text-left">旧</th><th className="p-1 text-left">新</th></tr></thead>
             <tbody>
-            {diff.length === 0 && <tr><td colSpan={3} className="p-2 text-center text-gray-500">无差异</td></tr>}
+            {diff.length === 0 && <tr><td colSpan={3} className="p-2 text-center text-muted-foreground">无差异</td></tr>}
             {diff.map(d => (
               <tr key={d.path} className="border-t">
                 <td className="p-1 align-top font-mono">{d.path || '(root)'}</td>
-                <td className="p-1 text-red-600 break-all font-mono">{JSON.stringify(d.old)}</td>
-                <td className="p-1 text-green-700 break-all font-mono">{JSON.stringify(d.new)}</td>
+                <td className="p-1 break-all font-mono text-red-600 dark:text-red-300">{JSON.stringify(d.old)}</td>
+                <td className="p-1 break-all font-mono text-green-700 dark:text-green-300">{JSON.stringify(d.new)}</td>
               </tr>
             ))}
             </tbody>
@@ -69,13 +79,13 @@ export default function AuditDiffViewer({ oldData, newData }) {
       )}
       {mode === 'inline' && (
         <div className="p-2 space-y-1 max-h-80 overflow-auto">
-          {diff.length === 0 && <div className="text-gray-500">无差异</div>}
+          {diff.length === 0 && <div className="text-muted-foreground">无差异</div>}
           {diff.map(d => (
-            <div key={d.path} className="border rounded p-1 bg-gray-50">
-              <div className="font-mono text-[10px] mb-1 text-gray-600">{d.path || '(root)'}</div>
+            <div key={d.path} className="rounded border border-border bg-muted/40 p-1">
+              <div className="mb-1 font-mono text-[10px] text-muted-foreground">{d.path || '(root)'}</div>
               <div className="flex flex-col md:flex-row gap-2">
-                <div className="flex-1 bg-red-50 p-1 rounded"><span className="text-red-700">旧:</span> <code className="break-all">{JSON.stringify(d.old)}</code></div>
-                <div className="flex-1 bg-green-50 p-1 rounded"><span className="text-green-700">新:</span> <code className="break-all">{JSON.stringify(d.new)}</code></div>
+                <div className="flex-1 rounded bg-red-500/10 p-1 dark:bg-red-500/15"><span className="text-red-700 dark:text-red-300">旧:</span> <code className="break-all">{JSON.stringify(d.old)}</code></div>
+                <div className="flex-1 rounded bg-green-500/10 p-1 dark:bg-green-500/15"><span className="text-green-700 dark:text-green-300">新:</span> <code className="break-all">{JSON.stringify(d.new)}</code></div>
               </div>
             </div>
           ))}

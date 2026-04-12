@@ -114,7 +114,7 @@ export function SecurityActivityList({
   compact = false,
   className = '',
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['common', 'securityActivity']);
 
   if (isLoading) {
     return (

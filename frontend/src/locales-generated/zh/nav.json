@@ -1,0 +1,42 @@
+{
+  "nav": {
+    "home": "首页",
+    "dashboard": "仪表盘",
+    "calculate": "记录活动",
+    "activities": "活动记录",
+    "products": "积分商城",
+    "messages": "站内信",
+    "support": "客服工单",
+    "profile": "个人中心",
+    "admin": "管理后台",
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出登录",
+    "notifications": "通知设置",
+    "about": "关于我们",
+    "openMenu": "展开菜单",
+    "closeMenu": "收起菜单",
+    "menuTitle": "导航 CarbonTrack",
+    "menuSubtitle": "快速跳转到核心功能区",
+    "languageSection": "界面语言",
+    "languageDescription": "切换界面显示语言",
+    "accountSignedIn": "当前登录账号",
+    "getStarted": "开始使用 CarbonTrack",
+    "accountDescription": "创建账号即可跨设备同步记录。",
+    "sections": {
+      "overview": "总览",
+      "overviewDesc": "快速了解平台核心内容",
+      "insights": "追踪",
+      "insightsDesc": "管理计算与仪表盘",
+      "marketplace": "兑换中心",
+      "marketplaceDesc": "兑换环保好物与奖励"
+    },
+    "hints": {
+      "home": "返回首页与焦点内容",
+      "about": "了解我们的使命与团队",
+      "calculate": "几分钟内估算你的碳排",
+      "dashboard": "查看历史趋势与目标进度",
+      "products": "兑换气候奖励与环保商品"
+    }
+  }
+}

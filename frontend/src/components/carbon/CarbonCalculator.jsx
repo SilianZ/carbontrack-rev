@@ -12,7 +12,7 @@ import { SmartActivityInput } from './SmartActivityInput';
 const InteractiveReceipt = React.lazy(() => import('./InteractiveReceipt'));
 
 export function CarbonCalculator() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'common', 'errors', 'images']);
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [activities, setActivities] = useState([]); // Store fetched activities

@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "loadFailed": "加载失败",
+    "network": "网络连接错误",
+    "unexpected": "发生未知错误",
+    "tryAgain": "请稍后重试或刷新页面",
+    "server": "服务器错误",
+    "unauthorized": "未授权访问",
+    "forbidden": "访问被禁止",
+    "notFound": "页面未找到",
+    "timeout": "请求超时",
+    "unknown": "未知错误",
+    "validation": "数据验证失败",
+    "turnstile": "人机验证失败，请重试",
+    "tooManyFiles": "选择的文件过多（最多 {{max}} 个）",
+    "singleFileOnly": "仅支持上传单个文件",
+    "operationFailed": "操作失败，请稍后重试",
+    "uploadFailed": "上传失败，请稍后重试"
+  }
+}

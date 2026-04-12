@@ -17,7 +17,7 @@ import { toast } from 'react-hot-toast';
 import R2Image from '../common/R2Image';
 
 export function Dashboard() {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['common', 'dashboard', 'date', 'errors']);
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({});
   const [chartData, setChartData] = useState([]);

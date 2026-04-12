@@ -1,0 +1,15 @@
+{
+  "onboarding": {
+    "title": "Complete School and Class Information",
+    "subtitle": "You can skip now and complete it later in your profile",
+    "schoolPlaceholder": "Search by keywords, or enter a new school name",
+    "noSchoolMatches": "No matching schools, you can enter a name to create",
+    "classLabel": "Class (optional)",
+    "classPlaceholder": "Search by keywords or create new",
+    "noClassMatches": "No matching classes, you can enter a name to create",
+    "leastOneField": "Please select at least a school or fill in school/class information",
+    "saved": "Information saved",
+    "saveAndContinue": "Save and continue",
+    "skipForNow": "Skip for now"
+  }
+}

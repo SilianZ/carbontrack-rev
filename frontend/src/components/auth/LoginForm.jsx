@@ -19,7 +19,7 @@ import { Alert, AlertDescription } from '../ui/Alert';
 import Turnstile from '../common/Turnstile';
 
 export function LoginForm() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'errors']);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');

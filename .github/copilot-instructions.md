@@ -17,8 +17,10 @@ Communication between the frontend and backend is via a RESTful API, which is do
 ### Key Files
 - `backend/openapi.json`: The OpenAPI specification that defines the contract between the frontend and backend. Keeping this up-to-date is crucial.
 - `backend/src/routes.php`: Defines all API endpoints and maps them to controller actions.
+- `backend/src/Services/CronSchedulerService.php`: Unified scheduler registry/executor for public cron entrypoints, admin manual runs, run history, and legacy wrapper dispatch.
 - `frontend/src/router/`: Defines the client-side routes.
 - `frontend/src/pages/admin/AiWorkspace.jsx`: Dedicated admin AI workspace. Keep its UX, starter prompts, and capability presentation aligned with the backend admin AI catalogue and routes.
+- `frontend/src/pages/admin/Cron.jsx`: Admin cron console for task cadence, run history, and manual task execution.
 - `backend/database/localhost.sql`: Contains the primary database schema. All migration scripts in `backend/database/migrations/` have been executed, so this file, along with the migration scripts, represents the definitive schema.
 - `backend/config/admin_ai_commands.json`: Source of truth for the admin AI assistant's single multi-turn command and tool catalogue. Whenever you add, rename, or remove admin functionality that the AI should understand, update this file (and keep the companion loader `admin_ai_commands.php` in sync) so the knowledge base matches the code.
 
@@ -44,6 +46,10 @@ The backend is a lean API service. Avoid adding redundant database structure che
     - **Error handling**: Expected and unexpected failures must use explicit error handling and persist exceptions/errors through `ErrorLogService`; do not rely only on plain `error_log()` or a generic PSR logger.
     - **DI requirement**: When a controller/service/job needs audit or error logging, register the required dependencies in `backend/src/dependencies.php`; do not leave logging as an optional afterthought.
     - **Review rule**: If you touch an endpoint or business flow and it still lacks the custom logging trio above, treat that as incomplete work and fix it before finishing.
+- **Cron / Scheduler Maintenance (Mandatory)**: Scheduled work is centralized through `CronSchedulerService`, the public compatibility entrypoints, and the admin cron console.
+    - New externally-triggered jobs should be registered in `CronSchedulerService`, persisted through `cron_tasks` / `cron_runs`, and exposed via `/api/v1/cron/run` rather than ad-hoc public endpoints.
+    - Legacy wrapper endpoints such as `/api/v1/support/sla-sweep` or `/api/v1/leaderboard/trigger` must remain truthful about downstream scheduler failures; do not mask failed/skipped runs as success.
+    - If you add or change scheduled tasks, update the migration/schema snapshot (`backend/database/migrations/`, `backend/database/localhost.sql`), env examples (`backend/.env.example`), OpenAPI, PHPUnit coverage, and the admin console at `/admin/cron` together.
 - **After Backend Changes (Required)**: Whenever you modify controllers, routes, models, requests, or responses:
     - Update `backend/openapi.json` to reflect the new or changed endpoints, request/response schemas, status codes, and auth requirements.
     - Add or update PHPUnit tests covering the changed behavior in `backend/tests/` (Unit and/or Integration). Focus on happy paths, validation errors, edge cases, and auth. Run it in the Powershell terminal to see output.
@@ -65,20 +71,27 @@ The frontend is a modern SPA.
 - **Routing**: `react-router-dom` is used for client-side routing. Page components are in `frontend/src/pages/`.
 - **Data Fetching**: Use the pre-configured `axios` instance for API requests, integrated with TanStack Query.
 - **Forms**: Use **React Hook Form** with **Zod** for schema-based validation.
+- **I18n**: The frontend uses **i18next** with namespace-based locale files. Treat `frontend/public/locales/<lng>/<namespace>.json` as the runtime translation source, keep translation keys namespaced (for example `home.hero.title`), and use page/component-specific `useTranslation([...])` calls instead of relying on a single global namespace. The previous monolithic locale layout is no longer the maintenance target.
+- **Bundled Critical Language Namespaces**: The homepage-critical namespaces (`home`, `nav`) are mirrored under `frontend/src/locales-generated/<lng>/` for supported languages and may be preloaded during i18n bootstrap for the detected current language and, when different, the fallback/default language. Keep those generated mirrors aligned with `frontend/public/locales/<lng>/`.
 
 ### Developer Workflow
 - **Setup**: Run `pnpm install` in the `frontend` directory.
 - **Build**: `pnpm build`.
 - **Lint**: `pnpm lint`.
 - **After Frontend Changes (Required)**: After modifying components, hooks, routes, state, or build config:
+    - Run `pnpm lint` and ensure it passes before committing. Treat passing ESLint as a required quality gate alongside backend `composer test`.
     - Run `pnpm build` to validate syntax, type-checking, and bundling issues before committing.
     - Do NOT execute `pnpm dev` within this AI session if terminal output cannot be captured; rely on local/CI builds instead, and keep code lint/type-clean.
-    - If new admin UI flows, functions, labels, or session-audit displays are introduced, update any corresponding AI knowledge base entries (e.g., adjust keywords, routes, tools, and confirmation metadata in `backend/config/admin_ai_commands.json`) so the admin AI surfaces them correctly.
+    - If you add or change UI copy, translation keys, or namespaces, update the relevant locale namespace files for both `frontend/public/locales/zh/` and `frontend/public/locales/en/`. Do not reintroduce new strings into a catch-all `common.json` pattern when a more specific namespace exists.
+    - If the copy change touches bundled homepage namespaces (`home`, `nav`), also update the mirrored files in `frontend/src/locales-generated/<lng>/` for each supported language you changed.
+- If new admin UI flows, functions, labels, or session-audit displays are introduced, update any corresponding AI knowledge base entries (e.g., adjust keywords, routes, tools, and confirmation metadata in `backend/config/admin_ai_commands.json`) so the admin AI surfaces them correctly.
+- If you add or change the cron console, scheduler labels, or admin-facing task controls, keep `frontend/src/pages/admin/Cron.jsx`, the admin navigation, and the `admin` locale namespace in sync; do not fall back to `common.json` for cron-specific copy.
 
 ## Admin AI Maintenance
 
 - The admin AI is a single multi-turn assistant entry. Do not introduce or document a separate long-lived `intent` product flow as the primary path.
 - The primary admin AI UX lives in the dedicated `/admin/ai` workspace. If you change workspace navigation, starter prompts, quick actions, or bootstrap payloads, update the backend catalogue, OpenAPI contract, and frontend workspace together.
+- Cron management is part of the admin AI surface. If you add or rename cron read/write actions, sync `backend/config/admin_ai_commands.json`, `AdminAiReadModelService`, `AdminAiWriteActionService`, `/admin/cron`, and the documented admin cron APIs in one change.
 - Keep task-template prompts and action labels in `/admin/ai` operational and locale-aware. Prefer direct admin phrasing that reliably maps to backend `managementActions`, especially for Chinese prompts used by administrators in production.
 - Conversation history is reconstructed from logs. If you change admin AI message/audit semantics, keep `llm_logs`, `audit_logs`, and any conversation aggregation responses compatible.
 - If the agent adds or changes keyword fallback routing, synonym matching, or “continue from result” affordances, update `backend/config/admin_ai_commands.json` keywords alongside the workspace UI so natural-language prompts and one-click follow-up actions stay aligned.

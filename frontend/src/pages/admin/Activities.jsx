@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Ta
 import { useTranslation } from '../../hooks/useTranslation';
 
 export default function AdminActivitiesPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'admin']);
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState('library');
 

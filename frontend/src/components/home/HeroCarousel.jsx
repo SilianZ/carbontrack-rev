@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
  * 支持自动播放、手动控制、暂停等功能
  */
 export default function HeroCarousel({ items = [], interval = 5000, className }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['home']);
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [isPaused, setIsPaused] = React.useState(false);
   const [direction, setDirection] = React.useState(0);

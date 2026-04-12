@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { resolveR2ImageSource } from '../../lib/r2Image';
 
 export function AchievementBadges({ badges = [], userBadges = [], loading = false, onTriggerAuto, isAdmin = false }) {
-  const { t, currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation(['dashboard']);
   const isChineseLocale = currentLanguage?.toLowerCase().startsWith('zh');
   const ownedMap = new Map();
   userBadges.forEach((entry) => {

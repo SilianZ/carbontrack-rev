@@ -11,7 +11,7 @@ const SCALE_VELOCITY_FACTOR = 1 / 800;
 const COLOR_LERP = 8;
 
 export default function NotFoundPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['notFoundPage']);
   const emojiRef = useRef(null);
   const angleRef = useRef(0); // degrees
   const velocityRef = useRef(40); // deg/s

@@ -30,7 +30,7 @@ import {
 const MESSAGE_COLORS = ['#22c55e', '#38bdf8'];
 
 export default function AdminPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['admin', 'common', 'dashboard', 'errors', 'messages', 'pagination', 'units']);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -213,17 +213,17 @@ export default function AdminPage() {
                   </div>
 
                   <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-lg font-semibold text-foreground">
                             {t('admin.dashboard.messages.title')}
                           </h3>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {t('admin.dashboard.messages.subtitle')}
                           </p>
                         </div>
-                        <div className="rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-600">
+                        <div className="rounded-full bg-sky-500/12 px-4 py-2 text-sm font-semibold text-sky-600 dark:text-sky-300">
                           {t('admin.dashboard.messages.unreadBadge')} {number.format(messageSummary.unread)}
                         </div>
                       </div>
@@ -241,32 +241,33 @@ export default function AdminPage() {
                                 contentStyle={{
                                   borderRadius: '0.75rem',
                                   border: '1px solid hsl(var(--border))',
-                                  backgroundColor: 'white',
+                                  backgroundColor: 'hsl(var(--card))',
+                                  color: 'hsl(var(--card-foreground))',
                                   boxShadow: '0 10px 25px -15px rgb(0 0 0 / 0.35)',
                                 }}
                               />
                             </PieChart>
                           </ResponsiveContainer>
                         ) : (
-                          <div className="flex h-full items-center justify-center text-sm text-gray-400">
+                          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                             {t('admin.dashboard.messages.empty')}
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                    <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+                      <h3 className="text-lg font-semibold text-foreground">
                         {t('admin.dashboard.messages.detailsTitle')}
                       </h3>
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         {t('admin.dashboard.messages.detailsSubtitle')}
                       </p>
 
-                      <div className="mt-6 space-y-3 text-sm text-gray-600">
+                      <div className="mt-6 space-y-3 text-sm text-muted-foreground">
                         <div className="flex items-center justify-between">
                           <span>{t('admin.dashboard.messages.totalLabel')}</span>
-                          <span className="font-semibold text-gray-900">{number.format(messageSummary.total)}</span>
+                          <span className="font-semibold text-foreground">{number.format(messageSummary.total)}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span>{t('admin.dashboard.messages.readLabel')}</span>
@@ -283,7 +284,7 @@ export default function AdminPage() {
                       </div>
 
                       <div className="mt-6 flex flex-wrap items-center gap-3">
-                        <div className="flex-1 rounded-lg bg-slate-50 p-4 text-xs text-slate-600">
+                        <div className="flex-1 rounded-lg bg-muted/50 p-4 text-xs text-muted-foreground">
                           {t('admin.dashboard.messages.tip')}
                         </div>
                         <Button variant="outline" size="sm" onClick={() => setActiveTab('broadcast')}>
@@ -379,9 +380,9 @@ export default function AdminPage() {
                             <td className="p-4 font-mono text-sm">{log.id}</td>
                             <td className="p-4">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                log.actor_type === 'admin' ? 'bg-red-100 text-red-800' :
-                                log.actor_type === 'user' ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-800'
+                                log.actor_type === 'admin' ? 'bg-red-500/12 text-red-700 dark:text-red-300' :
+                                log.actor_type === 'user' ? 'bg-blue-500/12 text-blue-700 dark:text-blue-300' :
+                                'bg-muted text-foreground'
                               }`}>
                                 {log.actor_type}
                               </span>
@@ -396,9 +397,9 @@ export default function AdminPage() {
                             </td>
                             <td className="p-4">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                log.status === 'success' ? 'bg-green-100 text-green-800' :
-                                log.status === 'failed' ? 'bg-red-100 text-red-800' :
-                                'bg-yellow-100 text-yellow-800'
+                                log.status === 'success' ? 'bg-green-500/12 text-green-700 dark:text-green-300' :
+                                log.status === 'failed' ? 'bg-red-500/12 text-red-700 dark:text-red-300' :
+                                'bg-amber-500/12 text-amber-700 dark:text-amber-300'
                               }`}>
                                 {log.status}
                               </span>
@@ -539,9 +540,9 @@ export default function AdminPage() {
                           <td className="p-4">
                             <div className="flex items-center gap-2">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                log.actor_type === 'admin' ? 'bg-red-100 text-red-800' :
-                                log.actor_type === 'user' ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-800'
+                                log.actor_type === 'admin' ? 'bg-red-500/12 text-red-700 dark:text-red-300' :
+                                log.actor_type === 'user' ? 'bg-blue-500/12 text-blue-700 dark:text-blue-300' :
+                                'bg-muted text-foreground'
                               }`}>
                                 {log.actor_type}
                               </span>
@@ -562,9 +563,9 @@ export default function AdminPage() {
                           </td>
                           <td className="p-4">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              log.status === 'success' ? 'bg-green-100 text-green-800' :
-                              log.status === 'failed' ? 'bg-red-100 text-red-800' :
-                              'bg-yellow-100 text-yellow-800'
+                              log.status === 'success' ? 'bg-green-500/12 text-green-700 dark:text-green-300' :
+                              log.status === 'failed' ? 'bg-red-500/12 text-red-700 dark:text-red-300' :
+                              'bg-amber-500/12 text-amber-700 dark:text-amber-300'
                             }`}>
                               {log.status}
                             </span>
