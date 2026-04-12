@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import {
   ArrowLeft,
   Check,
+  CheckCircle2,
   Headset,
   ImageIcon,
   Paperclip,
@@ -252,6 +253,7 @@ export default function SupportTicketDetailPage() {
   const [transferReason, setTransferReason] = useState('');
   const [reviewNotes, setReviewNotes] = useState({});
   const [sidePanelTab, setSidePanelTab] = useState('workflow');
+  const [replyMode, setReplyMode] = useState(null);
 
   const authState = useMemo(() => checkAuthStatus(), []);
   const currentUser = authState.user;
@@ -288,36 +290,11 @@ export default function SupportTicketDetailPage() {
   );
 
   const updateMutation = useMutation(
-    (payload) => supportAPI.updateTicket(ticketId, payload),
-    {
-      onSuccess: () => {
-        toast.success(t('support.portal.ticketUpdated'));
-        queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
-        queryClient.invalidateQueries(['support-queue']);
-        queryClient.invalidateQueries(['support-assignees']);
-      },
-      onError: (error) => {
-        const message = error?.response?.data?.message || error.message || t('errors.operationFailed');
-        toast.error(message);
-      },
-    }
+    (payload) => supportAPI.updateTicket(ticketId, payload)
   );
 
   const replyMutation = useMutation(
-    (payload) => supportAPI.replyTicket(ticketId, payload),
-    {
-      onSuccess: () => {
-        toast.success(t('support.portal.replyCreated'));
-        reset();
-        setAttachments([]);
-        queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
-        queryClient.invalidateQueries(['support-queue']);
-      },
-      onError: (error) => {
-        const message = error?.response?.data?.message || error.message || t('errors.operationFailed');
-        toast.error(message);
-      },
-    }
+    (payload) => supportAPI.replyTicket(ticketId, payload)
   );
 
   const transferRequestMutation = useMutation(
@@ -362,6 +339,7 @@ export default function SupportTicketDetailPage() {
     [assignees, ticket?.assigned_to]
   );
   const isCurrentAssignee = Number(ticket?.assigned_to ?? 0) > 0 && Number(ticket?.assigned_to) === Number(currentUser?.id ?? 0);
+  const canManageWorkflow = isAdmin || isCurrentAssignee;
   const transferableAssignees = useMemo(
     () => assignees.filter((entry) => String(entry.id) !== String(ticket?.assigned_to ?? '')),
     [assignees, ticket?.assigned_to]
@@ -378,7 +356,23 @@ export default function SupportTicketDetailPage() {
     setAssignedTo(ticket.assigned_to ? String(ticket.assigned_to) : 'none');
   }, [ticket]);
 
-  const handleWorkflowSave = () => {
+  const invalidateSupportViews = () => {
+    queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
+    queryClient.invalidateQueries(['support-queue']);
+    queryClient.invalidateQueries(['support-assignees']);
+    queryClient.invalidateQueries(['support-workbench-tickets']);
+    queryClient.invalidateQueries(['support-workbench-pending-transfers']);
+    queryClient.invalidateQueries(['admin-support-tickets']);
+    queryClient.invalidateQueries(['admin-support-ticket-detail', Number(ticketId)]);
+    queryClient.invalidateQueries(['admin-support-reports']);
+  };
+
+  const resetReplyComposer = () => {
+    reset();
+    setAttachments([]);
+  };
+
+  const handleWorkflowSave = async () => {
     const payload = {
       status,
       priority,
@@ -388,23 +382,73 @@ export default function SupportTicketDetailPage() {
       payload.assigned_to = assignedTo === 'none' ? null : Number(assignedTo);
     }
 
-    updateMutation.mutate(payload);
+    try {
+      await updateMutation.mutateAsync(payload);
+      invalidateSupportViews();
+      toast.success(t('support.portal.ticketUpdated'));
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || t('errors.operationFailed');
+      toast.error(message);
+    }
   };
 
-  const onReplySubmit = handleSubmit((values) => {
+  const buildReplyPayload = (values) => {
     if (attachmentGate.hasUploadErrors) {
       toast.error(t('support.attachments.uploadFailedBlocking'));
-      return;
+      return null;
     }
     if (attachmentGate.hasPendingUploads) {
       toast.error(t('support.attachments.uploadRequired'));
+      return null;
+    }
+
+    return {
+      content: values.content,
+      attachments: attachments.map((file) => file.file_path),
+    };
+  };
+
+  const submitReply = async (values, nextStatus = null) => {
+    setReplyMode(nextStatus ? 'resolve' : 'reply');
+    const payload = buildReplyPayload(values);
+    if (!payload) {
+      setReplyMode(null);
       return;
     }
 
-    replyMutation.mutate({
-      content: values.content,
-      attachments: attachments.map((file) => file.file_path),
-    });
+    try {
+      await replyMutation.mutateAsync(payload);
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || t('errors.operationFailed');
+      toast.error(message);
+      setReplyMode(null);
+      return;
+    }
+
+    if (nextStatus) {
+      try {
+        await updateMutation.mutateAsync({ status: nextStatus });
+      } catch {
+        resetReplyComposer();
+        invalidateSupportViews();
+        toast.error(t('support.portal.replyResolvePartial'));
+        setReplyMode(null);
+        return;
+      }
+    }
+
+    resetReplyComposer();
+    invalidateSupportViews();
+    toast.success(nextStatus ? t('support.portal.replyResolveSuccess') : t('support.portal.replyCreated'));
+    setReplyMode(null);
+  };
+
+  const onReplySubmit = handleSubmit((values) => {
+    void submitReply(values);
+  });
+
+  const onReplyAndResolve = handleSubmit((values) => {
+    void submitReply(values, 'resolved');
   });
 
   const handleCreateTransferRequest = () => {
@@ -444,6 +488,7 @@ export default function SupportTicketDetailPage() {
   const slaMeta = getSlaMeta(ticket, locale);
   const firstResponseMeta = getSlaMilestoneMeta(ticket, 'first_response', locale);
   const resolutionMeta = getSlaMilestoneMeta(ticket, 'resolution', locale);
+  const isReplySubmitting = replyMutation.isLoading || updateMutation.isLoading;
 
   return (
     <div className="space-y-6">
@@ -530,64 +575,83 @@ export default function SupportTicketDetailPage() {
               <CardDescription>{t('support.portal.replySubtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <form className="space-y-4" onSubmit={onReplySubmit}>
-                <Textarea
-                  rows={6}
-                  placeholder={t('support.portal.replyPlaceholder')}
-                  {...register('content')}
-                />
-                {errors.content && <p className="text-sm text-red-600">{errors.content.message}</p>}
+              {canManageWorkflow ? (
+                <form className="space-y-4" onSubmit={onReplySubmit}>
+                  <Textarea
+                    rows={6}
+                    placeholder={t('support.portal.replyPlaceholder')}
+                    {...register('content')}
+                  />
+                  {errors.content && <p className="text-sm text-red-600">{errors.content.message}</p>}
 
-                <FileUpload
-                  multiple
-                  maxFiles={4}
-                  directory="support-tickets"
-                  entityType="support_ticket_message"
-                  accept="image/*"
-                  compressImages
-                  onStateChange={setAttachmentGate}
-                  onUploadSuccess={(result) => {
-                    setAttachments((current) => mergeUploadedFiles(current, result));
-                    toast.success(t('support.feedback.uploaded'));
-                  }}
-                  onUploadError={(error) => toast.error(error?.message || t('errors.uploadFailed'))}
-                />
+                  <FileUpload
+                    multiple
+                    maxFiles={4}
+                    directory="support-tickets"
+                    entityType="support_ticket_message"
+                    accept="image/*"
+                    compressImages
+                    onStateChange={setAttachmentGate}
+                    onUploadSuccess={(result) => {
+                      setAttachments((current) => mergeUploadedFiles(current, result));
+                      toast.success(t('support.feedback.uploaded'));
+                    }}
+                    onUploadError={(error) => toast.error(error?.message || t('errors.uploadFailed'))}
+                  />
 
-                {attachments.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {attachments.map((file) => (
-                      <button
-                        key={file.file_path}
-                        type="button"
-                        onClick={() => setAttachments((current) => current.filter((entry) => entry.file_path !== file.file_path))}
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-                      >
-                        {file.original_name}
-                      </button>
-                    ))}
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((file) => (
+                        <button
+                          key={file.file_path}
+                          type="button"
+                          onClick={() => setAttachments((current) => current.filter((entry) => entry.file_path !== file.file_path))}
+                          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                        >
+                          {file.original_name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {attachmentGate.hasUploadErrors ? (
+                    <Alert>
+                      <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {attachmentGate.hasPendingUploads ? (
+                    <Alert>
+                      <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
+                    </Alert>
+                  ) : null}
+
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <Button
+                      type="submit"
+                      className="w-full rounded-full sm:flex-1"
+                      loading={isReplySubmitting && replyMode === 'reply'}
+                      disabled={attachmentGate.isSubmissionBlocked}
+                    >
+                      <Send className="mr-2 h-4 w-4" />
+                      {t('support.portal.replySubmit')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full rounded-full border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-400/40 dark:text-emerald-200 dark:hover:bg-emerald-500/10 sm:flex-1"
+                      loading={isReplySubmitting && replyMode === 'resolve'}
+                      disabled={attachmentGate.isSubmissionBlocked}
+                      onClick={onReplyAndResolve}
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      {t('support.portal.replyResolveSubmit')}
+                    </Button>
                   </div>
-                )}
-                {attachmentGate.hasUploadErrors ? (
-                  <Alert>
-                    <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
-                  </Alert>
-                ) : null}
-                {attachmentGate.hasPendingUploads ? (
-                  <Alert>
-                    <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
-                  </Alert>
-                ) : null}
-
-                <Button
-                  type="submit"
-                  className="w-full rounded-full"
-                  loading={replyMutation.isLoading}
-                  disabled={attachmentGate.isSubmissionBlocked}
-                >
-                  <Send className="mr-2 h-4 w-4" />
-                  {t('support.portal.replySubmit')}
-                </Button>
-              </form>
+                </form>
+              ) : (
+                <Alert>
+                  <AlertDescription>{t('support.portal.actionLockedHint')}</AlertDescription>
+                </Alert>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -685,95 +749,103 @@ export default function SupportTicketDetailPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">{t('support.filters.status')}</label>
-                    <Select value={status} onValueChange={setStatus}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TICKET_STATUS_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {t(option.labelKey)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">{t('support.feedback.fields.priority')}</label>
-                    <Select value={priority} onValueChange={setPriority}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TICKET_PRIORITY_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {t(option.labelKey)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {isAdmin ? (
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">{t('support.portal.assignedTo')}</label>
-                      <Select value={assignedTo} onValueChange={setAssignedTo}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">{t('support.portal.unassigned')}</SelectItem>
-                          {assignees.map((assignee) => (
-                            <SelectItem key={assignee.id} value={String(assignee.id)}>
-                              {assigneeLabel(assignee, t)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ) : (
-                    <div className="space-y-3 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm font-medium">{t('support.portal.assignedTo')}</span>
-                        <span className="text-right text-sm">{currentAssignee?.username || currentAssignee?.email || t('support.portal.unassigned')}</span>
+                  {canManageWorkflow ? (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">{t('support.filters.status')}</label>
+                        <Select value={status} onValueChange={setStatus}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {TICKET_STATUS_OPTIONS.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {t(option.labelKey)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
-                      {currentAssignee ? (
-                        <div className="grid grid-cols-3 gap-3 text-center">
-                          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                              {t('support.portal.workload.assigned')}
-                            </p>
-                            <p className="mt-2 text-xl font-semibold">{currentAssignee.assigned_total_count ?? 0}</p>
-                          </div>
-                          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                              {t('support.portal.workload.notStarted')}
-                            </p>
-                            <p className="mt-2 text-xl font-semibold">{currentAssignee.open_count ?? 0}</p>
-                          </div>
-                          <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                              {t('support.portal.workload.inProgress')}
-                            </p>
-                            <p className="mt-2 text-xl font-semibold">{currentAssignee.in_progress_count ?? 0}</p>
-                          </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">{t('support.feedback.fields.priority')}</label>
+                        <Select value={priority} onValueChange={setPriority}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {TICKET_PRIORITY_OPTIONS.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {t(option.labelKey)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {isAdmin ? (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">{t('support.portal.assignedTo')}</label>
+                          <Select value={assignedTo} onValueChange={setAssignedTo}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">{t('support.portal.unassigned')}</SelectItem>
+                              {assignees.map((assignee) => (
+                                <SelectItem key={assignee.id} value={String(assignee.id)}>
+                                  {assigneeLabel(assignee, t)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       ) : null}
-                      {ticket.assignment_locked ? (
-                        <Alert>
-                          <AlertDescription>{t('support.portal.assignmentLockedHint')}</AlertDescription>
-                        </Alert>
-                      ) : null}
-                    </div>
+
+                      <Button type="button" className="w-full rounded-full" onClick={() => { void handleWorkflowSave(); }} loading={updateMutation.isLoading}>
+                        <Save className="mr-2 h-4 w-4" />
+                        {t('support.portal.saveWorkflow')}
+                      </Button>
+                    </>
+                  ) : (
+                    <Alert>
+                      <AlertDescription>{t('support.portal.actionLockedHint')}</AlertDescription>
+                    </Alert>
                   )}
 
-                  <Button type="button" className="w-full rounded-full" onClick={handleWorkflowSave} loading={updateMutation.isLoading}>
-                    <Save className="mr-2 h-4 w-4" />
-                    {t('support.portal.saveWorkflow')}
-                  </Button>
+                  <div className="space-y-3 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-sm font-medium">{t('support.portal.assignedTo')}</span>
+                      <span className="text-right text-sm">{currentAssignee?.username || currentAssignee?.email || t('support.portal.unassigned')}</span>
+                    </div>
+                    {currentAssignee ? (
+                      <div className="grid grid-cols-3 gap-3 text-center">
+                        <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                            {t('support.portal.workload.assigned')}
+                          </p>
+                          <p className="mt-2 text-xl font-semibold">{currentAssignee.assigned_total_count ?? 0}</p>
+                        </div>
+                        <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                            {t('support.portal.workload.notStarted')}
+                          </p>
+                          <p className="mt-2 text-xl font-semibold">{currentAssignee.open_count ?? 0}</p>
+                        </div>
+                        <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                            {t('support.portal.workload.inProgress')}
+                          </p>
+                          <p className="mt-2 text-xl font-semibold">{currentAssignee.in_progress_count ?? 0}</p>
+                        </div>
+                      </div>
+                    ) : null}
+                    {ticket.assignment_locked ? (
+                      <Alert>
+                        <AlertDescription>{t('support.portal.assignmentLockedHint')}</AlertDescription>
+                      </Alert>
+                    ) : null}
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="transfer" className="space-y-4">

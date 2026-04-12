@@ -6,7 +6,7 @@ import { BarChart3, CheckCircle2, Clock3, Loader2, Mail, Save, Shield, Ticket, U
 
 import { adminAPI } from '../../lib/api';
 import { useTranslation } from '../../hooks/useTranslation';
-import { TICKET_CATEGORY_OPTIONS, TICKET_PRIORITY_OPTIONS, formatSupportDate, getPriorityVariant, getSlaMeta, getSlaMilestoneMeta, getSlaTone, getStatusTone, getTagTone } from '../../lib/supportTickets';
+import { TICKET_CATEGORY_OPTIONS, TICKET_PRIORITY_OPTIONS, TICKET_STATUS_OPTIONS, formatSupportDate, getPriorityVariant, getSlaMeta, getSlaMilestoneMeta, getSlaTone, getStatusTone, getTagTone } from '../../lib/supportTickets';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -238,6 +238,7 @@ export default function AdminSupportOpsPage() {
   const [selectedAssigneeId, setSelectedAssigneeId] = useState(null);
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [ticketStatusFilter, setTicketStatusFilter] = useState('all');
+  const [ticketWorkflowStatus, setTicketWorkflowStatus] = useState('open');
   const [routingSettingsForm, setRoutingSettingsForm] = useState(EMPTY_ROUTING_SETTINGS);
   const [assigneeProfileForm, setAssigneeProfileForm] = useState(null);
 
@@ -374,6 +375,24 @@ export default function AdminSupportOpsPage() {
     }
   );
 
+  const saveTicketWorkflowMutation = useMutation(
+    async ({ id, payload }) => adminAPI.updateSupportTicket(id, payload),
+    {
+      onSuccess: (_, variables) => {
+        toast.success(t('support.portal.ticketUpdated'));
+        queryClient.invalidateQueries(['admin-support-tickets']);
+        queryClient.invalidateQueries(['admin-support-ticket-detail', variables.id]);
+        queryClient.invalidateQueries(['admin-support-reports']);
+        queryClient.invalidateQueries(['support-queue']);
+        queryClient.invalidateQueries(['support-workbench-tickets']);
+        queryClient.invalidateQueries(['support-workbench-pending-transfers']);
+      },
+      onError: (error) => {
+        toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
+      },
+    }
+  );
+
   const summaryCards = useMemo(() => {
     const summary = reports.summary ?? {};
     return [
@@ -471,6 +490,14 @@ export default function AdminSupportOpsPage() {
     }
   }, [assigneeDetail]);
 
+  useEffect(() => {
+    if (!ticketDetail) {
+      return;
+    }
+
+    setTicketWorkflowStatus(ticketDetail.status || 'open');
+  }, [ticketDetail]);
+
   const handleTagSave = () => {
     saveTagMutation.mutate({
       id: tagForm.id,
@@ -500,6 +527,17 @@ export default function AdminSupportOpsPage() {
       required_agent_level: ruleForm.required_agent_level === 'none' ? null : Number(ruleForm.required_agent_level),
       skill_hints: ruleForm.skill_hints.split(',').map((item) => item.trim()).filter(Boolean),
       tag_ids: ruleForm.tag_ids,
+    });
+  };
+
+  const handleTicketWorkflowSave = () => {
+    if (!selectedTicketId) {
+      return;
+    }
+
+    saveTicketWorkflowMutation.mutate({
+      id: selectedTicketId,
+      payload: { status: ticketWorkflowStatus },
     });
   };
 
@@ -865,6 +903,37 @@ export default function AdminSupportOpsPage() {
                     <Badge variant={getPriorityVariant(ticketDetail.priority)}>{t(`support.priorities.${ticketDetail.priority}`)}</Badge>
                     {slaMeta.state ? <Badge variant="outline" className={getSlaTone(slaMeta.state)}>{t(`support.slaStatuses.${slaMeta.state}`, { defaultValue: slaMeta.state })}</Badge> : null}
                     <Badge variant="outline">{t(`support.categories.${ticketDetail.category}`)}</Badge>
+                  </div>
+
+                  <div className="rounded-2xl border border-border px-4 py-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('support.portal.workflowTitle')}</p>
+                    <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end">
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <label className="text-sm font-medium">{t('support.filters.status')}</label>
+                        <Select value={ticketWorkflowStatus} onValueChange={setTicketWorkflowStatus}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {TICKET_STATUS_OPTIONS.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {t(option.labelKey)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button
+                        type="button"
+                        className="rounded-full sm:min-w-[180px]"
+                        onClick={handleTicketWorkflowSave}
+                        loading={saveTicketWorkflowMutation.isLoading}
+                        disabled={ticketWorkflowStatus === (ticketDetail.status || 'open')}
+                      >
+                        <Save className="mr-2 h-4 w-4" />
+                        {t('support.portal.saveWorkflow')}
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">

@@ -157,8 +157,8 @@ const Turnstile = forwardRef(function Turnstile(
 	}
 
 	return (
-		<div className={className}>
-			<div ref={containerRef} className="inline-block" />
+		<div className={`w-full max-w-full ${className}`.trim()}>
+			<div ref={containerRef} className={size === 'flexible' ? 'w-full max-w-full' : 'inline-block max-w-full'} />
 			{/* 可选：在 require 模式下无 token 时提示 */}
 			{require && !token && loaded && (
 				<p className="mt-2 text-xs text-muted-foreground">请先完成验证码验证</p>
