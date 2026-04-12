@@ -37,11 +37,31 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Semgrep PRO
+      - name: Run Semgrep
         run: |
+          BASELINE_ARG=""
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            BASELINE_ARG="--baseline-commit=${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.event_name }}" = "push" ] && [ -n "${{ github.event.before }}" ]; then
+            BASELINE_ARG="--baseline-commit=${{ github.event.before }}"
+          fi
+
           set +e
-          SEMGREP_REPO_DISPLAY_NAME="${{ github.repository }}/backend" \
-          semgrep ci --pro-languages --include=backend/ --sarif > semgrep.sarif
+          if [ -n "${SEMGREP_APP_TOKEN}" ]; then
+            echo "SEMGREP_APP_TOKEN detected; running Semgrep CI with Pro languages."
+            SEMGREP_REPO_DISPLAY_NAME="${{ github.repository }}/backend" \
+            semgrep ci --pro-languages --include=backend/ --sarif > semgrep.sarif
+          else
+            echo "SEMGREP_APP_TOKEN is not set; falling back to local Semgrep scan."
+            semgrep scan backend \
+              --config="auto" \
+              --config=".semgrep/custom-rules.yml" \
+              --config="p/php" \
+              --config="p/owasp-top-ten" \
+              $BASELINE_ARG \
+              --sarif \
+              --output semgrep.sarif
+          fi
           SEMGREP_EXIT=$?
           set -e
 
