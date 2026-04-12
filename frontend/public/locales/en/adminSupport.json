@@ -46,13 +46,15 @@
       "candidateScores": "Candidate scores",
       "topFactors": "Top factors",
       "routingFallbackLabel": "Fallback reason",
-      "openInPortal": "Open in support portal"
+      "openInPortal": "Open in support portal",
+      "workflowTitle": "Workflow editor"
     },
     "actions": {
       "saveRule": "Save rule",
       "saveTag": "Save tag",
       "saveProfile": "Save profile",
-      "saveRoutingSettings": "Save routing settings"
+      "saveRoutingSettings": "Save routing settings",
+      "saveWorkflow": "Save workflow"
     },
     "common": {
       "active": "Active",
@@ -60,6 +62,8 @@
       "noDescription": "No description"
     },
     "filters": {
+      "status": "Status",
+      "allStatuses": "All statuses",
       "anyCategory": "Any category",
       "anyPriority": "Any priority"
     },
@@ -68,7 +72,8 @@
       "ruleSaved": "Rule saved",
       "tagSaved": "Tag saved",
       "routingSettingsSaved": "Routing settings saved",
-      "profileSaved": "Routing profile saved"
+      "profileSaved": "Routing profile saved",
+      "ticketUpdated": "Ticket workflow updated"
     },
     "roles": {
       "user": "User",
