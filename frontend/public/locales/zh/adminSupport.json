@@ -46,13 +46,15 @@
       "candidateScores": "候选得分",
       "topFactors": "主要因素",
       "routingFallbackLabel": "回退原因",
-      "openInPortal": "在客服工作台中打开"
+      "openInPortal": "在客服工作台中打开",
+      "workflowTitle": "流程编辑"
     },
     "actions": {
       "saveRule": "保存规则",
       "saveTag": "保存标签",
       "saveProfile": "保存档案",
-      "saveRoutingSettings": "保存分单设置"
+      "saveRoutingSettings": "保存分单设置",
+      "saveWorkflow": "保存流程"
     },
     "common": {
       "active": "启用",
@@ -60,6 +62,8 @@
       "noDescription": "暂无描述"
     },
     "filters": {
+      "status": "状态",
+      "allStatuses": "全部状态",
       "anyCategory": "任意分类",
       "anyPriority": "任意优先级"
     },
@@ -68,7 +72,8 @@
       "ruleSaved": "规则已保存",
       "tagSaved": "标签已保存",
       "routingSettingsSaved": "分单设置已保存",
-      "profileSaved": "客服档案已保存"
+      "profileSaved": "客服档案已保存",
+      "ticketUpdated": "工单流程已更新"
     },
     "roles": {
       "user": "用户",

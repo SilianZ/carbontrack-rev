@@ -379,7 +379,7 @@ export default function AdminSupportOpsPage() {
     async ({ id, payload }) => adminAPI.updateSupportTicket(id, payload),
     {
       onSuccess: (_, variables) => {
-        toast.success(t('support.portal.ticketUpdated'));
+        toast.success(t('adminSupport.messages.ticketUpdated'));
         queryClient.invalidateQueries(['admin-support-tickets']);
         queryClient.invalidateQueries(['admin-support-ticket-detail', variables.id]);
         queryClient.invalidateQueries(['admin-support-reports']);
@@ -825,7 +825,7 @@ export default function AdminSupportOpsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('support.filters.allStatuses')}</SelectItem>
+                  <SelectItem value="all">{t('adminSupport.filters.allStatuses')}</SelectItem>
                   {['open', 'in_progress', 'waiting_user', 'resolved', 'closed'].map((statusValue) => (
                     <SelectItem key={statusValue} value={statusValue}>
                       {t(`support.statuses.${statusValue}`)}
@@ -906,10 +906,10 @@ export default function AdminSupportOpsPage() {
                   </div>
 
                   <div className="rounded-2xl border border-border px-4 py-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('support.portal.workflowTitle')}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{t('adminSupport.tickets.workflowTitle')}</p>
                     <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end">
                       <div className="min-w-0 flex-1 space-y-2">
-                        <label className="text-sm font-medium">{t('support.filters.status')}</label>
+                        <label className="text-sm font-medium">{t('adminSupport.filters.status')}</label>
                         <Select value={ticketWorkflowStatus} onValueChange={setTicketWorkflowStatus}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
@@ -931,7 +931,7 @@ export default function AdminSupportOpsPage() {
                         disabled={ticketWorkflowStatus === (ticketDetail.status || 'open')}
                       >
                         <Save className="mr-2 h-4 w-4" />
-                        {t('support.portal.saveWorkflow')}
+                        {t('adminSupport.actions.saveWorkflow')}
                       </Button>
                     </div>
                   </div>
