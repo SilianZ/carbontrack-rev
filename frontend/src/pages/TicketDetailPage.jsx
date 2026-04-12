@@ -397,37 +397,137 @@ export default function TicketDetailPage() {
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
-          {ticket.messages?.map((message) => {
-            const tone = messageTone(message.sender_role);
-            return (
-              <div key={message.id} className={`flex ${tone.align}`}>
-                <div className={`flex w-full max-w-[95%] ${tone.rowDirection} items-end gap-3`}>
-                  <MessageIdentity
-                    message={message}
-                    senderRole={message.sender_role}
-                    senderName={message.sender_name}
-                    t={t}
-                    tone={tone}
-                  />
-                  <div className={`min-w-0 flex-1 rounded-[1.6rem] border px-5 py-4 shadow-sm ${tone.surface}`}>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className={`text-sm font-semibold ${tone.name}`}>
-                        {message.sender_name || t('support.thread.unknownSender')}
-                      </p>
-                      <Badge variant="outline" className={tone.badge}>
-                        {t(`support.senderRoles.${message.sender_role}`)}
-                      </Badge>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('support.thread.conversationTitle')}</CardTitle>
+              <CardDescription>{t('support.thread.conversationSubtitle')}</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="max-h-[62vh] space-y-4 overflow-y-auto pr-2">
+                {ticket.messages?.map((message) => {
+                  const tone = messageTone(message.sender_role);
+                  return (
+                    <div key={message.id} className={`flex ${tone.align}`}>
+                      <div className={`flex w-full max-w-[95%] ${tone.rowDirection} items-end gap-3`}>
+                        <MessageIdentity
+                          message={message}
+                          senderRole={message.sender_role}
+                          senderName={message.sender_name}
+                          t={t}
+                          tone={tone}
+                        />
+                        <div className={`min-w-0 flex-1 rounded-[1.6rem] border px-5 py-4 shadow-sm ${tone.surface}`}>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className={`text-sm font-semibold ${tone.name}`}>
+                              {message.sender_name || t('support.thread.unknownSender')}
+                            </p>
+                            <Badge variant="outline" className={tone.badge}>
+                              {t(`support.senderRoles.${message.sender_role}`)}
+                            </Badge>
+                          </div>
+                          <p className="mt-4 whitespace-pre-wrap text-sm leading-7">{message.body}</p>
+                          <AttachmentList attachments={message.attachments} />
+                          <p className={`mt-4 text-[11px] font-medium uppercase tracking-[0.18em] ${tone.timestamp}`}>
+                            {formatSupportDate(message.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="mt-4 whitespace-pre-wrap text-sm leading-7">{message.body}</p>
-                    <AttachmentList attachments={message.attachments} />
-                    <p className={`mt-4 text-[11px] font-medium uppercase tracking-[0.18em] ${tone.timestamp}`}>
-                      {formatSupportDate(message.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
-                    </p>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('support.thread.replyTitle')}</CardTitle>
+              <CardDescription>{t('support.thread.replySubtitle')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isClosed ? (
+                <Alert>
+                  <AlertDescription>
+                    {t('support.thread.closedHint')}
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <form className="space-y-4" onSubmit={onSubmit}>
+                  <div className="space-y-2">
+                    <Textarea
+                      rows={6}
+                      placeholder={t('support.thread.replyPlaceholder')}
+                      {...register('content')}
+                    />
+                    {errors.content && <p className="text-sm text-red-600">{errors.content.message}</p>}
+                  </div>
+
+                  <FileUpload
+                    multiple
+                    maxFiles={4}
+                    directory="support-tickets"
+                    entityType="support_ticket_message"
+                    accept="image/*"
+                    compressImages
+                    onStateChange={setAttachmentGate}
+                    onUploadSuccess={(result) => {
+                      setAttachments((current) => mergeUploadedFiles(current, result));
+                      toast.success(t('support.feedback.uploaded'));
+                    }}
+                    onUploadError={(error) => toast.error(error?.message || t('errors.uploadFailed'))}
+                  />
+
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((file) => (
+                        <button
+                          key={file.file_path}
+                          type="button"
+                          onClick={() => setAttachments((current) => current.filter((entry) => entry.file_path !== file.file_path))}
+                          className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
+                        >
+                          {file.original_name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {attachmentGate.hasUploadErrors ? (
+                    <Alert>
+                      <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {attachmentGate.hasPendingUploads ? (
+                    <Alert>
+                      <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
+                    </Alert>
+                  ) : null}
+
+                  <div className="overflow-hidden rounded-[1.4rem] border border-border/60 bg-muted/20 p-2">
+                    <Turnstile
+                      ref={turnstileRef}
+                      require
+                      size="flexible"
+                      className="w-full max-w-full"
+                      action="ticket_reply"
+                      onVerify={setTurnstileToken}
+                      onExpire={() => setTurnstileToken('')}
+                      onError={() => setTurnstileToken('')}
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full rounded-full"
+                    loading={replyMutation.isLoading}
+                    disabled={attachmentGate.isSubmissionBlocked}
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    {t('support.thread.replySubmit')}
+                  </Button>
+                </form>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-4">
@@ -554,92 +654,6 @@ export default function TicketDetailPage() {
               </CardContent>
             </Card>
           )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('support.thread.replyTitle')}</CardTitle>
-              <CardDescription>{t('support.thread.replySubtitle')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isClosed ? (
-                <Alert>
-                  <AlertDescription>
-                    {t('support.thread.closedHint')}
-                  </AlertDescription>
-                </Alert>
-              ) : (
-                <form className="space-y-4" onSubmit={onSubmit}>
-                  <div className="space-y-2">
-                    <Textarea
-                      rows={6}
-                      placeholder={t('support.thread.replyPlaceholder')}
-                      {...register('content')}
-                    />
-                    {errors.content && <p className="text-sm text-red-600">{errors.content.message}</p>}
-                  </div>
-
-                  <FileUpload
-                    multiple
-                    maxFiles={4}
-                    directory="support-tickets"
-                    entityType="support_ticket_message"
-                    accept="image/*"
-                    compressImages
-                    onStateChange={setAttachmentGate}
-                    onUploadSuccess={(result) => {
-                      setAttachments((current) => mergeUploadedFiles(current, result));
-                      toast.success(t('support.feedback.uploaded'));
-                    }}
-                    onUploadError={(error) => toast.error(error?.message || t('errors.uploadFailed'))}
-                  />
-
-                  {attachments.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {attachments.map((file) => (
-                        <button
-                          key={file.file_path}
-                          type="button"
-                          onClick={() => setAttachments((current) => current.filter((entry) => entry.file_path !== file.file_path))}
-                          className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
-                        >
-                          {file.original_name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {attachmentGate.hasUploadErrors ? (
-                    <Alert>
-                      <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
-                    </Alert>
-                  ) : null}
-                  {attachmentGate.hasPendingUploads ? (
-                    <Alert>
-                      <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
-                    </Alert>
-                  ) : null}
-
-                  <Turnstile
-                    ref={turnstileRef}
-                    require
-                    action="ticket_reply"
-                    onVerify={setTurnstileToken}
-                    onExpire={() => setTurnstileToken('')}
-                    onError={() => setTurnstileToken('')}
-                  />
-
-                  <Button
-                    type="submit"
-                    className="w-full rounded-full"
-                    loading={replyMutation.isLoading}
-                    disabled={attachmentGate.isSubmissionBlocked}
-                  >
-                    <Send className="mr-2 h-4 w-4" />
-                    {t('support.thread.replySubmit')}
-                  </Button>
-                </form>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
