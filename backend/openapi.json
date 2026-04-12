@@ -28382,6 +28382,115 @@
           }
         }
       },
+      "SupportAssigneeFeedbackBucket": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "integer"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "SupportAssigneeFeedbackSummary": {
+        "type": "object",
+        "properties": {
+          "average_rating": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "rating_count": {
+            "type": "integer"
+          },
+          "last_feedback_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "distribution": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportAssigneeFeedbackBucket"
+            }
+          }
+        }
+      },
+      "SupportAssigneeFeedbackEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "ticket_id": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "integer"
+          },
+          "comment": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "reviewer": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "email": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "ticket": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
       "SupportAssigneeDetail": {
         "allOf": [
           {
@@ -28400,6 +28509,15 @@
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/SupportAssigneeRecentTicket"
+                }
+              },
+              "feedback_summary": {
+                "$ref": "#/components/schemas/SupportAssigneeFeedbackSummary"
+              },
+              "feedback_entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SupportAssigneeFeedbackEntry"
                 }
               },
               "routing_profile": {
