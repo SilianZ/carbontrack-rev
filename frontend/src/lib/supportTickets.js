@@ -57,7 +57,10 @@ export function formatSupportDate(value, locale = 'zh-CN', fallback = '--') {
     return fallback;
   }
 
-  const date = new Date(value);
+  const normalizedValue = typeof value === 'string'
+    ? value.trim().replace(' ', 'T')
+    : value;
+  const date = new Date(normalizedValue);
   if (Number.isNaN(date.getTime())) {
     return fallback;
   }
