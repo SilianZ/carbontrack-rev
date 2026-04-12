@@ -16,6 +16,8 @@ use Monolog\Logger;
 
 class AvatarController
 {
+    private const ERR_INVALID_REQUEST_BODY = 'Request body must be a JSON object';
+
     private Avatar $avatarModel;
     private AuthService $authService;
     private ?AuditLogService $auditLogService;
@@ -910,7 +912,7 @@ class AvatarController
     private function normalizeAvatarPayload(mixed $payload): array
     {
         if (!is_array($payload)) {
-            throw new \InvalidArgumentException('Request body must be a JSON object');
+            throw new \InvalidArgumentException(self::ERR_INVALID_REQUEST_BODY);
         }
 
         foreach (['is_active', 'is_default'] as $field) {
@@ -928,7 +930,7 @@ class AvatarController
 
     private function avatarValidationErrorCode(\InvalidArgumentException $exception): string
     {
-        if ($exception->getMessage() === 'Request body must be a JSON object') {
+        if ($exception->getMessage() === self::ERR_INVALID_REQUEST_BODY) {
             return 'INVALID_REQUEST_BODY';
         }
 
