@@ -28,7 +28,7 @@ const R2Image = React.lazy(() => import('../common/R2Image'));
 const NAV_SECTION_ORDER = ['overview', 'insights', 'marketplace'];
 
 export function Navbar() {
-  const { t } = useTranslation(['nav']);
+  const { t } = useTranslation(['nav', 'footer']);
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const hasRefreshedUserRef = useRef(false);
@@ -709,6 +709,14 @@ export function Navbar() {
                       >
                         <Bell className="h-4 w-4" />
                         {t('nav.notifications')}
+                      </Link>
+
+                      <Link
+                        to="/help"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                      >
+                        <Headset className="h-4 w-4" />
+                        {t('footer.help')}
                       </Link>
 
                       {canAccessSupportPortal && (

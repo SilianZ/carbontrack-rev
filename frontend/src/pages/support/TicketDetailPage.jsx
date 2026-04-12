@@ -8,18 +8,22 @@ import { toast } from 'react-hot-toast';
 import {
   ArrowLeft,
   Check,
+  Headset,
   ImageIcon,
   Paperclip,
   Save,
   Send,
+  Shield,
   Star,
   Shuffle,
+  UserRound,
   X,
 } from 'lucide-react';
 
 import { useTranslation } from '../../hooks/useTranslation';
 import { supportAPI } from '../../lib/api';
 import { checkAuthStatus } from '../../lib/auth';
+import { buildAvatarDisplayProps } from '../../lib/avatarUtils';
 import {
   formatSupportDate,
   getPriorityVariant,
@@ -34,6 +38,7 @@ import {
   TICKET_STATUS_OPTIONS,
 } from '../../lib/supportTickets';
 import FileUpload from '../../components/FileUpload';
+import R2Image from '../../components/common/R2Image';
 import { Button } from '../../components/ui/Button';
 import { Textarea } from '../../components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -135,16 +140,65 @@ function messageTone(senderRole) {
   if (senderRole === 'support' || senderRole === 'admin') {
     return {
       align: 'justify-end',
+      rowDirection: 'flex-row-reverse',
       surface:
-        'border-sky-200 bg-sky-50/80 text-slate-900 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-slate-100',
+        senderRole === 'admin'
+          ? 'border-violet-200 bg-violet-50/80 text-slate-900 dark:border-violet-400/30 dark:bg-violet-500/10 dark:text-slate-100'
+          : 'border-sky-200 bg-sky-50/80 text-slate-900 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-slate-100',
+      avatar:
+        senderRole === 'admin'
+          ? 'border-violet-200 bg-violet-100 text-violet-700 dark:border-violet-400/30 dark:bg-violet-500/20 dark:text-violet-200'
+          : 'border-sky-200 bg-sky-100 text-sky-700 dark:border-sky-400/30 dark:bg-sky-500/20 dark:text-sky-200',
+      badge:
+        senderRole === 'admin'
+          ? 'border-violet-300 bg-white/80 text-violet-700 dark:border-violet-400/30 dark:bg-violet-500/10 dark:text-violet-200'
+          : 'border-sky-300 bg-white/80 text-sky-700 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-200',
+      name: senderRole === 'admin' ? 'text-violet-700 dark:text-violet-200' : 'text-sky-700 dark:text-sky-200',
+      timestamp: senderRole === 'admin' ? 'text-right text-violet-700/70 dark:text-violet-200/70' : 'text-right text-sky-700/70 dark:text-sky-200/70',
     };
   }
 
   return {
     align: 'justify-start',
+    rowDirection: 'flex-row',
     surface:
-      'border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-100',
+      'border-emerald-200 bg-emerald-50/80 text-slate-900 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-slate-100',
+    avatar:
+      'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/20 dark:text-emerald-200',
+    badge:
+      'border-emerald-300 bg-white/80 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-200',
+    name: 'text-emerald-700 dark:text-emerald-200',
+    timestamp: 'text-left text-emerald-700/70 dark:text-emerald-200/70',
   };
+}
+
+function MessageIdentity({ message, senderRole, senderName, t, tone }) {
+  const Icon = senderRole === 'admin' ? Shield : senderRole === 'support' ? Headset : UserRound;
+  const avatarDisplay = buildAvatarDisplayProps({
+    avatar_path: message?.avatar_path,
+    avatar_url: message?.avatar_url,
+    name: senderName || t('support.thread.unknownSender'),
+  });
+  const hasAvatar = Boolean(avatarDisplay.src || avatarDisplay.filePath);
+
+  return (
+    <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border shadow-sm ${tone.avatar}`}>
+      {hasAvatar ? (
+        <R2Image
+          src={avatarDisplay.src || undefined}
+          filePath={!avatarDisplay.src && avatarDisplay.filePath ? avatarDisplay.filePath : undefined}
+          alt={avatarDisplay.alt || senderName || t('support.thread.unknownSender')}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <Icon className="h-4.5 w-4.5" />
+      )}
+      <div className={`absolute -bottom-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-background shadow-sm ${tone.badge}`}>
+        <Icon className="h-2.5 w-2.5" />
+      </div>
+      <span className="sr-only">{senderName || t('support.thread.unknownSender')}</span>
+    </div>
+  );
 }
 
 const FEEDBACK_RATING_VALUES = [1, 2, 3, 4, 5];
@@ -438,24 +492,31 @@ export default function SupportTicketDetailPage() {
 
                 return (
                   <div key={message.id} className={`flex ${tone.align}`}>
-                    <div
-                      className={`w-full max-w-[92%] rounded-[1.6rem] border px-5 py-4 shadow-sm ${tone.surface}`}
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold">
+                    <div className={`flex w-full max-w-[95%] ${tone.rowDirection} items-end gap-3`}>
+                      <MessageIdentity
+                        message={message}
+                        senderRole={message.sender_role}
+                        senderName={message.sender_name}
+                        t={t}
+                        tone={tone}
+                      />
+                      <div
+                        className={`min-w-0 flex-1 rounded-[1.6rem] border px-5 py-4 shadow-sm ${tone.surface}`}
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className={`text-sm font-semibold ${tone.name}`}>
                             {message.sender_name || t('support.thread.unknownSender')}
                           </p>
-                          <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                          <Badge variant="outline" className={tone.badge}>
                             {t(`support.senderRoles.${message.sender_role}`)}
-                          </p>
+                          </Badge>
                         </div>
-                        <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                        <p className="mt-4 whitespace-pre-wrap text-sm leading-7">{message.body}</p>
+                        <SupportAttachmentList attachments={message.attachments} />
+                        <p className={`mt-4 text-[11px] font-medium uppercase tracking-[0.18em] ${tone.timestamp}`}>
                           {formatSupportDate(message.created_at, locale)}
                         </p>
                       </div>
-                      <p className="mt-4 whitespace-pre-wrap text-sm leading-7">{message.body}</p>
-                      <SupportAttachmentList attachments={message.attachments} />
                     </div>
                   </div>
                 );

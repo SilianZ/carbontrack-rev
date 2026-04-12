@@ -5,13 +5,15 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
-import { ArrowLeft, ImageIcon, Paperclip, Send, Star } from 'lucide-react';
+import { ArrowLeft, Headset, ImageIcon, Paperclip, Send, Shield, Star, UserRound } from 'lucide-react';
 
 import { useTranslation } from '../hooks/useTranslation';
 import { ticketAPI } from '../lib/api';
+import { buildAvatarDisplayProps } from '../lib/avatarUtils';
 import { formatSupportDate, getPriorityVariant, getSlaMeta, getSlaMilestoneMeta, getSlaTone, getStatusTone, isImageAttachment, mergeUploadedFiles } from '../lib/supportTickets';
 import Turnstile from '../components/common/Turnstile';
 import FileUpload from '../components/FileUpload';
+import R2Image from '../components/common/R2Image';
 import { Button } from '../components/ui/Button';
 import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
@@ -78,6 +80,80 @@ function AttachmentList({ attachments }) {
           ))}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function messageTone(senderRole) {
+  if (senderRole === 'user') {
+    return {
+      align: 'justify-end',
+      rowDirection: 'flex-row-reverse',
+      surface:
+        'border-emerald-200 bg-emerald-50/80 text-slate-900 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-slate-100',
+      avatar:
+        'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/20 dark:text-emerald-200',
+      badge:
+        'border-emerald-300 bg-white/80 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-200',
+      name: 'text-emerald-700 dark:text-emerald-200',
+      timestamp: 'text-right text-emerald-700/70 dark:text-emerald-200/70',
+    };
+  }
+
+  if (senderRole === 'admin') {
+    return {
+      align: 'justify-start',
+      rowDirection: 'flex-row',
+      surface:
+        'border-violet-200 bg-violet-50/80 text-slate-900 dark:border-violet-400/30 dark:bg-violet-500/10 dark:text-slate-100',
+      avatar:
+        'border-violet-200 bg-violet-100 text-violet-700 dark:border-violet-400/30 dark:bg-violet-500/20 dark:text-violet-200',
+      badge:
+        'border-violet-300 bg-white/80 text-violet-700 dark:border-violet-400/30 dark:bg-violet-500/10 dark:text-violet-200',
+      name: 'text-violet-700 dark:text-violet-200',
+      timestamp: 'text-left text-violet-700/70 dark:text-violet-200/70',
+    };
+  }
+
+  return {
+    align: 'justify-start',
+    rowDirection: 'flex-row',
+    surface:
+      'border-sky-200 bg-sky-50/75 text-slate-900 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-slate-100',
+    avatar:
+      'border-sky-200 bg-sky-100 text-sky-700 dark:border-sky-400/30 dark:bg-sky-500/20 dark:text-sky-200',
+    badge:
+      'border-sky-300 bg-white/80 text-sky-700 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-200',
+    name: 'text-sky-700 dark:text-sky-200',
+    timestamp: 'text-left text-sky-700/70 dark:text-sky-200/70',
+  };
+}
+
+function MessageIdentity({ message, senderRole, senderName, t, tone }) {
+  const Icon = senderRole === 'admin' ? Shield : senderRole === 'support' ? Headset : UserRound;
+  const avatarDisplay = buildAvatarDisplayProps({
+    avatar_path: message?.avatar_path,
+    avatar_url: message?.avatar_url,
+    name: senderName || t('support.thread.unknownSender'),
+  });
+  const hasAvatar = Boolean(avatarDisplay.src || avatarDisplay.filePath);
+
+  return (
+    <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border shadow-sm ${tone.avatar}`}>
+      {hasAvatar ? (
+        <R2Image
+          src={avatarDisplay.src || undefined}
+          filePath={!avatarDisplay.src && avatarDisplay.filePath ? avatarDisplay.filePath : undefined}
+          alt={avatarDisplay.alt || senderName || t('support.thread.unknownSender')}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <Icon className="h-4.5 w-4.5" />
+      )}
+      <div className={`absolute -bottom-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-background shadow-sm ${tone.badge}`}>
+        <Icon className="h-2.5 w-2.5" />
+      </div>
+      <span className="sr-only">{senderName || t('support.thread.unknownSender')}</span>
     </div>
   );
 }
@@ -322,27 +398,34 @@ export default function TicketDetailPage() {
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
           {ticket.messages?.map((message) => {
-            const isUser = message.sender_role === 'user';
+            const tone = messageTone(message.sender_role);
             return (
-              <Card key={message.id} className={isUser ? 'border-emerald-200/60 dark:border-emerald-500/20' : ''}>
-                <CardContent className="pt-6">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
+              <div key={message.id} className={`flex ${tone.align}`}>
+                <div className={`flex w-full max-w-[95%] ${tone.rowDirection} items-end gap-3`}>
+                  <MessageIdentity
+                    message={message}
+                    senderRole={message.sender_role}
+                    senderName={message.sender_name}
+                    t={t}
+                    tone={tone}
+                  />
+                  <div className={`min-w-0 flex-1 rounded-[1.6rem] border px-5 py-4 shadow-sm ${tone.surface}`}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className={`text-sm font-semibold ${tone.name}`}>
                         {message.sender_name || t('support.thread.unknownSender')}
                       </p>
-                      <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                      <Badge variant="outline" className={tone.badge}>
                         {t(`support.senderRoles.${message.sender_role}`)}
-                      </p>
+                      </Badge>
                     </div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                    <p className="mt-4 whitespace-pre-wrap text-sm leading-7">{message.body}</p>
+                    <AttachmentList attachments={message.attachments} />
+                    <p className={`mt-4 text-[11px] font-medium uppercase tracking-[0.18em] ${tone.timestamp}`}>
                       {formatSupportDate(message.created_at, currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}
                     </p>
                   </div>
-                  <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-foreground">{message.body}</p>
-                  <AttachmentList attachments={message.attachments} />
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>
