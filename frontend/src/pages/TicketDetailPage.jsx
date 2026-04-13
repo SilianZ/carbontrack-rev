@@ -338,6 +338,7 @@ export default function TicketDetailPage() {
   const slaMeta = getSlaMeta(ticket, locale);
   const firstResponseMeta = getSlaMilestoneMeta(ticket, 'first_response', locale);
   const resolutionMeta = getSlaMilestoneMeta(ticket, 'resolution', locale);
+  const replyActionsDisabled = attachmentGate.isSubmissionBlocked || !turnstileToken;
 
   const updateFeedbackDraft = (ratedUserId, patch) => {
     dirtyFeedbackDraftIdsRef.current.add(String(ratedUserId));
@@ -519,7 +520,7 @@ export default function TicketDetailPage() {
                     type="submit"
                     className="w-full rounded-full"
                     loading={replyMutation.isLoading}
-                    disabled={attachmentGate.isSubmissionBlocked}
+                    disabled={replyActionsDisabled}
                   >
                     <Send className="mr-2 h-4 w-4" />
                     {t('support.thread.replySubmit')}
