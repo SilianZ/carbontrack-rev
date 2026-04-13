@@ -253,7 +253,7 @@ class AdminSupportController
 
         try {
             $ticketId = $this->numericId($args, 'id');
-            $detail = $this->supportTicketService->updateTicketFromSupport($actor, $ticketId, $this->body($request));
+            $detail = $this->supportTicketService->updateTicketFromSupport($actor, $ticketId, $requestData);
             $this->auditLogService->logAdminOperation('admin_support_ticket_updated', $this->actorId($actor), 'admin_support', [
                 'table' => 'support_tickets',
                 'record_id' => $ticketId,
@@ -263,34 +263,13 @@ class AdminSupportController
             ]);
             return $this->json($response, ['success' => true, 'data' => $detail]);
         } catch (\DomainException $e) {
-            $this->auditLogService->logAdminOperation('admin_support_ticket_update_failed', $this->actorId($actor), 'admin_support', [
-                'table' => 'support_tickets',
-                'record_id' => $ticketId,
-                'request_data' => $requestData,
-                'request_id' => $request->getAttribute('request_id'),
-                'status' => 'failed',
-                'data' => ['error' => $e->getMessage()],
-            ]);
+            $this->logTicketUpdateFailure($request, $actor, $ticketId, $requestData, $e);
             return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'FORBIDDEN'], 403);
         } catch (\RuntimeException $e) {
-            $this->auditLogService->logAdminOperation('admin_support_ticket_update_failed', $this->actorId($actor), 'admin_support', [
-                'table' => 'support_tickets',
-                'record_id' => $ticketId,
-                'request_data' => $requestData,
-                'request_id' => $request->getAttribute('request_id'),
-                'status' => 'failed',
-                'data' => ['error' => $e->getMessage()],
-            ]);
+            $this->logTicketUpdateFailure($request, $actor, $ticketId, $requestData, $e);
             return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'TICKET_NOT_FOUND'], 404);
         } catch (\InvalidArgumentException $e) {
-            $this->auditLogService->logAdminOperation('admin_support_ticket_update_failed', $this->actorId($actor), 'admin_support', [
-                'table' => 'support_tickets',
-                'record_id' => $ticketId,
-                'request_data' => $requestData,
-                'request_id' => $request->getAttribute('request_id'),
-                'status' => 'failed',
-                'data' => ['error' => $e->getMessage()],
-            ]);
+            $this->logTicketUpdateFailure($request, $actor, $ticketId, $requestData, $e);
             return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
         } catch (\Throwable $e) {
             $this->auditLogService->logAdminOperation('admin_support_ticket_update_failed', $this->actorId($actor), 'admin_support', [
@@ -302,6 +281,31 @@ class AdminSupportController
                 'data' => ['error' => $e->getMessage()],
             ]);
             return $this->error($request, $response, $e, 'Failed to update support ticket');
+        }
+    }
+
+    private function logTicketUpdateFailure(Request $request, array $actor, ?int $ticketId, array $requestData, \Throwable $exception): void
+    {
+        $this->auditLogService->logAdminOperation('admin_support_ticket_update_failed', $this->actorId($actor), 'admin_support', [
+            'table' => 'support_tickets',
+            'record_id' => $ticketId,
+            'request_data' => $requestData,
+            'request_id' => $request->getAttribute('request_id'),
+            'status' => 'failed',
+            'data' => ['error' => $exception->getMessage()],
+        ]);
+
+        try {
+            $this->errorLogService->logException($exception, $request, [
+                'context_message' => 'Admin support ticket update failed',
+                'ticket_id' => $ticketId,
+                'request_data' => $requestData,
+            ]);
+        } catch (\Throwable $loggingError) {
+            $this->logger->error('Admin support ticket update failure logging failed', [
+                'error' => $loggingError->getMessage(),
+                'ticket_id' => $ticketId,
+            ]);
         }
     }
 
