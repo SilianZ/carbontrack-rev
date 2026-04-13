@@ -374,6 +374,10 @@ export default function SupportTicketDetailPage() {
   };
 
   const handleWorkflowSave = async () => {
+    if (replyMode !== null || replyInFlightRef.current || updateMutation.isLoading || replyMutation.isLoading) {
+      return;
+    }
+
     const payload = {
       status,
       priority,
@@ -500,6 +504,7 @@ export default function SupportTicketDetailPage() {
   const resolutionMeta = getSlaMilestoneMeta(ticket, 'resolution', locale);
   const isReplySubmitting = replyMutation.isLoading || updateMutation.isLoading;
   const replyActionsDisabled = attachmentGate.isSubmissionBlocked || isReplySubmitting || replyMode !== null;
+  const workflowActionsDisabled = updateMutation.isLoading || isReplySubmitting || replyMode !== null;
 
   return (
     <div className="space-y-6">
@@ -764,7 +769,7 @@ export default function SupportTicketDetailPage() {
                     <>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">{t('support.filters.status')}</label>
-                        <Select value={status} onValueChange={setStatus}>
+                        <Select value={status} onValueChange={setStatus} disabled={workflowActionsDisabled}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
                           </SelectTrigger>
@@ -780,7 +785,7 @@ export default function SupportTicketDetailPage() {
 
                       <div className="space-y-2">
                         <label className="text-sm font-medium">{t('support.feedback.fields.priority')}</label>
-                        <Select value={priority} onValueChange={setPriority}>
+                        <Select value={priority} onValueChange={setPriority} disabled={workflowActionsDisabled}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
                           </SelectTrigger>
@@ -797,7 +802,7 @@ export default function SupportTicketDetailPage() {
                       {isAdmin ? (
                         <div className="space-y-2">
                           <label className="text-sm font-medium">{t('support.portal.assignedTo')}</label>
-                          <Select value={assignedTo} onValueChange={setAssignedTo}>
+                          <Select value={assignedTo} onValueChange={setAssignedTo} disabled={workflowActionsDisabled}>
                             <SelectTrigger className="w-full">
                               <SelectValue />
                             </SelectTrigger>
@@ -813,7 +818,7 @@ export default function SupportTicketDetailPage() {
                         </div>
                       ) : null}
 
-                      <Button type="button" className="w-full rounded-full" onClick={() => { void handleWorkflowSave(); }} loading={updateMutation.isLoading}>
+                      <Button type="button" className="w-full rounded-full" onClick={() => { void handleWorkflowSave(); }} loading={updateMutation.isLoading} disabled={workflowActionsDisabled}>
                         <Save className="mr-2 h-4 w-4" />
                         {t('support.portal.saveWorkflow')}
                       </Button>
