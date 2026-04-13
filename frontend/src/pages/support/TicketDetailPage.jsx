@@ -499,6 +499,7 @@ export default function SupportTicketDetailPage() {
   const firstResponseMeta = getSlaMilestoneMeta(ticket, 'first_response', locale);
   const resolutionMeta = getSlaMilestoneMeta(ticket, 'resolution', locale);
   const isReplySubmitting = replyMutation.isLoading || updateMutation.isLoading;
+  const replyActionsDisabled = attachmentGate.isSubmissionBlocked || isReplySubmitting || replyMode !== null;
 
   return (
     <div className="space-y-6">
@@ -639,7 +640,7 @@ export default function SupportTicketDetailPage() {
                       type="submit"
                       className="w-full rounded-full sm:flex-1"
                       loading={isReplySubmitting && replyMode === 'reply'}
-                      disabled={attachmentGate.isSubmissionBlocked || isReplySubmitting || replyMode !== null}
+                      disabled={replyActionsDisabled}
                     >
                       <Send className="mr-2 h-4 w-4" />
                       {t('support.portal.replySubmit')}
@@ -649,7 +650,7 @@ export default function SupportTicketDetailPage() {
                       variant="outline"
                       className="w-full rounded-full border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-400/40 dark:text-emerald-200 dark:hover:bg-emerald-500/10 sm:flex-1"
                       loading={isReplySubmitting && replyMode === 'resolve'}
-                      disabled={attachmentGate.isSubmissionBlocked || isReplySubmitting || replyMode !== null}
+                      disabled={replyActionsDisabled}
                       onClick={onReplyAndResolve}
                     >
                       <CheckCircle2 className="mr-2 h-4 w-4" />

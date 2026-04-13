@@ -17289,7 +17289,7 @@
         "tags": [
           "Support"
         ],
-        "summary": "更新支持工单审计流程",
+        "summary": "更新支持工单状态与流程",
         "description": "管理员在运营页直接修改工单状态并返回最新详情。",
         "operationId": "adminSupportUpdateTicket",
         "security": [

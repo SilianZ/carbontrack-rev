@@ -21,7 +21,8 @@ class AdminSupportControllerTest extends TestCase
         ?AuthService $authService = null,
         ?SupportTicketService $ticketService = null,
         ?SupportRoutingEngineService $routingEngineService = null,
-        ?AuditLogService $auditLogService = null
+        ?AuditLogService $auditLogService = null,
+        ?ErrorLogService $errorLogService = null
     ): AdminSupportController {
         return new AdminSupportController(
             $automationService ?? $this->createMock(SupportAutomationService::class),
@@ -30,7 +31,7 @@ class AdminSupportControllerTest extends TestCase
             $authService ?? $this->createMock(AuthService::class),
             $auditLogService ?? $this->createMock(AuditLogService::class),
             $this->createMock(LoggerInterface::class),
-            $this->createMock(ErrorLogService::class)
+            $errorLogService ?? $this->createMock(ErrorLogService::class)
         );
     }
 
@@ -281,6 +282,9 @@ class AdminSupportControllerTest extends TestCase
                 })
             );
 
+        $errorLog = $this->createMock(ErrorLogService::class);
+        $errorLog->expects($this->once())->method('logException');
+
         $auth = $this->createMock(AuthService::class);
         $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => true, 'role' => 'admin']);
 
@@ -293,7 +297,8 @@ class AdminSupportControllerTest extends TestCase
         $controller = $this->makeController(
             authService: $auth,
             ticketService: $ticketService,
-            auditLogService: $audit
+            auditLogService: $audit,
+            errorLogService: $errorLog
         );
 
         $response = $controller->updateTicket(
