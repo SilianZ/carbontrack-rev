@@ -842,7 +842,7 @@ export default function AdminSupportOpsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>{t('adminSupport.team.feedback.title')}</CardTitle>
-                <CardDescription>{t('adminSupport.team.routingProfileTitle')}</CardDescription>
+                <CardDescription>{t('adminSupport.team.feedback.subtitle')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {!assigneeDetail ? (

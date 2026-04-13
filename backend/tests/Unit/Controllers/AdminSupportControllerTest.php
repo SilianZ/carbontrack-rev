@@ -233,4 +233,35 @@ class AdminSupportControllerTest extends TestCase
         $this->assertSame(90, $payload['data']['routing_runs'][0]['id']);
     }
 
+    public function testUpdateTicketReturnsUpdatedPayload(): void
+    {
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->once())->method('logAdminOperation');
+
+        $auth = $this->createMock(AuthService::class);
+        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => true, 'role' => 'admin']);
+
+        $ticketService = $this->createMock(SupportTicketService::class);
+        $ticketService->expects($this->once())
+            ->method('updateTicketFromSupport')
+            ->with(['id' => 1, 'is_admin' => true, 'role' => 'admin'], 12, ['status' => 'resolved'])
+            ->willReturn(['id' => 12, 'status' => 'resolved']);
+
+        $controller = $this->makeController(
+            authService: $auth,
+            ticketService: $ticketService,
+            auditLogService: $audit
+        );
+
+        $response = $controller->updateTicket(
+            makeRequest('PATCH', '/api/v1/admin/support/tickets/12', ['status' => 'resolved']),
+            new \Slim\Psr7\Response(),
+            ['id' => '12']
+        );
+
+        $this->assertSame(200, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('resolved', $payload['data']['status']);
+    }
+
 }

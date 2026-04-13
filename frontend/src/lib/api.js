@@ -432,7 +432,7 @@ export const adminAPI = {
   updateSupportRule: (id, data) => api.put(`/admin/support/rules/${id}`, data),
   getSupportTickets: (params = {}) => api.get('/admin/support/tickets', { params }),
   getSupportTicketDetail: (id) => api.get(`/admin/support/tickets/${id}`),
-  updateSupportTicket: (id, data) => api.patch(`/support/tickets/${id}`, data),
+  updateSupportTicket: (id, data) => api.patch(`/admin/support/tickets/${id}`, data),
   getSupportReports: (params = {}) => api.get('/admin/support/reports', { params }),
 
   // Cron scheduler
