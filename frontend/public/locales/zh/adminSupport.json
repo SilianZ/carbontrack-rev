@@ -130,6 +130,7 @@
       },
       "feedback": {
         "title": "评分与评价",
+        "subtitle": "查看客服累计评分、星级分布与逐条评价内容。",
         "summaryLine": "{{rating}} 分 · {{count}} 条评价",
         "noRatings": "暂无评价",
         "routingHint": "当前客服评分会参与智能分单总分计算。",

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useForm } from 'react-hook-form';
@@ -254,6 +254,7 @@ export default function SupportTicketDetailPage() {
   const [reviewNotes, setReviewNotes] = useState({});
   const [sidePanelTab, setSidePanelTab] = useState('workflow');
   const [replyMode, setReplyMode] = useState(null);
+  const replyInFlightRef = useRef(false);
 
   const authState = useMemo(() => checkAuthStatus(), []);
   const currentUser = authState.user;
@@ -409,10 +410,16 @@ export default function SupportTicketDetailPage() {
   };
 
   const submitReply = async (values, nextStatus = null) => {
+    if (replyInFlightRef.current) {
+      return;
+    }
+
+    replyInFlightRef.current = true;
     setReplyMode(nextStatus ? 'resolve' : 'reply');
     const payload = buildReplyPayload(values);
     if (!payload) {
       setReplyMode(null);
+      replyInFlightRef.current = false;
       return;
     }
 
@@ -422,6 +429,7 @@ export default function SupportTicketDetailPage() {
       const message = error?.response?.data?.message || error?.message || t('errors.operationFailed');
       toast.error(message);
       setReplyMode(null);
+      replyInFlightRef.current = false;
       return;
     }
 
@@ -433,6 +441,7 @@ export default function SupportTicketDetailPage() {
         invalidateSupportViews();
         toast.error(t('support.portal.replyResolvePartial'));
         setReplyMode(null);
+        replyInFlightRef.current = false;
         return;
       }
     }
@@ -441,6 +450,7 @@ export default function SupportTicketDetailPage() {
     invalidateSupportViews();
     toast.success(nextStatus ? t('support.portal.replyResolveSuccess') : t('support.portal.replyCreated'));
     setReplyMode(null);
+    replyInFlightRef.current = false;
   };
 
   const onReplySubmit = handleSubmit((values) => {
@@ -629,7 +639,7 @@ export default function SupportTicketDetailPage() {
                       type="submit"
                       className="w-full rounded-full sm:flex-1"
                       loading={isReplySubmitting && replyMode === 'reply'}
-                      disabled={attachmentGate.isSubmissionBlocked}
+                      disabled={attachmentGate.isSubmissionBlocked || isReplySubmitting || replyMode !== null}
                     >
                       <Send className="mr-2 h-4 w-4" />
                       {t('support.portal.replySubmit')}
@@ -639,7 +649,7 @@ export default function SupportTicketDetailPage() {
                       variant="outline"
                       className="w-full rounded-full border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-400/40 dark:text-emerald-200 dark:hover:bg-emerald-500/10 sm:flex-1"
                       loading={isReplySubmitting && replyMode === 'resolve'}
-                      disabled={attachmentGate.isSubmissionBlocked}
+                      disabled={attachmentGate.isSubmissionBlocked || isReplySubmitting || replyMode !== null}
                       onClick={onReplyAndResolve}
                     >
                       <CheckCircle2 className="mr-2 h-4 w-4" />

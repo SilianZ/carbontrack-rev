@@ -130,6 +130,7 @@
       },
       "feedback": {
         "title": "Ratings and reviews",
+        "subtitle": "Review cumulative scores, star distribution, and individual feedback entries.",
         "summaryLine": "{{rating}} avg · {{count}} reviews",
         "noRatings": "No reviews yet",
         "routingHint": "This support rating is already part of the smart-routing score.",
