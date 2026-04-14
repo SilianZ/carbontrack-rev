@@ -448,6 +448,7 @@ export default function SupportTicketDetailPage() {
     if (nextStatus) {
       try {
         await updateMutation.mutateAsync({ status: nextStatus });
+        setStatus(nextStatus);
       } catch {
         resetReplyComposer();
         invalidateSupportViews({ includeAssignees: true, includeAdminReports: true });
