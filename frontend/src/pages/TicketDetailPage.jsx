@@ -338,7 +338,7 @@ export default function TicketDetailPage() {
   const slaMeta = getSlaMeta(ticket, locale);
   const firstResponseMeta = getSlaMilestoneMeta(ticket, 'first_response', locale);
   const resolutionMeta = getSlaMilestoneMeta(ticket, 'resolution', locale);
-  const replyActionsDisabled = attachmentGate.isSubmissionBlocked || !turnstileToken;
+  const replyActionsDisabled = replyMutation.isLoading || attachmentGate.isSubmissionBlocked || !turnstileToken;
 
   const updateFeedbackDraft = (ratedUserId, patch) => {
     dirtyFeedbackDraftIdsRef.current.add(String(ratedUserId));
