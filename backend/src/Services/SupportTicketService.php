@@ -505,7 +505,7 @@ class SupportTicketService
         }
         $updates['updated_at'] = $now;
         $this->updateTicket($ticketId, $updates);
-        $updatedTicket = $this->applyTicketUpdatesToSnapshot($ticket, $updates);
+        $updatedTicket = $this->applyTicketUpdatesToSnapshot($ticket, $updates, $assigneeToNotify);
         $this->auditLogService->log([
             'user_id' => (int) ($actor['id'] ?? 0),
             'action' => 'support_ticket_updated',
@@ -517,7 +517,7 @@ class SupportTicketService
             'old_data' => $ticket,
             'new_data' => $updates,
         ]);
-        $this->notifyUserTicketUpdated($ticket, $updates, $ticketId);
+        $this->notifyUserTicketUpdated($ticket, $updates, $ticketId, $updatedTicket);
         if ($assigneeToNotify !== null) {
             $this->notifyAssignee(
                 $assigneeToNotify,
@@ -534,7 +534,13 @@ class SupportTicketService
                         'subject' => (string) ($ticket['subject'] ?? ''),
                     ],
                     'details' => $this->buildTicketEmailDetails($updatedTicket, [
-                        ['label' => 'Requester', 'value' => $this->formatRequesterDisplay($ticket)],
+                        [
+                            'label' => 'Requester',
+                            'value' => $this->formatRequesterDisplay([
+                                'username' => $ticket['requester_username'] ?? null,
+                                'email' => $ticket['requester_email'] ?? null,
+                            ]),
+                        ],
                     ]),
                     'message' => [
                         'label' => 'Assignment note',
@@ -1575,9 +1581,10 @@ class SupportTicketService
         }
     }
 
-    private function notifyUserTicketUpdated(array $ticket, array $updates, int $ticketId): void
+    private function notifyUserTicketUpdated(array $ticket, array $updates, int $ticketId, ?array $updatedTicket = null): void
     {
-        $changeItems = $this->buildTicketUpdateEntries($ticket, $updates);
+        $updatedTicket = $updatedTicket ?? $this->applyTicketUpdatesToSnapshot($ticket, $updates);
+        $changeItems = $this->buildTicketUpdateEntries($ticket, $updates, $updatedTicket);
         if ($changeItems === []) {
             return;
         }
@@ -1586,7 +1593,6 @@ class SupportTicketService
         $subject = sprintf('Support ticket #%d updated', $ticketId);
         $summary = $this->formatTicketUpdateEntriesAsText($changeItems);
         $messageBody = "Your support ticket has been updated.\n\n" . $summary;
-        $updatedTicket = $this->applyTicketUpdatesToSnapshot($ticket, $updates);
 
         if ($this->messageService !== null && $userId > 0) {
             try {
@@ -1634,7 +1640,7 @@ class SupportTicketService
         }
     }
 
-    private function applyTicketUpdatesToSnapshot(array $ticket, array $updates): array
+    private function applyTicketUpdatesToSnapshot(array $ticket, array $updates, ?array $resolvedAssignee = null): array
     {
         $updatedTicket = $ticket;
         foreach ($updates as $key => $value) {
@@ -1651,7 +1657,7 @@ class SupportTicketService
             return $updatedTicket;
         }
 
-        $resolvedAssignee = $this->loadUserById((int) $nextAssigneeId);
+        $resolvedAssignee = $resolvedAssignee ?? $this->loadUserById((int) $nextAssigneeId);
         $resolvedAssigneeName = trim((string) ($resolvedAssignee['username'] ?? ''));
         if ($resolvedAssigneeName === '') {
             return $updatedTicket;
@@ -1683,7 +1689,7 @@ class SupportTicketService
     /**
      * @return array<int, array{label:string,from?:string,to?:string,value?:string}>
      */
-    private function buildTicketUpdateEntries(array $ticket, array $updates): array
+    private function buildTicketUpdateEntries(array $ticket, array $updates, ?array $updatedTicket = null): array
     {
         $changes = [];
 
@@ -1707,7 +1713,7 @@ class SupportTicketService
             $changes[] = [
                 'label' => 'Assigned handler',
                 'from' => $this->resolveAssigneeLabel($ticket),
-                'to' => $this->resolveAssigneeLabel(['assigned_to' => $updates['assigned_to']]),
+                'to' => $this->resolveAssigneeLabel($updatedTicket ?? ['assigned_to' => $updates['assigned_to']]),
             ];
         }
 
