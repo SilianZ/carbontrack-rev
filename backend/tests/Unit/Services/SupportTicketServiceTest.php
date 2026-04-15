@@ -1746,6 +1746,103 @@ class SupportTicketServiceTest extends TestCase
         $this->assertSame(1, (int) $ticketRow->assignment_locked);
     }
 
+    public function testAdminAssignmentEmailUsesUpdatedTicketState(): void
+    {
+        $now = date('Y-m-d H:i:s');
+        $requester = User::create([
+            'username' => 'requester',
+            'email' => 'requester@example.com',
+            'role' => 'user',
+            'notification_email_mask' => 0,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $currentAssignee = User::create([
+            'username' => 'support-a',
+            'email' => 'support-a@example.com',
+            'role' => 'support',
+            'notification_email_mask' => 0,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $nextAssignee = User::create([
+            'username' => 'support-b',
+            'email' => 'support-b@example.com',
+            'role' => 'support',
+            'notification_email_mask' => 0,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        self::$capsule->table('support_tickets')->insert([
+            'id' => 31,
+            'user_id' => (int) $requester->id,
+            'subject' => 'Assignment metadata refresh',
+            'category' => 'account',
+            'status' => 'open',
+            'priority' => 'normal',
+            'assigned_to' => (int) $currentAssignee->id,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $audit = $this->createMock(AuditLogService::class);
+        $errorLog = $this->createMock(ErrorLogService::class);
+        $fileMetadata = $this->createMock(FileMetadataService::class);
+        $messages = $this->createMock(MessageService::class);
+        $email = $this->createMock(EmailService::class);
+        $audit->method('log')->willReturn(true);
+        $messages->expects($this->exactly(2))
+            ->method('sendSystemMessage');
+        $email->expects($this->exactly(2))
+            ->method('sendSupportTicketNotification')
+            ->withConsecutive(
+                [
+                    'requester@example.com',
+                    'requester',
+                    'Support ticket #31 updated',
+                    $this->anything(),
+                    NotificationPreferenceService::CATEGORY_SUPPORT,
+                    'normal',
+                ],
+                [
+                    'support-b@example.com',
+                    'support-b',
+                    'Ticket #31 assigned to you',
+                    $this->callback(function (array $payload): bool {
+                        return ($payload['button_path'] ?? null) === 'support/tickets/31'
+                            && in_array(['label' => 'Status', 'value' => 'In progress'], $payload['details'] ?? [], true)
+                            && in_array(['label' => 'Priority', 'value' => 'Urgent'], $payload['details'] ?? [], true)
+                            && in_array(['label' => 'Assignee', 'value' => 'support-b'], $payload['details'] ?? [], true)
+                            && !in_array(['label' => 'Assignee', 'value' => 'support-a'], $payload['details'] ?? [], true);
+                    }),
+                    NotificationPreferenceService::CATEGORY_SUPPORT,
+                    'normal',
+                ],
+            );
+
+        $service = new SupportTicketService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $audit,
+            $errorLog,
+            $fileMetadata,
+            $email,
+            $messages
+        );
+
+        $service->updateTicketFromSupport(
+            ['id' => 99, 'role' => 'admin', 'is_admin' => true, 'username' => 'admin-user'],
+            31,
+            [
+                'assigned_to' => (int) $nextAssignee->id,
+                'status' => 'in_progress',
+                'priority' => 'urgent',
+            ]
+        );
+    }
+
     public function testUpdateTicketFromSupportClearsResolvedMarkersWhenReopened(): void
     {
         $now = date('Y-m-d H:i:s');

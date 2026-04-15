@@ -505,6 +505,7 @@ class SupportTicketService
         }
         $updates['updated_at'] = $now;
         $this->updateTicket($ticketId, $updates);
+        $updatedTicket = $this->applyTicketUpdatesToSnapshot($ticket, $updates);
         $this->auditLogService->log([
             'user_id' => (int) ($actor['id'] ?? 0),
             'action' => 'support_ticket_updated',
@@ -532,7 +533,7 @@ class SupportTicketService
                         'id' => $ticketId,
                         'subject' => (string) ($ticket['subject'] ?? ''),
                     ],
-                    'details' => $this->buildTicketEmailDetails($ticket, [
+                    'details' => $this->buildTicketEmailDetails($updatedTicket, [
                         ['label' => 'Requester', 'value' => $this->formatRequesterDisplay($ticket)],
                     ]),
                     'message' => [
@@ -1585,25 +1586,7 @@ class SupportTicketService
         $subject = sprintf('Support ticket #%d updated', $ticketId);
         $summary = $this->formatTicketUpdateEntriesAsText($changeItems);
         $messageBody = "Your support ticket has been updated.\n\n" . $summary;
-        $updatedTicket = $ticket;
-        foreach ($updates as $key => $value) {
-            $updatedTicket[$key] = $value;
-        }
-        if (array_key_exists('assigned_to', $updates)) {
-            unset($updatedTicket['assigned_username'], $updatedTicket['assigned_user']);
-            $nextAssigneeId = $updates['assigned_to'];
-            if ($nextAssigneeId !== null && $nextAssigneeId !== '' && (int) $nextAssigneeId > 0) {
-                $resolvedAssignee = $this->loadUserById((int) $nextAssigneeId);
-                $resolvedAssigneeName = trim((string) ($resolvedAssignee['username'] ?? ''));
-                if ($resolvedAssigneeName !== '') {
-                    $updatedTicket['assigned_username'] = $resolvedAssigneeName;
-                    $updatedTicket['assigned_user'] = [
-                        'id' => (int) ($resolvedAssignee['id'] ?? $nextAssigneeId),
-                        'username' => $resolvedAssigneeName,
-                    ];
-                }
-            }
-        }
+        $updatedTicket = $this->applyTicketUpdatesToSnapshot($ticket, $updates);
 
         if ($this->messageService !== null && $userId > 0) {
             try {
@@ -1649,6 +1632,38 @@ class SupportTicketService
                 $this->logger->warning('Failed to send support ticket update email', ['ticket_id' => $ticketId, 'error' => $e->getMessage()]);
             }
         }
+    }
+
+    private function applyTicketUpdatesToSnapshot(array $ticket, array $updates): array
+    {
+        $updatedTicket = $ticket;
+        foreach ($updates as $key => $value) {
+            $updatedTicket[$key] = $value;
+        }
+
+        if (!array_key_exists('assigned_to', $updates)) {
+            return $updatedTicket;
+        }
+
+        unset($updatedTicket['assigned_username'], $updatedTicket['assigned_user']);
+        $nextAssigneeId = $updates['assigned_to'];
+        if ($nextAssigneeId === null || $nextAssigneeId === '' || (int) $nextAssigneeId <= 0) {
+            return $updatedTicket;
+        }
+
+        $resolvedAssignee = $this->loadUserById((int) $nextAssigneeId);
+        $resolvedAssigneeName = trim((string) ($resolvedAssignee['username'] ?? ''));
+        if ($resolvedAssigneeName === '') {
+            return $updatedTicket;
+        }
+
+        $updatedTicket['assigned_username'] = $resolvedAssigneeName;
+        $updatedTicket['assigned_user'] = [
+            'id' => (int) ($resolvedAssignee['id'] ?? $nextAssigneeId),
+            'username' => $resolvedAssigneeName,
+        ];
+
+        return $updatedTicket;
     }
 
     private function supportMailboxBody(array $actor, array $ticket, string $body): string
