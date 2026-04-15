@@ -500,7 +500,7 @@ class SupportTicketServiceTest extends TestCase
             ->with(
                 (int) $requester->id,
                 'Support ticket #1 updated',
-                $this->stringContains('Status: open -> in_progress'),
+                $this->stringContains('Status: Open -> In progress'),
                 'support_ticket',
                 'normal',
                 'support_ticket',
@@ -509,12 +509,18 @@ class SupportTicketServiceTest extends TestCase
             );
 
         $email->expects($this->once())
-            ->method('sendMessageNotification')
+            ->method('sendSupportTicketNotification')
             ->with(
                 'requester@example.com',
                 'requester',
                 'Support ticket #1 updated',
-                $this->stringContains('Priority: normal -> high'),
+                $this->callback(function (array $payload): bool {
+                    return ($payload['button_path'] ?? null) === 'tickets/1'
+                        && ($payload['changes'][0]['label'] ?? null) === 'Status'
+                        && ($payload['changes'][0]['to'] ?? null) === 'In progress'
+                        && ($payload['changes'][1]['label'] ?? null) === 'Priority'
+                        && ($payload['changes'][1]['to'] ?? null) === 'High';
+                }),
                 NotificationPreferenceService::CATEGORY_SUPPORT,
                 'normal'
             )
@@ -1140,8 +1146,20 @@ class SupportTicketServiceTest extends TestCase
             ->method('sendSystemMessage')
             ->with((int) $supportB->id, 'Transfer request for ticket #1', $this->stringContains('A transfer request is waiting for your review.'), 'support_ticket', 'normal', 'support_ticket', 1, false);
         $email->expects($this->once())
-            ->method('sendMessageNotification')
-            ->with('support-b@example.com', 'support-b', 'Transfer request for ticket #1', $this->stringContains('A transfer request is waiting for your review.'), NotificationPreferenceService::CATEGORY_SUPPORT, 'normal');
+            ->method('sendSupportTicketNotification')
+            ->with(
+                'support-b@example.com',
+                'support-b',
+                'Transfer request for ticket #1',
+                $this->callback(function (array $payload): bool {
+                    return ($payload['button_path'] ?? null) === 'support/tickets/1'
+                        && ($payload['message']['label'] ?? null) === 'Transfer reason'
+                        && ($payload['message']['body'] ?? null) === 'Need a different owner'
+                        && ($payload['details'][0]['label'] ?? null) === 'Status';
+                }),
+                NotificationPreferenceService::CATEGORY_SUPPORT,
+                'normal'
+            );
 
         $service = new SupportTicketService(
             self::$capsule->getConnection()->getPdo(),
@@ -1171,6 +1189,7 @@ class SupportTicketServiceTest extends TestCase
             'username' => 'requester',
             'email' => 'requester@example.com',
             'role' => 'user',
+            'notification_email_mask' => 0,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -1178,6 +1197,7 @@ class SupportTicketServiceTest extends TestCase
             'username' => 'support-a',
             'email' => 'support-a@example.com',
             'role' => 'support',
+            'notification_email_mask' => 0,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -1185,6 +1205,7 @@ class SupportTicketServiceTest extends TestCase
             'username' => 'support-b',
             'email' => 'support-b@example.com',
             'role' => 'support',
+            'notification_email_mask' => 0,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -1286,7 +1307,47 @@ class SupportTicketServiceTest extends TestCase
             ['to_assignee' => (int) $supportB->id, 'reason' => 'Need a different owner']
         );
 
-        $result = $service->reviewTransferRequest(
+        $messages = $this->createMock(MessageService::class);
+        $email = $this->createMock(EmailService::class);
+        $messages->expects($this->once())
+            ->method('sendSystemMessage')
+            ->with(
+                (int) $requester->id,
+                'Support ticket #1 updated',
+                $this->stringContains('Assigned handler: support-a -> support-b'),
+                'support_ticket',
+                'normal',
+                'support_ticket',
+                1,
+                false
+            );
+        $email->expects($this->once())
+            ->method('sendSupportTicketNotification')
+            ->with(
+                'requester@example.com',
+                'requester',
+                'Support ticket #1 updated',
+                $this->callback(function (array $payload): bool {
+                    return ($payload['button_path'] ?? null) === 'tickets/1'
+                        && ($payload['changes'][0]['label'] ?? null) === 'Assigned handler'
+                        && ($payload['changes'][0]['from'] ?? null) === 'support-a'
+                        && ($payload['changes'][0]['to'] ?? null) === 'support-b';
+                }),
+                NotificationPreferenceService::CATEGORY_SUPPORT,
+                'normal'
+            );
+
+        $reviewService = new SupportTicketService(
+            self::$capsule->getConnection()->getPdo(),
+            $logger,
+            $audit,
+            $errorLog,
+            $fileMetadata,
+            $email,
+            $messages
+        );
+
+        $result = $reviewService->reviewTransferRequest(
             ['id' => (int) $supportB->id, 'role' => 'support', 'is_support' => true, 'username' => 'support-b'],
             (int) $request['id'],
             ['status' => 'approved', 'review_note' => 'I can take this one']
@@ -1624,13 +1685,17 @@ class SupportTicketServiceTest extends TestCase
                 ]
             );
         $email->expects($this->exactly(2))
-            ->method('sendMessageNotification')
+            ->method('sendSupportTicketNotification')
             ->withConsecutive(
                 [
                     'requester@example.com',
                     'requester',
                     'Support ticket #3 updated',
-                    $this->stringContains('Assigned handler'),
+                    $this->callback(function (array $payload): bool {
+                        return ($payload['button_path'] ?? null) === 'tickets/3'
+                            && ($payload['changes'][0]['label'] ?? null) === 'Assigned handler'
+                            && ($payload['changes'][0]['to'] ?? null) === 'support-b';
+                    }),
                     NotificationPreferenceService::CATEGORY_SUPPORT,
                     'normal',
                 ],
@@ -1638,7 +1703,11 @@ class SupportTicketServiceTest extends TestCase
                     'support-b@example.com',
                     'support-b',
                     'Ticket #3 assigned to you',
-                    $this->stringContains('An administrator assigned ticket #3 to you.'),
+                    $this->callback(function (array $payload): bool {
+                        return ($payload['button_path'] ?? null) === 'support/tickets/3'
+                            && ($payload['message']['label'] ?? null) === 'Assignment note'
+                            && str_contains((string) ($payload['message']['body'] ?? ''), 'assigned ticket #3 to you');
+                    }),
                     NotificationPreferenceService::CATEGORY_SUPPORT,
                     'normal',
                 ]
@@ -1737,6 +1806,7 @@ class SupportTicketServiceTest extends TestCase
         $messageService->method('sendSystemMessage')->willThrowException(new \RuntimeException('message failed'));
 
         $emailService = $this->createMock(EmailService::class);
+        $emailService->method('sendSupportTicketNotification')->willThrowException(new \RuntimeException('email failed'));
         $emailService->method('sendMessageNotification')->willThrowException(new \RuntimeException('email failed'));
 
         $service = new SupportTicketService(
