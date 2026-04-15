@@ -74,11 +74,8 @@ class AvatarController
                 ], 403);
             }
 
-            $avatars = $this->avatarModel->getAvailableAvatars($category);
+            $avatars = $this->avatarModel->getAvailableAvatars($category, $includeInactive && $isAdmin);
             $avatars = array_map([$this, 'formatAvatar'], array_values($avatars));
-
-            // The database query already filters for active avatars
-            // Additional filtering is only needed if admin is requesting inactive avatars
 
             return $this->jsonResponse($response, [
                 'success' => true,
@@ -341,12 +338,6 @@ class AvatarController
                     'message' => 'No valid fields to update',
                     'code' => 'NO_UPDATE_DATA'
                 ], 400);
-            }
-
-            // 如果设置为默认头像，需要特殊处理
-            if (isset($updateData['is_default']) && $updateData['is_default']) {
-                $this->avatarModel->setDefaultAvatar($avatarId);
-                unset($updateData['is_default']); // 从普通更新中移除，因为已经特殊处理
             }
 
             // 更新头像
@@ -840,6 +831,22 @@ class AvatarController
      */
     private function formatAvatar(array $avatar): array
     {
+        foreach (['id', 'sort_order'] as $field) {
+            if (array_key_exists($field, $avatar) && $avatar[$field] !== null) {
+                $avatar[$field] = (int) $avatar[$field];
+            }
+        }
+
+        foreach (['is_active', 'is_default'] as $field) {
+            if (!array_key_exists($field, $avatar) || $avatar[$field] === null) {
+                continue;
+            }
+
+            $value = $avatar[$field];
+            $normalized = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            $avatar[$field] = $normalized ?? ((int) $value === 1);
+        }
+
         $filePath = $avatar['file_path'] ?? null;
         if ($filePath) {
             $normalizedPath = ltrim((string)$filePath, '/');

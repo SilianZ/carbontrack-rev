@@ -45,6 +45,46 @@ class AvatarControllerTest extends TestCase
         $this->assertEquals(1, $json['data'][0]['id']);
     }
 
+    public function testGetAvatarsAllowsAdminToIncludeInactiveAndReturnsActivationState(): void
+    {
+        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $logger = $this->createMock(\Monolog\Logger::class);
+        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+
+        $auth->method('getCurrentUser')->willReturn(['id' => 9, 'is_admin' => 1]);
+        $avatarModel->expects($this->once())
+            ->method('getAvailableAvatars')
+            ->with('animals', true)
+            ->willReturn([
+                ['id' => 1, 'name' => 'Cat', 'category' => 'animals', 'is_active' => '1', 'is_default' => '0'],
+                ['id' => 2, 'name' => 'Fox', 'category' => 'animals', 'is_active' => '0', 'is_default' => '1'],
+            ]);
+
+        /** @var \CarbonTrack\Models\Avatar $avatarModel */
+        /** @var \CarbonTrack\Services\AuthService $auth */
+        /** @var \CarbonTrack\Services\AuditLogService $audit */
+        /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
+        /** @var \Monolog\Logger $logger */
+        /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
+        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+
+        $response = $controller->getAvatars(
+            makeRequest('GET', '/admin/avatars', null, ['category' => 'animals', 'include_inactive' => 'true']),
+            new \Slim\Psr7\Response()
+        );
+
+        $this->assertSame(200, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertTrue($payload['success']);
+        $this->assertCount(2, $payload['data']);
+        $this->assertTrue($payload['data'][0]['is_active']);
+        $this->assertFalse($payload['data'][1]['is_active']);
+        $this->assertTrue($payload['data'][1]['is_default']);
+    }
+
     public function testGetAvatarsIncludesIconUrls(): void
     {
         $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
@@ -181,7 +221,7 @@ class AvatarControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
         $payload = json_decode((string) $response->getBody(), true);
         $this->assertTrue($payload['success']);
-        $this->assertSame(0, $payload['data']['is_default']);
+        $this->assertFalse($payload['data']['is_default']);
     }
 
     public function testUpdateAvatarRejectsInvalidSortOrderString(): void

@@ -26,18 +26,22 @@ class Avatar
     }
 
     /**
-     * 获取所有可用头像
+     * 获取头像列表，可按需包含停用头像
      */
-    public function getAvailableAvatars(?string $category = null): array
+    public function getAvailableAvatars(?string $category = null, bool $includeInactive = false): array
     {
         $sql = "
             SELECT id, uuid, name, description, file_path, thumbnail_path, 
-                   category, sort_order, is_default
+                   category, sort_order, is_default, is_active
             FROM avatars 
-            WHERE is_active = 1 AND deleted_at IS NULL
+            WHERE deleted_at IS NULL
         ";
         
         $params = [];
+
+        if (!$includeInactive) {
+            $sql .= " AND is_active = 1";
+        }
         
         if ($category) {
             $sql .= " AND category = ?";
@@ -150,28 +154,49 @@ class Avatar
     {
         $uuid = $this->generateUUID();
         $data = $this->normalizePersistenceData($data);
-        
-        $stmt = $this->db->prepare("
-            INSERT INTO avatars (
-                uuid, name, description, file_path, thumbnail_path, 
-                category, sort_order, is_active, is_default, 
-                created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-        ");
-        
-        $stmt->execute([
-            $uuid,
-            $data['name'],
-            $data['description'] ?? null,
-            $data['file_path'],
-            $data['thumbnail_path'] ?? null,
-            $data['category'] ?? 'default',
-            $data['sort_order'] ?? 0,
-            $data['is_active'] ?? 1,
-            $data['is_default'] ?? 0
-        ]);
-        
-        return (int)$this->db->lastInsertId();
+        $transactionStarted = false;
+
+        try {
+            if ($this->shouldResetDefaultAvatar($data)) {
+                $this->db->beginTransaction();
+                $transactionStarted = true;
+                $this->clearDefaultAvatarFlags();
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO avatars (
+                    uuid, name, description, file_path, thumbnail_path, 
+                    category, sort_order, is_active, is_default, 
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+            ");
+            
+            $stmt->execute([
+                $uuid,
+                $data['name'],
+                $data['description'] ?? null,
+                $data['file_path'],
+                $data['thumbnail_path'] ?? null,
+                $data['category'] ?? 'default',
+                $data['sort_order'] ?? 0,
+                $data['is_active'] ?? 1,
+                $data['is_default'] ?? 0
+            ]);
+
+            $avatarId = (int)$this->db->lastInsertId();
+
+            if ($transactionStarted) {
+                $this->db->commit();
+            }
+
+            return $avatarId;
+        } catch (\Throwable $e) {
+            if ($transactionStarted) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -182,6 +207,7 @@ class Avatar
         $data = $this->normalizePersistenceData($data);
         $fields = [];
         $params = [];
+        $transactionStarted = false;
         
         $allowedFields = [
             'name', 'description', 'file_path', 'thumbnail_path', 
@@ -202,10 +228,29 @@ class Avatar
         $fields[] = "updated_at = NOW()";
         $params[] = $avatarId;
         
-        $sql = "UPDATE avatars SET " . implode(', ', $fields) . " WHERE id = ? AND deleted_at IS NULL";
-        $stmt = $this->db->prepare($sql);
-        
-        return $stmt->execute($params);
+        try {
+            if ($this->shouldResetDefaultAvatar($data)) {
+                $this->db->beginTransaction();
+                $transactionStarted = true;
+                $this->clearDefaultAvatarFlags($avatarId);
+            }
+
+            $sql = "UPDATE avatars SET " . implode(', ', $fields) . " WHERE id = ? AND deleted_at IS NULL";
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute($params);
+
+            if ($transactionStarted) {
+                $this->db->commit();
+            }
+
+            return $result;
+        } catch (\Throwable $e) {
+            if ($transactionStarted) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -290,13 +335,7 @@ class Avatar
         $this->db->beginTransaction();
         
         try {
-            // 取消所有头像的默认状态
-            $stmt = $this->db->prepare("
-                UPDATE avatars 
-                SET is_default = 0, updated_at = NOW() 
-                WHERE deleted_at IS NULL
-            ");
-            $stmt->execute();
+            $this->clearDefaultAvatarFlags($avatarId);
             
             // 设置新的默认头像
             $stmt = $this->db->prepare("
@@ -313,6 +352,30 @@ class Avatar
             $this->db->rollBack();
             return false;
         }
+    }
+
+    private function shouldResetDefaultAvatar(array $data): bool
+    {
+        return array_key_exists('is_default', $data) && (int) $data['is_default'] === 1;
+    }
+
+    private function clearDefaultAvatarFlags(?int $excludeAvatarId = null): void
+    {
+        $sql = "
+            UPDATE avatars
+            SET is_default = 0, updated_at = NOW()
+            WHERE deleted_at IS NULL
+        ";
+
+        $params = [];
+
+        if ($excludeAvatarId !== null) {
+            $sql .= " AND id <> ?";
+            $params[] = $excludeAvatarId;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
     }
 
     /**

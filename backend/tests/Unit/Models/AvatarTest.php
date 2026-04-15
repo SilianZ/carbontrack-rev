@@ -29,6 +29,31 @@ class AvatarTest extends TestCase
         $this->assertEquals('c1', $list[0]['category']);
     }
 
+    public function testGetAvailableAvatarsCanIncludeInactive(): void
+    {
+        $pdo = $this->createMock(\PDO::class);
+        $stmt = $this->createMock(\PDOStatement::class);
+        $stmt->method('execute')->with(['c1'])->willReturn(true);
+        $stmt->method('fetchAll')->willReturn([
+            ['id' => 1, 'category' => 'c1', 'is_active' => 1],
+            ['id' => 2, 'category' => 'c1', 'is_active' => 0],
+        ]);
+        $pdo->expects($this->once())
+            ->method('prepare')
+            ->with($this->callback(function (string $sql): bool {
+                $this->assertStringContainsString('WHERE deleted_at IS NULL', $sql);
+                $this->assertStringNotContainsString('AND is_active = 1', $sql);
+                return true;
+            }))
+            ->willReturn($stmt);
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $model = new Avatar($pdo, $logger);
+        $list = $model->getAvailableAvatars('c1', true);
+        $this->assertCount(2, $list);
+        $this->assertSame(0, $list[1]['is_active']);
+    }
+
     public function testGetAvatarByIdReturnsNullWhenNotFound(): void
     {
         $pdo = $this->createMock(\PDO::class);
@@ -105,6 +130,51 @@ class AvatarTest extends TestCase
         $this->assertSame(12, $avatarId);
     }
 
+    public function testCreateAvatarClearsOtherDefaultsWhenNewAvatarIsDefault(): void
+    {
+        $pdo = $this->createMock(\PDO::class);
+        $resetStmt = $this->createMock(\PDOStatement::class);
+        $insertStmt = $this->createMock(\PDOStatement::class);
+        $prepareCalls = [];
+
+        $pdo->expects($this->once())->method('beginTransaction')->willReturn(true);
+        $pdo->expects($this->once())->method('commit')->willReturn(true);
+        $pdo->expects($this->never())->method('rollBack');
+        $pdo->expects($this->exactly(2))
+            ->method('prepare')
+            ->willReturnCallback(function (string $sql) use (&$prepareCalls, $resetStmt, $insertStmt) {
+                $prepareCalls[] = $sql;
+                return count($prepareCalls) === 1 ? $resetStmt : $insertStmt;
+            });
+
+        $resetStmt->expects($this->once())
+            ->method('execute')
+            ->with([])
+            ->willReturn(true);
+
+        $insertStmt->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function (array $params): bool {
+                $this->assertSame(1, $params[8]);
+                return true;
+            }))
+            ->willReturn(true);
+
+        $pdo->method('lastInsertId')->willReturn('18');
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $model = new Avatar($pdo, $logger);
+        $avatarId = $model->createAvatar([
+            'name' => 'Default Avatar',
+            'file_path' => '/avatars/default.png',
+            'is_default' => true,
+        ]);
+
+        $this->assertSame(18, $avatarId);
+        $this->assertStringContainsString('SET is_default = 0', $prepareCalls[0]);
+        $this->assertStringContainsString('INSERT INTO avatars', $prepareCalls[1]);
+    }
+
     public function testUpdateAvatarNormalizesEmptyStringNumericFields(): void
     {
         $pdo = $this->createMock(\PDO::class);
@@ -124,6 +194,45 @@ class AvatarTest extends TestCase
         ]);
 
         $this->assertTrue($result);
+    }
+
+    public function testUpdateAvatarClearsOtherDefaultsWhenAvatarBecomesDefault(): void
+    {
+        $pdo = $this->createMock(\PDO::class);
+        $resetStmt = $this->createMock(\PDOStatement::class);
+        $updateStmt = $this->createMock(\PDOStatement::class);
+        $prepareCalls = [];
+
+        $pdo->expects($this->once())->method('beginTransaction')->willReturn(true);
+        $pdo->expects($this->once())->method('commit')->willReturn(true);
+        $pdo->expects($this->never())->method('rollBack');
+        $pdo->expects($this->exactly(2))
+            ->method('prepare')
+            ->willReturnCallback(function (string $sql) use (&$prepareCalls, $resetStmt, $updateStmt) {
+                $prepareCalls[] = $sql;
+                return count($prepareCalls) === 1 ? $resetStmt : $updateStmt;
+            });
+
+        $resetStmt->expects($this->once())
+            ->method('execute')
+            ->with([7])
+            ->willReturn(true);
+
+        $updateStmt->expects($this->once())
+            ->method('execute')
+            ->with([1, 7])
+            ->willReturn(true);
+
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $model = new Avatar($pdo, $logger);
+        $result = $model->updateAvatar(7, [
+            'is_default' => true,
+        ]);
+
+        $this->assertTrue($result);
+        $this->assertStringContainsString('AND id <> ?', $prepareCalls[0]);
+        $this->assertStringContainsString('SET is_default = ?', $prepareCalls[1]);
     }
 
     public function testCreateAvatarRejectsInvalidNonEmptyNumericStrings(): void
