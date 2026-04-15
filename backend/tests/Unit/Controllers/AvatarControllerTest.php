@@ -72,7 +72,7 @@ class AvatarControllerTest extends TestCase
         $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
 
         $response = $controller->getAvatars(
-            makeRequest('GET', '/admin/avatars', null, ['category' => 'animals', 'include_inactive' => 'true']),
+            makeRequest('GET', '/admin/avatars', null, ['category' => 'animals', 'include_inactive' => '1']),
             new \Slim\Psr7\Response()
         );
 
@@ -285,6 +285,86 @@ class AvatarControllerTest extends TestCase
         $payload = json_decode((string) $response->getBody(), true);
         $this->assertFalse($payload['success']);
         $this->assertSame('INVALID_REQUEST_BODY', $payload['code']);
+    }
+
+    public function testCreateAvatarRejectsInactiveDefaultAvatar(): void
+    {
+        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $logger = $this->createMock(\Monolog\Logger::class);
+        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+
+        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $avatarModel->expects($this->never())->method('createAvatar');
+
+        /** @var \CarbonTrack\Models\Avatar $avatarModel */
+        /** @var \CarbonTrack\Services\AuthService $auth */
+        /** @var \CarbonTrack\Services\AuditLogService $audit */
+        /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
+        /** @var \Monolog\Logger $logger */
+        /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
+        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+
+        $response = $controller->createAvatar(
+            makeRequest('POST', '/admin/avatars', [
+                'name' => 'Broken Default',
+                'file_path' => '/avatars/broken.png',
+                'is_default' => true,
+                'is_active' => false,
+            ]),
+            new \Slim\Psr7\Response()
+        );
+
+        $this->assertSame(400, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertFalse($payload['success']);
+        $this->assertSame('VALIDATION_ERROR', $payload['code']);
+        $this->assertSame('Default avatar must remain active', $payload['message']);
+    }
+
+    public function testUpdateAvatarRejectsDisablingDefaultAvatar(): void
+    {
+        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $logger = $this->createMock(\Monolog\Logger::class);
+        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+
+        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $avatarModel->expects($this->once())
+            ->method('getAvatarById')
+            ->with(5)
+            ->willReturn([
+                'id' => 5,
+                'name' => 'Default Avatar',
+                'file_path' => '/avatars/default.png',
+                'is_default' => 1,
+                'is_active' => 1,
+            ]);
+        $avatarModel->expects($this->never())->method('updateAvatar');
+
+        /** @var \CarbonTrack\Models\Avatar $avatarModel */
+        /** @var \CarbonTrack\Services\AuthService $auth */
+        /** @var \CarbonTrack\Services\AuditLogService $audit */
+        /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
+        /** @var \Monolog\Logger $logger */
+        /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
+        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+
+        $response = $controller->updateAvatar(
+            makeRequest('PUT', '/admin/avatars/5', ['is_active' => false]),
+            new \Slim\Psr7\Response(),
+            ['id' => 5]
+        );
+
+        $this->assertSame(400, $response->getStatusCode());
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertFalse($payload['success']);
+        $this->assertSame('VALIDATION_ERROR', $payload['code']);
+        $this->assertSame('Default avatar must remain active', $payload['message']);
     }
 }
 

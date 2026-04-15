@@ -49,7 +49,8 @@ class AvatarController
         try {
             $queryParams = $request->getQueryParams();
             $category = $queryParams['category'] ?? null;
-            $includeInactive = isset($queryParams['include_inactive']) && $queryParams['include_inactive'] === 'true';
+            $includeInactive = !empty($queryParams['include_inactive'])
+                && filter_var($queryParams['include_inactive'], FILTER_VALIDATE_BOOLEAN);
 
             // 检查是否为管理员（容错：AuthService 可能在匿名请求时抛出异常）
             $user = null;
@@ -205,6 +206,8 @@ class AvatarController
                 }
             }
 
+            $this->assertDefaultAvatarStateIsValid($data);
+
             // 验证文件路径是否存在（如果是R2路径）
             if (strpos($data['file_path'], '/avatars/') === 0) {
                 $filePath = ltrim($data['file_path'], '/');
@@ -306,6 +309,8 @@ class AvatarController
                     'code' => 'AVATAR_NOT_FOUND'
                 ], 404);
             }
+
+            $this->assertDefaultAvatarStateIsValid($data, $existingAvatar);
 
             // 验证文件路径是否存在（如果提供了新的文件路径）
             if (!empty($data['file_path']) && strpos($data['file_path'], '/avatars/') === 0) {
@@ -842,9 +847,7 @@ class AvatarController
                 continue;
             }
 
-            $value = $avatar[$field];
-            $normalized = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            $avatar[$field] = $normalized ?? ((int) $value === 1);
+            $avatar[$field] = $this->normalizeBooleanValue($avatar[$field]);
         }
 
         $filePath = $avatar['file_path'] ?? null;
@@ -942,6 +945,33 @@ class AvatarController
         }
 
         return 'VALIDATION_ERROR';
+    }
+
+    /**
+     * Default avatars must remain active, otherwise downstream fallback selection breaks.
+     *
+     * @param array<string,mixed> $payload
+     * @param array<string,mixed>|null $existingAvatar
+     */
+    private function assertDefaultAvatarStateIsValid(array $payload, ?array $existingAvatar = null): void
+    {
+        $isDefault = array_key_exists('is_default', $payload)
+            ? (bool) $payload['is_default']
+            : $this->normalizeBooleanValue($existingAvatar['is_default'] ?? false);
+
+        $isActive = array_key_exists('is_active', $payload)
+            ? (bool) $payload['is_active']
+            : $this->normalizeBooleanValue($existingAvatar['is_active'] ?? true);
+
+        if ($isDefault && !$isActive) {
+            throw new \InvalidArgumentException('Default avatar must remain active');
+        }
+    }
+
+    private function normalizeBooleanValue(mixed $value): bool
+    {
+        $normalized = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        return $normalized ?? ((int) $value === 1);
     }
 }
 
