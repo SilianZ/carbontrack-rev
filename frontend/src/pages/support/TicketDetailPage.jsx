@@ -249,6 +249,7 @@ export default function SupportTicketDetailPage() {
   const [status, setStatus] = useState('open');
   const [priority, setPriority] = useState('normal');
   const [assignedTo, setAssignedTo] = useState('none');
+  const [ticketWorkflowStateTicketId, setTicketWorkflowStateTicketId] = useState(null);
   const [transferTo, setTransferTo] = useState('none');
   const [transferReason, setTransferReason] = useState('');
   const [reviewNotes, setReviewNotes] = useState({});
@@ -355,17 +356,24 @@ export default function SupportTicketDetailPage() {
     setStatus(ticket.status || 'open');
     setPriority(ticket.priority || 'normal');
     setAssignedTo(ticket.assigned_to ? String(ticket.assigned_to) : 'none');
+    setTicketWorkflowStateTicketId(ticket.id ?? null);
   }, [ticket]);
 
-  const invalidateSupportViews = () => {
+  const invalidateSupportViews = ({ includeAssignees = false, includeAdminReports = false, includePendingTransfers = false } = {}) => {
     queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
     queryClient.invalidateQueries(['support-queue']);
-    queryClient.invalidateQueries(['support-assignees']);
     queryClient.invalidateQueries(['support-workbench-tickets']);
-    queryClient.invalidateQueries(['support-workbench-pending-transfers']);
     queryClient.invalidateQueries(['admin-support-tickets']);
     queryClient.invalidateQueries(['admin-support-ticket-detail', Number(ticketId)]);
-    queryClient.invalidateQueries(['admin-support-reports']);
+    if (includeAssignees) {
+      queryClient.invalidateQueries(['support-assignees']);
+    }
+    if (includeAdminReports) {
+      queryClient.invalidateQueries(['admin-support-reports']);
+    }
+    if (includePendingTransfers) {
+      queryClient.invalidateQueries(['support-workbench-pending-transfers']);
+    }
   };
 
   const resetReplyComposer = () => {
@@ -374,7 +382,7 @@ export default function SupportTicketDetailPage() {
   };
 
   const handleWorkflowSave = async () => {
-    if (replyMode !== null || replyInFlightRef.current || updateMutation.isLoading || replyMutation.isLoading) {
+    if (replyMode !== null || replyInFlightRef.current || updateMutation.isLoading || replyMutation.isLoading || !isTicketWorkflowStateSynced) {
       return;
     }
 
@@ -389,7 +397,7 @@ export default function SupportTicketDetailPage() {
 
     try {
       await updateMutation.mutateAsync(payload);
-      invalidateSupportViews();
+      invalidateSupportViews({ includeAssignees: true, includeAdminReports: true });
       toast.success(t('support.portal.ticketUpdated'));
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || t('errors.operationFailed');
@@ -440,9 +448,10 @@ export default function SupportTicketDetailPage() {
     if (nextStatus) {
       try {
         await updateMutation.mutateAsync({ status: nextStatus });
+        setStatus(nextStatus);
       } catch {
         resetReplyComposer();
-        invalidateSupportViews();
+        invalidateSupportViews({ includeAssignees: true, includeAdminReports: true });
         toast.error(t('support.portal.replyResolvePartial'));
         setReplyMode(null);
         replyInFlightRef.current = false;
@@ -451,7 +460,7 @@ export default function SupportTicketDetailPage() {
     }
 
     resetReplyComposer();
-    invalidateSupportViews();
+    invalidateSupportViews({ includeAssignees: true, includeAdminReports: true });
     toast.success(nextStatus ? t('support.portal.replyResolveSuccess') : t('support.portal.replyCreated'));
     setReplyMode(null);
     replyInFlightRef.current = false;
@@ -504,7 +513,8 @@ export default function SupportTicketDetailPage() {
   const resolutionMeta = getSlaMilestoneMeta(ticket, 'resolution', locale);
   const isReplySubmitting = replyMutation.isLoading || updateMutation.isLoading;
   const replyActionsDisabled = attachmentGate.isSubmissionBlocked || isReplySubmitting || replyMode !== null;
-  const workflowActionsDisabled = updateMutation.isLoading || isReplySubmitting || replyMode !== null;
+  const isTicketWorkflowStateSynced = Number(ticket?.id ?? 0) > 0 && Number(ticketWorkflowStateTicketId ?? 0) === Number(ticket?.id ?? 0);
+  const workflowActionsDisabled = updateMutation.isLoading || isReplySubmitting || replyMode !== null || !isTicketWorkflowStateSynced;
 
   return (
     <div className="space-y-6">

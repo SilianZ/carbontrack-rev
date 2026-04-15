@@ -286,6 +286,7 @@ export default function AdminSupportOpsPage() {
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [ticketStatusFilter, setTicketStatusFilter] = useState('all');
   const [ticketWorkflowStatus, setTicketWorkflowStatus] = useState('open');
+  const [ticketWorkflowStateTicketId, setTicketWorkflowStateTicketId] = useState(null);
   const [assigneeDetailTab, setAssigneeDetailTab] = useState('overview');
   const [routingSettingsForm, setRoutingSettingsForm] = useState(EMPTY_ROUTING_SETTINGS);
   const [assigneeProfileForm, setAssigneeProfileForm] = useState(null);
@@ -548,6 +549,7 @@ export default function AdminSupportOpsPage() {
     }
 
     setTicketWorkflowStatus(ticketDetail.status || 'open');
+    setTicketWorkflowStateTicketId(ticketDetail.id ?? null);
   }, [ticketDetail]);
 
   const handleTagSave = () => {
@@ -583,7 +585,7 @@ export default function AdminSupportOpsPage() {
   };
 
   const handleTicketWorkflowSave = () => {
-    if (!selectedTicketId) {
+    if (!selectedTicketId || saveTicketWorkflowMutation.isLoading || !isTicketWorkflowStateSynced) {
       return;
     }
 
@@ -592,6 +594,9 @@ export default function AdminSupportOpsPage() {
       payload: { status: ticketWorkflowStatus },
     });
   };
+
+  const isTicketWorkflowStateSynced = Number(ticketDetail?.id ?? 0) > 0 && Number(ticketWorkflowStateTicketId ?? 0) === Number(ticketDetail?.id ?? 0);
+  const ticketWorkflowSaveDisabled = saveTicketWorkflowMutation.isLoading || !isTicketWorkflowStateSynced || ticketWorkflowStatus === (ticketDetail?.status || 'open');
 
   const handleRoutingSettingsSave = () => {
     saveRoutingSettingsMutation.mutate({
@@ -1118,7 +1123,7 @@ export default function AdminSupportOpsPage() {
                     <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end">
                       <div className="min-w-0 flex-1 space-y-2">
                         <label className="text-sm font-medium">{t('adminSupport.filters.status')}</label>
-                        <Select value={ticketWorkflowStatus} onValueChange={setTicketWorkflowStatus}>
+                        <Select value={ticketWorkflowStatus} onValueChange={setTicketWorkflowStatus} disabled={saveTicketWorkflowMutation.isLoading || !isTicketWorkflowStateSynced}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
                           </SelectTrigger>
@@ -1136,7 +1141,7 @@ export default function AdminSupportOpsPage() {
                         className="rounded-full sm:min-w-[180px]"
                         onClick={handleTicketWorkflowSave}
                         loading={saveTicketWorkflowMutation.isLoading}
-                        disabled={ticketWorkflowStatus === (ticketDetail.status || 'open')}
+                        disabled={ticketWorkflowSaveDisabled}
                       >
                         <Save className="mr-2 h-4 w-4" />
                         {t('adminSupport.actions.saveWorkflow')}
