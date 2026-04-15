@@ -205,21 +205,8 @@ class Avatar
     public function updateAvatar(int $avatarId, array $data): bool
     {
         $data = $this->normalizePersistenceData($data);
-        $fields = [];
-        $params = [];
+        ['fields' => $fields, 'params' => $params] = $this->buildUpdatePayload($data);
         $transactionStarted = false;
-        
-        $allowedFields = [
-            'name', 'description', 'file_path', 'thumbnail_path', 
-            'category', 'sort_order', 'is_active', 'is_default'
-        ];
-        
-        foreach ($allowedFields as $field) {
-            if (array_key_exists($field, $data)) {
-                $fields[] = "{$field} = ?";
-                $params[] = $data[$field];
-            }
-        }
         
         if (empty($fields)) {
             return false;
@@ -254,6 +241,62 @@ class Avatar
     }
 
     /**
+     * @return array<int, array{id:int, username:?string, email:?string}>
+     */
+    public function getUsersAssignedToAvatar(int $avatarId): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT id, username, email
+            FROM users
+            WHERE avatar_id = ? AND deleted_at IS NULL
+            ORDER BY id ASC
+        ");
+        $stmt->execute([$avatarId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function updateAvatarAndReassignUsers(int $avatarId, array $data, int $fallbackAvatarId): int
+    {
+        $data = $this->normalizePersistenceData($data);
+        ['fields' => $fields, 'params' => $params] = $this->buildUpdatePayload($data);
+
+        if (empty($fields)) {
+            return 0;
+        }
+
+        $fields[] = "updated_at = NOW()";
+        $params[] = $avatarId;
+
+        $this->db->beginTransaction();
+
+        try {
+            if ($this->shouldResetDefaultAvatar($data)) {
+                $this->clearDefaultAvatarFlags($avatarId);
+            }
+
+            $sql = "UPDATE avatars SET " . implode(', ', $fields) . " WHERE id = ? AND deleted_at IS NULL";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+
+            $stmt = $this->db->prepare("
+                UPDATE users
+                SET avatar_id = ?, updated_at = NOW()
+                WHERE avatar_id = ? AND deleted_at IS NULL
+            ");
+            $stmt->execute([$fallbackAvatarId, $avatarId]);
+            $affectedRows = $stmt->rowCount();
+
+            $this->db->commit();
+
+            return $affectedRows;
+        } catch (\Throwable $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * Normalize controller/input payload before persisting to integer-backed columns.
      *
      * @param array<string,mixed> $data
@@ -274,6 +317,33 @@ class Avatar
         }
 
         return $data;
+    }
+
+    /**
+     * @param array<string,mixed> $data
+     * @return array{fields:array<int,string>,params:array<int,mixed>}
+     */
+    private function buildUpdatePayload(array $data): array
+    {
+        $fields = [];
+        $params = [];
+
+        $allowedFields = [
+            'name', 'description', 'file_path', 'thumbnail_path',
+            'category', 'sort_order', 'is_active', 'is_default'
+        ];
+
+        foreach ($allowedFields as $field) {
+            if (array_key_exists($field, $data)) {
+                $fields[] = "{$field} = ?";
+                $params[] = $data[$field];
+            }
+        }
+
+        return [
+            'fields' => $fields,
+            'params' => $params,
+        ];
     }
 
     /**

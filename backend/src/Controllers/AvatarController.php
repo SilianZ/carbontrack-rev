@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CarbonTrack\Controllers;
 
+use CarbonTrack\Models\Message;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use CarbonTrack\Models\Avatar;
@@ -11,6 +12,7 @@ use CarbonTrack\Services\AuthService;
 use CarbonTrack\Services\AuditLogService;
 use CarbonTrack\Services\CloudflareR2Service;
 use CarbonTrack\Services\ErrorLogService;
+use CarbonTrack\Services\MessageService;
 use CarbonTrack\Support\InputValueNormalizer;
 use Monolog\Logger;
 
@@ -24,14 +26,16 @@ class AvatarController
     private ?CloudflareR2Service $r2Service;
     private ?Logger $logger;
     private ?ErrorLogService $errorLogService;
+    private ?MessageService $messageService;
 
     public function __construct(
         Avatar $avatarModel,
         AuthService $authService,
-    AuditLogService $auditLogService = null,
-    CloudflareR2Service $r2Service = null,
-    Logger $logger = null,
-    ErrorLogService $errorLogService = null
+        AuditLogService $auditLogService = null,
+        CloudflareR2Service $r2Service = null,
+        Logger $logger = null,
+        ErrorLogService $errorLogService = null,
+        MessageService $messageService = null
     ) {
         $this->avatarModel = $avatarModel;
         $this->authService = $authService;
@@ -39,6 +43,7 @@ class AvatarController
             $this->r2Service = $r2Service;
             $this->logger = $logger;
             $this->errorLogService = $errorLogService;
+            $this->messageService = $messageService;
     }
 
     /**
@@ -345,14 +350,70 @@ class AvatarController
                 ], 400);
             }
 
-            // 更新头像
-            $success = $this->avatarModel->updateAvatar($avatarId, $updateData);
+            $wasActive = $this->normalizeBooleanValue($existingAvatar['is_active'] ?? true);
+            $willBeActive = array_key_exists('is_active', $updateData)
+                ? (bool) $updateData['is_active']
+                : $wasActive;
+            $isDeactivation = $wasActive && !$willBeActive;
+            $fallbackAvatar = null;
+            $affectedUsers = [];
 
-            if (!$success) {
-                return $this->jsonResponse($response, [
-                    'success' => false,
-                    'message' => 'Failed to update avatar'
-                ], 500);
+            if ($isDeactivation) {
+                $affectedUsers = $this->avatarModel->getUsersAssignedToAvatar($avatarId);
+
+                if ($affectedUsers !== []) {
+                    $fallbackAvatar = $this->avatarModel->getDefaultAvatar();
+
+                    if (!$fallbackAvatar) {
+                        return $this->jsonResponse($response, [
+                            'success' => false,
+                            'message' => 'Cannot disable avatar without an active default avatar for fallback',
+                            'code' => 'DEFAULT_AVATAR_REQUIRED'
+                        ], 409);
+                    }
+                }
+            }
+
+            if ($isDeactivation && $fallbackAvatar !== null) {
+                $this->avatarModel->updateAvatarAndReassignUsers($avatarId, $updateData, (int) $fallbackAvatar['id']);
+            } else {
+                // 更新头像
+                $success = $this->avatarModel->updateAvatar($avatarId, $updateData);
+
+                if (!$success) {
+                    return $this->jsonResponse($response, [
+                        'success' => false,
+                        'message' => 'Failed to update avatar'
+                    ], 500);
+                }
+            }
+
+            $notificationSummary = null;
+            if ($isDeactivation && $fallbackAvatar !== null && $affectedUsers !== []) {
+                $notificationSummary = $this->notifyUsersAboutAvatarFallback(
+                    $affectedUsers,
+                    $existingAvatar,
+                    $fallbackAvatar,
+                    $request
+                );
+
+                $this->auditLogService->log([
+                    'user_id' => $user['id'],
+                    'action' => 'avatar_users_reassigned_to_default',
+                    'entity_type' => 'avatar',
+                    'entity_id' => $avatarId,
+                    'new_value' => json_encode([
+                        'fallback_avatar_id' => (int) $fallbackAvatar['id'],
+                        'fallback_avatar_name' => $fallbackAvatar['name'] ?? null,
+                        'affected_user_ids' => array_map(
+                            static fn (array $entry): int => (int) ($entry['id'] ?? 0),
+                            $affectedUsers
+                        ),
+                        'notified_count' => $notificationSummary['notified_count'],
+                        'notification_failures' => $notificationSummary['failed_user_ids'],
+                    ], JSON_UNESCAPED_UNICODE),
+                    'notes' => 'Users were reassigned to the default avatar after avatar deactivation'
+                ]);
             }
 
             // 记录审计日志
@@ -362,14 +423,19 @@ class AvatarController
                 'entity_type' => 'avatar',
                 'entity_id' => $avatarId,
                 'old_value' => json_encode($existingAvatar),
-                'new_value' => json_encode($updateData),
+                'new_value' => json_encode(array_merge($updateData, [
+                    'fallback_avatar_id' => $fallbackAvatar['id'] ?? null,
+                    'reassigned_user_count' => is_array($affectedUsers) ? count($affectedUsers) : 0,
+                ]), JSON_UNESCAPED_UNICODE),
                 'notes' => 'Avatar updated by admin'
             ]);
 
             $this->logger->info('Avatar updated', [
                 'avatar_id' => $avatarId,
                 'admin_id' => $user['id'],
-                'updated_fields' => array_keys($updateData)
+                'updated_fields' => array_keys($updateData),
+                'reassigned_user_count' => is_array($affectedUsers) ? count($affectedUsers) : 0,
+                'notification_failures' => $notificationSummary['failed_user_ids'] ?? [],
             ]);
 
             // 获取更新后的头像信息
@@ -972,6 +1038,94 @@ class AvatarController
     {
         $normalized = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         return $normalized ?? ((int) $value === 1);
+    }
+
+    /**
+     * @param array<int, array{id:int, username:?string, email:?string}> $affectedUsers
+     * @param array<string,mixed> $avatar
+     * @param array<string,mixed> $fallbackAvatar
+     * @return array{notified_count:int,failed_user_ids:array<int,int>}
+     */
+    private function notifyUsersAboutAvatarFallback(
+        array $affectedUsers,
+        array $avatar,
+        array $fallbackAvatar,
+        Request $request
+    ): array {
+        if ($this->messageService === null) {
+            return [
+                'notified_count' => 0,
+                'failed_user_ids' => array_map(
+                    static fn (array $entry): int => (int) ($entry['id'] ?? 0),
+                    $affectedUsers
+                ),
+            ];
+        }
+
+        $oldAvatarName = trim((string) ($avatar['name'] ?? ''));
+        $fallbackAvatarName = trim((string) ($fallbackAvatar['name'] ?? ''));
+        $oldAvatarLabel = $oldAvatarName !== '' ? $oldAvatarName : '已停用头像';
+        $fallbackAvatarLabel = $fallbackAvatarName !== '' ? $fallbackAvatarName : '默认头像';
+
+        $title = '您选择的头像已停用 / Selected avatar unavailable';
+        $content = sprintf(
+            "您当前使用的头像“%s”已被停用，系统已自动为您切换为默认头像“%s”。\n\n如需调整，请前往个人资料重新选择头像。\n\nThe avatar \"%s\" you selected has been disabled. CarbonTrack has automatically switched your profile to the default avatar \"%s\". You can choose a different avatar anytime from your profile.",
+            $oldAvatarLabel,
+            $fallbackAvatarLabel,
+            $oldAvatarLabel,
+            $fallbackAvatarLabel
+        );
+
+        $notifiedCount = 0;
+        $failedUserIds = [];
+
+        foreach ($affectedUsers as $recipient) {
+            $userId = (int) ($recipient['id'] ?? 0);
+            if ($userId <= 0) {
+                continue;
+            }
+
+            try {
+                $this->messageService->sendSystemMessage(
+                    $userId,
+                    $title,
+                    $content,
+                    Message::TYPE_NOTIFICATION,
+                    Message::PRIORITY_NORMAL,
+                    'avatar',
+                    (int) ($avatar['id'] ?? 0),
+                    true
+                );
+                $notifiedCount++;
+            } catch (\Throwable $e) {
+                $failedUserIds[] = $userId;
+                if ($this->errorLogService !== null) {
+                    try {
+                        $this->errorLogService->logException($e, $request, [
+                            'action' => 'avatar_fallback_notification_failed',
+                            'avatar_id' => $avatar['id'] ?? null,
+                            'fallback_avatar_id' => $fallbackAvatar['id'] ?? null,
+                            'recipient_user_id' => $userId,
+                        ]);
+                    } catch (\Throwable $ignore) {
+                    }
+                }
+
+                if ($this->logger !== null) {
+                    $this->logger->warning('Failed to notify user about avatar fallback', [
+                        'avatar_id' => $avatar['id'] ?? null,
+                        'fallback_avatar_id' => $fallbackAvatar['id'] ?? null,
+                        'recipient_user_id' => $userId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        return [
+            'notified_count' => $notifiedCount,
+            'failed_user_ids' => $failedUserIds,
+        ];
     }
 }
 
