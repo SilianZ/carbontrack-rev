@@ -519,7 +519,8 @@ class SupportTicketServiceTest extends TestCase
                         && ($payload['changes'][0]['label'] ?? null) === 'Status'
                         && ($payload['changes'][0]['to'] ?? null) === 'In progress'
                         && ($payload['changes'][1]['label'] ?? null) === 'Priority'
-                        && ($payload['changes'][1]['to'] ?? null) === 'High';
+                        && ($payload['changes'][1]['to'] ?? null) === 'High'
+                        && ($payload['details'][0]['label'] ?? null) === 'Status';
                 }),
                 NotificationPreferenceService::CATEGORY_SUPPORT,
                 'normal'
@@ -1331,7 +1332,12 @@ class SupportTicketServiceTest extends TestCase
                     return ($payload['button_path'] ?? null) === 'tickets/1'
                         && ($payload['changes'][0]['label'] ?? null) === 'Assigned handler'
                         && ($payload['changes'][0]['from'] ?? null) === 'support-a'
-                        && ($payload['changes'][0]['to'] ?? null) === 'support-b';
+                        && ($payload['changes'][0]['to'] ?? null) === 'support-b'
+                        && in_array(
+                            ['label' => 'Assignee', 'value' => 'support-b'],
+                            $payload['details'] ?? [],
+                            true
+                        );
                 }),
                 NotificationPreferenceService::CATEGORY_SUPPORT,
                 'normal'
@@ -1706,7 +1712,12 @@ class SupportTicketServiceTest extends TestCase
                     $this->callback(function (array $payload): bool {
                         return ($payload['button_path'] ?? null) === 'support/tickets/3'
                             && ($payload['message']['label'] ?? null) === 'Assignment note'
-                            && str_contains((string) ($payload['message']['body'] ?? ''), 'assigned ticket #3 to you');
+                            && str_contains((string) ($payload['message']['body'] ?? ''), 'assigned ticket #3 to you')
+                            && in_array(
+                                ['label' => 'Requester', 'value' => 'requester <requester@example.com>'],
+                                $payload['details'] ?? [],
+                                true
+                            );
                     }),
                     NotificationPreferenceService::CATEGORY_SUPPORT,
                     'normal',
@@ -1842,6 +1853,54 @@ class SupportTicketServiceTest extends TestCase
         $this->assertSame('failed', $finalNotificationLog['status'] ?? null);
         $this->assertFalse($finalNotificationLog['data']['message_sent'] ?? true);
         $this->assertFalse($finalNotificationLog['data']['email_sent'] ?? true);
+    }
+
+    public function testNotifyAssigneeAuditTracksSkippedEmailAsNotSent(): void
+    {
+        $loggedPayloads = [];
+        $audit = $this->createMock(AuditLogService::class);
+        $audit->expects($this->once())
+            ->method('log')
+            ->willReturnCallback(static function (array $payload) use (&$loggedPayloads): bool {
+                $loggedPayloads[] = $payload;
+                return true;
+            });
+
+        $messageService = $this->createMock(MessageService::class);
+        $messageService->expects($this->once())
+            ->method('sendSystemMessage');
+
+        $emailService = $this->createMock(EmailService::class);
+        $emailService->expects($this->once())
+            ->method('sendSupportTicketNotification')
+            ->willReturn(false);
+
+        $service = new SupportTicketService(
+            self::$capsule->getConnection()->getPdo(),
+            $this->createMock(LoggerInterface::class),
+            $audit,
+            $this->createMock(ErrorLogService::class),
+            $this->createMock(FileMetadataService::class),
+            $emailService,
+            $messageService
+        );
+
+        $method = new \ReflectionMethod($service, 'notifyAssignee');
+        $method->setAccessible(true);
+        $method->invoke(
+            $service,
+            ['id' => 98, 'username' => 'supporter', 'email' => 'support@example.com'],
+            'Subject',
+            'Body',
+            456,
+            'support_ticket_manual_assignment_notified',
+            ['button_path' => 'support/tickets/456']
+        );
+
+        $this->assertCount(1, $loggedPayloads);
+        $this->assertSame('partial', $loggedPayloads[0]['status'] ?? null);
+        $this->assertTrue($loggedPayloads[0]['data']['message_sent'] ?? false);
+        $this->assertFalse($loggedPayloads[0]['data']['email_sent'] ?? true);
     }
 
 }

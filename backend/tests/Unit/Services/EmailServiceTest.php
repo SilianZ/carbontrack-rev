@@ -156,6 +156,7 @@ class EmailServiceTest extends TestCase
         ];
 
         $logger = new Logger('email-service-support-ticket');
+        $logger->pushHandler(new TestHandler());
         $service = new class($config, $logger, null) extends EmailService {
             public ?array $capturedEmail = null;
 

@@ -1454,7 +1454,7 @@ class SupportTicketService
         if ($this->emailService !== null && !empty($user['email'])) {
             try {
                 if ($emailPayload !== null) {
-                    $this->emailService->sendSupportTicketNotification(
+                    $emailSent = $this->emailService->sendSupportTicketNotification(
                         (string) $user['email'],
                         (string) ($user['username'] ?? $user['email']),
                         $subject,
@@ -1463,7 +1463,7 @@ class SupportTicketService
                         'normal'
                     );
                 } else {
-                    $this->emailService->sendMessageNotification(
+                    $emailSent = $this->emailService->sendMessageNotification(
                         (string) $user['email'],
                         (string) ($user['username'] ?? $user['email']),
                         $subject,
@@ -1472,7 +1472,6 @@ class SupportTicketService
                         'normal'
                     );
                 }
-                $emailSent = true;
             } catch (\Throwable $exception) {
                 $this->logger->warning('Failed to send support assignee email notification', [
                     'ticket_id' => $ticketId,
@@ -1589,6 +1588,21 @@ class SupportTicketService
         $updatedTicket = $ticket;
         foreach ($updates as $key => $value) {
             $updatedTicket[$key] = $value;
+        }
+        if (array_key_exists('assigned_to', $updates)) {
+            unset($updatedTicket['assigned_username'], $updatedTicket['assigned_user']);
+            $nextAssigneeId = $updates['assigned_to'];
+            if ($nextAssigneeId !== null && $nextAssigneeId !== '' && (int) $nextAssigneeId > 0) {
+                $resolvedAssignee = $this->loadUserById((int) $nextAssigneeId);
+                $resolvedAssigneeName = trim((string) ($resolvedAssignee['username'] ?? ''));
+                if ($resolvedAssigneeName !== '') {
+                    $updatedTicket['assigned_username'] = $resolvedAssigneeName;
+                    $updatedTicket['assigned_user'] = [
+                        'id' => (int) ($resolvedAssignee['id'] ?? $nextAssigneeId),
+                        'username' => $resolvedAssigneeName,
+                    ];
+                }
+            }
         }
 
         if ($this->messageService !== null && $userId > 0) {
@@ -1774,8 +1788,12 @@ class SupportTicketService
 
     private function formatRequesterDisplay(array $actor): string
     {
-        $name = $this->actorName($actor);
-        $email = trim((string) ($actor['email'] ?? ''));
+        $name = trim((string) ($actor['username'] ?? $actor['requester_username'] ?? ''));
+        $email = trim((string) ($actor['email'] ?? $actor['requester_email'] ?? ''));
+
+        if ($name === '') {
+            $name = $email !== '' ? $email : 'User';
+        }
 
         if ($email === '') {
             return $name;
