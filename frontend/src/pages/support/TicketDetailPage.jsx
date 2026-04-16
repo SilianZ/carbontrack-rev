@@ -405,7 +405,7 @@ export default function SupportTicketDetailPage() {
     }
   };
 
-  const buildReplyPayload = (values) => {
+  const buildReplyPayload = (values, nextStatus = null) => {
     if (attachmentGate.hasUploadErrors) {
       toast.error(t('support.attachments.uploadFailedBlocking'));
       return null;
@@ -415,10 +415,16 @@ export default function SupportTicketDetailPage() {
       return null;
     }
 
-    return {
+    const payload = {
       content: values.content,
       attachments: attachments.map((file) => file.file_path),
     };
+
+    if (nextStatus) {
+      payload.status = nextStatus;
+    }
+
+    return payload;
   };
 
   const submitReply = async (values, nextStatus = null) => {
@@ -428,7 +434,7 @@ export default function SupportTicketDetailPage() {
 
     replyInFlightRef.current = true;
     setReplyMode(nextStatus ? 'resolve' : 'reply');
-    const payload = buildReplyPayload(values);
+    const payload = buildReplyPayload(values, nextStatus);
     if (!payload) {
       setReplyMode(null);
       replyInFlightRef.current = false;
@@ -446,17 +452,7 @@ export default function SupportTicketDetailPage() {
     }
 
     if (nextStatus) {
-      try {
-        await updateMutation.mutateAsync({ status: nextStatus });
-        setStatus(nextStatus);
-      } catch {
-        resetReplyComposer();
-        invalidateSupportViews({ includeAssignees: true, includeAdminReports: true });
-        toast.error(t('support.portal.replyResolvePartial'));
-        setReplyMode(null);
-        replyInFlightRef.current = false;
-        return;
-      }
+      setStatus(nextStatus);
     }
 
     resetReplyComposer();
