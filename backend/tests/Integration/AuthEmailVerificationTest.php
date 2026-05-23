@@ -60,79 +60,79 @@ final class AuthEmailVerificationTest extends TestCase
     private function makeController(): array
     {
         /** @var AuthService&MockObject $auth */
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('generateToken')->willReturn('test-jwt');
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('generateToken')->willReturn('test-jwt');
         /** @var EmailService&MockObject $email */
-        $email = $this->createMock(EmailService::class);
+        $Silian_email = $this->createMock(EmailService::class);
         /** @var TurnstileService&MockObject $turnstile */
-        $turnstile = $this->createMock(TurnstileService::class);
-        $turnstile->method('verify')->willReturn(['success' => true]);
+        $Silian_turnstile = $this->createMock(TurnstileService::class);
+        $Silian_turnstile->method('verify')->willReturn(['success' => true]);
         /** @var AuditLogService&MockObject $audit */
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->method('logAuthOperation')->willReturn(true);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->method('logAuthOperation')->willReturn(true);
         /** @var MessageService&MockObject $msg */
-        $msg = $this->createMock(MessageService::class);
+        $Silian_msg = $this->createMock(MessageService::class);
         /** @var CloudflareR2Service&MockObject $r2 */
-        $r2 = $this->createMock(CloudflareR2Service::class);
+        $Silian_r2 = $this->createMock(CloudflareR2Service::class);
         /** @var ErrorLogService&MockObject $err */
-        $err = $this->createMock(ErrorLogService::class);
+        $Silian_err = $this->createMock(ErrorLogService::class);
         /** @var RegionService&MockObject $region */
-        $region = $this->createMock(RegionService::class);
+        $Silian_region = $this->createMock(RegionService::class);
 
-        $logger = new Logger('test-email-verification');
-        $logger->pushHandler(new StreamHandler('php://stdout', Logger::WARNING));
+        $Silian_logger = new Logger('test-email-verification');
+        $Silian_logger->pushHandler(new StreamHandler('php://stdout', Logger::WARNING));
 
-        $controller = new AuthController(
-            $auth,
-            $email,
-            $turnstile,
-            $audit,
-            $msg,
-            $r2,
-            $logger,
+        $Silian_controller = new AuthController(
+            $Silian_auth,
+            $Silian_email,
+            $Silian_turnstile,
+            $Silian_audit,
+            $Silian_msg,
+            $Silian_r2,
+            $Silian_logger,
             $this->pdo,
-            $err,
-            $region
+            $Silian_err,
+            $Silian_region
         );
 
-        return ['controller' => $controller, 'email' => $email];
+        return ['controller' => $Silian_controller, 'email' => $Silian_email];
     }
 
     public function testSendVerificationCodeDispatchesEmail(): void
     {
-        $now = date('Y-m-d H:i:s');
+        $Silian_now = date('Y-m-d H:i:s');
         $this->pdo->prepare("
             INSERT INTO users (username, email, password, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?)
-        ")->execute(['alice', 'alice@example.com', password_hash('Secret123!', PASSWORD_DEFAULT), $now, $now]);
+        ")->execute(['alice', 'alice@example.com', password_hash('Secret123!', PASSWORD_DEFAULT), $Silian_now, $Silian_now]);
 
-        $setup = $this->makeController();
-        $controller = $setup['controller'];
-        $emailMock = $setup['email'];
-        $emailMock->expects($this->once())
+        $Silian_setup = $this->makeController();
+        $Silian_controller = $Silian_setup['controller'];
+        $Silian_emailMock = $Silian_setup['email'];
+        $Silian_emailMock->expects($this->once())
             ->method('sendVerificationCode')
             ->willReturn(true);
 
-        $request = makeRequest('POST', '/auth/send-verification-code', [
+        $Silian_request = makeRequest('POST', '/auth/send-verification-code', [
             'email' => 'alice@example.com',
             'cf_turnstile_response' => 'valid-turnstile-token'
         ]);
-        $response = $controller->sendVerificationCode($request, new Response());
+        $Silian_response = $Silian_controller->sendVerificationCode($Silian_request, new Response());
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string)$response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertArrayHasKey('data', $payload);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string)$Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertArrayHasKey('data', $Silian_payload);
 
-        $row = $this->pdo->query("SELECT verification_token, verification_send_count FROM users WHERE email='alice@example.com'")->fetch(PDO::FETCH_ASSOC);
-        $this->assertNotEmpty($row['verification_token']);
-        $this->assertSame(1, (int)$row['verification_send_count']);
+        $Silian_row = $this->pdo->query("SELECT verification_token, verification_send_count FROM users WHERE email='alice@example.com'")->fetch(PDO::FETCH_ASSOC);
+        $this->assertNotEmpty($Silian_row['verification_token']);
+        $this->assertSame(1, (int)$Silian_row['verification_send_count']);
     }
 
     public function testVerifyEmailWithTokenMarksUserVerified(): void
     {
-        $now = date('Y-m-d H:i:s');
-        $token = bin2hex(random_bytes(16));
+        $Silian_now = date('Y-m-d H:i:s');
+        $Silian_token = bin2hex(random_bytes(16));
         $this->pdo->prepare("
             INSERT INTO users (username, email, password, created_at, updated_at, verification_token, verification_code_expires_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -140,30 +140,30 @@ final class AuthEmailVerificationTest extends TestCase
             'bob',
             'bob@example.com',
             password_hash('Secret123!', PASSWORD_DEFAULT),
-            $now,
-            $now,
-            $token,
+            $Silian_now,
+            $Silian_now,
+            $Silian_token,
             (new \DateTimeImmutable('+30 minutes'))->format('Y-m-d H:i:s')
         ]);
 
-        $setup = $this->makeController();
-        $controller = $setup['controller'];
+        $Silian_setup = $this->makeController();
+        $Silian_controller = $Silian_setup['controller'];
         // Verification email not sent in this test, so no expectation on email mock
 
-        $request = makeRequest('POST', '/auth/verify-email', ['token' => $token]);
-        $response = $controller->verifyEmail($request, new Response());
+        $Silian_request = makeRequest('POST', '/auth/verify-email', ['token' => $Silian_token]);
+        $Silian_response = $Silian_controller->verifyEmail($Silian_request, new Response());
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string)$response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertArrayHasKey('data', $payload);
-        $this->assertArrayHasKey('token', $payload['data']);
-        $this->assertArrayHasKey('user', $payload['data']);
-        $this->assertSame('bob@example.com', $payload['data']['user']['email']);
-        $this->assertNotEmpty($payload['data']['user']['email_verified_at']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string)$Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertArrayHasKey('data', $Silian_payload);
+        $this->assertArrayHasKey('token', $Silian_payload['data']);
+        $this->assertArrayHasKey('user', $Silian_payload['data']);
+        $this->assertSame('bob@example.com', $Silian_payload['data']['user']['email']);
+        $this->assertNotEmpty($Silian_payload['data']['user']['email_verified_at']);
 
-        $row = $this->pdo->query("SELECT email_verified_at, verification_token FROM users WHERE email='bob@example.com'")->fetch(PDO::FETCH_ASSOC);
-        $this->assertNotEmpty($row['email_verified_at']);
-        $this->assertNull($row['verification_token']);
+        $Silian_row = $this->pdo->query("SELECT email_verified_at, verification_token FROM users WHERE email='bob@example.com'")->fetch(PDO::FETCH_ASSOC);
+        $this->assertNotEmpty($Silian_row['email_verified_at']);
+        $this->assertNull($Silian_row['verification_token']);
     }
 }

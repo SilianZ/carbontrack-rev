@@ -1,27 +1,27 @@
 "use client"
 
-import * as React from "react"
-import * as SeparatorPrimitive from "@radix-ui/react-separator"
+import * as Silian_React from "react"
+import * as Silian_SeparatorPrimitive from "@radix-ui/react-separator"
 
-import { cn } from "@/lib/utils"
+import { cn as Silian_cn } from "@/lib/utils"
 
-function Separator({
-  className,
-  orientation = "horizontal",
-  decorative = true,
-  ...props
+function Silian_Separator({
+  className: Silian_className,
+  orientation: Silian_orientation = "horizontal",
+  decorative: Silian_decorative = true,
+  ...Silian_props
 }) {
   return (
-    <SeparatorPrimitive.Root
+    <Silian_SeparatorPrimitive.Root
       data-slot="separator-root"
-      decorative={decorative}
-      orientation={orientation}
-      className={cn(
+      decorative={Silian_decorative}
+      orientation={Silian_orientation}
+      className={Silian_cn(
         "bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
-        className
+        Silian_className
       )}
-      {...props} />
+      {...Silian_props} />
   );
 }
 
-export { Separator }
+export { Silian_Separator as Separator }

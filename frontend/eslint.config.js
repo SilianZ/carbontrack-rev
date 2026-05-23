@@ -1,8 +1,8 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import importPlugin from 'eslint-plugin-import'
-import reactRefresh from 'eslint-plugin-react-refresh'
+import Silian_js from '@eslint/js'
+import Silian_globals from 'globals'
+import Silian_reactHooks from 'eslint-plugin-react-hooks'
+import Silian_importPlugin from 'eslint-plugin-import'
+import Silian_reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
   { ignores: ['dist'] },
@@ -10,7 +10,7 @@ export default [
     files: ['src/**/*.{js,jsx}'],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: Silian_globals.browser,
       parserOptions: {
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
@@ -18,9 +18,9 @@ export default [
       },
     },
     plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-      import: importPlugin,
+      'react-hooks': Silian_reactHooks,
+      'react-refresh': Silian_reactRefresh,
+      import: Silian_importPlugin,
     },
     settings: {
       'import/resolver': {
@@ -31,8 +31,8 @@ export default [
       },
     },
     rules: {
-      ...js.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
+      ...Silian_js.configs.recommended.rules,
+      ...Silian_reactHooks.configs.recommended.rules,
       // Enforce case-sensitive import paths
       'import/no-unresolved': ['error', { caseSensitive: true }],
       'import/named': 'error',
@@ -48,7 +48,7 @@ export default [
   {
     files: ['*.config.{js,cjs,mjs}', 'vite.config.js', 'eslint.config.js'],
     languageOptions: {
-      globals: globals.node,
+      globals: Silian_globals.node,
       sourceType: 'module',
     },
     rules: {

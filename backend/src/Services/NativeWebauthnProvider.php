@@ -32,144 +32,144 @@ class NativeWebauthnProvider implements WebauthnProviderInterface
     }
 
     public function verifyRegistrationResponse(
-        array $credential,
-        array $challengeRecord,
-        array $user,
-        PasskeyConfig $config
+        array $Silian_credential,
+        array $Silian_challengeRecord,
+        array $Silian_user,
+        PasskeyConfig $Silian_config
     ): array {
-        unset($user);
+        unset($Silian_user);
 
         $this->ensureAvailable();
 
         try {
-            $clientData = $this->decodeClientData($credential, 'webauthn.create', (string) $challengeRecord['challenge'], $config);
-            $attestationObject = $this->decodeRequiredResponseField($credential, 'attestationObject');
-            $decodedAttestation = CborDecoder::decode($attestationObject);
-            if (!is_array($decodedAttestation)) {
+            $Silian_clientData = $this->decodeClientData($Silian_credential, 'webauthn.create', (string) $Silian_challengeRecord['challenge'], $Silian_config);
+            $Silian_attestationObject = $this->decodeRequiredResponseField($Silian_credential, 'attestationObject');
+            $Silian_decodedAttestation = CborDecoder::decode($Silian_attestationObject);
+            if (!is_array($Silian_decodedAttestation)) {
                 throw new \InvalidArgumentException('Attestation object must decode to a CBOR map.');
             }
 
-            $fmt = (string) ($decodedAttestation['fmt'] ?? '');
-            $authDataBinary = $decodedAttestation['authData'] ?? null;
-            if (!is_string($authDataBinary) || $authDataBinary === '') {
+            $Silian_fmt = (string) ($Silian_decodedAttestation['fmt'] ?? '');
+            $Silian_authDataBinary = $Silian_decodedAttestation['authData'] ?? null;
+            if (!is_string($Silian_authDataBinary) || $Silian_authDataBinary === '') {
                 throw new \InvalidArgumentException('Attestation authData is missing.');
             }
 
-            $parsedAuthData = $this->parseAuthenticatorData($authDataBinary, true);
-            $this->assertRpIdHash($parsedAuthData['rp_id_hash'], $config->getRpId());
-            $this->assertUserPresence($parsedAuthData['user_present']);
+            $Silian_parsedAuthData = $this->parseAuthenticatorData($Silian_authDataBinary, true);
+            $this->assertRpIdHash($Silian_parsedAuthData['rp_id_hash'], $Silian_config->getRpId());
+            $this->assertUserPresence($Silian_parsedAuthData['user_present']);
 
-            if ($config->getUserVerificationPreference() === 'required') {
-                $this->assertUserVerification($parsedAuthData['user_verified']);
+            if ($Silian_config->getUserVerificationPreference() === 'required') {
+                $this->assertUserVerification($Silian_parsedAuthData['user_verified']);
             }
 
-            $credentialPublicKeyBytes = $parsedAuthData['credential_public_key'] ?? null;
-            if (!is_string($credentialPublicKeyBytes) || $credentialPublicKeyBytes === '') {
+            $Silian_credentialPublicKeyBytes = $Silian_parsedAuthData['credential_public_key'] ?? null;
+            if (!is_string($Silian_credentialPublicKeyBytes) || $Silian_credentialPublicKeyBytes === '') {
                 throw new \InvalidArgumentException('Credential public key is missing.');
             }
 
-            $normalizedKey = $this->normalizeCredentialPublicKey($credentialPublicKeyBytes);
+            $Silian_normalizedKey = $this->normalizeCredentialPublicKey($Silian_credentialPublicKeyBytes);
             $this->verifyAttestationStatement(
-                $fmt,
-                is_array($decodedAttestation['attStmt'] ?? null) ? $decodedAttestation['attStmt'] : [],
-                $authDataBinary,
-                $clientData['hash'],
-                $normalizedKey
+                $Silian_fmt,
+                is_array($Silian_decodedAttestation['attStmt'] ?? null) ? $Silian_decodedAttestation['attStmt'] : [],
+                $Silian_authDataBinary,
+                $Silian_clientData['hash'],
+                $Silian_normalizedKey
             );
 
             return [
-                'credential_id' => $parsedAuthData['credential_id'],
+                'credential_id' => $Silian_parsedAuthData['credential_id'],
                 'credential_type' => 'public-key',
-                'public_key' => json_encode($normalizedKey, JSON_UNESCAPED_SLASHES),
-                'rp_id' => $config->getRpId(),
-                'user_handle' => is_array($challengeRecord['context'] ?? null)
-                    ? (string) (($challengeRecord['context']['user_handle'] ?? '') ?: '')
+                'public_key' => json_encode($Silian_normalizedKey, JSON_UNESCAPED_SLASHES),
+                'rp_id' => $Silian_config->getRpId(),
+                'user_handle' => is_array($Silian_challengeRecord['context'] ?? null)
+                    ? (string) (($Silian_challengeRecord['context']['user_handle'] ?? '') ?: '')
                     : '',
-                'transports' => $this->extractTransports($credential),
-                'aaguid' => $parsedAuthData['aaguid'],
-                'sign_count' => $parsedAuthData['sign_count'],
-                'attestation_format' => $fmt !== '' ? $fmt : 'none',
-                'backup_eligible' => $parsedAuthData['backup_eligible'],
-                'backup_state' => $parsedAuthData['backup_state'],
+                'transports' => $this->extractTransports($Silian_credential),
+                'aaguid' => $Silian_parsedAuthData['aaguid'],
+                'sign_count' => $Silian_parsedAuthData['sign_count'],
+                'attestation_format' => $Silian_fmt !== '' ? $Silian_fmt : 'none',
+                'backup_eligible' => $Silian_parsedAuthData['backup_eligible'],
+                'backup_state' => $Silian_parsedAuthData['backup_state'],
                 'meta' => [
                     'provider' => 'native',
-                    'public_key_algorithm' => $normalizedKey['alg'] ?? null,
-                    'credential_public_key' => Base64Url::encode($credentialPublicKeyBytes),
-                    'authenticator_attachment' => $credential['authenticatorAttachment'] ?? null,
+                    'public_key_algorithm' => $Silian_normalizedKey['alg'] ?? null,
+                    'credential_public_key' => Base64Url::encode($Silian_credentialPublicKeyBytes),
+                    'authenticator_attachment' => $Silian_credential['authenticatorAttachment'] ?? null,
                 ],
                 'attested_at' => gmdate('Y-m-d H:i:s'),
             ];
-        } catch (PasskeyOperationException $exception) {
-            throw $exception;
-        } catch (\Throwable $exception) {
+        } catch (PasskeyOperationException $Silian_exception) {
+            throw $Silian_exception;
+        } catch (\Throwable $Silian_exception) {
             throw new PasskeyOperationException(
                 'Passkey registration response validation failed.',
                 'INVALID_REGISTRATION_RESPONSE',
                 400,
-                $exception
+                $Silian_exception
             );
         }
     }
 
     public function verifyAuthenticationResponse(
-        array $credential,
-        array $challengeRecord,
-        array $passkey,
-        PasskeyConfig $config
+        array $Silian_credential,
+        array $Silian_challengeRecord,
+        array $Silian_passkey,
+        PasskeyConfig $Silian_config
     ): array {
         $this->ensureAvailable();
 
         try {
-            $clientData = $this->decodeClientData($credential, 'webauthn.get', (string) $challengeRecord['challenge'], $config);
-            $authenticatorData = $this->decodeRequiredResponseField($credential, 'authenticatorData');
-            $signature = $this->decodeRequiredResponseField($credential, 'signature');
-            $parsedAuthData = $this->parseAuthenticatorData($authenticatorData, false);
+            $Silian_clientData = $this->decodeClientData($Silian_credential, 'webauthn.get', (string) $Silian_challengeRecord['challenge'], $Silian_config);
+            $Silian_authenticatorData = $this->decodeRequiredResponseField($Silian_credential, 'authenticatorData');
+            $Silian_signature = $this->decodeRequiredResponseField($Silian_credential, 'signature');
+            $Silian_parsedAuthData = $this->parseAuthenticatorData($Silian_authenticatorData, false);
 
-            $this->assertRpIdHash($parsedAuthData['rp_id_hash'], (string) ($passkey['rp_id'] ?? $config->getRpId()));
-            $this->assertUserPresence($parsedAuthData['user_present']);
+            $this->assertRpIdHash($Silian_parsedAuthData['rp_id_hash'], (string) ($Silian_passkey['rp_id'] ?? $Silian_config->getRpId()));
+            $this->assertUserPresence($Silian_parsedAuthData['user_present']);
 
-            if ($config->getUserVerificationPreference() === 'required') {
-                $this->assertUserVerification($parsedAuthData['user_verified']);
+            if ($Silian_config->getUserVerificationPreference() === 'required') {
+                $this->assertUserVerification($Silian_parsedAuthData['user_verified']);
             }
 
-            $expectedUserHandle = trim((string) ($passkey['user_handle'] ?? ''));
-            $presentedUserHandle = null;
-            if (isset($credential['response']['userHandle']) && $credential['response']['userHandle'] !== null) {
-                $presentedUserHandle = Base64Url::encode(Base64Url::decode((string) $credential['response']['userHandle']));
+            $Silian_expectedUserHandle = trim((string) ($Silian_passkey['user_handle'] ?? ''));
+            $Silian_presentedUserHandle = null;
+            if (isset($Silian_credential['response']['userHandle']) && $Silian_credential['response']['userHandle'] !== null) {
+                $Silian_presentedUserHandle = Base64Url::encode(Base64Url::decode((string) $Silian_credential['response']['userHandle']));
             }
 
-            if ($presentedUserHandle !== null && $expectedUserHandle !== '' && !hash_equals($expectedUserHandle, $presentedUserHandle)) {
+            if ($Silian_presentedUserHandle !== null && $Silian_expectedUserHandle !== '' && !hash_equals($Silian_expectedUserHandle, $Silian_presentedUserHandle)) {
                 throw new PasskeyOperationException('Passkey user handle mismatch.', 'INVALID_USER_HANDLE', 400);
             }
 
-            $normalizedKey = $this->loadStoredPublicKey((string) ($passkey['public_key'] ?? ''));
-            $signedPayload = $authenticatorData . $clientData['hash'];
-            if (!$this->verifySignature($signedPayload, $signature, $normalizedKey, (int) ($normalizedKey['alg'] ?? 0))) {
+            $Silian_normalizedKey = $this->loadStoredPublicKey((string) ($Silian_passkey['public_key'] ?? ''));
+            $Silian_signedPayload = $Silian_authenticatorData . $Silian_clientData['hash'];
+            if (!$this->verifySignature($Silian_signedPayload, $Silian_signature, $Silian_normalizedKey, (int) ($Silian_normalizedKey['alg'] ?? 0))) {
                 throw new PasskeyOperationException('Passkey signature verification failed.', 'INVALID_SIGNATURE', 401);
             }
 
-            $storedSignCount = (int) ($passkey['sign_count'] ?? 0);
-            $newSignCount = (int) ($parsedAuthData['sign_count'] ?? 0);
-            if ($storedSignCount > 0 && $newSignCount > 0 && $newSignCount <= $storedSignCount) {
+            $Silian_storedSignCount = (int) ($Silian_passkey['sign_count'] ?? 0);
+            $Silian_newSignCount = (int) ($Silian_parsedAuthData['sign_count'] ?? 0);
+            if ($Silian_storedSignCount > 0 && $Silian_newSignCount > 0 && $Silian_newSignCount <= $Silian_storedSignCount) {
                 throw new PasskeyOperationException('Authenticator sign count did not advance.', 'SIGN_COUNT_REPLAY', 401);
             }
 
             return [
-                'credential_id' => $this->extractCredentialId($credential),
-                'sign_count' => $newSignCount,
-                'user_handle' => $expectedUserHandle,
-                'backup_eligible' => $parsedAuthData['backup_eligible'],
-                'backup_state' => $parsedAuthData['backup_state'],
+                'credential_id' => $this->extractCredentialId($Silian_credential),
+                'sign_count' => $Silian_newSignCount,
+                'user_handle' => $Silian_expectedUserHandle,
+                'backup_eligible' => $Silian_parsedAuthData['backup_eligible'],
+                'backup_state' => $Silian_parsedAuthData['backup_state'],
                 'last_used_at' => gmdate('Y-m-d H:i:s'),
             ];
-        } catch (PasskeyOperationException $exception) {
-            throw $exception;
-        } catch (\Throwable $exception) {
+        } catch (PasskeyOperationException $Silian_exception) {
+            throw $Silian_exception;
+        } catch (\Throwable $Silian_exception) {
             throw new PasskeyOperationException(
                 'Passkey authentication response validation failed.',
                 'INVALID_AUTHENTICATION_RESPONSE',
                 401,
-                $exception
+                $Silian_exception
             );
         }
     }
@@ -182,45 +182,45 @@ class NativeWebauthnProvider implements WebauthnProviderInterface
     }
 
     private function decodeClientData(
-        array $credential,
-        string $expectedType,
-        string $expectedChallenge,
-        PasskeyConfig $config
+        array $Silian_credential,
+        string $Silian_expectedType,
+        string $Silian_expectedChallenge,
+        PasskeyConfig $Silian_config
     ): array {
-        $clientDataBinary = $this->decodeRequiredResponseField($credential, 'clientDataJSON');
-        $clientData = json_decode($clientDataBinary, true);
-        if (!is_array($clientData)) {
+        $Silian_clientDataBinary = $this->decodeRequiredResponseField($Silian_credential, 'clientDataJSON');
+        $Silian_clientData = json_decode($Silian_clientDataBinary, true);
+        if (!is_array($Silian_clientData)) {
             throw new \InvalidArgumentException('Client data JSON is invalid.');
         }
 
-        if (($clientData['type'] ?? null) !== $expectedType) {
+        if (($Silian_clientData['type'] ?? null) !== $Silian_expectedType) {
             throw new PasskeyOperationException('Unexpected WebAuthn ceremony type.', 'INVALID_CEREMONY_TYPE', 400);
         }
 
-        if (!hash_equals($expectedChallenge, (string) ($clientData['challenge'] ?? ''))) {
+        if (!hash_equals($Silian_expectedChallenge, (string) ($Silian_clientData['challenge'] ?? ''))) {
             throw new PasskeyOperationException('WebAuthn challenge mismatch.', 'INVALID_CHALLENGE', 400);
         }
 
-        $origin = trim((string) ($clientData['origin'] ?? ''));
-        if ($origin === '' || !$this->isAllowedOrigin($origin, $config->getAllowedOrigins())) {
+        $Silian_origin = trim((string) ($Silian_clientData['origin'] ?? ''));
+        if ($Silian_origin === '' || !$this->isAllowedOrigin($Silian_origin, $Silian_config->getAllowedOrigins())) {
             throw new PasskeyOperationException('WebAuthn origin is not allowed.', 'INVALID_ORIGIN', 400);
         }
 
-        if (!empty($clientData['crossOrigin'])) {
+        if (!empty($Silian_clientData['crossOrigin'])) {
             throw new PasskeyOperationException('Cross-origin WebAuthn responses are not allowed.', 'CROSS_ORIGIN_NOT_ALLOWED', 400);
         }
 
         return [
-            'json' => $clientData,
-            'binary' => $clientDataBinary,
-            'hash' => hash('sha256', $clientDataBinary, true),
+            'json' => $Silian_clientData,
+            'binary' => $Silian_clientDataBinary,
+            'hash' => hash('sha256', $Silian_clientDataBinary, true),
         ];
     }
 
-    private function isAllowedOrigin(string $origin, array $allowedOrigins): bool
+    private function isAllowedOrigin(string $Silian_origin, array $Silian_allowedOrigins): bool
     {
-        foreach ($allowedOrigins as $allowedOrigin) {
-            if (hash_equals(rtrim($allowedOrigin, '/'), rtrim($origin, '/'))) {
+        foreach ($Silian_allowedOrigins as $Silian_allowedOrigin) {
+            if (hash_equals(rtrim($Silian_allowedOrigin, '/'), rtrim($Silian_origin, '/'))) {
                 return true;
             }
         }
@@ -228,247 +228,247 @@ class NativeWebauthnProvider implements WebauthnProviderInterface
         return false;
     }
 
-    private function decodeRequiredResponseField(array $credential, string $field): string
+    private function decodeRequiredResponseField(array $Silian_credential, string $Silian_field): string
     {
-        $value = $credential['response'][$field] ?? null;
-        if (!is_string($value) || trim($value) === '') {
-            throw new \InvalidArgumentException(sprintf('Credential response field %s is missing.', $field));
+        $Silian_value = $Silian_credential['response'][$Silian_field] ?? null;
+        if (!is_string($Silian_value) || trim($Silian_value) === '') {
+            throw new \InvalidArgumentException(sprintf('Credential response field %s is missing.', $Silian_field));
         }
 
-        return Base64Url::decode($value);
+        return Base64Url::decode($Silian_value);
     }
 
-    private function extractCredentialId(array $credential): string
+    private function extractCredentialId(array $Silian_credential): string
     {
-        foreach (['rawId', 'id'] as $field) {
-            $value = $credential[$field] ?? null;
-            if (is_string($value) && trim($value) !== '') {
-                return trim($value);
+        foreach (['rawId', 'id'] as $Silian_field) {
+            $Silian_value = $Silian_credential[$Silian_field] ?? null;
+            if (is_string($Silian_value) && trim($Silian_value) !== '') {
+                return trim($Silian_value);
             }
         }
 
         throw new PasskeyOperationException('Credential id is required.', 'MISSING_CREDENTIAL_ID', 400);
     }
 
-    private function parseAuthenticatorData(string $authData, bool $requireAttestedCredentialData): array
+    private function parseAuthenticatorData(string $Silian_authData, bool $Silian_requireAttestedCredentialData): array
     {
-        if (strlen($authData) < 37) {
+        if (strlen($Silian_authData) < 37) {
             throw new \InvalidArgumentException('Authenticator data is too short.');
         }
 
-        $rpIdHash = substr($authData, 0, 32);
-        $flags = ord($authData[32]);
-        $signCount = unpack('N', substr($authData, 33, 4))[1];
-        $offset = 37;
+        $Silian_rpIdHash = substr($Silian_authData, 0, 32);
+        $Silian_flags = ord($Silian_authData[32]);
+        $Silian_signCount = unpack('N', substr($Silian_authData, 33, 4))[1];
+        $Silian_offset = 37;
 
-        $aaguid = null;
-        $credentialId = null;
-        $credentialPublicKey = null;
+        $Silian_aaguid = null;
+        $Silian_credentialId = null;
+        $Silian_credentialPublicKey = null;
 
-        if (($flags & self::FLAG_ATTESTED_CREDENTIAL_DATA) !== 0) {
-            if (strlen($authData) < ($offset + 18)) {
+        if (($Silian_flags & self::FLAG_ATTESTED_CREDENTIAL_DATA) !== 0) {
+            if (strlen($Silian_authData) < ($Silian_offset + 18)) {
                 throw new \InvalidArgumentException('Authenticator attested credential data is incomplete.');
             }
 
-            $aaguid = $this->formatUuidLikeHex(substr($authData, $offset, 16));
-            $offset += 16;
-            $credentialIdLength = unpack('n', substr($authData, $offset, 2))[1];
-            $offset += 2;
+            $Silian_aaguid = $this->formatUuidLikeHex(substr($Silian_authData, $Silian_offset, 16));
+            $Silian_offset += 16;
+            $Silian_credentialIdLength = unpack('n', substr($Silian_authData, $Silian_offset, 2))[1];
+            $Silian_offset += 2;
 
-            $credentialId = substr($authData, $offset, $credentialIdLength);
-            $offset += $credentialIdLength;
-            if ($credentialId === false || $credentialId === '') {
+            $Silian_credentialId = substr($Silian_authData, $Silian_offset, $Silian_credentialIdLength);
+            $Silian_offset += $Silian_credentialIdLength;
+            if ($Silian_credentialId === false || $Silian_credentialId === '') {
                 throw new \InvalidArgumentException('Credential id is missing from authenticator data.');
             }
 
-            $oldOffset = $offset;
+            $Silian_oldOffset = $Silian_offset;
             try {
-                CborDecoder::decodeWithOffset($authData, $offset);
-                $credentialPublicKey = substr($authData, $oldOffset, $offset - $oldOffset);
-            } catch (\Exception $e) {
-                throw new \InvalidArgumentException('Failed to decode credential public key: ' . $e->getMessage());
+                CborDecoder::decodeWithOffset($Silian_authData, $Silian_offset);
+                $Silian_credentialPublicKey = substr($Silian_authData, $Silian_oldOffset, $Silian_offset - $Silian_oldOffset);
+            } catch (\Exception $Silian_e) {
+                throw new \InvalidArgumentException('Failed to decode credential public key: ' . $Silian_e->getMessage());
             }
 
-            if ($credentialPublicKey === false || $credentialPublicKey === '') {
+            if ($Silian_credentialPublicKey === false || $Silian_credentialPublicKey === '') {
                 throw new \InvalidArgumentException('Credential public key is missing from authenticator data.');
             }
-        } elseif ($requireAttestedCredentialData) {
+        } elseif ($Silian_requireAttestedCredentialData) {
             throw new \InvalidArgumentException('Authenticator data is missing attested credential data.');
         }
 
-        $extensions = null;
-        if (($flags & self::FLAG_EXTENSION_DATA) !== 0) {
+        $Silian_extensions = null;
+        if (($Silian_flags & self::FLAG_EXTENSION_DATA) !== 0) {
             try {
-                $extensions = CborDecoder::decodeWithOffset($authData, $offset);
-            } catch (\Exception $e) {
-                throw new \InvalidArgumentException('Failed to decode extensions: ' . $e->getMessage());
+                $Silian_extensions = CborDecoder::decodeWithOffset($Silian_authData, $Silian_offset);
+            } catch (\Exception $Silian_e) {
+                throw new \InvalidArgumentException('Failed to decode extensions: ' . $Silian_e->getMessage());
             }
         }
 
-        if ($offset !== strlen($authData)) {
+        if ($Silian_offset !== strlen($Silian_authData)) {
             throw new \InvalidArgumentException('Authenticator data contains unexpected trailing bytes.');
         }
 
         return [
-            'rp_id_hash' => $rpIdHash,
-            'sign_count' => (int) $signCount,
-            'user_present' => ($flags & self::FLAG_USER_PRESENT) !== 0,
-            'user_verified' => ($flags & self::FLAG_USER_VERIFIED) !== 0,
-            'backup_eligible' => ($flags & self::FLAG_BACKUP_ELIGIBLE) !== 0,
-            'backup_state' => ($flags & self::FLAG_BACKUP_STATE) !== 0,
-            'aaguid' => $aaguid,
-            'credential_id' => $credentialId !== null ? Base64Url::encode($credentialId) : null,
-            'credential_public_key' => $credentialPublicKey,
-            'extensions' => $extensions,
+            'rp_id_hash' => $Silian_rpIdHash,
+            'sign_count' => (int) $Silian_signCount,
+            'user_present' => ($Silian_flags & self::FLAG_USER_PRESENT) !== 0,
+            'user_verified' => ($Silian_flags & self::FLAG_USER_VERIFIED) !== 0,
+            'backup_eligible' => ($Silian_flags & self::FLAG_BACKUP_ELIGIBLE) !== 0,
+            'backup_state' => ($Silian_flags & self::FLAG_BACKUP_STATE) !== 0,
+            'aaguid' => $Silian_aaguid,
+            'credential_id' => $Silian_credentialId !== null ? Base64Url::encode($Silian_credentialId) : null,
+            'credential_public_key' => $Silian_credentialPublicKey,
+            'extensions' => $Silian_extensions,
         ];
     }
 
     private function verifyAttestationStatement(
-        string $format,
-        array $attestationStatement,
-        string $authDataBinary,
-        string $clientDataHash,
-        array $normalizedKey
+        string $Silian_format,
+        array $Silian_attestationStatement,
+        string $Silian_authDataBinary,
+        string $Silian_clientDataHash,
+        array $Silian_normalizedKey
     ): void {
-        if ($format === '' || $format === 'none') {
+        if ($Silian_format === '' || $Silian_format === 'none') {
             return;
         }
 
-        if ($format !== 'packed') {
+        if ($Silian_format !== 'packed') {
             throw new PasskeyOperationException('Unsupported attestation format.', 'UNSUPPORTED_ATTESTATION_FORMAT', 400);
         }
 
-        $alg = isset($attestationStatement['alg']) && is_int($attestationStatement['alg'])
-            ? $attestationStatement['alg']
-            : (int) ($normalizedKey['alg'] ?? 0);
-        $signature = $attestationStatement['sig'] ?? null;
-        if (!is_string($signature) || $signature === '') {
+        $Silian_alg = isset($Silian_attestationStatement['alg']) && is_int($Silian_attestationStatement['alg'])
+            ? $Silian_attestationStatement['alg']
+            : (int) ($Silian_normalizedKey['alg'] ?? 0);
+        $Silian_signature = $Silian_attestationStatement['sig'] ?? null;
+        if (!is_string($Silian_signature) || $Silian_signature === '') {
             throw new PasskeyOperationException('Packed attestation signature is missing.', 'INVALID_ATTESTATION', 400);
         }
 
-        $signedPayload = $authDataBinary . $clientDataHash;
-        $verificationKey = $normalizedKey;
-        if (isset($attestationStatement['x5c']) && is_array($attestationStatement['x5c']) && isset($attestationStatement['x5c'][0]) && is_string($attestationStatement['x5c'][0])) {
-            $verificationKey = [
-                'alg' => $alg,
-                'pem' => $this->derToPemCertificate($attestationStatement['x5c'][0]),
+        $Silian_signedPayload = $Silian_authDataBinary . $Silian_clientDataHash;
+        $Silian_verificationKey = $Silian_normalizedKey;
+        if (isset($Silian_attestationStatement['x5c']) && is_array($Silian_attestationStatement['x5c']) && isset($Silian_attestationStatement['x5c'][0]) && is_string($Silian_attestationStatement['x5c'][0])) {
+            $Silian_verificationKey = [
+                'alg' => $Silian_alg,
+                'pem' => $this->derToPemCertificate($Silian_attestationStatement['x5c'][0]),
             ];
         }
 
-        if (!$this->verifySignature($signedPayload, $signature, $verificationKey, $alg)) {
+        if (!$this->verifySignature($Silian_signedPayload, $Silian_signature, $Silian_verificationKey, $Silian_alg)) {
             throw new PasskeyOperationException('Packed attestation signature verification failed.', 'INVALID_ATTESTATION', 400);
         }
     }
 
-    private function normalizeCredentialPublicKey(string $credentialPublicKeyBytes): array
+    private function normalizeCredentialPublicKey(string $Silian_credentialPublicKeyBytes): array
     {
-        $coseKey = CborDecoder::decode($credentialPublicKeyBytes);
-        if (!is_array($coseKey)) {
+        $Silian_coseKey = CborDecoder::decode($Silian_credentialPublicKeyBytes);
+        if (!is_array($Silian_coseKey)) {
             throw new \InvalidArgumentException('Credential public key CBOR must decode to a map.');
         }
 
-        $kty = (int) ($coseKey[1] ?? 0);
-        $alg = (int) ($coseKey[3] ?? 0);
+        $Silian_kty = (int) ($Silian_coseKey[1] ?? 0);
+        $Silian_alg = (int) ($Silian_coseKey[3] ?? 0);
 
-        if ($kty === 2) {
-            $curve = (int) ($coseKey[-1] ?? 0);
-            $x = $coseKey[-2] ?? null;
-            $y = $coseKey[-3] ?? null;
-            if (!is_string($x) || !is_string($y)) {
+        if ($Silian_kty === 2) {
+            $Silian_curve = (int) ($Silian_coseKey[-1] ?? 0);
+            $Silian_x = $Silian_coseKey[-2] ?? null;
+            $Silian_y = $Silian_coseKey[-3] ?? null;
+            if (!is_string($Silian_x) || !is_string($Silian_y)) {
                 throw new \InvalidArgumentException('EC2 credential public key is incomplete.');
             }
 
             return [
-                'alg' => $alg,
+                'alg' => $Silian_alg,
                 'kty' => 'EC2',
-                'curve' => $this->mapEcCurve($curve),
-                'x' => Base64Url::encode($x),
-                'y' => Base64Url::encode($y),
-                'pem' => $this->buildEcPublicKeyPem($curve, $x, $y),
+                'curve' => $this->mapEcCurve($Silian_curve),
+                'x' => Base64Url::encode($Silian_x),
+                'y' => Base64Url::encode($Silian_y),
+                'pem' => $this->buildEcPublicKeyPem($Silian_curve, $Silian_x, $Silian_y),
             ];
         }
 
-        if ($kty === 3) {
-            $modulus = $coseKey[-1] ?? null;
-            $exponent = $coseKey[-2] ?? null;
-            if (!is_string($modulus) || !is_string($exponent)) {
+        if ($Silian_kty === 3) {
+            $Silian_modulus = $Silian_coseKey[-1] ?? null;
+            $Silian_exponent = $Silian_coseKey[-2] ?? null;
+            if (!is_string($Silian_modulus) || !is_string($Silian_exponent)) {
                 throw new \InvalidArgumentException('RSA credential public key is incomplete.');
             }
 
             return [
-                'alg' => $alg,
+                'alg' => $Silian_alg,
                 'kty' => 'RSA',
-                'n' => Base64Url::encode($modulus),
-                'e' => Base64Url::encode($exponent),
-                'pem' => $this->buildRsaPublicKeyPem($modulus, $exponent),
+                'n' => Base64Url::encode($Silian_modulus),
+                'e' => Base64Url::encode($Silian_exponent),
+                'pem' => $this->buildRsaPublicKeyPem($Silian_modulus, $Silian_exponent),
             ];
         }
 
         throw new PasskeyOperationException('Unsupported credential public key type.', 'UNSUPPORTED_PUBLIC_KEY', 400);
     }
 
-    private function loadStoredPublicKey(string $value): array
+    private function loadStoredPublicKey(string $Silian_value): array
     {
-        $decoded = json_decode($value, true);
-        if (is_array($decoded)) {
-            return $decoded;
+        $Silian_decoded = json_decode($Silian_value, true);
+        if (is_array($Silian_decoded)) {
+            return $Silian_decoded;
         }
 
-        if (strpos($value, 'BEGIN PUBLIC KEY') !== false) {
+        if (strpos($Silian_value, 'BEGIN PUBLIC KEY') !== false) {
             return [
                 'alg' => -7,
-                'pem' => $value,
+                'pem' => $Silian_value,
             ];
         }
 
         throw new PasskeyOperationException('Stored passkey public key is invalid.', 'INVALID_STORED_PUBLIC_KEY', 500);
     }
 
-    private function verifySignature(string $payload, string $signature, array $verificationKey, int $alg): bool
+    private function verifySignature(string $Silian_payload, string $Silian_signature, array $Silian_verificationKey, int $Silian_alg): bool
     {
-        $pem = $verificationKey['pem'] ?? null;
-        if (!is_string($pem) || $pem === '') {
+        $Silian_pem = $Silian_verificationKey['pem'] ?? null;
+        if (!is_string($Silian_pem) || $Silian_pem === '') {
             return false;
         }
 
-        $opensslAlgorithm = $this->mapOpenSslAlgorithm($alg);
-        if ($opensslAlgorithm === null) {
+        $Silian_opensslAlgorithm = $this->mapOpenSslAlgorithm($Silian_alg);
+        if ($Silian_opensslAlgorithm === null) {
             return false;
         }
 
-        return openssl_verify($payload, $signature, $pem, $opensslAlgorithm) === 1;
+        return openssl_verify($Silian_payload, $Silian_signature, $Silian_pem, $Silian_opensslAlgorithm) === 1;
     }
 
-    private function mapOpenSslAlgorithm(int $alg): ?int
+    private function mapOpenSslAlgorithm(int $Silian_alg): ?int
     {
-        if ($alg === -7) {
+        if ($Silian_alg === -7) {
             return OPENSSL_ALGO_SHA256;
         }
 
-        if ($alg === -257) {
+        if ($Silian_alg === -257) {
             return OPENSSL_ALGO_SHA256;
         }
 
         return null;
     }
 
-    private function assertRpIdHash(string $presentedHash, string $rpId): void
+    private function assertRpIdHash(string $Silian_presentedHash, string $Silian_rpId): void
     {
-        if (!hash_equals(hash('sha256', strtolower($rpId), true), $presentedHash)) {
+        if (!hash_equals(hash('sha256', strtolower($Silian_rpId), true), $Silian_presentedHash)) {
             throw new PasskeyOperationException('Relying party id hash mismatch.', 'INVALID_RP_ID', 400);
         }
     }
 
-    private function assertUserPresence(bool $userPresent): void
+    private function assertUserPresence(bool $Silian_userPresent): void
     {
-        if (!$userPresent) {
+        if (!$Silian_userPresent) {
             throw new PasskeyOperationException('Authenticator did not signal user presence.', 'USER_PRESENCE_REQUIRED', 400);
         }
     }
 
-    private function assertUserVerification(bool $userVerified): void
+    private function assertUserVerification(bool $Silian_userVerified): void
     {
-        if (!$userVerified) {
+        if (!$Silian_userVerified) {
             throw new PasskeyOperationException('Authenticator did not complete user verification.', 'USER_VERIFICATION_REQUIRED', 400);
         }
     }
@@ -476,106 +476,106 @@ class NativeWebauthnProvider implements WebauthnProviderInterface
     /**
      * @return string[]
      */
-    private function extractTransports(array $credential): array
+    private function extractTransports(array $Silian_credential): array
     {
-        $transports = [];
-        if (isset($credential['response']['transports']) && is_array($credential['response']['transports'])) {
-            $transports = $credential['response']['transports'];
+        $Silian_transports = [];
+        if (isset($Silian_credential['response']['transports']) && is_array($Silian_credential['response']['transports'])) {
+            $Silian_transports = $Silian_credential['response']['transports'];
         }
 
-        if ($transports === [] && isset($credential['authenticatorAttachment']) && is_string($credential['authenticatorAttachment'])) {
-            $transports[] = $credential['authenticatorAttachment'] === 'platform' ? 'internal' : $credential['authenticatorAttachment'];
+        if ($Silian_transports === [] && isset($Silian_credential['authenticatorAttachment']) && is_string($Silian_credential['authenticatorAttachment'])) {
+            $Silian_transports[] = $Silian_credential['authenticatorAttachment'] === 'platform' ? 'internal' : $Silian_credential['authenticatorAttachment'];
         }
 
-        return array_values(array_unique(array_filter(array_map('strval', $transports), static fn (string $transport): bool => $transport !== '')));
+        return array_values(array_unique(array_filter(array_map('strval', $Silian_transports), static fn (string $Silian_transport): bool => $Silian_transport !== '')));
     }
 
-    private function mapEcCurve(int $curve): string
+    private function mapEcCurve(int $Silian_curve): string
     {
-        if ($curve === 1) {
+        if ($Silian_curve === 1) {
             return 'P-256';
         }
 
-        if ($curve === 2) {
+        if ($Silian_curve === 2) {
             return 'P-384';
         }
 
-        if ($curve === 3) {
+        if ($Silian_curve === 3) {
             return 'P-521';
         }
 
         throw new PasskeyOperationException('Unsupported EC public key curve.', 'UNSUPPORTED_PUBLIC_KEY', 400);
     }
 
-    private function buildEcPublicKeyPem(int $curve, string $x, string $y): string
+    private function buildEcPublicKeyPem(int $Silian_curve, string $Silian_x, string $Silian_y): string
     {
-        if ($curve !== 1) {
+        if ($Silian_curve !== 1) {
             throw new PasskeyOperationException('Only P-256 passkeys are currently supported.', 'UNSUPPORTED_PUBLIC_KEY', 400);
         }
 
-        $algorithm = $this->derSequence(
+        $Silian_algorithm = $this->derSequence(
             $this->derOid('1.2.840.10045.2.1'),
             $this->derOid('1.2.840.10045.3.1.7')
         );
-        $publicKey = "\x04" . $x . $y;
-        $spki = $this->derSequence(
-            $algorithm,
-            $this->derBitString($publicKey)
+        $Silian_publicKey = "\x04" . $Silian_x . $Silian_y;
+        $Silian_spki = $this->derSequence(
+            $Silian_algorithm,
+            $this->derBitString($Silian_publicKey)
         );
 
-        return $this->derToPemPublicKey($spki);
+        return $this->derToPemPublicKey($Silian_spki);
     }
 
-    private function buildRsaPublicKeyPem(string $modulus, string $exponent): string
+    private function buildRsaPublicKeyPem(string $Silian_modulus, string $Silian_exponent): string
     {
-        $rsaPublicKey = $this->derSequence(
-            $this->derInteger($modulus),
-            $this->derInteger($exponent)
+        $Silian_rsaPublicKey = $this->derSequence(
+            $this->derInteger($Silian_modulus),
+            $this->derInteger($Silian_exponent)
         );
-        $algorithm = $this->derSequence(
+        $Silian_algorithm = $this->derSequence(
             $this->derOid('1.2.840.113549.1.1.1'),
             $this->derNull()
         );
-        $spki = $this->derSequence(
-            $algorithm,
-            $this->derBitString($rsaPublicKey)
+        $Silian_spki = $this->derSequence(
+            $Silian_algorithm,
+            $this->derBitString($Silian_rsaPublicKey)
         );
 
-        return $this->derToPemPublicKey($spki);
+        return $this->derToPemPublicKey($Silian_spki);
     }
 
-    private function derToPemPublicKey(string $der): string
+    private function derToPemPublicKey(string $Silian_der): string
     {
         return "-----BEGIN PUBLIC KEY-----\n"
-            . chunk_split(base64_encode($der), 64, "\n")
+            . chunk_split(base64_encode($Silian_der), 64, "\n")
             . "-----END PUBLIC KEY-----\n";
     }
 
-    private function derToPemCertificate(string $der): string
+    private function derToPemCertificate(string $Silian_der): string
     {
         return "-----BEGIN CERTIFICATE-----\n"
-            . chunk_split(base64_encode($der), 64, "\n")
+            . chunk_split(base64_encode($Silian_der), 64, "\n")
             . "-----END CERTIFICATE-----\n";
     }
 
-    private function derSequence(string ...$parts): string
+    private function derSequence(string ...$Silian_parts): string
     {
-        $payload = implode('', $parts);
-        return "\x30" . $this->derLength(strlen($payload)) . $payload;
+        $Silian_payload = implode('', $Silian_parts);
+        return "\x30" . $this->derLength(strlen($Silian_payload)) . $Silian_payload;
     }
 
-    private function derBitString(string $payload): string
+    private function derBitString(string $Silian_payload): string
     {
-        return "\x03" . $this->derLength(strlen($payload) + 1) . "\x00" . $payload;
+        return "\x03" . $this->derLength(strlen($Silian_payload) + 1) . "\x00" . $Silian_payload;
     }
 
-    private function derInteger(string $payload): string
+    private function derInteger(string $Silian_payload): string
     {
-        if ($payload === '' || (ord($payload[0]) & 0x80) !== 0) {
-            $payload = "\x00" . $payload;
+        if ($Silian_payload === '' || (ord($Silian_payload[0]) & 0x80) !== 0) {
+            $Silian_payload = "\x00" . $Silian_payload;
         }
 
-        return "\x02" . $this->derLength(strlen($payload)) . $payload;
+        return "\x02" . $this->derLength(strlen($Silian_payload)) . $Silian_payload;
     }
 
     private function derNull(): string
@@ -583,52 +583,52 @@ class NativeWebauthnProvider implements WebauthnProviderInterface
         return "\x05\x00";
     }
 
-    private function derOid(string $oid): string
+    private function derOid(string $Silian_oid): string
     {
-        $parts = array_map('intval', explode('.', $oid));
-        $first = (40 * $parts[0]) + $parts[1];
-        $encoded = chr($first);
-        for ($index = 2, $count = count($parts); $index < $count; $index++) {
-            $encoded .= $this->encodeBase128($parts[$index]);
+        $Silian_parts = array_map('intval', explode('.', $Silian_oid));
+        $Silian_first = (40 * $Silian_parts[0]) + $Silian_parts[1];
+        $Silian_encoded = chr($Silian_first);
+        for ($Silian_index = 2, $Silian_count = count($Silian_parts); $Silian_index < $Silian_count; $Silian_index++) {
+            $Silian_encoded .= $this->encodeBase128($Silian_parts[$Silian_index]);
         }
 
-        return "\x06" . $this->derLength(strlen($encoded)) . $encoded;
+        return "\x06" . $this->derLength(strlen($Silian_encoded)) . $Silian_encoded;
     }
 
-    private function encodeBase128(int $value): string
+    private function encodeBase128(int $Silian_value): string
     {
-        $bytes = [chr($value & 0x7f)];
-        $value >>= 7;
-        while ($value > 0) {
-            array_unshift($bytes, chr(($value & 0x7f) | 0x80));
-            $value >>= 7;
+        $Silian_bytes = [chr($Silian_value & 0x7f)];
+        $Silian_value >>= 7;
+        while ($Silian_value > 0) {
+            array_unshift($Silian_bytes, chr(($Silian_value & 0x7f) | 0x80));
+            $Silian_value >>= 7;
         }
 
-        return implode('', $bytes);
+        return implode('', $Silian_bytes);
     }
 
-    private function derLength(int $length): string
+    private function derLength(int $Silian_length): string
     {
-        if ($length < 128) {
-            return chr($length);
+        if ($Silian_length < 128) {
+            return chr($Silian_length);
         }
 
-        $bytes = '';
-        while ($length > 0) {
-            $bytes = chr($length & 0xff) . $bytes;
-            $length >>= 8;
+        $Silian_bytes = '';
+        while ($Silian_length > 0) {
+            $Silian_bytes = chr($Silian_length & 0xff) . $Silian_bytes;
+            $Silian_length >>= 8;
         }
 
-        return chr(0x80 | strlen($bytes)) . $bytes;
+        return chr(0x80 | strlen($Silian_bytes)) . $Silian_bytes;
     }
 
-    private function formatUuidLikeHex(string $binary): string
+    private function formatUuidLikeHex(string $Silian_binary): string
     {
-        $hex = bin2hex($binary);
-        return substr($hex, 0, 8)
-            . '-' . substr($hex, 8, 4)
-            . '-' . substr($hex, 12, 4)
-            . '-' . substr($hex, 16, 4)
-            . '-' . substr($hex, 20, 12);
+        $Silian_hex = bin2hex($Silian_binary);
+        return substr($Silian_hex, 0, 8)
+            . '-' . substr($Silian_hex, 8, 4)
+            . '-' . substr($Silian_hex, 12, 4)
+            . '-' . substr($Silian_hex, 16, 4)
+            . '-' . substr($Silian_hex, 20, 12);
     }
 }

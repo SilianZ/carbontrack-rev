@@ -1,10 +1,10 @@
 import {
-  ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
-  renderAnnouncementContentHtml,
+  ANNOUNCEMENT_CONTENT_FORMAT_TEXT as Silian_ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
+  renderAnnouncementContentHtml as Silian_renderAnnouncementContentHtml,
 } from './announcementHtml';
 
-function escapeHtml(value) {
-  return String(value ?? '')
+function Silian_escapeHtml(Silian_value) {
+  return String(Silian_value ?? '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
@@ -12,37 +12,37 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;');
 }
 
-function buildPriorityNotice(priority) {
-  const normalized = String(priority ?? '').trim().toLowerCase();
-  if (normalized === 'urgent') {
+function Silian_buildPriorityNotice(Silian_priority) {
+  const Silian_normalized = String(Silian_priority ?? '').trim().toLowerCase();
+  if (Silian_normalized === 'urgent') {
     return 'This announcement is marked as urgent. Please review it as soon as possible.';
   }
-  if (normalized === 'high') {
+  if (Silian_normalized === 'high') {
     return 'This announcement is marked as high priority.';
   }
   return '';
 }
 
 export function renderAnnouncementEmailPreviewHtml({
-  title,
-  content,
-  contentFormat = ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
-  priority = 'normal',
-  appName = 'CarbonTrack',
-  supportEmail = 'support@example.com',
+  title: Silian_title,
+  content: Silian_content,
+  contentFormat: Silian_contentFormat = Silian_ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
+  priority: Silian_priority = 'normal',
+  appName: Silian_appName = 'CarbonTrack',
+  supportEmail: Silian_supportEmail = 'support@example.com',
 }) {
-  const safeTitle = escapeHtml(title || 'Announcement preview');
-  const safeAppName = escapeHtml(appName);
-  const safeSupportEmail = escapeHtml(supportEmail);
-  const priorityNotice = buildPriorityNotice(priority);
-  const announcementBody = renderAnnouncementContentHtml(content, contentFormat);
+  const Silian_safeTitle = Silian_escapeHtml(Silian_title || 'Announcement preview');
+  const Silian_safeAppName = Silian_escapeHtml(Silian_appName);
+  const Silian_safeSupportEmail = Silian_escapeHtml(Silian_supportEmail);
+  const Silian_priorityNotice = Silian_buildPriorityNotice(Silian_priority);
+  const Silian_announcementBody = Silian_renderAnnouncementContentHtml(Silian_content, Silian_contentFormat);
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${safeTitle}</title>
+  <title>${Silian_safeTitle}</title>
   <style>
     :root { color-scheme: light; }
     body {
@@ -151,23 +151,23 @@ export function renderAnnouncementEmailPreviewHtml({
 <body>
   <div class="email-wrapper">
     <header class="email-header">
-      <p class="brand">${safeAppName}</p>
-      <h1>${safeTitle}</h1>
+      <p class="brand">${Silian_safeAppName}</p>
+      <h1>${Silian_safeTitle}</h1>
     </header>
     <main class="email-body">
-      <p>Hello ${safeAppName} community member,</p>
-      ${priorityNotice ? `<p class="priority-notice">${escapeHtml(priorityNotice)}</p>` : ''}
-      <p>${safeAppName} has published a new announcement:</p>
+      <p>Hello ${Silian_safeAppName} community member,</p>
+      ${Silian_priorityNotice ? `<p class="priority-notice">${Silian_escapeHtml(Silian_priorityNotice)}</p>` : ''}
+      <p>${Silian_safeAppName} has published a new announcement:</p>
       <div class="announcement-shell">
-        <h2 style="margin:0 0 12px 0;font-size:18px;color:#0f172a;">${safeTitle}</h2>
-        <div class="announcement-body">${announcementBody}</div>
+        <h2 style="margin:0 0 12px 0;font-size:18px;color:#0f172a;">${Silian_safeTitle}</h2>
+        <div class="announcement-body">${Silian_announcementBody}</div>
       </div>
       <p>You can review the announcement in your inbox at any time.</p>
       <a class="cta-button" href="#">View announcements</a>
     </main>
     <footer class="email-footer">
-      <p>&copy; ${new Date().getFullYear()} ${safeAppName}. All rights reserved.</p>
-      <p>For assistance contact <a href="mailto:${safeSupportEmail}">${safeSupportEmail}</a></p>
+      <p>&copy; ${new Date().getFullYear()} ${Silian_safeAppName}. All rights reserved.</p>
+      <p>For assistance contact <a href="mailto:${Silian_safeSupportEmail}">${Silian_safeSupportEmail}</a></p>
     </footer>
   </div>
 </body>

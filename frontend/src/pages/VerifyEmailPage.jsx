@@ -1,377 +1,377 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { Loader2, MailCheck } from 'lucide-react';
-import { useTranslation } from '../hooks/useTranslation';
-import { authAPI, tokenManager, userManager } from '../lib/auth';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { Alert, AlertDescription } from '../components/ui/Alert';
-import Turnstile from '../components/common/Turnstile';
+import Silian_React, { useCallback as Silian_useCallback, useEffect as Silian_useEffect, useMemo as Silian_useMemo, useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { useForm as Silian_useForm } from 'react-hook-form';
+import { useNavigate as Silian_useNavigate, useSearchParams as Silian_useSearchParams } from 'react-router-dom';
+import { toast as Silian_toast } from 'react-hot-toast';
+import { Loader2 as Silian_Loader2, MailCheck as Silian_MailCheck } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../hooks/useTranslation';
+import { authAPI as Silian_authAPI, tokenManager as Silian_tokenManager, userManager as Silian_userManager } from '../lib/auth';
+import { Button as Silian_Button } from '../components/ui/Button';
+import { Input as Silian_Input } from '../components/ui/Input';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../components/ui/Card';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../components/ui/Alert';
+import Silian_Turnstile from '../components/common/Turnstile';
 
-const toTimestamp = (value) => {
-  if (!value) return null;
-  const ts = Date.parse(value);
-  return Number.isNaN(ts) ? null : ts;
+const Silian_toTimestamp = (Silian_value) => {
+  if (!Silian_value) return null;
+  const Silian_ts = Date.parse(Silian_value);
+  return Number.isNaN(Silian_ts) ? null : Silian_ts;
 };
 
-const getSessionValue = (key) => {
+const Silian_getSessionValue = (Silian_key) => {
   if (typeof window === 'undefined') return null;
-  return sessionStorage.getItem(key);
+  return sessionStorage.getItem(Silian_key);
 };
 
-const VerifyEmailPage = () => {
-  const { t } = useTranslation(['activities', 'auth', 'errors']);
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const tokenParam = searchParams.get('token');
-  const returnParam = searchParams.get('return');
+const Silian_VerifyEmailPage = () => {
+  const { t: Silian_t } = Silian_useTranslation(['activities', 'auth', 'errors']);
+  const Silian_navigate = Silian_useNavigate();
+  const [Silian_searchParams] = Silian_useSearchParams();
+  const Silian_tokenParam = Silian_searchParams.get('token');
+  const Silian_returnParam = Silian_searchParams.get('return');
 
-  const initialEmail = useMemo(() => {
-    return searchParams.get('email')
-      || getSessionValue('pending_verification_email')
-      || userManager.getUser()?.email
+  const Silian_initialEmail = Silian_useMemo(() => {
+    return Silian_searchParams.get('email')
+      || Silian_getSessionValue('pending_verification_email')
+      || Silian_userManager.getUser()?.email
       || '';
-  }, [searchParams]);
+  }, [Silian_searchParams]);
 
   const {
-    register,
-    handleSubmit,
-    setValue,
-    getValues,
-    watch,
-    formState: { errors }
-  } = useForm({
+    register: Silian_register,
+    handleSubmit: Silian_handleSubmit,
+    setValue: Silian_setValue,
+    getValues: Silian_getValues,
+    watch: Silian_watch,
+    formState: { errors: Silian_errors }
+  } = Silian_useForm({
     defaultValues: {
-      email: initialEmail,
+      email: Silian_initialEmail,
       code: ''
     }
   });
 
-  useEffect(() => {
-    if (initialEmail) {
-      setValue('email', initialEmail);
+  Silian_useEffect(() => {
+    if (Silian_initialEmail) {
+      Silian_setValue('email', Silian_initialEmail);
     }
-  }, [initialEmail, setValue]);
+  }, [Silian_initialEmail, Silian_setValue]);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tokenHandled, setTokenHandled] = useState(false);
-  const [tokenStatus, setTokenStatus] = useState(tokenParam ? 'pending' : 'idle');
-  const [status, setStatus] = useState(null);
-  const [resendAvailableAt, setResendAvailableAt] = useState(() => toTimestamp(getSessionValue('verification_resend_available_at')));
-  const [resendCountdown, setResendCountdown] = useState(0);
-  const turnstileRef = useRef(null);
-  const [turnstileToken, setTurnstileToken] = useState('');
-  const requiresTurnstile = Boolean(import.meta.env?.VITE_TURNSTILE_SITE_KEY);
+  const [Silian_isSubmitting, Silian_setIsSubmitting] = Silian_useState(false);
+  const [Silian_tokenHandled, Silian_setTokenHandled] = Silian_useState(false);
+  const [Silian_tokenStatus, Silian_setTokenStatus] = Silian_useState(Silian_tokenParam ? 'pending' : 'idle');
+  const [Silian_status, Silian_setStatus] = Silian_useState(null);
+  const [Silian_resendAvailableAt, Silian_setResendAvailableAt] = Silian_useState(() => Silian_toTimestamp(Silian_getSessionValue('verification_resend_available_at')));
+  const [Silian_resendCountdown, Silian_setResendCountdown] = Silian_useState(0);
+  const Silian_turnstileRef = Silian_useRef(null);
+  const [Silian_turnstileToken, Silian_setTurnstileToken] = Silian_useState('');
+  const Silian_requiresTurnstile = Boolean(import.meta.env?.VITE_TURNSTILE_SITE_KEY);
 
-  const emailValue = watch('email');
+  const Silian_emailValue = Silian_watch('email');
 
-  const processVerifiedSession = useCallback((payload) => {
-    const token = payload?.token;
-    const user = payload?.user;
+  const Silian_processVerifiedSession = Silian_useCallback((Silian_payload) => {
+    const Silian_token = Silian_payload?.token;
+    const Silian_user = Silian_payload?.user;
 
-    if (token) {
-      tokenManager.setToken(token);
+    if (Silian_token) {
+      Silian_tokenManager.setToken(Silian_token);
     }
-    if (user) {
-      userManager.setUser(user);
+    if (Silian_user) {
+      Silian_userManager.setUser(Silian_user);
     }
 
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('pending_verification_email');
       sessionStorage.removeItem('verification_resend_available_at');
-      const storedReturn = sessionStorage.getItem('verification_return_path');
+      const Silian_storedReturn = sessionStorage.getItem('verification_return_path');
       sessionStorage.removeItem('verification_return_path');
-      const target = returnParam || storedReturn || '/dashboard';
-      navigate(target, { replace: true });
+      const Silian_target = Silian_returnParam || Silian_storedReturn || '/dashboard';
+      Silian_navigate(Silian_target, { replace: true });
     } else {
-      navigate(returnParam || '/dashboard', { replace: true });
+      Silian_navigate(Silian_returnParam || '/dashboard', { replace: true });
     }
-  }, [navigate, returnParam]);
+  }, [Silian_navigate, Silian_returnParam]);
 
-  useEffect(() => {
-    if (!resendAvailableAt) {
-      setResendCountdown(0);
+  Silian_useEffect(() => {
+    if (!Silian_resendAvailableAt) {
+      Silian_setResendCountdown(0);
       return;
     }
 
-    const updateCountdown = () => {
-      const diff = resendAvailableAt - Date.now();
-      if (diff <= 0) {
-        setResendCountdown(0);
-        setResendAvailableAt(null);
+    const Silian_updateCountdown = () => {
+      const Silian_diff = Silian_resendAvailableAt - Date.now();
+      if (Silian_diff <= 0) {
+        Silian_setResendCountdown(0);
+        Silian_setResendAvailableAt(null);
         if (typeof window !== 'undefined') {
           sessionStorage.removeItem('verification_resend_available_at');
         }
       } else {
-        setResendCountdown(diff);
+        Silian_setResendCountdown(Silian_diff);
       }
     };
 
-    updateCountdown();
-    const timer = window.setInterval(updateCountdown, 1000);
-    return () => window.clearInterval(timer);
-  }, [resendAvailableAt]);
+    Silian_updateCountdown();
+    const Silian_timer = window.setInterval(Silian_updateCountdown, 1000);
+    return () => window.clearInterval(Silian_timer);
+  }, [Silian_resendAvailableAt]);
 
-  useEffect(() => {
-    if (tokenParam && !tokenHandled) {
-      const verifyWithToken = async () => {
-        setTokenStatus('pending');
-        setIsSubmitting(true);
-        setStatus(null);
+  Silian_useEffect(() => {
+    if (Silian_tokenParam && !Silian_tokenHandled) {
+      const Silian_verifyWithToken = async () => {
+        Silian_setTokenStatus('pending');
+        Silian_setIsSubmitting(true);
+        Silian_setStatus(null);
         try {
-          const response = await authAPI.verifyEmail({ token: tokenParam });
-          if (response.success) {
-            toast.success(t('auth.verification.tokenSuccess'));
-            processVerifiedSession(response.data);
+          const Silian_response = await Silian_authAPI.verifyEmail({ token: Silian_tokenParam });
+          if (Silian_response.success) {
+            Silian_toast.success(Silian_t('auth.verification.tokenSuccess'));
+            Silian_processVerifiedSession(Silian_response.data);
           } else {
-            setTokenStatus('failed');
-            const message = response.message || t('auth.verification.tokenFailed');
-            setStatus({ variant: 'destructive', message });
-            toast.error(message);
+            Silian_setTokenStatus('failed');
+            const Silian_message = Silian_response.message || Silian_t('auth.verification.tokenFailed');
+            Silian_setStatus({ variant: 'destructive', message: Silian_message });
+            Silian_toast.error(Silian_message);
           }
-        } catch (error) {
-          setTokenStatus('failed');
-          const message = error?.response?.data?.message || error.message || t('auth.verification.tokenFailed');
-          setStatus({ variant: 'destructive', message });
-          toast.error(message);
+        } catch (Silian_error) {
+          Silian_setTokenStatus('failed');
+          const Silian_message = Silian_error?.response?.data?.message || Silian_error.message || Silian_t('auth.verification.tokenFailed');
+          Silian_setStatus({ variant: 'destructive', message: Silian_message });
+          Silian_toast.error(Silian_message);
         } finally {
-          setIsSubmitting(false);
-          setTokenHandled(true);
+          Silian_setIsSubmitting(false);
+          Silian_setTokenHandled(true);
         }
       };
 
-      verifyWithToken();
+      Silian_verifyWithToken();
     }
-  }, [processVerifiedSession, t, tokenHandled, tokenParam]);
+  }, [Silian_processVerifiedSession, Silian_t, Silian_tokenHandled, Silian_tokenParam]);
 
-  const ensureTurnstile = () => {
-    if (requiresTurnstile && !turnstileToken) {
-      const message = t('auth.verification.turnstileRequired');
-      setStatus({ variant: 'warning', message });
-      toast.error(message);
+  const Silian_ensureTurnstile = () => {
+    if (Silian_requiresTurnstile && !Silian_turnstileToken) {
+      const Silian_message = Silian_t('auth.verification.turnstileRequired');
+      Silian_setStatus({ variant: 'warning', message: Silian_message });
+      Silian_toast.error(Silian_message);
       return false;
     }
     return true;
   };
 
-  const resetTurnstile = () => {
-    setTurnstileToken('');
-    turnstileRef.current?.reset?.();
+  const Silian_resetTurnstile = () => {
+    Silian_setTurnstileToken('');
+    Silian_turnstileRef.current?.reset?.();
   };
 
-  const handleManualVerify = async (values) => {
-    const email = values.email.trim();
-    const code = values.code.trim();
+  const Silian_handleManualVerify = async (Silian_values) => {
+    const Silian_email = Silian_values.email.trim();
+    const Silian_code = Silian_values.code.trim();
 
-    if (!email) {
-      setStatus({ variant: 'warning', message: t('auth.verification.emailRequired') });
+    if (!Silian_email) {
+      Silian_setStatus({ variant: 'warning', message: Silian_t('auth.verification.emailRequired') });
       return;
     }
-    if (!code) {
-      setStatus({ variant: 'warning', message: t('auth.verification.codeRequired') });
-      return;
-    }
-
-    if (!ensureTurnstile()) {
+    if (!Silian_code) {
+      Silian_setStatus({ variant: 'warning', message: Silian_t('auth.verification.codeRequired') });
       return;
     }
 
-    setIsSubmitting(true);
-    setStatus(null);
+    if (!Silian_ensureTurnstile()) {
+      return;
+    }
+
+    Silian_setIsSubmitting(true);
+    Silian_setStatus(null);
 
     try {
-      const response = await authAPI.verifyEmail({ email, code, cf_turnstile_response: turnstileToken });
-      if (response.success) {
-        toast.success(t('auth.verification.codeSuccess'));
-        processVerifiedSession(response.data);
+      const Silian_response = await Silian_authAPI.verifyEmail({ email: Silian_email, code: Silian_code, cf_turnstile_response: Silian_turnstileToken });
+      if (Silian_response.success) {
+        Silian_toast.success(Silian_t('auth.verification.codeSuccess'));
+        Silian_processVerifiedSession(Silian_response.data);
       } else {
-        const message = response.message || t('auth.verification.codeFailed');
-        setStatus({ variant: 'destructive', message });
-        toast.error(message);
+        const Silian_message = Silian_response.message || Silian_t('auth.verification.codeFailed');
+        Silian_setStatus({ variant: 'destructive', message: Silian_message });
+        Silian_toast.error(Silian_message);
       }
-    } catch (error) {
-      const message = error?.response?.data?.message || error.message || t('auth.verification.codeFailed');
-      setStatus({ variant: 'destructive', message });
-      toast.error(message);
+    } catch (Silian_error) {
+      const Silian_message = Silian_error?.response?.data?.message || Silian_error.message || Silian_t('auth.verification.codeFailed');
+      Silian_setStatus({ variant: 'destructive', message: Silian_message });
+      Silian_toast.error(Silian_message);
     } finally {
-      resetTurnstile();
-      setIsSubmitting(false);
+      Silian_resetTurnstile();
+      Silian_setIsSubmitting(false);
     }
   };
 
-  const handleResend = async () => {
-    const email = getValues('email').trim();
-    if (!email) {
-      setStatus({ variant: 'warning', message: t('auth.verification.emailRequired') });
+  const Silian_handleResend = async () => {
+    const Silian_email = Silian_getValues('email').trim();
+    if (!Silian_email) {
+      Silian_setStatus({ variant: 'warning', message: Silian_t('auth.verification.emailRequired') });
       return;
     }
 
-    if (!ensureTurnstile()) {
+    if (!Silian_ensureTurnstile()) {
       return;
     }
 
-    setIsSubmitting(true);
+    Silian_setIsSubmitting(true);
     try {
-      const response = await authAPI.sendVerificationCode({ email, cf_turnstile_response: turnstileToken });
-      if (response.success) {
-        const meta = response.data || {};
-        const nextAt = toTimestamp(meta.verification_resend_available_at);
+      const Silian_response = await Silian_authAPI.sendVerificationCode({ email: Silian_email, cf_turnstile_response: Silian_turnstileToken });
+      if (Silian_response.success) {
+        const Silian_meta = Silian_response.data || {};
+        const Silian_nextAt = Silian_toTimestamp(Silian_meta.verification_resend_available_at);
         if (typeof window !== 'undefined') {
-          sessionStorage.setItem('pending_verification_email', email);
-          if (meta.verification_resend_available_at) {
-            sessionStorage.setItem('verification_resend_available_at', meta.verification_resend_available_at);
+          sessionStorage.setItem('pending_verification_email', Silian_email);
+          if (Silian_meta.verification_resend_available_at) {
+            sessionStorage.setItem('verification_resend_available_at', Silian_meta.verification_resend_available_at);
           } else {
             sessionStorage.removeItem('verification_resend_available_at');
           }
         }
-        setResendAvailableAt(nextAt);
-        const message = response.message || t('auth.verification.resendSuccess');
-        setStatus({ variant: 'info', message });
-        toast.success(message);
+        Silian_setResendAvailableAt(Silian_nextAt);
+        const Silian_message = Silian_response.message || Silian_t('auth.verification.resendSuccess');
+        Silian_setStatus({ variant: 'info', message: Silian_message });
+        Silian_toast.success(Silian_message);
       } else {
-        const message = response.message || t('auth.verification.tokenFailed');
-        setStatus({ variant: 'destructive', message });
-        toast.error(message);
+        const Silian_message = Silian_response.message || Silian_t('auth.verification.tokenFailed');
+        Silian_setStatus({ variant: 'destructive', message: Silian_message });
+        Silian_toast.error(Silian_message);
       }
-    } catch (error) {
-        const message = error?.response?.data?.message || error.message || t('auth.verification.tokenFailed');
-        setStatus({ variant: 'destructive', message });
-        toast.error(message);
+    } catch (Silian_error) {
+        const Silian_message = Silian_error?.response?.data?.message || Silian_error.message || Silian_t('auth.verification.tokenFailed');
+        Silian_setStatus({ variant: 'destructive', message: Silian_message });
+        Silian_toast.error(Silian_message);
       } finally {
-      resetTurnstile();
-        setIsSubmitting(false);
+      Silian_resetTurnstile();
+        Silian_setIsSubmitting(false);
       }
     };
 
-  const resendDisabled = isSubmitting
-    || (resendAvailableAt !== null && resendAvailableAt > Date.now())
-    || (requiresTurnstile && !turnstileToken);
-  const secondsRemaining = Math.max(0, Math.ceil(resendCountdown / 1000));
+  const Silian_resendDisabled = Silian_isSubmitting
+    || (Silian_resendAvailableAt !== null && Silian_resendAvailableAt > Date.now())
+    || (Silian_requiresTurnstile && !Silian_turnstileToken);
+  const Silian_secondsRemaining = Math.max(0, Math.ceil(Silian_resendCountdown / 1000));
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-6">
-        <Card>
-          <CardHeader className="space-y-1">
+        <Silian_Card>
+          <Silian_CardHeader className="space-y-1">
             <div className="flex items-center gap-2">
-              <MailCheck className="h-6 w-6 text-green-600" />
-              <CardTitle>{t('auth.verification.title')}</CardTitle>
+              <Silian_MailCheck className="h-6 w-6 text-green-600" />
+              <Silian_CardTitle>{Silian_t('auth.verification.title')}</Silian_CardTitle>
             </div>
-            <CardDescription>
-              {t('auth.verification.description', { email: emailValue || t('auth.verification.yourEmail') })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {tokenStatus === 'pending' && (
-              <Alert variant="info">
-                <AlertDescription className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {t('auth.verification.tokenVerifying')}
-                </AlertDescription>
-              </Alert>
+            <Silian_CardDescription>
+              {Silian_t('auth.verification.description', { email: Silian_emailValue || Silian_t('auth.verification.yourEmail') })}
+            </Silian_CardDescription>
+          </Silian_CardHeader>
+          <Silian_CardContent className="space-y-4">
+            {Silian_tokenStatus === 'pending' && (
+              <Silian_Alert variant="info">
+                <Silian_AlertDescription className="flex items-center gap-2">
+                  <Silian_Loader2 className="h-4 w-4 animate-spin" />
+                  {Silian_t('auth.verification.tokenVerifying')}
+                </Silian_AlertDescription>
+              </Silian_Alert>
             )}
 
-            {status?.message && (
-              <Alert variant={status.variant || 'info'}>
-                <AlertDescription>{status.message}</AlertDescription>
-              </Alert>
+            {Silian_status?.message && (
+              <Silian_Alert variant={Silian_status.variant || 'info'}>
+                <Silian_AlertDescription>{Silian_status.message}</Silian_AlertDescription>
+              </Silian_Alert>
             )}
 
-            <form onSubmit={handleSubmit(handleManualVerify)} className="space-y-4">
+            <form onSubmit={Silian_handleSubmit(Silian_handleManualVerify)} className="space-y-4">
               <div className="space-y-1">
                 <label className="text-sm font-medium text-foreground" htmlFor="email">
-                  {t('auth.verification.emailLabel')}
+                  {Silian_t('auth.verification.emailLabel')}
                 </label>
-                <Input
+                <Silian_Input
                   id="email"
                   type="email"
                   autoComplete="email"
-                  placeholder={t('auth.verification.emailPlaceholder')}
-                  {...register('email', { required: t('auth.verification.emailRequired') })}
+                  placeholder={Silian_t('auth.verification.emailPlaceholder')}
+                  {...Silian_register('email', { required: Silian_t('auth.verification.emailRequired') })}
                 />
-                {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email.message}</p>
+                {Silian_errors.email && (
+                  <p className="text-sm text-red-600">{Silian_errors.email.message}</p>
                 )}
               </div>
 
               <div className="space-y-1">
                 <label className="text-sm font-medium text-foreground" htmlFor="code">
-                  {t('auth.verification.codeLabel')}
+                  {Silian_t('auth.verification.codeLabel')}
                 </label>
-                <Input
+                <Silian_Input
                   id="code"
                   inputMode="numeric"
                   maxLength={6}
                   placeholder="123456"
-                  {...register('code', {
-                    required: t('auth.verification.codeRequired'),
+                  {...Silian_register('code', {
+                    required: Silian_t('auth.verification.codeRequired'),
                     pattern: {
                       value: /^\d{6}$/,
-                      message: t('auth.verification.codePattern')
+                      message: Silian_t('auth.verification.codePattern')
                     }
                   })}
                 />
-                {errors.code && (
-                  <p className="text-sm text-red-600">{errors.code.message}</p>
+                {Silian_errors.code && (
+                  <p className="text-sm text-red-600">{Silian_errors.code.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Turnstile
-                  ref={turnstileRef}
+                <Silian_Turnstile
+                  ref={Silian_turnstileRef}
                   className="flex justify-center"
-                  require={requiresTurnstile}
-                  onVerify={(token) => setTurnstileToken(token)}
-                  onExpire={() => setTurnstileToken('')}
-                  onError={() => setTurnstileToken('')}
+                  require={Silian_requiresTurnstile}
+                  onVerify={(Silian_token) => Silian_setTurnstileToken(Silian_token)}
+                  onExpire={() => Silian_setTurnstileToken('')}
+                  onError={() => Silian_setTurnstileToken('')}
                 />
               </div>
 
-              <Button
+              <Silian_Button
                 type="submit"
                 className="w-full"
-                disabled={isSubmitting || (requiresTurnstile && !turnstileToken)}
+                disabled={Silian_isSubmitting || (Silian_requiresTurnstile && !Silian_turnstileToken)}
               >
-                {isSubmitting ? (
+                {Silian_isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {t('auth.verification.submitting')}
+                    <Silian_Loader2 className="h-4 w-4 animate-spin" />
+                    {Silian_t('auth.verification.submitting')}
                   </span>
                 ) : (
-                  t('auth.verification.submit')
+                  Silian_t('auth.verification.submit')
                 )}
-              </Button>
+              </Silian_Button>
             </form>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <Button
+              <Silian_Button
                 variant="outline"
-                onClick={handleResend}
-                disabled={resendDisabled}
+                onClick={Silian_handleResend}
+                disabled={Silian_resendDisabled}
               >
-                {resendDisabled && secondsRemaining > 0
-                  ? t('auth.verification.resendCountdown', { seconds: secondsRemaining })
-                  : t('auth.verification.resend')}
-              </Button>
-              <Button
+                {Silian_resendDisabled && Silian_secondsRemaining > 0
+                  ? Silian_t('auth.verification.resendCountdown', { seconds: Silian_secondsRemaining })
+                  : Silian_t('auth.verification.resend')}
+              </Silian_Button>
+              <Silian_Button
                 variant="ghost"
-                onClick={() => navigate('/auth/login')}
+                onClick={() => Silian_navigate('/auth/login')}
               >
-                {t('auth.verification.backToLogin')}
-              </Button>
+                {Silian_t('auth.verification.backToLogin')}
+              </Silian_Button>
             </div>
 
             <p className="text-sm text-muted-foreground">
-              {t('auth.verification.helper')}
+              {Silian_t('auth.verification.helper')}
             </p>
-          </CardContent>
-        </Card>
+          </Silian_CardContent>
+        </Silian_Card>
       </div>
     </div>
   );
 };
 
-export default VerifyEmailPage;
+export default Silian_VerifyEmailPage;

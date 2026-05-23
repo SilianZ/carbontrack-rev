@@ -29,179 +29,179 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 // Load environment variables (with fallback)
 try {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-    $dotenv->load();
-} catch (\Exception $e) {
+    $Silian_dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+    $Silian_dotenv->load();
+} catch (\Exception $Silian_e) {
     // If .env file doesn't exist, Dotenv will throw; fall back to defaults below.
 }
 
-$resolvedAppEnv = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?? 'development';
-$resolvedAppEnv = is_string($resolvedAppEnv) ? strtolower($resolvedAppEnv) : 'development';
-$_ENV['APP_ENV'] = $resolvedAppEnv;
-$_SERVER['APP_ENV'] = $resolvedAppEnv;
-putenv('APP_ENV=' . $resolvedAppEnv);
-$isProduction = $resolvedAppEnv === 'production';
+$Silian_resolvedAppEnv = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?? 'development';
+$Silian_resolvedAppEnv = is_string($Silian_resolvedAppEnv) ? strtolower($Silian_resolvedAppEnv) : 'development';
+$_ENV['APP_ENV'] = $Silian_resolvedAppEnv;
+$_SERVER['APP_ENV'] = $Silian_resolvedAppEnv;
+putenv('APP_ENV=' . $Silian_resolvedAppEnv);
+$Silian_isProduction = $Silian_resolvedAppEnv === 'production';
 
 if (!defined('CARBONTRACK_NO_EMIT')) {
     define('CARBONTRACK_NO_EMIT', false);
 }
 
 // Create Container and register dependencies before creating the app
-$container = new Container();
-$dependencies = require_once __DIR__ . '/../src/dependencies.php';
-$dependencies($container);
+$Silian_container = new Container();
+$Silian_dependencies = require_once __DIR__ . '/../src/dependencies.php';
+$Silian_dependencies($Silian_container);
 
 // Set container to create App with on AppFactory and then create the app
-AppFactory::setContainer($container);
-$app = AppFactory::create();
+AppFactory::setContainer($Silian_container);
+$Silian_app = AppFactory::create();
 
 // --- Middleware Registration (Order is important: LIFO - Last In, First Out) ---
 // The last middleware added is the first to be executed.
 
 // 1. Error Middleware - Added first, so it executes last, catching all exceptions.
-$errorMiddleware = $app->addErrorMiddleware(
-    !$isProduction,
+$Silian_errorMiddleware = $Silian_app->addErrorMiddleware(
+    !$Silian_isProduction,
     true,
     true
 );
 
 // 2. Routing Middleware - This must run before the app's routes are processed.
-$app->addRoutingMiddleware();
+$Silian_app->addRoutingMiddleware();
 
 // 3. Body Parsing Middleware
-$app->addBodyParsingMiddleware();
+$Silian_app->addBodyParsingMiddleware();
 
 // 4. Application-specific middleware
 try {
-    $logger = $container->get(\Monolog\Logger::class);
-    $app->add(new LoggingMiddleware($logger));
-    $app->add(new IdempotencyMiddleware(
-        $container->get(DatabaseService::class),
-        $logger
+    $Silian_logger = $Silian_container->get(\Monolog\Logger::class);
+    $Silian_app->add(new LoggingMiddleware($Silian_logger));
+    $Silian_app->add(new IdempotencyMiddleware(
+        $Silian_container->get(DatabaseService::class),
+        $Silian_logger
     ));
-} catch (\Exception $e) {
-    error_log('Failed to create application middleware: ' . $e->getMessage());
+} catch (\Exception $Silian_e) {
+    error_log('Failed to create application middleware: ' . $Silian_e->getMessage());
 }
 
 // 5. CORS Middleware - Added last, so it executes first.
 // This allows it to intercept preflight OPTIONS requests before the router even runs.
-$app->add(new CorsMiddleware());
+$Silian_app->add(new CorsMiddleware());
 
 // Custom error handler for 404 errors
-$errorMiddleware->setErrorHandler(
+$Silian_errorMiddleware->setErrorHandler(
     Slim\Exception\HttpNotFoundException::class,
-    function (Psr\Http\Message\ServerRequestInterface $request) {
-        $response = new \Slim\Psr7\Response();
-        $response->getBody()->write(json_encode([
+    function (Psr\Http\Message\ServerRequestInterface $Silian_request) {
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_response->getBody()->write(json_encode([
             'success' => false,
             'error' => 'Not Found',
             'message' => 'The requested resource was not found',
-            'path' => $request->getUri()->getPath(),
-            'method' => $request->getMethod(),
+            'path' => $Silian_request->getUri()->getPath(),
+            'method' => $Silian_request->getMethod(),
             'timestamp' => date(APP_DATE_FMT)
         ]));
-        
-        return $response
+
+        return $Silian_response
             ->withStatus(404)
             ->withHeader('Content-Type', APP_JSON);
     }
 );
 
 // Default error handler to ensure all unhandled exceptions are persisted to DB
-$errorMiddleware->setDefaultErrorHandler(
+$Silian_errorMiddleware->setDefaultErrorHandler(
     function (
-        Psr\Http\Message\ServerRequestInterface $request,
-        Throwable $exception,
-        bool $displayErrorDetails,
-        bool $logErrors,
-        bool $logErrorDetails
-    ) use ($container, $resolvedAppEnv) {
+        Psr\Http\Message\ServerRequestInterface $Silian_request,
+        Throwable $Silian_exception,
+        bool $Silian_displayErrorDetails,
+        bool $Silian_logErrors,
+        bool $Silian_logErrorDetails
+    ) use ($Silian_container, $Silian_resolvedAppEnv) {
         try {
-            $els = $container->get(ErrorLogService::class);
-            $els->logException($exception, $request);
-        } catch (Throwable $e) {
-            error_log('Failed to persist unhandled exception: ' . $e->getMessage());
+            $Silian_els = $Silian_container->get(ErrorLogService::class);
+            $Silian_els->logException($Silian_exception, $Silian_request);
+        } catch (Throwable $Silian_e) {
+            error_log('Failed to persist unhandled exception: ' . $Silian_e->getMessage());
         }
 
         try {
-            if ($container->has(LoggerInterface::class)) {
-                $container->get(LoggerInterface::class)->error('Unhandled application exception', [
-                    'exception' => $exception,
-                    'environment' => $resolvedAppEnv,
-                    'display_error_details' => $displayErrorDetails,
-                    'log_errors' => $logErrors,
-                    'log_error_details' => $logErrorDetails,
+            if ($Silian_container->has(LoggerInterface::class)) {
+                $Silian_container->get(LoggerInterface::class)->error('Unhandled application exception', [
+                    'exception' => $Silian_exception,
+                    'environment' => $Silian_resolvedAppEnv,
+                    'display_error_details' => $Silian_displayErrorDetails,
+                    'log_errors' => $Silian_logErrors,
+                    'log_error_details' => $Silian_logErrorDetails,
                 ]);
             }
-        } catch (Throwable $loggerEx) {
-            error_log('Failed to log exception via logger: ' . $loggerEx->getMessage());
+        } catch (Throwable $Silian_loggerEx) {
+            error_log('Failed to log exception via logger: ' . $Silian_loggerEx->getMessage());
         }
 
-        $response = new \Slim\Psr7\Response();
-        $status = 500;
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_status = 500;
 
         // Derive an HTTP status code that works across Slim and other frameworks:
         // 1) Slim HttpException exposes the correct status via getCode()
         // 2) Some third-party exceptions expose getStatusCode()
         // 3) Fall back to Exception::getCode()
-        $derivedStatus = null;
-        if ($exception instanceof HttpException) {
-            $derivedStatus = (int) $exception->getCode();
-        } elseif (method_exists($exception, 'getStatusCode')) {
+        $Silian_derivedStatus = null;
+        if ($Silian_exception instanceof HttpException) {
+            $Silian_derivedStatus = (int) $Silian_exception->getCode();
+        } elseif (method_exists($Silian_exception, 'getStatusCode')) {
             try {
-                $derivedStatus = (int) $exception->getStatusCode();
-            } catch (\Throwable $statusEx) {
-                $derivedStatus = null;
+                $Silian_derivedStatus = (int) $Silian_exception->getStatusCode();
+            } catch (\Throwable $Silian_statusEx) {
+                $Silian_derivedStatus = null;
             }
         }
 
-        if ($derivedStatus === null) {
-            $derivedStatus = (int) $exception->getCode();
+        if ($Silian_derivedStatus === null) {
+            $Silian_derivedStatus = (int) $Silian_exception->getCode();
         }
 
-        if ($derivedStatus >= 400 && $derivedStatus <= 599) {
-            $status = $derivedStatus;
+        if ($Silian_derivedStatus >= 400 && $Silian_derivedStatus <= 599) {
+            $Silian_status = $Silian_derivedStatus;
         }
-        $payload = ErrorResponseBuilder::build($exception, $request, $resolvedAppEnv, $status);
-        $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        return $response
-            ->withStatus($status)
+        $Silian_payload = ErrorResponseBuilder::build($Silian_exception, $Silian_request, $Silian_resolvedAppEnv, $Silian_status);
+        $Silian_response->getBody()->write(json_encode($Silian_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        return $Silian_response
+            ->withStatus($Silian_status)
             ->withHeader('Content-Type', APP_JSON);
     }
 );
 
 // Add a debug route to test if routing is working
-$app->get('/debug', function ($request, $response) {
-    $response->getBody()->write(json_encode([
+$Silian_app->get('/debug', function ($Silian_request, $Silian_response) {
+    $Silian_response->getBody()->write(json_encode([
         'success' => true,
         'message' => 'Debug route working',
         'routes' => 'Routes registered successfully',
-        'path' => $request->getUri()->getPath(),
-        'method' => $request->getMethod(),
+        'path' => $Silian_request->getUri()->getPath(),
+        'method' => $Silian_request->getMethod(),
         'timestamp' => date(APP_DATE_FMT)
     ]));
-    return $response->withHeader('Content-Type', APP_JSON);
+    return $Silian_response->withHeader('Content-Type', APP_JSON);
 });
 
 // Register routes
-$routes = require_once __DIR__ . '/../src/routes.php';
-$routes($app);
+$Silian_routes = require_once __DIR__ . '/../src/routes.php';
+$Silian_routes($Silian_app);
 
 if (CARBONTRACK_NO_EMIT === true) {
     return [
-        'app' => $app,
-        'container' => $container,
-        'errorMiddleware' => $errorMiddleware,
-        'environment' => $resolvedAppEnv,
+        'app' => $Silian_app,
+        'container' => $Silian_container,
+        'errorMiddleware' => $Silian_errorMiddleware,
+        'environment' => $Silian_resolvedAppEnv,
     ];
 }
 
 // Create Request object from globals
-$serverRequestCreator = ServerRequestCreatorFactory::create();
-$request = $serverRequestCreator->createServerRequestFromGlobals();
+$Silian_serverRequestCreator = ServerRequestCreatorFactory::create();
+$Silian_request = $Silian_serverRequestCreator->createServerRequestFromGlobals();
 
 // Run App
-$response = $app->handle($request);
-$responseEmitter = new ResponseEmitter();
-$responseEmitter->emit($response);
+$Silian_response = $Silian_app->handle($Silian_request);
+$Silian_responseEmitter = new ResponseEmitter();
+$Silian_responseEmitter->emit($Silian_response);
 

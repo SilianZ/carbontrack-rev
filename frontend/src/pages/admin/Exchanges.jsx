@@ -1,6 +1,6 @@
-import React from 'react';
-import { ExchangeManagement } from '../../components/admin/ExchangeManagement';
+import Silian_React from 'react';
+import { ExchangeManagement as Silian_ExchangeManagement } from '../../components/admin/ExchangeManagement';
 
 export default function AdminExchangesPage() {
-  return <ExchangeManagement />;
+  return <Silian_ExchangeManagement />;
 }

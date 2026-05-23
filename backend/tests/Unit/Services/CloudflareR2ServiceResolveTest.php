@@ -11,51 +11,51 @@ use PHPUnit\Framework\TestCase;
 
 class CloudflareR2ServiceResolveTest extends TestCase
 {
-    private function makeService(string $endpoint, string $bucket, ?string $publicUrl = null): CloudflareR2Service
+    private function makeService(string $Silian_endpoint, string $Silian_bucket, ?string $Silian_publicUrl = null): CloudflareR2Service
     {
-        $logger = new Logger('test');
-        $auditLog = $this->createMock(AuditLogService::class);
+        $Silian_logger = new Logger('test');
+        $Silian_auditLog = $this->createMock(AuditLogService::class);
 
         return new CloudflareR2Service(
             'test-access',
             'test-secret',
-            $endpoint,
-            $bucket,
-            $publicUrl,
-            $logger,
-            $auditLog
+            $Silian_endpoint,
+            $Silian_bucket,
+            $Silian_publicUrl,
+            $Silian_logger,
+            $Silian_auditLog
         );
     }
 
     public function testResolveKeyFromDerivedPublicUrl(): void
     {
-        $service = $this->makeService('https://example.r2.cloudflarestorage.com', 'media', 'https://pub-example.r2.dev/media');
+        $Silian_service = $this->makeService('https://example.r2.cloudflarestorage.com', 'media', 'https://pub-example.r2.dev/media');
 
-        $key = $service->resolveKeyFromUrl('https://pub-example.r2.dev/media/badges/2025/icon.png');
-        $this->assertSame('badges/2025/icon.png', $key);
+        $Silian_key = $Silian_service->resolveKeyFromUrl('https://pub-example.r2.dev/media/badges/2025/icon.png');
+        $this->assertSame('badges/2025/icon.png', $Silian_key);
     }
 
     public function testResolveKeyFromCustomEndpoint(): void
     {
-        $service = $this->makeService('https://files.example.com', 'media', null);
+        $Silian_service = $this->makeService('https://files.example.com', 'media', null);
 
-        $key = $service->resolveKeyFromUrl('https://files.example.com/media/uploads/2025/01/avatar.png');
-        $this->assertSame('uploads/2025/01/avatar.png', $key);
+        $Silian_key = $Silian_service->resolveKeyFromUrl('https://files.example.com/media/uploads/2025/01/avatar.png');
+        $this->assertSame('uploads/2025/01/avatar.png', $Silian_key);
     }
 
     public function testResolveKeyFromRelativePath(): void
     {
-        $service = $this->makeService('https://files.example.com', 'media');
+        $Silian_service = $this->makeService('https://files.example.com', 'media');
 
-        $key = $service->resolveKeyFromUrl('uploads/2025/01/icon.webp');
-        $this->assertSame('uploads/2025/01/icon.webp', $key);
+        $Silian_key = $Silian_service->resolveKeyFromUrl('uploads/2025/01/icon.webp');
+        $this->assertSame('uploads/2025/01/icon.webp', $Silian_key);
     }
 
     public function testResolveKeyWithQueryString(): void
     {
-        $service = $this->makeService('https://example.r2.cloudflarestorage.com', 'media', 'https://pub-example.r2.dev/media');
+        $Silian_service = $this->makeService('https://example.r2.cloudflarestorage.com', 'media', 'https://pub-example.r2.dev/media');
 
-        $key = $service->resolveKeyFromUrl('https://pub-example.r2.dev/media/badges/icon.png?signature=123');
-        $this->assertSame('badges/icon.png', $key);
+        $Silian_key = $Silian_service->resolveKeyFromUrl('https://pub-example.r2.dev/media/badges/icon.png?signature=123');
+        $this->assertSame('badges/icon.png', $Silian_key);
     }
 }

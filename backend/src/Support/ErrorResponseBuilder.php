@@ -10,66 +10,66 @@ use Throwable;
 class ErrorResponseBuilder
 {
     public static function build(
-        Throwable $exception,
-        ServerRequestInterface $request,
-        string $environment,
-        int $status = 500
+        Throwable $Silian_exception,
+        ServerRequestInterface $Silian_request,
+        string $Silian_environment,
+        int $Silian_status = 500
     ): array {
-        $env = strtolower($environment);
-        $isProduction = $env === 'production';
+        $Silian_env = strtolower($Silian_environment);
+        $Silian_isProduction = $Silian_env === 'production';
 
-        $payload = [
+        $Silian_payload = [
             'success' => false,
-            'code' => self::resolveErrorCode($exception, $status),
-            'request_id' => self::extractRequestId($request),
+            'code' => self::resolveErrorCode($Silian_exception, $Silian_status),
+            'request_id' => self::extractRequestId($Silian_request),
         ];
 
-        if (!$isProduction) {
-            $payload['message'] = $exception->getMessage();
-            $payload['error'] = get_class($exception);
+        if (!$Silian_isProduction) {
+            $Silian_payload['message'] = $Silian_exception->getMessage();
+            $Silian_payload['error'] = get_class($Silian_exception);
         }
 
-        return $payload;
+        return $Silian_payload;
     }
 
-    private static function resolveErrorCode(Throwable $exception, int $status): string
+    private static function resolveErrorCode(Throwable $Silian_exception, int $Silian_status): string
     {
-        $code = $exception->getCode();
+        $Silian_code = $Silian_exception->getCode();
 
-        if (is_string($code) && $code !== '') {
-            return $code;
+        if (is_string($Silian_code) && $Silian_code !== '') {
+            return $Silian_code;
         }
 
-        if (is_int($code) && $code > 0) {
-            return (string) $code;
+        if (is_int($Silian_code) && $Silian_code > 0) {
+            return (string) $Silian_code;
         }
 
-        return $status >= 500 ? 'SERVER_ERROR' : (string) $status;
+        return $Silian_status >= 500 ? 'SERVER_ERROR' : (string) $Silian_status;
     }
 
-    private static function extractRequestId(ServerRequestInterface $request): ?string
+    private static function extractRequestId(ServerRequestInterface $Silian_request): ?string
     {
-        $attribute = $request->getAttribute('request_id');
-        if (is_string($attribute)) {
-            $normalized = RequestIdNormalizer::normalize($attribute);
-            if ($normalized !== null) {
-                return $normalized;
+        $Silian_attribute = $Silian_request->getAttribute('request_id');
+        if (is_string($Silian_attribute)) {
+            $Silian_normalized = RequestIdNormalizer::normalize($Silian_attribute);
+            if ($Silian_normalized !== null) {
+                return $Silian_normalized;
             }
         }
 
-        $headerRequestId = RequestIdNormalizer::normalize($request->getHeaderLine('X-Request-ID'));
-        if ($headerRequestId !== null) {
-            return $headerRequestId;
+        $Silian_headerRequestId = RequestIdNormalizer::normalize($Silian_request->getHeaderLine('X-Request-ID'));
+        if ($Silian_headerRequestId !== null) {
+            return $Silian_headerRequestId;
         }
 
-        $serverParams = $request->getServerParams();
-        $candidateKeys = ['HTTP_X_REQUEST_ID', 'REQUEST_ID'];
+        $Silian_serverParams = $Silian_request->getServerParams();
+        $Silian_candidateKeys = ['HTTP_X_REQUEST_ID', 'REQUEST_ID'];
 
-        foreach ($candidateKeys as $key) {
-            if (!empty($serverParams[$key])) {
-                $normalized = RequestIdNormalizer::normalize($serverParams[$key]);
-                if ($normalized !== null) {
-                    return $normalized;
+        foreach ($Silian_candidateKeys as $Silian_key) {
+            if (!empty($Silian_serverParams[$Silian_key])) {
+                $Silian_normalized = RequestIdNormalizer::normalize($Silian_serverParams[$Silian_key]);
+                if ($Silian_normalized !== null) {
+                    return $Silian_normalized;
                 }
             }
         }

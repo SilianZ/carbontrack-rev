@@ -1,139 +1,139 @@
-import React, { useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
-import { useTranslation } from '../hooks/useTranslation';
+import Silian_React, { useRef as Silian_useRef, useEffect as Silian_useEffect } from 'react';
+import { Link as Silian_Link } from 'react-router-dom';
+import { Button as Silian_Button } from '../components/ui/Button';
+import { useTranslation as Silian_useTranslation } from '../hooks/useTranslation';
 import './NotFoundPage.css';
 
-const BASE_SPEED = 40;
-const ANGULAR_ACCEL = 360;
-const SCALE_BASE_RATE = 1.2;
-const SCALE_VELOCITY_FACTOR = 1 / 800;
-const COLOR_LERP = 8;
+const Silian_BASE_SPEED = 40;
+const Silian_ANGULAR_ACCEL = 360;
+const Silian_SCALE_BASE_RATE = 1.2;
+const Silian_SCALE_VELOCITY_FACTOR = 1 / 800;
+const Silian_COLOR_LERP = 8;
 
 export default function NotFoundPage() {
-  const { t } = useTranslation(['notFoundPage']);
-  const emojiRef = useRef(null);
-  const angleRef = useRef(0); // degrees
-  const velocityRef = useRef(40); // deg/s
-  const rafRef = useRef(null);
-  const lastTimeRef = useRef(null);
-  const directionRef = useRef(1);
-  const isHoveredRef = useRef(false);
-  const scaleRef = useRef(1);
-  const colorMixRef = useRef(0); // 0..1
+  const { t: Silian_t } = Silian_useTranslation(['notFoundPage']);
+  const Silian_emojiRef = Silian_useRef(null);
+  const Silian_angleRef = Silian_useRef(0); // degrees
+  const Silian_velocityRef = Silian_useRef(40); // deg/s
+  const Silian_rafRef = Silian_useRef(null);
+  const Silian_lastTimeRef = Silian_useRef(null);
+  const Silian_directionRef = Silian_useRef(1);
+  const Silian_isHoveredRef = Silian_useRef(false);
+  const Silian_scaleRef = Silian_useRef(1);
+  const Silian_colorMixRef = Silian_useRef(0); // 0..1
 
-  useEffect(() => {
-    const el = emojiRef.current;
-    if (!el) return;
+  Silian_useEffect(() => {
+    const Silian_el = Silian_emojiRef.current;
+    if (!Silian_el) return;
 
-    const redColor = '#ff3b30';
+    const Silian_redColor = '#ff3b30';
 
-    const hexToRgb = (hex) => {
-      const h = hex.replace('#', '');
-      const bigint = parseInt(h, 16);
-      return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+    const Silian_hexToRgb = (Silian_hex) => {
+      const Silian_h = Silian_hex.replace('#', '');
+      const Silian_bigint = parseInt(Silian_h, 16);
+      return { r: (Silian_bigint >> 16) & 255, g: (Silian_bigint >> 8) & 255, b: Silian_bigint & 255 };
     };
 
-    const rgbToCss = (rgb) => `rgb(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)})`;
+    const Silian_rgbToCss = (Silian_rgb) => `rgb(${Math.round(Silian_rgb.r)}, ${Math.round(Silian_rgb.g)}, ${Math.round(Silian_rgb.b)})`;
 
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const lerpColor = (c1, c2, t) => ({ r: lerp(c1.r, c2.r, t), g: lerp(c1.g, c2.g, t), b: lerp(c1.b, c2.b, t) });
+    const Silian_lerp = (Silian_a, Silian_b, Silian_t) => Silian_a + (Silian_b - Silian_a) * Silian_t;
+    const Silian_lerpColor = (Silian_c1, Silian_c2, Silian_t) => ({ r: Silian_lerp(Silian_c1.r, Silian_c2.r, Silian_t), g: Silian_lerp(Silian_c1.g, Silian_c2.g, Silian_t), b: Silian_lerp(Silian_c1.b, Silian_c2.b, Silian_t) });
 
-    const baseRgb = hexToRgb('#374151'); // Tailwind gray-700 fallback
-    const redRgb = hexToRgb(redColor);
+    const Silian_baseRgb = Silian_hexToRgb('#374151'); // Tailwind gray-700 fallback
+    const Silian_redRgb = Silian_hexToRgb(Silian_redColor);
 
-    const step = (time) => {
-      if (lastTimeRef.current == null) lastTimeRef.current = time;
-      const dt = Math.min(0.05, (time - lastTimeRef.current) / 1000); // seconds, clamp to avoid big jumps
-      lastTimeRef.current = time;
+    const Silian_step = (Silian_time) => {
+      if (Silian_lastTimeRef.current == null) Silian_lastTimeRef.current = Silian_time;
+      const Silian_dt = Math.min(0.05, (Silian_time - Silian_lastTimeRef.current) / 1000); // seconds, clamp to avoid big jumps
+      Silian_lastTimeRef.current = Silian_time;
 
-      const hovered = isHoveredRef.current;
-      if (hovered) {
-        velocityRef.current += directionRef.current * ANGULAR_ACCEL * dt;
+      const Silian_hovered = Silian_isHoveredRef.current;
+      if (Silian_hovered) {
+        Silian_velocityRef.current += Silian_directionRef.current * Silian_ANGULAR_ACCEL * Silian_dt;
       } else {
-        const dir = directionRef.current;
-        const speed = Math.abs(velocityRef.current || dir * BASE_SPEED);
-        if (speed > BASE_SPEED) {
-          const decel = ANGULAR_ACCEL * dt;
-          const newSpeed = Math.max(BASE_SPEED, speed - decel);
-          velocityRef.current = dir * newSpeed;
+        const Silian_dir = Silian_directionRef.current;
+        const Silian_speed = Math.abs(Silian_velocityRef.current || Silian_dir * Silian_BASE_SPEED);
+        if (Silian_speed > Silian_BASE_SPEED) {
+          const Silian_decel = Silian_ANGULAR_ACCEL * Silian_dt;
+          const Silian_newSpeed = Math.max(Silian_BASE_SPEED, Silian_speed - Silian_decel);
+          Silian_velocityRef.current = Silian_dir * Silian_newSpeed;
         } else {
-          velocityRef.current = dir * BASE_SPEED;
+          Silian_velocityRef.current = Silian_dir * Silian_BASE_SPEED;
         }
       }
-      angleRef.current += velocityRef.current * dt;
+      Silian_angleRef.current += Silian_velocityRef.current * Silian_dt;
 
-      const scaleRate = SCALE_BASE_RATE + Math.abs(velocityRef.current) * SCALE_VELOCITY_FACTOR;
-      if (hovered) {
-        scaleRef.current += scaleRate * dt;
+      const Silian_scaleRate = Silian_SCALE_BASE_RATE + Math.abs(Silian_velocityRef.current) * Silian_SCALE_VELOCITY_FACTOR;
+      if (Silian_hovered) {
+        Silian_scaleRef.current += Silian_scaleRate * Silian_dt;
       } else {
-        scaleRef.current = Math.max(1, scaleRef.current - scaleRate * dt);
+        Silian_scaleRef.current = Math.max(1, Silian_scaleRef.current - Silian_scaleRate * Silian_dt);
       }
 
-      const colorTarget = hovered ? 1 : 0;
-      const colorAlpha = 1 - Math.exp(-COLOR_LERP * dt);
-      colorMixRef.current += (colorTarget - colorMixRef.current) * colorAlpha;
-      const mixedRgb = lerpColor(baseRgb, redRgb, colorMixRef.current);
+      const Silian_colorTarget = Silian_hovered ? 1 : 0;
+      const Silian_colorAlpha = 1 - Math.exp(-Silian_COLOR_LERP * Silian_dt);
+      Silian_colorMixRef.current += (Silian_colorTarget - Silian_colorMixRef.current) * Silian_colorAlpha;
+      const Silian_mixedRgb = Silian_lerpColor(Silian_baseRgb, Silian_redRgb, Silian_colorMixRef.current);
 
       // apply to element without forcing React updates
-      el.style.transform = `rotate(${angleRef.current}deg) scale(${scaleRef.current})`;
-      el.style.color = rgbToCss(mixedRgb);
+      Silian_el.style.transform = `rotate(${Silian_angleRef.current}deg) scale(${Silian_scaleRef.current})`;
+      Silian_el.style.color = Silian_rgbToCss(Silian_mixedRgb);
 
-      rafRef.current = requestAnimationFrame(step);
+      Silian_rafRef.current = requestAnimationFrame(Silian_step);
     };
 
-    rafRef.current = requestAnimationFrame(step);
+    Silian_rafRef.current = requestAnimationFrame(Silian_step);
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
+      if (Silian_rafRef.current) cancelAnimationFrame(Silian_rafRef.current);
+      Silian_rafRef.current = null;
     };
     // empty dependency so RAF loop never restarts unexpectedly
   }, []);
 
-  const handleMouseEnter = () => {
-    isHoveredRef.current = true;
+  const Silian_handleMouseEnter = () => {
+    Silian_isHoveredRef.current = true;
   };
-  const handleMouseLeave = () => {
-    const prevVelocity = velocityRef.current || directionRef.current * BASE_SPEED;
-    isHoveredRef.current = false;
-    const newDirection = prevVelocity >= 0 ? -1 : 1;
-    directionRef.current = newDirection;
-    velocityRef.current = -prevVelocity;
+  const Silian_handleMouseLeave = () => {
+    const Silian_prevVelocity = Silian_velocityRef.current || Silian_directionRef.current * Silian_BASE_SPEED;
+    Silian_isHoveredRef.current = false;
+    const Silian_newDirection = Silian_prevVelocity >= 0 ? -1 : 1;
+    Silian_directionRef.current = Silian_newDirection;
+    Silian_velocityRef.current = -Silian_prevVelocity;
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 text-foreground">
       <div className="text-center max-w-xl">
-        <h1 className="mb-4 text-5xl font-bold text-foreground">{t('notFoundPage.code')}</h1>
+        <h1 className="mb-4 text-5xl font-bold text-foreground">{Silian_t('notFoundPage.code')}</h1>
         <div
           className="mb-6 flex items-center justify-center"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          onMouseEnter={Silian_handleMouseEnter}
+          onMouseLeave={Silian_handleMouseLeave}
         >
           <span
             aria-hidden
-            ref={emojiRef}
+            ref={Silian_emojiRef}
             className="text-6xl emoji"
             style={{ display: 'inline-block' }}
           >
-            {t('notFoundPage.emoji')}
+            {Silian_t('notFoundPage.emoji')}
           </span>
         </div>
-        <p className="mb-2 text-lg text-foreground">{t('notFoundPage.message')}</p>
-        <p className="mb-6 text-base text-muted-foreground">{t('notFoundPage.submessage')}</p>
+        <p className="mb-2 text-lg text-foreground">{Silian_t('notFoundPage.message')}</p>
+        <p className="mb-6 text-base text-muted-foreground">{Silian_t('notFoundPage.submessage')}</p>
         <div className="flex items-center justify-center gap-3">
-          <Button 
+          <Silian_Button
             onClick={() => window.location.reload()}
             variant="outline"
           >
-            {t('notFoundPage.refresh')}
-          </Button>
-          <Link to="/">
-            <Button>
-              {t('notFoundPage.home')}
-            </Button>
-          </Link>
+            {Silian_t('notFoundPage.refresh')}
+          </Silian_Button>
+          <Silian_Link to="/">
+            <Silian_Button>
+              {Silian_t('notFoundPage.home')}
+            </Silian_Button>
+          </Silian_Link>
         </div>
       </div>
     </div>

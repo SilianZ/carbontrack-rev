@@ -6,116 +6,116 @@ namespace CarbonTrack\Services\Webauthn;
 
 final class CborDecoder
 {
-    public static function decode(string $payload)
+    public static function decode(string $Silian_payload)
     {
-        $offset = 0;
-        $value = self::decodeWithOffset($payload, $offset);
-        if ($offset !== strlen($payload)) {
+        $Silian_offset = 0;
+        $Silian_value = self::decodeWithOffset($Silian_payload, $Silian_offset);
+        if ($Silian_offset !== strlen($Silian_payload)) {
             throw new \InvalidArgumentException('Unexpected trailing bytes in CBOR payload.');
         }
 
-        return $value;
+        return $Silian_value;
     }
 
-    public static function decodeWithOffset(string $payload, int &$offset)
+    public static function decodeWithOffset(string $Silian_payload, int &$Silian_offset)
     {
-        return self::readItem($payload, $offset);
+        return self::readItem($Silian_payload, $Silian_offset);
     }
 
-    private static function readItem(string $payload, int &$offset)
+    private static function readItem(string $Silian_payload, int &$Silian_offset)
     {
-        if (!isset($payload[$offset])) {
+        if (!isset($Silian_payload[$Silian_offset])) {
             throw new \InvalidArgumentException('Unexpected end of CBOR payload.');
         }
 
-        $initial = ord($payload[$offset++]);
-        $majorType = $initial >> 5;
-        $additional = $initial & 0x1f;
+        $Silian_initial = ord($Silian_payload[$Silian_offset++]);
+        $Silian_majorType = $Silian_initial >> 5;
+        $Silian_additional = $Silian_initial & 0x1f;
 
-        switch ($majorType) {
+        switch ($Silian_majorType) {
             case 0:
-                return self::readLength($payload, $offset, $additional);
+                return self::readLength($Silian_payload, $Silian_offset, $Silian_additional);
             case 1:
-                return -1 - self::readLength($payload, $offset, $additional);
+                return -1 - self::readLength($Silian_payload, $Silian_offset, $Silian_additional);
             case 2:
-                $length = self::readLength($payload, $offset, $additional);
-                return self::readBytes($payload, $offset, $length);
+                $Silian_length = self::readLength($Silian_payload, $Silian_offset, $Silian_additional);
+                return self::readBytes($Silian_payload, $Silian_offset, $Silian_length);
             case 3:
-                $length = self::readLength($payload, $offset, $additional);
-                return self::readBytes($payload, $offset, $length);
+                $Silian_length = self::readLength($Silian_payload, $Silian_offset, $Silian_additional);
+                return self::readBytes($Silian_payload, $Silian_offset, $Silian_length);
             case 4:
-                $length = self::readLength($payload, $offset, $additional);
-                $items = [];
-                for ($index = 0; $index < $length; $index++) {
-                    $items[] = self::readItem($payload, $offset);
+                $Silian_length = self::readLength($Silian_payload, $Silian_offset, $Silian_additional);
+                $Silian_items = [];
+                for ($Silian_index = 0; $Silian_index < $Silian_length; $Silian_index++) {
+                    $Silian_items[] = self::readItem($Silian_payload, $Silian_offset);
                 }
-                return $items;
+                return $Silian_items;
             case 5:
-                $length = self::readLength($payload, $offset, $additional);
-                $items = [];
-                for ($index = 0; $index < $length; $index++) {
-                    $items[self::readItem($payload, $offset)] = self::readItem($payload, $offset);
+                $Silian_length = self::readLength($Silian_payload, $Silian_offset, $Silian_additional);
+                $Silian_items = [];
+                for ($Silian_index = 0; $Silian_index < $Silian_length; $Silian_index++) {
+                    $Silian_items[self::readItem($Silian_payload, $Silian_offset)] = self::readItem($Silian_payload, $Silian_offset);
                 }
-                return $items;
+                return $Silian_items;
             case 7:
-                return self::readSimpleValue($payload, $offset, $additional);
+                return self::readSimpleValue($Silian_payload, $Silian_offset, $Silian_additional);
             default:
                 throw new \InvalidArgumentException('Unsupported CBOR major type.');
         }
     }
 
-    private static function readLength(string $payload, int &$offset, int $additional): int
+    private static function readLength(string $Silian_payload, int &$Silian_offset, int $Silian_additional): int
     {
-        if ($additional < 24) {
-            return $additional;
+        if ($Silian_additional < 24) {
+            return $Silian_additional;
         }
 
-        if ($additional === 24) {
-            return ord(self::readBytes($payload, $offset, 1));
+        if ($Silian_additional === 24) {
+            return ord(self::readBytes($Silian_payload, $Silian_offset, 1));
         }
 
-        if ($additional === 25) {
-            return unpack('n', self::readBytes($payload, $offset, 2))[1];
+        if ($Silian_additional === 25) {
+            return unpack('n', self::readBytes($Silian_payload, $Silian_offset, 2))[1];
         }
 
-        if ($additional === 26) {
-            return unpack('N', self::readBytes($payload, $offset, 4))[1];
+        if ($Silian_additional === 26) {
+            return unpack('N', self::readBytes($Silian_payload, $Silian_offset, 4))[1];
         }
 
-        if ($additional === 27) {
-            $parts = unpack('N2', self::readBytes($payload, $offset, 8));
-            return ((int) $parts[1] << 32) | (int) $parts[2];
+        if ($Silian_additional === 27) {
+            $Silian_parts = unpack('N2', self::readBytes($Silian_payload, $Silian_offset, 8));
+            return ((int) $Silian_parts[1] << 32) | (int) $Silian_parts[2];
         }
 
         throw new \InvalidArgumentException('Unsupported CBOR additional information value.');
     }
 
-    private static function readSimpleValue(string $payload, int &$offset, int $additional)
+    private static function readSimpleValue(string $Silian_payload, int &$Silian_offset, int $Silian_additional)
     {
-        if ($additional === 20) {
+        if ($Silian_additional === 20) {
             return false;
         }
 
-        if ($additional === 21) {
+        if ($Silian_additional === 21) {
             return true;
         }
 
-        if ($additional === 22) {
+        if ($Silian_additional === 22) {
             return null;
         }
 
         throw new \InvalidArgumentException('Unsupported CBOR simple value.');
     }
 
-    private static function readBytes(string $payload, int &$offset, int $length): string
+    private static function readBytes(string $Silian_payload, int &$Silian_offset, int $Silian_length): string
     {
-        if ($length < 0 || ($offset + $length) > strlen($payload)) {
+        if ($Silian_length < 0 || ($Silian_offset + $Silian_length) > strlen($Silian_payload)) {
             throw new \InvalidArgumentException('Unexpected end of CBOR payload.');
         }
 
-        $value = substr($payload, $offset, $length);
-        $offset += $length;
+        $Silian_value = substr($Silian_payload, $Silian_offset, $Silian_length);
+        $Silian_offset += $Silian_length;
 
-        return $value;
+        return $Silian_value;
     }
 }

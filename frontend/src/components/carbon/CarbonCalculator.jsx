@@ -1,196 +1,196 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { CheckCircle, ArrowLeft, Leaf } from 'lucide-react';
-import { useTranslation } from '../../hooks/useTranslation';
-import { carbonAPI } from '../../lib/api';
-import { ActivitySelector } from './ActivitySelector';
-import DataInputForm from './DataInputForm';
-import { Button } from '../ui/Button';
-import { Alert, AlertDescription } from '../ui/Alert';
-import { SmartActivityInput } from './SmartActivityInput';
+import Silian_React, { useState as Silian_useState, useCallback as Silian_useCallback, useMemo as Silian_useMemo } from 'react';
+import { useSearchParams as Silian_useSearchParams } from 'react-router-dom';
+import { CheckCircle as Silian_CheckCircle, ArrowLeft as Silian_ArrowLeft, Leaf as Silian_Leaf } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { carbonAPI as Silian_carbonAPI } from '../../lib/api';
+import { ActivitySelector as Silian_ActivitySelector } from './ActivitySelector';
+import Silian_DataInputForm from './DataInputForm';
+import { Button as Silian_Button } from '../ui/Button';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../ui/Alert';
+import { SmartActivityInput as Silian_SmartActivityInput } from './SmartActivityInput';
 
-const InteractiveReceipt = React.lazy(() => import('./InteractiveReceipt'));
+const Silian_InteractiveReceipt = Silian_React.lazy(() => import('./InteractiveReceipt'));
 
 export function CarbonCalculator() {
-  const { t } = useTranslation(['activities', 'common', 'errors', 'images']);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [activities, setActivities] = useState([]); // Store fetched activities
-  const [selectedActivity, setSelectedActivity] = useState(null);
-  const [smartData, setSmartData] = useState(null); // Data from AI
-  const [calculationResult, setCalculationResult] = useState(null);
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitResult, setSubmitResult] = useState(null);
-  const [error, setError] = useState('');
+  const { t: Silian_t } = Silian_useTranslation(['activities', 'common', 'errors', 'images']);
+  const [Silian_searchParams, Silian_setSearchParams] = Silian_useSearchParams();
+  const [Silian_currentStep, Silian_setCurrentStep] = Silian_useState(1);
+  const [Silian_activities, Silian_setActivities] = Silian_useState([]); // Store fetched activities
+  const [Silian_selectedActivity, Silian_setSelectedActivity] = Silian_useState(null);
+  const [Silian_smartData, Silian_setSmartData] = Silian_useState(null); // Data from AI
+  const [Silian_calculationResult, Silian_setCalculationResult] = Silian_useState(null);
+  const [Silian_isCalculating, Silian_setIsCalculating] = Silian_useState(false);
+  const [Silian_isSubmitting, Silian_setIsSubmitting] = Silian_useState(false);
+  const [Silian_submitResult, Silian_setSubmitResult] = Silian_useState(null);
+  const [Silian_error, Silian_setError] = Silian_useState('');
 
-  const checkinDate = useMemo(() => {
-    const raw = searchParams.get('checkin_date');
-    if (!raw) {
+  const Silian_checkinDate = Silian_useMemo(() => {
+    const Silian_raw = Silian_searchParams.get('checkin_date');
+    if (!Silian_raw) {
       return null;
     }
-    const trimmed = String(raw).trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : null;
-  }, [searchParams]);
+    const Silian_trimmed = String(Silian_raw).trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(Silian_trimmed) ? Silian_trimmed : null;
+  }, [Silian_searchParams]);
 
-  const clearCheckinDate = useCallback(() => {
-    const next = new URLSearchParams(searchParams);
-    next.delete('checkin_date');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+  const Silian_clearCheckinDate = Silian_useCallback(() => {
+    const Silian_next = new URLSearchParams(Silian_searchParams);
+    Silian_next.delete('checkin_date');
+    Silian_setSearchParams(Silian_next, { replace: true });
+  }, [Silian_searchParams, Silian_setSearchParams]);
 
   // Fetch activities on mount to support Smart matching
-  React.useEffect(() => {
-    const fetchActivities = async () => {
+  Silian_React.useEffect(() => {
+    const Silian_fetchActivities = async () => {
       try {
-        const response = await carbonAPI.getActivities();
-        if (response?.data?.success) {
-          const payload = response?.data?.data;
-          const raw = Array.isArray(payload?.activities) ? payload.activities : (Array.isArray(payload) ? payload : []);
-          setActivities(raw); // Store raw for now, or processed if needed
+        const Silian_response = await Silian_carbonAPI.getActivities();
+        if (Silian_response?.data?.success) {
+          const Silian_payload = Silian_response?.data?.data;
+          const Silian_raw = Array.isArray(Silian_payload?.activities) ? Silian_payload.activities : (Array.isArray(Silian_payload) ? Silian_payload : []);
+          Silian_setActivities(Silian_raw); // Store raw for now, or processed if needed
         }
-      } catch (err) {
-        console.error("Failed to fetch activities for smart matching", err);
+      } catch (Silian_err) {
+        console.error("Failed to fetch activities for smart matching", Silian_err);
       }
     };
-    fetchActivities();
+    Silian_fetchActivities();
   }, []);
 
-  const handleSmartSuggestion = (prediction) => {
-    if (!prediction) return;
+  const Silian_handleSmartSuggestion = (Silian_prediction) => {
+    if (!Silian_prediction) return;
 
     // Prefer UUID match
-    let match = null;
-    if (prediction.activity_uuid) {
-      match = activities.find(
-        (a) =>
-          String(a.id) === String(prediction.activity_uuid) ||
-          String(a.uuid || '') === String(prediction.activity_uuid)
+    let Silian_match = null;
+    if (Silian_prediction.activity_uuid) {
+      Silian_match = Silian_activities.find(
+        (Silian_a) =>
+          String(Silian_a.id) === String(Silian_prediction.activity_uuid) ||
+          String(Silian_a.uuid || '') === String(Silian_prediction.activity_uuid)
       );
     }
 
     // Fallback to name matching
-    if (!match && prediction.activity_name) {
-      const name = prediction.activity_name.toLowerCase();
-      match = activities.find(
-        (a) =>
-          (a.name_en && a.name_en.toLowerCase() === name) ||
-          (a.name_zh && a.name_zh.toLowerCase() === name) ||
-          (a.name && a.name.toLowerCase() === name)
+    if (!Silian_match && Silian_prediction.activity_name) {
+      const Silian_name = Silian_prediction.activity_name.toLowerCase();
+      Silian_match = Silian_activities.find(
+        (Silian_a) =>
+          (Silian_a.name_en && Silian_a.name_en.toLowerCase() === Silian_name) ||
+          (Silian_a.name_zh && Silian_a.name_zh.toLowerCase() === Silian_name) ||
+          (Silian_a.name && Silian_a.name.toLowerCase() === Silian_name)
       );
     }
 
-    if (match) {
-      setSelectedActivity(match);
-      setSmartData({
-        amount: prediction.amount,
-        unit: prediction.unit,
-        description: prediction.notes || prediction.description, // if AI returns it
-        activity_date: prediction.activity_date || null,
+    if (Silian_match) {
+      Silian_setSelectedActivity(Silian_match);
+      Silian_setSmartData({
+        amount: Silian_prediction.amount,
+        unit: Silian_prediction.unit,
+        description: Silian_prediction.notes || Silian_prediction.description, // if AI returns it
+        activity_date: Silian_prediction.activity_date || null,
       });
-      setCurrentStep(2);
-      setError('');
+      Silian_setCurrentStep(2);
+      Silian_setError('');
     } else {
       // Fallback: Show error or try fuzzy match (omitted for now)
-      setError(t('activities.smartAdd.notFound') || `Could not find activity type: ${prediction.activity_name}`);
+      Silian_setError(Silian_t('activities.smartAdd.notFound') || `Could not find activity type: ${Silian_prediction.activity_name}`);
     }
   };
 
-  const steps = [
-    { id: 1, title: t('activities.form.selectActivity'), description: t('activities.form.selectActivityDesc') },
-    { id: 2, title: t('activities.form.dataInput'), description: t('activities.form.dataInputDesc') },
-    { id: 3, title: t('activities.form.submit'), description: t('activities.form.submitDesc') }
+  const Silian_steps = [
+    { id: 1, title: Silian_t('activities.form.selectActivity'), description: Silian_t('activities.form.selectActivityDesc') },
+    { id: 2, title: Silian_t('activities.form.dataInput'), description: Silian_t('activities.form.dataInputDesc') },
+    { id: 3, title: Silian_t('activities.form.submit'), description: Silian_t('activities.form.submitDesc') }
   ];
 
   // 选择活动
-  const handleActivitySelect = (activity) => {
-    setSelectedActivity(activity);
-    setCalculationResult(null);
-    setError('');
-    setCurrentStep(2);
+  const Silian_handleActivitySelect = (Silian_activity) => {
+    Silian_setSelectedActivity(Silian_activity);
+    Silian_setCalculationResult(null);
+    Silian_setError('');
+    Silian_setCurrentStep(2);
   };
 
   // 计算碳减排
   // 使用 useCallback 保持函数引用稳定，避免子组件 useEffect 因 onCalculate 引用变化而重复触发
-  const handleCalculate = useCallback(async (data) => {
-    if (!selectedActivity) return;
+  const Silian_handleCalculate = Silian_useCallback(async (Silian_data) => {
+    if (!Silian_selectedActivity) return;
 
-    setIsCalculating(true);
-    setError('');
+    Silian_setIsCalculating(true);
+    Silian_setError('');
 
     try {
-      const activityId = selectedActivity.id || selectedActivity.uuid;
-      const response = await carbonAPI.calculate(activityId, data);
+      const Silian_activityId = Silian_selectedActivity.id || Silian_selectedActivity.uuid;
+      const Silian_response = await Silian_carbonAPI.calculate(Silian_activityId, Silian_data);
 
-      if (response.data.success) {
-        setCalculationResult(response.data.data);
+      if (Silian_response.data.success) {
+        Silian_setCalculationResult(Silian_response.data.data);
       } else {
-        setError(response.data.message || t('activities.form.calculationFailed'));
+        Silian_setError(Silian_response.data.message || Silian_t('activities.form.calculationFailed'));
       }
-    } catch (err) {
+    } catch (Silian_err) {
       // 忽略被取消的请求（快速输入时会取消上一次未完成的计算）
-      const msg = err?.message || '';
-      if (err?.code === 'ERR_CANCELED' || /aborted|canceled/i.test(msg)) {
+      const Silian_msg = Silian_err?.message || '';
+      if (Silian_err?.code === 'ERR_CANCELED' || /aborted|canceled/i.test(Silian_msg)) {
         return;
       }
-      setError(msg || t('activities.form.calculationFailed'));
+      Silian_setError(Silian_msg || Silian_t('activities.form.calculationFailed'));
     } finally {
-      setIsCalculating(false);
+      Silian_setIsCalculating(false);
     }
-  }, [selectedActivity, t]);
+  }, [Silian_selectedActivity, Silian_t]);
 
   // 提交记录
-  const handleSubmit = async (formData) => {
-    setIsSubmitting(true);
-    setError('');
+  const Silian_handleSubmit = async (Silian_formData) => {
+    Silian_setIsSubmitting(true);
+    Silian_setError('');
 
     try {
-      const response = await carbonAPI.recordActivity({
-        ...formData
+      const Silian_response = await Silian_carbonAPI.recordActivity({
+        ...Silian_formData
       });
 
-      if (response.data.success) {
+      if (Silian_response.data.success) {
         // 后端 submitRecord 返回 { success, record_id, calculation: { carbon_saved, points_earned }, message }
-        const calc = response.data.calculation || {};
-        setSubmitResult({
-          carbon_saved: calc.carbon_saved || 0,
-          points_earned: calc.points_earned || 0,
-          record_id: response.data.record_id,
-          amount: formData.amount,
-          date: formData.date,
-          checkin_date: formData.checkin_date || null,
-          description: formData.description || '',
-          images: Array.isArray(formData.images) ? formData.images : [],
-          image_count: Array.isArray(formData.images) ? formData.images.length : 0,
+        const Silian_calc = Silian_response.data.calculation || {};
+        Silian_setSubmitResult({
+          carbon_saved: Silian_calc.carbon_saved || 0,
+          points_earned: Silian_calc.points_earned || 0,
+          record_id: Silian_response.data.record_id,
+          amount: Silian_formData.amount,
+          date: Silian_formData.date,
+          checkin_date: Silian_formData.checkin_date || null,
+          description: Silian_formData.description || '',
+          images: Array.isArray(Silian_formData.images) ? Silian_formData.images : [],
+          image_count: Array.isArray(Silian_formData.images) ? Silian_formData.images.length : 0,
           submitted_at: new Date().toISOString(),
-          activity: selectedActivity ? { ...selectedActivity } : null,
+          activity: Silian_selectedActivity ? { ...Silian_selectedActivity } : null,
         });
-        setCurrentStep(3);
+        Silian_setCurrentStep(3);
       } else {
-        setError(response.data.message || t('activities.form.submitFailed'));
+        Silian_setError(Silian_response.data.message || Silian_t('activities.form.submitFailed'));
       }
-    } catch (err) {
-      setError(err.message || t('activities.form.submitFailed'));
+    } catch (Silian_err) {
+      Silian_setError(Silian_err.message || Silian_t('activities.form.submitFailed'));
     } finally {
-      setIsSubmitting(false);
+      Silian_setIsSubmitting(false);
     }
   };
 
   // 重新开始
-  const handleRestart = () => {
-    setCurrentStep(1);
-    setSelectedActivity(null);
-    setSmartData(null);
-    setCalculationResult(null);
-    setSubmitResult(null);
-    setError('');
+  const Silian_handleRestart = () => {
+    Silian_setCurrentStep(1);
+    Silian_setSelectedActivity(null);
+    Silian_setSmartData(null);
+    Silian_setCalculationResult(null);
+    Silian_setSubmitResult(null);
+    Silian_setError('');
   };
 
   // 返回上一步
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      setError('');
+  const Silian_handleBack = () => {
+    if (Silian_currentStep > 1) {
+      Silian_setCurrentStep(Silian_currentStep - 1);
+      Silian_setError('');
     }
   };
 
@@ -203,44 +203,44 @@ export function CarbonCalculator() {
         {/* 页面标题 */}
         <div className="text-center mb-8">
           <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-green-500/12 shadow-sm border border-green-500/20 backdrop-blur-md">
-            <Leaf className="w-8 h-8 text-green-600" />
+            <Silian_Leaf className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="mb-2 text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">
-            {t('activities.title')}
+            {Silian_t('activities.title')}
           </h1>
           <p className="text-lg text-muted-foreground">
-            {t('activities.description')}
+            {Silian_t('activities.description')}
           </p>
         </div>
 
       {/* 步骤指示器 */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${currentStep >= step.id
+          {Silian_steps.map((Silian_step, Silian_index) => (
+            <div key={Silian_step.id} className="flex items-center">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${Silian_currentStep >= Silian_step.id
                 ? 'bg-green-600 border-green-600 text-white'
                 : 'border-border text-muted-foreground'
                 }`}>
-                {currentStep > step.id ? (
-                  <CheckCircle className="w-6 h-6" />
+                {Silian_currentStep > Silian_step.id ? (
+                  <Silian_CheckCircle className="w-6 h-6" />
                 ) : (
-                  <span className="text-sm font-medium">{step.id}</span>
+                  <span className="text-sm font-medium">{Silian_step.id}</span>
                 )}
               </div>
 
               <div className="ml-3 hidden sm:block">
-                <div className={`text-sm font-medium ${currentStep >= step.id ? 'text-green-600' : 'text-muted-foreground'
+                <div className={`text-sm font-medium ${Silian_currentStep >= Silian_step.id ? 'text-green-600' : 'text-muted-foreground'
                   }`}>
-                  {step.title}
+                  {Silian_step.title}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {step.description}
+                  {Silian_step.description}
                 </div>
               </div>
 
-              {index < steps.length - 1 && (
-                <div className={`mx-4 h-0.5 flex-1 ${currentStep > step.id ? 'bg-green-600' : 'bg-border'
+              {Silian_index < Silian_steps.length - 1 && (
+                <div className={`mx-4 h-0.5 flex-1 ${Silian_currentStep > Silian_step.id ? 'bg-green-600' : 'bg-border'
                   }`} />
               )}
             </div>
@@ -249,77 +249,77 @@ export function CarbonCalculator() {
       </div>
 
       {/* 错误提示 */}
-      {error && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+      {Silian_error && (
+        <Silian_Alert variant="destructive" className="mb-6">
+          <Silian_AlertDescription>{Silian_error}</Silian_AlertDescription>
+        </Silian_Alert>
       )}
 
-      {checkinDate && (
-        <Alert className="mb-6 border-emerald-200 bg-emerald-50 text-emerald-800">
-          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
-            <span>{t('activities.checkin.makeupNotice',  { date: checkinDate })}</span>
-            <Button variant="ghost" size="sm" onClick={clearCheckinDate}>
-              {t('activities.checkin.clear')}
-            </Button>
-          </AlertDescription>
-        </Alert>
+      {Silian_checkinDate && (
+        <Silian_Alert className="mb-6 border-emerald-200 bg-emerald-50 text-emerald-800">
+          <Silian_AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>{Silian_t('activities.checkin.makeupNotice',  { date: Silian_checkinDate })}</span>
+            <Silian_Button variant="ghost" size="sm" onClick={Silian_clearCheckinDate}>
+              {Silian_t('activities.checkin.clear')}
+            </Silian_Button>
+          </Silian_AlertDescription>
+        </Silian_Alert>
       )}
 
       {/* 步骤内容 */}
       <div className="space-y-6">
         {/* 步骤1: 选择活动 */}
-        {currentStep === 1 && (
+        {Silian_currentStep === 1 && (
           <>
-            <SmartActivityInput onSuggestion={handleSmartSuggestion} />
-            <ActivitySelector
-              onActivitySelect={handleActivitySelect}
-              selectedActivity={selectedActivity}
+            <Silian_SmartActivityInput onSuggestion={Silian_handleSmartSuggestion} />
+            <Silian_ActivitySelector
+              onActivitySelect={Silian_handleActivitySelect}
+              selectedActivity={Silian_selectedActivity}
             />
           </>
         )}
 
         {/* 步骤2: 输入数据 */}
-        {currentStep === 2 && (
+        {Silian_currentStep === 2 && (
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <Button
+              <Silian_Button
                 variant="outline"
-                onClick={handleBack}
+                onClick={Silian_handleBack}
                 className="flex items-center gap-2"
               >
-                <ArrowLeft className="w-4 h-4" />
-                {t('common.back')}
-              </Button>
+                <Silian_ArrowLeft className="w-4 h-4" />
+                {Silian_t('common.back')}
+              </Silian_Button>
               <div className="text-sm text-muted-foreground">
-                {t('activities.form.step2Of3')}
+                {Silian_t('activities.form.step2Of3')}
               </div>
             </div>
 
-            <DataInputForm
-              activity={selectedActivity}
-              onCalculate={handleCalculate}
-              onSubmit={handleSubmit}
-              calculationResult={calculationResult}
-              isCalculating={isCalculating}
-              isSubmitting={isSubmitting}
-              initialData={smartData}
-              checkinDate={checkinDate}
+            <Silian_DataInputForm
+              activity={Silian_selectedActivity}
+              onCalculate={Silian_handleCalculate}
+              onSubmit={Silian_handleSubmit}
+              calculationResult={Silian_calculationResult}
+              isCalculating={Silian_isCalculating}
+              isSubmitting={Silian_isSubmitting}
+              initialData={Silian_smartData}
+              checkinDate={Silian_checkinDate}
             />
           </div>
         )}
 
         {/* 步骤3: 提交成功 */}
-        {currentStep === 3 && submitResult && (
-          <React.Suspense fallback={<div className="h-[560px] rounded-[36px] border border-black/6 bg-white" />}>
-            <InteractiveReceipt
-              receipt={submitResult}
-              onRestart={handleRestart}
+        {Silian_currentStep === 3 && Silian_submitResult && (
+          <Silian_React.Suspense fallback={<div className="h-[560px] rounded-[36px] border border-black/6 bg-white" />}>
+            <Silian_InteractiveReceipt
+              receipt={Silian_submitResult}
+              onRestart={Silian_handleRestart}
               onGoDashboard={() => {
                 window.location.href = '/dashboard';
               }}
             />
-          </React.Suspense>
+          </Silian_React.Suspense>
         )}
       </div>
     </div>

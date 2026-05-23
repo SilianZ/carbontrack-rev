@@ -58,677 +58,677 @@ class SupportTicketService
     ) {
     }
 
-    public function createTicket(array $actor, array $payload): array
+    public function createTicket(array $Silian_actor, array $Silian_payload): array
     {
-        $subject = $this->requireString($payload['subject'] ?? null, 'subject');
-        $body = $this->requireString($payload['content'] ?? null, 'content');
-        $category = $this->normalizeCategory($payload['category'] ?? null);
-        $priority = $this->normalizePriority($payload['priority'] ?? null);
-        $attachments = $this->normalizeAttachments($payload['attachments'] ?? []);
-        $now = $this->now();
+        $Silian_subject = $this->requireString($Silian_payload['subject'] ?? null, 'subject');
+        $Silian_body = $this->requireString($Silian_payload['content'] ?? null, 'content');
+        $Silian_category = $this->normalizeCategory($Silian_payload['category'] ?? null);
+        $Silian_priority = $this->normalizePriority($Silian_payload['priority'] ?? null);
+        $Silian_attachments = $this->normalizeAttachments($Silian_payload['attachments'] ?? []);
+        $Silian_now = $this->now();
 
         try {
             $this->db->beginTransaction();
 
-            $ticket = SupportTicket::create([
-                'user_id' => (int) $actor['id'],
-                'subject' => $subject,
-                'category' => $category,
+            $Silian_ticket = SupportTicket::create([
+                'user_id' => (int) $Silian_actor['id'],
+                'subject' => $Silian_subject,
+                'category' => $Silian_category,
                 'status' => self::STATUS_OPEN,
-                'priority' => $priority,
-                'last_replied_at' => $now,
+                'priority' => $Silian_priority,
+                'last_replied_at' => $Silian_now,
                 'last_reply_by_role' => 'user',
             ]);
 
-            $message = SupportTicketMessage::create([
-                'ticket_id' => (int) $ticket->id,
-                'sender_id' => (int) $actor['id'],
+            $Silian_message = SupportTicketMessage::create([
+                'ticket_id' => (int) $Silian_ticket->id,
+                'sender_id' => (int) $Silian_actor['id'],
                 'sender_role' => 'user',
-                'sender_name' => $this->actorName($actor),
-                'body' => $body,
+                'sender_name' => $this->actorName($Silian_actor),
+                'body' => $Silian_body,
             ]);
 
-            $this->attachFiles((int) $ticket->id, (int) $message->id, $attachments, (int) $actor['id'], false);
+            $this->attachFiles((int) $Silian_ticket->id, (int) $Silian_message->id, $Silian_attachments, (int) $Silian_actor['id'], false);
             $this->db->commit();
 
             $this->auditLogService->log([
-                'user_id' => (int) $actor['id'],
+                'user_id' => (int) $Silian_actor['id'],
                 'action' => 'support_ticket_created',
                 'operation_category' => 'support',
                 'actor_type' => 'user',
                 'affected_table' => 'support_tickets',
-                'affected_id' => (int) $ticket->id,
+                'affected_id' => (int) $Silian_ticket->id,
                 'status' => 'success',
-                'new_data' => ['category' => $category, 'priority' => $priority, 'attachment_count' => count($attachments)],
+                'new_data' => ['category' => $Silian_category, 'priority' => $Silian_priority, 'attachment_count' => count($Silian_attachments)],
             ]);
 
             if ($this->supportRoutingEngineService !== null) {
                 try {
-                    $this->supportRoutingEngineService->routeTicket((int) $ticket->id, 'created');
-                } catch (\Throwable $routingException) {
+                    $this->supportRoutingEngineService->routeTicket((int) $Silian_ticket->id, 'created');
+                } catch (\Throwable $Silian_routingException) {
                     $this->logger->warning('Support ticket routing failed after ticket creation', [
-                        'ticket_id' => (int) $ticket->id,
-                        'error' => $routingException->getMessage(),
+                        'ticket_id' => (int) $Silian_ticket->id,
+                        'error' => $Silian_routingException->getMessage(),
                     ]);
-                    $this->recordFailure($routingException, 'support_ticket_routing_failed', $actor, (int) $ticket->id);
+                    $this->recordFailure($Silian_routingException, 'support_ticket_routing_failed', $Silian_actor, (int) $Silian_ticket->id);
                 }
             }
 
-            $detail = $this->getTicketDetailForUser((int) $actor['id'], (int) $ticket->id);
+            $Silian_detail = $this->getTicketDetailForUser((int) $Silian_actor['id'], (int) $Silian_ticket->id);
             $this->notifySupportMailbox(
-                sprintf('New support ticket #%d: %s', (int) $ticket->id, $subject),
-                $this->supportMailboxBody($actor, $detail, $body),
+                sprintf('New support ticket #%d: %s', (int) $Silian_ticket->id, $Silian_subject),
+                $this->supportMailboxBody($Silian_actor, $Silian_detail, $Silian_body),
                 $this->buildSupportMailboxEmailPayload(
-                    $actor,
-                    $detail,
-                    (int) ($ticket->id ?? 0),
+                    $Silian_actor,
+                    $Silian_detail,
+                    (int) ($Silian_ticket->id ?? 0),
                     'A new support ticket was created and is ready for triage.',
                     'Original message',
-                    $body
+                    $Silian_body
                 )
             );
-            return $detail;
-        } catch (\Throwable $e) {
+            return $Silian_detail;
+        } catch (\Throwable $Silian_e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
-            $this->recordFailure($e, 'support_ticket_create_failed', $actor, null);
-            throw $e;
+            $this->recordFailure($Silian_e, 'support_ticket_create_failed', $Silian_actor, null);
+            throw $Silian_e;
         }
     }
 
-    public function listUserTickets(int $userId, array $query = []): array
+    public function listUserTickets(int $Silian_userId, array $Silian_query = []): array
     {
-        $result = $this->listTickets(false, ['user_id' => $userId], $query);
+        $Silian_result = $this->listTickets(false, ['user_id' => $Silian_userId], $Silian_query);
         $this->auditLogService->log([
-            'user_id' => $userId,
+            'user_id' => $Silian_userId,
             'action' => 'support_ticket_list_viewed',
             'operation_category' => 'support',
             'actor_type' => 'user',
             'affected_table' => 'support_tickets',
             'status' => 'success',
-            'data' => $result['pagination'],
+            'data' => $Silian_result['pagination'],
         ]);
-        return $result;
+        return $Silian_result;
     }
 
-    public function getTicketDetailForUser(int $userId, int $ticketId): array
+    public function getTicketDetailForUser(int $Silian_userId, int $Silian_ticketId): array
     {
-        $ticket = $this->findTicketForUser($userId, $ticketId);
-        if ($ticket === null) {
+        $Silian_ticket = $this->findTicketForUser($Silian_userId, $Silian_ticketId);
+        if ($Silian_ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
-        $detail = $this->formatTicketDetail($ticket, false);
+        $Silian_detail = $this->formatTicketDetail($Silian_ticket, false);
         $this->auditLogService->log([
-            'user_id' => $userId,
+            'user_id' => $Silian_userId,
             'action' => 'support_ticket_detail_viewed',
             'operation_category' => 'support',
             'actor_type' => 'user',
             'affected_table' => 'support_tickets',
-            'affected_id' => $ticketId,
+            'affected_id' => $Silian_ticketId,
             'status' => 'success',
         ]);
-        return $detail;
+        return $Silian_detail;
     }
 
-    public function addUserMessage(array $actor, int $ticketId, array $payload): array
+    public function addUserMessage(array $Silian_actor, int $Silian_ticketId, array $Silian_payload): array
     {
-        $ticket = $this->findTicketForUser((int) $actor['id'], $ticketId);
-        if ($ticket === null) {
+        $Silian_ticket = $this->findTicketForUser((int) $Silian_actor['id'], $Silian_ticketId);
+        if ($Silian_ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
-        if (($ticket['status'] ?? '') === self::STATUS_CLOSED) {
+        if (($Silian_ticket['status'] ?? '') === self::STATUS_CLOSED) {
             throw new \RuntimeException('Closed tickets cannot receive new replies');
         }
 
-        $body = $this->requireString($payload['content'] ?? null, 'content');
-        $attachments = $this->normalizeAttachments($payload['attachments'] ?? []);
-        $now = $this->now();
+        $Silian_body = $this->requireString($Silian_payload['content'] ?? null, 'content');
+        $Silian_attachments = $this->normalizeAttachments($Silian_payload['attachments'] ?? []);
+        $Silian_now = $this->now();
 
         try {
             $this->db->beginTransaction();
-            $message = SupportTicketMessage::create([
-                'ticket_id' => $ticketId,
-                'sender_id' => (int) $actor['id'],
+            $Silian_message = SupportTicketMessage::create([
+                'ticket_id' => $Silian_ticketId,
+                'sender_id' => (int) $Silian_actor['id'],
                 'sender_role' => 'user',
-                'sender_name' => $this->actorName($actor),
-                'body' => $body,
+                'sender_name' => $this->actorName($Silian_actor),
+                'body' => $Silian_body,
             ]);
-            $this->attachFiles($ticketId, (int) $message->id, $attachments, (int) $actor['id'], false);
-            $nextStatus = in_array((string) $ticket['status'], [self::STATUS_WAITING_USER, self::STATUS_RESOLVED], true)
+            $this->attachFiles($Silian_ticketId, (int) $Silian_message->id, $Silian_attachments, (int) $Silian_actor['id'], false);
+            $Silian_nextStatus = in_array((string) $Silian_ticket['status'], [self::STATUS_WAITING_USER, self::STATUS_RESOLVED], true)
                 ? self::STATUS_OPEN
-                : (string) $ticket['status'];
-            $updates = [
-                'status' => $nextStatus,
-                'last_replied_at' => $now,
+                : (string) $Silian_ticket['status'];
+            $Silian_updates = [
+                'status' => $Silian_nextStatus,
+                'last_replied_at' => $Silian_now,
                 'last_reply_by_role' => 'user',
-                'updated_at' => $now,
+                'updated_at' => $Silian_now,
             ];
-            $reopenedResolvedTicket = $nextStatus === self::STATUS_OPEN && (
-                (string) ($ticket['status'] ?? '') === self::STATUS_RESOLVED
-                || (string) ($ticket['sla_status'] ?? '') === 'resolved'
-                || !empty($ticket['resolved_at'])
-                || !empty($ticket['closed_at'])
+            $Silian_reopenedResolvedTicket = $Silian_nextStatus === self::STATUS_OPEN && (
+                (string) ($Silian_ticket['status'] ?? '') === self::STATUS_RESOLVED
+                || (string) ($Silian_ticket['sla_status'] ?? '') === 'resolved'
+                || !empty($Silian_ticket['resolved_at'])
+                || !empty($Silian_ticket['closed_at'])
             );
-            if ($reopenedResolvedTicket) {
-                $updates['resolved_at'] = null;
-                $updates['closed_at'] = null;
-                $updates['sla_status'] = 'pending';
+            if ($Silian_reopenedResolvedTicket) {
+                $Silian_updates['resolved_at'] = null;
+                $Silian_updates['closed_at'] = null;
+                $Silian_updates['sla_status'] = 'pending';
             }
-            $this->updateTicket($ticketId, $updates);
+            $this->updateTicket($Silian_ticketId, $Silian_updates);
             $this->db->commit();
 
             $this->auditLogService->log([
-                'user_id' => (int) $actor['id'],
+                'user_id' => (int) $Silian_actor['id'],
                 'action' => 'support_ticket_reply_created',
                 'operation_category' => 'support',
                 'actor_type' => 'user',
                 'affected_table' => 'support_ticket_messages',
-                'affected_id' => (int) $message->id,
+                'affected_id' => (int) $Silian_message->id,
                 'status' => 'success',
-                'data' => ['ticket_id' => $ticketId, 'attachment_count' => count($attachments)],
+                'data' => ['ticket_id' => $Silian_ticketId, 'attachment_count' => count($Silian_attachments)],
             ]);
 
-            $detail = $this->getTicketDetailForUser((int) $actor['id'], $ticketId);
+            $Silian_detail = $this->getTicketDetailForUser((int) $Silian_actor['id'], $Silian_ticketId);
             $this->notifySupportMailbox(
-                sprintf('User replied on support ticket #%d: %s', $ticketId, $ticket['subject'] ?? ''),
-                $this->supportMailboxBody($actor, $detail, $body),
+                sprintf('User replied on support ticket #%d: %s', $Silian_ticketId, $Silian_ticket['subject'] ?? ''),
+                $this->supportMailboxBody($Silian_actor, $Silian_detail, $Silian_body),
                 $this->buildSupportMailboxEmailPayload(
-                    $actor,
-                    $detail,
-                    $ticketId,
+                    $Silian_actor,
+                    $Silian_detail,
+                    $Silian_ticketId,
                     'The requester added a new reply to an existing support ticket.',
                     'Latest reply',
-                    $body
+                    $Silian_body
                 )
             );
-            return $detail;
-        } catch (\Throwable $e) {
+            return $Silian_detail;
+        } catch (\Throwable $Silian_e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
-            $this->recordFailure($e, 'support_ticket_reply_create_failed', $actor, $ticketId);
-            throw $e;
+            $this->recordFailure($Silian_e, 'support_ticket_reply_create_failed', $Silian_actor, $Silian_ticketId);
+            throw $Silian_e;
         }
     }
 
-    public function submitTicketFeedback(array $actor, int $ticketId, array $payload): array
+    public function submitTicketFeedback(array $Silian_actor, int $Silian_ticketId, array $Silian_payload): array
     {
-        $ticket = $this->findTicketForUser((int) $actor['id'], $ticketId);
-        if ($ticket === null) {
+        $Silian_ticket = $this->findTicketForUser((int) $Silian_actor['id'], $Silian_ticketId);
+        if ($Silian_ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
-        if (!in_array((string) ($ticket['status'] ?? ''), self::FEEDBACK_ALLOWED_STATUSES, true)) {
+        if (!in_array((string) ($Silian_ticket['status'] ?? ''), self::FEEDBACK_ALLOWED_STATUSES, true)) {
             throw new \RuntimeException('Feedback is only available after the ticket is resolved or closed');
         }
 
-        $ratedUserId = (int) ($payload['rated_user_id'] ?? 0);
-        if ($ratedUserId <= 0) {
+        $Silian_ratedUserId = (int) ($Silian_payload['rated_user_id'] ?? 0);
+        if ($Silian_ratedUserId <= 0) {
             throw new \InvalidArgumentException('rated_user_id is required');
         }
 
-        $candidate = $this->findFeedbackCandidate($ticketId, $ratedUserId);
-        if ($candidate === null) {
+        $Silian_candidate = $this->findFeedbackCandidate($Silian_ticketId, $Silian_ratedUserId);
+        if ($Silian_candidate === null) {
             throw new \InvalidArgumentException('Rated user is not eligible for feedback on this ticket');
         }
 
-        $rating = $this->normalizeRating($payload['rating'] ?? null);
-        $comment = $this->normalizeFeedbackComment($payload['comment'] ?? null);
-        $feedback = $this->findFeedbackRecord($ticketId, (int) $actor['id'], $ratedUserId);
-        $isNew = $feedback === null;
-        $now = $this->now();
+        $Silian_rating = $this->normalizeRating($Silian_payload['rating'] ?? null);
+        $Silian_comment = $this->normalizeFeedbackComment($Silian_payload['comment'] ?? null);
+        $Silian_feedback = $this->findFeedbackRecord($Silian_ticketId, (int) $Silian_actor['id'], $Silian_ratedUserId);
+        $Silian_isNew = $Silian_feedback === null;
+        $Silian_now = $this->now();
 
-        if ($feedback === null) {
-            $feedback = SupportTicketFeedback::create([
-                'ticket_id' => $ticketId,
-                'user_id' => (int) $actor['id'],
-                'rated_user_id' => $ratedUserId,
-                'rating' => $rating,
-                'comment' => $comment,
-                'created_at' => $now,
-                'updated_at' => $now,
+        if ($Silian_feedback === null) {
+            $Silian_feedback = SupportTicketFeedback::create([
+                'ticket_id' => $Silian_ticketId,
+                'user_id' => (int) $Silian_actor['id'],
+                'rated_user_id' => $Silian_ratedUserId,
+                'rating' => $Silian_rating,
+                'comment' => $Silian_comment,
+                'created_at' => $Silian_now,
+                'updated_at' => $Silian_now,
             ]);
         } else {
-            $feedback->fill([
-                'rating' => $rating,
-                'comment' => $comment,
-                'updated_at' => $now,
+            $Silian_feedback->fill([
+                'rating' => $Silian_rating,
+                'comment' => $Silian_comment,
+                'updated_at' => $Silian_now,
             ]);
-            $feedback->save();
+            $Silian_feedback->save();
         }
 
         $this->auditLogService->log([
-            'user_id' => (int) $actor['id'],
-            'action' => $isNew ? 'support_ticket_feedback_created' : 'support_ticket_feedback_updated',
+            'user_id' => (int) $Silian_actor['id'],
+            'action' => $Silian_isNew ? 'support_ticket_feedback_created' : 'support_ticket_feedback_updated',
             'operation_category' => 'support',
             'actor_type' => 'user',
             'affected_table' => 'support_ticket_feedback',
-            'affected_id' => (int) ($feedback->id ?? 0),
+            'affected_id' => (int) ($Silian_feedback->id ?? 0),
             'status' => 'success',
             'data' => [
-                'ticket_id' => $ticketId,
-                'rated_user_id' => $ratedUserId,
-                'rating' => $rating,
+                'ticket_id' => $Silian_ticketId,
+                'rated_user_id' => $Silian_ratedUserId,
+                'rating' => $Silian_rating,
             ],
         ]);
 
-        return $this->getTicketDetailForUser((int) $actor['id'], $ticketId);
+        return $this->getTicketDetailForUser((int) $Silian_actor['id'], $Silian_ticketId);
     }
 
-    public function listSupportTickets(array $actor, array $query = []): array
+    public function listSupportTickets(array $Silian_actor, array $Silian_query = []): array
     {
-        $pendingTransferTargetView = $this->isPendingTransferTargetQuery($actor, $query);
-        $result = $this->listTickets(true, $this->supportTicketBaseFilters($actor, $query), $this->supportTicketQuery($actor, $query));
+        $Silian_pendingTransferTargetView = $this->isPendingTransferTargetQuery($Silian_actor, $Silian_query);
+        $Silian_result = $this->listTickets(true, $this->supportTicketBaseFilters($Silian_actor, $Silian_query), $this->supportTicketQuery($Silian_actor, $Silian_query));
 
-        if ($pendingTransferTargetView && !empty($result['items'])) {
-            $pendingTransferMap = $this->pendingTransferRequestsForTarget(
-                array_map(static fn (array $item): int => (int) ($item['id'] ?? 0), $result['items']),
-                (int) ($actor['id'] ?? 0)
+        if ($Silian_pendingTransferTargetView && !empty($Silian_result['items'])) {
+            $Silian_pendingTransferMap = $this->pendingTransferRequestsForTarget(
+                array_map(static fn (array $Silian_item): int => (int) ($Silian_item['id'] ?? 0), $Silian_result['items']),
+                (int) ($Silian_actor['id'] ?? 0)
             );
-            $result['items'] = array_map(static function (array $item) use ($pendingTransferMap): array {
-                $item['pending_transfer_request'] = $pendingTransferMap[(int) ($item['id'] ?? 0)] ?? null;
-                return $item;
-            }, $result['items']);
+            $Silian_result['items'] = array_map(static function (array $Silian_item) use ($Silian_pendingTransferMap): array {
+                $Silian_item['pending_transfer_request'] = $Silian_pendingTransferMap[(int) ($Silian_item['id'] ?? 0)] ?? null;
+                return $Silian_item;
+            }, $Silian_result['items']);
         }
 
         $this->auditLogService->log([
-            'user_id' => (int) ($actor['id'] ?? 0),
+            'user_id' => (int) ($Silian_actor['id'] ?? 0),
             'action' => 'support_ticket_queue_viewed',
             'operation_category' => 'support',
-            'actor_type' => $this->actorType($actor),
+            'actor_type' => $this->actorType($Silian_actor),
             'affected_table' => 'support_tickets',
             'status' => 'success',
-            'data' => $result['pagination'],
+            'data' => $Silian_result['pagination'],
         ]);
-        return $result;
+        return $Silian_result;
     }
 
-    public function listSupportAssignees(array $actor): array
+    public function listSupportAssignees(array $Silian_actor): array
     {
-        $items = $this->supportAutomationService?->listAssignableUsers() ?? [];
+        $Silian_items = $this->supportAutomationService?->listAssignableUsers() ?? [];
         $this->auditLogService->log([
-            'user_id' => (int) ($actor['id'] ?? 0),
+            'user_id' => (int) ($Silian_actor['id'] ?? 0),
             'action' => 'support_assignee_list_viewed',
             'operation_category' => 'support',
-            'actor_type' => $this->actorType($actor),
+            'actor_type' => $this->actorType($Silian_actor),
             'affected_table' => 'users',
             'status' => 'success',
-            'data' => ['count' => count($items)],
+            'data' => ['count' => count($Silian_items)],
         ]);
-        return $items;
+        return $Silian_items;
     }
 
-    public function getTicketDetailForSupport(array $actor, int $ticketId): array
+    public function getTicketDetailForSupport(array $Silian_actor, int $Silian_ticketId): array
     {
-        $ticket = $this->findTicketForSupport($actor, $ticketId, true);
-        if ($ticket === null) {
+        $Silian_ticket = $this->findTicketForSupport($Silian_actor, $Silian_ticketId, true);
+        if ($Silian_ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
-        $detail = $this->formatTicketDetail($ticket, true);
+        $Silian_detail = $this->formatTicketDetail($Silian_ticket, true);
         $this->auditLogService->log([
-            'user_id' => (int) ($actor['id'] ?? 0),
+            'user_id' => (int) ($Silian_actor['id'] ?? 0),
             'action' => 'support_ticket_detail_viewed',
             'operation_category' => 'support',
-            'actor_type' => $this->actorType($actor),
+            'actor_type' => $this->actorType($Silian_actor),
             'affected_table' => 'support_tickets',
-            'affected_id' => $ticketId,
+            'affected_id' => $Silian_ticketId,
             'status' => 'success',
         ]);
-        return $detail;
+        return $Silian_detail;
     }
 
-    public function addSupportMessage(array $actor, int $ticketId, array $payload): array
+    public function addSupportMessage(array $Silian_actor, int $Silian_ticketId, array $Silian_payload): array
     {
-        $ticket = $this->findTicketForSupport($actor, $ticketId);
-        if ($ticket === null) {
+        $Silian_ticket = $this->findTicketForSupport($Silian_actor, $Silian_ticketId);
+        if ($Silian_ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
 
-        $body = $this->requireString($payload['content'] ?? null, 'content');
-        $attachments = $this->normalizeAttachments($payload['attachments'] ?? []);
-        $senderRole = !empty($actor['is_admin']) ? 'admin' : 'support';
-        $now = $this->now();
+        $Silian_body = $this->requireString($Silian_payload['content'] ?? null, 'content');
+        $Silian_attachments = $this->normalizeAttachments($Silian_payload['attachments'] ?? []);
+        $Silian_senderRole = !empty($Silian_actor['is_admin']) ? 'admin' : 'support';
+        $Silian_now = $this->now();
 
         try {
             $this->db->beginTransaction();
-            $message = SupportTicketMessage::create([
-                'ticket_id' => $ticketId,
-                'sender_id' => (int) $actor['id'],
-                'sender_role' => $senderRole,
-                'sender_name' => $this->actorName($actor),
-                'body' => $body,
+            $Silian_message = SupportTicketMessage::create([
+                'ticket_id' => $Silian_ticketId,
+                'sender_id' => (int) $Silian_actor['id'],
+                'sender_role' => $Silian_senderRole,
+                'sender_name' => $this->actorName($Silian_actor),
+                'body' => $Silian_body,
             ]);
-            $this->attachFiles($ticketId, (int) $message->id, $attachments, (int) $actor['id'], true);
-            $targetStatus = self::STATUS_WAITING_USER;
-            if (array_key_exists('status', $payload) && $payload['status'] !== null && $payload['status'] !== '') {
-                $targetStatus = $this->normalizeStatus($payload['status']);
+            $this->attachFiles($Silian_ticketId, (int) $Silian_message->id, $Silian_attachments, (int) $Silian_actor['id'], true);
+            $Silian_targetStatus = self::STATUS_WAITING_USER;
+            if (array_key_exists('status', $Silian_payload) && $Silian_payload['status'] !== null && $Silian_payload['status'] !== '') {
+                $Silian_targetStatus = $this->normalizeStatus($Silian_payload['status']);
             }
 
-            $updates = [
-                'status' => $targetStatus,
-                'last_replied_at' => $now,
-                'last_reply_by_role' => $senderRole,
-                'updated_at' => $now,
+            $Silian_updates = [
+                'status' => $Silian_targetStatus,
+                'last_replied_at' => $Silian_now,
+                'last_reply_by_role' => $Silian_senderRole,
+                'updated_at' => $Silian_now,
             ];
-            $reopenedTicket = in_array((string) ($ticket['status'] ?? ''), [self::STATUS_RESOLVED, self::STATUS_CLOSED], true)
-                || (string) ($ticket['sla_status'] ?? 'pending') === 'resolved'
-                || !empty($ticket['resolved_at'])
-                || !empty($ticket['closed_at']);
-            if ($targetStatus === self::STATUS_RESOLVED) {
-                $updates['resolved_at'] = $now;
-                $updates['closed_at'] = null;
-                $updates['sla_status'] = 'resolved';
-            } elseif ($targetStatus === self::STATUS_CLOSED) {
-                $updates['closed_at'] = $now;
-                $updates['sla_status'] = 'resolved';
-            } elseif ($reopenedTicket) {
-                $updates['resolved_at'] = null;
-                $updates['closed_at'] = null;
+            $Silian_reopenedTicket = in_array((string) ($Silian_ticket['status'] ?? ''), [self::STATUS_RESOLVED, self::STATUS_CLOSED], true)
+                || (string) ($Silian_ticket['sla_status'] ?? 'pending') === 'resolved'
+                || !empty($Silian_ticket['resolved_at'])
+                || !empty($Silian_ticket['closed_at']);
+            if ($Silian_targetStatus === self::STATUS_RESOLVED) {
+                $Silian_updates['resolved_at'] = $Silian_now;
+                $Silian_updates['closed_at'] = null;
+                $Silian_updates['sla_status'] = 'resolved';
+            } elseif ($Silian_targetStatus === self::STATUS_CLOSED) {
+                $Silian_updates['closed_at'] = $Silian_now;
+                $Silian_updates['sla_status'] = 'resolved';
+            } elseif ($Silian_reopenedTicket) {
+                $Silian_updates['resolved_at'] = null;
+                $Silian_updates['closed_at'] = null;
             }
-            if (empty($ticket['first_support_response_at'])) {
-                $updates['first_support_response_at'] = $now;
+            if (empty($Silian_ticket['first_support_response_at'])) {
+                $Silian_updates['first_support_response_at'] = $Silian_now;
             }
-            if ($reopenedTicket && !in_array($targetStatus, [self::STATUS_RESOLVED, self::STATUS_CLOSED], true)) {
-                $updates['sla_status'] = 'pending';
+            if ($Silian_reopenedTicket && !in_array($Silian_targetStatus, [self::STATUS_RESOLVED, self::STATUS_CLOSED], true)) {
+                $Silian_updates['sla_status'] = 'pending';
             }
-            $this->updateTicket($ticketId, $updates);
+            $this->updateTicket($Silian_ticketId, $Silian_updates);
             $this->db->commit();
 
             $this->auditLogService->log([
-                'user_id' => (int) ($actor['id'] ?? 0),
+                'user_id' => (int) ($Silian_actor['id'] ?? 0),
                 'action' => 'support_ticket_support_reply_created',
                 'operation_category' => 'support',
-                'actor_type' => $this->actorType($actor),
+                'actor_type' => $this->actorType($Silian_actor),
                 'affected_table' => 'support_ticket_messages',
-                'affected_id' => (int) $message->id,
+                'affected_id' => (int) $Silian_message->id,
                 'status' => 'success',
-                'data' => ['ticket_id' => $ticketId, 'attachment_count' => count($attachments)],
+                'data' => ['ticket_id' => $Silian_ticketId, 'attachment_count' => count($Silian_attachments)],
             ]);
 
-            $emailTicket = $this->applyTicketUpdatesToSnapshot($ticket, $updates);
-            $this->notifyUserReply($emailTicket, $body, $ticketId);
-            return $this->getTicketDetailForSupport($actor, $ticketId);
-        } catch (\Throwable $e) {
+            $Silian_emailTicket = $this->applyTicketUpdatesToSnapshot($Silian_ticket, $Silian_updates);
+            $this->notifyUserReply($Silian_emailTicket, $Silian_body, $Silian_ticketId);
+            return $this->getTicketDetailForSupport($Silian_actor, $Silian_ticketId);
+        } catch (\Throwable $Silian_e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
-            $this->recordFailure($e, 'support_ticket_support_reply_failed', $actor, $ticketId);
-            throw $e;
+            $this->recordFailure($Silian_e, 'support_ticket_support_reply_failed', $Silian_actor, $Silian_ticketId);
+            throw $Silian_e;
         }
     }
 
-    public function updateTicketFromSupport(array $actor, int $ticketId, array $payload): array
+    public function updateTicketFromSupport(array $Silian_actor, int $Silian_ticketId, array $Silian_payload): array
     {
-        $ticket = $this->findTicketForSupport($actor, $ticketId);
-        if ($ticket === null) {
+        $Silian_ticket = $this->findTicketForSupport($Silian_actor, $Silian_ticketId);
+        if ($Silian_ticket === null) {
             throw new \RuntimeException('Ticket not found');
         }
 
-        $updates = [];
-        $now = $this->now();
-        $assigneeToNotify = null;
-        if (array_key_exists('status', $payload) && $payload['status'] !== null && $payload['status'] !== '') {
-            $status = $this->normalizeStatus($payload['status']);
-            $updates['status'] = $status;
-            if ($status === self::STATUS_RESOLVED) {
-                $updates['resolved_at'] = $now;
-                $updates['sla_status'] = 'resolved';
+        $Silian_updates = [];
+        $Silian_now = $this->now();
+        $Silian_assigneeToNotify = null;
+        if (array_key_exists('status', $Silian_payload) && $Silian_payload['status'] !== null && $Silian_payload['status'] !== '') {
+            $Silian_status = $this->normalizeStatus($Silian_payload['status']);
+            $Silian_updates['status'] = $Silian_status;
+            if ($Silian_status === self::STATUS_RESOLVED) {
+                $Silian_updates['resolved_at'] = $Silian_now;
+                $Silian_updates['sla_status'] = 'resolved';
             }
-            if ($status === self::STATUS_CLOSED) {
-                $updates['closed_at'] = $now;
-                $updates['sla_status'] = 'resolved';
+            if ($Silian_status === self::STATUS_CLOSED) {
+                $Silian_updates['closed_at'] = $Silian_now;
+                $Silian_updates['sla_status'] = 'resolved';
             }
-            if (in_array($status, [self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_WAITING_USER], true) && ($ticket['sla_status'] ?? null) === 'resolved') {
-                $updates['sla_status'] = 'pending';
-                $updates['resolved_at'] = null;
-                $updates['closed_at'] = null;
+            if (in_array($Silian_status, [self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_WAITING_USER], true) && ($Silian_ticket['sla_status'] ?? null) === 'resolved') {
+                $Silian_updates['sla_status'] = 'pending';
+                $Silian_updates['resolved_at'] = null;
+                $Silian_updates['closed_at'] = null;
             }
         }
-        if (array_key_exists('priority', $payload) && $payload['priority'] !== null && $payload['priority'] !== '') {
-            $updates['priority'] = $this->normalizePriority($payload['priority']);
+        if (array_key_exists('priority', $Silian_payload) && $Silian_payload['priority'] !== null && $Silian_payload['priority'] !== '') {
+            $Silian_updates['priority'] = $this->normalizePriority($Silian_payload['priority']);
         }
-        if (array_key_exists('assigned_to', $payload)) {
-            if (empty($actor['is_admin'])) {
+        if (array_key_exists('assigned_to', $Silian_payload)) {
+            if (empty($Silian_actor['is_admin'])) {
                 throw new \DomainException('Only administrators can manually assign or transfer tickets');
             }
-            $assigned = $payload['assigned_to'];
-            if ($assigned === null || $assigned === '' || (int) $assigned <= 0) {
-                $updates['assigned_to'] = null;
-                $updates['assignment_source'] = null;
-                $updates['assigned_rule_id'] = null;
-                $updates['assignment_locked'] = 0;
+            $Silian_assigned = $Silian_payload['assigned_to'];
+            if ($Silian_assigned === null || $Silian_assigned === '' || (int) $Silian_assigned <= 0) {
+                $Silian_updates['assigned_to'] = null;
+                $Silian_updates['assignment_source'] = null;
+                $Silian_updates['assigned_rule_id'] = null;
+                $Silian_updates['assignment_locked'] = 0;
             } else {
-                $assignee = $this->findAssignableUser((int) $assigned);
-                if ($assignee === null) {
+                $Silian_assignee = $this->findAssignableUser((int) $Silian_assigned);
+                if ($Silian_assignee === null) {
                     throw new \InvalidArgumentException('Assigned user must be support or admin');
                 }
-                $updates['assigned_to'] = (int) $assignee['id'];
-                $updates['assignment_source'] = 'manual';
-                $updates['assigned_rule_id'] = null;
-                $updates['assignment_locked'] = 1;
-                $assigneeToNotify = $this->loadUserById((int) $assignee['id']);
+                $Silian_updates['assigned_to'] = (int) $Silian_assignee['id'];
+                $Silian_updates['assignment_source'] = 'manual';
+                $Silian_updates['assigned_rule_id'] = null;
+                $Silian_updates['assignment_locked'] = 1;
+                $Silian_assigneeToNotify = $this->loadUserById((int) $Silian_assignee['id']);
             }
         }
-        if ($updates === []) {
-            return $this->getTicketDetailForSupport($actor, $ticketId);
+        if ($Silian_updates === []) {
+            return $this->getTicketDetailForSupport($Silian_actor, $Silian_ticketId);
         }
-        $updates['updated_at'] = $now;
-        $this->updateTicket($ticketId, $updates);
-        $updatedTicket = $this->applyTicketUpdatesToSnapshot($ticket, $updates, $assigneeToNotify);
+        $Silian_updates['updated_at'] = $Silian_now;
+        $this->updateTicket($Silian_ticketId, $Silian_updates);
+        $Silian_updatedTicket = $this->applyTicketUpdatesToSnapshot($Silian_ticket, $Silian_updates, $Silian_assigneeToNotify);
         $this->auditLogService->log([
-            'user_id' => (int) ($actor['id'] ?? 0),
+            'user_id' => (int) ($Silian_actor['id'] ?? 0),
             'action' => 'support_ticket_updated',
             'operation_category' => 'support',
-            'actor_type' => $this->actorType($actor),
+            'actor_type' => $this->actorType($Silian_actor),
             'affected_table' => 'support_tickets',
-            'affected_id' => $ticketId,
+            'affected_id' => $Silian_ticketId,
             'status' => 'success',
-            'old_data' => $ticket,
-            'new_data' => $updates,
+            'old_data' => $Silian_ticket,
+            'new_data' => $Silian_updates,
         ]);
-        $this->notifyUserTicketUpdated($ticket, $updates, $ticketId, $updatedTicket);
-        if ($assigneeToNotify !== null) {
+        $this->notifyUserTicketUpdated($Silian_ticket, $Silian_updates, $Silian_ticketId, $Silian_updatedTicket);
+        if ($Silian_assigneeToNotify !== null) {
             $this->notifyAssignee(
-                $assigneeToNotify,
-                sprintf('Ticket #%d assigned to you', $ticketId),
-                sprintf("An administrator assigned ticket #%d to you.\nSubject: %s", $ticketId, (string) ($ticket['subject'] ?? '')),
-                $ticketId,
+                $Silian_assigneeToNotify,
+                sprintf('Ticket #%d assigned to you', $Silian_ticketId),
+                sprintf("An administrator assigned ticket #%d to you.\nSubject: %s", $Silian_ticketId, (string) ($Silian_ticket['subject'] ?? '')),
+                $Silian_ticketId,
                 'support_ticket_manual_assignment_notified',
                 [
                     'eyebrow' => 'Assignment update',
                     'intro' => 'An administrator assigned a support ticket to you.',
                     'summary' => 'Review the ticket context and continue the conversation from the support workbench.',
                     'ticket' => [
-                        'id' => $ticketId,
-                        'subject' => (string) ($ticket['subject'] ?? ''),
+                        'id' => $Silian_ticketId,
+                        'subject' => (string) ($Silian_ticket['subject'] ?? ''),
                     ],
-                    'details' => $this->buildTicketEmailDetails($updatedTicket, [
+                    'details' => $this->buildTicketEmailDetails($Silian_updatedTicket, [
                         [
                             'label' => 'Requester',
                             'value' => $this->formatRequesterDisplay([
-                                'username' => $ticket['requester_username'] ?? null,
-                                'email' => $ticket['requester_email'] ?? null,
+                                'username' => $Silian_ticket['requester_username'] ?? null,
+                                'email' => $Silian_ticket['requester_email'] ?? null,
                             ]),
                         ],
                     ]),
                     'message' => [
                         'label' => 'Assignment note',
-                        'body' => sprintf("An administrator assigned ticket #%d to you.\nSubject: %s", $ticketId, (string) ($ticket['subject'] ?? '')),
+                        'body' => sprintf("An administrator assigned ticket #%d to you.\nSubject: %s", $Silian_ticketId, (string) ($Silian_ticket['subject'] ?? '')),
                     ],
                     'button_label' => 'Open support ticket',
-                    'button_path' => $this->ticketEmailPath($ticketId, true),
+                    'button_path' => $this->ticketEmailPath($Silian_ticketId, true),
                     'closing' => 'Open the support queue in CarbonTrack to review the full thread and next steps.',
                 ]
             );
         }
-        return $this->getTicketDetailForSupport($actor, $ticketId);
+        return $this->getTicketDetailForSupport($Silian_actor, $Silian_ticketId);
     }
 
-    public function createTransferRequest(array $actor, int $ticketId, array $payload): array
+    public function createTransferRequest(array $Silian_actor, int $Silian_ticketId, array $Silian_payload): array
     {
-        if ($this->isAdminActor($actor)) {
+        if ($this->isAdminActor($Silian_actor)) {
             throw new \DomainException('Administrators can manually transfer tickets without creating a request');
         }
 
-        $actorId = (int) ($actor['id'] ?? 0);
-        if ($actorId <= 0) {
+        $Silian_actorId = (int) ($Silian_actor['id'] ?? 0);
+        if ($Silian_actorId <= 0) {
             throw new \DomainException('Only the current assignee can request a transfer');
         }
 
-        $targetId = (int) ($payload['to_assignee'] ?? 0);
-        $assignee = $this->findAssignableUser($targetId);
-        if ($assignee === null || (int) ($assignee['id'] ?? 0) === $actorId) {
+        $Silian_targetId = (int) ($Silian_payload['to_assignee'] ?? 0);
+        $Silian_assignee = $this->findAssignableUser($Silian_targetId);
+        if ($Silian_assignee === null || (int) ($Silian_assignee['id'] ?? 0) === $Silian_actorId) {
             throw new \InvalidArgumentException('Transfer target must be another support or admin user');
         }
 
-        $reason = $this->nullableString($payload['reason'] ?? null);
-        $now = $this->now();
-        $requestId = null;
+        $Silian_reason = $this->nullableString($Silian_payload['reason'] ?? null);
+        $Silian_now = $this->now();
+        $Silian_requestId = null;
 
         try {
             $this->db->beginTransaction();
 
-            $ticket = $this->findTicket($ticketId, '', [], true);
-            if ($ticket === null) {
+            $Silian_ticket = $this->findTicket($Silian_ticketId, '', [], true);
+            if ($Silian_ticket === null) {
                 throw new \RuntimeException('Ticket not found');
             }
-            if ((int) ($ticket['assigned_to'] ?? 0) !== $actorId) {
+            if ((int) ($Silian_ticket['assigned_to'] ?? 0) !== $Silian_actorId) {
                 throw new \DomainException('Only the current assignee can request a transfer');
             }
 
-            $existingPending = $this->findPendingTransferRequestForTicket($ticketId);
-            if ($existingPending !== null) {
+            $Silian_existingPending = $this->findPendingTransferRequestForTicket($Silian_ticketId);
+            if ($Silian_existingPending !== null) {
                 throw new \InvalidArgumentException('A pending transfer request already exists for this ticket');
             }
 
-            $stmt = $this->db->prepare("
+            $Silian_stmt = $this->db->prepare("
                 INSERT INTO support_ticket_transfer_requests (
                     ticket_id, requested_by, from_assignee, to_assignee, reason, status, created_at, updated_at
                 ) VALUES (
                     :ticket_id, :requested_by, :from_assignee, :to_assignee, :reason, :status, :created_at, :updated_at
                 )
             ");
-            $stmt->execute([
-                'ticket_id' => $ticketId,
-                'requested_by' => $actorId,
-                'from_assignee' => $actorId,
-                'to_assignee' => (int) $assignee['id'],
-                'reason' => $reason,
+            $Silian_stmt->execute([
+                'ticket_id' => $Silian_ticketId,
+                'requested_by' => $Silian_actorId,
+                'from_assignee' => $Silian_actorId,
+                'to_assignee' => (int) $Silian_assignee['id'],
+                'reason' => $Silian_reason,
                 'status' => self::TRANSFER_STATUS_PENDING,
-                'created_at' => $now,
-                'updated_at' => $now,
+                'created_at' => $Silian_now,
+                'updated_at' => $Silian_now,
             ]);
-            $requestId = (int) $this->db->lastInsertId();
+            $Silian_requestId = (int) $this->db->lastInsertId();
             $this->db->commit();
-        } catch (\Throwable $exception) {
+        } catch (\Throwable $Silian_exception) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
-            throw $exception;
+            throw $Silian_exception;
         }
 
-        $formatted = $requestId > 0 ? $this->findTransferRequest($requestId) : null;
+        $Silian_formatted = $Silian_requestId > 0 ? $this->findTransferRequest($Silian_requestId) : null;
         $this->auditLogService->log([
-            'user_id' => $actorId,
+            'user_id' => $Silian_actorId,
             'action' => 'support_ticket_transfer_requested',
             'operation_category' => 'support',
-            'actor_type' => $this->actorType($actor),
+            'actor_type' => $this->actorType($Silian_actor),
             'affected_table' => 'support_ticket_transfer_requests',
-            'affected_id' => $requestId,
+            'affected_id' => $Silian_requestId,
             'status' => 'success',
             'data' => [
-                'ticket_id' => $ticketId,
-                'from_assignee' => $actorId,
-                'to_assignee' => (int) $assignee['id'],
+                'ticket_id' => $Silian_ticketId,
+                'from_assignee' => $Silian_actorId,
+                'to_assignee' => (int) $Silian_assignee['id'],
             ],
         ]);
 
-        $targetUser = $this->loadUserById((int) $assignee['id']);
-        if ($targetUser !== null) {
+        $Silian_targetUser = $this->loadUserById((int) $Silian_assignee['id']);
+        if ($Silian_targetUser !== null) {
             $this->notifyAssignee(
-                $targetUser,
-                sprintf('Transfer request for ticket #%d', $ticketId),
+                $Silian_targetUser,
+                sprintf('Transfer request for ticket #%d', $Silian_ticketId),
                 sprintf(
                     "A transfer request is waiting for your review.\nTicket #%d\nFrom: %s\nReason: %s",
-                    $ticketId,
-                    $this->actorName($actor),
-                    $reason ?? 'No reason provided'
+                    $Silian_ticketId,
+                    $this->actorName($Silian_actor),
+                    $Silian_reason ?? 'No reason provided'
                 ),
-                $ticketId,
+                $Silian_ticketId,
                 'support_ticket_transfer_target_notified',
                 [
                     'eyebrow' => 'Transfer request',
                     'intro' => 'A teammate requested to transfer a support ticket to you for review.',
                     'summary' => 'Review the reason below and decide whether to accept ownership.',
                     'ticket' => [
-                        'id' => $ticketId,
-                        'subject' => (string) ($ticket['subject'] ?? ''),
+                        'id' => $Silian_ticketId,
+                        'subject' => (string) ($Silian_ticket['subject'] ?? ''),
                     ],
-                    'details' => $this->buildTicketEmailDetails($ticket, [
-                        ['label' => 'From', 'value' => $this->actorName($actor)],
+                    'details' => $this->buildTicketEmailDetails($Silian_ticket, [
+                        ['label' => 'From', 'value' => $this->actorName($Silian_actor)],
                     ]),
                     'message' => [
                         'label' => 'Transfer reason',
-                        'body' => $reason ?? 'No reason provided',
+                        'body' => $Silian_reason ?? 'No reason provided',
                     ],
                     'button_label' => 'Review transfer',
-                    'button_path' => $this->ticketEmailPath($ticketId, true),
+                    'button_path' => $this->ticketEmailPath($Silian_ticketId, true),
                     'closing' => 'Review the request in CarbonTrack to accept, reject, or follow up with the current owner.',
                 ]
             );
         }
 
-        return $formatted ?? [];
+        return $Silian_formatted ?? [];
     }
 
-    public function reviewTransferRequest(array $actor, int $requestId, array $payload): array
+    public function reviewTransferRequest(array $Silian_actor, int $Silian_requestId, array $Silian_payload): array
     {
-        $decision = $this->normalizeTransferStatus($payload['status'] ?? null);
-        if (!in_array($decision, [self::TRANSFER_STATUS_APPROVED, self::TRANSFER_STATUS_REJECTED, self::TRANSFER_STATUS_CANCELLED], true)) {
+        $Silian_decision = $this->normalizeTransferStatus($Silian_payload['status'] ?? null);
+        if (!in_array($Silian_decision, [self::TRANSFER_STATUS_APPROVED, self::TRANSFER_STATUS_REJECTED, self::TRANSFER_STATUS_CANCELLED], true)) {
             throw new \InvalidArgumentException('Transfer review must approve, reject, or cancel the request');
         }
 
-        $actorId = (int) ($actor['id'] ?? 0);
-        $reviewNote = $this->nullableString($payload['review_note'] ?? null);
-        $now = $this->now();
-        $requestRow = null;
-        $updatedRequest = null;
-        $ticketBeforeTransfer = null;
+        $Silian_actorId = (int) ($Silian_actor['id'] ?? 0);
+        $Silian_reviewNote = $this->nullableString($Silian_payload['review_note'] ?? null);
+        $Silian_now = $this->now();
+        $Silian_requestRow = null;
+        $Silian_updatedRequest = null;
+        $Silian_ticketBeforeTransfer = null;
 
         try {
             $this->db->beginTransaction();
 
-            $requestRow = $this->findTransferRequest($requestId, true);
-            if ($requestRow === null) {
+            $Silian_requestRow = $this->findTransferRequest($Silian_requestId, true);
+            if ($Silian_requestRow === null) {
                 throw new \RuntimeException('Transfer request not found');
             }
-            if (($requestRow['status'] ?? '') !== self::TRANSFER_STATUS_PENDING) {
+            if (($Silian_requestRow['status'] ?? '') !== self::TRANSFER_STATUS_PENDING) {
                 throw new \InvalidArgumentException('Transfer request is no longer pending');
             }
 
-            $isRequester = $actorId > 0 && $actorId === (int) ($requestRow['requested_by'] ?? 0);
-            $isTarget = $actorId > 0 && $actorId === (int) ($requestRow['to_assignee'] ?? 0);
-            if ($decision === self::TRANSFER_STATUS_CANCELLED && !$isRequester) {
+            $Silian_isRequester = $Silian_actorId > 0 && $Silian_actorId === (int) ($Silian_requestRow['requested_by'] ?? 0);
+            $Silian_isTarget = $Silian_actorId > 0 && $Silian_actorId === (int) ($Silian_requestRow['to_assignee'] ?? 0);
+            if ($Silian_decision === self::TRANSFER_STATUS_CANCELLED && !$Silian_isRequester) {
                 throw new \DomainException('Only the transfer requester can cancel this request');
             }
-            if (in_array($decision, [self::TRANSFER_STATUS_APPROVED, self::TRANSFER_STATUS_REJECTED], true) && !$isTarget) {
+            if (in_array($Silian_decision, [self::TRANSFER_STATUS_APPROVED, self::TRANSFER_STATUS_REJECTED], true) && !$Silian_isTarget) {
                 throw new \DomainException('Only the transfer target can approve or reject this request');
             }
 
-            if ($decision === self::TRANSFER_STATUS_APPROVED) {
-                $ticket = $this->findTicket((int) $requestRow['ticket_id'], '', [], true);
-                if ($ticket === null) {
+            if ($Silian_decision === self::TRANSFER_STATUS_APPROVED) {
+                $Silian_ticket = $this->findTicket((int) $Silian_requestRow['ticket_id'], '', [], true);
+                if ($Silian_ticket === null) {
                     throw new \RuntimeException('Ticket not found');
                 }
-                $ticketBeforeTransfer = $ticket;
-                $currentAssigneeId = isset($ticket['assigned_to']) ? (int) $ticket['assigned_to'] : 0;
-                $expectedAssigneeId = isset($requestRow['from_assignee']) ? (int) $requestRow['from_assignee'] : 0;
-                if ($currentAssigneeId !== $expectedAssigneeId) {
+                $Silian_ticketBeforeTransfer = $Silian_ticket;
+                $Silian_currentAssigneeId = isset($Silian_ticket['assigned_to']) ? (int) $Silian_ticket['assigned_to'] : 0;
+                $Silian_expectedAssigneeId = isset($Silian_requestRow['from_assignee']) ? (int) $Silian_requestRow['from_assignee'] : 0;
+                if ($Silian_currentAssigneeId !== $Silian_expectedAssigneeId) {
                     throw new \InvalidArgumentException('Transfer request is stale because the ticket assignee has changed');
                 }
             }
 
-            $updateStmt = $this->db->prepare("
+            $Silian_updateStmt = $this->db->prepare("
                 UPDATE support_ticket_transfer_requests
                 SET status = :status,
                     review_note = :review_note,
@@ -738,125 +738,125 @@ class SupportTicketService
                 WHERE id = :id
                   AND status = :expected_status
             ");
-            $updateStmt->execute([
-                'status' => $decision,
-                'review_note' => $reviewNote,
-                'reviewed_by' => $actorId,
-                'reviewed_at' => $now,
-                'updated_at' => $now,
-                'id' => $requestId,
+            $Silian_updateStmt->execute([
+                'status' => $Silian_decision,
+                'review_note' => $Silian_reviewNote,
+                'reviewed_by' => $Silian_actorId,
+                'reviewed_at' => $Silian_now,
+                'updated_at' => $Silian_now,
+                'id' => $Silian_requestId,
                 'expected_status' => self::TRANSFER_STATUS_PENDING,
             ]);
-            if ($updateStmt->rowCount() !== 1) {
+            if ($Silian_updateStmt->rowCount() !== 1) {
                 throw new \InvalidArgumentException('Transfer request is no longer pending');
             }
 
-            if ($decision === self::TRANSFER_STATUS_APPROVED) {
-                $this->updateTicket((int) $requestRow['ticket_id'], [
-                    'assigned_to' => (int) $requestRow['to_assignee'],
+            if ($Silian_decision === self::TRANSFER_STATUS_APPROVED) {
+                $this->updateTicket((int) $Silian_requestRow['ticket_id'], [
+                    'assigned_to' => (int) $Silian_requestRow['to_assignee'],
                     'assignment_source' => 'manual',
                     'assigned_rule_id' => null,
                     'assignment_locked' => 0,
-                    'updated_at' => $now,
+                    'updated_at' => $Silian_now,
                 ]);
             }
 
             $this->db->commit();
-            $updatedRequest = $this->findTransferRequest($requestId);
-        } catch (\Throwable $exception) {
+            $Silian_updatedRequest = $this->findTransferRequest($Silian_requestId);
+        } catch (\Throwable $Silian_exception) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
-            throw $exception;
+            throw $Silian_exception;
         }
 
         $this->auditLogService->log([
-            'user_id' => (int) ($actor['id'] ?? 0),
+            'user_id' => (int) ($Silian_actor['id'] ?? 0),
             'action' => 'support_ticket_transfer_reviewed',
             'operation_category' => 'support',
-            'actor_type' => $this->actorType($actor),
+            'actor_type' => $this->actorType($Silian_actor),
             'affected_table' => 'support_ticket_transfer_requests',
-            'affected_id' => $requestId,
+            'affected_id' => $Silian_requestId,
             'status' => 'success',
-            'old_data' => $requestRow,
-            'new_data' => $updatedRequest,
+            'old_data' => $Silian_requestRow,
+            'new_data' => $Silian_updatedRequest,
         ]);
 
         if (
-            $decision === self::TRANSFER_STATUS_APPROVED
-            && $requestRow !== null
-            && $ticketBeforeTransfer !== null
+            $Silian_decision === self::TRANSFER_STATUS_APPROVED
+            && $Silian_requestRow !== null
+            && $Silian_ticketBeforeTransfer !== null
         ) {
             $this->notifyUserTicketUpdated(
-                $ticketBeforeTransfer,
-                ['assigned_to' => (int) ($requestRow['to_assignee'] ?? 0)],
-                (int) ($requestRow['ticket_id'] ?? 0)
+                $Silian_ticketBeforeTransfer,
+                ['assigned_to' => (int) ($Silian_requestRow['to_assignee'] ?? 0)],
+                (int) ($Silian_requestRow['ticket_id'] ?? 0)
             );
         }
 
-        return $updatedRequest ?? [];
+        return $Silian_updatedRequest ?? [];
     }
 
-    private function listTickets(bool $includeRequester, array $baseFilters, array $query): array
+    private function listTickets(bool $Silian_includeRequester, array $Silian_baseFilters, array $Silian_query): array
     {
-        $page = max(1, (int) ($query['page'] ?? 1));
-        $limit = min($includeRequester ? 100 : 50, max(1, (int) ($query['limit'] ?? ($includeRequester ? 20 : 10))));
-        $offset = ($page - 1) * $limit;
+        $Silian_page = max(1, (int) ($Silian_query['page'] ?? 1));
+        $Silian_limit = min($Silian_includeRequester ? 100 : 50, max(1, (int) ($Silian_query['limit'] ?? ($Silian_includeRequester ? 20 : 10))));
+        $Silian_offset = ($Silian_page - 1) * $Silian_limit;
 
-        $where = ['1 = 1'];
-        $params = [];
-        if (isset($baseFilters['user_id'])) {
-            $where[] = 't.user_id = :user_id';
-            $params['user_id'] = (int) $baseFilters['user_id'];
+        $Silian_where = ['1 = 1'];
+        $Silian_params = [];
+        if (isset($Silian_baseFilters['user_id'])) {
+            $Silian_where[] = 't.user_id = :user_id';
+            $Silian_params['user_id'] = (int) $Silian_baseFilters['user_id'];
         }
-        if (array_key_exists('assigned_to', $baseFilters)) {
-            $assignedTo = $baseFilters['assigned_to'];
-            if ($assignedTo === null) {
-                $where[] = 't.assigned_to IS NULL';
+        if (array_key_exists('assigned_to', $Silian_baseFilters)) {
+            $Silian_assignedTo = $Silian_baseFilters['assigned_to'];
+            if ($Silian_assignedTo === null) {
+                $Silian_where[] = 't.assigned_to IS NULL';
             } else {
-                $where[] = 't.assigned_to = :base_assigned_to';
-                $params['base_assigned_to'] = (int) $assignedTo;
+                $Silian_where[] = 't.assigned_to = :base_assigned_to';
+                $Silian_params['base_assigned_to'] = (int) $Silian_assignedTo;
             }
         }
-        if (array_key_exists('transfer_target', $baseFilters)) {
-            $where[] = 'EXISTS (
+        if (array_key_exists('transfer_target', $Silian_baseFilters)) {
+            $Silian_where[] = 'EXISTS (
                 SELECT 1
                 FROM support_ticket_transfer_requests tr
                 WHERE tr.ticket_id = t.id
                   AND tr.to_assignee = :transfer_target
                   AND tr.status = :transfer_status
             )';
-            $params['transfer_target'] = (int) $baseFilters['transfer_target'];
-            $params['transfer_status'] = self::TRANSFER_STATUS_PENDING;
+            $Silian_params['transfer_target'] = (int) $Silian_baseFilters['transfer_target'];
+            $Silian_params['transfer_status'] = self::TRANSFER_STATUS_PENDING;
         }
-        if (!empty($query['status'])) {
-            $where[] = 't.status = :status';
-            $params['status'] = $this->normalizeStatus($query['status']);
+        if (!empty($Silian_query['status'])) {
+            $Silian_where[] = 't.status = :status';
+            $Silian_params['status'] = $this->normalizeStatus($Silian_query['status']);
         }
-        if (!empty($query['category'])) {
-            $where[] = 't.category = :category';
-            $params['category'] = $this->normalizeCategory($query['category']);
+        if (!empty($Silian_query['category'])) {
+            $Silian_where[] = 't.category = :category';
+            $Silian_params['category'] = $this->normalizeCategory($Silian_query['category']);
         }
-        if ($includeRequester && isset($query['assigned_to']) && $query['assigned_to'] !== '') {
-            $assignedTo = (int) $query['assigned_to'];
-            if ($assignedTo <= 0) {
-                $where[] = 't.assigned_to IS NULL';
+        if ($Silian_includeRequester && isset($Silian_query['assigned_to']) && $Silian_query['assigned_to'] !== '') {
+            $Silian_assignedTo = (int) $Silian_query['assigned_to'];
+            if ($Silian_assignedTo <= 0) {
+                $Silian_where[] = 't.assigned_to IS NULL';
             } else {
-                $where[] = 't.assigned_to = :assigned_to';
-                $params['assigned_to'] = $assignedTo;
+                $Silian_where[] = 't.assigned_to = :assigned_to';
+                $Silian_params['assigned_to'] = $Silian_assignedTo;
             }
         }
-        if ($includeRequester && !empty($query['q'])) {
-            $where[] = '(t.subject LIKE :search_subject OR requester.username LIKE :search_username OR requester.email LIKE :search_email)';
-            $term = trim((string) $query['q']);
-            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $term);
-            $searchPattern = '%' . $escaped . '%';
-            $params['search_subject'] = $searchPattern;
-            $params['search_username'] = $searchPattern;
-            $params['search_email'] = $searchPattern;
+        if ($Silian_includeRequester && !empty($Silian_query['q'])) {
+            $Silian_where[] = '(t.subject LIKE :search_subject OR requester.username LIKE :search_username OR requester.email LIKE :search_email)';
+            $Silian_term = trim((string) $Silian_query['q']);
+            $Silian_escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $Silian_term);
+            $Silian_searchPattern = '%' . $Silian_escaped . '%';
+            $Silian_params['search_subject'] = $Silian_searchPattern;
+            $Silian_params['search_username'] = $Silian_searchPattern;
+            $Silian_params['search_email'] = $Silian_searchPattern;
         }
 
-        $sql = "
+        $Silian_sql = "
             SELECT
                 t.*,
                 requester.username AS requester_username,
@@ -876,66 +876,66 @@ class SupportTicketService
             FROM support_tickets t
             INNER JOIN users requester ON requester.id = t.user_id
             LEFT JOIN users assignee ON assignee.id = t.assigned_to
-            WHERE " . implode(' AND ', $where) . "
+            WHERE " . implode(' AND ', $Silian_where) . "
             ORDER BY COALESCE(t.last_replied_at, t.updated_at, t.created_at) DESC, t.id DESC
-            LIMIT {$limit} OFFSET {$offset}
+            LIMIT {$Silian_limit} OFFSET {$Silian_offset}
         ";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        $slaSettings = $this->supportRoutingEngineService?->getSlaSettingsSnapshot();
-        $items = array_map(
-            fn (array $row): array => $this->formatTicketSummary($row, $includeRequester, $slaSettings),
-            $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_params);
+        $Silian_slaSettings = $this->supportRoutingEngineService?->getSlaSettingsSnapshot();
+        $Silian_items = array_map(
+            fn (array $Silian_row): array => $this->formatTicketSummary($Silian_row, $Silian_includeRequester, $Silian_slaSettings),
+            $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []
         );
-        if ($includeRequester && $items !== [] && $this->supportAutomationService !== null) {
-            $tagsByTicket = $this->supportAutomationService->getTagsForTicketIds(array_map(static fn (array $item): int => (int) $item['id'], $items));
-            $items = array_map(static function (array $item) use ($tagsByTicket): array {
-                $item['tags'] = array_values($tagsByTicket[(int) $item['id']] ?? []);
-                return $item;
-            }, $items);
+        if ($Silian_includeRequester && $Silian_items !== [] && $this->supportAutomationService !== null) {
+            $Silian_tagsByTicket = $this->supportAutomationService->getTagsForTicketIds(array_map(static fn (array $Silian_item): int => (int) $Silian_item['id'], $Silian_items));
+            $Silian_items = array_map(static function (array $Silian_item) use ($Silian_tagsByTicket): array {
+                $Silian_item['tags'] = array_values($Silian_tagsByTicket[(int) $Silian_item['id']] ?? []);
+                return $Silian_item;
+            }, $Silian_items);
         }
-        if ($includeRequester && $items !== [] && $this->supportRoutingEngineService !== null) {
-            $items = array_map(function (array $item): array {
-                $item['routing_summary'] = $this->supportRoutingEngineService?->getRoutingSummaryForTicket((int) $item['id']);
-                return $item;
-            }, $items);
+        if ($Silian_includeRequester && $Silian_items !== [] && $this->supportRoutingEngineService !== null) {
+            $Silian_items = array_map(function (array $Silian_item): array {
+                $Silian_item['routing_summary'] = $this->supportRoutingEngineService?->getRoutingSummaryForTicket((int) $Silian_item['id']);
+                return $Silian_item;
+            }, $Silian_items);
         }
-        $countStmt = $this->db->prepare("
+        $Silian_countStmt = $this->db->prepare("
             SELECT COUNT(*)
             FROM support_tickets t
             INNER JOIN users requester ON requester.id = t.user_id
-            WHERE " . implode(' AND ', $where)
+            WHERE " . implode(' AND ', $Silian_where)
         );
-        $countStmt->execute($params);
+        $Silian_countStmt->execute($Silian_params);
         return [
-            'items' => $items,
-            'pagination' => ['page' => $page, 'limit' => $limit, 'total' => (int) $countStmt->fetchColumn()],
+            'items' => $Silian_items,
+            'pagination' => ['page' => $Silian_page, 'limit' => $Silian_limit, 'total' => (int) $Silian_countStmt->fetchColumn()],
         ];
     }
 
-    private function findTicketForUser(int $userId, int $ticketId): ?array
+    private function findTicketForUser(int $Silian_userId, int $Silian_ticketId): ?array
     {
-        return $this->findTicket($ticketId, 'AND t.user_id = :user_id', ['user_id' => $userId]);
+        return $this->findTicket($Silian_ticketId, 'AND t.user_id = :user_id', ['user_id' => $Silian_userId]);
     }
 
-    private function findTicketForSupport(array $actor, int $ticketId, bool $allowPendingTransferTarget = false): ?array
+    private function findTicketForSupport(array $Silian_actor, int $Silian_ticketId, bool $Silian_allowPendingTransferTarget = false): ?array
     {
-        if ($this->isAdminActor($actor)) {
-            return $this->findTicket($ticketId);
+        if ($this->isAdminActor($Silian_actor)) {
+            return $this->findTicket($Silian_ticketId);
         }
 
-        $actorId = (int) ($actor['id'] ?? 0);
-        if ($actorId <= 0) {
+        $Silian_actorId = (int) ($Silian_actor['id'] ?? 0);
+        if ($Silian_actorId <= 0) {
             return null;
         }
 
-        $assignedTicket = $this->findTicket($ticketId, 'AND t.assigned_to = :assigned_to', ['assigned_to' => $actorId]);
-        if ($assignedTicket !== null || !$allowPendingTransferTarget) {
-            return $assignedTicket;
+        $Silian_assignedTicket = $this->findTicket($Silian_ticketId, 'AND t.assigned_to = :assigned_to', ['assigned_to' => $Silian_actorId]);
+        if ($Silian_assignedTicket !== null || !$Silian_allowPendingTransferTarget) {
+            return $Silian_assignedTicket;
         }
 
         return $this->findTicket(
-            $ticketId,
+            $Silian_ticketId,
             'AND EXISTS (
                 SELECT 1
                 FROM support_ticket_transfer_requests tr
@@ -944,15 +944,15 @@ class SupportTicketService
                   AND tr.status = :transfer_status
             )',
             [
-                'transfer_target' => $actorId,
+                'transfer_target' => $Silian_actorId,
                 'transfer_status' => self::TRANSFER_STATUS_PENDING,
             ]
         );
     }
 
-    private function findTicket(int $ticketId, string $extraWhere = '', array $params = [], bool $forUpdate = false): ?array
+    private function findTicket(int $Silian_ticketId, string $Silian_extraWhere = '', array $Silian_params = [], bool $Silian_forUpdate = false): ?array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 t.*,
                 requester.username AS requester_username,
@@ -962,80 +962,80 @@ class SupportTicketService
             FROM support_tickets t
             INNER JOIN users requester ON requester.id = t.user_id
             LEFT JOIN users assignee ON assignee.id = t.assigned_to
-            WHERE t.id = :ticket_id {$extraWhere}
+            WHERE t.id = :ticket_id {$Silian_extraWhere}
             LIMIT 1
-            {$this->selectForUpdateClause($forUpdate)}
+            {$this->selectForUpdateClause($Silian_forUpdate)}
         ");
-        $stmt->execute(['ticket_id' => $ticketId] + $params);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        $Silian_stmt->execute(['ticket_id' => $Silian_ticketId] + $Silian_params);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_row ?: null;
     }
 
-    private function formatTicketSummary(array $row, bool $includeRequester, ?array $slaSettings = null): array
+    private function formatTicketSummary(array $Silian_row, bool $Silian_includeRequester, ?array $Silian_slaSettings = null): array
     {
-        $summary = [
-            'id' => (int) $row['id'],
-            'subject' => (string) $row['subject'],
-            'category' => (string) $row['category'],
-            'status' => (string) $row['status'],
-            'priority' => (string) $row['priority'],
-            'assigned_to' => isset($row['assigned_to']) ? (int) $row['assigned_to'] : null,
-            'assignment_source' => $row['assignment_source'] ?? null,
-            'assigned_rule_id' => isset($row['assigned_rule_id']) && $row['assigned_rule_id'] !== null ? (int) $row['assigned_rule_id'] : null,
-            'assignment_locked' => !empty($row['assignment_locked']),
-            'assigned_user' => $row['assigned_to'] ? ['id' => (int) $row['assigned_to'], 'username' => $row['assigned_username'] ?? null] : null,
-            'last_replied_at' => $row['last_replied_at'] ?? null,
-            'last_reply_by_role' => $row['last_reply_by_role'] ?? null,
-            'first_support_response_at' => $row['first_support_response_at'] ?? null,
-            'first_response_due_at' => $row['first_response_due_at'] ?? null,
-            'resolution_due_at' => $row['resolution_due_at'] ?? null,
-            'sla_status' => $row['sla_status'] ?? 'pending',
-            'escalation_level' => (int) ($row['escalation_level'] ?? 0),
-            'last_routing_run_id' => isset($row['last_routing_run_id']) && $row['last_routing_run_id'] !== null ? (int) $row['last_routing_run_id'] : null,
-            'created_at' => $row['created_at'] ?? null,
-            'updated_at' => $row['updated_at'] ?? null,
-            'resolved_at' => $row['resolved_at'] ?? null,
-            'closed_at' => $row['closed_at'] ?? null,
-            'message_count' => (int) ($row['message_count'] ?? 0),
-            'latest_message_preview' => $row['latest_message_preview'] ?? null,
+        $Silian_summary = [
+            'id' => (int) $Silian_row['id'],
+            'subject' => (string) $Silian_row['subject'],
+            'category' => (string) $Silian_row['category'],
+            'status' => (string) $Silian_row['status'],
+            'priority' => (string) $Silian_row['priority'],
+            'assigned_to' => isset($Silian_row['assigned_to']) ? (int) $Silian_row['assigned_to'] : null,
+            'assignment_source' => $Silian_row['assignment_source'] ?? null,
+            'assigned_rule_id' => isset($Silian_row['assigned_rule_id']) && $Silian_row['assigned_rule_id'] !== null ? (int) $Silian_row['assigned_rule_id'] : null,
+            'assignment_locked' => !empty($Silian_row['assignment_locked']),
+            'assigned_user' => $Silian_row['assigned_to'] ? ['id' => (int) $Silian_row['assigned_to'], 'username' => $Silian_row['assigned_username'] ?? null] : null,
+            'last_replied_at' => $Silian_row['last_replied_at'] ?? null,
+            'last_reply_by_role' => $Silian_row['last_reply_by_role'] ?? null,
+            'first_support_response_at' => $Silian_row['first_support_response_at'] ?? null,
+            'first_response_due_at' => $Silian_row['first_response_due_at'] ?? null,
+            'resolution_due_at' => $Silian_row['resolution_due_at'] ?? null,
+            'sla_status' => $Silian_row['sla_status'] ?? 'pending',
+            'escalation_level' => (int) ($Silian_row['escalation_level'] ?? 0),
+            'last_routing_run_id' => isset($Silian_row['last_routing_run_id']) && $Silian_row['last_routing_run_id'] !== null ? (int) $Silian_row['last_routing_run_id'] : null,
+            'created_at' => $Silian_row['created_at'] ?? null,
+            'updated_at' => $Silian_row['updated_at'] ?? null,
+            'resolved_at' => $Silian_row['resolved_at'] ?? null,
+            'closed_at' => $Silian_row['closed_at'] ?? null,
+            'message_count' => (int) ($Silian_row['message_count'] ?? 0),
+            'latest_message_preview' => $Silian_row['latest_message_preview'] ?? null,
         ];
         if ($this->supportRoutingEngineService !== null) {
-            $summary['sla_summary'] = $this->supportRoutingEngineService->buildSlaSummaryForTicket($row, $slaSettings);
+            $Silian_summary['sla_summary'] = $this->supportRoutingEngineService->buildSlaSummaryForTicket($Silian_row, $Silian_slaSettings);
         }
-        if ($includeRequester) {
-            $summary['requester'] = [
-                'id' => (int) ($row['user_id'] ?? 0),
-                'username' => $row['requester_username'] ?? null,
-                'email' => $row['requester_email'] ?? null,
-                'uuid' => $row['requester_uuid'] ?? null,
+        if ($Silian_includeRequester) {
+            $Silian_summary['requester'] = [
+                'id' => (int) ($Silian_row['user_id'] ?? 0),
+                'username' => $Silian_row['requester_username'] ?? null,
+                'email' => $Silian_row['requester_email'] ?? null,
+                'uuid' => $Silian_row['requester_uuid'] ?? null,
             ];
         }
-        return $summary;
+        return $Silian_summary;
     }
 
-    private function formatTicketDetail(array $ticket, bool $includeRequester): array
+    private function formatTicketDetail(array $Silian_ticket, bool $Silian_includeRequester): array
     {
-        $detail = $this->formatTicketSummary(
-            $ticket,
-            $includeRequester,
+        $Silian_detail = $this->formatTicketSummary(
+            $Silian_ticket,
+            $Silian_includeRequester,
             $this->supportRoutingEngineService?->getSlaSettingsSnapshot()
         );
-        $detail['messages'] = $this->messages((int) $ticket['id']);
-        $detail['feedback_candidates'] = $this->feedbackCandidates((int) $ticket['id']);
-        $detail['feedback'] = $this->feedback((int) $ticket['id']);
-        if ($includeRequester && $this->supportAutomationService !== null) {
-            $detail['tags'] = $this->supportAutomationService->getTagsForTicket((int) $ticket['id']);
+        $Silian_detail['messages'] = $this->messages((int) $Silian_ticket['id']);
+        $Silian_detail['feedback_candidates'] = $this->feedbackCandidates((int) $Silian_ticket['id']);
+        $Silian_detail['feedback'] = $this->feedback((int) $Silian_ticket['id']);
+        if ($Silian_includeRequester && $this->supportAutomationService !== null) {
+            $Silian_detail['tags'] = $this->supportAutomationService->getTagsForTicket((int) $Silian_ticket['id']);
         }
-        if ($includeRequester) {
-            $detail['transfer_requests'] = $this->transferRequests((int) $ticket['id']);
-            $detail['routing_summary'] = $this->supportRoutingEngineService?->getRoutingSummaryForTicket((int) $ticket['id']);
+        if ($Silian_includeRequester) {
+            $Silian_detail['transfer_requests'] = $this->transferRequests((int) $Silian_ticket['id']);
+            $Silian_detail['routing_summary'] = $this->supportRoutingEngineService?->getRoutingSummaryForTicket((int) $Silian_ticket['id']);
         }
-        return $detail;
+        return $Silian_detail;
     }
 
-    private function messages(int $ticketId): array
+    private function messages(int $Silian_ticketId): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 stm.*,
                 avatar.file_path AS sender_avatar_path
@@ -1045,31 +1045,31 @@ class SupportTicketService
             WHERE stm.ticket_id = :ticket_id
             ORDER BY stm.id ASC
         ");
-        $stmt->execute(['ticket_id' => $ticketId]);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $attachments = $this->attachments(array_map(static fn (array $row): int => (int) $row['id'], $rows));
-        return array_map(function (array $row) use ($attachments): array {
-            $messageId = (int) $row['id'];
-            $avatar = $this->resolveAvatar($row['sender_avatar_path'] ?? null);
+        $Silian_stmt->execute(['ticket_id' => $Silian_ticketId]);
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_attachments = $this->attachments(array_map(static fn (array $Silian_row): int => (int) $Silian_row['id'], $Silian_rows));
+        return array_map(function (array $Silian_row) use ($Silian_attachments): array {
+            $Silian_messageId = (int) $Silian_row['id'];
+            $Silian_avatar = $this->resolveAvatar($Silian_row['sender_avatar_path'] ?? null);
             return [
-                'id' => $messageId,
-                'ticket_id' => (int) $row['ticket_id'],
-                'sender_id' => isset($row['sender_id']) ? (int) $row['sender_id'] : null,
-                'sender_role' => $row['sender_role'] ?? null,
-                'sender_name' => $row['sender_name'] ?? null,
-                'avatar_path' => $avatar['avatar_path'],
-                'avatar_url' => $avatar['avatar_url'],
-                'body' => $row['body'] ?? '',
-                'created_at' => $row['created_at'] ?? null,
-                'updated_at' => $row['updated_at'] ?? null,
-                'attachments' => $attachments[$messageId] ?? [],
+                'id' => $Silian_messageId,
+                'ticket_id' => (int) $Silian_row['ticket_id'],
+                'sender_id' => isset($Silian_row['sender_id']) ? (int) $Silian_row['sender_id'] : null,
+                'sender_role' => $Silian_row['sender_role'] ?? null,
+                'sender_name' => $Silian_row['sender_name'] ?? null,
+                'avatar_path' => $Silian_avatar['avatar_path'],
+                'avatar_url' => $Silian_avatar['avatar_url'],
+                'body' => $Silian_row['body'] ?? '',
+                'created_at' => $Silian_row['created_at'] ?? null,
+                'updated_at' => $Silian_row['updated_at'] ?? null,
+                'attachments' => $Silian_attachments[$Silian_messageId] ?? [],
             ];
-        }, $rows);
+        }, $Silian_rows);
     }
 
-    private function feedbackCandidates(int $ticketId): array
+    private function feedbackCandidates(int $Silian_ticketId): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT DISTINCT
                 u.id,
                 u.username,
@@ -1093,36 +1093,36 @@ class SupportTicketService
               AND (u.is_admin = 1 OR LOWER(COALESCE(u.role, 'user')) IN ('support', 'admin'))
             ORDER BY COALESCE(u.username, u.email, ''), u.id
         ");
-        $stmt->execute([
-            'message_ticket_id' => $ticketId,
-            'assigned_ticket_id' => $ticketId,
+        $Silian_stmt->execute([
+            'message_ticket_id' => $Silian_ticketId,
+            'assigned_ticket_id' => $Silian_ticketId,
         ]);
 
-        return array_map(static function (array $row): array {
-            $role = !empty($row['is_admin']) ? 'admin' : strtolower((string) ($row['role'] ?? 'support'));
+        return array_map(static function (array $Silian_row): array {
+            $Silian_role = !empty($Silian_row['is_admin']) ? 'admin' : strtolower((string) ($Silian_row['role'] ?? 'support'));
             return [
-                'id' => (int) ($row['id'] ?? 0),
-                'username' => $row['username'] ?? null,
-                'email' => $row['email'] ?? null,
-                'role' => $role,
+                'id' => (int) ($Silian_row['id'] ?? 0),
+                'username' => $Silian_row['username'] ?? null,
+                'email' => $Silian_row['email'] ?? null,
+                'role' => $Silian_role,
             ];
-        }, $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        }, $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
-    private function findFeedbackCandidate(int $ticketId, int $ratedUserId): ?array
+    private function findFeedbackCandidate(int $Silian_ticketId, int $Silian_ratedUserId): ?array
     {
-        foreach ($this->feedbackCandidates($ticketId) as $candidate) {
-            if ((int) ($candidate['id'] ?? 0) === $ratedUserId) {
-                return $candidate;
+        foreach ($this->feedbackCandidates($Silian_ticketId) as $Silian_candidate) {
+            if ((int) ($Silian_candidate['id'] ?? 0) === $Silian_ratedUserId) {
+                return $Silian_candidate;
             }
         }
 
         return null;
     }
 
-    private function feedback(int $ticketId): array
+    private function feedback(int $Silian_ticketId): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 f.*,
                 reviewer.username AS reviewer_username,
@@ -1137,75 +1137,75 @@ class SupportTicketService
             WHERE f.ticket_id = :ticket_id
             ORDER BY f.id ASC
         ");
-        $stmt->execute(['ticket_id' => $ticketId]);
+        $Silian_stmt->execute(['ticket_id' => $Silian_ticketId]);
 
-        return array_map(static function (array $row): array {
-            $ratedRole = !empty($row['rated_is_admin']) ? 'admin' : strtolower((string) ($row['rated_role'] ?? 'support'));
+        return array_map(static function (array $Silian_row): array {
+            $Silian_ratedRole = !empty($Silian_row['rated_is_admin']) ? 'admin' : strtolower((string) ($Silian_row['rated_role'] ?? 'support'));
             return [
-                'id' => (int) ($row['id'] ?? 0),
-                'ticket_id' => (int) ($row['ticket_id'] ?? 0),
-                'user_id' => (int) ($row['user_id'] ?? 0),
-                'rated_user_id' => (int) ($row['rated_user_id'] ?? 0),
-                'rating' => (int) ($row['rating'] ?? 0),
-                'comment' => $row['comment'] ?? null,
-                'created_at' => $row['created_at'] ?? null,
-                'updated_at' => $row['updated_at'] ?? null,
+                'id' => (int) ($Silian_row['id'] ?? 0),
+                'ticket_id' => (int) ($Silian_row['ticket_id'] ?? 0),
+                'user_id' => (int) ($Silian_row['user_id'] ?? 0),
+                'rated_user_id' => (int) ($Silian_row['rated_user_id'] ?? 0),
+                'rating' => (int) ($Silian_row['rating'] ?? 0),
+                'comment' => $Silian_row['comment'] ?? null,
+                'created_at' => $Silian_row['created_at'] ?? null,
+                'updated_at' => $Silian_row['updated_at'] ?? null,
                 'reviewer' => [
-                    'id' => (int) ($row['user_id'] ?? 0),
-                    'username' => $row['reviewer_username'] ?? null,
-                    'email' => $row['reviewer_email'] ?? null,
+                    'id' => (int) ($Silian_row['user_id'] ?? 0),
+                    'username' => $Silian_row['reviewer_username'] ?? null,
+                    'email' => $Silian_row['reviewer_email'] ?? null,
                 ],
                 'rated_user' => [
-                    'id' => (int) ($row['rated_user_id'] ?? 0),
-                    'username' => $row['rated_username'] ?? null,
-                    'email' => $row['rated_email'] ?? null,
-                    'role' => $ratedRole,
+                    'id' => (int) ($Silian_row['rated_user_id'] ?? 0),
+                    'username' => $Silian_row['rated_username'] ?? null,
+                    'email' => $Silian_row['rated_email'] ?? null,
+                    'role' => $Silian_ratedRole,
                 ],
             ];
-        }, $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        }, $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
-    private function findFeedbackRecord(int $ticketId, int $userId, int $ratedUserId): ?SupportTicketFeedback
+    private function findFeedbackRecord(int $Silian_ticketId, int $Silian_userId, int $Silian_ratedUserId): ?SupportTicketFeedback
     {
         return SupportTicketFeedback::query()
-            ->where('ticket_id', $ticketId)
-            ->where('user_id', $userId)
-            ->where('rated_user_id', $ratedUserId)
+            ->where('ticket_id', $Silian_ticketId)
+            ->where('user_id', $Silian_userId)
+            ->where('rated_user_id', $Silian_ratedUserId)
             ->first();
     }
 
-    private function attachments(array $messageIds): array
+    private function attachments(array $Silian_messageIds): array
     {
-        if ($messageIds === []) {
+        if ($Silian_messageIds === []) {
             return [];
         }
-        $sql = 'SELECT * FROM support_ticket_attachments WHERE message_id IN (' . implode(',', array_fill(0, count($messageIds), '?')) . ') ORDER BY id ASC';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($messageIds);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $result = [];
-        foreach ($rows as $row) {
-            $messageId = (int) $row['message_id'];
-            $result[$messageId][] = [
-                'id' => (int) $row['id'],
-                'ticket_id' => (int) $row['ticket_id'],
-                'message_id' => $messageId,
-                'file_id' => isset($row['file_id']) ? (int) $row['file_id'] : null,
-                'file_path' => $row['file_path'],
-                'original_name' => $row['original_name'],
-                'mime_type' => $row['mime_type'],
-                'size' => (int) ($row['size'] ?? 0),
-                'entity_type' => $row['entity_type'] ?? 'support_ticket_message',
-                'download_url' => $this->presignedUrl($row['file_path'] ?? null),
-                'created_at' => $row['created_at'] ?? null,
+        $Silian_sql = 'SELECT * FROM support_ticket_attachments WHERE message_id IN (' . implode(',', array_fill(0, count($Silian_messageIds), '?')) . ') ORDER BY id ASC';
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_messageIds);
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_result = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_messageId = (int) $Silian_row['message_id'];
+            $Silian_result[$Silian_messageId][] = [
+                'id' => (int) $Silian_row['id'],
+                'ticket_id' => (int) $Silian_row['ticket_id'],
+                'message_id' => $Silian_messageId,
+                'file_id' => isset($Silian_row['file_id']) ? (int) $Silian_row['file_id'] : null,
+                'file_path' => $Silian_row['file_path'],
+                'original_name' => $Silian_row['original_name'],
+                'mime_type' => $Silian_row['mime_type'],
+                'size' => (int) ($Silian_row['size'] ?? 0),
+                'entity_type' => $Silian_row['entity_type'] ?? 'support_ticket_message',
+                'download_url' => $this->presignedUrl($Silian_row['file_path'] ?? null),
+                'created_at' => $Silian_row['created_at'] ?? null,
             ];
         }
-        return $result;
+        return $Silian_result;
     }
 
-    private function transferRequests(int $ticketId): array
+    private function transferRequests(int $Silian_ticketId): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 tr.*,
                 requester.username AS requester_username,
@@ -1224,74 +1224,74 @@ class SupportTicketService
             WHERE tr.ticket_id = :ticket_id
             ORDER BY tr.id DESC
         ");
-        $stmt->execute(['ticket_id' => $ticketId]);
+        $Silian_stmt->execute(['ticket_id' => $Silian_ticketId]);
 
-        return array_map(fn (array $row): array => $this->formatTransferRequest($row), $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(fn (array $Silian_row): array => $this->formatTransferRequest($Silian_row), $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
-    private function attachFiles(int $ticketId, int $messageId, array $paths, int $actorUserId, bool $supportActor): void
+    private function attachFiles(int $Silian_ticketId, int $Silian_messageId, array $Silian_paths, int $Silian_actorUserId, bool $Silian_supportActor): void
     {
-        foreach ($paths as $path) {
-            $file = $this->fileMetadataService->findByFilePath($path);
-            if ($file === null) {
-                throw new \InvalidArgumentException('Attachment not found: ' . $path);
+        foreach ($Silian_paths as $Silian_path) {
+            $Silian_file = $this->fileMetadataService->findByFilePath($Silian_path);
+            if ($Silian_file === null) {
+                throw new \InvalidArgumentException('Attachment not found: ' . $Silian_path);
             }
-            if (!$supportActor && (int) ($file->user_id ?? 0) !== $actorUserId) {
-                throw new \InvalidArgumentException('Attachment ownership mismatch: ' . $path);
+            if (!$Silian_supportActor && (int) ($Silian_file->user_id ?? 0) !== $Silian_actorUserId) {
+                throw new \InvalidArgumentException('Attachment ownership mismatch: ' . $Silian_path);
             }
-            if ($supportActor && !$this->canSupportActorAttachFile($ticketId, $path, (int) ($file->user_id ?? 0), $actorUserId)) {
-                throw new \InvalidArgumentException('Attachment is not authorized for this ticket: ' . $path);
+            if ($Silian_supportActor && !$this->canSupportActorAttachFile($Silian_ticketId, $Silian_path, (int) ($Silian_file->user_id ?? 0), $Silian_actorUserId)) {
+                throw new \InvalidArgumentException('Attachment is not authorized for this ticket: ' . $Silian_path);
             }
             SupportTicketAttachment::create([
-                'ticket_id' => $ticketId,
-                'message_id' => $messageId,
-                'file_id' => (int) ($file->id ?? 0) ?: null,
-                'file_path' => (string) $file->file_path,
-                'original_name' => $file->original_name,
-                'mime_type' => $file->mime_type,
-                'size' => (int) ($file->size ?? 0),
+                'ticket_id' => $Silian_ticketId,
+                'message_id' => $Silian_messageId,
+                'file_id' => (int) ($Silian_file->id ?? 0) ?: null,
+                'file_path' => (string) $Silian_file->file_path,
+                'original_name' => $Silian_file->original_name,
+                'mime_type' => $Silian_file->mime_type,
+                'size' => (int) ($Silian_file->size ?? 0),
                 'entity_type' => 'support_ticket_message',
                 'created_at' => $this->now(),
             ]);
         }
     }
 
-    private function canSupportActorAttachFile(int $ticketId, string $path, int $fileOwnerUserId, int $actorUserId): bool
+    private function canSupportActorAttachFile(int $Silian_ticketId, string $Silian_path, int $Silian_fileOwnerUserId, int $Silian_actorUserId): bool
     {
-        if ($fileOwnerUserId > 0 && $fileOwnerUserId === $actorUserId) {
+        if ($Silian_fileOwnerUserId > 0 && $Silian_fileOwnerUserId === $Silian_actorUserId) {
             return true;
         }
 
-        $stmt = $this->db->prepare('
+        $Silian_stmt = $this->db->prepare('
             SELECT 1
             FROM support_ticket_attachments
             WHERE ticket_id = :ticket_id
               AND file_path = :file_path
             LIMIT 1
         ');
-        $stmt->execute([
-            'ticket_id' => $ticketId,
-            'file_path' => $path,
+        $Silian_stmt->execute([
+            'ticket_id' => $Silian_ticketId,
+            'file_path' => $Silian_path,
         ]);
 
-        return $stmt->fetchColumn() !== false;
+        return $Silian_stmt->fetchColumn() !== false;
     }
 
-    private function updateTicket(int $ticketId, array $fields): void
+    private function updateTicket(int $Silian_ticketId, array $Silian_fields): void
     {
-        $set = [];
-        $params = ['id' => $ticketId];
-        foreach ($fields as $field => $value) {
-            $set[] = "{$field} = :{$field}";
-            $params[$field] = $value;
+        $Silian_set = [];
+        $Silian_params = ['id' => $Silian_ticketId];
+        foreach ($Silian_fields as $Silian_field => $Silian_value) {
+            $Silian_set[] = "{$Silian_field} = :{$Silian_field}";
+            $Silian_params[$Silian_field] = $Silian_value;
         }
-        $stmt = $this->db->prepare('UPDATE support_tickets SET ' . implode(', ', $set) . ' WHERE id = :id');
-        $stmt->execute($params);
+        $Silian_stmt = $this->db->prepare('UPDATE support_tickets SET ' . implode(', ', $Silian_set) . ' WHERE id = :id');
+        $Silian_stmt->execute($Silian_params);
     }
 
-    private function findTransferRequest(int $requestId, bool $forUpdate = false): ?array
+    private function findTransferRequest(int $Silian_requestId, bool $Silian_forUpdate = false): ?array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 tr.*,
                 requester.username AS requester_username,
@@ -1309,291 +1309,291 @@ class SupportTicketService
             LEFT JOIN users reviewer ON reviewer.id = tr.reviewed_by
             WHERE tr.id = :id
             LIMIT 1
-            {$this->selectForUpdateClause($forUpdate)}
+            {$this->selectForUpdateClause($Silian_forUpdate)}
         ");
-        $stmt->execute(['id' => $requestId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $Silian_stmt->execute(['id' => $Silian_requestId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $row ? $this->formatTransferRequest($row) : null;
+        return $Silian_row ? $this->formatTransferRequest($Silian_row) : null;
     }
 
-    private function selectForUpdateClause(bool $forUpdate): string
+    private function selectForUpdateClause(bool $Silian_forUpdate): string
     {
-        if (!$forUpdate) {
+        if (!$Silian_forUpdate) {
             return '';
         }
 
         try {
-            $driver = strtolower((string) $this->db->getAttribute(PDO::ATTR_DRIVER_NAME));
+            $Silian_driver = strtolower((string) $this->db->getAttribute(PDO::ATTR_DRIVER_NAME));
         } catch (\Throwable) {
             return '';
         }
 
-        return in_array($driver, ['mysql', 'pgsql', 'sqlsrv'], true) ? ' FOR UPDATE' : '';
+        return in_array($Silian_driver, ['mysql', 'pgsql', 'sqlsrv'], true) ? ' FOR UPDATE' : '';
     }
 
-    private function findPendingTransferRequestForTicket(int $ticketId): ?array
+    private function findPendingTransferRequestForTicket(int $Silian_ticketId): ?array
     {
-        $stmt = $this->db->prepare('
+        $Silian_stmt = $this->db->prepare('
             SELECT id
             FROM support_ticket_transfer_requests
             WHERE ticket_id = :ticket_id AND status = :status
             ORDER BY id DESC
             LIMIT 1
         ');
-        $stmt->execute([
-            'ticket_id' => $ticketId,
+        $Silian_stmt->execute([
+            'ticket_id' => $Silian_ticketId,
             'status' => self::TRANSFER_STATUS_PENDING,
         ]);
-        $requestId = $stmt->fetchColumn();
+        $Silian_requestId = $Silian_stmt->fetchColumn();
 
-        return $requestId ? $this->findTransferRequest((int) $requestId) : null;
+        return $Silian_requestId ? $this->findTransferRequest((int) $Silian_requestId) : null;
     }
 
-    private function formatTransferRequest(array $row): array
+    private function formatTransferRequest(array $Silian_row): array
     {
         return [
-            'id' => (int) ($row['id'] ?? 0),
-            'ticket_id' => (int) ($row['ticket_id'] ?? 0),
-            'requested_by' => (int) ($row['requested_by'] ?? 0),
-            'from_assignee' => isset($row['from_assignee']) ? (int) $row['from_assignee'] : null,
-            'to_assignee' => (int) ($row['to_assignee'] ?? 0),
-            'reason' => $row['reason'] ?? null,
-            'status' => (string) ($row['status'] ?? self::TRANSFER_STATUS_PENDING),
-            'review_note' => $row['review_note'] ?? null,
-            'reviewed_by' => isset($row['reviewed_by']) ? (int) $row['reviewed_by'] : null,
-            'reviewed_at' => $row['reviewed_at'] ?? null,
-            'created_at' => $row['created_at'] ?? null,
-            'updated_at' => $row['updated_at'] ?? null,
+            'id' => (int) ($Silian_row['id'] ?? 0),
+            'ticket_id' => (int) ($Silian_row['ticket_id'] ?? 0),
+            'requested_by' => (int) ($Silian_row['requested_by'] ?? 0),
+            'from_assignee' => isset($Silian_row['from_assignee']) ? (int) $Silian_row['from_assignee'] : null,
+            'to_assignee' => (int) ($Silian_row['to_assignee'] ?? 0),
+            'reason' => $Silian_row['reason'] ?? null,
+            'status' => (string) ($Silian_row['status'] ?? self::TRANSFER_STATUS_PENDING),
+            'review_note' => $Silian_row['review_note'] ?? null,
+            'reviewed_by' => isset($Silian_row['reviewed_by']) ? (int) $Silian_row['reviewed_by'] : null,
+            'reviewed_at' => $Silian_row['reviewed_at'] ?? null,
+            'created_at' => $Silian_row['created_at'] ?? null,
+            'updated_at' => $Silian_row['updated_at'] ?? null,
             'requester' => [
-                'id' => (int) ($row['requested_by'] ?? 0),
-                'username' => $row['requester_username'] ?? null,
-                'email' => $row['requester_email'] ?? null,
+                'id' => (int) ($Silian_row['requested_by'] ?? 0),
+                'username' => $Silian_row['requester_username'] ?? null,
+                'email' => $Silian_row['requester_email'] ?? null,
             ],
-            'from_user' => ($row['from_assignee'] ?? null) !== null ? [
-                'id' => (int) $row['from_assignee'],
-                'username' => $row['from_username'] ?? null,
-                'email' => $row['from_email'] ?? null,
+            'from_user' => ($Silian_row['from_assignee'] ?? null) !== null ? [
+                'id' => (int) $Silian_row['from_assignee'],
+                'username' => $Silian_row['from_username'] ?? null,
+                'email' => $Silian_row['from_email'] ?? null,
             ] : null,
             'to_user' => [
-                'id' => (int) ($row['to_assignee'] ?? 0),
-                'username' => $row['to_username'] ?? null,
-                'email' => $row['to_email'] ?? null,
+                'id' => (int) ($Silian_row['to_assignee'] ?? 0),
+                'username' => $Silian_row['to_username'] ?? null,
+                'email' => $Silian_row['to_email'] ?? null,
             ],
-            'reviewer' => ($row['reviewed_by'] ?? null) !== null ? [
-                'id' => (int) $row['reviewed_by'],
-                'username' => $row['reviewer_username'] ?? null,
-                'email' => $row['reviewer_email'] ?? null,
+            'reviewer' => ($Silian_row['reviewed_by'] ?? null) !== null ? [
+                'id' => (int) $Silian_row['reviewed_by'],
+                'username' => $Silian_row['reviewer_username'] ?? null,
+                'email' => $Silian_row['reviewer_email'] ?? null,
             ] : null,
         ];
     }
 
-    private function findAssignableUser(int $userId): ?array
+    private function findAssignableUser(int $Silian_userId): ?array
     {
-        $stmt = $this->db->prepare('SELECT id, role, is_admin FROM users WHERE id = :id AND deleted_at IS NULL LIMIT 1');
-        $stmt->execute(['id' => $userId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
+        $Silian_stmt = $this->db->prepare('SELECT id, role, is_admin FROM users WHERE id = :id AND deleted_at IS NULL LIMIT 1');
+        $Silian_stmt->execute(['id' => $Silian_userId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$Silian_row) {
             return null;
         }
-        $role = strtolower((string) ($row['role'] ?? 'user'));
-        return (!empty($row['is_admin']) || in_array($role, ['support', 'admin'], true)) ? $row : null;
+        $Silian_role = strtolower((string) ($Silian_row['role'] ?? 'user'));
+        return (!empty($Silian_row['is_admin']) || in_array($Silian_role, ['support', 'admin'], true)) ? $Silian_row : null;
     }
 
-    private function loadUserById(int $userId): ?array
+    private function loadUserById(int $Silian_userId): ?array
     {
-        $stmt = $this->db->prepare('SELECT id, username, email, role, is_admin FROM users WHERE id = :id AND deleted_at IS NULL LIMIT 1');
-        $stmt->execute(['id' => $userId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        $Silian_stmt = $this->db->prepare('SELECT id, username, email, role, is_admin FROM users WHERE id = :id AND deleted_at IS NULL LIMIT 1');
+        $Silian_stmt->execute(['id' => $Silian_userId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_row ?: null;
     }
 
     /**
      * @return array{avatar_path:?string,avatar_url:?string}
      */
-    private function resolveAvatar(?string $filePath): array
+    private function resolveAvatar(?string $Silian_filePath): array
     {
-        $originalPath = $filePath !== null ? trim($filePath) : null;
-        if ($originalPath === '') {
-            $originalPath = null;
+        $Silian_originalPath = $Silian_filePath !== null ? trim($Silian_filePath) : null;
+        if ($Silian_originalPath === '') {
+            $Silian_originalPath = null;
         }
 
-        $normalized = $originalPath ? ltrim($originalPath, '/') : null;
-        $url = ($normalized && $this->r2Service !== null) ? $this->r2Service->getPublicUrl($normalized) : null;
+        $Silian_normalized = $Silian_originalPath ? ltrim($Silian_originalPath, '/') : null;
+        $Silian_url = ($Silian_normalized && $this->r2Service !== null) ? $this->r2Service->getPublicUrl($Silian_normalized) : null;
 
         return [
-            'avatar_path' => $originalPath,
-            'avatar_url' => $url,
+            'avatar_path' => $Silian_originalPath,
+            'avatar_url' => $Silian_url,
         ];
     }
 
     private function notifyAssignee(
-        array $user,
-        string $subject,
-        string $body,
-        int $ticketId,
-        string $auditAction,
-        ?array $emailPayload = null
+        array $Silian_user,
+        string $Silian_subject,
+        string $Silian_body,
+        int $Silian_ticketId,
+        string $Silian_auditAction,
+        ?array $Silian_emailPayload = null
     ): void
     {
-        $userId = (int) ($user['id'] ?? 0);
-        $messageSent = false;
-        $emailSent = false;
+        $Silian_userId = (int) ($Silian_user['id'] ?? 0);
+        $Silian_messageSent = false;
+        $Silian_emailSent = false;
 
-        if ($this->messageService !== null && $userId > 0) {
+        if ($this->messageService !== null && $Silian_userId > 0) {
             try {
                 $this->messageService->sendSystemMessage(
-                    $userId,
-                    $subject,
-                    $body,
+                    $Silian_userId,
+                    $Silian_subject,
+                    $Silian_body,
                     'support_ticket',
                     'normal',
                     'support_ticket',
-                    $ticketId,
+                    $Silian_ticketId,
                     false
                 );
-                $messageSent = true;
-            } catch (\Throwable $exception) {
+                $Silian_messageSent = true;
+            } catch (\Throwable $Silian_exception) {
                 $this->logger->warning('Failed to send support assignee system notification', [
-                    'ticket_id' => $ticketId,
-                    'user_id' => $userId,
-                    'error' => $exception->getMessage(),
+                    'ticket_id' => $Silian_ticketId,
+                    'user_id' => $Silian_userId,
+                    'error' => $Silian_exception->getMessage(),
                 ]);
-                $this->recordNotificationFailure($exception, 'support_assignee_system_notification_failed', [
-                    'ticket_id' => $ticketId,
-                    'user_id' => $userId,
-                    'subject' => $subject,
+                $this->recordNotificationFailure($Silian_exception, 'support_assignee_system_notification_failed', [
+                    'ticket_id' => $Silian_ticketId,
+                    'user_id' => $Silian_userId,
+                    'subject' => $Silian_subject,
                 ]);
             }
         }
 
-        if ($this->emailService !== null && !empty($user['email'])) {
+        if ($this->emailService !== null && !empty($Silian_user['email'])) {
             try {
-                if ($emailPayload !== null) {
-                    $emailSent = $this->emailService->sendSupportTicketNotification(
-                        (string) $user['email'],
-                        (string) ($user['username'] ?? $user['email']),
-                        $subject,
-                        $emailPayload,
+                if ($Silian_emailPayload !== null) {
+                    $Silian_emailSent = $this->emailService->sendSupportTicketNotification(
+                        (string) $Silian_user['email'],
+                        (string) ($Silian_user['username'] ?? $Silian_user['email']),
+                        $Silian_subject,
+                        $Silian_emailPayload,
                         NotificationPreferenceService::CATEGORY_SUPPORT,
                         'normal'
                     );
                 } else {
-                    $emailSent = $this->emailService->sendMessageNotification(
-                        (string) $user['email'],
-                        (string) ($user['username'] ?? $user['email']),
-                        $subject,
-                        $body,
+                    $Silian_emailSent = $this->emailService->sendMessageNotification(
+                        (string) $Silian_user['email'],
+                        (string) ($Silian_user['username'] ?? $Silian_user['email']),
+                        $Silian_subject,
+                        $Silian_body,
                         NotificationPreferenceService::CATEGORY_SUPPORT,
                         'normal'
                     );
                 }
-            } catch (\Throwable $exception) {
+            } catch (\Throwable $Silian_exception) {
                 $this->logger->warning('Failed to send support assignee email notification', [
-                    'ticket_id' => $ticketId,
-                    'user_id' => $userId,
-                    'error' => $exception->getMessage(),
+                    'ticket_id' => $Silian_ticketId,
+                    'user_id' => $Silian_userId,
+                    'error' => $Silian_exception->getMessage(),
                 ]);
-                $this->recordNotificationFailure($exception, 'support_assignee_email_notification_failed', [
-                    'ticket_id' => $ticketId,
-                    'user_id' => $userId,
-                    'subject' => $subject,
+                $this->recordNotificationFailure($Silian_exception, 'support_assignee_email_notification_failed', [
+                    'ticket_id' => $Silian_ticketId,
+                    'user_id' => $Silian_userId,
+                    'subject' => $Silian_subject,
                 ]);
             }
         }
 
         $this->auditLogService->log([
-            'user_id' => $userId > 0 ? $userId : null,
-            'action' => $auditAction,
+            'user_id' => $Silian_userId > 0 ? $Silian_userId : null,
+            'action' => $Silian_auditAction,
             'operation_category' => 'support',
             'actor_type' => 'system',
             'affected_table' => 'support_tickets',
-            'affected_id' => $ticketId,
-            'status' => $messageSent && $emailSent
+            'affected_id' => $Silian_ticketId,
+            'status' => $Silian_messageSent && $Silian_emailSent
                 ? 'success'
-                : (($messageSent || $emailSent) ? 'partial' : 'failed'),
+                : (($Silian_messageSent || $Silian_emailSent) ? 'partial' : 'failed'),
             'data' => [
-                'message_sent' => $messageSent,
-                'email_sent' => $emailSent,
-                'subject' => $subject,
+                'message_sent' => $Silian_messageSent,
+                'email_sent' => $Silian_emailSent,
+                'subject' => $Silian_subject,
             ],
         ]);
     }
 
-    private function notifySupportMailbox(string $subject, string $body, ?array $emailPayload = null): void
+    private function notifySupportMailbox(string $Silian_subject, string $Silian_body, ?array $Silian_emailPayload = null): void
     {
         if ($this->emailService === null) {
             return;
         }
-        $supportEmail = trim((string) $this->emailService->getSupportEmail());
-        if ($supportEmail === '') {
+        $Silian_supportEmail = trim((string) $this->emailService->getSupportEmail());
+        if ($Silian_supportEmail === '') {
             return;
         }
         try {
-            if ($emailPayload !== null) {
+            if ($Silian_emailPayload !== null) {
                 $this->emailService->sendSupportTicketNotification(
-                    $supportEmail,
+                    $Silian_supportEmail,
                     'Support Team',
-                    $subject,
-                    $emailPayload,
+                    $Silian_subject,
+                    $Silian_emailPayload,
                     NotificationPreferenceService::CATEGORY_MESSAGE,
                     'high'
                 );
             } else {
-                $this->emailService->sendMessageNotification($supportEmail, 'Support Team', $subject, $body, NotificationPreferenceService::CATEGORY_MESSAGE, 'high');
+                $this->emailService->sendMessageNotification($Silian_supportEmail, 'Support Team', $Silian_subject, $Silian_body, NotificationPreferenceService::CATEGORY_MESSAGE, 'high');
             }
-        } catch (\Throwable $e) {
-            $this->logger->warning('Failed to send support mailbox notification', ['subject' => $subject, 'error' => $e->getMessage()]);
+        } catch (\Throwable $Silian_e) {
+            $this->logger->warning('Failed to send support mailbox notification', ['subject' => $Silian_subject, 'error' => $Silian_e->getMessage()]);
         }
     }
 
-    private function notifyUserReply(array $ticket, string $body, int $ticketId): void
+    private function notifyUserReply(array $Silian_ticket, string $Silian_body, int $Silian_ticketId): void
     {
-        $userId = (int) ($ticket['user_id'] ?? 0);
-        $statusLabel = $this->formatTicketStatusLabel((string) ($ticket['status'] ?? self::STATUS_WAITING_USER));
-        $messageBody = "Your support ticket has a new reply.\n\nStatus: {$statusLabel}\n\n" . $body;
-        if ($this->messageService !== null && $userId > 0) {
+        $Silian_userId = (int) ($Silian_ticket['user_id'] ?? 0);
+        $Silian_statusLabel = $this->formatTicketStatusLabel((string) ($Silian_ticket['status'] ?? self::STATUS_WAITING_USER));
+        $Silian_messageBody = "Your support ticket has a new reply.\n\nStatus: {$Silian_statusLabel}\n\n" . $Silian_body;
+        if ($this->messageService !== null && $Silian_userId > 0) {
             try {
-                $this->messageService->sendSystemMessage($userId, 'Support replied to your ticket', $messageBody, 'message', 'normal', 'support_ticket', $ticketId, false);
-            } catch (\Throwable $e) {
-                $this->logger->warning('Failed to send support reply message', ['ticket_id' => $ticketId, 'error' => $e->getMessage()]);
+                $this->messageService->sendSystemMessage($Silian_userId, 'Support replied to your ticket', $Silian_messageBody, 'message', 'normal', 'support_ticket', $Silian_ticketId, false);
+            } catch (\Throwable $Silian_e) {
+                $this->logger->warning('Failed to send support reply message', ['ticket_id' => $Silian_ticketId, 'error' => $Silian_e->getMessage()]);
             }
         }
-        if ($this->emailService !== null && !empty($ticket['requester_email'])) {
+        if ($this->emailService !== null && !empty($Silian_ticket['requester_email'])) {
             try {
                 $this->emailService->sendSupportTicketNotification(
-                    (string) $ticket['requester_email'],
-                    (string) ($ticket['requester_username'] ?? $ticket['requester_email']),
-                    sprintf('Support replied to ticket #%d', $ticketId),
+                    (string) $Silian_ticket['requester_email'],
+                    (string) ($Silian_ticket['requester_username'] ?? $Silian_ticket['requester_email']),
+                    sprintf('Support replied to ticket #%d', $Silian_ticketId),
                     [
                         'eyebrow' => 'Support reply',
                         'intro' => 'Our support team replied to your ticket.',
-                        'summary' => $this->supportReplySummary((string) ($ticket['status'] ?? self::STATUS_WAITING_USER)),
+                        'summary' => $this->supportReplySummary((string) ($Silian_ticket['status'] ?? self::STATUS_WAITING_USER)),
                         'ticket' => [
-                            'id' => $ticketId,
-                            'subject' => (string) ($ticket['subject'] ?? ''),
+                            'id' => $Silian_ticketId,
+                            'subject' => (string) ($Silian_ticket['subject'] ?? ''),
                         ],
-                        'details' => $this->buildTicketEmailDetails($ticket),
+                        'details' => $this->buildTicketEmailDetails($Silian_ticket),
                         'message' => [
                             'label' => 'Latest reply',
-                            'body' => $body,
+                            'body' => $Silian_body,
                         ],
                         'button_label' => 'View ticket',
-                        'button_path' => $this->ticketEmailPath($ticketId, false),
-                        'closing' => $this->supportReplyClosing((string) ($ticket['status'] ?? self::STATUS_WAITING_USER)),
+                        'button_path' => $this->ticketEmailPath($Silian_ticketId, false),
+                        'closing' => $this->supportReplyClosing((string) ($Silian_ticket['status'] ?? self::STATUS_WAITING_USER)),
                     ],
                     NotificationPreferenceService::CATEGORY_MESSAGE,
                     'normal'
                 );
-            } catch (\Throwable $e) {
-                $this->logger->warning('Failed to send support reply email', ['ticket_id' => $ticketId, 'error' => $e->getMessage()]);
+            } catch (\Throwable $Silian_e) {
+                $this->logger->warning('Failed to send support reply email', ['ticket_id' => $Silian_ticketId, 'error' => $Silian_e->getMessage()]);
             }
         }
     }
 
-    private function supportReplySummary(string $status): string
+    private function supportReplySummary(string $Silian_status): string
     {
-        return match ($status) {
+        return match ($Silian_status) {
             self::STATUS_RESOLVED => 'We posted a new reply and marked the ticket as resolved.',
             self::STATUS_CLOSED => 'We posted a new reply and closed the ticket.',
             self::STATUS_IN_PROGRESS => 'We posted a new reply and kept the ticket in progress.',
@@ -1602,156 +1602,156 @@ class SupportTicketService
         };
     }
 
-    private function supportReplyClosing(string $status): string
+    private function supportReplyClosing(string $Silian_status): string
     {
-        return match ($status) {
+        return match ($Silian_status) {
             self::STATUS_RESOLVED, self::STATUS_CLOSED => 'If anything is still unclear, open CarbonTrack to review the thread and follow up.',
             default => 'Reply in CarbonTrack whenever you are ready so we can keep the thread moving.',
         };
     }
 
-    private function notifyUserTicketUpdated(array $ticket, array $updates, int $ticketId, ?array $updatedTicket = null): void
+    private function notifyUserTicketUpdated(array $Silian_ticket, array $Silian_updates, int $Silian_ticketId, ?array $Silian_updatedTicket = null): void
     {
-        $updatedTicket = $updatedTicket ?? $this->applyTicketUpdatesToSnapshot($ticket, $updates);
-        $changeItems = $this->buildTicketUpdateEntries($ticket, $updates, $updatedTicket);
-        if ($changeItems === []) {
+        $Silian_updatedTicket = $Silian_updatedTicket ?? $this->applyTicketUpdatesToSnapshot($Silian_ticket, $Silian_updates);
+        $Silian_changeItems = $this->buildTicketUpdateEntries($Silian_ticket, $Silian_updates, $Silian_updatedTicket);
+        if ($Silian_changeItems === []) {
             return;
         }
 
-        $userId = (int) ($ticket['user_id'] ?? 0);
-        $subject = sprintf('Support ticket #%d updated', $ticketId);
-        $summary = $this->formatTicketUpdateEntriesAsText($changeItems);
-        $messageBody = "Your support ticket has been updated.\n\n" . $summary;
+        $Silian_userId = (int) ($Silian_ticket['user_id'] ?? 0);
+        $Silian_subject = sprintf('Support ticket #%d updated', $Silian_ticketId);
+        $Silian_summary = $this->formatTicketUpdateEntriesAsText($Silian_changeItems);
+        $Silian_messageBody = "Your support ticket has been updated.\n\n" . $Silian_summary;
 
-        if ($this->messageService !== null && $userId > 0) {
+        if ($this->messageService !== null && $Silian_userId > 0) {
             try {
                 $this->messageService->sendSystemMessage(
-                    $userId,
-                    $subject,
-                    $messageBody,
+                    $Silian_userId,
+                    $Silian_subject,
+                    $Silian_messageBody,
                     'support_ticket',
                     'normal',
                     'support_ticket',
-                    $ticketId,
+                    $Silian_ticketId,
                     false
                 );
-            } catch (\Throwable $e) {
-                $this->logger->warning('Failed to send support ticket update message', ['ticket_id' => $ticketId, 'error' => $e->getMessage()]);
+            } catch (\Throwable $Silian_e) {
+                $this->logger->warning('Failed to send support ticket update message', ['ticket_id' => $Silian_ticketId, 'error' => $Silian_e->getMessage()]);
             }
         }
 
-        if ($this->emailService !== null && !empty($ticket['requester_email'])) {
+        if ($this->emailService !== null && !empty($Silian_ticket['requester_email'])) {
             try {
                 $this->emailService->sendSupportTicketNotification(
-                    (string) $ticket['requester_email'],
-                    (string) ($ticket['requester_username'] ?? $ticket['requester_email']),
-                    $subject,
+                    (string) $Silian_ticket['requester_email'],
+                    (string) ($Silian_ticket['requester_username'] ?? $Silian_ticket['requester_email']),
+                    $Silian_subject,
                     [
                         'eyebrow' => 'Workflow update',
                         'intro' => 'We updated the workflow details for your support ticket.',
                         'summary' => 'Review the latest status below so you know what changed on our side.',
                         'ticket' => [
-                            'id' => $ticketId,
-                            'subject' => (string) ($ticket['subject'] ?? ''),
+                            'id' => $Silian_ticketId,
+                            'subject' => (string) ($Silian_ticket['subject'] ?? ''),
                         ],
-                        'details' => $this->buildTicketEmailDetails($updatedTicket),
-                        'changes' => $changeItems,
+                        'details' => $this->buildTicketEmailDetails($Silian_updatedTicket),
+                        'changes' => $Silian_changeItems,
                         'button_label' => 'Review ticket',
-                        'button_path' => $this->ticketEmailPath($ticketId, false),
+                        'button_path' => $this->ticketEmailPath($Silian_ticketId, false),
                         'closing' => 'You can revisit the ticket thread in CarbonTrack whenever you need the full context.',
                     ],
                     NotificationPreferenceService::CATEGORY_SUPPORT,
                     'normal'
                 );
-            } catch (\Throwable $e) {
-                $this->logger->warning('Failed to send support ticket update email', ['ticket_id' => $ticketId, 'error' => $e->getMessage()]);
+            } catch (\Throwable $Silian_e) {
+                $this->logger->warning('Failed to send support ticket update email', ['ticket_id' => $Silian_ticketId, 'error' => $Silian_e->getMessage()]);
             }
         }
     }
 
-    private function applyTicketUpdatesToSnapshot(array $ticket, array $updates, ?array $resolvedAssignee = null): array
+    private function applyTicketUpdatesToSnapshot(array $Silian_ticket, array $Silian_updates, ?array $Silian_resolvedAssignee = null): array
     {
-        $updatedTicket = $ticket;
-        foreach ($updates as $key => $value) {
-            $updatedTicket[$key] = $value;
+        $Silian_updatedTicket = $Silian_ticket;
+        foreach ($Silian_updates as $Silian_key => $Silian_value) {
+            $Silian_updatedTicket[$Silian_key] = $Silian_value;
         }
 
-        if (!array_key_exists('assigned_to', $updates)) {
-            return $updatedTicket;
+        if (!array_key_exists('assigned_to', $Silian_updates)) {
+            return $Silian_updatedTicket;
         }
 
-        unset($updatedTicket['assigned_username'], $updatedTicket['assigned_user']);
-        $nextAssigneeId = $updates['assigned_to'];
-        if ($nextAssigneeId === null || $nextAssigneeId === '' || (int) $nextAssigneeId <= 0) {
-            return $updatedTicket;
+        unset($Silian_updatedTicket['assigned_username'], $Silian_updatedTicket['assigned_user']);
+        $Silian_nextAssigneeId = $Silian_updates['assigned_to'];
+        if ($Silian_nextAssigneeId === null || $Silian_nextAssigneeId === '' || (int) $Silian_nextAssigneeId <= 0) {
+            return $Silian_updatedTicket;
         }
 
-        $resolvedAssignee = $resolvedAssignee ?? $this->loadUserById((int) $nextAssigneeId);
-        $resolvedAssigneeName = trim((string) ($resolvedAssignee['username'] ?? ''));
-        if ($resolvedAssigneeName === '') {
-            return $updatedTicket;
+        $Silian_resolvedAssignee = $Silian_resolvedAssignee ?? $this->loadUserById((int) $Silian_nextAssigneeId);
+        $Silian_resolvedAssigneeName = trim((string) ($Silian_resolvedAssignee['username'] ?? ''));
+        if ($Silian_resolvedAssigneeName === '') {
+            return $Silian_updatedTicket;
         }
 
-        $updatedTicket['assigned_username'] = $resolvedAssigneeName;
-        $updatedTicket['assigned_user'] = [
-            'id' => (int) ($resolvedAssignee['id'] ?? $nextAssigneeId),
-            'username' => $resolvedAssigneeName,
+        $Silian_updatedTicket['assigned_username'] = $Silian_resolvedAssigneeName;
+        $Silian_updatedTicket['assigned_user'] = [
+            'id' => (int) ($Silian_resolvedAssignee['id'] ?? $Silian_nextAssigneeId),
+            'username' => $Silian_resolvedAssigneeName,
         ];
 
-        return $updatedTicket;
+        return $Silian_updatedTicket;
     }
 
-    private function supportMailboxBody(array $actor, array $ticket, string $body): string
+    private function supportMailboxBody(array $Silian_actor, array $Silian_ticket, string $Silian_body): string
     {
         return sprintf(
             "Ticket #%d\nUser: %s <%s>\nCategory: %s\nPriority: %s\nStatus: %s\n\n%s",
-            (int) ($ticket['id'] ?? 0),
-            $this->actorName($actor),
-            (string) ($actor['email'] ?? ''),
-            (string) ($ticket['category'] ?? ''),
-            (string) ($ticket['priority'] ?? 'normal'),
-            (string) ($ticket['status'] ?? self::STATUS_OPEN),
-            $body
+            (int) ($Silian_ticket['id'] ?? 0),
+            $this->actorName($Silian_actor),
+            (string) ($Silian_actor['email'] ?? ''),
+            (string) ($Silian_ticket['category'] ?? ''),
+            (string) ($Silian_ticket['priority'] ?? 'normal'),
+            (string) ($Silian_ticket['status'] ?? self::STATUS_OPEN),
+            $Silian_body
         );
     }
 
     /**
      * @return array<int, array{label:string,from?:string,to?:string,value?:string}>
      */
-    private function buildTicketUpdateEntries(array $ticket, array $updates, ?array $updatedTicket = null): array
+    private function buildTicketUpdateEntries(array $Silian_ticket, array $Silian_updates, ?array $Silian_updatedTicket = null): array
     {
-        $changes = [];
+        $Silian_changes = [];
 
-        if (array_key_exists('status', $updates)) {
-            $changes[] = [
+        if (array_key_exists('status', $Silian_updates)) {
+            $Silian_changes[] = [
                 'label' => 'Status',
-                'from' => $this->formatTicketStatusLabel((string) ($ticket['status'] ?? 'unknown')),
-                'to' => $this->formatTicketStatusLabel((string) ($updates['status'] ?? 'unknown')),
+                'from' => $this->formatTicketStatusLabel((string) ($Silian_ticket['status'] ?? 'unknown')),
+                'to' => $this->formatTicketStatusLabel((string) ($Silian_updates['status'] ?? 'unknown')),
             ];
         }
 
-        if (array_key_exists('priority', $updates)) {
-            $changes[] = [
+        if (array_key_exists('priority', $Silian_updates)) {
+            $Silian_changes[] = [
                 'label' => 'Priority',
-                'from' => $this->formatTicketPriorityLabel((string) ($ticket['priority'] ?? 'unknown')),
-                'to' => $this->formatTicketPriorityLabel((string) ($updates['priority'] ?? 'unknown')),
+                'from' => $this->formatTicketPriorityLabel((string) ($Silian_ticket['priority'] ?? 'unknown')),
+                'to' => $this->formatTicketPriorityLabel((string) ($Silian_updates['priority'] ?? 'unknown')),
             ];
         }
 
-        if (array_key_exists('assigned_to', $updates)) {
-            $changes[] = [
+        if (array_key_exists('assigned_to', $Silian_updates)) {
+            $Silian_changes[] = [
                 'label' => 'Assigned handler',
-                'from' => $this->resolveAssigneeLabel($ticket),
-                'to' => $this->resolveAssigneeLabel($updatedTicket ?? ['assigned_to' => $updates['assigned_to']]),
+                'from' => $this->resolveAssigneeLabel($Silian_ticket),
+                'to' => $this->resolveAssigneeLabel($Silian_updatedTicket ?? ['assigned_to' => $Silian_updates['assigned_to']]),
             ];
         }
 
-        return $changes;
+        return $Silian_changes;
     }
 
-    private function buildTicketUpdateSummary(array $ticket, array $updates): string
+    private function buildTicketUpdateSummary(array $Silian_ticket, array $Silian_updates): string
     {
-        return $this->formatTicketUpdateEntriesAsText($this->buildTicketUpdateEntries($ticket, $updates));
+        return $this->formatTicketUpdateEntriesAsText($this->buildTicketUpdateEntries($Silian_ticket, $Silian_updates));
     }
 
     /**
@@ -1768,30 +1768,30 @@ class SupportTicketService
      * }
      */
     private function buildSupportMailboxEmailPayload(
-        array $actor,
-        array $ticket,
-        int $ticketId,
-        string $intro,
-        string $messageLabel,
-        string $body
+        array $Silian_actor,
+        array $Silian_ticket,
+        int $Silian_ticketId,
+        string $Silian_intro,
+        string $Silian_messageLabel,
+        string $Silian_body
     ): array {
         return [
             'eyebrow' => 'Support inbox',
-            'intro' => $intro,
+            'intro' => $Silian_intro,
             'summary' => 'Review the latest request details below and continue the thread from the support workbench.',
             'ticket' => [
-                'id' => $ticketId,
-                'subject' => (string) ($ticket['subject'] ?? ''),
+                'id' => $Silian_ticketId,
+                'subject' => (string) ($Silian_ticket['subject'] ?? ''),
             ],
-            'details' => $this->buildTicketEmailDetails($ticket, [
-                ['label' => 'Requester', 'value' => $this->formatRequesterDisplay($actor)],
+            'details' => $this->buildTicketEmailDetails($Silian_ticket, [
+                ['label' => 'Requester', 'value' => $this->formatRequesterDisplay($Silian_actor)],
             ]),
             'message' => [
-                'label' => $messageLabel,
-                'body' => $body,
+                'label' => $Silian_messageLabel,
+                'body' => $Silian_body,
             ],
             'button_label' => 'Open support ticket',
-            'button_path' => $this->ticketEmailPath($ticketId, true),
+            'button_path' => $this->ticketEmailPath($Silian_ticketId, true),
             'closing' => 'Open CarbonTrack to review the full conversation, attachments, and workflow state.',
         ];
     }
@@ -1800,355 +1800,355 @@ class SupportTicketService
      * @param array<int, array{label:string,value:string}> $extraDetails
      * @return array<int, array{label:string,value:string}>
      */
-    private function buildTicketEmailDetails(array $ticket, array $extraDetails = []): array
+    private function buildTicketEmailDetails(array $Silian_ticket, array $Silian_extraDetails = []): array
     {
-        $details = [];
+        $Silian_details = [];
 
-        $status = $this->formatTicketStatusLabel((string) ($ticket['status'] ?? self::STATUS_OPEN));
-        if ($status !== '') {
-            $details[] = ['label' => 'Status', 'value' => $status];
+        $Silian_status = $this->formatTicketStatusLabel((string) ($Silian_ticket['status'] ?? self::STATUS_OPEN));
+        if ($Silian_status !== '') {
+            $Silian_details[] = ['label' => 'Status', 'value' => $Silian_status];
         }
 
-        $priority = $this->formatTicketPriorityLabel((string) ($ticket['priority'] ?? 'normal'));
-        if ($priority !== '') {
-            $details[] = ['label' => 'Priority', 'value' => $priority];
+        $Silian_priority = $this->formatTicketPriorityLabel((string) ($Silian_ticket['priority'] ?? 'normal'));
+        if ($Silian_priority !== '') {
+            $Silian_details[] = ['label' => 'Priority', 'value' => $Silian_priority];
         }
 
-        $category = $this->formatTicketCategoryLabel((string) ($ticket['category'] ?? ''));
-        if ($category !== '') {
-            $details[] = ['label' => 'Category', 'value' => $category];
+        $Silian_category = $this->formatTicketCategoryLabel((string) ($Silian_ticket['category'] ?? ''));
+        if ($Silian_category !== '') {
+            $Silian_details[] = ['label' => 'Category', 'value' => $Silian_category];
         }
 
-        $assignee = $this->resolveAssigneeLabel($ticket);
-        if ($assignee !== 'Unassigned') {
-            $details[] = ['label' => 'Assignee', 'value' => $assignee];
+        $Silian_assignee = $this->resolveAssigneeLabel($Silian_ticket);
+        if ($Silian_assignee !== 'Unassigned') {
+            $Silian_details[] = ['label' => 'Assignee', 'value' => $Silian_assignee];
         }
 
-        foreach ($extraDetails as $detail) {
-            $label = trim((string) ($detail['label'] ?? ''));
-            $value = trim((string) ($detail['value'] ?? ''));
-            if ($label === '' || $value === '') {
+        foreach ($Silian_extraDetails as $Silian_detail) {
+            $Silian_label = trim((string) ($Silian_detail['label'] ?? ''));
+            $Silian_value = trim((string) ($Silian_detail['value'] ?? ''));
+            if ($Silian_label === '' || $Silian_value === '') {
                 continue;
             }
-            $details[] = ['label' => $label, 'value' => $value];
+            $Silian_details[] = ['label' => $Silian_label, 'value' => $Silian_value];
         }
 
-        return $details;
+        return $Silian_details;
     }
 
-    private function formatRequesterDisplay(array $actor): string
+    private function formatRequesterDisplay(array $Silian_actor): string
     {
-        $name = trim((string) ($actor['username'] ?? $actor['requester_username'] ?? ''));
-        $email = trim((string) ($actor['email'] ?? $actor['requester_email'] ?? ''));
+        $Silian_name = trim((string) ($Silian_actor['username'] ?? $Silian_actor['requester_username'] ?? ''));
+        $Silian_email = trim((string) ($Silian_actor['email'] ?? $Silian_actor['requester_email'] ?? ''));
 
-        if ($name === '') {
-            $name = $email !== '' ? $email : 'User';
+        if ($Silian_name === '') {
+            $Silian_name = $Silian_email !== '' ? $Silian_email : 'User';
         }
 
-        if ($email === '') {
-            return $name;
+        if ($Silian_email === '') {
+            return $Silian_name;
         }
 
-        return sprintf('%s <%s>', $name, $email);
+        return sprintf('%s <%s>', $Silian_name, $Silian_email);
     }
 
-    private function ticketEmailPath(int $ticketId, bool $supportView): string
+    private function ticketEmailPath(int $Silian_ticketId, bool $Silian_supportView): string
     {
-        return ($supportView ? 'support/tickets/' : 'tickets/') . $ticketId;
+        return ($Silian_supportView ? 'support/tickets/' : 'tickets/') . $Silian_ticketId;
     }
 
-    private function formatTicketStatusLabel(string $status): string
+    private function formatTicketStatusLabel(string $Silian_status): string
     {
-        $normalized = strtolower(trim($status));
-        return match ($normalized) {
+        $Silian_normalized = strtolower(trim($Silian_status));
+        return match ($Silian_normalized) {
             self::STATUS_OPEN => 'Open',
             self::STATUS_IN_PROGRESS => 'In progress',
             self::STATUS_WAITING_USER => 'Waiting for user',
             self::STATUS_RESOLVED => 'Resolved',
             self::STATUS_CLOSED => 'Closed',
-            default => $this->humanizeToken($status),
+            default => $this->humanizeToken($Silian_status),
         };
     }
 
-    private function formatTicketPriorityLabel(string $priority): string
+    private function formatTicketPriorityLabel(string $Silian_priority): string
     {
-        $normalized = strtolower(trim($priority));
-        return match ($normalized) {
+        $Silian_normalized = strtolower(trim($Silian_priority));
+        return match ($Silian_normalized) {
             'low' => 'Low',
             'normal' => 'Normal',
             'high' => 'High',
             'urgent' => 'Urgent',
-            default => $this->humanizeToken($priority),
+            default => $this->humanizeToken($Silian_priority),
         };
     }
 
-    private function formatTicketCategoryLabel(string $category): string
+    private function formatTicketCategoryLabel(string $Silian_category): string
     {
-        $normalized = strtolower(trim($category));
-        return match ($normalized) {
+        $Silian_normalized = strtolower(trim($Silian_category));
+        return match ($Silian_normalized) {
             'website_bug' => 'Website bug',
             'business_issue' => 'Business issue',
             'feature_request' => 'Feature request',
             'account' => 'Account',
             'other' => 'Other',
-            default => $this->humanizeToken($category),
+            default => $this->humanizeToken($Silian_category),
         };
     }
 
     /**
      * @param array<int, array{label:string,from?:string,to?:string,value?:string}> $entries
      */
-    private function formatTicketUpdateEntriesAsText(array $entries): string
+    private function formatTicketUpdateEntriesAsText(array $Silian_entries): string
     {
-        $lines = [];
-        foreach ($entries as $entry) {
-            $label = trim((string) ($entry['label'] ?? ''));
-            if ($label === '') {
+        $Silian_lines = [];
+        foreach ($Silian_entries as $Silian_entry) {
+            $Silian_label = trim((string) ($Silian_entry['label'] ?? ''));
+            if ($Silian_label === '') {
                 continue;
             }
 
-            $value = trim((string) ($entry['value'] ?? ''));
-            if ($value !== '') {
-                $lines[] = sprintf('%s: %s', $label, $value);
+            $Silian_value = trim((string) ($Silian_entry['value'] ?? ''));
+            if ($Silian_value !== '') {
+                $Silian_lines[] = sprintf('%s: %s', $Silian_label, $Silian_value);
                 continue;
             }
 
-            $from = trim((string) ($entry['from'] ?? ''));
-            $to = trim((string) ($entry['to'] ?? ''));
-            if ($to !== '') {
-                $lines[] = sprintf('%s: %s -> %s', $label, $from !== '' ? $from : 'Unknown', $to);
+            $Silian_from = trim((string) ($Silian_entry['from'] ?? ''));
+            $Silian_to = trim((string) ($Silian_entry['to'] ?? ''));
+            if ($Silian_to !== '') {
+                $Silian_lines[] = sprintf('%s: %s -> %s', $Silian_label, $Silian_from !== '' ? $Silian_from : 'Unknown', $Silian_to);
             }
         }
 
-        return implode("\n", $lines);
+        return implode("\n", $Silian_lines);
     }
 
-    private function resolveAssigneeLabel(array $ticket): string
+    private function resolveAssigneeLabel(array $Silian_ticket): string
     {
-        $assignedUser = $ticket['assigned_user'] ?? null;
-        if (is_array($assignedUser)) {
-            $username = trim((string) ($assignedUser['username'] ?? ''));
-            if ($username !== '') {
-                return $username;
+        $Silian_assignedUser = $Silian_ticket['assigned_user'] ?? null;
+        if (is_array($Silian_assignedUser)) {
+            $Silian_username = trim((string) ($Silian_assignedUser['username'] ?? ''));
+            if ($Silian_username !== '') {
+                return $Silian_username;
             }
         }
 
-        $username = trim((string) ($ticket['assigned_username'] ?? ''));
-        if ($username !== '') {
-            return $username;
+        $Silian_username = trim((string) ($Silian_ticket['assigned_username'] ?? ''));
+        if ($Silian_username !== '') {
+            return $Silian_username;
         }
 
-        $assignedTo = $ticket['assigned_to'] ?? null;
-        if ($assignedTo === null || $assignedTo === '' || (int) $assignedTo <= 0) {
+        $Silian_assignedTo = $Silian_ticket['assigned_to'] ?? null;
+        if ($Silian_assignedTo === null || $Silian_assignedTo === '' || (int) $Silian_assignedTo <= 0) {
             return 'Unassigned';
         }
 
-        $user = $this->loadUserById((int) $assignedTo);
-        $resolvedName = trim((string) ($user['username'] ?? ''));
-        if ($resolvedName !== '') {
-            return $resolvedName;
+        $Silian_user = $this->loadUserById((int) $Silian_assignedTo);
+        $Silian_resolvedName = trim((string) ($Silian_user['username'] ?? ''));
+        if ($Silian_resolvedName !== '') {
+            return $Silian_resolvedName;
         }
 
-        return 'User #' . (int) $assignedTo;
+        return 'User #' . (int) $Silian_assignedTo;
     }
 
-    private function humanizeToken(string $value): string
+    private function humanizeToken(string $Silian_value): string
     {
-        $trimmed = trim($value);
-        if ($trimmed === '') {
+        $Silian_trimmed = trim($Silian_value);
+        if ($Silian_trimmed === '') {
             return '';
         }
 
-        return ucwords(str_replace(['_', '-'], ' ', strtolower($trimmed)));
+        return ucwords(str_replace(['_', '-'], ' ', strtolower($Silian_trimmed)));
     }
 
-    private function presignedUrl(?string $filePath): ?string
+    private function presignedUrl(?string $Silian_filePath): ?string
     {
-        if (!$this->r2Service || !is_string($filePath) || trim($filePath) === '') {
+        if (!$this->r2Service || !is_string($Silian_filePath) || trim($Silian_filePath) === '') {
             return null;
         }
         try {
-            return $this->r2Service->generatePresignedUrl($filePath, 900);
-        } catch (\Throwable $e) {
-            $this->logger->warning('Failed to build support ticket file URL', ['file_path' => $filePath, 'error' => $e->getMessage()]);
+            return $this->r2Service->generatePresignedUrl($Silian_filePath, 900);
+        } catch (\Throwable $Silian_e) {
+            $this->logger->warning('Failed to build support ticket file URL', ['file_path' => $Silian_filePath, 'error' => $Silian_e->getMessage()]);
             return null;
         }
     }
 
-    private function normalizeAttachments(mixed $attachments): array
+    private function normalizeAttachments(mixed $Silian_attachments): array
     {
-        if (!is_array($attachments)) {
+        if (!is_array($Silian_attachments)) {
             return [];
         }
-        $paths = [];
-        foreach ($attachments as $attachment) {
-            if (is_string($attachment) && trim($attachment) !== '') {
-                $paths[] = trim($attachment);
+        $Silian_paths = [];
+        foreach ($Silian_attachments as $Silian_attachment) {
+            if (is_string($Silian_attachment) && trim($Silian_attachment) !== '') {
+                $Silian_paths[] = trim($Silian_attachment);
                 continue;
             }
-            if (is_array($attachment)) {
-                $path = $attachment['file_path'] ?? $attachment['path'] ?? null;
-                if (is_string($path) && trim($path) !== '') {
-                    $paths[] = trim($path);
+            if (is_array($Silian_attachment)) {
+                $Silian_path = $Silian_attachment['file_path'] ?? $Silian_attachment['path'] ?? null;
+                if (is_string($Silian_path) && trim($Silian_path) !== '') {
+                    $Silian_paths[] = trim($Silian_path);
                 }
             }
         }
-        return array_values(array_unique($paths));
+        return array_values(array_unique($Silian_paths));
     }
 
-    private function normalizeCategory(mixed $value): string
+    private function normalizeCategory(mixed $Silian_value): string
     {
-        $category = is_string($value) ? trim($value) : '';
-        if (!in_array($category, self::VALID_CATEGORIES, true)) {
+        $Silian_category = is_string($Silian_value) ? trim($Silian_value) : '';
+        if (!in_array($Silian_category, self::VALID_CATEGORIES, true)) {
             throw new \InvalidArgumentException('Invalid category');
         }
-        return $category;
+        return $Silian_category;
     }
 
-    private function normalizeStatus(mixed $value): string
+    private function normalizeStatus(mixed $Silian_value): string
     {
-        $status = is_string($value) ? trim($value) : '';
-        if (!in_array($status, self::VALID_STATUSES, true)) {
+        $Silian_status = is_string($Silian_value) ? trim($Silian_value) : '';
+        if (!in_array($Silian_status, self::VALID_STATUSES, true)) {
             throw new \InvalidArgumentException('Invalid status');
         }
-        return $status;
+        return $Silian_status;
     }
 
-    private function normalizePriority(mixed $value): string
+    private function normalizePriority(mixed $Silian_value): string
     {
-        $priority = is_string($value) && trim($value) !== '' ? trim($value) : 'normal';
-        if (!in_array($priority, self::VALID_PRIORITIES, true)) {
+        $Silian_priority = is_string($Silian_value) && trim($Silian_value) !== '' ? trim($Silian_value) : 'normal';
+        if (!in_array($Silian_priority, self::VALID_PRIORITIES, true)) {
             throw new \InvalidArgumentException('Invalid priority');
         }
-        return $priority;
+        return $Silian_priority;
     }
 
-    private function normalizeTransferStatus(mixed $value): string
+    private function normalizeTransferStatus(mixed $Silian_value): string
     {
-        $status = is_string($value) ? trim($value) : '';
-        if (!in_array($status, self::VALID_TRANSFER_STATUSES, true)) {
+        $Silian_status = is_string($Silian_value) ? trim($Silian_value) : '';
+        if (!in_array($Silian_status, self::VALID_TRANSFER_STATUSES, true)) {
             throw new \InvalidArgumentException('Invalid transfer status');
         }
-        return $status;
+        return $Silian_status;
     }
 
-    private function normalizeRating(mixed $value): int
+    private function normalizeRating(mixed $Silian_value): int
     {
-        if (!is_numeric($value)) {
+        if (!is_numeric($Silian_value)) {
             throw new \InvalidArgumentException('rating is required');
         }
 
-        $rating = (int) $value;
-        if ($rating < 1 || $rating > 5) {
+        $Silian_rating = (int) $Silian_value;
+        if ($Silian_rating < 1 || $Silian_rating > 5) {
             throw new \InvalidArgumentException('rating must be between 1 and 5');
         }
 
-        return $rating;
+        return $Silian_rating;
     }
 
-    private function normalizeFeedbackComment(mixed $value): ?string
+    private function normalizeFeedbackComment(mixed $Silian_value): ?string
     {
-        $comment = $this->nullableString($value);
-        if ($comment !== null && mb_strlen($comment) > 1000) {
+        $Silian_comment = $this->nullableString($Silian_value);
+        if ($Silian_comment !== null && mb_strlen($Silian_comment) > 1000) {
             throw new \InvalidArgumentException('comment must be 1000 characters or fewer');
         }
 
-        return $comment;
+        return $Silian_comment;
     }
 
-    private function requireString(mixed $value, string $field): string
+    private function requireString(mixed $Silian_value, string $Silian_field): string
     {
-        if (!is_string($value) || trim($value) === '') {
-            throw new \InvalidArgumentException(sprintf('%s is required', $field));
+        if (!is_string($Silian_value) || trim($Silian_value) === '') {
+            throw new \InvalidArgumentException(sprintf('%s is required', $Silian_field));
         }
-        return trim($value);
+        return trim($Silian_value);
     }
 
-    private function nullableString(mixed $value): ?string
+    private function nullableString(mixed $Silian_value): ?string
     {
-        if (!is_string($value)) {
+        if (!is_string($Silian_value)) {
             return null;
         }
-        $trimmed = trim($value);
-        return $trimmed === '' ? null : $trimmed;
+        $Silian_trimmed = trim($Silian_value);
+        return $Silian_trimmed === '' ? null : $Silian_trimmed;
     }
 
-    private function actorName(array $actor): string
+    private function actorName(array $Silian_actor): string
     {
-        $name = trim((string) ($actor['username'] ?? ''));
-        return $name !== '' ? $name : ((string) ($actor['email'] ?? 'User'));
+        $Silian_name = trim((string) ($Silian_actor['username'] ?? ''));
+        return $Silian_name !== '' ? $Silian_name : ((string) ($Silian_actor['email'] ?? 'User'));
     }
 
-    private function actorType(array $actor): string
+    private function actorType(array $Silian_actor): string
     {
-        if ($this->isAdminActor($actor)) {
+        if ($this->isAdminActor($Silian_actor)) {
             return 'admin';
         }
-        if (!empty($actor['is_support']) || (($actor['role'] ?? null) === 'support')) {
+        if (!empty($Silian_actor['is_support']) || (($Silian_actor['role'] ?? null) === 'support')) {
             return 'support';
         }
         return 'user';
     }
 
-    private function isAdminActor(array $actor): bool
+    private function isAdminActor(array $Silian_actor): bool
     {
-        return !empty($actor['is_admin']) || (($actor['role'] ?? null) === 'admin');
+        return !empty($Silian_actor['is_admin']) || (($Silian_actor['role'] ?? null) === 'admin');
     }
 
-    private function supportTicketBaseFilters(array $actor, array $query = []): array
+    private function supportTicketBaseFilters(array $Silian_actor, array $Silian_query = []): array
     {
-        $actorId = (int) ($actor['id'] ?? 0);
-        if ($actorId <= 0) {
+        $Silian_actorId = (int) ($Silian_actor['id'] ?? 0);
+        if ($Silian_actorId <= 0) {
             return ['assigned_to' => -1];
         }
 
-        if ($this->isPendingTransferTargetQuery($actor, $query)) {
-            return ['transfer_target' => $actorId];
+        if ($this->isPendingTransferTargetQuery($Silian_actor, $Silian_query)) {
+            return ['transfer_target' => $Silian_actorId];
         }
 
-        if ($this->isAdminActor($actor)) {
+        if ($this->isAdminActor($Silian_actor)) {
             return [];
         }
 
-        return ['assigned_to' => $actorId];
+        return ['assigned_to' => $Silian_actorId];
     }
 
-    private function supportTicketQuery(array $actor, array $query): array
+    private function supportTicketQuery(array $Silian_actor, array $Silian_query): array
     {
-        if ($this->isAdminActor($actor)) {
-            return $query;
+        if ($this->isAdminActor($Silian_actor)) {
+            return $Silian_query;
         }
 
-        unset($query['assigned_to']);
-        unset($query['pending_transfer_target']);
-        return $query;
+        unset($Silian_query['assigned_to']);
+        unset($Silian_query['pending_transfer_target']);
+        return $Silian_query;
     }
 
-    private function isPendingTransferTargetQuery(array $actor, array $query): bool
+    private function isPendingTransferTargetQuery(array $Silian_actor, array $Silian_query): bool
     {
-        $raw = $query['pending_transfer_target'] ?? null;
-        if (is_bool($raw)) {
-            return $raw;
+        $Silian_raw = $Silian_query['pending_transfer_target'] ?? null;
+        if (is_bool($Silian_raw)) {
+            return $Silian_raw;
         }
-        if (is_int($raw) || is_float($raw) || (is_string($raw) && is_numeric($raw))) {
-            return (int) $raw === 1;
+        if (is_int($Silian_raw) || is_float($Silian_raw) || (is_string($Silian_raw) && is_numeric($Silian_raw))) {
+            return (int) $Silian_raw === 1;
         }
-        if (is_string($raw)) {
-            return in_array(strtolower(trim($raw)), ['true', 'yes', 'on'], true);
+        if (is_string($Silian_raw)) {
+            return in_array(strtolower(trim($Silian_raw)), ['true', 'yes', 'on'], true);
         }
 
         return false;
     }
 
-    private function pendingTransferRequestsForTarget(array $ticketIds, int $targetUserId): array
+    private function pendingTransferRequestsForTarget(array $Silian_ticketIds, int $Silian_targetUserId): array
     {
-        $ticketIds = array_values(array_filter(array_map('intval', $ticketIds), static fn (int $id): bool => $id > 0));
-        if ($ticketIds === [] || $targetUserId <= 0) {
+        $Silian_ticketIds = array_values(array_filter(array_map('intval', $Silian_ticketIds), static fn (int $Silian_id): bool => $Silian_id > 0));
+        if ($Silian_ticketIds === [] || $Silian_targetUserId <= 0) {
             return [];
         }
 
-        $placeholders = implode(',', array_fill(0, count($ticketIds), '?'));
-        $stmt = $this->db->prepare("
+        $Silian_placeholders = implode(',', array_fill(0, count($Silian_ticketIds), '?'));
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 tr.*,
                 requester.username AS requester_username,
@@ -2164,65 +2164,65 @@ class SupportTicketService
             LEFT JOIN users from_user ON from_user.id = tr.from_assignee
             LEFT JOIN users to_user ON to_user.id = tr.to_assignee
             LEFT JOIN users reviewer ON reviewer.id = tr.reviewed_by
-            WHERE tr.ticket_id IN ({$placeholders})
+            WHERE tr.ticket_id IN ({$Silian_placeholders})
               AND tr.to_assignee = ?
               AND tr.status = ?
             ORDER BY tr.id DESC
         ");
-        $stmt->execute([
-            ...$ticketIds,
-            $targetUserId,
+        $Silian_stmt->execute([
+            ...$Silian_ticketIds,
+            $Silian_targetUserId,
             self::TRANSFER_STATUS_PENDING,
         ]);
 
-        $result = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-            $ticketId = (int) ($row['ticket_id'] ?? 0);
-            if ($ticketId > 0 && !isset($result[$ticketId])) {
-                $result[$ticketId] = $this->formatTransferRequest($row);
+        $Silian_result = [];
+        foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+            $Silian_ticketId = (int) ($Silian_row['ticket_id'] ?? 0);
+            if ($Silian_ticketId > 0 && !isset($Silian_result[$Silian_ticketId])) {
+                $Silian_result[$Silian_ticketId] = $this->formatTransferRequest($Silian_row);
             }
         }
 
-        return $result;
+        return $Silian_result;
     }
 
-    private function recordFailure(\Throwable $e, string $action, array $actor, ?int $ticketId): void
+    private function recordFailure(\Throwable $Silian_e, string $Silian_action, array $Silian_actor, ?int $Silian_ticketId): void
     {
         $this->auditLogService->log([
-            'user_id' => isset($actor['id']) ? (int) $actor['id'] : null,
-            'action' => $action,
+            'user_id' => isset($Silian_actor['id']) ? (int) $Silian_actor['id'] : null,
+            'action' => $Silian_action,
             'operation_category' => 'support',
-            'actor_type' => $this->actorType($actor),
+            'actor_type' => $this->actorType($Silian_actor),
             'affected_table' => 'support_tickets',
-            'affected_id' => $ticketId,
+            'affected_id' => $Silian_ticketId,
             'status' => 'failed',
-            'data' => ['error' => $e->getMessage()],
+            'data' => ['error' => $Silian_e->getMessage()],
         ]);
     }
 
-    private function recordNotificationFailure(\Throwable $exception, string $action, array $context): void
+    private function recordNotificationFailure(\Throwable $Silian_exception, string $Silian_action, array $Silian_context): void
     {
         $this->auditLogService->log([
-            'user_id' => isset($context['user_id']) ? (int) $context['user_id'] : null,
-            'action' => $action,
+            'user_id' => isset($Silian_context['user_id']) ? (int) $Silian_context['user_id'] : null,
+            'action' => $Silian_action,
             'operation_category' => 'support',
             'actor_type' => 'system',
             'affected_table' => 'support_tickets',
-            'affected_id' => isset($context['ticket_id']) ? (int) $context['ticket_id'] : null,
+            'affected_id' => isset($Silian_context['ticket_id']) ? (int) $Silian_context['ticket_id'] : null,
             'status' => 'failed',
-            'data' => $context + ['error' => $exception->getMessage()],
+            'data' => $Silian_context + ['error' => $Silian_exception->getMessage()],
         ]);
 
         try {
-            $request = \CarbonTrack\Support\SyntheticRequestFactory::fromContext(
+            $Silian_request = \CarbonTrack\Support\SyntheticRequestFactory::fromContext(
                 '/support/notifications',
                 'SYSTEM',
                 null,
                 [],
-                $context,
+                $Silian_context,
                 ['PHP_SAPI' => PHP_SAPI]
             );
-            $this->errorLogService->logException($exception, $request, $context);
+            $this->errorLogService->logException($Silian_exception, $Silian_request, $Silian_context);
         } catch (\Throwable) {
             // ignore secondary logging failure
         }

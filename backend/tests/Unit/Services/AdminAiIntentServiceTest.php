@@ -15,16 +15,16 @@ class AdminAiIntentServiceTest extends TestCase
 {
     public function testServiceReportsDisabledWithoutClient(): void
     {
-        $service = new AdminAiIntentService(null, new NullLogger());
+        $Silian_service = new AdminAiIntentService(null, new NullLogger());
 
-        $this->assertFalse($service->isEnabled());
+        $this->assertFalse($Silian_service->isEnabled());
         $this->expectException(\RuntimeException::class);
-        $service->analyzeIntent('anything', []);
+        $Silian_service->analyzeIntent('anything', []);
     }
 
     public function testAnalyzeIntentParsesActionSuggestion(): void
     {
-        $responsePayload = $this->createChatResponse([
+        $Silian_responsePayload = $this->createChatResponse([
             'intent' => [
                 'type' => 'action',
                 'label' => 'Approve records 10 and 11',
@@ -48,23 +48,23 @@ class AdminAiIntentServiceTest extends TestCase
             ],
         ]);
 
-        $client = new FakeLlmClient($responsePayload);
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
-        $service = new AdminAiIntentService($client, new NullLogger(), ['model' => 'test-model'], null, null, $auditLogService, $this->createMock(ErrorLogService::class));
+        $Silian_client = new FakeLlmClient($Silian_responsePayload);
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
+        $Silian_service = new AdminAiIntentService($Silian_client, new NullLogger(), ['model' => 'test-model'], null, null, $Silian_auditLogService, $this->createMock(ErrorLogService::class));
 
-        $result = $service->analyzeIntent('审批 10 11', []);
+        $Silian_result = $Silian_service->analyzeIntent('审批 10 11', []);
 
-        $this->assertSame('action', $result['intent']['type']);
-        $this->assertSame('approve_carbon_records', $result['intent']['action']['name']);
-        $this->assertSame([10, 11], $result['intent']['action']['api']['payload']['record_ids']);
-        $this->assertTrue($result['intent']['action']['autoExecute']);
-        $this->assertSame('test-model', $result['metadata']['model']);
+        $this->assertSame('action', $Silian_result['intent']['type']);
+        $this->assertSame('approve_carbon_records', $Silian_result['intent']['action']['name']);
+        $this->assertSame([10, 11], $Silian_result['intent']['action']['api']['payload']['record_ids']);
+        $this->assertTrue($Silian_result['intent']['action']['autoExecute']);
+        $this->assertSame('test-model', $Silian_result['metadata']['model']);
     }
 
     public function testAnalyzeIntentHeuristicNavigationFallback(): void
     {
-        $responsePayload = $this->createChatResponse([
+        $Silian_responsePayload = $this->createChatResponse([
             'intent' => [
                 'type' => 'fallback',
                 'label' => 'Activity Review',
@@ -76,18 +76,18 @@ class AdminAiIntentServiceTest extends TestCase
             ],
         ]);
 
-        $client = new FakeLlmClient($responsePayload);
-        $service = new AdminAiIntentService($client, new NullLogger(), ['model' => 'test-model']);
+        $Silian_client = new FakeLlmClient($Silian_responsePayload);
+        $Silian_service = new AdminAiIntentService($Silian_client, new NullLogger(), ['model' => 'test-model']);
 
-        $result = $service->analyzeIntent('carbon record review', []);
+        $Silian_result = $Silian_service->analyzeIntent('carbon record review', []);
 
-        $this->assertSame('navigate', $result['intent']['type']);
-        $this->assertSame('/admin/activities', $result['intent']['target']['route']);
+        $this->assertSame('navigate', $Silian_result['intent']['type']);
+        $this->assertSame('/admin/activities', $Silian_result['intent']['target']['route']);
     }
 
     public function testAnalyzeIntentDetectsMissingRequirements(): void
     {
-        $responsePayload = $this->createChatResponse([
+        $Silian_responsePayload = $this->createChatResponse([
             'intent' => [
                 'type' => 'action',
                 'label' => 'Approve records',
@@ -109,18 +109,18 @@ class AdminAiIntentServiceTest extends TestCase
             ],
         ]);
 
-        $service = new AdminAiIntentService(new FakeLlmClient($responsePayload), new NullLogger());
+        $Silian_service = new AdminAiIntentService(new FakeLlmClient($Silian_responsePayload), new NullLogger());
 
-        $result = $service->analyzeIntent('帮我审批下刚才的活动', []);
+        $Silian_result = $Silian_service->analyzeIntent('帮我审批下刚才的活动', []);
 
-        $this->assertSame('action', $result['intent']['type']);
-        $this->assertNotEmpty($result['intent']['missing']);
-        $this->assertSame('record_ids', $result['intent']['missing'][0]['field']);
+        $this->assertSame('action', $Silian_result['intent']['type']);
+        $this->assertNotEmpty($Silian_result['intent']['missing']);
+        $this->assertSame('record_ids', $Silian_result['intent']['missing'][0]['field']);
     }
 
     public function testAnalyzeIntentFallsBackWhenRouteUnknown(): void
     {
-        $responsePayload = $this->createChatResponse([
+        $Silian_responsePayload = $this->createChatResponse([
             'intent' => [
                 'type' => 'navigate',
                 'label' => 'Go somewhere',
@@ -132,15 +132,15 @@ class AdminAiIntentServiceTest extends TestCase
             ],
         ]);
 
-        $service = new AdminAiIntentService(new FakeLlmClient($responsePayload), new NullLogger());
-        $result = $service->analyzeIntent('去未知页面', []);
+        $Silian_service = new AdminAiIntentService(new FakeLlmClient($Silian_responsePayload), new NullLogger());
+        $Silian_result = $Silian_service->analyzeIntent('去未知页面', []);
 
-        $this->assertSame('fallback', $result['intent']['type']);
+        $this->assertSame('fallback', $Silian_result['intent']['type']);
     }
 
     public function testFallbackHeuristicSuggestsNavigation(): void
     {
-        $responsePayload = $this->createChatResponse([
+        $Silian_responsePayload = $this->createChatResponse([
             'intent' => [
                 'type' => 'fallback',
                 'label' => 'No match',
@@ -149,17 +149,17 @@ class AdminAiIntentServiceTest extends TestCase
             ],
         ]);
 
-        $service = new AdminAiIntentService(new FakeLlmClient($responsePayload), new NullLogger());
+        $Silian_service = new AdminAiIntentService(new FakeLlmClient($Silian_responsePayload), new NullLogger());
 
-        $result = $service->analyzeIntent('carbon record review', []);
+        $Silian_result = $Silian_service->analyzeIntent('carbon record review', []);
 
-        $this->assertSame('navigate', $result['intent']['type']);
-        $this->assertSame('/admin/activities', $result['intent']['target']['route']);
+        $this->assertSame('navigate', $Silian_result['intent']['type']);
+        $this->assertSame('/admin/activities', $Silian_result['intent']['target']['route']);
     }
 
     public function testCustomConfigurationOverridesDefaults(): void
     {
-        $responsePayload = $this->createChatResponse([
+        $Silian_responsePayload = $this->createChatResponse([
             'intent' => [
                 'type' => 'navigate',
                 'label' => 'Open custom',
@@ -171,7 +171,7 @@ class AdminAiIntentServiceTest extends TestCase
             ],
         ]);
 
-        $config = [
+        $Silian_config = [
             'navigationTargets' => [
                 [
                     'id' => 'custom-dashboard',
@@ -183,28 +183,28 @@ class AdminAiIntentServiceTest extends TestCase
             'managementActions' => [],
         ];
 
-        $service = new AdminAiIntentService(new FakeLlmClient($responsePayload), new NullLogger(), [], $config);
+        $Silian_service = new AdminAiIntentService(new FakeLlmClient($Silian_responsePayload), new NullLogger(), [], $Silian_config);
 
-        $result = $service->analyzeIntent('打开自定义面板', []);
+        $Silian_result = $Silian_service->analyzeIntent('打开自定义面板', []);
 
-        $this->assertSame('navigate', $result['intent']['type']);
-        $this->assertSame('/admin/custom-dashboard', $result['intent']['target']['route']);
+        $this->assertSame('navigate', $Silian_result['intent']['type']);
+        $this->assertSame('/admin/custom-dashboard', $Silian_result['intent']['target']['route']);
     }
 
     public function testDiagnosticsReportsDisabledWhenClientMissing(): void
     {
-        $service = new AdminAiIntentService(null, new NullLogger());
+        $Silian_service = new AdminAiIntentService(null, new NullLogger());
 
-        $diagnostics = $service->getDiagnostics();
+        $Silian_diagnostics = $Silian_service->getDiagnostics();
 
-        $this->assertFalse($diagnostics['enabled']);
-        $this->assertSame('skipped', $diagnostics['connectivity']['status']);
-        $this->assertFalse($diagnostics['client']['available']);
+        $this->assertFalse($Silian_diagnostics['enabled']);
+        $this->assertSame('skipped', $Silian_diagnostics['connectivity']['status']);
+        $this->assertFalse($Silian_diagnostics['client']['available']);
     }
 
     public function testDiagnosticsConnectivityCheckSuccess(): void
     {
-        $response = [
+        $Silian_response = [
             'model' => 'diag-model',
             'choices' => [
                 [
@@ -222,40 +222,40 @@ class AdminAiIntentServiceTest extends TestCase
             ],
         ];
 
-        $client = new FakeLlmClient($response);
-        $service = new AdminAiIntentService($client, new NullLogger(), ['model' => 'diag-model']);
+        $Silian_client = new FakeLlmClient($Silian_response);
+        $Silian_service = new AdminAiIntentService($Silian_client, new NullLogger(), ['model' => 'diag-model']);
 
-        $diagnostics = $service->getDiagnostics(true);
+        $Silian_diagnostics = $Silian_service->getDiagnostics(true);
 
-        $this->assertTrue($diagnostics['enabled']);
-        $this->assertSame('ok', $diagnostics['connectivity']['status']);
-        $this->assertSame('diag-model', $diagnostics['connectivity']['model']);
-        $this->assertNotNull($client->lastPayload);
-        $this->assertSame(1, $client->lastPayload['max_tokens']);
-        $this->assertSame('Ping', $client->lastPayload['messages'][1]['content']);
+        $this->assertTrue($Silian_diagnostics['enabled']);
+        $this->assertSame('ok', $Silian_diagnostics['connectivity']['status']);
+        $this->assertSame('diag-model', $Silian_diagnostics['connectivity']['model']);
+        $this->assertNotNull($Silian_client->lastPayload);
+        $this->assertSame(1, $Silian_client->lastPayload['max_tokens']);
+        $this->assertSame('Ping', $Silian_client->lastPayload['messages'][1]['content']);
     }
 
     public function testDiagnosticsConnectivityCheckError(): void
     {
-        $client = new ThrowingLlmClient(new \RuntimeException('bad gateway'));
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
-        $errorLogService = $this->createMock(ErrorLogService::class);
-        $errorLogService->expects($this->once())->method('logException');
-        $service = new AdminAiIntentService($client, new NullLogger(), [], null, null, $auditLogService, $errorLogService);
+        $Silian_client = new ThrowingLlmClient(new \RuntimeException('bad gateway'));
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
+        $Silian_errorLogService = $this->createMock(ErrorLogService::class);
+        $Silian_errorLogService->expects($this->once())->method('logException');
+        $Silian_service = new AdminAiIntentService($Silian_client, new NullLogger(), [], null, null, $Silian_auditLogService, $Silian_errorLogService);
 
-        $diagnostics = $service->getDiagnostics(true);
+        $Silian_diagnostics = $Silian_service->getDiagnostics(true);
 
-        $this->assertSame('error', $diagnostics['connectivity']['status']);
-        $this->assertSame('bad gateway', $diagnostics['connectivity']['error']);
-        $this->assertSame(\RuntimeException::class, $diagnostics['connectivity']['exception']);
+        $this->assertSame('error', $Silian_diagnostics['connectivity']['status']);
+        $this->assertSame('bad gateway', $Silian_diagnostics['connectivity']['error']);
+        $this->assertSame(\RuntimeException::class, $Silian_diagnostics['connectivity']['exception']);
     }
 
     /**
      * @param array<string,mixed> $content
      * @return array<string,mixed>
      */
-    private function createChatResponse(array $content): array
+    private function createChatResponse(array $Silian_content): array
     {
         return [
             'id' => 'chatcmpl-test',
@@ -267,7 +267,7 @@ class AdminAiIntentServiceTest extends TestCase
                     'index' => 0,
                     'message' => [
                         'role' => 'assistant',
-                        'content' => json_encode($content, JSON_UNESCAPED_UNICODE),
+                        'content' => json_encode($Silian_content, JSON_UNESCAPED_UNICODE),
                     ],
                     'finish_reason' => 'stop',
                 ],
@@ -294,9 +294,9 @@ class FakeLlmClient implements LlmClientInterface
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    public function createChatCompletion(array $payload): array
+    public function createChatCompletion(array $Silian_payload): array
     {
-        $this->lastPayload = $payload;
+        $this->lastPayload = $Silian_payload;
         return $this->response;
     }
 
@@ -314,7 +314,7 @@ class ThrowingLlmClient implements LlmClientInterface
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    public function createChatCompletion(array $payload): array
+    public function createChatCompletion(array $Silian_payload): array
     {
         throw $this->throwable;
     }

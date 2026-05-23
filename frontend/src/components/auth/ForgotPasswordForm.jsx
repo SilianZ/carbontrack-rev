@@ -1,58 +1,58 @@
-import React, { useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft } from 'lucide-react';
-import { useTranslation } from '../../hooks/useTranslation';
-import { authAPI, getValidationRules } from '../../lib/auth';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
-import { Alert, AlertDescription } from '../ui/Alert';
-import Turnstile from '../common/Turnstile';
+import Silian_React, { useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { useForm as Silian_useForm } from 'react-hook-form';
+import { Link as Silian_Link } from 'react-router-dom';
+import { Mail as Silian_Mail, ArrowLeft as Silian_ArrowLeft } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { authAPI as Silian_authAPI, getValidationRules as Silian_getValidationRules } from '../../lib/auth';
+import { Button as Silian_Button } from '../ui/Button';
+import { Input as Silian_Input } from '../ui/Input';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../ui/Card';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../ui/Alert';
+import Silian_Turnstile from '../common/Turnstile';
 
 export function ForgotPasswordForm() {
-  const { t } = useTranslation(['auth', 'errors', 'success']);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const turnstileRef = useRef(null);
-  const [turnstileToken, setTurnstileToken] = useState('');
-  const requiresTurnstile = Boolean(import.meta.env?.VITE_TURNSTILE_SITE_KEY);
+  const { t: Silian_t } = Silian_useTranslation(['auth', 'errors', 'success']);
+  const [Silian_error, Silian_setError] = Silian_useState('');
+  const [Silian_success, Silian_setSuccess] = Silian_useState('');
+  const [Silian_isLoading, Silian_setIsLoading] = Silian_useState(false);
+  const Silian_turnstileRef = Silian_useRef(null);
+  const [Silian_turnstileToken, Silian_setTurnstileToken] = Silian_useState('');
+  const Silian_requiresTurnstile = Boolean(import.meta.env?.VITE_TURNSTILE_SITE_KEY);
 
   const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm();
-  const validationRules = getValidationRules();
+    register: Silian_register,
+    handleSubmit: Silian_handleSubmit,
+    formState: { errors: Silian_errors }
+  } = Silian_useForm();
+  const Silian_validationRules = Silian_getValidationRules();
 
-  const onSubmit = async (data) => {
-    if (requiresTurnstile && !turnstileToken) {
-      setError(t('auth.verification.turnstileRequired'));
+  const Silian_onSubmit = async (Silian_data) => {
+    if (Silian_requiresTurnstile && !Silian_turnstileToken) {
+      Silian_setError(Silian_t('auth.verification.turnstileRequired'));
       return;
     }
 
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
+    Silian_setIsLoading(true);
+    Silian_setError('');
+    Silian_setSuccess('');
 
     try {
-      const result = await authAPI.forgotPassword({
-        email: data.email,
-        cf_turnstile_response: turnstileToken,
+      const Silian_result = await Silian_authAPI.forgotPassword({
+        email: Silian_data.email,
+        cf_turnstile_response: Silian_turnstileToken,
       });
 
-      if (result.success) {
-        setSuccess(t('auth.resetEmailSent'));
+      if (Silian_result.success) {
+        Silian_setSuccess(Silian_t('auth.resetEmailSent'));
       } else {
-        setError(result.message || t('auth.resetEmailFailed'));
+        Silian_setError(Silian_result.message || Silian_t('auth.resetEmailFailed'));
       }
-    } catch (err) {
-      setError(err.message || t('auth.resetEmailFailed'));
+    } catch (Silian_err) {
+      Silian_setError(Silian_err.message || Silian_t('auth.resetEmailFailed'));
     } finally {
-      setTurnstileToken('');
-      turnstileRef.current?.reset?.();
-      setIsLoading(false);
+      Silian_setTurnstileToken('');
+      Silian_turnstileRef.current?.reset?.();
+      Silian_setIsLoading(false);
     }
   };
 
@@ -61,91 +61,91 @@ export function ForgotPasswordForm() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-100">
-            <Mail className="h-6 w-6 text-green-600" />
+            <Silian_Mail className="h-6 w-6 text-green-600" />
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-foreground">
-            {t('auth.forgotPassword')}
+            {Silian_t('auth.forgotPassword')}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            {t('auth.forgotPasswordDescription')}
+            {Silian_t('auth.forgotPasswordDescription')}
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('auth.resetPassword.title')}</CardTitle>
-            <CardDescription>
-              {t('auth.enterEmailForReset')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+        <Silian_Card>
+          <Silian_CardHeader>
+            <Silian_CardTitle>{Silian_t('auth.resetPassword.title')}</Silian_CardTitle>
+            <Silian_CardDescription>
+              {Silian_t('auth.enterEmailForReset')}
+            </Silian_CardDescription>
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            <form onSubmit={Silian_handleSubmit(Silian_onSubmit)} className="space-y-6">
+              {Silian_error && (
+                <Silian_Alert variant="destructive">
+                  <Silian_AlertDescription>{Silian_error}</Silian_AlertDescription>
+                </Silian_Alert>
               )}
 
-              {success && (
-                <Alert variant="success">
-                  <AlertDescription>{success}</AlertDescription>
-                </Alert>
+              {Silian_success && (
+                <Silian_Alert variant="success">
+                  <Silian_AlertDescription>{Silian_success}</Silian_AlertDescription>
+                </Silian_Alert>
               )}
 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-foreground">
-                  {t('auth.email')}
+                  {Silian_t('auth.email')}
                 </label>
                 <div className="mt-1">
-                  <Input
+                  <Silian_Input
                     id="email"
                     type="email"
                     autoComplete="email"
-                    placeholder={t('auth.emailPlaceholder')}
-                    error={errors.email}
-                    {...register('email', validationRules.email)}
+                    placeholder={Silian_t('auth.emailPlaceholder')}
+                    error={Silian_errors.email}
+                    {...Silian_register('email', Silian_validationRules.email)}
                   />
-                  {errors.email && (
+                  {Silian_errors.email && (
                     <p className="mt-1 text-sm text-red-600">
-                      {errors.email.message}
+                      {Silian_errors.email.message}
                     </p>
                   )}
                 </div>
               </div>
 
               <div>
-                <Turnstile
-                  ref={turnstileRef}
+                <Silian_Turnstile
+                  ref={Silian_turnstileRef}
                   className="flex justify-center"
-                  require={requiresTurnstile}
-                  onVerify={(token) => setTurnstileToken(token)}
-                  onExpire={() => setTurnstileToken('')}
-                  onError={() => setTurnstileToken('')}
+                  require={Silian_requiresTurnstile}
+                  onVerify={(Silian_token) => Silian_setTurnstileToken(Silian_token)}
+                  onExpire={() => Silian_setTurnstileToken('')}
+                  onError={() => Silian_setTurnstileToken('')}
                 />
               </div>
 
               <div>
-                <Button
+                <Silian_Button
                   type="submit"
                   className="w-full"
-                  loading={isLoading}
-                  disabled={isLoading || success || (requiresTurnstile && !turnstileToken)}
+                  loading={Silian_isLoading}
+                  disabled={Silian_isLoading || Silian_success || (Silian_requiresTurnstile && !Silian_turnstileToken)}
                 >
-                  {isLoading ? t('auth.sending') : t('auth.sendResetEmail')}
-                </Button>
+                  {Silian_isLoading ? Silian_t('auth.sending') : Silian_t('auth.sendResetEmail')}
+                </Silian_Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </Silian_CardContent>
+        </Silian_Card>
 
         <div className="text-center">
-          <Link
+          <Silian_Link
             to="/auth/login"
             className="inline-flex items-center text-sm font-medium text-green-600 hover:text-green-500"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            {t('auth.backToLogin')}
-          </Link>
+            <Silian_ArrowLeft className="h-4 w-4 mr-1" />
+            {Silian_t('auth.backToLogin')}
+          </Silian_Link>
         </div>
       </div>
     </div>

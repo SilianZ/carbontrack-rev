@@ -27,12 +27,12 @@ class UserAiServiceTest extends TestCase
         $this->errorLogService = $this->createMock(ErrorLogService::class);
     }
 
-    private function createService(array $config = [], bool $withClient = true): UserAiService
+    private function createService(array $Silian_config = [], bool $Silian_withClient = true): UserAiService
     {
         return new UserAiService(
-            $withClient ? $this->llmClient : null,
+            $Silian_withClient ? $this->llmClient : null,
             $this->logger,
-            $config,
+            $Silian_config,
             null,
             $this->auditLogService,
             $this->errorLogService
@@ -41,28 +41,28 @@ class UserAiServiceTest extends TestCase
 
     public function testIsEnabled(): void
     {
-        $serviceWithClient = $this->createService();
-        $this->assertTrue($serviceWithClient->isEnabled());
+        $Silian_serviceWithClient = $this->createService();
+        $this->assertTrue($Silian_serviceWithClient->isEnabled());
 
-        $serviceWithoutClient = $this->createService([], false);
-        $this->assertFalse($serviceWithoutClient->isEnabled());
+        $Silian_serviceWithoutClient = $this->createService([], false);
+        $this->assertFalse($Silian_serviceWithoutClient->isEnabled());
     }
 
     public function testSuggestActivityThrowsWhenDisabled(): void
     {
-        $service = $this->createService([], false);
+        $Silian_service = $this->createService([], false);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('AI service is disabled');
 
-        $service->suggestActivity('some query');
+        $Silian_service->suggestActivity('some query');
     }
 
     public function testSuggestActivitySuccess(): void
     {
         $this->auditLogService->expects($this->once())->method('logUserAction')->willReturn(true);
 
-        $expectedResponse = [
+        $Silian_expectedResponse = [
             'activity_name' => 'Bus',
             'amount' => 10,
             'unit' => 'km',
@@ -70,11 +70,11 @@ class UserAiServiceTest extends TestCase
             'activity_date' => null
         ];
 
-        $rawResponse = [
+        $Silian_rawResponse = [
             'choices' => [
                 [
                     'message' => [
-                        'content' => json_encode($expectedResponse)
+                        'content' => json_encode($Silian_expectedResponse)
                     ]
                 ]
             ],
@@ -84,70 +84,70 @@ class UserAiServiceTest extends TestCase
 
         $this->llmClient->expects($this->once())
             ->method('createChatCompletion')
-            ->with($this->callback(function ($payload) {
-                return $payload['model'] === 'google/gemini-2.5-flash-lite'
-                    && isset($payload['messages'][1]['content'])
-                    && $payload['messages'][1]['content'] === 'test query';
+            ->with($this->callback(function ($Silian_payload) {
+                return $Silian_payload['model'] === 'google/gemini-2.5-flash-lite'
+                    && isset($Silian_payload['messages'][1]['content'])
+                    && $Silian_payload['messages'][1]['content'] === 'test query';
             }))
-            ->willReturn($rawResponse);
+            ->willReturn($Silian_rawResponse);
 
-        $service = $this->createService();
-        $result = $service->suggestActivity('test query');
+        $Silian_service = $this->createService();
+        $Silian_result = $Silian_service->suggestActivity('test query');
 
-        $this->assertTrue($result['success']);
-        $this->assertEquals($expectedResponse, $result['prediction']);
-        $this->assertEquals('test-model', $result['metadata']['model']);
+        $this->assertTrue($Silian_result['success']);
+        $this->assertEquals($Silian_expectedResponse, $Silian_result['prediction']);
+        $this->assertEquals('test-model', $Silian_result['metadata']['model']);
     }
 
     public function testSuggestActivityHandlesMarkdownJsonBlock(): void
     {
-        $expectedResponse = ['activity' => 'Test', 'activity_uuid' => null, 'activity_date' => null];
-        $jsonString = json_encode($expectedResponse);
-        $content = "Here is the result:\n```json\n$jsonString\n```";
+        $Silian_expectedResponse = ['activity' => 'Test', 'activity_uuid' => null, 'activity_date' => null];
+        $Silian_jsonString = json_encode($Silian_expectedResponse);
+        $Silian_content = "Here is the result:\n```json\n$Silian_jsonString\n```";
 
-        $rawResponse = [
+        $Silian_rawResponse = [
             'choices' => [
                 [
-                    'message' => ['content' => $content]
+                    'message' => ['content' => $Silian_content]
                 ]
             ]
         ];
 
-        $this->llmClient->method('createChatCompletion')->willReturn($rawResponse);
+        $this->llmClient->method('createChatCompletion')->willReturn($Silian_rawResponse);
 
-        $service = $this->createService();
-        $result = $service->suggestActivity('test');
+        $Silian_service = $this->createService();
+        $Silian_result = $Silian_service->suggestActivity('test');
 
-        $this->assertTrue($result['success']);
-        $this->assertEquals($expectedResponse, $result['prediction']);
+        $this->assertTrue($Silian_result['success']);
+        $this->assertEquals($Silian_expectedResponse, $Silian_result['prediction']);
     }
 
     public function testSuggestActivityHandlesFallbackParsing(): void
     {
-        $expectedResponse = ['activity' => 'Test', 'activity_uuid' => null, 'activity_date' => null];
-        $jsonString = json_encode($expectedResponse);
-        $content = "Sure! $jsonString is your result.";
+        $Silian_expectedResponse = ['activity' => 'Test', 'activity_uuid' => null, 'activity_date' => null];
+        $Silian_jsonString = json_encode($Silian_expectedResponse);
+        $Silian_content = "Sure! $Silian_jsonString is your result.";
 
-        $rawResponse = [
+        $Silian_rawResponse = [
             'choices' => [
                 [
-                    'message' => ['content' => $content]
+                    'message' => ['content' => $Silian_content]
                 ]
             ]
         ];
 
-        $this->llmClient->method('createChatCompletion')->willReturn($rawResponse);
+        $this->llmClient->method('createChatCompletion')->willReturn($Silian_rawResponse);
 
-        $service = $this->createService();
-        $result = $service->suggestActivity('test');
+        $Silian_service = $this->createService();
+        $Silian_result = $Silian_service->suggestActivity('test');
 
-        $this->assertTrue($result['success']);
-        $this->assertEquals($expectedResponse, $result['prediction']);
+        $this->assertTrue($Silian_result['success']);
+        $this->assertEquals($Silian_expectedResponse, $Silian_result['prediction']);
     }
 
     public function testSuggestActivityHandlesInvalidJson(): void
     {
-        $rawResponse = [
+        $Silian_rawResponse = [
             'choices' => [
                 [
                     'message' => ['content' => 'Not JSON at all']
@@ -155,13 +155,13 @@ class UserAiServiceTest extends TestCase
             ]
         ];
 
-        $this->llmClient->method('createChatCompletion')->willReturn($rawResponse);
+        $this->llmClient->method('createChatCompletion')->willReturn($Silian_rawResponse);
 
-        $service = $this->createService();
-        $result = $service->suggestActivity('test');
+        $Silian_service = $this->createService();
+        $Silian_result = $Silian_service->suggestActivity('test');
 
-        $this->assertFalse($result['success']);
-        $this->assertEquals('Failed to parse AI response', $result['error']);
+        $this->assertFalse($Silian_result['success']);
+        $this->assertEquals('Failed to parse AI response', $Silian_result['error']);
     }
 
     public function testSuggestActivityHandlesClientException(): void
@@ -172,34 +172,34 @@ class UserAiServiceTest extends TestCase
         $this->llmClient->method('createChatCompletion')
             ->willThrowException(new \Exception('API Error'));
 
-        $service = $this->createService();
+        $Silian_service = $this->createService();
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('LLM_UNAVAILABLE');
 
-        $service->suggestActivity('test');
+        $Silian_service->suggestActivity('test');
     }
-    
+
     public function testConfigOverrides(): void
     {
-        $config = [
+        $Silian_config = [
             'model' => 'custom-model',
             'temperature' => 0.5,
             'max_tokens' => 1000
         ];
-        
-        $service = $this->createService($config);
-        
+
+        $Silian_service = $this->createService($Silian_config);
+
         // We can verify this by checking what createChatCompletion receives
         $this->llmClient->expects($this->once())
             ->method('createChatCompletion')
-            ->with($this->callback(function ($payload) {
-                return $payload['model'] === 'custom-model'
-                    && $payload['temperature'] === 0.5
-                    && $payload['max_tokens'] === 1000;
+            ->with($this->callback(function ($Silian_payload) {
+                return $Silian_payload['model'] === 'custom-model'
+                    && $Silian_payload['temperature'] === 0.5
+                    && $Silian_payload['max_tokens'] === 1000;
             }))
             ->willReturn(['choices' => []]); // will fail at parsing but that's fine for this test check
-            
-        $service->suggestActivity('test');
+
+        $Silian_service->suggestActivity('test');
     }
 }

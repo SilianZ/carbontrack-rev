@@ -18,14 +18,14 @@ class UserAiService
     public function __construct(
         private ?LlmClientInterface $client,
         private LoggerInterface $logger,
-        array $config = [],
+        array $Silian_config = [],
         private ?LlmLogService $llmLogService = null,
         private ?AuditLogService $auditLogService = null,
         private ?ErrorLogService $errorLogService = null
     ) {
-        $this->model = (string)($config['model'] ?? 'google/gemini-2.5-flash-lite');
-        $this->temperature = isset($config['temperature']) ? (float)$config['temperature'] : 0.1;
-        $this->maxTokens = isset($config['max_tokens']) ? (int)$config['max_tokens'] : 500;
+        $this->model = (string)($Silian_config['model'] ?? 'google/gemini-2.5-flash-lite');
+        $this->temperature = isset($Silian_config['temperature']) ? (float)$Silian_config['temperature'] : 0.1;
+        $this->maxTokens = isset($Silian_config['max_tokens']) ? (int)$Silian_config['max_tokens'] : 500;
         $this->enabled = $client !== null;
     }
 
@@ -41,161 +41,161 @@ class UserAiService
      * @return array
      */
     public function suggestActivity(
-        string $query,
-        array $availableActivities = [],
-        array $clientTimeContext = [],
-        array $logContext = []
+        string $Silian_query,
+        array $Silian_availableActivities = [],
+        array $Silian_clientTimeContext = [],
+        array $Silian_logContext = []
     ): array
     {
         if (!$this->enabled) {
             throw new \RuntimeException('AI service is disabled');
         }
 
-        $messages = $this->buildMessages($query, $availableActivities, $clientTimeContext);
+        $Silian_messages = $this->buildMessages($Silian_query, $Silian_availableActivities, $Silian_clientTimeContext);
 
-        $payload = [
+        $Silian_payload = [
             'model' => $this->model,
             'temperature' => $this->temperature,
             'max_tokens' => $this->maxTokens,
-            'messages' => $messages,
+            'messages' => $Silian_messages,
             'response_format' => ['type' => 'json_object'] // JSON mode if supported
         ];
 
-        $startedAt = microtime(true);
+        $Silian_startedAt = microtime(true);
         try {
-            $rawResponse = $this->client->createChatCompletion($payload);
-            $this->logLlmCall($query, $rawResponse, $logContext, $clientTimeContext, $startedAt);
-        } catch (\Throwable $e) {
+            $Silian_rawResponse = $this->client->createChatCompletion($Silian_payload);
+            $this->logLlmCall($Silian_query, $Silian_rawResponse, $Silian_logContext, $Silian_clientTimeContext, $Silian_startedAt);
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('User AI suggest call failed', [
-                'exception' => $e::class,
-                'message' => $e->getMessage(),
+                'exception' => $Silian_e::class,
+                'message' => $Silian_e->getMessage(),
             ]);
-            $this->logLlmFailure($query, $logContext, $clientTimeContext, $startedAt, $e);
-            $this->logAudit('user_ai_service_suggest_failed', $logContext, [
+            $this->logLlmFailure($Silian_query, $Silian_logContext, $Silian_clientTimeContext, $Silian_startedAt, $Silian_e);
+            $this->logAudit('user_ai_service_suggest_failed', $Silian_logContext, [
                 'status' => 'failed',
                 'request_data' => [
-                    'query_length' => mb_strlen($query),
-                    'source' => $logContext['source'] ?? null,
-                    'error' => $e->getMessage(),
+                    'query_length' => mb_strlen($Silian_query),
+                    'source' => $Silian_logContext['source'] ?? null,
+                    'error' => $Silian_e->getMessage(),
                 ],
             ]);
-            $this->logError($e, $logContext, [
-                'query' => $query,
-                'client_time_context' => $clientTimeContext,
+            $this->logError($Silian_e, $Silian_logContext, [
+                'query' => $Silian_query,
+                'client_time_context' => $Silian_clientTimeContext,
             ]);
-            throw new \RuntimeException('LLM_UNAVAILABLE', 0, $e);
+            throw new \RuntimeException('LLM_UNAVAILABLE', 0, $Silian_e);
         }
 
-        $result = $this->processResponse($rawResponse, $availableActivities);
-        $this->logAudit('user_ai_service_suggest_succeeded', $logContext, [
+        $Silian_result = $this->processResponse($Silian_rawResponse, $Silian_availableActivities);
+        $this->logAudit('user_ai_service_suggest_succeeded', $Silian_logContext, [
             'request_data' => [
-                'query_length' => mb_strlen($query),
-                'source' => $logContext['source'] ?? null,
-                'model' => $rawResponse['model'] ?? $this->model,
-                'activity_uuid' => $result['prediction']['activity_uuid'] ?? null,
-                'confidence' => $result['prediction']['confidence'] ?? null,
+                'query_length' => mb_strlen($Silian_query),
+                'source' => $Silian_logContext['source'] ?? null,
+                'model' => $Silian_rawResponse['model'] ?? $this->model,
+                'activity_uuid' => $Silian_result['prediction']['activity_uuid'] ?? null,
+                'confidence' => $Silian_result['prediction']['confidence'] ?? null,
             ],
         ]);
 
-        return $result;
+        return $Silian_result;
     }
 
-    private function logLlmCall(string $prompt, array $rawResponse, array $logContext, array $context, float $startedAt): void
+    private function logLlmCall(string $Silian_prompt, array $Silian_rawResponse, array $Silian_logContext, array $Silian_context, float $Silian_startedAt): void
     {
         if (!$this->llmLogService) {
             return;
         }
 
-        $durationMs = (microtime(true) - $startedAt) * 1000.0;
-        $responseId = $rawResponse['id'] ?? ($rawResponse['metadata']['request_id'] ?? null);
+        $Silian_durationMs = (microtime(true) - $Silian_startedAt) * 1000.0;
+        $Silian_responseId = $Silian_rawResponse['id'] ?? ($Silian_rawResponse['metadata']['request_id'] ?? null);
 
         $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'user',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'source' => $logContext['source'] ?? null,
-            'model' => $rawResponse['model'] ?? $this->model,
-            'prompt' => $prompt,
-            'response_raw' => $rawResponse,
-            'response_id' => $responseId,
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'user',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'source' => $Silian_logContext['source'] ?? null,
+            'model' => $Silian_rawResponse['model'] ?? $this->model,
+            'prompt' => $Silian_prompt,
+            'response_raw' => $Silian_rawResponse,
+            'response_id' => $Silian_responseId,
             'status' => 'success',
             'error_message' => null,
-            'usage' => $rawResponse['usage'] ?? null,
-            'latency_ms' => round($durationMs, 2),
-            'context' => $context ?: null,
+            'usage' => $Silian_rawResponse['usage'] ?? null,
+            'latency_ms' => round($Silian_durationMs, 2),
+            'context' => $Silian_context ?: null,
         ]);
     }
 
-    private function logLlmFailure(string $prompt, array $logContext, array $context, float $startedAt, \Throwable $error): void
+    private function logLlmFailure(string $Silian_prompt, array $Silian_logContext, array $Silian_context, float $Silian_startedAt, \Throwable $Silian_error): void
     {
         if (!$this->llmLogService) {
             return;
         }
 
-        $durationMs = (microtime(true) - $startedAt) * 1000.0;
+        $Silian_durationMs = (microtime(true) - $Silian_startedAt) * 1000.0;
 
         $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'user',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'source' => $logContext['source'] ?? null,
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'user',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'source' => $Silian_logContext['source'] ?? null,
             'model' => $this->model,
-            'prompt' => $prompt,
+            'prompt' => $Silian_prompt,
             'response_raw' => null,
             'response_id' => null,
             'status' => 'failed',
-            'error_message' => $error->getMessage(),
+            'error_message' => $Silian_error->getMessage(),
             'usage' => null,
-            'latency_ms' => round($durationMs, 2),
-            'context' => $context ?: null,
+            'latency_ms' => round($Silian_durationMs, 2),
+            'context' => $Silian_context ?: null,
         ]);
     }
 
-    private function buildMessages(string $query, array $activities, array $clientTimeContext = []): array
+    private function buildMessages(string $Silian_query, array $Silian_activities, array $Silian_clientTimeContext = []): array
     {
-        $now = new \DateTimeImmutable('now');
-        $today = $now->format('Y-m-d');
-        $weekday = $now->format('l');
-        $clientTimeLine = '';
+        $Silian_now = new \DateTimeImmutable('now');
+        $Silian_today = $Silian_now->format('Y-m-d');
+        $Silian_weekday = $Silian_now->format('l');
+        $Silian_clientTimeLine = '';
 
-        $clientTimeRaw = $clientTimeContext['client_time'] ?? null;
-        $clientTzRaw = $clientTimeContext['client_timezone'] ?? null;
-        if ($clientTimeRaw) {
+        $Silian_clientTimeRaw = $Silian_clientTimeContext['client_time'] ?? null;
+        $Silian_clientTzRaw = $Silian_clientTimeContext['client_timezone'] ?? null;
+        if ($Silian_clientTimeRaw) {
             try {
-                $tz = $clientTzRaw ? new \DateTimeZone((string)$clientTzRaw) : null;
-                $clientTime = $tz ? new \DateTimeImmutable((string)$clientTimeRaw, $tz) : new \DateTimeImmutable((string)$clientTimeRaw);
-                $clientTimeLine = "User local time: " . $clientTime->format('Y-m-d H:i:s T');
-            } catch (\Throwable $e) {
-                $clientTimeLine = "User local time: " . (string)$clientTimeRaw . ($clientTzRaw ? " ({$clientTzRaw})" : '');
+                $Silian_tz = $Silian_clientTzRaw ? new \DateTimeZone((string)$Silian_clientTzRaw) : null;
+                $Silian_clientTime = $Silian_tz ? new \DateTimeImmutable((string)$Silian_clientTimeRaw, $Silian_tz) : new \DateTimeImmutable((string)$Silian_clientTimeRaw);
+                $Silian_clientTimeLine = "User local time: " . $Silian_clientTime->format('Y-m-d H:i:s T');
+            } catch (\Throwable $Silian_e) {
+                $Silian_clientTimeLine = "User local time: " . (string)$Silian_clientTimeRaw . ($Silian_clientTzRaw ? " ({$Silian_clientTzRaw})" : '');
             }
         }
 
-        $activityLines = [];
-        foreach (array_slice($activities, 0, 500) as $item) {
-            if (is_array($item)) {
-                $id = (string)($item['id'] ?? '');
-                $label = $item['label'] ?? ($item['name'] ?? '');
-                $category = $item['category'] ?? ($item['cat'] ?? 'General');
-                $unit = $item['unit'] ?? null;
-                $unitPart = $unit ? " | Unit: {$unit}" : '';
-                $activityLines[] = "UUID: {$id} | Category: {$category} | Name: {$label}{$unitPart}";
+        $Silian_activityLines = [];
+        foreach (array_slice($Silian_activities, 0, 500) as $Silian_item) {
+            if (is_array($Silian_item)) {
+                $Silian_id = (string)($Silian_item['id'] ?? '');
+                $Silian_label = $Silian_item['label'] ?? ($Silian_item['name'] ?? '');
+                $Silian_category = $Silian_item['category'] ?? ($Silian_item['cat'] ?? 'General');
+                $Silian_unit = $Silian_item['unit'] ?? null;
+                $Silian_unitPart = $Silian_unit ? " | Unit: {$Silian_unit}" : '';
+                $Silian_activityLines[] = "UUID: {$Silian_id} | Category: {$Silian_category} | Name: {$Silian_label}{$Silian_unitPart}";
             } else {
-                $activityLines[] = (string)$item;
+                $Silian_activityLines[] = (string)$Silian_item;
             }
         }
-        $activityList = implode("\n", $activityLines);
-        if (count($activities) > 500) {
-            $activityList .= "\n... (and more)";
+        $Silian_activityList = implode("\n", $Silian_activityLines);
+        if (count($Silian_activities) > 500) {
+            $Silian_activityList .= "\n... (and more)";
         }
 
-        $systemPrompt = <<<EOT
+        $Silian_systemPrompt = <<<EOT
 You are a CarbonTrack assistant. help extract carbon footprint activity data from user input.
 You must return a valid JSON object. Match to the provided activities by UUID.
-Today is {$today} ({$weekday}).
-{$clientTimeLine}
+Today is {$Silian_today} ({$Silian_weekday}).
+{$Silian_clientTimeLine}
 
 Available Activity Types (Reference):
-{$activityList}
+{$Silian_activityList}
 
 Instructions:
 1. Identify the activity type from the user input. Match it to one of the available UUIDs above if possible.
@@ -220,114 +220,114 @@ If no activity is detected, set confidence to 0.
 EOT;
 
         return [
-            ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => $query]
+            ['role' => 'system', 'content' => $Silian_systemPrompt],
+            ['role' => 'user', 'content' => $Silian_query]
         ];
     }
 
-    private function processResponse(array $rawResponse, array $availableActivities = []): array
+    private function processResponse(array $Silian_rawResponse, array $Silian_availableActivities = []): array
     {
-         $choice = $rawResponse['choices'][0] ?? [];
-         $content = $choice['message']['content'] ?? '{}';
-         
+         $Silian_choice = $Silian_rawResponse['choices'][0] ?? [];
+         $Silian_content = $Silian_choice['message']['content'] ?? '{}';
+
          // Basic cleanup for JSON block if model returns markdown
-         if (str_contains($content, '```')) {
-             $content = preg_replace('/^```json\s*|\s*```$/', '', $content);
+         if (str_contains($Silian_content, '```')) {
+             $Silian_content = preg_replace('/^```json\s*|\s*```$/', '', $Silian_content);
          }
-         
-         $data = json_decode($content, true);
-         
-         if (!is_array($data)) {
+
+         $Silian_data = json_decode($Silian_content, true);
+
+         if (!is_array($Silian_data)) {
              // Fallback: try to find start and end braces
-             if (preg_match('/\{.*\}/s', $content, $matches)) {
-                 $data = json_decode($matches[0], true);
+             if (preg_match('/\{.*\}/s', $Silian_content, $Silian_matches)) {
+                 $Silian_data = json_decode($Silian_matches[0], true);
              }
          }
 
-         if (!is_array($data)) {
+         if (!is_array($Silian_data)) {
              return [
                  'success' => false,
                  'error' => 'Failed to parse AI response',
-                 'raw_content' => $content
+                 'raw_content' => $Silian_content
              ];
          }
-         
+
          // Normalize uuid presence and enforce allowed list
-         $allowedUuids = [];
-         foreach ($availableActivities as $item) {
-             if (is_array($item) && isset($item['id'])) {
-                 $allowedUuids[] = (string)$item['id'];
+         $Silian_allowedUuids = [];
+         foreach ($Silian_availableActivities as $Silian_item) {
+             if (is_array($Silian_item) && isset($Silian_item['id'])) {
+                 $Silian_allowedUuids[] = (string)$Silian_item['id'];
              }
          }
-         $allowedUuids = array_unique($allowedUuids);
+         $Silian_allowedUuids = array_unique($Silian_allowedUuids);
 
-         if (!array_key_exists('activity_uuid', $data)) {
-             $data['activity_uuid'] = null;
+         if (!array_key_exists('activity_uuid', $Silian_data)) {
+             $Silian_data['activity_uuid'] = null;
          }
-         if (!array_key_exists('activity_date', $data)) {
-             $data['activity_date'] = null;
-         }
-
-         if ($data['activity_uuid'] !== null && !is_string($data['activity_uuid'])) {
-             $data['activity_uuid'] = (string)$data['activity_uuid'];
+         if (!array_key_exists('activity_date', $Silian_data)) {
+             $Silian_data['activity_date'] = null;
          }
 
-         if (!empty($allowedUuids) && $data['activity_uuid'] !== null && !in_array($data['activity_uuid'], $allowedUuids, true)) {
+         if ($Silian_data['activity_uuid'] !== null && !is_string($Silian_data['activity_uuid'])) {
+             $Silian_data['activity_uuid'] = (string)$Silian_data['activity_uuid'];
+         }
+
+         if (!empty($Silian_allowedUuids) && $Silian_data['activity_uuid'] !== null && !in_array($Silian_data['activity_uuid'], $Silian_allowedUuids, true)) {
              // If model picked an unknown uuid, drop confidence and clear uuid to signal no match
-             $data['activity_uuid'] = null;
-             $data['confidence'] = 0;
+             $Silian_data['activity_uuid'] = null;
+             $Silian_data['confidence'] = 0;
          }
 
          return [
             'success' => true,
-            'prediction' => $data,
+            'prediction' => $Silian_data,
             'metadata' => [
-                'model' => $rawResponse['model'] ?? $this->model,
-                'usage' => $rawResponse['usage'] ?? null
+                'model' => $Silian_rawResponse['model'] ?? $this->model,
+                'usage' => $Silian_rawResponse['usage'] ?? null
             ]
          ];
     }
 
-    private function logAudit(string $action, array $logContext, array $context = []): void
+    private function logAudit(string $Silian_action, array $Silian_logContext, array $Silian_context = []): void
     {
         if (!$this->auditLogService) {
             return;
         }
 
         try {
-            $actorId = isset($logContext['actor_id']) && is_numeric((string) $logContext['actor_id'])
-                ? (int) $logContext['actor_id']
+            $Silian_actorId = isset($Silian_logContext['actor_id']) && is_numeric((string) $Silian_logContext['actor_id'])
+                ? (int) $Silian_logContext['actor_id']
                 : null;
-            $this->auditLogService->logUserAction($actorId, $action, array_merge([
-                'request_id' => $logContext['request_id'] ?? null,
-                'endpoint' => $logContext['source'] ?? '/ai/suggest-activity',
+            $this->auditLogService->logUserAction($Silian_actorId, $Silian_action, array_merge([
+                'request_id' => $Silian_logContext['request_id'] ?? null,
+                'endpoint' => $Silian_logContext['source'] ?? '/ai/suggest-activity',
                 'request_method' => 'POST',
                 'status' => 'success',
-            ], $context));
-        } catch (\Throwable $ignore) {
+            ], $Silian_context));
+        } catch (\Throwable $Silian_ignore) {
             // 审计日志失败不阻断主流程
         }
     }
 
-    private function logError(\Throwable $exception, array $logContext, array $context = []): void
+    private function logError(\Throwable $Silian_exception, array $Silian_logContext, array $Silian_context = []): void
     {
         if (!$this->errorLogService) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext(
-                $logContext['source'] ?? '/ai/suggest-activity',
+            $Silian_request = SyntheticRequestFactory::fromContext(
+                $Silian_logContext['source'] ?? '/ai/suggest-activity',
                 'POST',
-                $logContext['request_id'] ?? null,
+                $Silian_logContext['request_id'] ?? null,
                 [],
-                $context
+                $Silian_context
             );
-            $this->errorLogService->logException($exception, $request, [
-                'request_id' => $logContext['request_id'] ?? null,
-                'actor_type' => $logContext['actor_type'] ?? 'user',
+            $this->errorLogService->logException($Silian_exception, $Silian_request, [
+                'request_id' => $Silian_logContext['request_id'] ?? null,
+                'actor_type' => $Silian_logContext['actor_type'] ?? 'user',
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // swallow secondary logging failure
         }
     }

@@ -1,53 +1,53 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
+import Silian_React, { useState as Silian_useState, useMemo as Silian_useMemo, useCallback as Silian_useCallback, useEffect as Silian_useEffect, useRef as Silian_useRef } from 'react';
+import Silian_PropTypes from 'prop-types';
 import {
-  ChevronRight,
-  ChevronDown,
-  ChevronsDown,
-  ChevronsUp,
-  Copy,
-  FileJson,
-  Search
+  ChevronRight as Silian_ChevronRight,
+  ChevronDown as Silian_ChevronDown,
+  ChevronsDown as Silian_ChevronsDown,
+  ChevronsUp as Silian_ChevronsUp,
+  Copy as Silian_Copy,
+  FileJson as Silian_FileJson,
+  Search as Silian_Search
 } from 'lucide-react';
 
-import { useTranslation } from '../../hooks/useTranslation';
-import { cn } from '@/lib/utils';
-import { Input } from '../ui/Input';
-import { Button } from '../ui/Button';
-import { Badge } from '../ui/badge';
-import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { cn as Silian_cn } from '@/lib/utils';
+import { Input as Silian_Input } from '../ui/Input';
+import { Button as Silian_Button } from '../ui/Button';
+import { Badge as Silian_Badge } from '../ui/badge';
+import { Tooltip as Silian_Tooltip, TooltipTrigger as Silian_TooltipTrigger, TooltipContent as Silian_TooltipContent } from '../ui/tooltip';
 
-const ROOT_PATH = [];
-const ROOT_KEY = '$';
+const Silian_ROOT_PATH = [];
+const Silian_ROOT_KEY = '$';
 
-function getType(value) {
-  if (value === null) return 'null';
-  if (Array.isArray(value)) return 'array';
-  return typeof value;
+function Silian_getType(Silian_value) {
+  if (Silian_value === null) return 'null';
+  if (Array.isArray(Silian_value)) return 'array';
+  return typeof Silian_value;
 }
 
-function isExpandableType(type) {
-  return type === 'object' || type === 'array';
+function Silian_isExpandableType(Silian_type) {
+  return Silian_type === 'object' || Silian_type === 'array';
 }
 
-function formatValue(value, type) {
-  switch (type) {
+function Silian_formatValue(Silian_value, Silian_type) {
+  switch (Silian_type) {
     case 'string':
-      return `"${value}"`;
+      return `"${Silian_value}"`;
     case 'number':
     case 'boolean':
-      return String(value);
+      return String(Silian_value);
     case 'null':
       return 'null';
     case 'undefined':
       return 'undefined';
     default:
-      return String(value);
+      return String(Silian_value);
   }
 }
 
-function valueClass(type) {
-  switch (type) {
+function Silian_valueClass(Silian_type) {
+  switch (Silian_type) {
     case 'string':
       return 'text-emerald-600';
     case 'number':
@@ -62,192 +62,192 @@ function valueClass(type) {
   }
 }
 
-function getPathKey(path) {
-  if (!path || path.length === 0) return ROOT_KEY;
-  return `${ROOT_KEY}${path
-    .map((segment) => (typeof segment === 'number' ? `[${segment}]` : `.${segment}`))
+function Silian_getPathKey(Silian_path) {
+  if (!Silian_path || Silian_path.length === 0) return Silian_ROOT_KEY;
+  return `${Silian_ROOT_KEY}${Silian_path
+    .map((Silian_segment) => (typeof Silian_segment === 'number' ? `[${Silian_segment}]` : `.${Silian_segment}`))
     .join('')}`;
 }
 
-function pathToString(path) {
-  if (!path || path.length === 0) return ROOT_KEY;
-  return path.reduce((acc, segment) => {
-    if (typeof segment === 'number') {
-      return `${acc}[${segment}]`;
+function Silian_pathToString(Silian_path) {
+  if (!Silian_path || Silian_path.length === 0) return Silian_ROOT_KEY;
+  return Silian_path.reduce((Silian_acc, Silian_segment) => {
+    if (typeof Silian_segment === 'number') {
+      return `${Silian_acc}[${Silian_segment}]`;
     }
-    return `${acc}.${segment}`;
-  }, ROOT_KEY);
+    return `${Silian_acc}.${Silian_segment}`;
+  }, Silian_ROOT_KEY);
 }
 
-function collectExpandablePaths(value, path = [], result = new Set()) {
-  const type = getType(value);
-  if (!isExpandableType(type)) return result;
+function Silian_collectExpandablePaths(Silian_value, Silian_path = [], Silian_result = new Set()) {
+  const Silian_type = Silian_getType(Silian_value);
+  if (!Silian_isExpandableType(Silian_type)) return Silian_result;
 
-  result.add(getPathKey(path));
-  const entries = type === 'array'
-    ? value.map((child, index) => [index, child])
-    : Object.entries(value || {});
+  Silian_result.add(Silian_getPathKey(Silian_path));
+  const Silian_entries = Silian_type === 'array'
+    ? Silian_value.map((Silian_child, Silian_index) => [Silian_index, Silian_child])
+    : Object.entries(Silian_value || {});
 
-  entries.forEach(([key, child]) => {
-    collectExpandablePaths(child, path.concat(key), result);
+  Silian_entries.forEach(([Silian_key, Silian_child]) => {
+    Silian_collectExpandablePaths(Silian_child, Silian_path.concat(Silian_key), Silian_result);
   });
 
-  return result;
+  return Silian_result;
 }
 
-function findMatches(value, term, path = [], matches = []) {
-  if (term === '') return matches;
-  const type = getType(value);
+function Silian_findMatches(Silian_value, Silian_term, Silian_path = [], Silian_matches = []) {
+  if (Silian_term === '') return Silian_matches;
+  const Silian_type = Silian_getType(Silian_value);
 
-  if (type === 'object') {
-    Object.entries(value || {}).forEach(([key, child]) => {
-      const keyMatch = key.toLowerCase().includes(term);
-      if (keyMatch) matches.push(path.concat(key));
-      findMatches(child, term, path.concat(key), matches);
+  if (Silian_type === 'object') {
+    Object.entries(Silian_value || {}).forEach(([Silian_key, Silian_child]) => {
+      const Silian_keyMatch = Silian_key.toLowerCase().includes(Silian_term);
+      if (Silian_keyMatch) Silian_matches.push(Silian_path.concat(Silian_key));
+      Silian_findMatches(Silian_child, Silian_term, Silian_path.concat(Silian_key), Silian_matches);
     });
-  } else if (type === 'array') {
-    value.forEach((child, index) => {
-      findMatches(child, term, path.concat(index), matches);
+  } else if (Silian_type === 'array') {
+    Silian_value.forEach((Silian_child, Silian_index) => {
+      Silian_findMatches(Silian_child, Silian_term, Silian_path.concat(Silian_index), Silian_matches);
     });
-  } else if (String(value ?? '').toLowerCase().includes(term)) {
-    matches.push(path);
+  } else if (String(Silian_value ?? '').toLowerCase().includes(Silian_term)) {
+    Silian_matches.push(Silian_path);
   }
 
-  return matches;
+  return Silian_matches;
 }
 
-function ancestorsOf(path) {
-  const ancestors = [];
-  for (let i = 0; i <= path.length; i += 1) {
-    ancestors.push(getPathKey(path.slice(0, i)));
+function Silian_ancestorsOf(Silian_path) {
+  const Silian_ancestors = [];
+  for (let Silian_i = 0; Silian_i <= Silian_path.length; Silian_i += 1) {
+    Silian_ancestors.push(Silian_getPathKey(Silian_path.slice(0, Silian_i)));
   }
-  return ancestors;
+  return Silian_ancestors;
 }
 
-function normaliseName(name, fallback) {
-  if (name === undefined) return fallback;
-  if (typeof name === 'number') return `[${name}]`;
-  return name;
+function Silian_normaliseName(Silian_name, Silian_fallback) {
+  if (Silian_name === undefined) return Silian_fallback;
+  if (typeof Silian_name === 'number') return `[${Silian_name}]`;
+  return Silian_name;
 }
 
-const JsonNode = React.memo(function JsonNode({
-  name,
-  value,
-  path,
-  searchTerm,
-  labels,
-  typeLabels,
-  expandedPaths,
-  onToggle,
-  onCopyPath,
-  onCopyValue
+const Silian_JsonNode = Silian_React.memo(function JsonNode({
+  name: Silian_name,
+  value: Silian_value,
+  path: Silian_path,
+  searchTerm: Silian_searchTerm,
+  labels: Silian_labels,
+  typeLabels: Silian_typeLabels,
+  expandedPaths: Silian_expandedPaths,
+  onToggle: Silian_onToggle,
+  onCopyPath: Silian_onCopyPath,
+  onCopyValue: Silian_onCopyValue
 }) {
-  const type = getType(value);
-  const expandable = isExpandableType(type);
-  const pathKey = getPathKey(path);
-  const isExpanded = expandedPaths.has(pathKey);
-  const displayName = normaliseName(name, labels.root);
+  const Silian_type = Silian_getType(Silian_value);
+  const Silian_expandable = Silian_isExpandableType(Silian_type);
+  const Silian_pathKey = Silian_getPathKey(Silian_path);
+  const Silian_isExpanded = Silian_expandedPaths.has(Silian_pathKey);
+  const Silian_displayName = Silian_normaliseName(Silian_name, Silian_labels.root);
 
-  const entries = useMemo(() => {
-    if (!expandable) return [];
-    if (type === 'array') {
-      return value.map((item, index) => [index, item]);
+  const Silian_entries = Silian_useMemo(() => {
+    if (!Silian_expandable) return [];
+    if (Silian_type === 'array') {
+      return Silian_value.map((Silian_item, Silian_index) => [Silian_index, Silian_item]);
     }
-    return Object.entries(value || {});
-  }, [expandable, type, value]);
+    return Object.entries(Silian_value || {});
+  }, [Silian_expandable, Silian_type, Silian_value]);
 
-  const valueString = !expandable ? String(value ?? '') : '';
-  const matches = Boolean(
-    searchTerm && (
-      (displayName && displayName.toLowerCase().includes(searchTerm)) ||
-      (!expandable && valueString.toLowerCase().includes(searchTerm))
+  const Silian_valueString = !Silian_expandable ? String(Silian_value ?? '') : '';
+  const Silian_matches = Boolean(
+    Silian_searchTerm && (
+      (Silian_displayName && Silian_displayName.toLowerCase().includes(Silian_searchTerm)) ||
+      (!Silian_expandable && Silian_valueString.toLowerCase().includes(Silian_searchTerm))
     )
   );
 
-  const typeLabel = typeLabels[type] || typeLabels.unknown;
-  const countLabel = expandable ? `${entries.length}` : undefined;
+  const Silian_typeLabel = Silian_typeLabels[Silian_type] || Silian_typeLabels.unknown;
+  const Silian_countLabel = Silian_expandable ? `${Silian_entries.length}` : undefined;
 
   return (
     <div
-      className={cn(
+      className={Silian_cn(
         'group relative border-l border-muted-foreground/20 pl-3',
-        matches && 'bg-amber-500/10 dark:bg-amber-400/10'
+        Silian_matches && 'bg-amber-500/10 dark:bg-amber-400/10'
       )}
     >
       <div className="flex items-start gap-2 py-1">
         <button
           type="button"
-          className={cn(
+          className={Silian_cn(
             'mt-1 flex h-4 w-4 items-center justify-center rounded text-muted-foreground transition hover:bg-muted hover:text-foreground',
-            !expandable && 'opacity-0'
+            !Silian_expandable && 'opacity-0'
           )}
-          onClick={() => expandable && onToggle(path)}
-          aria-label={isExpanded ? labels.collapse : labels.expand}
+          onClick={() => Silian_expandable && Silian_onToggle(Silian_path)}
+          aria-label={Silian_isExpanded ? Silian_labels.collapse : Silian_labels.expand}
         >
-          {isExpanded ? (
-            <ChevronDown className="h-3 w-3" />
+          {Silian_isExpanded ? (
+            <Silian_ChevronDown className="h-3 w-3" />
           ) : (
-            <ChevronRight className="h-3 w-3" />
+            <Silian_ChevronRight className="h-3 w-3" />
           )}
         </button>
         <div className="flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[12px] text-foreground">{displayName}</span>
-            <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
-              {typeLabel}
-              {countLabel ? ` · ${countLabel}` : ''}
-            </Badge>
+            <span className="font-mono text-[12px] text-foreground">{Silian_displayName}</span>
+            <Silian_Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
+              {Silian_typeLabel}
+              {Silian_countLabel ? ` · ${Silian_countLabel}` : ''}
+            </Silian_Badge>
           </div>
-          {!expandable && (
-            <div className={cn('font-mono text-[11px] break-all', valueClass(type))}>
-              {formatValue(value, type)}
+          {!Silian_expandable && (
+            <div className={Silian_cn('font-mono text-[11px] break-all', Silian_valueClass(Silian_type))}>
+              {Silian_formatValue(Silian_value, Silian_type)}
             </div>
           )}
         </div>
         <div className="flex items-center gap-1 pt-0.5 opacity-0 transition group-hover:opacity-100">
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <Silian_Tooltip>
+            <Silian_TooltipTrigger asChild>
               <button
                 type="button"
                 className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => onCopyPath(path)}
-                aria-label={labels.copyPath}
+                onClick={() => Silian_onCopyPath(Silian_path)}
+                aria-label={Silian_labels.copyPath}
               >
-                <FileJson className="h-4 w-4" />
+                <Silian_FileJson className="h-4 w-4" />
               </button>
-            </TooltipTrigger>
-            <TooltipContent>{labels.copyPath}</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
+            </Silian_TooltipTrigger>
+            <Silian_TooltipContent>{Silian_labels.copyPath}</Silian_TooltipContent>
+          </Silian_Tooltip>
+          <Silian_Tooltip>
+            <Silian_TooltipTrigger asChild>
               <button
                 type="button"
                 className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => onCopyValue(value)}
-                aria-label={labels.copyValue}
+                onClick={() => Silian_onCopyValue(Silian_value)}
+                aria-label={Silian_labels.copyValue}
               >
-                <Copy className="h-4 w-4" />
+                <Silian_Copy className="h-4 w-4" />
               </button>
-            </TooltipTrigger>
-            <TooltipContent>{labels.copyValue}</TooltipContent>
-          </Tooltip>
+            </Silian_TooltipTrigger>
+            <Silian_TooltipContent>{Silian_labels.copyValue}</Silian_TooltipContent>
+          </Silian_Tooltip>
         </div>
       </div>
-      {expandable && isExpanded && entries.length > 0 && (
+      {Silian_expandable && Silian_isExpanded && Silian_entries.length > 0 && (
         <div className="pl-4">
-          {entries.map(([childName, childValue]) => (
+          {Silian_entries.map(([Silian_childName, Silian_childValue]) => (
             <JsonNode
-              key={typeof childName === 'number' ? childName : String(childName)}
-              name={childName}
-              value={childValue}
-              path={path.concat(childName)}
-              searchTerm={searchTerm}
-              labels={labels}
-              typeLabels={typeLabels}
-              expandedPaths={expandedPaths}
-              onToggle={onToggle}
-              onCopyPath={onCopyPath}
-              onCopyValue={onCopyValue}
+              key={typeof Silian_childName === 'number' ? Silian_childName : String(Silian_childName)}
+              name={Silian_childName}
+              value={Silian_childValue}
+              path={Silian_path.concat(Silian_childName)}
+              searchTerm={Silian_searchTerm}
+              labels={Silian_labels}
+              typeLabels={Silian_typeLabels}
+              expandedPaths={Silian_expandedPaths}
+              onToggle={Silian_onToggle}
+              onCopyPath={Silian_onCopyPath}
+              onCopyValue={Silian_onCopyValue}
             />
           ))}
         </div>
@@ -256,215 +256,215 @@ const JsonNode = React.memo(function JsonNode({
   );
 });
 
-JsonNode.displayName = 'JsonNode';
+Silian_JsonNode.displayName = 'JsonNode';
 
-export function JsonTreeViewer({ value, collapsed = false, maxHeight = '20rem', className }) {
-  const { t } = useTranslation(['common', 'jsonViewer', 'messages']);
-  const [search, setSearch] = useState('');
-  const [expanded, setExpanded] = useState(new Set([ROOT_KEY]));
-  const [feedback, setFeedback] = useState('');
-  const feedbackTimer = useRef();
+export function JsonTreeViewer({ value: Silian_value, collapsed: Silian_collapsed = false, maxHeight: Silian_maxHeight = '20rem', className: Silian_className }) {
+  const { t: Silian_t } = Silian_useTranslation(['common', 'jsonViewer', 'messages']);
+  const [Silian_search, Silian_setSearch] = Silian_useState('');
+  const [Silian_expanded, Silian_setExpanded] = Silian_useState(new Set([Silian_ROOT_KEY]));
+  const [Silian_feedback, Silian_setFeedback] = Silian_useState('');
+  const Silian_feedbackTimer = Silian_useRef();
 
-  const data = useMemo(() => value, [value]);
-  const searchTerm = search.trim().toLowerCase();
+  const Silian_data = Silian_useMemo(() => Silian_value, [Silian_value]);
+  const Silian_searchTerm = Silian_search.trim().toLowerCase();
 
-  const typeLabels = useMemo(
+  const Silian_typeLabels = Silian_useMemo(
     () => ({
       // NOTE: useTranslation 默认命名空间是 'common'，
       // 这里不应再在 key 前加 'common.' 前缀，否则会导致找不到翻译而显示原 key。
-      object: t('jsonViewer.typeLabels.object'),
-      array: t('jsonViewer.typeLabels.array'),
-      string: t('jsonViewer.typeLabels.string'),
-      number: t('jsonViewer.typeLabels.number'),
-      boolean: t('jsonViewer.typeLabels.boolean'),
-      null: t('jsonViewer.typeLabels.null'),
-      undefined: t('jsonViewer.typeLabels.undefined'),
-      unknown: t('jsonViewer.typeLabels.unknown')
+      object: Silian_t('jsonViewer.typeLabels.object'),
+      array: Silian_t('jsonViewer.typeLabels.array'),
+      string: Silian_t('jsonViewer.typeLabels.string'),
+      number: Silian_t('jsonViewer.typeLabels.number'),
+      boolean: Silian_t('jsonViewer.typeLabels.boolean'),
+      null: Silian_t('jsonViewer.typeLabels.null'),
+      undefined: Silian_t('jsonViewer.typeLabels.undefined'),
+      unknown: Silian_t('jsonViewer.typeLabels.unknown')
     }),
-    [t]
+    [Silian_t]
   );
 
-  const labels = useMemo(
+  const Silian_labels = Silian_useMemo(
     () => ({
-      root: t('jsonViewer.root'),
-      searchPlaceholder: t('jsonViewer.searchPlaceholder'),
-      expandAll: t('jsonViewer.expandAll'),
-      collapseAll: t('jsonViewer.collapseAll'),
-      copyJson: t('jsonViewer.copyJson'),
-      copyPath: t('jsonViewer.copyPath'),
-      copyValue: t('jsonViewer.copyValue'),
-      expand: t('jsonViewer.expandNode'),
-      collapse: t('jsonViewer.collapseNode'),
-      copied: t('jsonViewer.copied'),
-      noData: t('jsonViewer.noData')
+      root: Silian_t('jsonViewer.root'),
+      searchPlaceholder: Silian_t('jsonViewer.searchPlaceholder'),
+      expandAll: Silian_t('jsonViewer.expandAll'),
+      collapseAll: Silian_t('jsonViewer.collapseAll'),
+      copyJson: Silian_t('jsonViewer.copyJson'),
+      copyPath: Silian_t('jsonViewer.copyPath'),
+      copyValue: Silian_t('jsonViewer.copyValue'),
+      expand: Silian_t('jsonViewer.expandNode'),
+      collapse: Silian_t('jsonViewer.collapseNode'),
+      copied: Silian_t('jsonViewer.copied'),
+      noData: Silian_t('jsonViewer.noData')
     }),
-    [t]
+    [Silian_t]
   );
 
-  const defaultExpanded = useMemo(() => {
-    const defaults = new Set([ROOT_KEY]);
-    if (!collapsed) {
-      const type = getType(data);
-      const entries = type === 'array'
-        ? data.map((_, index) => [index, data[index]])
-        : Object.entries(data || {});
-      entries.forEach(([key, child]) => {
-        if (isExpandableType(getType(child))) {
-          defaults.add(getPathKey([key]));
+  const Silian_defaultExpanded = Silian_useMemo(() => {
+    const Silian_defaults = new Set([Silian_ROOT_KEY]);
+    if (!Silian_collapsed) {
+      const Silian_type = Silian_getType(Silian_data);
+      const Silian_entries = Silian_type === 'array'
+        ? Silian_data.map((Silian__, Silian_index) => [Silian_index, Silian_data[Silian_index]])
+        : Object.entries(Silian_data || {});
+      Silian_entries.forEach(([Silian_key, Silian_child]) => {
+        if (Silian_isExpandableType(Silian_getType(Silian_child))) {
+          Silian_defaults.add(Silian_getPathKey([Silian_key]));
         }
       });
     }
-    return defaults;
-  }, [data, collapsed]);
+    return Silian_defaults;
+  }, [Silian_data, Silian_collapsed]);
 
-  useEffect(() => {
-    setExpanded(defaultExpanded);
-  }, [defaultExpanded]);
+  Silian_useEffect(() => {
+    Silian_setExpanded(Silian_defaultExpanded);
+  }, [Silian_defaultExpanded]);
 
-  const showFeedback = useCallback((message) => {
-    setFeedback(message);
-    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
-    feedbackTimer.current = setTimeout(() => setFeedback(''), 1200);
+  const Silian_showFeedback = Silian_useCallback((Silian_message) => {
+    Silian_setFeedback(Silian_message);
+    if (Silian_feedbackTimer.current) clearTimeout(Silian_feedbackTimer.current);
+    Silian_feedbackTimer.current = setTimeout(() => Silian_setFeedback(''), 1200);
   }, []);
 
-  useEffect(() => () => {
-    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+  Silian_useEffect(() => () => {
+    if (Silian_feedbackTimer.current) clearTimeout(Silian_feedbackTimer.current);
   }, []);
 
-  useEffect(() => {
-    if (!searchTerm) return;
-    const matches = findMatches(data, searchTerm);
-    if (matches.length === 0) return;
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      matches.forEach((matchPath) => {
-        ancestorsOf(matchPath).forEach((ancestorKey) => next.add(ancestorKey));
+  Silian_useEffect(() => {
+    if (!Silian_searchTerm) return;
+    const Silian_matches = Silian_findMatches(Silian_data, Silian_searchTerm);
+    if (Silian_matches.length === 0) return;
+    Silian_setExpanded((Silian_prev) => {
+      const Silian_next = new Set(Silian_prev);
+      Silian_matches.forEach((Silian_matchPath) => {
+        Silian_ancestorsOf(Silian_matchPath).forEach((Silian_ancestorKey) => Silian_next.add(Silian_ancestorKey));
       });
-      return next;
+      return Silian_next;
     });
-  }, [data, searchTerm]);
+  }, [Silian_data, Silian_searchTerm]);
 
-  const expandablePaths = useMemo(() => collectExpandablePaths(data), [data]);
+  const Silian_expandablePaths = Silian_useMemo(() => Silian_collectExpandablePaths(Silian_data), [Silian_data]);
 
-  const handleToggle = useCallback((path) => {
-    const key = getPathKey(path);
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
+  const Silian_handleToggle = Silian_useCallback((Silian_path) => {
+    const Silian_key = Silian_getPathKey(Silian_path);
+    Silian_setExpanded((Silian_prev) => {
+      const Silian_next = new Set(Silian_prev);
+      if (Silian_next.has(Silian_key)) {
+        Silian_next.delete(Silian_key);
       } else {
-        next.add(key);
+        Silian_next.add(Silian_key);
       }
-      return next;
+      return Silian_next;
     });
   }, []);
 
-  const handleExpandAll = useCallback(() => {
-    setExpanded(new Set(expandablePaths));
-  }, [expandablePaths]);
+  const Silian_handleExpandAll = Silian_useCallback(() => {
+    Silian_setExpanded(new Set(Silian_expandablePaths));
+  }, [Silian_expandablePaths]);
 
-  const handleCollapseAll = useCallback(() => {
-    setExpanded(new Set([ROOT_KEY]));
+  const Silian_handleCollapseAll = Silian_useCallback(() => {
+    Silian_setExpanded(new Set([Silian_ROOT_KEY]));
   }, []);
 
-  const copyToClipboard = useCallback((text) => {
-    if (!text && text !== '') return;
+  const Silian_copyToClipboard = Silian_useCallback((Silian_text) => {
+    if (!Silian_text && Silian_text !== '') return;
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
       navigator.clipboard
-        .writeText(text)
+        .writeText(Silian_text)
         .then(() => {
-          showFeedback(labels.copied);
+          Silian_showFeedback(Silian_labels.copied);
         })
         .catch(() => {});
     }
-  }, [labels.copied, showFeedback]);
+  }, [Silian_labels.copied, Silian_showFeedback]);
 
-  const handleCopyJson = useCallback(() => {
+  const Silian_handleCopyJson = Silian_useCallback(() => {
     try {
-      const json = JSON.stringify(data, null, 2);
-      copyToClipboard(json);
+      const Silian_json = JSON.stringify(Silian_data, null, 2);
+      Silian_copyToClipboard(Silian_json);
     } catch {
-      copyToClipboard(String(data));
+      Silian_copyToClipboard(String(Silian_data));
     }
-  }, [copyToClipboard, data]);
+  }, [Silian_copyToClipboard, Silian_data]);
 
-  const handleCopyPath = useCallback((path) => {
-    copyToClipboard(pathToString(path));
-  }, [copyToClipboard]);
+  const Silian_handleCopyPath = Silian_useCallback((Silian_path) => {
+    Silian_copyToClipboard(Silian_pathToString(Silian_path));
+  }, [Silian_copyToClipboard]);
 
-  const handleCopyValue = useCallback((valueToCopy) => {
-    const type = getType(valueToCopy);
-    const text = isExpandableType(type)
-      ? JSON.stringify(valueToCopy, null, 2)
-      : String(valueToCopy ?? '');
-    copyToClipboard(text);
-  }, [copyToClipboard]);
+  const Silian_handleCopyValue = Silian_useCallback((Silian_valueToCopy) => {
+    const Silian_type = Silian_getType(Silian_valueToCopy);
+    const Silian_text = Silian_isExpandableType(Silian_type)
+      ? JSON.stringify(Silian_valueToCopy, null, 2)
+      : String(Silian_valueToCopy ?? '');
+    Silian_copyToClipboard(Silian_text);
+  }, [Silian_copyToClipboard]);
 
   return (
     <div
-      className={cn('border rounded bg-background text-xs shadow-sm', className)}
-      style={{ maxHeight, display: 'flex', flexDirection: 'column' }}
+      className={Silian_cn('border rounded bg-background text-xs shadow-sm', Silian_className)}
+      style={{ maxHeight: Silian_maxHeight, display: 'flex', flexDirection: 'column' }}
     >
       <div className="flex items-center gap-2 border-b bg-muted/30 px-2 py-2">
         <div className="relative flex-1">
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={labels.searchPlaceholder}
+          <Silian_Input
+            value={Silian_search}
+            onChange={(Silian_event) => Silian_setSearch(Silian_event.target.value)}
+            placeholder={Silian_labels.searchPlaceholder}
             className="h-8 w-full pl-7 text-xs"
           />
           <span className="pointer-events-none absolute left-2 top-1/2 flex -translate-y-1/2 text-muted-foreground">
-            <Search className="h-3.5 w-3.5" />
+            <Silian_Search className="h-3.5 w-3.5" />
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <Button
+          <Silian_Button
             size="icon"
             variant="ghost"
-            onClick={handleExpandAll}
+            onClick={Silian_handleExpandAll}
             className="h-8 w-8"
-            aria-label={labels.expandAll}
+            aria-label={Silian_labels.expandAll}
           >
-            <ChevronsDown className="h-4 w-4" />
-          </Button>
-          <Button
+            <Silian_ChevronsDown className="h-4 w-4" />
+          </Silian_Button>
+          <Silian_Button
             size="icon"
             variant="ghost"
-            onClick={handleCollapseAll}
+            onClick={Silian_handleCollapseAll}
             className="h-8 w-8"
-            aria-label={labels.collapseAll}
+            aria-label={Silian_labels.collapseAll}
           >
-            <ChevronsUp className="h-4 w-4" />
-          </Button>
-          <Button
+            <Silian_ChevronsUp className="h-4 w-4" />
+          </Silian_Button>
+          <Silian_Button
             size="icon"
             variant="ghost"
-            onClick={handleCopyJson}
+            onClick={Silian_handleCopyJson}
             className="h-8 w-8"
-            aria-label={labels.copyJson}
+            aria-label={Silian_labels.copyJson}
           >
-            <Copy className="h-4 w-4" />
-          </Button>
+            <Silian_Copy className="h-4 w-4" />
+          </Silian_Button>
         </div>
-        {feedback && (
-          <span className="ml-2 text-[10px] text-muted-foreground">{feedback}</span>
+        {Silian_feedback && (
+          <span className="ml-2 text-[10px] text-muted-foreground">{Silian_feedback}</span>
         )}
       </div>
       <div className="flex-1 overflow-auto px-2 py-2">
-        {data === undefined || data === null ? (
-          <div className="text-xs text-muted-foreground">{labels.noData}</div>
+        {Silian_data === undefined || Silian_data === null ? (
+          <div className="text-xs text-muted-foreground">{Silian_labels.noData}</div>
         ) : (
-          <JsonNode
-            name={labels.root}
-            value={data}
-            path={ROOT_PATH}
-            searchTerm={searchTerm}
-            labels={labels}
-            typeLabels={typeLabels}
-            expandedPaths={expanded}
-            onToggle={handleToggle}
-            onCopyPath={handleCopyPath}
-            onCopyValue={handleCopyValue}
+          <Silian_JsonNode
+            name={Silian_labels.root}
+            value={Silian_data}
+            path={Silian_ROOT_PATH}
+            searchTerm={Silian_searchTerm}
+            labels={Silian_labels}
+            typeLabels={Silian_typeLabels}
+            expandedPaths={Silian_expanded}
+            onToggle={Silian_handleToggle}
+            onCopyPath={Silian_handleCopyPath}
+            onCopyValue={Silian_handleCopyValue}
           />
         )}
       </div>
@@ -473,10 +473,10 @@ export function JsonTreeViewer({ value, collapsed = false, maxHeight = '20rem', 
 }
 
 JsonTreeViewer.propTypes = {
-  value: PropTypes.any,
-  collapsed: PropTypes.bool,
-  maxHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  className: PropTypes.string
+  value: Silian_PropTypes.any,
+  collapsed: Silian_PropTypes.bool,
+  maxHeight: Silian_PropTypes.oneOfType([Silian_PropTypes.string, Silian_PropTypes.number]),
+  className: Silian_PropTypes.string
 };
 
 export default JsonTreeViewer;

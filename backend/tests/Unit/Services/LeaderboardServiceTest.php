@@ -13,18 +13,18 @@ class LeaderboardServiceTest extends TestCase
 {
     public function testRebuildCacheUsesCompatibleSchoolAndRegionFields(): void
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, points REAL, avatar_id INTEGER, region_code TEXT, school_id INTEGER, deleted_at TEXT)');
-        $pdo->exec('CREATE TABLE schools (id INTEGER PRIMARY KEY, name TEXT)');
-        $pdo->exec('CREATE TABLE avatars (id INTEGER PRIMARY KEY, file_path TEXT)');
-        $pdo->exec("INSERT INTO schools (id, name) VALUES (7, 'Canonical Academy')");
-        $pdo->exec("INSERT INTO users (id, username, points, avatar_id, region_code, school_id, deleted_at) VALUES (1, 'alice', 520, NULL, 'US-UM-81', 7, NULL)");
+        $Silian_pdo = new \PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $Silian_pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, points REAL, avatar_id INTEGER, region_code TEXT, school_id INTEGER, deleted_at TEXT)');
+        $Silian_pdo->exec('CREATE TABLE schools (id INTEGER PRIMARY KEY, name TEXT)');
+        $Silian_pdo->exec('CREATE TABLE avatars (id INTEGER PRIMARY KEY, file_path TEXT)');
+        $Silian_pdo->exec("INSERT INTO schools (id, name) VALUES (7, 'Canonical Academy')");
+        $Silian_pdo->exec("INSERT INTO users (id, username, points, avatar_id, region_code, school_id, deleted_at) VALUES (1, 'alice', 520, NULL, 'US-UM-81', 7, NULL)");
 
-        $regionService = $this->createMock(RegionService::class);
-        $regionService->method('getRegionContext')
-            ->willReturnCallback(static function (?string $value): ?array {
-                if ($value !== 'US-UM-81') {
+        $Silian_regionService = $this->createMock(RegionService::class);
+        $Silian_regionService->method('getRegionContext')
+            ->willReturnCallback(static function (?string $Silian_value): ?array {
+                if ($Silian_value !== 'US-UM-81') {
                     return null;
                 }
 
@@ -38,30 +38,30 @@ class LeaderboardServiceTest extends TestCase
                 ];
             });
 
-        $cacheDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ct_leaderboard_cache_' . uniqid('', true);
-        mkdir($cacheDir, 0777, true);
+        $Silian_cacheDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ct_leaderboard_cache_' . uniqid('', true);
+        mkdir($Silian_cacheDir, 0777, true);
 
         try {
-            $service = new LeaderboardService(
-                $pdo,
-                $regionService,
+            $Silian_service = new LeaderboardService(
+                $Silian_pdo,
+                $Silian_regionService,
                 null,
-                $cacheDir,
+                $Silian_cacheDir,
                 600,
                 null,
                 null,
-                new UserProfileViewService($regionService)
+                new UserProfileViewService($Silian_regionService)
             );
 
-            $snapshot = $service->rebuildCache('test');
+            $Silian_snapshot = $Silian_service->rebuildCache('test');
 
-            $this->assertSame('US-UM-81', $snapshot['global'][0]['region_code']);
-            $this->assertSame('Canonical Academy', $snapshot['global'][0]['school_name']);
-            $this->assertArrayHasKey('US-UM-81', $snapshot['regions']);
-            $this->assertSame('Canonical Academy', $snapshot['schools'][7]['school_name']);
+            $this->assertSame('US-UM-81', $Silian_snapshot['global'][0]['region_code']);
+            $this->assertSame('Canonical Academy', $Silian_snapshot['global'][0]['school_name']);
+            $this->assertArrayHasKey('US-UM-81', $Silian_snapshot['regions']);
+            $this->assertSame('Canonical Academy', $Silian_snapshot['schools'][7]['school_name']);
         } finally {
-            @unlink($cacheDir . DIRECTORY_SEPARATOR . 'leaderboards.json');
-            @rmdir($cacheDir);
+            @unlink($Silian_cacheDir . DIRECTORY_SEPARATOR . 'leaderboards.json');
+            @rmdir($Silian_cacheDir);
         }
     }
 }

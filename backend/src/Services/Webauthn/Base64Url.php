@@ -6,24 +6,24 @@ namespace CarbonTrack\Services\Webauthn;
 
 final class Base64Url
 {
-    public static function encode(string $value): string
+    public static function encode(string $Silian_value): string
     {
-        return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
+        return rtrim(strtr(base64_encode($Silian_value), '+/', '-_'), '=');
     }
 
-    public static function decode(string $value): string
+    public static function decode(string $Silian_value): string
     {
-        $normalized = strtr($value, '-_', '+/');
-        $padding = strlen($normalized) % 4;
-        if ($padding > 0) {
-            $normalized .= str_repeat('=', 4 - $padding);
+        $Silian_normalized = strtr($Silian_value, '-_', '+/');
+        $Silian_padding = strlen($Silian_normalized) % 4;
+        if ($Silian_padding > 0) {
+            $Silian_normalized .= str_repeat('=', 4 - $Silian_padding);
         }
 
-        $decoded = base64_decode($normalized, true);
-        if ($decoded === false) {
+        $Silian_decoded = base64_decode($Silian_normalized, true);
+        if ($Silian_decoded === false) {
             throw new \InvalidArgumentException('Invalid base64url payload.');
         }
 
-        return $decoded;
+        return $Silian_decoded;
     }
 }

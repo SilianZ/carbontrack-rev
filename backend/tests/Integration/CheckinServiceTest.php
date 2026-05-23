@@ -25,44 +25,44 @@ class CheckinServiceTest extends TestCase
 
     public function testStreakStatsAndDuplicateCheckins(): void
     {
-        $service = new CheckinService($this->pdo, null, 'UTC');
-        $userId = (int) $this->pdo->query("SELECT id FROM users LIMIT 1")->fetchColumn();
+        $Silian_service = new CheckinService($this->pdo, null, 'UTC');
+        $Silian_userId = (int) $this->pdo->query("SELECT id FROM users LIMIT 1")->fetchColumn();
 
-        $service->recordCheckinFromSubmission($userId, 'rec-1', new DateTimeImmutable('2026-01-01 10:00:00', new DateTimeZone('UTC')));
-        $service->recordCheckinFromSubmission($userId, 'rec-2', new DateTimeImmutable('2026-01-02 10:00:00', new DateTimeZone('UTC')));
-        $service->recordCheckinFromSubmission($userId, 'rec-3', new DateTimeImmutable('2026-01-02 20:00:00', new DateTimeZone('UTC')));
-        $service->recordCheckinFromSubmission($userId, 'rec-4', new DateTimeImmutable('2026-01-04 10:00:00', new DateTimeZone('UTC')));
+        $Silian_service->recordCheckinFromSubmission($Silian_userId, 'rec-1', new DateTimeImmutable('2026-01-01 10:00:00', new DateTimeZone('UTC')));
+        $Silian_service->recordCheckinFromSubmission($Silian_userId, 'rec-2', new DateTimeImmutable('2026-01-02 10:00:00', new DateTimeZone('UTC')));
+        $Silian_service->recordCheckinFromSubmission($Silian_userId, 'rec-3', new DateTimeImmutable('2026-01-02 20:00:00', new DateTimeZone('UTC')));
+        $Silian_service->recordCheckinFromSubmission($Silian_userId, 'rec-4', new DateTimeImmutable('2026-01-04 10:00:00', new DateTimeZone('UTC')));
 
-        $count = (int) $this->pdo->query("SELECT COUNT(*) FROM user_checkins WHERE user_id = {$userId}")->fetchColumn();
-        $this->assertSame(3, $count);
+        $Silian_count = (int) $this->pdo->query("SELECT COUNT(*) FROM user_checkins WHERE user_id = {$Silian_userId}")->fetchColumn();
+        $this->assertSame(3, $Silian_count);
 
-        $stats = $service->getUserStreakStats($userId, new DateTimeImmutable('2026-01-04', new DateTimeZone('UTC')));
-        $this->assertSame(1, $stats['current_streak']);
-        $this->assertSame(2, $stats['longest_streak']);
-        $this->assertSame('2026-01-04', $stats['last_checkin_date']);
+        $Silian_stats = $Silian_service->getUserStreakStats($Silian_userId, new DateTimeImmutable('2026-01-04', new DateTimeZone('UTC')));
+        $this->assertSame(1, $Silian_stats['current_streak']);
+        $this->assertSame(2, $Silian_stats['longest_streak']);
+        $this->assertSame('2026-01-04', $Silian_stats['last_checkin_date']);
     }
 
     public function testMakeupCheckin(): void
     {
-        $service = new CheckinService($this->pdo, null, 'UTC');
-        $userId = (int) $this->pdo->query("SELECT id FROM users LIMIT 1")->fetchColumn();
+        $Silian_service = new CheckinService($this->pdo, null, 'UTC');
+        $Silian_userId = (int) $this->pdo->query("SELECT id FROM users LIMIT 1")->fetchColumn();
 
-        $service->createMakeupCheckin($userId, '2026-01-03', 'manual', 'rec-20260103');
+        $Silian_service->createMakeupCheckin($Silian_userId, '2026-01-03', 'manual', 'rec-20260103');
 
-        $this->assertTrue($service->hasCheckin($userId, '2026-01-03'));
-        $stats = $service->getUserStreakStats($userId, new DateTimeImmutable('2026-01-03', new DateTimeZone('UTC')));
-        $this->assertSame(1, $stats['makeup_days']);
+        $this->assertTrue($Silian_service->hasCheckin($Silian_userId, '2026-01-03'));
+        $Silian_stats = $Silian_service->getUserStreakStats($Silian_userId, new DateTimeImmutable('2026-01-03', new DateTimeZone('UTC')));
+        $this->assertSame(1, $Silian_stats['makeup_days']);
     }
 
     public function testSyncUserCheckinsLogsAuditWhenRowsInserted(): void
     {
-        $userId = (int) $this->pdo->query("SELECT id FROM users LIMIT 1")->fetchColumn();
-        $stmt = $this->pdo->prepare(
+        $Silian_userId = (int) $this->pdo->query("SELECT id FROM users LIMIT 1")->fetchColumn();
+        $Silian_stmt = $this->pdo->prepare(
             'INSERT INTO carbon_records (id, user_id, activity_id, amount, unit, carbon_saved, points_earned, date, status, created_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)'
         );
-        $stmt->execute([
+        $Silian_stmt->execute([
             'rec-sync-1',
-            $userId,
+            $Silian_userId,
             '550e8400-e29b-41d4-a716-446655440001',
             1,
             'times',
@@ -73,19 +73,19 @@ class CheckinServiceTest extends TestCase
             '2026-01-05 08:00:00',
         ]);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())
             ->method('log')
-            ->with($this->callback(function (array $payload) use ($userId): bool {
-                return ($payload['action'] ?? null) === 'checkin_sync_completed'
-                    && ($payload['operation_category'] ?? null) === 'checkin'
-                    && ($payload['data']['user_id'] ?? null) === $userId
-                    && ($payload['data']['synced_count'] ?? null) === 1;
+            ->with($this->callback(function (array $Silian_payload) use ($Silian_userId): bool {
+                return ($Silian_payload['action'] ?? null) === 'checkin_sync_completed'
+                    && ($Silian_payload['operation_category'] ?? null) === 'checkin'
+                    && ($Silian_payload['data']['user_id'] ?? null) === $Silian_userId
+                    && ($Silian_payload['data']['synced_count'] ?? null) === 1;
             }))
             ->willReturn(true);
 
-        $service = new CheckinService($this->pdo, null, 'UTC', $audit, null);
+        $Silian_service = new CheckinService($this->pdo, null, 'UTC', $Silian_audit, null);
 
-        $this->assertSame(1, $service->syncUserCheckinsFromRecords($userId));
+        $this->assertSame(1, $Silian_service->syncUserCheckinsFromRecords($Silian_userId));
     }
 }

@@ -16,19 +16,19 @@ class EmailJobRunnerTest extends TestCase
 {
     public function testRunLogsAuditWhenJobTypeMissing(): void
     {
-        $emailService = $this->createMock(EmailService::class);
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $errorLogService = $this->createMock(ErrorLogService::class);
+        $Silian_emailService = $this->createMock(EmailService::class);
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_errorLogService = $this->createMock(ErrorLogService::class);
 
-        $auditLogService->expects($this->once())
+        $Silian_auditLogService->expects($this->once())
             ->method('logSystemEvent')
             ->with('email_job_missing_type', 'email_job', $this->isType('array'))
             ->willReturn(true);
 
-        $logger = new Logger('test-email-job');
-        $logger->pushHandler(new NullHandler());
+        $Silian_logger = new Logger('test-email-job');
+        $Silian_logger->pushHandler(new NullHandler());
 
-        EmailJobRunner::run($emailService, $logger, '', [], $auditLogService, $errorLogService);
+        EmailJobRunner::run($Silian_emailService, $Silian_logger, '', [], $Silian_auditLogService, $Silian_errorLogService);
 
         $this->assertTrue(true);
     }

@@ -33,583 +33,583 @@ class LogSearchController
     private const LIMIT_PARAM = ':limit';
     private const OFFSET_PARAM = ':offset';
 
-    public function __construct(PDO $db, AuthService $authService, AuditLogService $auditLogService, ErrorLogService $errorLogService = null)
+    public function __construct(PDO $Silian_db, AuthService $Silian_authService, AuditLogService $Silian_auditLogService, ErrorLogService $Silian_errorLogService = null)
     {
-        $this->db = $db;
-        $this->authService = $authService;
-        $this->auditLogService = $auditLogService;
-        $this->errorLogService = $errorLogService;
+        $this->db = $Silian_db;
+        $this->authService = $Silian_authService;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->errorLogService = $Silian_errorLogService;
     }
 
-    public function search(Request $request, Response $response): Response
+    public function search(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $admin = $this->authService->getCurrentUser($request);
-            if (!$admin || !$this->authService->isAdminUser($admin)) {
-                return $this->json($response, ['error' => 'Access denied'], 403);
+            $Silian_admin = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_admin || !$this->authService->isAdminUser($Silian_admin)) {
+                return $this->json($Silian_response, ['error' => 'Access denied'], 403);
             }
 
-            $q = $request->getQueryParams();
-            $keyword = trim((string)($q['q'] ?? ''));
-            $types = isset($q['types']) ? array_filter(array_map('trim', explode(',', (string)$q['types']))) : ['system','audit','error','llm'];
-            if (!$types) { $types = ['system','audit','error','llm']; }
-            $limit = (int)($q['limit_per_type'] ?? 50); $limit = max(1, min(200, $limit));
-            $systemPage = max(1, (int)($q['system_page'] ?? 1));
-            $auditPage = max(1, (int)($q['audit_page'] ?? 1));
-            $errorPage = max(1, (int)($q['error_page'] ?? 1));
-            $llmPage = max(1, (int)($q['llm_page'] ?? 1));
-            $dateFrom = $q['date_from'] ?? null;
-            $dateTo = $q['date_to'] ?? null;
-            $conversationId = $this->normalizeConversationId($q['conversation_id'] ?? null);
-            $conversationRequestIds = $conversationId !== null
-                ? $this->findRequestIdsByConversation($conversationId)
+            $Silian_q = $Silian_request->getQueryParams();
+            $Silian_keyword = trim((string)($Silian_q['q'] ?? ''));
+            $Silian_types = isset($Silian_q['types']) ? array_filter(array_map('trim', explode(',', (string)$Silian_q['types']))) : ['system','audit','error','llm'];
+            if (!$Silian_types) { $Silian_types = ['system','audit','error','llm']; }
+            $Silian_limit = (int)($Silian_q['limit_per_type'] ?? 50); $Silian_limit = max(1, min(200, $Silian_limit));
+            $Silian_systemPage = max(1, (int)($Silian_q['system_page'] ?? 1));
+            $Silian_auditPage = max(1, (int)($Silian_q['audit_page'] ?? 1));
+            $Silian_errorPage = max(1, (int)($Silian_q['error_page'] ?? 1));
+            $Silian_llmPage = max(1, (int)($Silian_q['llm_page'] ?? 1));
+            $Silian_dateFrom = $Silian_q['date_from'] ?? null;
+            $Silian_dateTo = $Silian_q['date_to'] ?? null;
+            $Silian_conversationId = $this->normalizeConversationId($Silian_q['conversation_id'] ?? null);
+            $Silian_conversationRequestIds = $Silian_conversationId !== null
+                ? $this->findRequestIdsByConversation($Silian_conversationId)
                 : [];
 
             // new explicit filter params
-            $systemFilters = [
-                'method' => $q['method'] ?? null,
-                'status_code' => $q['status_code'] ?? null,
-                'user_id' => $q['user_id'] ?? null,
-                'request_id' => $q['request_id'] ?? null,
-                'path' => $q['path'] ?? null,
-                'min_duration' => $q['min_duration'] ?? null,
-                'max_duration' => $q['max_duration'] ?? null,
-                'conversation_id' => $conversationId,
-                'request_ids' => $conversationRequestIds,
+            $Silian_systemFilters = [
+                'method' => $Silian_q['method'] ?? null,
+                'status_code' => $Silian_q['status_code'] ?? null,
+                'user_id' => $Silian_q['user_id'] ?? null,
+                'request_id' => $Silian_q['request_id'] ?? null,
+                'path' => $Silian_q['path'] ?? null,
+                'min_duration' => $Silian_q['min_duration'] ?? null,
+                'max_duration' => $Silian_q['max_duration'] ?? null,
+                'conversation_id' => $Silian_conversationId,
+                'request_ids' => $Silian_conversationRequestIds,
             ];
-            $auditFilters = [
-                'user_id' => $q['user_id'] ?? null,
-                'action' => $q['action'] ?? null,
-                'status' => $q['audit_status'] ?? null,
-                'request_id' => $q['request_id'] ?? null,
-                'conversation_id' => $conversationId,
+            $Silian_auditFilters = [
+                'user_id' => $Silian_q['user_id'] ?? null,
+                'action' => $Silian_q['action'] ?? null,
+                'status' => $Silian_q['audit_status'] ?? null,
+                'request_id' => $Silian_q['request_id'] ?? null,
+                'conversation_id' => $Silian_conversationId,
             ];
-            $errorFilters = [
-                'error_type' => $q['error_type'] ?? null,
-                'request_id' => $q['request_id'] ?? null,
-                'conversation_id' => $conversationId,
-                'request_ids' => $conversationRequestIds,
+            $Silian_errorFilters = [
+                'error_type' => $Silian_q['error_type'] ?? null,
+                'request_id' => $Silian_q['request_id'] ?? null,
+                'conversation_id' => $Silian_conversationId,
+                'request_ids' => $Silian_conversationRequestIds,
             ];
-            $llmFilters = [
-                'actor_type' => $q['actor_type'] ?? null,
-                'actor_id' => $q['actor_id'] ?? ($q['user_id'] ?? null),
-                'status' => $q['llm_status'] ?? null,
-                'model' => $q['model'] ?? null,
-                'source' => $q['source'] ?? null,
-                'request_id' => $q['request_id'] ?? null,
-                'conversation_id' => $conversationId,
-                'turn_no' => $q['turn_no'] ?? null,
+            $Silian_llmFilters = [
+                'actor_type' => $Silian_q['actor_type'] ?? null,
+                'actor_id' => $Silian_q['actor_id'] ?? ($Silian_q['user_id'] ?? null),
+                'status' => $Silian_q['llm_status'] ?? null,
+                'model' => $Silian_q['model'] ?? null,
+                'source' => $Silian_q['source'] ?? null,
+                'request_id' => $Silian_q['request_id'] ?? null,
+                'conversation_id' => $Silian_conversationId,
+                'turn_no' => $Silian_q['turn_no'] ?? null,
             ];
 
-            $result = [];
-            if (in_array('system', $types, true)) {
-                $result['system'] = $this->searchSystem($keyword, $limit, $dateFrom, $dateTo, $systemPage, $systemFilters);
+            $Silian_result = [];
+            if (in_array('system', $Silian_types, true)) {
+                $Silian_result['system'] = $this->searchSystem($Silian_keyword, $Silian_limit, $Silian_dateFrom, $Silian_dateTo, $Silian_systemPage, $Silian_systemFilters);
             }
-            if (in_array('audit', $types, true)) {
-                $result['audit'] = $this->searchAudit($keyword, $limit, $dateFrom, $dateTo, $auditPage, $auditFilters);
+            if (in_array('audit', $Silian_types, true)) {
+                $Silian_result['audit'] = $this->searchAudit($Silian_keyword, $Silian_limit, $Silian_dateFrom, $Silian_dateTo, $Silian_auditPage, $Silian_auditFilters);
             }
-            if (in_array('error', $types, true)) {
-                $result['error'] = $this->searchError($keyword, $limit, $dateFrom, $dateTo, $errorPage, $errorFilters);
+            if (in_array('error', $Silian_types, true)) {
+                $Silian_result['error'] = $this->searchError($Silian_keyword, $Silian_limit, $Silian_dateFrom, $Silian_dateTo, $Silian_errorPage, $Silian_errorFilters);
             }
-            if (in_array('llm', $types, true)) {
-                $result['llm'] = $this->searchLlm($keyword, $limit, $dateFrom, $dateTo, $llmPage, $llmFilters);
+            if (in_array('llm', $Silian_types, true)) {
+                $Silian_result['llm'] = $this->searchLlm($Silian_keyword, $Silian_limit, $Silian_dateFrom, $Silian_dateTo, $Silian_llmPage, $Silian_llmFilters);
             }
 
-            $this->logAudit('admin_logs_search_viewed', $admin, $request, [
+            $this->logAudit('admin_logs_search_viewed', $Silian_admin, $Silian_request, [
                 'data' => [
-                    'keyword_present' => $keyword !== '',
-                    'types' => $types,
-                    'limit' => $limit,
+                    'keyword_present' => $Silian_keyword !== '',
+                    'types' => $Silian_types,
+                    'limit' => $Silian_limit,
                 ],
             ]);
 
-            return $this->json($response, ['success' => true, 'data' => $result]);
-        } catch (\Exception $e) {
-            try { $this->errorLogService?->logException($e, $request); } catch (\Throwable $ignore) { /* swallow secondary */ }
-            $this->logAudit('admin_logs_search_failed', null, $request, [
-                'data' => ['error' => $e->getMessage()],
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_result]);
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService?->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) { /* swallow secondary */ }
+            $this->logAudit('admin_logs_search_failed', null, $Silian_request, [
+                'data' => ['error' => $Silian_e->getMessage()],
             ], 'failed');
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
         /**
          * 导出日志 (CSV / NDJSON)
          */
-        public function export(Request $request, Response $response): Response
+        public function export(Request $Silian_request, Response $Silian_response): Response
         {
             try {
-                $admin = $this->authService->getCurrentUser($request);
-                if (!$admin || !$this->authService->isAdminUser($admin)) {
-                    return $this->json($response, ['error' => 'Access denied'], 403);
+                $Silian_admin = $this->authService->getCurrentUser($Silian_request);
+                if (!$Silian_admin || !$this->authService->isAdminUser($Silian_admin)) {
+                    return $this->json($Silian_response, ['error' => 'Access denied'], 403);
                 }
 
-                $q = $request->getQueryParams();
-                $format = strtolower($q['format'] ?? 'csv');
-                if (!in_array($format, ['csv','ndjson'], true)) {
-                    return $this->json($response, ['success'=>false,'message'=>'format must be csv or ndjson'], 400);
+                $Silian_q = $Silian_request->getQueryParams();
+                $Silian_format = strtolower($Silian_q['format'] ?? 'csv');
+                if (!in_array($Silian_format, ['csv','ndjson'], true)) {
+                    return $this->json($Silian_response, ['success'=>false,'message'=>'format must be csv or ndjson'], 400);
                 }
-                $keyword = trim((string)($q['q'] ?? ''));
-                $dateFrom = $q['date_from'] ?? null;
-                $dateTo = $q['date_to'] ?? null;
-                $conversationId = $this->normalizeConversationId($q['conversation_id'] ?? null);
-                $conversationRequestIds = $conversationId !== null
-                    ? $this->findRequestIdsByConversation($conversationId)
+                $Silian_keyword = trim((string)($Silian_q['q'] ?? ''));
+                $Silian_dateFrom = $Silian_q['date_from'] ?? null;
+                $Silian_dateTo = $Silian_q['date_to'] ?? null;
+                $Silian_conversationId = $this->normalizeConversationId($Silian_q['conversation_id'] ?? null);
+                $Silian_conversationRequestIds = $Silian_conversationId !== null
+                    ? $this->findRequestIdsByConversation($Silian_conversationId)
                     : [];
-                $types = isset($q['types']) && $q['types'] !== '' ? array_values(array_filter(array_map('trim', explode(',', $q['types'])))) : ['system','audit','error','llm'];
-                $allowed = ['system','audit','error','llm'];
-                $types = array_values(array_intersect($types, $allowed));
-                if (!$types) { $types = ['system','audit','error','llm']; }
-                $max = (int)($q['max'] ?? 1000); $max = max(1, min(10000, $max));
+                $Silian_types = isset($Silian_q['types']) && $Silian_q['types'] !== '' ? array_values(array_filter(array_map('trim', explode(',', $Silian_q['types'])))) : ['system','audit','error','llm'];
+                $Silian_allowed = ['system','audit','error','llm'];
+                $Silian_types = array_values(array_intersect($Silian_types, $Silian_allowed));
+                if (!$Silian_types) { $Silian_types = ['system','audit','error','llm']; }
+                $Silian_max = (int)($Silian_q['max'] ?? 1000); $Silian_max = max(1, min(10000, $Silian_max));
 
                 // 收集每类记录（最多 max / count(types) 各自抓取 或 统一累积直到总数达到）
-                $perTypeCap = (int)ceil($max / max(1,count($types)));
+                $Silian_perTypeCap = (int)ceil($Silian_max / max(1,count($Silian_types)));
 
-                $datasets = [];
-                foreach ($types as $t) {
-                    $datasets[$t] = $this->exportFetch($t, $keyword, $dateFrom, $dateTo, $perTypeCap, [
-                        'request_id' => $q['request_id'] ?? null,
-                        'conversation_id' => $conversationId,
-                        'request_ids' => $conversationRequestIds,
-                        'actor_type' => $q['actor_type'] ?? null,
-                        'actor_id' => $q['actor_id'] ?? ($q['user_id'] ?? null),
-                        'status' => $q['llm_status'] ?? null,
-                        'model' => $q['model'] ?? null,
-                        'source' => $q['source'] ?? null,
-                        'turn_no' => $q['turn_no'] ?? null,
-                        'user_id' => $q['user_id'] ?? null,
-                        'action' => $q['action'] ?? null,
-                        'audit_status' => $q['audit_status'] ?? null,
-                        'error_type' => $q['error_type'] ?? null,
+                $Silian_datasets = [];
+                foreach ($Silian_types as $Silian_t) {
+                    $Silian_datasets[$Silian_t] = $this->exportFetch($Silian_t, $Silian_keyword, $Silian_dateFrom, $Silian_dateTo, $Silian_perTypeCap, [
+                        'request_id' => $Silian_q['request_id'] ?? null,
+                        'conversation_id' => $Silian_conversationId,
+                        'request_ids' => $Silian_conversationRequestIds,
+                        'actor_type' => $Silian_q['actor_type'] ?? null,
+                        'actor_id' => $Silian_q['actor_id'] ?? ($Silian_q['user_id'] ?? null),
+                        'status' => $Silian_q['llm_status'] ?? null,
+                        'model' => $Silian_q['model'] ?? null,
+                        'source' => $Silian_q['source'] ?? null,
+                        'turn_no' => $Silian_q['turn_no'] ?? null,
+                        'user_id' => $Silian_q['user_id'] ?? null,
+                        'action' => $Silian_q['action'] ?? null,
+                        'audit_status' => $Silian_q['audit_status'] ?? null,
+                        'error_type' => $Silian_q['error_type'] ?? null,
                     ]);
                 }
 
-                $this->logAudit('admin_logs_exported', $admin, $request, [
+                $this->logAudit('admin_logs_exported', $Silian_admin, $Silian_request, [
                     'data' => [
-                        'format' => $format,
-                        'types' => $types,
-                        'max' => $max,
+                        'format' => $Silian_format,
+                        'types' => $Silian_types,
+                        'max' => $Silian_max,
                     ],
                 ]);
 
-                if ($format === 'csv') {
-                    $filename = 'logs_export_' . date('Ymd_His') . '.csv';
-                    $response = $response->withHeader('Content-Type', 'text/csv; charset=UTF-8')
-                                         ->withHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
-                    $fh = fopen('php://temp','w+');
+                if ($Silian_format === 'csv') {
+                    $Silian_filename = 'logs_export_' . date('Ymd_His') . '.csv';
+                    $Silian_response = $Silian_response->withHeader('Content-Type', 'text/csv; charset=UTF-8')
+                                         ->withHeader('Content-Disposition', 'attachment; filename="' . $Silian_filename . '"');
+                    $Silian_fh = fopen('php://temp','w+');
                     // 统一列: type,id,request_id,method,path,status_code,user_id,duration_ms,created_at,action,operation_category,actor_type,audit_status,error_type,error_message,error_file,error_line,error_time,actor_id,source,model,llm_status,prompt,response_id,prompt_tokens,completion_tokens,total_tokens,latency_ms
-                    $header = [
+                    $Silian_header = [
                         'type','id','conversation_id','turn_no','request_id','method','path','status_code','user_id','duration_ms','created_at',
                         'action','operation_category','actor_type','audit_status','error_type','error_message','error_file',
                         'error_line','error_time','actor_id','source','model','llm_status','prompt','response_id',
                         'prompt_tokens','completion_tokens','total_tokens','latency_ms'
                     ];
-                    fputcsv($fh, $header);
-                    foreach ($datasets as $type => $rows) {
-                        foreach ($rows as $r) {
-                            fputcsv($fh, [
-                                $type,
-                                $r['id'] ?? null,
-                                $r['conversation_id'] ?? null,
-                                $r['turn_no'] ?? null,
-                                $r['request_id'] ?? null,
-                                $r['method'] ?? null,
-                                $r['path'] ?? null,
-                                $r['status_code'] ?? null,
-                                $r['user_id'] ?? null,
-                                $r['duration_ms'] ?? null,
-                                $r['created_at'] ?? null,
-                                $r['action'] ?? null,
-                                $r['operation_category'] ?? null,
-                                $r['actor_type'] ?? null,
-                                $r['status'] ?? null,
-                                $r['error_type'] ?? null,
-                                $r['error_message'] ?? null,
-                                $r['error_file'] ?? null,
-                                $r['error_line'] ?? null,
-                                $r['error_time'] ?? null,
-                                $r['actor_id'] ?? null,
-                                $r['source'] ?? null,
-                                $r['model'] ?? null,
-                                $r['status'] ?? null,
-                                $r['prompt'] ?? null,
-                                $r['response_id'] ?? null,
-                                $r['prompt_tokens'] ?? null,
-                                $r['completion_tokens'] ?? null,
-                                $r['total_tokens'] ?? null,
-                                $r['latency_ms'] ?? null,
+                    fputcsv($Silian_fh, $Silian_header);
+                    foreach ($Silian_datasets as $Silian_type => $Silian_rows) {
+                        foreach ($Silian_rows as $Silian_r) {
+                            fputcsv($Silian_fh, [
+                                $Silian_type,
+                                $Silian_r['id'] ?? null,
+                                $Silian_r['conversation_id'] ?? null,
+                                $Silian_r['turn_no'] ?? null,
+                                $Silian_r['request_id'] ?? null,
+                                $Silian_r['method'] ?? null,
+                                $Silian_r['path'] ?? null,
+                                $Silian_r['status_code'] ?? null,
+                                $Silian_r['user_id'] ?? null,
+                                $Silian_r['duration_ms'] ?? null,
+                                $Silian_r['created_at'] ?? null,
+                                $Silian_r['action'] ?? null,
+                                $Silian_r['operation_category'] ?? null,
+                                $Silian_r['actor_type'] ?? null,
+                                $Silian_r['status'] ?? null,
+                                $Silian_r['error_type'] ?? null,
+                                $Silian_r['error_message'] ?? null,
+                                $Silian_r['error_file'] ?? null,
+                                $Silian_r['error_line'] ?? null,
+                                $Silian_r['error_time'] ?? null,
+                                $Silian_r['actor_id'] ?? null,
+                                $Silian_r['source'] ?? null,
+                                $Silian_r['model'] ?? null,
+                                $Silian_r['status'] ?? null,
+                                $Silian_r['prompt'] ?? null,
+                                $Silian_r['response_id'] ?? null,
+                                $Silian_r['prompt_tokens'] ?? null,
+                                $Silian_r['completion_tokens'] ?? null,
+                                $Silian_r['total_tokens'] ?? null,
+                                $Silian_r['latency_ms'] ?? null,
                             ]);
                         }
                     }
-                    rewind($fh);
-                    $csv = stream_get_contents($fh) ?: '';
-                    fclose($fh);
-                    $response->getBody()->write($csv);
-                    return $response;
+                    rewind($Silian_fh);
+                    $Silian_csv = stream_get_contents($Silian_fh) ?: '';
+                    fclose($Silian_fh);
+                    $Silian_response->getBody()->write($Silian_csv);
+                    return $Silian_response;
                 }
 
                 // NDJSON
-                $response = $response->withHeader('Content-Type', 'application/x-ndjson')
+                $Silian_response = $Silian_response->withHeader('Content-Type', 'application/x-ndjson')
                                      ->withHeader('Content-Disposition', 'attachment; filename="logs_export_' . date('Ymd_His') . '.ndjson"');
-                $body = $response->getBody();
-                foreach ($datasets as $type => $rows) {
-                    foreach ($rows as $r) {
-                        $r['type'] = $type;
-                        $body->write(json_encode($r, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n");
+                $Silian_body = $Silian_response->getBody();
+                foreach ($Silian_datasets as $Silian_type => $Silian_rows) {
+                    foreach ($Silian_rows as $Silian_r) {
+                        $Silian_r['type'] = $Silian_type;
+                        $Silian_body->write(json_encode($Silian_r, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n");
                     }
                 }
-                return $response;
-            } catch (\Throwable $e) {
-                try { $this->errorLogService?->logException($e, $request); } catch (\Throwable $ignore) { /* swallow secondary */ }
-                $this->logAudit('admin_logs_export_failed', null, $request, [
-                    'data' => ['error' => $e->getMessage()],
+                return $Silian_response;
+            } catch (\Throwable $Silian_e) {
+                try { $this->errorLogService?->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) { /* swallow secondary */ }
+                $this->logAudit('admin_logs_export_failed', null, $Silian_request, [
+                    'data' => ['error' => $Silian_e->getMessage()],
                 ], 'failed');
-                return $this->json($response, ['error' => 'Internal server error'], 500);
+                return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
             }
         }
 
         /**
          * 获取关联日志 (audit + error by request_id)
          */
-        public function related(Request $request, Response $response): Response
+        public function related(Request $Silian_request, Response $Silian_response): Response
         {
             try {
-                $admin = $this->authService->getCurrentUser($request);
-                if (!$admin || !$this->authService->isAdminUser($admin)) {
-                    return $this->json($response, ['error' => 'Access denied'], 403);
+                $Silian_admin = $this->authService->getCurrentUser($Silian_request);
+                if (!$Silian_admin || !$this->authService->isAdminUser($Silian_admin)) {
+                    return $this->json($Silian_response, ['error' => 'Access denied'], 403);
                 }
 
-                $q = $request->getQueryParams();
-                $rid = RequestIdNormalizer::normalize($q['request_id'] ?? null);
-                if ($rid === null) {
-                    return $this->json($response, ['success'=>false,'message'=>'request_id required'], 400);
+                $Silian_q = $Silian_request->getQueryParams();
+                $Silian_rid = RequestIdNormalizer::normalize($Silian_q['request_id'] ?? null);
+                if ($Silian_rid === null) {
+                    return $this->json($Silian_response, ['success'=>false,'message'=>'request_id required'], 400);
                 }
-                $system = $this->fetchByRequestId('system_logs', $rid, ['id','request_id','method','path','status_code','user_id','duration_ms','created_at']);
-                $audit = $this->fetchByRequestId('audit_logs', $rid, ['id','conversation_id','request_id','action','operation_category','actor_type','status','user_id','ip_address','created_at']);
-                $error = $this->fetchByRequestId('error_logs', $rid, ['id','request_id','error_type','error_message','error_file','error_line','error_time']);
-                $llm = $this->fetchByRequestId('llm_logs', $rid, ['id','conversation_id','request_id','turn_no','actor_type','actor_id','source','model','status','prompt','response_id','total_tokens','latency_ms','created_at']);
+                $Silian_system = $this->fetchByRequestId('system_logs', $Silian_rid, ['id','request_id','method','path','status_code','user_id','duration_ms','created_at']);
+                $Silian_audit = $this->fetchByRequestId('audit_logs', $Silian_rid, ['id','conversation_id','request_id','action','operation_category','actor_type','status','user_id','ip_address','created_at']);
+                $Silian_error = $this->fetchByRequestId('error_logs', $Silian_rid, ['id','request_id','error_type','error_message','error_file','error_line','error_time']);
+                $Silian_llm = $this->fetchByRequestId('llm_logs', $Silian_rid, ['id','conversation_id','request_id','turn_no','actor_type','actor_id','source','model','status','prompt','response_id','total_tokens','latency_ms','created_at']);
 
-                $this->logAudit('admin_logs_related_viewed', $admin, $request, [
-                    'data' => ['request_id' => $rid],
+                $this->logAudit('admin_logs_related_viewed', $Silian_admin, $Silian_request, [
+                    'data' => ['request_id' => $Silian_rid],
                 ]);
 
-                return $this->json($response, ['success'=>true,'data'=>[
-                    'request_id' => $rid,
-                    'system' => $system,
-                    'audit' => $audit,
-                    'error' => $error,
-                    'llm' => $llm
+                return $this->json($Silian_response, ['success'=>true,'data'=>[
+                    'request_id' => $Silian_rid,
+                    'system' => $Silian_system,
+                    'audit' => $Silian_audit,
+                    'error' => $Silian_error,
+                    'llm' => $Silian_llm
                 ]]);
-            } catch (\Throwable $e) {
-                try { $this->errorLogService?->logException($e, $request); } catch (\Throwable $ignore) { /* swallow secondary */ }
-                $this->logAudit('admin_logs_related_failed', null, $request, [
-                    'data' => ['error' => $e->getMessage()],
+            } catch (\Throwable $Silian_e) {
+                try { $this->errorLogService?->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) { /* swallow secondary */ }
+                $this->logAudit('admin_logs_related_failed', null, $Silian_request, [
+                    'data' => ['error' => $Silian_e->getMessage()],
                 ], 'failed');
-                return $this->json($response, ['error' => 'Internal server error'], 500);
+                return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
             }
         }
 
-        private function logAudit(string $action, ?array $admin, Request $request, array $context = [], string $status = 'success'): void
+        private function logAudit(string $Silian_action, ?array $Silian_admin, Request $Silian_request, array $Silian_context = [], string $Silian_status = 'success'): void
         {
             try {
-                $adminId = isset($admin['id']) && is_numeric((string)$admin['id']) ? (int)$admin['id'] : null;
-                $this->auditLogService->logAdminOperation($action, $adminId, 'log_search', array_merge([
-                    'request_id' => $request->getAttribute('request_id'),
-                    'request_method' => $request->getMethod(),
-                    'endpoint' => (string)$request->getUri()->getPath(),
-                    'status' => $status,
-                    'request_data' => $context['data'] ?? null,
-                ], $context));
-            } catch (\Throwable $ignore) {
+                $Silian_adminId = isset($Silian_admin['id']) && is_numeric((string)$Silian_admin['id']) ? (int)$Silian_admin['id'] : null;
+                $this->auditLogService->logAdminOperation($Silian_action, $Silian_adminId, 'log_search', array_merge([
+                    'request_id' => $Silian_request->getAttribute('request_id'),
+                    'request_method' => $Silian_request->getMethod(),
+                    'endpoint' => (string)$Silian_request->getUri()->getPath(),
+                    'status' => $Silian_status,
+                    'request_data' => $Silian_context['data'] ?? null,
+                ], $Silian_context));
+            } catch (\Throwable $Silian_ignore) {
                 // 审计日志失败不阻断主流程
             }
         }
 
-        private function fetchByRequestId(string $table, string $rid, array $columns): array
+        private function fetchByRequestId(string $Silian_table, string $Silian_rid, array $Silian_columns): array
         {
-            $cols = implode(',', $columns);
-            $sql = "SELECT $cols FROM {$table} WHERE request_id = :rid ORDER BY id DESC LIMIT 200"; // 安全上限
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':rid', $rid);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_cols = implode(',', $Silian_columns);
+            $Silian_sql = "SELECT $Silian_cols FROM {$Silian_table} WHERE request_id = :rid ORDER BY id DESC LIMIT 200"; // 安全上限
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->bindValue(':rid', $Silian_rid);
+            $Silian_stmt->execute();
+            return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         }
 
-        private function exportFetch(string $type, string $kw, ?string $from, ?string $to, int $limit, array $filters = []): array
+        private function exportFetch(string $Silian_type, string $Silian_kw, ?string $Silian_from, ?string $Silian_to, int $Silian_limit, array $Silian_filters = []): array
         {
-            switch ($type) {
+            switch ($Silian_type) {
                 case 'system':
                     return $this->rawFetch(
                         'system_logs',
                         ['id','request_id','method','path','status_code','user_id','duration_ms','created_at'],
                         ['method','path','request_body','response_body','error_message','server_meta'],
-                        $kw,
-                        $limit,
-                        ['from'=>$from,'to'=>$to,'date'=>'created_at'],
-                        $filters
+                        $Silian_kw,
+                        $Silian_limit,
+                        ['from'=>$Silian_from,'to'=>$Silian_to,'date'=>'created_at'],
+                        $Silian_filters
                     );
                 case 'audit':
                     return $this->rawFetch(
                         'audit_logs',
                         ['id','conversation_id','action','operation_category','actor_type','status','user_id','ip_address','created_at','request_id'],
                         ['action','operation_category','details_raw','summary','old_data','new_data'],
-                        $kw,
-                        $limit,
-                        ['from'=>$from,'to'=>$to,'date'=>'created_at'],
-                        $filters
+                        $Silian_kw,
+                        $Silian_limit,
+                        ['from'=>$Silian_from,'to'=>$Silian_to,'date'=>'created_at'],
+                        $Silian_filters
                     );
                 case 'error':
                     return $this->rawFetch(
                         'error_logs',
                         ['id','error_type','error_message','error_file','error_line','error_time','request_id'],
                         ['error_type','error_message','error_file','stack_trace'],
-                        $kw,
-                        $limit,
-                        ['from'=>$from,'to'=>$to,'date'=>'error_time'],
-                        $filters
+                        $Silian_kw,
+                        $Silian_limit,
+                        ['from'=>$Silian_from,'to'=>$Silian_to,'date'=>'error_time'],
+                        $Silian_filters
                     );
                 case 'llm':
                     return $this->rawFetch(
                         'llm_logs',
                         ['id','conversation_id','turn_no','request_id','actor_type','actor_id','source','model','status','prompt','response_id','prompt_tokens','completion_tokens','total_tokens','latency_ms','created_at'],
                         ['prompt','response_raw','source','model','error_message','request_id'],
-                        $kw,
-                        $limit,
-                        ['from'=>$from,'to'=>$to,'date'=>'created_at'],
-                        $filters
+                        $Silian_kw,
+                        $Silian_limit,
+                        ['from'=>$Silian_from,'to'=>$Silian_to,'date'=>'created_at'],
+                        $Silian_filters
                     );
                 default:
                     return [];
             }
         }
 
-        private function rawFetch(string $table, array $selectCols, array $likeCols, string $kw, int $limit, array $dateFilter, array $filters = []): array
+        private function rawFetch(string $Silian_table, array $Silian_selectCols, array $Silian_likeCols, string $Silian_kw, int $Silian_limit, array $Silian_dateFilter, array $Silian_filters = []): array
         {
-            $conditions = [];
-            $params = [];
-            $from = $dateFilter['from'] ?? null;
-            $to = $dateFilter['to'] ?? null;
-            $dateColumn = $dateFilter['date'] ?? 'created_at';
-            if ($kw !== '') {
-                $likeParts = [];
-                foreach ($likeCols as $i => $col) {
-                    $p = 'k' . $i;
-                    $likeParts[] = "$col LIKE :$p";
-                    $params[$p] = '%' . $kw . '%';
+            $Silian_conditions = [];
+            $Silian_params = [];
+            $Silian_from = $Silian_dateFilter['from'] ?? null;
+            $Silian_to = $Silian_dateFilter['to'] ?? null;
+            $Silian_dateColumn = $Silian_dateFilter['date'] ?? 'created_at';
+            if ($Silian_kw !== '') {
+                $Silian_likeParts = [];
+                foreach ($Silian_likeCols as $Silian_i => $Silian_col) {
+                    $Silian_p = 'k' . $Silian_i;
+                    $Silian_likeParts[] = "$Silian_col LIKE :$Silian_p";
+                    $Silian_params[$Silian_p] = '%' . $Silian_kw . '%';
                 }
-                $conditions[] = '(' . implode(' OR ', $likeParts) . ')';
+                $Silian_conditions[] = '(' . implode(' OR ', $Silian_likeParts) . ')';
             }
-            if ($from) { $conditions[] = "$dateColumn >= :dfrom"; $params['dfrom'] = $from . ' 00:00:00'; }
-            if ($to) { $conditions[] = "$dateColumn <= :dto"; $params['dto'] = $to . ' 23:59:59'; }
-            $this->applyRawFetchFilters($table, $conditions, $params, $filters);
-            $where = $conditions ? ('WHERE ' . implode(' AND ', $conditions)) : '';
-            $cols = implode(',', $selectCols);
-            $sql = "SELECT $cols FROM {$table} $where ORDER BY id DESC LIMIT :limit";
-            $stmt = $this->db->prepare($sql);
-            foreach ($params as $k=>$v) { $stmt->bindValue(':'.$k, $v); }
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            if ($Silian_from) { $Silian_conditions[] = "$Silian_dateColumn >= :dfrom"; $Silian_params['dfrom'] = $Silian_from . ' 00:00:00'; }
+            if ($Silian_to) { $Silian_conditions[] = "$Silian_dateColumn <= :dto"; $Silian_params['dto'] = $Silian_to . ' 23:59:59'; }
+            $this->applyRawFetchFilters($Silian_table, $Silian_conditions, $Silian_params, $Silian_filters);
+            $Silian_where = $Silian_conditions ? ('WHERE ' . implode(' AND ', $Silian_conditions)) : '';
+            $Silian_cols = implode(',', $Silian_selectCols);
+            $Silian_sql = "SELECT $Silian_cols FROM {$Silian_table} $Silian_where ORDER BY id DESC LIMIT :limit";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_params as $Silian_k=>$Silian_v) { $Silian_stmt->bindValue(':'.$Silian_k, $Silian_v); }
+            $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         }
 
-    private function searchSystem(string $kw, int $limit, ?string $from, ?string $to, int $page, array $filters = []): array
+    private function searchSystem(string $Silian_kw, int $Silian_limit, ?string $Silian_from, ?string $Silian_to, int $Silian_page, array $Silian_filters = []): array
     {
-        $conditions = [];
-        $params = [];
-        $conversationId = $this->normalizeConversationId($filters['conversation_id'] ?? null);
-        if ($kw !== '') {
-            $likeCols = ['path','request_id','method','user_agent','ip_address','request_body','response_body','server_meta'];
-            $likeParts = [];
-            foreach ($likeCols as $i => $col) {
-                $ph = ':kw_s_' . $i;
-                $likeParts[] = "$col LIKE $ph";
-                $params['kw_s_' . $i] = '%' . $kw . '%';
+        $Silian_conditions = [];
+        $Silian_params = [];
+        $Silian_conversationId = $this->normalizeConversationId($Silian_filters['conversation_id'] ?? null);
+        if ($Silian_kw !== '') {
+            $Silian_likeCols = ['path','request_id','method','user_agent','ip_address','request_body','response_body','server_meta'];
+            $Silian_likeParts = [];
+            foreach ($Silian_likeCols as $Silian_i => $Silian_col) {
+                $Silian_ph = ':kw_s_' . $Silian_i;
+                $Silian_likeParts[] = "$Silian_col LIKE $Silian_ph";
+                $Silian_params['kw_s_' . $Silian_i] = '%' . $Silian_kw . '%';
             }
-            $conditions[] = '(' . implode(' OR ', $likeParts) . ')';
+            $Silian_conditions[] = '(' . implode(' OR ', $Silian_likeParts) . ')';
         }
-        if ($from) { $conditions[] = 'created_at >= :from'; $params['from'] = $this->normalizeStart($from); }
-        if ($to) { $conditions[] = 'created_at <= :to'; $params['to'] = $this->normalizeEnd($to); }
-        if (!empty($filters['method'])) { $conditions[] = 'method = :f_method'; $params['f_method'] = $filters['method']; }
-        if (!empty($filters['status_code'])) { $conditions[] = 'status_code = :f_status'; $params['f_status'] = (int)$filters['status_code']; }
-        if (!empty($filters['user_id'])) { $conditions[] = 'user_id = :f_user'; $params['f_user'] = (int)$filters['user_id']; }
-        $rid = RequestIdNormalizer::normalize($filters['request_id'] ?? null);
-        if ($rid !== null) {
-            $conditions[] = 'request_id = :f_rid';
-            $params['f_rid'] = $rid;
+        if ($Silian_from) { $Silian_conditions[] = 'created_at >= :from'; $Silian_params['from'] = $this->normalizeStart($Silian_from); }
+        if ($Silian_to) { $Silian_conditions[] = 'created_at <= :to'; $Silian_params['to'] = $this->normalizeEnd($Silian_to); }
+        if (!empty($Silian_filters['method'])) { $Silian_conditions[] = 'method = :f_method'; $Silian_params['f_method'] = $Silian_filters['method']; }
+        if (!empty($Silian_filters['status_code'])) { $Silian_conditions[] = 'status_code = :f_status'; $Silian_params['f_status'] = (int)$Silian_filters['status_code']; }
+        if (!empty($Silian_filters['user_id'])) { $Silian_conditions[] = 'user_id = :f_user'; $Silian_params['f_user'] = (int)$Silian_filters['user_id']; }
+        $Silian_rid = RequestIdNormalizer::normalize($Silian_filters['request_id'] ?? null);
+        if ($Silian_rid !== null) {
+            $Silian_conditions[] = 'request_id = :f_rid';
+            $Silian_params['f_rid'] = $Silian_rid;
         }
-        if (!empty($filters['path'])) { $conditions[] = 'path LIKE :f_path'; $params['f_path'] = '%' . $filters['path'] . '%'; }
-        if (!empty($filters['min_duration'])) { $conditions[] = 'duration_ms >= :f_min_d'; $params['f_min_d'] = (int)$filters['min_duration']; }
-        if (!empty($filters['max_duration'])) { $conditions[] = 'duration_ms <= :f_max_d'; $params['f_max_d'] = (int)$filters['max_duration']; }
-        if ($conversationId !== null) {
-            $requestIds = is_array($filters['request_ids'] ?? null) ? array_values(array_filter($filters['request_ids'], static fn ($id) => is_string($id) && $id !== '')) : [];
-            if ($requestIds === []) {
-                return [ 'items' => [], 'count' => 0, 'page' => $page, 'pages' => 0, 'limit' => $limit ];
+        if (!empty($Silian_filters['path'])) { $Silian_conditions[] = 'path LIKE :f_path'; $Silian_params['f_path'] = '%' . $Silian_filters['path'] . '%'; }
+        if (!empty($Silian_filters['min_duration'])) { $Silian_conditions[] = 'duration_ms >= :f_min_d'; $Silian_params['f_min_d'] = (int)$Silian_filters['min_duration']; }
+        if (!empty($Silian_filters['max_duration'])) { $Silian_conditions[] = 'duration_ms <= :f_max_d'; $Silian_params['f_max_d'] = (int)$Silian_filters['max_duration']; }
+        if ($Silian_conversationId !== null) {
+            $Silian_requestIds = is_array($Silian_filters['request_ids'] ?? null) ? array_values(array_filter($Silian_filters['request_ids'], static fn ($Silian_id) => is_string($Silian_id) && $Silian_id !== '')) : [];
+            if ($Silian_requestIds === []) {
+                return [ 'items' => [], 'count' => 0, 'page' => $Silian_page, 'pages' => 0, 'limit' => $Silian_limit ];
             }
-            $this->appendInCondition($conditions, $params, 'request_id', $requestIds, 'sys_conv_req');
+            $this->appendInCondition($Silian_conditions, $Silian_params, 'request_id', $Silian_requestIds, 'sys_conv_req');
         }
-        $where = $conditions ? (self::KW_WHERE . implode(self::SEP_AND, $conditions)) : '';
-        $offset = ($page - 1) * $limit;
-        $sql = "SELECT id, request_id, method, path, status_code, user_id, duration_ms, created_at FROM system_logs {$where} ORDER BY id DESC LIMIT :limit OFFSET :offset";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $k=>$v) { $stmt->bindValue(':' . $k, $v); }
-        $stmt->bindValue(self::LIMIT_PARAM, $limit, PDO::PARAM_INT);
-        $stmt->bindValue(self::OFFSET_PARAM, $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $total = $this->countRows('system_logs', $where, $params);
-        return [ 'items' => $rows, 'count' => (int)$total, 'page' => $page, 'pages' => (int)ceil($total / $limit), 'limit' => $limit ];
+        $Silian_where = $Silian_conditions ? (self::KW_WHERE . implode(self::SEP_AND, $Silian_conditions)) : '';
+        $Silian_offset = ($Silian_page - 1) * $Silian_limit;
+        $Silian_sql = "SELECT id, request_id, method, path, status_code, user_id, duration_ms, created_at FROM system_logs {$Silian_where} ORDER BY id DESC LIMIT :limit OFFSET :offset";
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_k=>$Silian_v) { $Silian_stmt->bindValue(':' . $Silian_k, $Silian_v); }
+        $Silian_stmt->bindValue(self::LIMIT_PARAM, $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->bindValue(self::OFFSET_PARAM, $Silian_offset, PDO::PARAM_INT);
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_total = $this->countRows('system_logs', $Silian_where, $Silian_params);
+        return [ 'items' => $Silian_rows, 'count' => (int)$Silian_total, 'page' => $Silian_page, 'pages' => (int)ceil($Silian_total / $Silian_limit), 'limit' => $Silian_limit ];
     }
 
-    private function searchAudit(string $kw, int $limit, ?string $from, ?string $to, int $page, array $filters = []): array
+    private function searchAudit(string $Silian_kw, int $Silian_limit, ?string $Silian_from, ?string $Silian_to, int $Silian_page, array $Silian_filters = []): array
     {
-        $conditions = [];
-        $params = [];
-        $conversationId = $this->normalizeConversationId($filters['conversation_id'] ?? null);
-        if ($kw !== '') {
-            $likeCols = ['action','operation_category','operation_subtype','endpoint','ip_address','data','old_data','new_data'];
-            $likeParts = [];
-            foreach ($likeCols as $i => $col) {
-                $ph = ':kw_a_' . $i;
-                $likeParts[] = "$col LIKE $ph";
-                $params['kw_a_' . $i] = '%' . $kw . '%';
+        $Silian_conditions = [];
+        $Silian_params = [];
+        $Silian_conversationId = $this->normalizeConversationId($Silian_filters['conversation_id'] ?? null);
+        if ($Silian_kw !== '') {
+            $Silian_likeCols = ['action','operation_category','operation_subtype','endpoint','ip_address','data','old_data','new_data'];
+            $Silian_likeParts = [];
+            foreach ($Silian_likeCols as $Silian_i => $Silian_col) {
+                $Silian_ph = ':kw_a_' . $Silian_i;
+                $Silian_likeParts[] = "$Silian_col LIKE $Silian_ph";
+                $Silian_params['kw_a_' . $Silian_i] = '%' . $Silian_kw . '%';
             }
-            $conditions[] = '(' . implode(' OR ', $likeParts) . ')';
+            $Silian_conditions[] = '(' . implode(' OR ', $Silian_likeParts) . ')';
         }
-        if ($from) { $conditions[] = 'created_at >= :from'; $params['from'] = $this->normalizeStart($from); }
-        if ($to) { $conditions[] = 'created_at <= :to'; $params['to'] = $this->normalizeEnd($to); }
-        if (!empty($filters['user_id'])) { $conditions[] = 'user_id = :a_user'; $params['a_user'] = (int)$filters['user_id']; }
-        if (!empty($filters['action'])) { $conditions[] = 'action = :a_action'; $params['a_action'] = $filters['action']; }
-        if (!empty($filters['status'])) { $conditions[] = 'status = :a_status'; $params['a_status'] = $filters['status']; }
-        if ($conversationId !== null) { $conditions[] = 'conversation_id = :a_conversation_id'; $params['a_conversation_id'] = $conversationId; }
-        $rid = RequestIdNormalizer::normalize($filters['request_id'] ?? null);
-        if ($rid !== null) {
-            $conditions[] = 'request_id = :a_rid';
-            $params['a_rid'] = $rid;
+        if ($Silian_from) { $Silian_conditions[] = 'created_at >= :from'; $Silian_params['from'] = $this->normalizeStart($Silian_from); }
+        if ($Silian_to) { $Silian_conditions[] = 'created_at <= :to'; $Silian_params['to'] = $this->normalizeEnd($Silian_to); }
+        if (!empty($Silian_filters['user_id'])) { $Silian_conditions[] = 'user_id = :a_user'; $Silian_params['a_user'] = (int)$Silian_filters['user_id']; }
+        if (!empty($Silian_filters['action'])) { $Silian_conditions[] = 'action = :a_action'; $Silian_params['a_action'] = $Silian_filters['action']; }
+        if (!empty($Silian_filters['status'])) { $Silian_conditions[] = 'status = :a_status'; $Silian_params['a_status'] = $Silian_filters['status']; }
+        if ($Silian_conversationId !== null) { $Silian_conditions[] = 'conversation_id = :a_conversation_id'; $Silian_params['a_conversation_id'] = $Silian_conversationId; }
+        $Silian_rid = RequestIdNormalizer::normalize($Silian_filters['request_id'] ?? null);
+        if ($Silian_rid !== null) {
+            $Silian_conditions[] = 'request_id = :a_rid';
+            $Silian_params['a_rid'] = $Silian_rid;
         }
-        $where = $conditions ? (self::KW_WHERE . implode(self::SEP_AND, $conditions)) : '';
-        $offset = ($page - 1) * $limit;
+        $Silian_where = $Silian_conditions ? (self::KW_WHERE . implode(self::SEP_AND, $Silian_conditions)) : '';
+        $Silian_offset = ($Silian_page - 1) * $Silian_limit;
     // Include old_data & new_data for diff visualization on frontend (may be NULL for many rows)
-    $sql = "SELECT id, user_id, conversation_id, request_id, actor_type, action, operation_category, status, ip_address, created_at, old_data, new_data FROM audit_logs {$where} ORDER BY id DESC LIMIT :limit OFFSET :offset";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $k=>$v) { $stmt->bindValue(':' . $k, $v); }
-        $stmt->bindValue(self::LIMIT_PARAM, $limit, PDO::PARAM_INT);
-        $stmt->bindValue(self::OFFSET_PARAM, $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $total = $this->countRows('audit_logs', $where, $params);
-        return [ 'items' => $rows, 'count' => (int)$total, 'page' => $page, 'pages' => (int)ceil($total / $limit), 'limit' => $limit ];
+    $Silian_sql = "SELECT id, user_id, conversation_id, request_id, actor_type, action, operation_category, status, ip_address, created_at, old_data, new_data FROM audit_logs {$Silian_where} ORDER BY id DESC LIMIT :limit OFFSET :offset";
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_k=>$Silian_v) { $Silian_stmt->bindValue(':' . $Silian_k, $Silian_v); }
+        $Silian_stmt->bindValue(self::LIMIT_PARAM, $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->bindValue(self::OFFSET_PARAM, $Silian_offset, PDO::PARAM_INT);
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_total = $this->countRows('audit_logs', $Silian_where, $Silian_params);
+        return [ 'items' => $Silian_rows, 'count' => (int)$Silian_total, 'page' => $Silian_page, 'pages' => (int)ceil($Silian_total / $Silian_limit), 'limit' => $Silian_limit ];
     }
 
-    private function searchError(string $kw, int $limit, ?string $from, ?string $to, int $page, array $filters = []): array
+    private function searchError(string $Silian_kw, int $Silian_limit, ?string $Silian_from, ?string $Silian_to, int $Silian_page, array $Silian_filters = []): array
     {
-        $conditions = [];
-        $params = [];
-        $conversationId = $this->normalizeConversationId($filters['conversation_id'] ?? null);
-        if ($kw !== '') {
-            $likeCols = ['error_type','error_message','error_file','script_name','client_get','client_post'];
-            $likeParts = [];
-            foreach ($likeCols as $i => $col) {
-                $ph = ':kw_e_' . $i;
-                $likeParts[] = "$col LIKE $ph";
-                $params['kw_e_' . $i] = '%' . $kw . '%';
+        $Silian_conditions = [];
+        $Silian_params = [];
+        $Silian_conversationId = $this->normalizeConversationId($Silian_filters['conversation_id'] ?? null);
+        if ($Silian_kw !== '') {
+            $Silian_likeCols = ['error_type','error_message','error_file','script_name','client_get','client_post'];
+            $Silian_likeParts = [];
+            foreach ($Silian_likeCols as $Silian_i => $Silian_col) {
+                $Silian_ph = ':kw_e_' . $Silian_i;
+                $Silian_likeParts[] = "$Silian_col LIKE $Silian_ph";
+                $Silian_params['kw_e_' . $Silian_i] = '%' . $Silian_kw . '%';
             }
-            $conditions[] = '(' . implode(' OR ', $likeParts) . ')';
+            $Silian_conditions[] = '(' . implode(' OR ', $Silian_likeParts) . ')';
         }
-        if ($from) { $conditions[] = 'error_time >= :from'; $params['from'] = $this->normalizeStart($from); }
-        if ($to) { $conditions[] = 'error_time <= :to'; $params['to'] = $this->normalizeEnd($to); }
-        if (!empty($filters['error_type'])) { $conditions[] = 'error_type = :e_type'; $params['e_type'] = $filters['error_type']; }
-        $rid = RequestIdNormalizer::normalize($filters['request_id'] ?? null);
-        if ($rid !== null) {
-            $conditions[] = 'request_id = :e_rid';
-            $params['e_rid'] = $rid;
+        if ($Silian_from) { $Silian_conditions[] = 'error_time >= :from'; $Silian_params['from'] = $this->normalizeStart($Silian_from); }
+        if ($Silian_to) { $Silian_conditions[] = 'error_time <= :to'; $Silian_params['to'] = $this->normalizeEnd($Silian_to); }
+        if (!empty($Silian_filters['error_type'])) { $Silian_conditions[] = 'error_type = :e_type'; $Silian_params['e_type'] = $Silian_filters['error_type']; }
+        $Silian_rid = RequestIdNormalizer::normalize($Silian_filters['request_id'] ?? null);
+        if ($Silian_rid !== null) {
+            $Silian_conditions[] = 'request_id = :e_rid';
+            $Silian_params['e_rid'] = $Silian_rid;
         }
-        if ($conversationId !== null) {
-            $requestIds = is_array($filters['request_ids'] ?? null) ? array_values(array_filter($filters['request_ids'], static fn ($id) => is_string($id) && $id !== '')) : [];
-            if ($requestIds === []) {
-                return [ 'items' => [], 'count' => 0, 'page' => $page, 'pages' => 0, 'limit' => $limit ];
+        if ($Silian_conversationId !== null) {
+            $Silian_requestIds = is_array($Silian_filters['request_ids'] ?? null) ? array_values(array_filter($Silian_filters['request_ids'], static fn ($Silian_id) => is_string($Silian_id) && $Silian_id !== '')) : [];
+            if ($Silian_requestIds === []) {
+                return [ 'items' => [], 'count' => 0, 'page' => $Silian_page, 'pages' => 0, 'limit' => $Silian_limit ];
             }
-            $this->appendInCondition($conditions, $params, 'request_id', $requestIds, 'err_conv_req');
+            $this->appendInCondition($Silian_conditions, $Silian_params, 'request_id', $Silian_requestIds, 'err_conv_req');
         }
-        $where = $conditions ? (self::KW_WHERE . implode(self::SEP_AND, $conditions)) : '';
-        $offset = ($page - 1) * $limit;
-        $sql = "SELECT id, request_id, error_type, error_message, error_file, error_line, error_time FROM error_logs {$where} ORDER BY id DESC LIMIT :limit OFFSET :offset";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $k=>$v) { $stmt->bindValue(':' . $k, $v); }
-        $stmt->bindValue(self::LIMIT_PARAM, $limit, PDO::PARAM_INT);
-        $stmt->bindValue(self::OFFSET_PARAM, $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $total = $this->countRows('error_logs', $where, $params);
-        return [ 'items' => $rows, 'count' => (int)$total, 'page' => $page, 'pages' => (int)ceil($total / $limit), 'limit' => $limit ];
+        $Silian_where = $Silian_conditions ? (self::KW_WHERE . implode(self::SEP_AND, $Silian_conditions)) : '';
+        $Silian_offset = ($Silian_page - 1) * $Silian_limit;
+        $Silian_sql = "SELECT id, request_id, error_type, error_message, error_file, error_line, error_time FROM error_logs {$Silian_where} ORDER BY id DESC LIMIT :limit OFFSET :offset";
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_k=>$Silian_v) { $Silian_stmt->bindValue(':' . $Silian_k, $Silian_v); }
+        $Silian_stmt->bindValue(self::LIMIT_PARAM, $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->bindValue(self::OFFSET_PARAM, $Silian_offset, PDO::PARAM_INT);
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_total = $this->countRows('error_logs', $Silian_where, $Silian_params);
+        return [ 'items' => $Silian_rows, 'count' => (int)$Silian_total, 'page' => $Silian_page, 'pages' => (int)ceil($Silian_total / $Silian_limit), 'limit' => $Silian_limit ];
     }
 
-    private function searchLlm(string $kw, int $limit, ?string $from, ?string $to, int $page, array $filters = []): array
+    private function searchLlm(string $Silian_kw, int $Silian_limit, ?string $Silian_from, ?string $Silian_to, int $Silian_page, array $Silian_filters = []): array
     {
-        $conditions = [];
-        $params = [];
-        $conversationId = $this->normalizeConversationId($filters['conversation_id'] ?? null);
-        if ($kw !== '') {
-            $likeCols = ['prompt','response_raw','source','model','error_message','request_id'];
-            $likeParts = [];
-            foreach ($likeCols as $i => $col) {
-                $ph = ':kw_l_' . $i;
-                $likeParts[] = "$col LIKE $ph";
-                $params['kw_l_' . $i] = '%' . $kw . '%';
+        $Silian_conditions = [];
+        $Silian_params = [];
+        $Silian_conversationId = $this->normalizeConversationId($Silian_filters['conversation_id'] ?? null);
+        if ($Silian_kw !== '') {
+            $Silian_likeCols = ['prompt','response_raw','source','model','error_message','request_id'];
+            $Silian_likeParts = [];
+            foreach ($Silian_likeCols as $Silian_i => $Silian_col) {
+                $Silian_ph = ':kw_l_' . $Silian_i;
+                $Silian_likeParts[] = "$Silian_col LIKE $Silian_ph";
+                $Silian_params['kw_l_' . $Silian_i] = '%' . $Silian_kw . '%';
             }
-            $conditions[] = '(' . implode(' OR ', $likeParts) . ')';
+            $Silian_conditions[] = '(' . implode(' OR ', $Silian_likeParts) . ')';
         }
-        if ($from) { $conditions[] = 'created_at >= :from'; $params['from'] = $this->normalizeStart($from); }
-        if ($to) { $conditions[] = 'created_at <= :to'; $params['to'] = $this->normalizeEnd($to); }
-        if (!empty($filters['actor_type'])) { $conditions[] = 'actor_type = :l_actor_type'; $params['l_actor_type'] = $filters['actor_type']; }
-        if (!empty($filters['actor_id'])) { $conditions[] = 'actor_id = :l_actor_id'; $params['l_actor_id'] = (int)$filters['actor_id']; }
-        if (!empty($filters['status'])) { $conditions[] = 'status = :l_status'; $params['l_status'] = $filters['status']; }
-        if (!empty($filters['model'])) { $conditions[] = 'model LIKE :l_model'; $params['l_model'] = '%' . $filters['model'] . '%'; }
-        if (!empty($filters['source'])) { $conditions[] = 'source LIKE :l_source'; $params['l_source'] = '%' . $filters['source'] . '%'; }
-        if ($conversationId !== null) { $conditions[] = 'conversation_id = :l_conversation_id'; $params['l_conversation_id'] = $conversationId; }
-        if (!empty($filters['turn_no']) && is_numeric((string) $filters['turn_no'])) {
-            $conditions[] = 'turn_no = :l_turn_no';
-            $params['l_turn_no'] = (int) $filters['turn_no'];
+        if ($Silian_from) { $Silian_conditions[] = 'created_at >= :from'; $Silian_params['from'] = $this->normalizeStart($Silian_from); }
+        if ($Silian_to) { $Silian_conditions[] = 'created_at <= :to'; $Silian_params['to'] = $this->normalizeEnd($Silian_to); }
+        if (!empty($Silian_filters['actor_type'])) { $Silian_conditions[] = 'actor_type = :l_actor_type'; $Silian_params['l_actor_type'] = $Silian_filters['actor_type']; }
+        if (!empty($Silian_filters['actor_id'])) { $Silian_conditions[] = 'actor_id = :l_actor_id'; $Silian_params['l_actor_id'] = (int)$Silian_filters['actor_id']; }
+        if (!empty($Silian_filters['status'])) { $Silian_conditions[] = 'status = :l_status'; $Silian_params['l_status'] = $Silian_filters['status']; }
+        if (!empty($Silian_filters['model'])) { $Silian_conditions[] = 'model LIKE :l_model'; $Silian_params['l_model'] = '%' . $Silian_filters['model'] . '%'; }
+        if (!empty($Silian_filters['source'])) { $Silian_conditions[] = 'source LIKE :l_source'; $Silian_params['l_source'] = '%' . $Silian_filters['source'] . '%'; }
+        if ($Silian_conversationId !== null) { $Silian_conditions[] = 'conversation_id = :l_conversation_id'; $Silian_params['l_conversation_id'] = $Silian_conversationId; }
+        if (!empty($Silian_filters['turn_no']) && is_numeric((string) $Silian_filters['turn_no'])) {
+            $Silian_conditions[] = 'turn_no = :l_turn_no';
+            $Silian_params['l_turn_no'] = (int) $Silian_filters['turn_no'];
         }
-        $rid = RequestIdNormalizer::normalize($filters['request_id'] ?? null);
-        if ($rid !== null) {
-            $conditions[] = 'request_id = :l_rid';
-            $params['l_rid'] = $rid;
+        $Silian_rid = RequestIdNormalizer::normalize($Silian_filters['request_id'] ?? null);
+        if ($Silian_rid !== null) {
+            $Silian_conditions[] = 'request_id = :l_rid';
+            $Silian_params['l_rid'] = $Silian_rid;
         }
-        $where = $conditions ? (self::KW_WHERE . implode(self::SEP_AND, $conditions)) : '';
-        $offset = ($page - 1) * $limit;
-        $sql = "SELECT id, conversation_id, turn_no, request_id, actor_type, actor_id, source, model, status, response_id, total_tokens, latency_ms, created_at, prompt, error_message
-                FROM llm_logs {$where}
+        $Silian_where = $Silian_conditions ? (self::KW_WHERE . implode(self::SEP_AND, $Silian_conditions)) : '';
+        $Silian_offset = ($Silian_page - 1) * $Silian_limit;
+        $Silian_sql = "SELECT id, conversation_id, turn_no, request_id, actor_type, actor_id, source, model, status, response_id, total_tokens, latency_ms, created_at, prompt, error_message
+                FROM llm_logs {$Silian_where}
                 ORDER BY id DESC LIMIT :limit OFFSET :offset";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $k=>$v) { $stmt->bindValue(':' . $k, $v); }
-        $stmt->bindValue(self::LIMIT_PARAM, $limit, PDO::PARAM_INT);
-        $stmt->bindValue(self::OFFSET_PARAM, $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $total = $this->countRows('llm_logs', $where, $params);
-        return [ 'items' => $rows, 'count' => (int)$total, 'page' => $page, 'pages' => (int)ceil($total / $limit), 'limit' => $limit ];
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_k=>$Silian_v) { $Silian_stmt->bindValue(':' . $Silian_k, $Silian_v); }
+        $Silian_stmt->bindValue(self::LIMIT_PARAM, $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->bindValue(self::OFFSET_PARAM, $Silian_offset, PDO::PARAM_INT);
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_total = $this->countRows('llm_logs', $Silian_where, $Silian_params);
+        return [ 'items' => $Silian_rows, 'count' => (int)$Silian_total, 'page' => $Silian_page, 'pages' => (int)ceil($Silian_total / $Silian_limit), 'limit' => $Silian_limit ];
     }
 
-    private function normalizeConversationId(mixed $value): ?string
+    private function normalizeConversationId(mixed $Silian_value): ?string
     {
-        if (!is_string($value)) {
+        if (!is_string($Silian_value)) {
             return null;
         }
 
-        $value = trim($value);
-        if ($value === '') {
+        $Silian_value = trim($Silian_value);
+        if ($Silian_value === '') {
             return null;
         }
 
-        return preg_match('/^[A-Za-z0-9._:-]{8,64}$/', $value) === 1 ? $value : null;
+        return preg_match('/^[A-Za-z0-9._:-]{8,64}$/', $Silian_value) === 1 ? $Silian_value : null;
     }
 
     /**
      * @return array<int,string>
      */
-    private function findRequestIdsByConversation(string $conversationId): array
+    private function findRequestIdsByConversation(string $Silian_conversationId): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT DISTINCT request_id
             FROM (
                 SELECT request_id FROM audit_logs WHERE conversation_id = :conversation_id_audit
@@ -618,13 +618,13 @@ class LogSearchController
             ) requests
             WHERE request_id IS NOT NULL AND request_id <> ''
         ");
-        $stmt->execute([
-            ':conversation_id_audit' => $conversationId,
-            ':conversation_id_llm' => $conversationId,
+        $Silian_stmt->execute([
+            ':conversation_id_audit' => $Silian_conversationId,
+            ':conversation_id_llm' => $Silian_conversationId,
         ]);
         return array_values(array_filter(array_map(
-            static fn ($value): ?string => is_string($value) && trim($value) !== '' ? trim($value) : null,
-            $stmt->fetchAll(PDO::FETCH_COLUMN) ?: []
+            static fn ($Silian_value): ?string => is_string($Silian_value) && trim($Silian_value) !== '' ? trim($Silian_value) : null,
+            $Silian_stmt->fetchAll(PDO::FETCH_COLUMN) ?: []
         )));
     }
 
@@ -633,20 +633,20 @@ class LogSearchController
      * @param array<string,mixed> $params
      * @param array<int,string> $values
      */
-    private function appendInCondition(array &$conditions, array &$params, string $column, array $values, string $prefix): void
+    private function appendInCondition(array &$Silian_conditions, array &$Silian_params, string $Silian_column, array $Silian_values, string $Silian_prefix): void
     {
-        if ($values === []) {
+        if ($Silian_values === []) {
             return;
         }
 
-        $placeholders = [];
-        foreach (array_values($values) as $index => $value) {
-            $placeholder = ':' . $prefix . '_' . $index;
-            $placeholders[] = $placeholder;
-            $params[substr($placeholder, 1)] = $value;
+        $Silian_placeholders = [];
+        foreach (array_values($Silian_values) as $Silian_index => $Silian_value) {
+            $Silian_placeholder = ':' . $Silian_prefix . '_' . $Silian_index;
+            $Silian_placeholders[] = $Silian_placeholder;
+            $Silian_params[substr($Silian_placeholder, 1)] = $Silian_value;
         }
 
-        $conditions[] = sprintf('%s IN (%s)', $column, implode(', ', $placeholders));
+        $Silian_conditions[] = sprintf('%s IN (%s)', $Silian_column, implode(', ', $Silian_placeholders));
     }
 
     /**
@@ -654,81 +654,81 @@ class LogSearchController
      * @param array<string,mixed> $params
      * @param array<string,mixed> $filters
      */
-    private function applyRawFetchFilters(string $table, array &$conditions, array &$params, array $filters): void
+    private function applyRawFetchFilters(string $Silian_table, array &$Silian_conditions, array &$Silian_params, array $Silian_filters): void
     {
-        $conversationId = $this->normalizeConversationId($filters['conversation_id'] ?? null);
-        $requestId = RequestIdNormalizer::normalize($filters['request_id'] ?? null);
+        $Silian_conversationId = $this->normalizeConversationId($Silian_filters['conversation_id'] ?? null);
+        $Silian_requestId = RequestIdNormalizer::normalize($Silian_filters['request_id'] ?? null);
 
-        if ($requestId !== null) {
-            $conditions[] = 'request_id = :f_request_id';
-            $params['f_request_id'] = $requestId;
+        if ($Silian_requestId !== null) {
+            $Silian_conditions[] = 'request_id = :f_request_id';
+            $Silian_params['f_request_id'] = $Silian_requestId;
         }
 
-        if ($table === 'system_logs' || $table === 'error_logs') {
-            if ($conversationId !== null) {
-                $requestIds = is_array($filters['request_ids'] ?? null) ? array_values(array_filter($filters['request_ids'], static fn ($id) => is_string($id) && $id !== '')) : [];
-                if ($requestIds === []) {
-                    $conditions[] = '1 = 0';
+        if ($Silian_table === 'system_logs' || $Silian_table === 'error_logs') {
+            if ($Silian_conversationId !== null) {
+                $Silian_requestIds = is_array($Silian_filters['request_ids'] ?? null) ? array_values(array_filter($Silian_filters['request_ids'], static fn ($Silian_id) => is_string($Silian_id) && $Silian_id !== '')) : [];
+                if ($Silian_requestIds === []) {
+                    $Silian_conditions[] = '1 = 0';
                     return;
                 }
-                $this->appendInCondition($conditions, $params, 'request_id', $requestIds, $table === 'system_logs' ? 'raw_sys_conv_req' : 'raw_err_conv_req');
+                $this->appendInCondition($Silian_conditions, $Silian_params, 'request_id', $Silian_requestIds, $Silian_table === 'system_logs' ? 'raw_sys_conv_req' : 'raw_err_conv_req');
             }
         }
 
-        if ($table === 'audit_logs') {
-            if (!empty($filters['user_id']) && is_numeric((string) $filters['user_id'])) {
-                $conditions[] = 'user_id = :f_a_user';
-                $params['f_a_user'] = (int) $filters['user_id'];
+        if ($Silian_table === 'audit_logs') {
+            if (!empty($Silian_filters['user_id']) && is_numeric((string) $Silian_filters['user_id'])) {
+                $Silian_conditions[] = 'user_id = :f_a_user';
+                $Silian_params['f_a_user'] = (int) $Silian_filters['user_id'];
             }
-            if (!empty($filters['action'])) {
-                $conditions[] = 'action = :f_a_action';
-                $params['f_a_action'] = (string) $filters['action'];
+            if (!empty($Silian_filters['action'])) {
+                $Silian_conditions[] = 'action = :f_a_action';
+                $Silian_params['f_a_action'] = (string) $Silian_filters['action'];
             }
-            if (!empty($filters['audit_status'])) {
-                $conditions[] = 'status = :f_a_status';
-                $params['f_a_status'] = (string) $filters['audit_status'];
+            if (!empty($Silian_filters['audit_status'])) {
+                $Silian_conditions[] = 'status = :f_a_status';
+                $Silian_params['f_a_status'] = (string) $Silian_filters['audit_status'];
             }
-            if ($conversationId !== null) {
-                $conditions[] = 'conversation_id = :f_a_conversation_id';
-                $params['f_a_conversation_id'] = $conversationId;
-            }
-        }
-
-        if ($table === 'error_logs') {
-            if (!empty($filters['error_type'])) {
-                $conditions[] = 'error_type = :f_e_type';
-                $params['f_e_type'] = (string) $filters['error_type'];
+            if ($Silian_conversationId !== null) {
+                $Silian_conditions[] = 'conversation_id = :f_a_conversation_id';
+                $Silian_params['f_a_conversation_id'] = $Silian_conversationId;
             }
         }
 
-        if ($table === 'llm_logs') {
-            if (!empty($filters['actor_type'])) {
-                $conditions[] = 'actor_type = :f_l_actor_type';
-                $params['f_l_actor_type'] = (string) $filters['actor_type'];
+        if ($Silian_table === 'error_logs') {
+            if (!empty($Silian_filters['error_type'])) {
+                $Silian_conditions[] = 'error_type = :f_e_type';
+                $Silian_params['f_e_type'] = (string) $Silian_filters['error_type'];
             }
-            if (!empty($filters['actor_id']) && is_numeric((string) $filters['actor_id'])) {
-                $conditions[] = 'actor_id = :f_l_actor_id';
-                $params['f_l_actor_id'] = (int) $filters['actor_id'];
+        }
+
+        if ($Silian_table === 'llm_logs') {
+            if (!empty($Silian_filters['actor_type'])) {
+                $Silian_conditions[] = 'actor_type = :f_l_actor_type';
+                $Silian_params['f_l_actor_type'] = (string) $Silian_filters['actor_type'];
             }
-            if (!empty($filters['status'])) {
-                $conditions[] = 'status = :f_l_status';
-                $params['f_l_status'] = (string) $filters['status'];
+            if (!empty($Silian_filters['actor_id']) && is_numeric((string) $Silian_filters['actor_id'])) {
+                $Silian_conditions[] = 'actor_id = :f_l_actor_id';
+                $Silian_params['f_l_actor_id'] = (int) $Silian_filters['actor_id'];
             }
-            if (!empty($filters['model'])) {
-                $conditions[] = 'model LIKE :f_l_model';
-                $params['f_l_model'] = '%' . (string) $filters['model'] . '%';
+            if (!empty($Silian_filters['status'])) {
+                $Silian_conditions[] = 'status = :f_l_status';
+                $Silian_params['f_l_status'] = (string) $Silian_filters['status'];
             }
-            if (!empty($filters['source'])) {
-                $conditions[] = 'source LIKE :f_l_source';
-                $params['f_l_source'] = '%' . (string) $filters['source'] . '%';
+            if (!empty($Silian_filters['model'])) {
+                $Silian_conditions[] = 'model LIKE :f_l_model';
+                $Silian_params['f_l_model'] = '%' . (string) $Silian_filters['model'] . '%';
             }
-            if ($conversationId !== null) {
-                $conditions[] = 'conversation_id = :f_l_conversation_id';
-                $params['f_l_conversation_id'] = $conversationId;
+            if (!empty($Silian_filters['source'])) {
+                $Silian_conditions[] = 'source LIKE :f_l_source';
+                $Silian_params['f_l_source'] = '%' . (string) $Silian_filters['source'] . '%';
             }
-            if (!empty($filters['turn_no']) && is_numeric((string) $filters['turn_no'])) {
-                $conditions[] = 'turn_no = :f_l_turn_no';
-                $params['f_l_turn_no'] = (int) $filters['turn_no'];
+            if ($Silian_conversationId !== null) {
+                $Silian_conditions[] = 'conversation_id = :f_l_conversation_id';
+                $Silian_params['f_l_conversation_id'] = $Silian_conversationId;
+            }
+            if (!empty($Silian_filters['turn_no']) && is_numeric((string) $Silian_filters['turn_no'])) {
+                $Silian_conditions[] = 'turn_no = :f_l_turn_no';
+                $Silian_params['f_l_turn_no'] = (int) $Silian_filters['turn_no'];
             }
         }
     }
@@ -736,24 +736,24 @@ class LogSearchController
     /**
      * @param array<string,mixed> $params
      */
-    private function countRows(string $table, string $whereClause, array $params): int
+    private function countRows(string $Silian_table, string $Silian_whereClause, array $Silian_params): int
     {
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM {$table} {$whereClause}");
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
+        $Silian_stmt = $this->db->prepare("SELECT COUNT(*) FROM {$Silian_table} {$Silian_whereClause}");
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue(':' . $Silian_key, $Silian_value);
         }
-        $stmt->execute();
-        return (int) ($stmt->fetchColumn() ?: 0);
+        $Silian_stmt->execute();
+        return (int) ($Silian_stmt->fetchColumn() ?: 0);
     }
 
-    private function normalizeStart(string $d): string
-    { return preg_match('/\d{2}:\d{2}:\d{2}/', $d) ? $d : trim($d) . ' 00:00:00'; }
-    private function normalizeEnd(string $d): string
-    { return preg_match('/\d{2}:\d{2}:\d{2}/', $d) ? $d : trim($d) . ' 23:59:59'; }
+    private function normalizeStart(string $Silian_d): string
+    { return preg_match('/\d{2}:\d{2}:\d{2}/', $Silian_d) ? $Silian_d : trim($Silian_d) . ' 00:00:00'; }
+    private function normalizeEnd(string $Silian_d): string
+    { return preg_match('/\d{2}:\d{2}:\d{2}/', $Silian_d) ? $Silian_d : trim($Silian_d) . ' 23:59:59'; }
 
-    private function json(Response $response, array $data, int $status = 200): Response
+    private function json(Response $Silian_response, array $Silian_data, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus($status);
+        $Silian_response->getBody()->write(json_encode($Silian_data, JSON_UNESCAPED_UNICODE));
+        return $Silian_response->withHeader('Content-Type', 'application/json')->withStatus($Silian_status);
     }
 }

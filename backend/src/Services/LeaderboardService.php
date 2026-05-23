@@ -24,55 +24,55 @@ class LeaderboardService
     private string $cacheFile;
     private int $ttlSeconds;
 
-    public function __construct(PDO $db, RegionService $regionService, ?Logger $logger = null, ?string $cacheDir = null, ?int $ttlSeconds = null, ?AuditLogService $auditLogService = null, ?ErrorLogService $errorLogService = null, ?UserProfileViewService $userProfileViewService = null)
+    public function __construct(PDO $Silian_db, RegionService $Silian_regionService, ?Logger $Silian_logger = null, ?string $Silian_cacheDir = null, ?int $Silian_ttlSeconds = null, ?AuditLogService $Silian_auditLogService = null, ?ErrorLogService $Silian_errorLogService = null, ?UserProfileViewService $Silian_userProfileViewService = null)
     {
-        $this->db = $db;
-        $this->regionService = $regionService;
-        $this->logger = $logger;
-        $this->auditLogService = $auditLogService;
-        $this->errorLogService = $errorLogService;
-        $this->userProfileViewService = $userProfileViewService ?? new UserProfileViewService($regionService);
-        $baseDir = $cacheDir ?? (dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'cache');
-        if (!is_dir($baseDir)) {
-            @mkdir($baseDir, 0755, true);
+        $this->db = $Silian_db;
+        $this->regionService = $Silian_regionService;
+        $this->logger = $Silian_logger;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->errorLogService = $Silian_errorLogService;
+        $this->userProfileViewService = $Silian_userProfileViewService ?? new UserProfileViewService($Silian_regionService);
+        $Silian_baseDir = $Silian_cacheDir ?? (dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'cache');
+        if (!is_dir($Silian_baseDir)) {
+            @mkdir($Silian_baseDir, 0755, true);
         }
-        $this->cacheFile = rtrim($baseDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'leaderboards.json';
-        $this->ttlSeconds = $this->validateTtl($ttlSeconds ?? (int) ($_ENV['LEADERBOARD_CACHE_TTL'] ?? self::DEFAULT_TTL));
+        $this->cacheFile = rtrim($Silian_baseDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'leaderboards.json';
+        $this->ttlSeconds = $this->validateTtl($Silian_ttlSeconds ?? (int) ($_ENV['LEADERBOARD_CACHE_TTL'] ?? self::DEFAULT_TTL));
     }
 
-    public function getSnapshot(bool $forceRefresh = false): array
+    public function getSnapshot(bool $Silian_forceRefresh = false): array
     {
-        if (!$forceRefresh) {
-            $cached = $this->readCache();
-            if ($cached !== null) {
-                return $cached;
+        if (!$Silian_forceRefresh) {
+            $Silian_cached = $this->readCache();
+            if ($Silian_cached !== null) {
+                return $Silian_cached;
             }
         }
 
         return $this->rebuildCache('auto');
     }
 
-    public function rebuildCache(?string $reason = null): array
+    public function rebuildCache(?string $Silian_reason = null): array
     {
         try {
-            $data = $this->generateSnapshot();
-            $this->writeCache($data, $reason);
+            $Silian_data = $this->generateSnapshot();
+            $this->writeCache($Silian_data, $Silian_reason);
             $this->logAudit('leaderboard_cache_rebuilt', 'success', [
-                'reason' => $reason,
-                'entries_global' => count($data['global'] ?? []),
+                'reason' => $Silian_reason,
+                'entries_global' => count($Silian_data['global'] ?? []),
             ]);
-            return $data;
-        } catch (\Throwable $e) {
+            return $Silian_data;
+        } catch (\Throwable $Silian_e) {
             $this->log('error', 'Failed to rebuild leaderboard cache', [
-                'error' => $e->getMessage(),
-                'reason' => $reason,
+                'error' => $Silian_e->getMessage(),
+                'reason' => $Silian_reason,
             ]);
             $this->logAudit('leaderboard_cache_rebuild_failed', 'failed', [
-                'reason' => $reason,
-                'error' => $e->getMessage(),
+                'reason' => $Silian_reason,
+                'error' => $Silian_e->getMessage(),
             ]);
-            $this->logError($e, '/internal/leaderboard/rebuild', [
-                'reason' => $reason,
+            $this->logError($Silian_e, '/internal/leaderboard/rebuild', [
+                'reason' => $Silian_reason,
             ]);
             return $this->readCache() ?? [
                 'generated_at' => null,
@@ -86,7 +86,7 @@ class LeaderboardService
 
     private function generateSnapshot(): array
     {
-        $sql = "SELECT u.id, u.username, COALESCE(u.points, 0) AS total_points,
+        $Silian_sql = "SELECT u.id, u.username, COALESCE(u.points, 0) AS total_points,
                     u.avatar_id, u.region_code, u.school_id, s.name AS school_name, a.file_path AS avatar_path
                 FROM users u
                 LEFT JOIN avatars a ON u.avatar_id = a.id
@@ -94,72 +94,72 @@ class LeaderboardService
                 WHERE u.deleted_at IS NULL
                 ORDER BY u.points DESC, u.id ASC";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $global = [];
-        $regions = [];
-        $schools = [];
+        $Silian_global = [];
+        $Silian_regions = [];
+        $Silian_schools = [];
 
-        foreach ($rows as $row) {
-            $profileFields = $this->userProfileViewService->buildProfileFields($row);
-            $entry = $this->formatEntry($row, $profileFields);
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_profileFields = $this->userProfileViewService->buildProfileFields($Silian_row);
+            $Silian_entry = $this->formatEntry($Silian_row, $Silian_profileFields);
 
-            if (count($global) < self::GLOBAL_LIMIT) {
-                $entry['rank'] = count($global) + 1;
-                $global[] = $entry;
+            if (count($Silian_global) < self::GLOBAL_LIMIT) {
+                $Silian_entry['rank'] = count($Silian_global) + 1;
+                $Silian_global[] = $Silian_entry;
             }
 
-            $regionCode = $profileFields['region_code'] ?? null;
-            if ($regionCode) {
-                if (!isset($regions[$regionCode])) {
-                    $context = [
-                        'region_code' => $profileFields['region_code'] ?? $regionCode,
-                        'country_code' => $profileFields['country_code'] ?? null,
-                        'state_code' => $profileFields['state_code'] ?? null,
-                        'region_label' => $profileFields['region_label'] ?? null,
+            $Silian_regionCode = $Silian_profileFields['region_code'] ?? null;
+            if ($Silian_regionCode) {
+                if (!isset($Silian_regions[$Silian_regionCode])) {
+                    $Silian_context = [
+                        'region_code' => $Silian_profileFields['region_code'] ?? $Silian_regionCode,
+                        'country_code' => $Silian_profileFields['country_code'] ?? null,
+                        'state_code' => $Silian_profileFields['state_code'] ?? null,
+                        'region_label' => $Silian_profileFields['region_label'] ?? null,
                     ];
-                    $regions[$regionCode] = [
-                        'region_code' => $context['region_code'] ?? $regionCode,
-                        'country_code' => $context['country_code'] ?? null,
-                        'state_code' => $context['state_code'] ?? null,
-                        'region_label' => $context['region_label'] ?? null,
+                    $Silian_regions[$Silian_regionCode] = [
+                        'region_code' => $Silian_context['region_code'] ?? $Silian_regionCode,
+                        'country_code' => $Silian_context['country_code'] ?? null,
+                        'state_code' => $Silian_context['state_code'] ?? null,
+                        'region_label' => $Silian_context['region_label'] ?? null,
                         'entries' => [],
                     ];
                 }
-                if (count($regions[$regionCode]['entries']) < self::REGION_LIMIT) {
-                    $entry['rank'] = count($regions[$regionCode]['entries']) + 1;
-                    $regions[$regionCode]['entries'][] = $entry;
+                if (count($Silian_regions[$Silian_regionCode]['entries']) < self::REGION_LIMIT) {
+                    $Silian_entry['rank'] = count($Silian_regions[$Silian_regionCode]['entries']) + 1;
+                    $Silian_regions[$Silian_regionCode]['entries'][] = $Silian_entry;
                 }
             }
 
-            $schoolId = isset($row['school_id']) ? (int) $row['school_id'] : 0;
-            if ($schoolId > 0) {
-                if (!isset($schools[$schoolId])) {
-                    $schools[$schoolId] = [
-                        'school_id' => $schoolId,
-                        'school_name' => $profileFields['school_name'] ?? null,
+            $Silian_schoolId = isset($Silian_row['school_id']) ? (int) $Silian_row['school_id'] : 0;
+            if ($Silian_schoolId > 0) {
+                if (!isset($Silian_schools[$Silian_schoolId])) {
+                    $Silian_schools[$Silian_schoolId] = [
+                        'school_id' => $Silian_schoolId,
+                        'school_name' => $Silian_profileFields['school_name'] ?? null,
                         'entries' => [],
                     ];
                 }
-                if (count($schools[$schoolId]['entries']) < self::SCHOOL_LIMIT) {
-                    $entry['rank'] = count($schools[$schoolId]['entries']) + 1;
-                    $schools[$schoolId]['entries'][] = $entry;
+                if (count($Silian_schools[$Silian_schoolId]['entries']) < self::SCHOOL_LIMIT) {
+                    $Silian_entry['rank'] = count($Silian_schools[$Silian_schoolId]['entries']) + 1;
+                    $Silian_schools[$Silian_schoolId]['entries'][] = $Silian_entry;
                 }
             }
         }
 
-        $generatedAt = (new \DateTimeImmutable('now'))->format(DATE_ATOM);
-        $expiresAt = (new \DateTimeImmutable('now'))->modify(sprintf('+%d seconds', $this->ttlSeconds))->format(DATE_ATOM);
+        $Silian_generatedAt = (new \DateTimeImmutable('now'))->format(DATE_ATOM);
+        $Silian_expiresAt = (new \DateTimeImmutable('now'))->modify(sprintf('+%d seconds', $this->ttlSeconds))->format(DATE_ATOM);
 
         return [
-            'generated_at' => $generatedAt,
-            'expires_at' => $expiresAt,
+            'generated_at' => $Silian_generatedAt,
+            'expires_at' => $Silian_expiresAt,
             'ttl' => $this->ttlSeconds,
-            'global' => $global,
-            'regions' => $regions,
-            'schools' => $schools,
+            'global' => $Silian_global,
+            'regions' => $Silian_regions,
+            'schools' => $Silian_schools,
         ];
     }
 
@@ -169,103 +169,103 @@ class LeaderboardService
             return null;
         }
 
-        $modified = @filemtime($this->cacheFile);
-        if ($modified === false || (time() - $modified) > $this->ttlSeconds) {
+        $Silian_modified = @filemtime($this->cacheFile);
+        if ($Silian_modified === false || (time() - $Silian_modified) > $this->ttlSeconds) {
             return null;
         }
 
-        $contents = @file_get_contents($this->cacheFile);
-        if ($contents === false) {
+        $Silian_contents = @file_get_contents($this->cacheFile);
+        if ($Silian_contents === false) {
             return null;
         }
 
-        $decoded = json_decode($contents, true);
-        if (!is_array($decoded)) {
+        $Silian_decoded = json_decode($Silian_contents, true);
+        if (!is_array($Silian_decoded)) {
             return null;
         }
 
-        return $decoded;
+        return $Silian_decoded;
     }
 
-    private function writeCache(array $data, ?string $reason = null): void
+    private function writeCache(array $Silian_data, ?string $Silian_reason = null): void
     {
         if (!is_dir(dirname($this->cacheFile))) {
             @mkdir(dirname($this->cacheFile), 0755, true);
         }
-        $payload = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        if ($payload === false) {
+        $Silian_payload = json_encode($Silian_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($Silian_payload === false) {
             return;
         }
-        @file_put_contents($this->cacheFile, $payload, LOCK_EX);
+        @file_put_contents($this->cacheFile, $Silian_payload, LOCK_EX);
         $this->log('info', 'Leaderboard cache written', [
-            'reason' => $reason,
-            'entries_global' => count($data['global'] ?? []),
+            'reason' => $Silian_reason,
+            'entries_global' => count($Silian_data['global'] ?? []),
         ]);
         $this->logAudit('leaderboard_cache_written', 'success', [
-            'reason' => $reason,
-            'entries_global' => count($data['global'] ?? []),
+            'reason' => $Silian_reason,
+            'entries_global' => count($Silian_data['global'] ?? []),
         ]);
     }
 
-    private function formatEntry(array $row, array $profileFields): array
+    private function formatEntry(array $Silian_row, array $Silian_profileFields): array
     {
         return [
-            'id' => isset($row['id']) ? (int) $row['id'] : null,
-            'username' => $row['username'] ?? null,
-            'total_points' => isset($row['total_points']) ? (float) $row['total_points'] : 0.0,
-            'avatar_id' => isset($row['avatar_id']) ? (int) $row['avatar_id'] : null,
-            'avatar_path' => $row['avatar_path'] ?? null,
-            'region_code' => $profileFields['region_code'] ?? null,
-            'school_id' => isset($row['school_id']) ? (int) $row['school_id'] : null,
-            'school_name' => $profileFields['school_name'] ?? null,
+            'id' => isset($Silian_row['id']) ? (int) $Silian_row['id'] : null,
+            'username' => $Silian_row['username'] ?? null,
+            'total_points' => isset($Silian_row['total_points']) ? (float) $Silian_row['total_points'] : 0.0,
+            'avatar_id' => isset($Silian_row['avatar_id']) ? (int) $Silian_row['avatar_id'] : null,
+            'avatar_path' => $Silian_row['avatar_path'] ?? null,
+            'region_code' => $Silian_profileFields['region_code'] ?? null,
+            'school_id' => isset($Silian_row['school_id']) ? (int) $Silian_row['school_id'] : null,
+            'school_name' => $Silian_profileFields['school_name'] ?? null,
         ];
     }
 
-    private function validateTtl(int $value): int
+    private function validateTtl(int $Silian_value): int
     {
-        return max(60, min($value, 3600));
+        return max(60, min($Silian_value, 3600));
     }
 
-    private function log(string $level, string $message, array $context = []): void
+    private function log(string $Silian_level, string $Silian_message, array $Silian_context = []): void
     {
         if (!$this->logger) {
             return;
         }
         try {
-            $this->logger->log($level, $message, $context);
-        } catch (\Throwable $ignore) {
+            $this->logger->log($Silian_level, $Silian_message, $Silian_context);
+        } catch (\Throwable $Silian_ignore) {
             // swallow logger failures
         }
     }
 
-    private function logAudit(string $action, string $status, array $data = []): void
+    private function logAudit(string $Silian_action, string $Silian_status, array $Silian_data = []): void
     {
         if (!$this->auditLogService) {
             return;
         }
 
         try {
-            $this->auditLogService->logSystemEvent($action, 'leaderboard_service', [
-                'status' => $status,
+            $this->auditLogService->logSystemEvent($Silian_action, 'leaderboard_service', [
+                'status' => $Silian_status,
                 'endpoint' => '/internal/leaderboard/cache',
                 'request_method' => 'SYSTEM',
-                'request_data' => $data,
+                'request_data' => $Silian_data,
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // 审计日志失败不阻断主流程
         }
     }
 
-    private function logError(\Throwable $exception, string $path, array $context = []): void
+    private function logError(\Throwable $Silian_exception, string $Silian_path, array $Silian_context = []): void
     {
         if (!$this->errorLogService) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext($path, 'SYSTEM', null, [], $context, ['PHP_SAPI' => PHP_SAPI]);
-            $this->errorLogService->logException($exception, $request, $context);
-        } catch (\Throwable $ignore) {
+            $Silian_request = SyntheticRequestFactory::fromContext($Silian_path, 'SYSTEM', null, [], $Silian_context, ['PHP_SAPI' => PHP_SAPI]);
+            $this->errorLogService->logException($Silian_exception, $Silian_request, $Silian_context);
+        } catch (\Throwable $Silian_ignore) {
             // swallow secondary logging failure
         }
     }

@@ -1,481 +1,481 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import clsx from 'clsx';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Silian_React, { useState as Silian_useState, useEffect as Silian_useEffect, useMemo as Silian_useMemo, useRef as Silian_useRef } from 'react';
+import { createPortal as Silian_createPortal } from 'react-dom';
+import Silian_clsx from 'clsx';
+import { Link as Silian_Link, useLocation as Silian_useLocation, useNavigate as Silian_useNavigate } from 'react-router-dom';
 import {
-  Menu,
-  X,
-  Home,
-  Calculator,
-  BarChart3,
-  ShoppingBag,
-  Settings,
-  LogOut,
-  Bell,
-  MessageSquare,
-  Info,
-  Headset
+  Menu as Silian_Menu,
+  X as Silian_X,
+  Home as Silian_Home,
+  Calculator as Silian_Calculator,
+  BarChart3 as Silian_BarChart3,
+  ShoppingBag as Silian_ShoppingBag,
+  Settings as Silian_Settings,
+  LogOut as Silian_LogOut,
+  Bell as Silian_Bell,
+  MessageSquare as Silian_MessageSquare,
+  Info as Silian_Info,
+  Headset as Silian_Headset
 } from 'lucide-react';
-import { useTranslation } from '../../hooks/useTranslation';
-import { checkAuthStatus, authAPI, hasSupportPortalAccess } from '../../lib/auth';
-import { useUnreadMessagesCount } from '../../hooks/useUnreadMessagesCount';
-import { Button } from '../ui/Button';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { checkAuthStatus as Silian_checkAuthStatus, authAPI as Silian_authAPI, hasSupportPortalAccess as Silian_hasSupportPortalAccess } from '../../lib/auth';
+import { useUnreadMessagesCount as Silian_useUnreadMessagesCount } from '../../hooks/useUnreadMessagesCount';
+import { Button as Silian_Button } from '../ui/Button';
 
-const LanguageSwitcher = React.lazy(() => import('../LanguageSwitcher'));
-const ThemeToggle = React.lazy(() => import('../ThemeToggle').then((module) => ({ default: module.ThemeToggle })));
-const R2Image = React.lazy(() => import('../common/R2Image'));
+const Silian_LanguageSwitcher = Silian_React.lazy(() => import('../LanguageSwitcher'));
+const Silian_ThemeToggle = Silian_React.lazy(() => import('../ThemeToggle').then((Silian_module) => ({ default: Silian_module.ThemeToggle })));
+const Silian_R2Image = Silian_React.lazy(() => import('../common/R2Image'));
 
-const NAV_SECTION_ORDER = ['overview', 'insights', 'marketplace'];
+const Silian_NAV_SECTION_ORDER = ['overview', 'insights', 'marketplace'];
 
 export function Navbar() {
-  const { t } = useTranslation(['nav', 'footer']);
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  const hasRefreshedUserRef = useRef(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showSecondaryControls, setShowSecondaryControls] = useState(false);
-  const { count: unreadCount, isLoading: unreadLoading } = useUnreadMessagesCount({
-    enabled: location.pathname !== '/',
+  const { t: Silian_t } = Silian_useTranslation(['nav', 'footer']);
+  const Silian_location = Silian_useLocation();
+  const Silian_isAdminRoute = Silian_location.pathname.startsWith('/admin');
+  const Silian_hasRefreshedUserRef = Silian_useRef(false);
+  const [Silian_isOpen, Silian_setIsOpen] = Silian_useState(false);
+  const [Silian_user, Silian_setUser] = Silian_useState(null);
+  const [Silian_isAuthenticated, Silian_setIsAuthenticated] = Silian_useState(false);
+  const [Silian_showSecondaryControls, Silian_setShowSecondaryControls] = Silian_useState(false);
+  const { count: Silian_unreadCount, isLoading: Silian_unreadLoading } = Silian_useUnreadMessagesCount({
+    enabled: Silian_location.pathname !== '/',
   });
-  const navigate = useNavigate();
-  const getIsPortrait = () => {
+  const Silian_navigate = Silian_useNavigate();
+  const Silian_getIsPortrait = () => {
     if (typeof window === 'undefined' || !window.matchMedia) {
       return true;
     }
     return window.matchMedia('(orientation: portrait)').matches;
   };
-  const [isPortrait, setIsPortrait] = useState(getIsPortrait);
-  const [renderMobileNav, setRenderMobileNav] = useState(false);
-  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+  const [Silian_isPortrait, Silian_setIsPortrait] = Silian_useState(Silian_getIsPortrait);
+  const [Silian_renderMobileNav, Silian_setRenderMobileNav] = Silian_useState(false);
+  const [Silian_isAnimatingOut, Silian_setIsAnimatingOut] = Silian_useState(false);
 
-  useEffect(() => {
-    const { isAuthenticated: authStatus, user: currentUser } = checkAuthStatus();
-    setIsAuthenticated(authStatus);
-    setUser(currentUser);
+  Silian_useEffect(() => {
+    const { isAuthenticated: Silian_authStatus, user: Silian_currentUser } = Silian_checkAuthStatus();
+    Silian_setIsAuthenticated(Silian_authStatus);
+    Silian_setUser(Silian_currentUser);
 
-    if (!authStatus || hasRefreshedUserRef.current || location.pathname === '/') {
+    if (!Silian_authStatus || Silian_hasRefreshedUserRef.current || Silian_location.pathname === '/') {
       return undefined;
     }
 
-    let cancelled = false;
+    let Silian_cancelled = false;
 
     (async () => {
       try {
-        const freshUser = await authAPI.getCurrentUser();
-        if (!cancelled && freshUser) {
-          hasRefreshedUserRef.current = true;
-          setUser(freshUser);
+        const Silian_freshUser = await Silian_authAPI.getCurrentUser();
+        if (!Silian_cancelled && Silian_freshUser) {
+          Silian_hasRefreshedUserRef.current = true;
+          Silian_setUser(Silian_freshUser);
         }
-      } catch (error) {
-        hasRefreshedUserRef.current = false;
-        console.error('Failed to refresh current user information', error);
+      } catch (Silian_error) {
+        Silian_hasRefreshedUserRef.current = false;
+        console.error('Failed to refresh current user information', Silian_error);
       }
     })();
 
     return () => {
-      cancelled = true;
+      Silian_cancelled = true;
     };
-  }, [location.pathname]);
+  }, [Silian_location.pathname]);
 
-  useEffect(() => {
+  Silian_useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {
       return;
     }
-    const mediaQuery = window.matchMedia('(orientation: portrait)');
-    const handleOrientationChange = (event) => {
-      setIsPortrait(event.matches);
+    const Silian_mediaQuery = window.matchMedia('(orientation: portrait)');
+    const Silian_handleOrientationChange = (Silian_event) => {
+      Silian_setIsPortrait(Silian_event.matches);
     };
-    setIsPortrait(mediaQuery.matches);
+    Silian_setIsPortrait(Silian_mediaQuery.matches);
 
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', handleOrientationChange);
-      return () => mediaQuery.removeEventListener('change', handleOrientationChange);
+    if (typeof Silian_mediaQuery.addEventListener === 'function') {
+      Silian_mediaQuery.addEventListener('change', Silian_handleOrientationChange);
+      return () => Silian_mediaQuery.removeEventListener('change', Silian_handleOrientationChange);
     }
 
-    mediaQuery.addListener(handleOrientationChange);
-    return () => mediaQuery.removeListener(handleOrientationChange);
+    Silian_mediaQuery.addListener(Silian_handleOrientationChange);
+    return () => Silian_mediaQuery.removeListener(Silian_handleOrientationChange);
   }, []);
 
-  useEffect(() => {
-    if (isOpen) {
-      setRenderMobileNav(true);
-      setIsAnimatingOut(false);
+  Silian_useEffect(() => {
+    if (Silian_isOpen) {
+      Silian_setRenderMobileNav(true);
+      Silian_setIsAnimatingOut(false);
       return;
     }
-    if (!renderMobileNav) {
+    if (!Silian_renderMobileNav) {
       return;
     }
 
-    setIsAnimatingOut(true);
-    const timeout = setTimeout(() => {
-      setRenderMobileNav(false);
-      setIsAnimatingOut(false);
+    Silian_setIsAnimatingOut(true);
+    const Silian_timeout = setTimeout(() => {
+      Silian_setRenderMobileNav(false);
+      Silian_setIsAnimatingOut(false);
     }, 220);
 
-    return () => clearTimeout(timeout);
-  }, [isOpen, renderMobileNav]);
+    return () => clearTimeout(Silian_timeout);
+  }, [Silian_isOpen, Silian_renderMobileNav]);
 
-  useEffect(() => {
-    if (!isPortrait || !renderMobileNav || typeof document === 'undefined') {
+  Silian_useEffect(() => {
+    if (!Silian_isPortrait || !Silian_renderMobileNav || typeof document === 'undefined') {
       return;
     }
-    const originalOverflow = document.body.style.overflow;
+    const Silian_originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = Silian_originalOverflow;
     };
-  }, [isPortrait, renderMobileNav]);
+  }, [Silian_isPortrait, Silian_renderMobileNav]);
 
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location.pathname]);
+  Silian_useEffect(() => {
+    Silian_setIsOpen(false);
+  }, [Silian_location.pathname]);
 
-  useEffect(() => {
-    if (showSecondaryControls) {
+  Silian_useEffect(() => {
+    if (Silian_showSecondaryControls) {
       return undefined;
     }
 
-    let cancelled = false;
-    let idleHandle = null;
-    const timeoutHandle = window.setTimeout(() => {
-      const activate = () => {
-        if (cancelled) {
+    let Silian_cancelled = false;
+    let Silian_idleHandle = null;
+    const Silian_timeoutHandle = window.setTimeout(() => {
+      const Silian_activate = () => {
+        if (Silian_cancelled) {
           return;
         }
 
-        if (typeof React.startTransition === 'function') {
-          React.startTransition(() => setShowSecondaryControls(true));
+        if (typeof Silian_React.startTransition === 'function') {
+          Silian_React.startTransition(() => Silian_setShowSecondaryControls(true));
           return;
         }
 
-        setShowSecondaryControls(true);
+        Silian_setShowSecondaryControls(true);
       };
 
       if (typeof window.requestIdleCallback === 'function') {
-        idleHandle = window.requestIdleCallback(activate, { timeout: 1500 });
+        Silian_idleHandle = window.requestIdleCallback(Silian_activate, { timeout: 1500 });
         return;
       }
 
-      activate();
+      Silian_activate();
     }, 1200);
 
     return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutHandle);
-      if (idleHandle != null && typeof window.cancelIdleCallback === 'function') {
-        window.cancelIdleCallback(idleHandle);
+      Silian_cancelled = true;
+      window.clearTimeout(Silian_timeoutHandle);
+      if (Silian_idleHandle != null && typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(Silian_idleHandle);
       }
     };
-  }, [showSecondaryControls]);
+  }, [Silian_showSecondaryControls]);
 
-  const mobilePanelId = 'navbar-mobile-panel';
-  const canAccessSupportPortal = hasSupportPortalAccess(user);
+  const Silian_mobilePanelId = 'navbar-mobile-panel';
+  const Silian_canAccessSupportPortal = Silian_hasSupportPortalAccess(Silian_user);
 
-  const handleLogout = async () => {
+  const Silian_handleLogout = async () => {
     try {
-      await authAPI.logout();
-      setIsAuthenticated(false);
-      setUser(null);
-    } catch (e) {
-      console.error('Logout failed:', e);
+      await Silian_authAPI.logout();
+      Silian_setIsAuthenticated(false);
+      Silian_setUser(null);
+    } catch (Silian_e) {
+      console.error('Logout failed:', Silian_e);
     } finally {
       // 统一跳转到登录页
-      navigate('/auth/login');
+      Silian_navigate('/auth/login');
     }
   };
 
-  const toggleMobile = () => {
-    setIsOpen((prev) => !prev);
+  const Silian_toggleMobile = () => {
+    Silian_setIsOpen((Silian_prev) => !Silian_prev);
   };
 
-  const closeMobile = () => {
-    setIsOpen(false);
+  const Silian_closeMobile = () => {
+    Silian_setIsOpen(false);
   };
 
-  const isActivePath = (path) => {
-    return location.pathname === path;
+  const Silian_isActivePath = (Silian_path) => {
+    return Silian_location.pathname === Silian_path;
   };
 
-  const navItems = [
+  const Silian_navItems = [
     {
       path: '/',
-      label: t('nav.home'),
-      icon: Home,
+      label: Silian_t('nav.home'),
+      icon: Silian_Home,
       public: true,
       section: 'overview',
-      hint: t('nav.hints.home')
+      hint: Silian_t('nav.hints.home')
     },
     {
       path: '/about-us',
-      label: t('nav.about'),
-      icon: Info,
+      label: Silian_t('nav.about'),
+      icon: Silian_Info,
       public: true,
       section: 'overview',
-      hint: t('nav.hints.about')
+      hint: Silian_t('nav.hints.about')
     },
     {
       path: '/calculate',
-      label: t('nav.calculate'),
-      icon: Calculator,
+      label: Silian_t('nav.calculate'),
+      icon: Silian_Calculator,
       auth: true,
       section: 'insights',
-      hint: t('nav.hints.calculate')
+      hint: Silian_t('nav.hints.calculate')
     },
     {
       path: '/dashboard',
-      label: t('nav.dashboard'),
-      icon: BarChart3,
+      label: Silian_t('nav.dashboard'),
+      icon: Silian_BarChart3,
       auth: true,
       section: 'insights',
-      hint: t('nav.hints.dashboard')
+      hint: Silian_t('nav.hints.dashboard')
     },
     {
       path: '/store',
-      label: t('nav.products'),
-      icon: ShoppingBag,
+      label: Silian_t('nav.products'),
+      icon: Silian_ShoppingBag,
       auth: true,
       section: 'marketplace',
-      hint: t('nav.hints.products')
+      hint: Silian_t('nav.hints.products')
     }
   ];
 
-  const filteredNavItems = navItems.filter(item => {
-    if (item.public) return true;
-    if (item.auth) return isAuthenticated;
+  const Silian_filteredNavItems = Silian_navItems.filter(Silian_item => {
+    if (Silian_item.public) return true;
+    if (Silian_item.auth) return Silian_isAuthenticated;
     return true;
   });
 
-  const navSectionsMeta = useMemo(() => ({
+  const Silian_navSectionsMeta = Silian_useMemo(() => ({
     overview: {
-      title: t('nav.sections.overview'),
-      description: t('nav.sections.overviewDesc')
+      title: Silian_t('nav.sections.overview'),
+      description: Silian_t('nav.sections.overviewDesc')
     },
     insights: {
-      title: t('nav.sections.insights'),
-      description: t('nav.sections.insightsDesc')
+      title: Silian_t('nav.sections.insights'),
+      description: Silian_t('nav.sections.insightsDesc')
     },
     marketplace: {
-      title: t('nav.sections.marketplace'),
-      description: t('nav.sections.marketplaceDesc')
+      title: Silian_t('nav.sections.marketplace'),
+      description: Silian_t('nav.sections.marketplaceDesc')
     }
-  }), [t]);
+  }), [Silian_t]);
 
-  const mobileNavSections = useMemo(() => {
-    return NAV_SECTION_ORDER
-      .map((key) => {
-        const items = filteredNavItems.filter(
-          (item) => (item.section || 'overview') === key
+  const Silian_mobileNavSections = Silian_useMemo(() => {
+    return Silian_NAV_SECTION_ORDER
+      .map((Silian_key) => {
+        const Silian_items = Silian_filteredNavItems.filter(
+          (Silian_item) => (Silian_item.section || 'overview') === Silian_key
         );
 
-        if (!items.length) {
+        if (!Silian_items.length) {
           return null;
         }
 
-        const sectionMeta = navSectionsMeta[key] || {};
+        const Silian_sectionMeta = Silian_navSectionsMeta[Silian_key] || {};
         return {
-          key,
-          ...sectionMeta,
-          items
+          key: Silian_key,
+          ...Silian_sectionMeta,
+          items: Silian_items
         };
       })
       .filter(Boolean);
-  }, [filteredNavItems, navSectionsMeta]);
+  }, [Silian_filteredNavItems, Silian_navSectionsMeta]);
 
-  const userInitial = useMemo(() => {
-    if (!user?.username) return 'C';
-    const trimmed = String(user.username).trim();
-    return trimmed ? trimmed.charAt(0).toUpperCase() : 'C';
-  }, [user?.username]);
+  const Silian_userInitial = Silian_useMemo(() => {
+    if (!Silian_user?.username) return 'C';
+    const Silian_trimmed = String(Silian_user.username).trim();
+    return Silian_trimmed ? Silian_trimmed.charAt(0).toUpperCase() : 'C';
+  }, [Silian_user?.username]);
 
-  const accountActions = useMemo(() => {
-    if (!isAuthenticated) {
+  const Silian_accountActions = Silian_useMemo(() => {
+    if (!Silian_isAuthenticated) {
       return [];
     }
 
-    const actions = [
+    const Silian_actions = [
       {
         key: 'messages',
-        label: t('nav.messages'),
+        label: Silian_t('nav.messages'),
         to: '/messages',
-        icon: MessageSquare,
-        badge: !unreadLoading && unreadCount > 0 ? unreadCount : null
+        icon: Silian_MessageSquare,
+        badge: !Silian_unreadLoading && Silian_unreadCount > 0 ? Silian_unreadCount : null
       },
       {
         key: 'profile',
-        label: t('nav.profile'),
+        label: Silian_t('nav.profile'),
         to: '/profile',
-        icon: Settings
+        icon: Silian_Settings
       },
       {
         key: 'notifications',
-        label: t('nav.notifications'),
+        label: Silian_t('nav.notifications'),
         to: '/settings/notifications',
-        icon: Bell
+        icon: Silian_Bell
       }
     ];
 
-    if (canAccessSupportPortal) {
-      actions.push({
+    if (Silian_canAccessSupportPortal) {
+      Silian_actions.push({
         key: 'support',
-        label: t('nav.support'),
+        label: Silian_t('nav.support'),
         to: '/support/',
-        icon: Headset
+        icon: Silian_Headset
       });
     }
 
-    if (user?.is_admin) {
-      actions.push({
+    if (Silian_user?.is_admin) {
+      Silian_actions.push({
         key: 'admin',
-        label: t('nav.admin'),
+        label: Silian_t('nav.admin'),
         to: '/admin',
-        icon: Settings
+        icon: Silian_Settings
       });
     }
 
-    return actions;
-  }, [canAccessSupportPortal, isAuthenticated, t, unreadCount, unreadLoading, user?.is_admin]);
+    return Silian_actions;
+  }, [Silian_canAccessSupportPortal, Silian_isAuthenticated, Silian_t, Silian_unreadCount, Silian_unreadLoading, Silian_user?.is_admin]);
 
-  const renderUserAvatar = (sizeClass = 'h-8 w-8') => {
-    const fallback = (
-      <div className={`${sizeClass} flex items-center justify-center rounded-full bg-green-100 text-green-600 text-sm font-semibold`}>
-        {userInitial}
+  const Silian_renderUserAvatar = (Silian_sizeClass = 'h-8 w-8') => {
+    const Silian_fallback = (
+      <div className={`${Silian_sizeClass} flex items-center justify-center rounded-full bg-green-100 text-green-600 text-sm font-semibold`}>
+        {Silian_userInitial}
       </div>
     );
 
-    const avatarPath = user?.avatar_path;
-    const avatarUrl = user?.avatar_url;
+    const Silian_avatarPath = Silian_user?.avatar_path;
+    const Silian_avatarUrl = Silian_user?.avatar_url;
 
-    if (!avatarPath && !avatarUrl) {
-      return fallback;
+    if (!Silian_avatarPath && !Silian_avatarUrl) {
+      return Silian_fallback;
     }
 
-    const isAbsoluteUrl = typeof avatarUrl === 'string' && /^https?:\/\//i.test(avatarUrl);
-    const resolvedFilePath = avatarPath || (!isAbsoluteUrl ? avatarUrl : undefined);
+    const Silian_isAbsoluteUrl = typeof Silian_avatarUrl === 'string' && /^https?:\/\//i.test(Silian_avatarUrl);
+    const Silian_resolvedFilePath = Silian_avatarPath || (!Silian_isAbsoluteUrl ? Silian_avatarUrl : undefined);
 
     return (
-      <React.Suspense fallback={fallback}>
-        <R2Image
-          filePath={resolvedFilePath}
-          src={isAbsoluteUrl ? avatarUrl : undefined}
-          alt={user?.username || 'avatar'}
-          className={`${sizeClass} rounded-full border border-border object-cover`}
-          fallback={fallback}
+      <Silian_React.Suspense fallback={Silian_fallback}>
+        <Silian_R2Image
+          filePath={Silian_resolvedFilePath}
+          src={Silian_isAbsoluteUrl ? Silian_avatarUrl : undefined}
+          alt={Silian_user?.username || 'avatar'}
+          className={`${Silian_sizeClass} rounded-full border border-border object-cover`}
+          fallback={Silian_fallback}
         />
-      </React.Suspense>
+      </Silian_React.Suspense>
     );
   };
 
-  const mobileNavigation = renderMobileNav && typeof document !== 'undefined' && document.body
-    ? createPortal(
+  const Silian_mobileNavigation = Silian_renderMobileNav && typeof document !== 'undefined' && document.body
+    ? Silian_createPortal(
         <>
-          {isPortrait && (
+          {Silian_isPortrait && (
             <button
               type="button"
-              onClick={closeMobile}
-              aria-label={t('nav.closeMenu')}
-              className={clsx(
+              onClick={Silian_closeMobile}
+              aria-label={Silian_t('nav.closeMenu')}
+              className={Silian_clsx(
                 'fixed inset-0 z-[55] bg-black/45 transition-opacity duration-200 ease-out md:hidden',
-                isAnimatingOut ? 'opacity-0' : 'opacity-100'
+                Silian_isAnimatingOut ? 'opacity-0' : 'opacity-100'
               )}
             />
           )}
           <div
-            id={mobilePanelId}
-            role={isPortrait ? 'dialog' : 'region'}
-            aria-modal={isPortrait ? 'true' : undefined}
-            className={clsx(
+            id={Silian_mobilePanelId}
+            role={Silian_isPortrait ? 'dialog' : 'region'}
+            aria-modal={Silian_isPortrait ? 'true' : undefined}
+            className={Silian_clsx(
               'md:hidden border-t border-border bg-background text-foreground',
-              isPortrait
+              Silian_isPortrait
                 ? 'fixed inset-0 z-[60] border-0 rounded-none bg-background shadow-2xl shadow-black/20'
                 : 'absolute inset-x-0 top-16 z-10 rounded-b-2xl border border-border shadow-lg shadow-black/10',
-              isAnimatingOut ? 'animate-mobile-nav-out' : 'animate-mobile-nav-in'
+              Silian_isAnimatingOut ? 'animate-mobile-nav-out' : 'animate-mobile-nav-in'
             )}
           >
             <div
-              className={clsx(
+              className={Silian_clsx(
                 'space-y-5',
-                isPortrait
+                Silian_isPortrait
                   ? 'h-[100dvh] overflow-y-auto px-4 pt-0 pb-[max(2rem,env(safe-area-inset-bottom))]'
                   : 'px-3 pt-4 pb-6'
               )}
             >
               <div
-                className={clsx(
+                className={Silian_clsx(
                   'flex items-center justify-between gap-3',
-                  isPortrait && 'sticky top-0 z-10 -mx-4 border-b border-border bg-background px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))]'
+                  Silian_isPortrait && 'sticky top-0 z-10 -mx-4 border-b border-border bg-background px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))]'
                 )}
               >
                 <div>
                   <p className="text-sm font-semibold text-foreground">
-                    {t('nav.menuTitle')}
+                    {Silian_t('nav.menuTitle')}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {t('nav.menuSubtitle')}
+                    {Silian_t('nav.menuSubtitle')}
                   </p>
                 </div>
-                <Button
+                <Silian_Button
                   variant="ghost"
                   size="icon"
-                  onClick={closeMobile}
-                  aria-label={t('nav.closeMenu')}
+                  onClick={Silian_closeMobile}
+                  aria-label={Silian_t('nav.closeMenu')}
                   className="h-9 w-9 rounded-full border border-border"
                 >
-                  <X className="h-4 w-4" />
-                </Button>
+                  <Silian_X className="h-4 w-4" />
+                </Silian_Button>
               </div>
 
-              {mobileNavSections.map((section) => (
+              {Silian_mobileNavSections.map((Silian_section) => (
                 <div
-                  key={section.key}
+                  key={Silian_section.key}
                   className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5"
                 >
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
-                      {section.title}
+                      {Silian_section.title}
                     </p>
-                    {section.description && (
-                      <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
+                    {Silian_section.description && (
+                      <p className="mt-1 text-sm text-muted-foreground">{Silian_section.description}</p>
                     )}
                   </div>
                   <div
-                    className={clsx(
+                    className={Silian_clsx(
                       'mt-4 gap-3',
-                      isPortrait ? 'grid grid-cols-1 min-[420px]:grid-cols-2' : 'flex flex-col'
+                      Silian_isPortrait ? 'grid grid-cols-1 min-[420px]:grid-cols-2' : 'flex flex-col'
                     )}
                   >
-                    {section.items.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = isActivePath(item.path);
+                    {Silian_section.items.map((Silian_item) => {
+                      const Silian_Icon = Silian_item.icon;
+                      const Silian_isActive = Silian_isActivePath(Silian_item.path);
                       return (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          onClick={closeMobile}
-                          className={clsx(
+                        <Silian_Link
+                          key={Silian_item.path}
+                          to={Silian_item.path}
+                          onClick={Silian_closeMobile}
+                          className={Silian_clsx(
                             'flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40',
-                            isActive
+                            Silian_isActive
                               ? 'border-green-200 bg-green-50/80 text-green-700 shadow-sm dark:border-green-900/60 dark:bg-green-950/30 dark:text-green-300'
                               : 'border-border text-muted-foreground hover:border-green-200 hover:bg-accent hover:text-foreground'
                           )}
                         >
                           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600">
-                            <Icon className="h-5 w-5" />
+                            <Silian_Icon className="h-5 w-5" />
                           </span>
                           <div className="flex-1">
-                            <span className="text-sm font-semibold">{item.label}</span>
-                            {item.hint && (
-                              <p className="mt-0.5 text-xs text-muted-foreground">{item.hint}</p>
+                            <span className="text-sm font-semibold">{Silian_item.label}</span>
+                            {Silian_item.hint && (
+                              <p className="mt-0.5 text-xs text-muted-foreground">{Silian_item.hint}</p>
                             )}
                           </div>
-                          {item.badge && item.badge > 0 && (
+                          {Silian_item.badge && Silian_item.badge > 0 && (
                             <span className="ml-auto flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-semibold text-white">
-                              {item.badge > 99 ? '99+' : item.badge}
+                              {Silian_item.badge > 99 ? '99+' : Silian_item.badge}
                             </span>
                           )}
-                        </Link>
+                        </Silian_Link>
                       );
                     })}
                   </div>
@@ -487,27 +487,27 @@ export function Navbar() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wide text-green-600">
-                        {t('nav.languageSection')}
+                        {Silian_t('nav.languageSection')}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {t('nav.languageDescription')}
+                        {Silian_t('nav.languageDescription')}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {showSecondaryControls ? (
-                        <React.Suspense fallback={null}>
-                          <LanguageSwitcher
+                      {Silian_showSecondaryControls ? (
+                        <Silian_React.Suspense fallback={null}>
+                          <Silian_LanguageSwitcher
                             variant="outline"
                             size="sm"
                             showText={false}
                             className="border-border bg-background/80 text-foreground hover:bg-accent"
                           />
-                          <ThemeToggle
+                          <Silian_ThemeToggle
                             variant="outline"
                             size="icon"
                             className="border-border bg-background/80 text-foreground hover:bg-accent"
                           />
-                        </React.Suspense>
+                        </Silian_React.Suspense>
                       ) : (
                         <div className="flex items-center gap-2">
                           <div className="h-9 w-9 rounded-md border border-border bg-background/80" />
@@ -518,44 +518,44 @@ export function Navbar() {
                   </div>
                 </div>
 
-                {isAuthenticated ? (
+                {Silian_isAuthenticated ? (
                   <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
                     <div className="flex items-center gap-3">
-                      {renderUserAvatar('h-12 w-12')}
+                      {Silian_renderUserAvatar('h-12 w-12')}
                       <div>
                         <p className="text-base font-semibold text-foreground">
-                          {user?.username}
+                          {Silian_user?.username}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {t('nav.accountSignedIn')}
+                          {Silian_t('nav.accountSignedIn')}
                         </p>
                       </div>
                     </div>
 
-                    {accountActions.length > 0 && (
+                    {Silian_accountActions.length > 0 && (
                       <div
-                        className={clsx(
+                        className={Silian_clsx(
                           'mt-4 gap-3',
-                          isPortrait ? 'grid grid-cols-2' : 'flex flex-col'
+                          Silian_isPortrait ? 'grid grid-cols-2' : 'flex flex-col'
                         )}
                       >
-                        {accountActions.map((action) => {
-                          const ActionIcon = action.icon;
+                        {Silian_accountActions.map((Silian_action) => {
+                          const Silian_ActionIcon = Silian_action.icon;
                           return (
-                            <Link
-                              key={action.key}
-                              to={action.to}
-                              onClick={closeMobile}
+                            <Silian_Link
+                              key={Silian_action.key}
+                              to={Silian_action.to}
+                              onClick={Silian_closeMobile}
                               className="flex items-center gap-2 rounded-xl border border-border bg-background/80 px-3 py-3 text-sm font-medium text-muted-foreground transition hover:-translate-y-0.5 hover:border-green-200 hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40 dark:bg-background/60"
                             >
-                              <ActionIcon className="h-4 w-4" />
-                              <span>{action.label}</span>
-                              {typeof action.badge === 'number' && action.badge > 0 && (
+                              <Silian_ActionIcon className="h-4 w-4" />
+                              <span>{Silian_action.label}</span>
+                              {typeof Silian_action.badge === 'number' && Silian_action.badge > 0 && (
                                 <span className="ml-auto rounded-full bg-red-500 px-2 text-xs font-semibold text-white">
-                                  {action.badge > 99 ? '99+' : action.badge}
+                                  {Silian_action.badge > 99 ? '99+' : Silian_action.badge}
                                 </span>
                               )}
-                            </Link>
+                            </Silian_Link>
                           );
                         })}
                       </div>
@@ -563,34 +563,34 @@ export function Navbar() {
 
                     <button
                       onClick={() => {
-                        handleLogout();
-                        closeMobile();
+                        Silian_handleLogout();
+                        Silian_closeMobile();
                       }}
                       className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-green-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/60"
                     >
-                      <LogOut className="h-4 w-4" />
-                      {t('nav.logout')}
+                      <Silian_LogOut className="h-4 w-4" />
+                      {Silian_t('nav.logout')}
                     </button>
                   </div>
                 ) : (
                   <div className="rounded-2xl border border-border bg-card/95 p-4 shadow-sm shadow-black/5">
                     <p className="text-base font-semibold text-foreground">
-                      {t('nav.getStarted')}
+                      {Silian_t('nav.getStarted')}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {t('nav.accountDescription')}
+                      {Silian_t('nav.accountDescription')}
                     </p>
                     <div className="mt-4 space-y-2">
-                      <Link to="/auth/login" onClick={closeMobile}>
-                        <Button variant="outline" className="w-full justify-center">
-                          {t('nav.login')}
-                        </Button>
-                      </Link>
-                      <Link to="/auth/register" onClick={closeMobile}>
-                        <Button className="w-full">
-                          {t('nav.register')}
-                        </Button>
-                      </Link>
+                      <Silian_Link to="/auth/login" onClick={Silian_closeMobile}>
+                        <Silian_Button variant="outline" className="w-full justify-center">
+                          {Silian_t('nav.login')}
+                        </Silian_Button>
+                      </Silian_Link>
+                      <Silian_Link to="/auth/register" onClick={Silian_closeMobile}>
+                        <Silian_Button className="w-full">
+                          {Silian_t('nav.register')}
+                        </Silian_Button>
+                      </Silian_Link>
                     </div>
                   </div>
                 )}
@@ -605,11 +605,11 @@ export function Navbar() {
   return (
     <>
       <nav
-        className={clsx(
+        className={Silian_clsx(
           'sticky top-0 z-50 transition-all duration-300',
-          isAdminRoute
+          Silian_isAdminRoute
             ? 'border-b border-border bg-background'
-            : isPortrait && renderMobileNav
+            : Silian_isPortrait && Silian_renderMobileNav
               ? 'border-b border-border bg-background'
             : 'border-b border-black/5 dark:border-white/10 bg-white/70 dark:bg-black/50 backdrop-blur-xl supports-[backdrop-filter]:backdrop-blur-xl'
         )}
@@ -617,136 +617,136 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 text-xl font-bold text-green-600 dark:text-emerald-400">
+          <Silian_Link to="/" className="flex items-center gap-3 text-xl font-bold text-green-600 dark:text-emerald-400">
             <img src="/favicon.ico" alt="CarbonTrack logo" className="h-12 w-12 shrink-0 object-contain" />
             <span>CarbonTrack</span>
-          </Link>
+          </Silian_Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1 lg:gap-2">
-            {filteredNavItems.map((item) => {
-              const Icon = item.icon;
+            {Silian_filteredNavItems.map((Silian_item) => {
+              const Silian_Icon = Silian_item.icon;
               return (
-                <Link
-                  key={item.path}
-                  to={item.path}
+                <Silian_Link
+                  key={Silian_item.path}
+                  to={Silian_item.path}
                   className={`relative flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors lg:px-4 ${
-                    isActivePath(item.path)
+                    Silian_isActivePath(Silian_item.path)
                       ? 'bg-green-50 text-green-600 dark:bg-emerald-500/15 dark:text-emerald-300'
                       : 'text-muted-foreground hover:bg-green-50/70 hover:text-green-600 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span className="whitespace-nowrap">{item.label}</span>
-                  {item.badge && item.badge > 0 && (
+                  <Silian_Icon className="h-4 w-4" />
+                  <span className="whitespace-nowrap">{Silian_item.label}</span>
+                  {Silian_item.badge && Silian_item.badge > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {item.badge > 99 ? '99+' : item.badge}
+                      {Silian_item.badge > 99 ? '99+' : Silian_item.badge}
                     </span>
                   )}
-                </Link>
+                </Silian_Link>
               );
             })}
           </div>
 
           {/* Desktop User Menu */}
           <div className="hidden md:flex items-center space-x-2">
-            {showSecondaryControls ? (
-              <React.Suspense fallback={null}>
-                <LanguageSwitcher
+            {Silian_showSecondaryControls ? (
+              <Silian_React.Suspense fallback={null}>
+                <Silian_LanguageSwitcher
                   variant="outline"
                   className="rounded-xl border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
                 />
-                <ThemeToggle
+                <Silian_ThemeToggle
                   variant="outline"
                   className="rounded-xl border-border bg-background text-foreground hover:bg-muted hover:text-foreground"
                 />
-              </React.Suspense>
+              </Silian_React.Suspense>
             ) : (
               <div className="flex items-center space-x-2">
                 <div className="h-10 w-[88px] rounded-xl border border-border bg-background" />
                 <div className="h-10 w-10 rounded-xl border border-border bg-background" />
               </div>
             )}
-            
-            {isAuthenticated ? (
+
+            {Silian_isAuthenticated ? (
               <div className="flex items-center space-x-3">
                 {/* 站内信图标按钮，仅图标，无文字，点击跳转/messages */}
-                <Button
+                <Silian_Button
                   variant="ghost"
                   size="sm"
                   className="relative rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
-                  aria-label={t('nav.messages')}
-                  onClick={() => navigate('/messages')}
+                  aria-label={Silian_t('nav.messages')}
+                  onClick={() => Silian_navigate('/messages')}
                 >
-                  <Bell className="h-4 w-4" />
-                  {!unreadLoading && unreadCount > 0 && (
+                  <Silian_Bell className="h-4 w-4" />
+                  {!Silian_unreadLoading && Silian_unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                      {unreadCount > 99 ? '99+' : unreadCount}
+                      {Silian_unreadCount > 99 ? '99+' : Silian_unreadCount}
                     </span>
                   )}
-                </Button>
+                </Silian_Button>
                 {/* 用户菜单 */}
                 <div className="relative group">
-                  <Button variant="ghost" className="flex items-center gap-3 whitespace-nowrap rounded-xl px-2 text-foreground hover:bg-muted">
-                    {renderUserAvatar('h-8 w-8')}
-                    <span className="hidden lg:inline">{user?.username}</span>
-                  </Button>
-                  
+                  <Silian_Button variant="ghost" className="flex items-center gap-3 whitespace-nowrap rounded-xl px-2 text-foreground hover:bg-muted">
+                    {Silian_renderUserAvatar('h-8 w-8')}
+                    <span className="hidden lg:inline">{Silian_user?.username}</span>
+                  </Silian_Button>
+
                   {/* 下拉菜单 */}
                   <div className="absolute right-0 mt-2 w-48 rounded-md border border-border bg-card text-card-foreground shadow-lg shadow-black/10 opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible">
                     <div className="py-1">
-                      <Link
+                      <Silian_Link
                         to="/profile"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
-                        <Settings className="h-4 w-4" />
-                        {t('nav.profile')}
-                      </Link>
+                        <Silian_Settings className="h-4 w-4" />
+                        {Silian_t('nav.profile')}
+                      </Silian_Link>
 
-                      <Link
+                      <Silian_Link
                         to="/settings/notifications"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
-                        <Bell className="h-4 w-4" />
-                        {t('nav.notifications')}
-                      </Link>
+                        <Silian_Bell className="h-4 w-4" />
+                        {Silian_t('nav.notifications')}
+                      </Silian_Link>
 
-                      <Link
+                      <Silian_Link
                         to="/help"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
-                        <Headset className="h-4 w-4" />
-                        {t('footer.help')}
-                      </Link>
+                        <Silian_Headset className="h-4 w-4" />
+                        {Silian_t('footer.help')}
+                      </Silian_Link>
 
-                      {canAccessSupportPortal && (
-                        <Link
+                      {Silian_canAccessSupportPortal && (
+                        <Silian_Link
                           to="/support/"
                           className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                         >
-                          <Headset className="h-4 w-4" />
-                          {t('nav.support')}
-                        </Link>
+                          <Silian_Headset className="h-4 w-4" />
+                          {Silian_t('nav.support')}
+                        </Silian_Link>
                       )}
-                      
-                      {user?.is_admin && (
-                        <Link
+
+                      {Silian_user?.is_admin && (
+                        <Silian_Link
                           to="/admin"
                           className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                         >
-                          <Settings className="h-4 w-4" />
-                          {t('nav.admin')}
-                        </Link>
+                          <Silian_Settings className="h-4 w-4" />
+                          {Silian_t('nav.admin')}
+                        </Silian_Link>
                       )}
-                      
+
                       <hr className="my-1 border-border" />
-                      
+
                       <button
-                        onClick={handleLogout}
+                        onClick={Silian_handleLogout}
                         className="flex w-full items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
-                        <LogOut className="h-4 w-4" />
-                        {t('nav.logout')}
+                        <Silian_LogOut className="h-4 w-4" />
+                        {Silian_t('nav.logout')}
                       </button>
                     </div>
                   </div>
@@ -754,40 +754,40 @@ export function Navbar() {
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Link to="/auth/login">
-                  <Button variant="ghost" className="rounded-xl text-foreground hover:bg-muted">
-                    {t('nav.login')}
-                  </Button>
-                </Link>
-                <Link to="/auth/register">
-                  <Button className="rounded-xl bg-green-600 text-white hover:bg-green-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400">
-                    {t('nav.register')}
-                  </Button>
-                </Link>
+                <Silian_Link to="/auth/login">
+                  <Silian_Button variant="ghost" className="rounded-xl text-foreground hover:bg-muted">
+                    {Silian_t('nav.login')}
+                  </Silian_Button>
+                </Silian_Link>
+                <Silian_Link to="/auth/register">
+                  <Silian_Button className="rounded-xl bg-green-600 text-white hover:bg-green-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400">
+                    {Silian_t('nav.register')}
+                  </Silian_Button>
+                </Silian_Link>
               </div>
             )}
           </div>
 
             {/* Mobile menu button */}
             <div className="md:hidden">
-              <Button
+              <Silian_Button
                 variant="ghost"
-                onClick={toggleMobile}
-                aria-expanded={isOpen}
-                aria-controls={mobilePanelId}
+                onClick={Silian_toggleMobile}
+                aria-expanded={Silian_isOpen}
+                aria-controls={Silian_mobilePanelId}
                 aria-label={
-                  isOpen
-                    ? t('nav.closeMenu')
-                    : t('nav.openMenu')
+                  Silian_isOpen
+                    ? Silian_t('nav.closeMenu')
+                    : Silian_t('nav.openMenu')
                 }
               >
-                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </Button>
+                {Silian_isOpen ? <Silian_X className="h-6 w-6" /> : <Silian_Menu className="h-6 w-6" />}
+              </Silian_Button>
             </div>
           </div>
         </div>
       </nav>
-      {mobileNavigation}
+      {Silian_mobileNavigation}
     </>
   );
 }

@@ -1,9 +1,9 @@
-import * as AspectRatioPrimitive from "@radix-ui/react-aspect-ratio"
+import * as Silian_AspectRatioPrimitive from "@radix-ui/react-aspect-ratio"
 
-function AspectRatio({
-  ...props
+function Silian_AspectRatio({
+  ...Silian_props
 }) {
-  return <AspectRatioPrimitive.Root data-slot="aspect-ratio" {...props} />;
+  return <Silian_AspectRatioPrimitive.Root data-slot="aspect-ratio" {...Silian_props} />;
 }
 
-export { AspectRatio }
+export { Silian_AspectRatio as AspectRatio }

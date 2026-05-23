@@ -59,51 +59,51 @@ class SystemLogServiceTest extends TestCase
 
     public function testSummaryUsesContextValues(): void
     {
-        $service = $this->makeService();
+        $Silian_service = $this->makeService();
         $_SERVER = [];
 
-        $metaJson = $this->invokeBuildServerMeta($service, ['HTTP_AUTHORIZATION' => 'secret-token'], [
+        $Silian_metaJson = $this->invokeBuildServerMeta($Silian_service, ['HTTP_AUTHORIZATION' => 'secret-token'], [
             'method' => 'POST',
             'path' => '/api/system/test',
             'ip_address' => '198.51.100.2',
         ]);
 
-        $meta = json_decode($metaJson, true);
-        $this->assertIsArray($meta);
-        $this->assertSame('[REDACTED]', $meta['HTTP_AUTHORIZATION']);
-        $this->assertSame('POST', $meta['_summary']['method']);
-        $this->assertSame('/api/system/test', $meta['_summary']['uri']);
-        $this->assertSame('198.51.100.2', $meta['_summary']['ip']);
+        $Silian_meta = json_decode($Silian_metaJson, true);
+        $this->assertIsArray($Silian_meta);
+        $this->assertSame('[REDACTED]', $Silian_meta['HTTP_AUTHORIZATION']);
+        $this->assertSame('POST', $Silian_meta['_summary']['method']);
+        $this->assertSame('/api/system/test', $Silian_meta['_summary']['uri']);
+        $this->assertSame('198.51.100.2', $Silian_meta['_summary']['ip']);
     }
 
     public function testSummaryFallsBackToServerGlobalsWithCloudflareIpPreference(): void
     {
-        $service = $this->makeService();
+        $Silian_service = $this->makeService();
         $_SERVER = [
             'HTTP_CF_CONNNECTING_IP' => '203.0.113.9',
             'REQUEST_METHOD' => 'DELETE',
             'REQUEST_URI' => '/from-global',
         ];
 
-        $metaJson = $this->invokeBuildServerMeta($service, [], []);
-        $meta = json_decode($metaJson, true);
+        $Silian_metaJson = $this->invokeBuildServerMeta($Silian_service, [], []);
+        $Silian_meta = json_decode($Silian_metaJson, true);
 
-        $this->assertIsArray($meta);
-        $this->assertSame('DELETE', $meta['_summary']['method']);
-        $this->assertSame('/from-global', $meta['_summary']['uri']);
-        $this->assertSame('203.0.113.9', $meta['_summary']['ip']);
+        $this->assertIsArray($Silian_meta);
+        $this->assertSame('DELETE', $Silian_meta['_summary']['method']);
+        $this->assertSame('/from-global', $Silian_meta['_summary']['uri']);
+        $this->assertSame('203.0.113.9', $Silian_meta['_summary']['ip']);
     }
 
     public function testSummaryUsesRemoteAddrWhenNoCloudflareHeaders(): void
     {
-        $service = $this->makeService();
+        $Silian_service = $this->makeService();
         $_SERVER = [];
 
-        $metaJson = $this->invokeBuildServerMeta($service, ['REMOTE_ADDR' => '192.0.2.44'], []);
-        $meta = json_decode($metaJson, true);
+        $Silian_metaJson = $this->invokeBuildServerMeta($Silian_service, ['REMOTE_ADDR' => '192.0.2.44'], []);
+        $Silian_meta = json_decode($Silian_metaJson, true);
 
-        $this->assertIsArray($meta);
-        $this->assertSame('192.0.2.44', $meta['_summary']['ip']);
+        $this->assertIsArray($Silian_meta);
+        $this->assertSame('192.0.2.44', $Silian_meta['_summary']['ip']);
     }
 
     public function testLogReturnsNullWhenWritesDisabled(): void
@@ -111,18 +111,18 @@ class SystemLogServiceTest extends TestCase
         $_ENV['DISABLE_SYSTEM_LOG_WRITES'] = 'true';
         $_SERVER['DISABLE_SYSTEM_LOG_WRITES'] = 'true';
 
-        $pdo = $this->createMock(PDO::class);
-        $pdo->expects($this->never())->method('prepare');
+        $Silian_pdo = $this->createMock(PDO::class);
+        $Silian_pdo->expects($this->never())->method('prepare');
 
-        $service = new SystemLogService($pdo, new Logger('test'));
+        $Silian_service = new SystemLogService($Silian_pdo, new Logger('test'));
 
-        $result = $service->log([
+        $Silian_result = $Silian_service->log([
             'request_id' => 'req-1',
             'method' => 'GET',
             'path' => '/api/test',
         ]);
 
-        $this->assertNull($result);
+        $this->assertNull($Silian_result);
     }
 
     public function testProductionEnvironmentIgnoresDisableFlag(): void
@@ -132,38 +132,38 @@ class SystemLogServiceTest extends TestCase
         $_ENV['DISABLE_SYSTEM_LOG_WRITES'] = 'true';
         $_SERVER['DISABLE_SYSTEM_LOG_WRITES'] = 'true';
 
-        $pdo = $this->createMock(PDO::class);
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $pdo->expects($this->once())->method('prepare')->willReturn($stmt);
-        $pdo->method('lastInsertId')->willReturn('1');
+        $Silian_pdo = $this->createMock(PDO::class);
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->method('execute')->willReturn(true);
+        $Silian_pdo->expects($this->once())->method('prepare')->willReturn($Silian_stmt);
+        $Silian_pdo->method('lastInsertId')->willReturn('1');
 
-        $service = new SystemLogService($pdo, new Logger('test'));
+        $Silian_service = new SystemLogService($Silian_pdo, new Logger('test'));
 
-        $result = $service->log([
+        $Silian_result = $Silian_service->log([
             'request_id' => 'req-1',
             'method' => 'GET',
             'path' => '/api/test',
         ]);
 
-        $this->assertSame(1, $result);
+        $this->assertSame(1, $Silian_result);
     }
 
     private function makeService(): SystemLogService
     {
-        $pdo = new PDO('sqlite::memory:');
-        $logger = new Logger('test');
-        return new SystemLogService($pdo, $logger);
+        $Silian_pdo = new PDO('sqlite::memory:');
+        $Silian_logger = new Logger('test');
+        return new SystemLogService($Silian_pdo, $Silian_logger);
     }
 
-    private function invokeBuildServerMeta(SystemLogService $service, array $server, array $context): string
+    private function invokeBuildServerMeta(SystemLogService $Silian_service, array $Silian_server, array $Silian_context): string
     {
-        $ref = new \ReflectionClass(SystemLogService::class);
-        $method = $ref->getMethod('buildServerMeta');
-        $method->setAccessible(true);
+        $Silian_ref = new \ReflectionClass(SystemLogService::class);
+        $Silian_method = $Silian_ref->getMethod('buildServerMeta');
+        $Silian_method->setAccessible(true);
 
         /** @var string $json */
-        $json = $method->invoke($service, $server, $context);
-        return $json;
+        $Silian_json = $Silian_method->invoke($Silian_service, $Silian_server, $Silian_context);
+        return $Silian_json;
     }
 }

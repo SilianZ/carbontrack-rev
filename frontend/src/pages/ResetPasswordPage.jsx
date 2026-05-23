@@ -1,79 +1,79 @@
-import React, { useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Eye, EyeOff, Lock } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { useTranslation } from '../hooks/useTranslation';
-import { authAPI } from '../lib/auth';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { Alert, AlertDescription } from '../components/ui/Alert';
+import Silian_React, { useMemo as Silian_useMemo, useState as Silian_useState } from 'react';
+import { useForm as Silian_useForm } from 'react-hook-form';
+import { Link as Silian_Link, useNavigate as Silian_useNavigate, useSearchParams as Silian_useSearchParams } from 'react-router-dom';
+import { Eye as Silian_Eye, EyeOff as Silian_EyeOff, Lock as Silian_Lock } from 'lucide-react';
+import { toast as Silian_toast } from 'react-hot-toast';
+import { useTranslation as Silian_useTranslation } from '../hooks/useTranslation';
+import { authAPI as Silian_authAPI } from '../lib/auth';
+import { Button as Silian_Button } from '../components/ui/Button';
+import { Input as Silian_Input } from '../components/ui/Input';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../components/ui/Card';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../components/ui/Alert';
 
-const TogglePasswordButton = ({ visible, onClick }) => (
+const Silian_TogglePasswordButton = ({ visible: Silian_visible, onClick: Silian_onClick }) => (
   <button
     type="button"
     className="absolute inset-y-0 right-0 pr-3 flex items-center"
-    onClick={onClick}
+    onClick={Silian_onClick}
   >
-    {visible ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+    {Silian_visible ? <Silian_EyeOff className="h-4 w-4 text-muted-foreground" /> : <Silian_Eye className="h-4 w-4 text-muted-foreground" />}
   </button>
 );
 
 export default function ResetPasswordPage() {
-  const { t } = useTranslation(['activities', 'auth', 'errors']);
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') || '';
-  const fromEmail = searchParams.get('email') || '';
+  const { t: Silian_t } = Silian_useTranslation(['activities', 'auth', 'errors']);
+  const Silian_navigate = Silian_useNavigate();
+  const [Silian_searchParams] = Silian_useSearchParams();
+  const Silian_token = Silian_searchParams.get('token') || '';
+  const Silian_fromEmail = Silian_searchParams.get('email') || '';
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [status, setStatus] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [Silian_showPassword, Silian_setShowPassword] = Silian_useState(false);
+  const [Silian_showConfirmPassword, Silian_setShowConfirmPassword] = Silian_useState(false);
+  const [Silian_status, Silian_setStatus] = Silian_useState(null);
+  const [Silian_isSubmitting, Silian_setIsSubmitting] = Silian_useState(false);
 
-  const defaultValues = useMemo(() => ({
+  const Silian_defaultValues = Silian_useMemo(() => ({
     password: '',
     confirmPassword: ''
   }), []);
 
   const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors }
-  } = useForm({
-    defaultValues
+    register: Silian_register,
+    handleSubmit: Silian_handleSubmit,
+    watch: Silian_watch,
+    formState: { errors: Silian_errors }
+  } = Silian_useForm({
+    defaultValues: Silian_defaultValues
   });
 
-  const passwordValue = watch('password');
+  const Silian_passwordValue = Silian_watch('password');
 
-  const handleReset = async (values) => {
-    if (!token) {
-      setStatus({ variant: 'destructive', message: t('auth.resetPassword.tokenMissing') });
+  const Silian_handleReset = async (Silian_values) => {
+    if (!Silian_token) {
+      Silian_setStatus({ variant: 'destructive', message: Silian_t('auth.resetPassword.tokenMissing') });
       return;
     }
 
-    setIsSubmitting(true);
-    setStatus(null);
+    Silian_setIsSubmitting(true);
+    Silian_setStatus(null);
 
     try {
-      const response = await authAPI.resetPassword(token, values.password, values.confirmPassword);
-      if (response.success) {
-        toast.success(t('auth.resetPassword.success'));
-        setStatus({ variant: 'success', message: t('auth.resetPassword.success') });
-        setTimeout(() => navigate('/auth/login'), 2000);
+      const Silian_response = await Silian_authAPI.resetPassword(Silian_token, Silian_values.password, Silian_values.confirmPassword);
+      if (Silian_response.success) {
+        Silian_toast.success(Silian_t('auth.resetPassword.success'));
+        Silian_setStatus({ variant: 'success', message: Silian_t('auth.resetPassword.success') });
+        setTimeout(() => Silian_navigate('/auth/login'), 2000);
       } else {
-        const message = response.message || t('auth.resetPassword.failed');
-        setStatus({ variant: 'destructive', message });
-        toast.error(message);
+        const Silian_message = Silian_response.message || Silian_t('auth.resetPassword.failed');
+        Silian_setStatus({ variant: 'destructive', message: Silian_message });
+        Silian_toast.error(Silian_message);
       }
-    } catch (error) {
-      const message = error?.response?.data?.message || error.message || t('auth.resetPassword.failed');
-      setStatus({ variant: 'destructive', message });
-      toast.error(message);
+    } catch (Silian_error) {
+      const Silian_message = Silian_error?.response?.data?.message || Silian_error.message || Silian_t('auth.resetPassword.failed');
+      Silian_setStatus({ variant: 'destructive', message: Silian_message });
+      Silian_toast.error(Silian_message);
     } finally {
-      setIsSubmitting(false);
+      Silian_setIsSubmitting(false);
     }
   };
 
@@ -82,97 +82,97 @@ export default function ResetPasswordPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-100">
-            <Lock className="h-6 w-6 text-green-600" />
+            <Silian_Lock className="h-6 w-6 text-green-600" />
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-foreground">
-            {t('auth.resetPassword.newTitle')}
+            {Silian_t('auth.resetPassword.newTitle')}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            {t('auth.resetPassword.newSubtitle', { email: fromEmail || t('auth.verification.yourEmail') })}
+            {Silian_t('auth.resetPassword.newSubtitle', { email: Silian_fromEmail || Silian_t('auth.verification.yourEmail') })}
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('auth.resetPassword.newTitle')}</CardTitle>
-            <CardDescription>
-              {t('auth.resetPassword.instructions')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!token && (
-              <Alert variant="warning" className="mb-4">
-                <AlertDescription>{t('auth.resetPassword.tokenMissing')}</AlertDescription>
-              </Alert>
+        <Silian_Card>
+          <Silian_CardHeader>
+            <Silian_CardTitle>{Silian_t('auth.resetPassword.newTitle')}</Silian_CardTitle>
+            <Silian_CardDescription>
+              {Silian_t('auth.resetPassword.instructions')}
+            </Silian_CardDescription>
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            {!Silian_token && (
+              <Silian_Alert variant="warning" className="mb-4">
+                <Silian_AlertDescription>{Silian_t('auth.resetPassword.tokenMissing')}</Silian_AlertDescription>
+              </Silian_Alert>
             )}
 
-            {status?.message && (
-              <Alert variant={status.variant || 'info'} className="mb-4">
-                <AlertDescription>{status.message}</AlertDescription>
-              </Alert>
+            {Silian_status?.message && (
+              <Silian_Alert variant={Silian_status.variant || 'info'} className="mb-4">
+                <Silian_AlertDescription>{Silian_status.message}</Silian_AlertDescription>
+              </Silian_Alert>
             )}
 
-            <form onSubmit={handleSubmit(handleReset)} className="space-y-6">
+            <form onSubmit={Silian_handleSubmit(Silian_handleReset)} className="space-y-6">
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                  {t('auth.resetPassword.newPasswordLabel')}
+                  {Silian_t('auth.resetPassword.newPasswordLabel')}
                 </label>
                 <div className="mt-1 relative">
-                  <Input
+                  <Silian_Input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={Silian_showPassword ? 'text' : 'password'}
                     autoComplete="new-password"
-                    placeholder={t('auth.passwordPlaceholder')}
-                    disabled={isSubmitting}
-                    error={errors.password}
-                    {...register('password', {
-                      required: t('auth.passwordRequired'),
-                      minLength: { value: 8, message: t('auth.passwordMinLength') }
+                    placeholder={Silian_t('auth.passwordPlaceholder')}
+                    disabled={Silian_isSubmitting}
+                    error={Silian_errors.password}
+                    {...Silian_register('password', {
+                      required: Silian_t('auth.passwordRequired'),
+                      minLength: { value: 8, message: Silian_t('auth.passwordMinLength') }
                     })}
                   />
-                  <TogglePasswordButton visible={showPassword} onClick={() => setShowPassword((prev) => !prev)} />
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                  <Silian_TogglePasswordButton visible={Silian_showPassword} onClick={() => Silian_setShowPassword((Silian_prev) => !Silian_prev)} />
+                  {Silian_errors.password && (
+                    <p className="mt-1 text-sm text-red-600">{Silian_errors.password.message}</p>
                   )}
                 </div>
               </div>
 
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
-                  {t('auth.resetPassword.confirmPasswordLabel')}
+                  {Silian_t('auth.resetPassword.confirmPasswordLabel')}
                 </label>
                 <div className="mt-1 relative">
-                  <Input
+                  <Silian_Input
                     id="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
+                    type={Silian_showConfirmPassword ? 'text' : 'password'}
                     autoComplete="new-password"
-                    placeholder={t('auth.confirmPasswordPlaceholder')}
-                    disabled={isSubmitting}
-                    error={errors.confirmPassword}
-                    {...register('confirmPassword', {
-                      required: t('auth.resetPassword.confirmPasswordRequired'),
-                      validate: (value) => value === passwordValue || t('auth.resetPassword.passwordMismatch')
+                    placeholder={Silian_t('auth.confirmPasswordPlaceholder')}
+                    disabled={Silian_isSubmitting}
+                    error={Silian_errors.confirmPassword}
+                    {...Silian_register('confirmPassword', {
+                      required: Silian_t('auth.resetPassword.confirmPasswordRequired'),
+                      validate: (Silian_value) => Silian_value === Silian_passwordValue || Silian_t('auth.resetPassword.passwordMismatch')
                     })}
                   />
-                  <TogglePasswordButton visible={showConfirmPassword} onClick={() => setShowConfirmPassword((prev) => !prev)} />
-                  {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                  <Silian_TogglePasswordButton visible={Silian_showConfirmPassword} onClick={() => Silian_setShowConfirmPassword((Silian_prev) => !Silian_prev)} />
+                  {Silian_errors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-600">{Silian_errors.confirmPassword.message}</p>
                   )}
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting || !token}>
-                {isSubmitting ? t('auth.resetPassword.submitting') : t('auth.resetPassword.submit')}
-              </Button>
+              <Silian_Button type="submit" className="w-full" disabled={Silian_isSubmitting || !Silian_token}>
+                {Silian_isSubmitting ? Silian_t('auth.resetPassword.submitting') : Silian_t('auth.resetPassword.submit')}
+              </Silian_Button>
             </form>
 
             <div className="mt-6 text-center">
-              <Link to="/auth/login" className="text-sm font-medium text-green-600 hover:text-green-500">
-                {t('auth.backToLogin')}
-              </Link>
+              <Silian_Link to="/auth/login" className="text-sm font-medium text-green-600 hover:text-green-500">
+                {Silian_t('auth.backToLogin')}
+              </Silian_Link>
             </div>
-          </CardContent>
-        </Card>
+          </Silian_CardContent>
+        </Silian_Card>
       </div>
     </div>
   );

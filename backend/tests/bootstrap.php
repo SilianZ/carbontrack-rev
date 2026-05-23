@@ -6,30 +6,30 @@ require __DIR__ . '/../vendor/autoload.php';
 
 // Load test environment variables
 if (file_exists(__DIR__ . '/../.env.testing')) {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..', '.env.testing');
-    $dotenv->load();
+    $Silian_dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..', '.env.testing');
+    $Silian_dotenv->load();
 } elseif (file_exists(__DIR__ . '/../.env')) {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-    $dotenv->load();
+    $Silian_dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+    $Silian_dotenv->load();
 }
 
 // Ensure tests run with safe mail defaults
-$allowLiveEmailsValue = $_ENV['PHPUNIT_ALLOW_LIVE_EMAILS']
+$Silian_allowLiveEmailsValue = $_ENV['PHPUNIT_ALLOW_LIVE_EMAILS']
     ?? $_SERVER['PHPUNIT_ALLOW_LIVE_EMAILS']
     ?? getenv('PHPUNIT_ALLOW_LIVE_EMAILS');
-$allowLiveEmails = filter_var($allowLiveEmailsValue, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-if ($allowLiveEmails === null) {
-    $allowLiveEmails = false;
+$Silian_allowLiveEmails = filter_var($Silian_allowLiveEmailsValue, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+if ($Silian_allowLiveEmails === null) {
+    $Silian_allowLiveEmails = false;
 }
 
-if (!$allowLiveEmails) {
+if (!$Silian_allowLiveEmails) {
     $_ENV['MAIL_SIMULATE'] = 'true';
     $_SERVER['MAIL_SIMULATE'] = 'true';
     putenv('MAIL_SIMULATE=true');
 }
 
 // CI often runs without backend/.env, so provide safe mail defaults for container wiring.
-$mailDefaults = [
+$Silian_mailDefaults = [
     'MAIL_HOST' => 'localhost',
     'MAIL_PORT' => '1025',
     'MAIL_USERNAME' => 'test',
@@ -42,13 +42,13 @@ $mailDefaults = [
     'FRONTEND_URL' => 'http://localhost:5173',
 ];
 
-foreach ($mailDefaults as $key => $value) {
-    if (!isset($_ENV[$key])) {
-        $_ENV[$key] = $value;
+foreach ($Silian_mailDefaults as $Silian_key => $Silian_value) {
+    if (!isset($_ENV[$Silian_key])) {
+        $_ENV[$Silian_key] = $Silian_value;
     }
 
-    $_SERVER[$key] = $_ENV[$key];
-    putenv($key . '=' . $_ENV[$key]);
+    $_SERVER[$Silian_key] = $_ENV[$Silian_key];
+    putenv($Silian_key . '=' . $_ENV[$Silian_key]);
 }
 
 // Set test environment variables if not already set
@@ -65,19 +65,19 @@ date_default_timezone_set('UTC');
 
 // Helper to create a Slim PSR-7 Request with sane defaults
 if (!function_exists('makeRequest')) {
-    function makeRequest(string $method, string $path, array $parsedBody = null, array $queryParams = null, array $headers = []): \Slim\Psr7\Request {
-        $uri = new \Slim\Psr7\Uri('http', 'localhost', null, $path);
-        $slimHeaders = new \Slim\Psr7\Headers($headers);
-        $serverParams = [];
-        $stream = new \Slim\Psr7\Stream(fopen('php://temp', 'r+'));
-        $request = new \Slim\Psr7\Request($method, $uri, $slimHeaders, [], $serverParams, $stream);
-        if ($parsedBody !== null) {
-            $request = $request->withParsedBody($parsedBody);
+    function makeRequest(string $Silian_method, string $Silian_path, array $Silian_parsedBody = null, array $Silian_queryParams = null, array $Silian_headers = []): \Slim\Psr7\Request {
+        $Silian_uri = new \Slim\Psr7\Uri('http', 'localhost', null, $Silian_path);
+        $Silian_slimHeaders = new \Slim\Psr7\Headers($Silian_headers);
+        $Silian_serverParams = [];
+        $Silian_stream = new \Slim\Psr7\Stream(fopen('php://temp', 'r+'));
+        $Silian_request = new \Slim\Psr7\Request($Silian_method, $Silian_uri, $Silian_slimHeaders, [], $Silian_serverParams, $Silian_stream);
+        if ($Silian_parsedBody !== null) {
+            $Silian_request = $Silian_request->withParsedBody($Silian_parsedBody);
         }
-        if ($queryParams !== null) {
-            $request = $request->withQueryParams($queryParams);
+        if ($Silian_queryParams !== null) {
+            $Silian_request = $Silian_request->withQueryParams($Silian_queryParams);
         }
-        return $request;
+        return $Silian_request;
     }
 }
 

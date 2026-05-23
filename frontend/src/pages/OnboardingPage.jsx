@@ -1,166 +1,166 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { schoolAPI, profileAPI } from '../lib/api';
-import { userManager } from '../lib/auth';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/Card';
-import { Alert, AlertDescription } from '../components/ui/Alert';
-import Turnstile from '../components/common/Turnstile';
-import { useTranslation } from '../hooks/useTranslation';
+import Silian_React, { useCallback as Silian_useCallback, useEffect as Silian_useEffect, useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { useNavigate as Silian_useNavigate } from 'react-router-dom';
+import { schoolAPI as Silian_schoolAPI, profileAPI as Silian_profileAPI } from '../lib/api';
+import { userManager as Silian_userManager } from '../lib/auth';
+import { Input as Silian_Input } from '../components/ui/Input';
+import { Button as Silian_Button } from '../components/ui/Button';
+import { Card as Silian_Card, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription } from '../components/ui/Card';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../components/ui/Alert';
+import Silian_Turnstile from '../components/common/Turnstile';
+import { useTranslation as Silian_useTranslation } from '../hooks/useTranslation';
 
 export default function OnboardingPage() {
-  const navigate = useNavigate();
-  const { t } = useTranslation(['auth', 'common', 'errors', 'onboarding', 'success']);
-  const user = userManager.getUser();
-  const currentSchoolId = user?.school_id;
-  const [schools, setSchools] = useState([]);
-  const [schoolQuery, setSchoolQuery] = useState('');
-  const [selectedSchoolId, setSelectedSchoolId] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const turnstileRef = useRef(null);
-  const [turnstileToken, setTurnstileToken] = useState('');
-  const requiresTurnstile = Boolean(import.meta.env?.VITE_TURNSTILE_SITE_KEY || import.meta.env?.MODE !== 'production');
+  const Silian_navigate = Silian_useNavigate();
+  const { t: Silian_t } = Silian_useTranslation(['auth', 'common', 'errors', 'onboarding', 'success']);
+  const Silian_user = Silian_userManager.getUser();
+  const Silian_currentSchoolId = Silian_user?.school_id;
+  const [Silian_schools, Silian_setSchools] = Silian_useState([]);
+  const [Silian_schoolQuery, Silian_setSchoolQuery] = Silian_useState('');
+  const [Silian_selectedSchoolId, Silian_setSelectedSchoolId] = Silian_useState('');
+  const [Silian_isSubmitting, Silian_setIsSubmitting] = Silian_useState(false);
+  const [Silian_error, Silian_setError] = Silian_useState('');
+  const [Silian_success, Silian_setSuccess] = Silian_useState('');
+  const Silian_turnstileRef = Silian_useRef(null);
+  const [Silian_turnstileToken, Silian_setTurnstileToken] = Silian_useState('');
+  const Silian_requiresTurnstile = Boolean(import.meta.env?.VITE_TURNSTILE_SITE_KEY || import.meta.env?.MODE !== 'production');
 
-  const loadSchools = useCallback(async (search) => {
+  const Silian_loadSchools = Silian_useCallback(async (Silian_search) => {
     try {
-      const res = await schoolAPI.getSchools({ search, limit: 20, page: 1 });
-      const list = res.data?.data?.schools || [];
-      setSchools(list);
-    } catch (e) {
-      console.error('Load schools failed:', e);
+      const Silian_res = await Silian_schoolAPI.getSchools({ search: Silian_search, limit: 20, page: 1 });
+      const Silian_list = Silian_res.data?.data?.schools || [];
+      Silian_setSchools(Silian_list);
+    } catch (Silian_e) {
+      console.error('Load schools failed:', Silian_e);
     }
   }, []);
 
-  useEffect(() => {
-    if (currentSchoolId) {
-      navigate('/dashboard', { replace: true });
+  Silian_useEffect(() => {
+    if (Silian_currentSchoolId) {
+      Silian_navigate('/dashboard', { replace: true });
     }
-  }, [currentSchoolId, navigate]);
+  }, [Silian_currentSchoolId, Silian_navigate]);
 
-  useEffect(() => {
-    if (currentSchoolId) {
+  Silian_useEffect(() => {
+    if (Silian_currentSchoolId) {
       return undefined;
     }
 
-    const trimmedQuery = schoolQuery.trim();
-    const timer = setTimeout(() => {
-      loadSchools(trimmedQuery);
-    }, trimmedQuery ? 300 : 0);
+    const Silian_trimmedQuery = Silian_schoolQuery.trim();
+    const Silian_timer = setTimeout(() => {
+      Silian_loadSchools(Silian_trimmedQuery);
+    }, Silian_trimmedQuery ? 300 : 0);
 
-    return () => clearTimeout(timer);
-  }, [currentSchoolId, loadSchools, schoolQuery]);
+    return () => clearTimeout(Silian_timer);
+  }, [Silian_currentSchoolId, Silian_loadSchools, Silian_schoolQuery]);
 
-  const ensureTurnstile = () => {
-    if (requiresTurnstile && !turnstileToken) {
-      setError(t('auth.verification.turnstileRequired'));
+  const Silian_ensureTurnstile = () => {
+    if (Silian_requiresTurnstile && !Silian_turnstileToken) {
+      Silian_setError(Silian_t('auth.verification.turnstileRequired'));
       return false;
     }
 
     return true;
   };
 
-  const resetTurnstile = () => {
-    setTurnstileToken('');
-    turnstileRef.current?.reset?.();
+  const Silian_resetTurnstile = () => {
+    Silian_setTurnstileToken('');
+    Silian_turnstileRef.current?.reset?.();
   };
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
-    setSuccess('');
+  const Silian_onSubmit = async (Silian_e) => {
+    Silian_e.preventDefault();
+    Silian_setIsSubmitting(true);
+    Silian_setError('');
+    Silian_setSuccess('');
 
     try {
-      const payload = {};
-      if (selectedSchoolId) {
-        payload.school_id = parseInt(selectedSchoolId, 10);
-      } else if (schoolQuery.trim()) {
-        payload.new_school_name = schoolQuery.trim();
+      const Silian_payload = {};
+      if (Silian_selectedSchoolId) {
+        Silian_payload.school_id = parseInt(Silian_selectedSchoolId, 10);
+      } else if (Silian_schoolQuery.trim()) {
+        Silian_payload.new_school_name = Silian_schoolQuery.trim();
       }
 
-      if (Object.keys(payload).length === 0) {
-        setError(t('onboarding.leastOneField'));
-        setIsSubmitting(false);
+      if (Object.keys(Silian_payload).length === 0) {
+        Silian_setError(Silian_t('onboarding.leastOneField'));
+        Silian_setIsSubmitting(false);
         return;
       }
 
-      if (!ensureTurnstile()) {
-        setIsSubmitting(false);
+      if (!Silian_ensureTurnstile()) {
+        Silian_setIsSubmitting(false);
         return;
       }
 
-      payload.cf_turnstile_response = turnstileToken;
+      Silian_payload.cf_turnstile_response = Silian_turnstileToken;
 
-      const res = await profileAPI.updateProfile(payload);
-      if (res.data?.success) {
+      const Silian_res = await Silian_profileAPI.updateProfile(Silian_payload);
+      if (Silian_res.data?.success) {
         // 更新本地用户缓存（优先使用后端返回的完整用户数据）
-        const newUser = res.data?.data ? res.data.data : { ...(user || {}), ...payload };
-        userManager.setUser(newUser);
+        const Silian_newUser = Silian_res.data?.data ? Silian_res.data.data : { ...(Silian_user || {}), ...Silian_payload };
+        Silian_userManager.setUser(Silian_newUser);
   try { sessionStorage.removeItem('onboarding_skipped'); } catch { /* no-op */ }
-        setSuccess(t('onboarding.saved'));
-        setTimeout(() => navigate('/dashboard', { replace: true }), 800);
+        Silian_setSuccess(Silian_t('onboarding.saved'));
+        setTimeout(() => Silian_navigate('/dashboard', { replace: true }), 800);
       } else {
-        setError(res.data?.message || t('common.error'));
+        Silian_setError(Silian_res.data?.message || Silian_t('common.error'));
       }
-    } catch (e) {
-      setError(e?.response?.data?.message || e?.message || t('common.error'));
-      resetTurnstile();
+    } catch (Silian_e) {
+      Silian_setError(Silian_e?.response?.data?.message || Silian_e?.message || Silian_t('common.error'));
+      Silian_resetTurnstile();
     } finally {
-      setIsSubmitting(false);
+      Silian_setIsSubmitting(false);
     }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 text-foreground sm:px-6 lg:px-8">
       <div className="max-w-lg w-full space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('onboarding.title')}</CardTitle>
-            <CardDescription>{t('onboarding.subtitle')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+        <Silian_Card>
+          <Silian_CardHeader>
+            <Silian_CardTitle>{Silian_t('onboarding.title')}</Silian_CardTitle>
+            <Silian_CardDescription>{Silian_t('onboarding.subtitle')}</Silian_CardDescription>
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            {Silian_error && (
+              <Silian_Alert variant="destructive" className="mb-4">
+                <Silian_AlertDescription>{Silian_error}</Silian_AlertDescription>
+              </Silian_Alert>
             )}
-            {success && (
-              <Alert variant="success" className="mb-4">
-                <AlertDescription>{success}</AlertDescription>
-              </Alert>
+            {Silian_success && (
+              <Silian_Alert variant="success" className="mb-4">
+                <Silian_AlertDescription>{Silian_success}</Silian_AlertDescription>
+              </Silian_Alert>
             )}
 
-            <form onSubmit={onSubmit} className="space-y-5">
+            <form onSubmit={Silian_onSubmit} className="space-y-5">
               <div>
-                <label htmlFor="schoolSearch" className="mb-1 block text-sm font-medium text-foreground">{t('auth.school')}</label>
-                <Input
+                <label htmlFor="schoolSearch" className="mb-1 block text-sm font-medium text-foreground">{Silian_t('auth.school')}</label>
+                <Silian_Input
                   id="schoolSearch"
-                  placeholder={t('onboarding.schoolPlaceholder')}
-                  value={schoolQuery}
-                  onChange={(e) => {
-                    setSchoolQuery(e.target.value);
-                    setSelectedSchoolId('');
+                  placeholder={Silian_t('onboarding.schoolPlaceholder')}
+                  value={Silian_schoolQuery}
+                  onChange={(Silian_e) => {
+                    Silian_setSchoolQuery(Silian_e.target.value);
+                    Silian_setSelectedSchoolId('');
                   }}
                 />
                 <div className="mt-2 max-h-40 overflow-auto rounded border border-border bg-card">
-                  {schools.map((s) => (
+                  {Silian_schools.map((Silian_s) => (
                     <button
-                      key={s.id}
+                      key={Silian_s.id}
                       type="button"
-                      className={`w-full px-3 py-2 text-left text-foreground hover:bg-muted/60 ${String(selectedSchoolId)===String(s.id)?'bg-green-500/12 text-green-500':''}`}
+                      className={`w-full px-3 py-2 text-left text-foreground hover:bg-muted/60 ${String(Silian_selectedSchoolId)===String(Silian_s.id)?'bg-green-500/12 text-green-500':''}`}
                       onClick={() => {
-                        setSelectedSchoolId(String(s.id));
-                        setSchoolQuery(s.name);
+                        Silian_setSelectedSchoolId(String(Silian_s.id));
+                        Silian_setSchoolQuery(Silian_s.name);
                       }}
                     >
-                      {s.name}
+                      {Silian_s.name}
                     </button>
                   ))}
-                  {schools.length === 0 && (
-                    <div className="px-3 py-2 text-muted-foreground">{t('onboarding.noSchoolMatches')}</div>
+                  {Silian_schools.length === 0 && (
+                    <div className="px-3 py-2 text-muted-foreground">{Silian_t('onboarding.noSchoolMatches')}</div>
                   )}
                 </div>
               </div>
@@ -169,45 +169,45 @@ export default function OnboardingPage() {
                 {/* class_name UI 已移除 */}
               </div>
 
-              {requiresTurnstile && (
+              {Silian_requiresTurnstile && (
                 <div className="space-y-3">
-                  <p className="text-sm text-muted-foreground">{t('auth.turnstileNotice')}</p>
+                  <p className="text-sm text-muted-foreground">{Silian_t('auth.turnstileNotice')}</p>
                   <div className="flex justify-center">
-                    <Turnstile
-                      ref={turnstileRef}
-                      require={requiresTurnstile}
-                      onVerify={(token) => setTurnstileToken(token)}
-                      onExpire={() => setTurnstileToken('')}
-                      onError={() => setTurnstileToken('')}
+                    <Silian_Turnstile
+                      ref={Silian_turnstileRef}
+                      require={Silian_requiresTurnstile}
+                      onVerify={(Silian_token) => Silian_setTurnstileToken(Silian_token)}
+                      onExpire={() => Silian_setTurnstileToken('')}
+                      onError={() => Silian_setTurnstileToken('')}
                     />
                   </div>
                 </div>
               )}
 
               <div className="flex gap-3">
-                <Button
+                <Silian_Button
                   type="submit"
                   className="flex-1"
-                  loading={isSubmitting}
-                  disabled={isSubmitting || (requiresTurnstile && !turnstileToken)}
+                  loading={Silian_isSubmitting}
+                  disabled={Silian_isSubmitting || (Silian_requiresTurnstile && !Silian_turnstileToken)}
                 >
-                  {t('onboarding.saveAndContinue')}
-                </Button>
-                <Button
+                  {Silian_t('onboarding.saveAndContinue')}
+                </Silian_Button>
+                <Silian_Button
                   type="button"
                   variant="ghost"
                   className="flex-1"
                   onClick={() => {
                     try { sessionStorage.setItem('onboarding_skipped', '1'); } catch { /* no-op */ }
-                    navigate('/dashboard');
+                    Silian_navigate('/dashboard');
                   }}
                 >
-                  {t('onboarding.skipForNow')}
-                </Button>
+                  {Silian_t('onboarding.skipForNow')}
+                </Silian_Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </Silian_CardContent>
+        </Silian_Card>
       </div>
     </div>
   );

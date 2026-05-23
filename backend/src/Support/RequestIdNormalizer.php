@@ -13,21 +13,21 @@ final class RequestIdNormalizer
      *
      * @param mixed $value
      */
-    public static function normalize($value, bool $nullIfEmpty = true): ?string
+    public static function normalize($Silian_value, bool $Silian_nullIfEmpty = true): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
 
-        $trimmed = trim((string)$value);
-        if ($trimmed === '') {
-            return $nullIfEmpty ? null : '';
+        $Silian_trimmed = trim((string)$Silian_value);
+        if ($Silian_trimmed === '') {
+            return $Silian_nullIfEmpty ? null : '';
         }
 
-        if (preg_match(self::UUID_PATTERN, $trimmed) === 1) {
-            return strtolower($trimmed);
+        if (preg_match(self::UUID_PATTERN, $Silian_trimmed) === 1) {
+            return strtolower($Silian_trimmed);
         }
 
-        return $trimmed;
+        return $Silian_trimmed;
     }
 }

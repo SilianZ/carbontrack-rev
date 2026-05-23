@@ -18,46 +18,46 @@ class Avatar
 
     private ?ErrorLogService $errorLogService;
 
-    public function __construct(PDO $db, LoggerInterface $logger, ?ErrorLogService $errorLogService = null)
+    public function __construct(PDO $Silian_db, LoggerInterface $Silian_logger, ?ErrorLogService $Silian_errorLogService = null)
     {
-        $this->db = $db;
-        $this->logger = $logger;
-        $this->errorLogService = $errorLogService;
+        $this->db = $Silian_db;
+        $this->logger = $Silian_logger;
+        $this->errorLogService = $Silian_errorLogService;
     }
 
     /**
      * 获取头像列表，可按需包含停用头像
      */
-    public function getAvailableAvatars(?string $category = null, bool $includeInactive = false): array
+    public function getAvailableAvatars(?string $Silian_category = null, bool $Silian_includeInactive = false): array
     {
-        $sql = "
-            SELECT id, uuid, name, description, file_path, thumbnail_path, 
+        $Silian_sql = "
+            SELECT id, uuid, name, description, file_path, thumbnail_path,
                    category, sort_order, is_default, is_active
-            FROM avatars 
+            FROM avatars
             WHERE deleted_at IS NULL
         ";
-        
-        $params = [];
 
-        if (!$includeInactive) {
-            $sql .= " AND is_active = 1";
+        $Silian_params = [];
+
+        if (!$Silian_includeInactive) {
+            $Silian_sql .= " AND is_active = 1";
         }
-        
-        if ($category) {
-            $sql .= " AND category = ?";
-            $params[] = $category;
+
+        if ($Silian_category) {
+            $Silian_sql .= " AND category = ?";
+            $Silian_params[] = $Silian_category;
         }
-        
-        $sql .= " ORDER BY sort_order ASC, id ASC";
-        
+
+        $Silian_sql .= " ORDER BY sort_order ASC, id ASC";
+
         try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            return $result;
-        } catch (\Exception $e) {
-            $this->logErrorWithService($e, 'Avatar query failed:');
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute($Silian_params);
+            $Silian_result = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return $Silian_result;
+        } catch (\Exception $Silian_e) {
+            $this->logErrorWithService($Silian_e, 'Avatar query failed:');
             return [];
         }
     }
@@ -65,35 +65,35 @@ class Avatar
     /**
      * 根据ID获取头像信息
      */
-    public function getAvatarById(int $avatarId): ?array
+    public function getAvatarById(int $Silian_avatarId): ?array
     {
-        $stmt = $this->db->prepare("
-            SELECT id, uuid, name, description, file_path, thumbnail_path, 
+        $Silian_stmt = $this->db->prepare("
+            SELECT id, uuid, name, description, file_path, thumbnail_path,
                    category, sort_order, is_default, is_active
-            FROM avatars 
+            FROM avatars
             WHERE id = ? AND deleted_at IS NULL
         ");
-        $stmt->execute([$avatarId]);
-        
-        $avatar = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $avatar ?: null;
+        $Silian_stmt->execute([$Silian_avatarId]);
+
+        $Silian_avatar = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_avatar ?: null;
     }
 
     /**
      * 根据UUID获取头像信息
      */
-    public function getAvatarByUuid(string $uuid): ?array
+    public function getAvatarByUuid(string $Silian_uuid): ?array
     {
-        $stmt = $this->db->prepare("
-            SELECT id, uuid, name, description, file_path, thumbnail_path, 
+        $Silian_stmt = $this->db->prepare("
+            SELECT id, uuid, name, description, file_path, thumbnail_path,
                    category, sort_order, is_default, is_active
-            FROM avatars 
+            FROM avatars
             WHERE uuid = ? AND deleted_at IS NULL
         ");
-        $stmt->execute([$uuid]);
-        
-        $avatar = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $avatar ?: null;
+        $Silian_stmt->execute([$Silian_uuid]);
+
+        $Silian_avatar = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_avatar ?: null;
     }
 
     /**
@@ -101,17 +101,17 @@ class Avatar
      */
     public function getDefaultAvatar(): ?array
     {
-        $stmt = $this->db->prepare("
-            SELECT id, uuid, name, description, file_path, thumbnail_path, 
+        $Silian_stmt = $this->db->prepare("
+            SELECT id, uuid, name, description, file_path, thumbnail_path,
                    category, sort_order, is_default
-            FROM avatars 
+            FROM avatars
             WHERE is_default = 1 AND is_active = 1 AND deleted_at IS NULL
             LIMIT 1
         ");
-        $stmt->execute();
-        
-        $avatar = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $avatar ?: null;
+        $Silian_stmt->execute();
+
+        $Silian_avatar = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_avatar ?: null;
     }
 
     /**
@@ -119,152 +119,152 @@ class Avatar
      */
     public function getAvatarCategories(): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT DISTINCT category, COUNT(*) as count
-            FROM avatars 
+            FROM avatars
             WHERE is_active = 1 AND deleted_at IS NULL
             GROUP BY category
             ORDER BY category ASC
         ");
-        $stmt->execute();
-        
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $Silian_stmt->execute();
+
+        return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
      * 验证头像是否可用
      */
-    public function isAvatarAvailable(int $avatarId): bool
+    public function isAvatarAvailable(int $Silian_avatarId): bool
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT COUNT(*) as count
-            FROM avatars 
+            FROM avatars
             WHERE id = ? AND is_active = 1 AND deleted_at IS NULL
         ");
-        $stmt->execute([$avatarId]);
-        
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['count'] > 0;
+        $Silian_stmt->execute([$Silian_avatarId]);
+
+        $Silian_result = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_result['count'] > 0;
     }
 
     /**
      * 创建新头像（管理员功能）
      */
-    public function createAvatar(array $data): int
+    public function createAvatar(array $Silian_data): int
     {
-        $uuid = $this->generateUUID();
-        $data = $this->normalizePersistenceData($data);
-        $transactionStarted = false;
+        $Silian_uuid = $this->generateUUID();
+        $Silian_data = $this->normalizePersistenceData($Silian_data);
+        $Silian_transactionStarted = false;
 
         try {
-            if ($this->shouldResetDefaultAvatar($data)) {
+            if ($this->shouldResetDefaultAvatar($Silian_data)) {
                 $this->db->beginTransaction();
-                $transactionStarted = true;
+                $Silian_transactionStarted = true;
                 $this->clearDefaultAvatarFlags();
             }
 
-            $stmt = $this->db->prepare("
+            $Silian_stmt = $this->db->prepare("
                 INSERT INTO avatars (
-                    uuid, name, description, file_path, thumbnail_path, 
-                    category, sort_order, is_active, is_default, 
+                    uuid, name, description, file_path, thumbnail_path,
+                    category, sort_order, is_active, is_default,
                     created_at, updated_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
             ");
-            
-            $stmt->execute([
-                $uuid,
-                $data['name'],
-                $data['description'] ?? null,
-                $data['file_path'],
-                $data['thumbnail_path'] ?? null,
-                $data['category'] ?? 'default',
-                $data['sort_order'] ?? 0,
-                $data['is_active'] ?? 1,
-                $data['is_default'] ?? 0
+
+            $Silian_stmt->execute([
+                $Silian_uuid,
+                $Silian_data['name'],
+                $Silian_data['description'] ?? null,
+                $Silian_data['file_path'],
+                $Silian_data['thumbnail_path'] ?? null,
+                $Silian_data['category'] ?? 'default',
+                $Silian_data['sort_order'] ?? 0,
+                $Silian_data['is_active'] ?? 1,
+                $Silian_data['is_default'] ?? 0
             ]);
 
-            $avatarId = (int)$this->db->lastInsertId();
+            $Silian_avatarId = (int)$this->db->lastInsertId();
 
-            if ($transactionStarted) {
+            if ($Silian_transactionStarted) {
                 $this->db->commit();
             }
 
-            return $avatarId;
-        } catch (\Throwable $e) {
-            if ($transactionStarted) {
+            return $Silian_avatarId;
+        } catch (\Throwable $Silian_e) {
+            if ($Silian_transactionStarted) {
                 $this->db->rollBack();
             }
 
-            throw $e;
+            throw $Silian_e;
         }
     }
 
     /**
      * 更新头像信息（管理员功能）
      */
-    public function updateAvatar(int $avatarId, array $data): bool
+    public function updateAvatar(int $Silian_avatarId, array $Silian_data): bool
     {
-        $data = $this->normalizePersistenceData($data);
-        ['fields' => $fields, 'params' => $params] = $this->buildUpdatePayload($data);
-        $transactionStarted = false;
-        
-        if (empty($fields)) {
+        $Silian_data = $this->normalizePersistenceData($Silian_data);
+        ['fields' => $Silian_fields, 'params' => $Silian_params] = $this->buildUpdatePayload($Silian_data);
+        $Silian_transactionStarted = false;
+
+        if (empty($Silian_fields)) {
             return false;
         }
-        
-        $fields[] = "updated_at = NOW()";
-        $params[] = $avatarId;
-        
+
+        $Silian_fields[] = "updated_at = NOW()";
+        $Silian_params[] = $Silian_avatarId;
+
         try {
-            if ($this->shouldResetDefaultAvatar($data)) {
+            if ($this->shouldResetDefaultAvatar($Silian_data)) {
                 $this->db->beginTransaction();
-                $transactionStarted = true;
-                $this->clearDefaultAvatarFlags($avatarId);
+                $Silian_transactionStarted = true;
+                $this->clearDefaultAvatarFlags($Silian_avatarId);
             }
 
-            $sql = "UPDATE avatars SET " . implode(', ', $fields) . " WHERE id = ? AND deleted_at IS NULL";
-            $stmt = $this->db->prepare($sql);
-            $result = $stmt->execute($params);
+            $Silian_sql = "UPDATE avatars SET " . implode(', ', $Silian_fields) . " WHERE id = ? AND deleted_at IS NULL";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_result = $Silian_stmt->execute($Silian_params);
 
-            if ($transactionStarted) {
+            if ($Silian_transactionStarted) {
                 $this->db->commit();
             }
 
-            return $result;
-        } catch (\Throwable $e) {
-            if ($transactionStarted) {
+            return $Silian_result;
+        } catch (\Throwable $Silian_e) {
+            if ($Silian_transactionStarted) {
                 $this->db->rollBack();
             }
 
-            throw $e;
+            throw $Silian_e;
         }
     }
 
     /**
      * @return array<int, array{id:int, username:?string, email:?string}>
      */
-    public function getUsersAssignedToAvatar(int $avatarId): array
+    public function getUsersAssignedToAvatar(int $Silian_avatarId): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT id, username, email
             FROM users
             WHERE avatar_id = ? AND deleted_at IS NULL
             ORDER BY id ASC
         ");
-        $stmt->execute([$avatarId]);
+        $Silian_stmt->execute([$Silian_avatarId]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
      * @return array{reassigned_user_count:int,users:array<int,array{id:int,username:?string,email:?string}>,fallback_avatar:array<string,mixed>|null}
      */
-    public function updateAvatarAndReassignUsers(int $avatarId, array $data, ?int $fallbackAvatarId): array
+    public function updateAvatarAndReassignUsers(int $Silian_avatarId, array $Silian_data, ?int $Silian_fallbackAvatarId): array
     {
-        $data = $this->normalizePersistenceData($data);
-        ['fields' => $fields, 'params' => $params] = $this->buildUpdatePayload($data);
+        $Silian_data = $this->normalizePersistenceData($Silian_data);
+        ['fields' => $Silian_fields, 'params' => $Silian_params] = $this->buildUpdatePayload($Silian_data);
 
-        if (empty($fields)) {
+        if (empty($Silian_fields)) {
             return [
                 'reassigned_user_count' => 0,
                 'users' => [],
@@ -272,78 +272,78 @@ class Avatar
             ];
         }
 
-        $fields[] = "updated_at = NOW()";
-        $params[] = $avatarId;
+        $Silian_fields[] = "updated_at = NOW()";
+        $Silian_params[] = $Silian_avatarId;
 
         $this->db->beginTransaction();
 
         try {
-            $affectedUsers = $this->lockUsersAssignedToAvatar($avatarId);
-            $fallbackAvatar = null;
-            if ($affectedUsers !== []) {
-                $fallbackAvatar = $this->lockFallbackDefaultAvatar($avatarId, $fallbackAvatarId);
-                if ($fallbackAvatar === null) {
+            $Silian_affectedUsers = $this->lockUsersAssignedToAvatar($Silian_avatarId);
+            $Silian_fallbackAvatar = null;
+            if ($Silian_affectedUsers !== []) {
+                $Silian_fallbackAvatar = $this->lockFallbackDefaultAvatar($Silian_avatarId, $Silian_fallbackAvatarId);
+                if ($Silian_fallbackAvatar === null) {
                     throw new AvatarFallbackUnavailableException();
                 }
-                $fallbackAvatarId = (int) $fallbackAvatar['id'];
+                $Silian_fallbackAvatarId = (int) $Silian_fallbackAvatar['id'];
             }
 
-            if ($this->shouldResetDefaultAvatar($data)) {
-                $this->clearDefaultAvatarFlags($avatarId);
+            if ($this->shouldResetDefaultAvatar($Silian_data)) {
+                $this->clearDefaultAvatarFlags($Silian_avatarId);
             }
 
-            $sql = "UPDATE avatars SET " . implode(', ', $fields) . " WHERE id = ? AND deleted_at IS NULL";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
+            $Silian_sql = "UPDATE avatars SET " . implode(', ', $Silian_fields) . " WHERE id = ? AND deleted_at IS NULL";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute($Silian_params);
 
-            $affectedRows = 0;
-            if ($affectedUsers !== []) {
-                $stmt = $this->db->prepare("
+            $Silian_affectedRows = 0;
+            if ($Silian_affectedUsers !== []) {
+                $Silian_stmt = $this->db->prepare("
                     UPDATE users
                     SET avatar_id = ?, updated_at = NOW()
                     WHERE avatar_id = ? AND deleted_at IS NULL
                 ");
-                $stmt->execute([$fallbackAvatarId, $avatarId]);
-                $affectedRows = $stmt->rowCount();
+                $Silian_stmt->execute([$Silian_fallbackAvatarId, $Silian_avatarId]);
+                $Silian_affectedRows = $Silian_stmt->rowCount();
             }
 
             $this->db->commit();
 
             return [
-                'reassigned_user_count' => $affectedRows,
-                'users' => $affectedUsers,
-                'fallback_avatar' => $fallbackAvatar,
+                'reassigned_user_count' => $Silian_affectedRows,
+                'users' => $Silian_affectedUsers,
+                'fallback_avatar' => $Silian_fallbackAvatar,
             ];
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->db->rollBack();
-            throw $e;
+            throw $Silian_e;
         }
     }
 
     /**
      * @return array<int, array{id:int, username:?string, email:?string}>
      */
-    private function lockUsersAssignedToAvatar(int $avatarId): array
+    private function lockUsersAssignedToAvatar(int $Silian_avatarId): array
     {
-        $lockClause = $this->rowLockClause();
-        $stmt = $this->db->prepare("
+        $Silian_lockClause = $this->rowLockClause();
+        $Silian_stmt = $this->db->prepare("
             SELECT id, username, email
             FROM users
             WHERE avatar_id = ? AND deleted_at IS NULL
             ORDER BY id ASC
-            {$lockClause}
+            {$Silian_lockClause}
         ");
-        $stmt->execute([$avatarId]);
+        $Silian_stmt->execute([$Silian_avatarId]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
      * @return array<string,mixed>|null
      */
-    private function lockFallbackDefaultAvatar(int $avatarId, ?int $fallbackAvatarId): ?array
+    private function lockFallbackDefaultAvatar(int $Silian_avatarId, ?int $Silian_fallbackAvatarId): ?array
     {
-        $sql = "
+        $Silian_sql = "
             SELECT id, name, file_path, thumbnail_path, category, is_default, is_active
             FROM avatars
             WHERE is_default = 1
@@ -351,31 +351,31 @@ class Avatar
               AND deleted_at IS NULL
               AND id <> ?
         ";
-        $params = [$avatarId];
+        $Silian_params = [$Silian_avatarId];
 
-        if ($fallbackAvatarId !== null && $fallbackAvatarId > 0) {
-            $sql .= " AND id = ?";
-            $params[] = $fallbackAvatarId;
+        if ($Silian_fallbackAvatarId !== null && $Silian_fallbackAvatarId > 0) {
+            $Silian_sql .= " AND id = ?";
+            $Silian_params[] = $Silian_fallbackAvatarId;
         }
 
-        $sql .= " ORDER BY sort_order ASC, id ASC LIMIT 1" . $this->rowLockClause();
+        $Silian_sql .= " ORDER BY sort_order ASC, id ASC LIMIT 1" . $this->rowLockClause();
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        $fallbackAvatar = $stmt->fetch(PDO::FETCH_ASSOC);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_params);
+        $Silian_fallbackAvatar = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-        return is_array($fallbackAvatar) ? $fallbackAvatar : null;
+        return is_array($Silian_fallbackAvatar) ? $Silian_fallbackAvatar : null;
     }
 
     private function rowLockClause(): string
     {
         try {
-            $driver = strtolower((string) $this->db->getAttribute(PDO::ATTR_DRIVER_NAME));
+            $Silian_driver = strtolower((string) $this->db->getAttribute(PDO::ATTR_DRIVER_NAME));
         } catch (\Throwable) {
             return '';
         }
 
-        return in_array($driver, ['mysql', 'pgsql'], true) ? ' FOR UPDATE' : '';
+        return in_array($Silian_driver, ['mysql', 'pgsql'], true) ? ' FOR UPDATE' : '';
     }
 
     /**
@@ -384,174 +384,174 @@ class Avatar
      * @param array<string,mixed> $data
      * @return array<string,mixed>
      */
-    private function normalizePersistenceData(array $data): array
+    private function normalizePersistenceData(array $Silian_data): array
     {
-        if (array_key_exists('sort_order', $data)) {
-            $data['sort_order'] = InputValueNormalizer::integer($data['sort_order'], 'sort_order');
+        if (array_key_exists('sort_order', $Silian_data)) {
+            $Silian_data['sort_order'] = InputValueNormalizer::integer($Silian_data['sort_order'], 'sort_order');
         }
 
-        foreach (['is_active', 'is_default'] as $field) {
-            if (!array_key_exists($field, $data)) {
+        foreach (['is_active', 'is_default'] as $Silian_field) {
+            if (!array_key_exists($Silian_field, $Silian_data)) {
                 continue;
             }
 
-            $data[$field] = InputValueNormalizer::booleanFlagInteger($data[$field], $field);
+            $Silian_data[$Silian_field] = InputValueNormalizer::booleanFlagInteger($Silian_data[$Silian_field], $Silian_field);
         }
 
-        return $data;
+        return $Silian_data;
     }
 
     /**
      * @param array<string,mixed> $data
      * @return array{fields:array<int,string>,params:array<int,mixed>}
      */
-    private function buildUpdatePayload(array $data): array
+    private function buildUpdatePayload(array $Silian_data): array
     {
-        $fields = [];
-        $params = [];
+        $Silian_fields = [];
+        $Silian_params = [];
 
-        $allowedFields = [
+        $Silian_allowedFields = [
             'name', 'description', 'file_path', 'thumbnail_path',
             'category', 'sort_order', 'is_active', 'is_default'
         ];
 
-        foreach ($allowedFields as $field) {
-            if (array_key_exists($field, $data)) {
-                $fields[] = "{$field} = ?";
-                $params[] = $data[$field];
+        foreach ($Silian_allowedFields as $Silian_field) {
+            if (array_key_exists($Silian_field, $Silian_data)) {
+                $Silian_fields[] = "{$Silian_field} = ?";
+                $Silian_params[] = $Silian_data[$Silian_field];
             }
         }
 
         return [
-            'fields' => $fields,
-            'params' => $params,
+            'fields' => $Silian_fields,
+            'params' => $Silian_params,
         ];
     }
 
     /**
      * 软删除头像（管理员功能）
      */
-    public function deleteAvatar(int $avatarId): bool
+    public function deleteAvatar(int $Silian_avatarId): bool
     {
         // 检查是否有用户正在使用此头像
-        $stmt = $this->db->prepare("
-            SELECT COUNT(*) as count 
-            FROM users 
+        $Silian_stmt = $this->db->prepare("
+            SELECT COUNT(*) as count
+            FROM users
             WHERE avatar_id = ? AND deleted_at IS NULL
         ");
-        $stmt->execute([$avatarId]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($result['count'] > 0) {
+        $Silian_stmt->execute([$Silian_avatarId]);
+        $Silian_result = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($Silian_result['count'] > 0) {
             // 如果有用户使用，将他们的头像改为默认头像
-            $defaultAvatar = $this->getDefaultAvatar();
-            if ($defaultAvatar) {
-                $stmt = $this->db->prepare("
-                    UPDATE users 
-                    SET avatar_id = ?, updated_at = NOW() 
+            $Silian_defaultAvatar = $this->getDefaultAvatar();
+            if ($Silian_defaultAvatar) {
+                $Silian_stmt = $this->db->prepare("
+                    UPDATE users
+                    SET avatar_id = ?, updated_at = NOW()
                     WHERE avatar_id = ? AND deleted_at IS NULL
                 ");
-                $stmt->execute([$defaultAvatar['id'], $avatarId]);
+                $Silian_stmt->execute([$Silian_defaultAvatar['id'], $Silian_avatarId]);
             }
         }
-        
+
         // 软删除头像
-        $stmt = $this->db->prepare("
-            UPDATE avatars 
-            SET deleted_at = NOW(), updated_at = NOW() 
+        $Silian_stmt = $this->db->prepare("
+            UPDATE avatars
+            SET deleted_at = NOW(), updated_at = NOW()
             WHERE id = ? AND deleted_at IS NULL
         ");
-        
-        return $stmt->execute([$avatarId]);
+
+        return $Silian_stmt->execute([$Silian_avatarId]);
     }
 
     /**
      * 恢复已删除的头像（管理员功能）
      */
-    public function restoreAvatar(int $avatarId): bool
+    public function restoreAvatar(int $Silian_avatarId): bool
     {
-        $stmt = $this->db->prepare("
-            UPDATE avatars 
-            SET deleted_at = NULL, updated_at = NOW() 
+        $Silian_stmt = $this->db->prepare("
+            UPDATE avatars
+            SET deleted_at = NULL, updated_at = NOW()
             WHERE id = ? AND deleted_at IS NOT NULL
         ");
-        
-        return $stmt->execute([$avatarId]);
+
+        return $Silian_stmt->execute([$Silian_avatarId]);
     }
 
     /**
      * 设置默认头像（管理员功能）
      */
-    public function setDefaultAvatar(int $avatarId): bool
+    public function setDefaultAvatar(int $Silian_avatarId): bool
     {
         $this->db->beginTransaction();
-        
+
         try {
-            $this->clearDefaultAvatarFlags($avatarId);
-            
+            $this->clearDefaultAvatarFlags($Silian_avatarId);
+
             // 设置新的默认头像
-            $stmt = $this->db->prepare("
-                UPDATE avatars 
-                SET is_default = 1, updated_at = NOW() 
+            $Silian_stmt = $this->db->prepare("
+                UPDATE avatars
+                SET is_default = 1, updated_at = NOW()
                 WHERE id = ? AND deleted_at IS NULL
             ");
-            $stmt->execute([$avatarId]);
-            
+            $Silian_stmt->execute([$Silian_avatarId]);
+
             $this->db->commit();
             return true;
-            
-        } catch (\Exception $e) {
+
+        } catch (\Exception $Silian_e) {
             $this->db->rollBack();
             return false;
         }
     }
 
-    private function shouldResetDefaultAvatar(array $data): bool
+    private function shouldResetDefaultAvatar(array $Silian_data): bool
     {
-        return array_key_exists('is_default', $data) && (int) $data['is_default'] === 1;
+        return array_key_exists('is_default', $Silian_data) && (int) $Silian_data['is_default'] === 1;
     }
 
-    private function clearDefaultAvatarFlags(?int $excludeAvatarId = null): void
+    private function clearDefaultAvatarFlags(?int $Silian_excludeAvatarId = null): void
     {
-        $sql = "
+        $Silian_sql = "
             UPDATE avatars
             SET is_default = 0, updated_at = NOW()
             WHERE deleted_at IS NULL AND is_default = 1
         ";
 
-        $params = [];
+        $Silian_params = [];
 
-        if ($excludeAvatarId !== null) {
-            $sql .= " AND id <> ?";
-            $params[] = $excludeAvatarId;
+        if ($Silian_excludeAvatarId !== null) {
+            $Silian_sql .= " AND id <> ?";
+            $Silian_params[] = $Silian_excludeAvatarId;
         }
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_params);
     }
 
     /**
      * 批量更新头像排序（管理员功能）
      */
-    public function updateSortOrders(array $sortOrders): bool
+    public function updateSortOrders(array $Silian_sortOrders): bool
     {
         $this->db->beginTransaction();
-        
+
         try {
-            $stmt = $this->db->prepare("
-                UPDATE avatars 
-                SET sort_order = ?, updated_at = NOW() 
+            $Silian_stmt = $this->db->prepare("
+                UPDATE avatars
+                SET sort_order = ?, updated_at = NOW()
                 WHERE id = ? AND deleted_at IS NULL
             ");
-            
-            foreach ($sortOrders as $avatarId => $sortOrder) {
-                $stmt->execute([$sortOrder, $avatarId]);
+
+            foreach ($Silian_sortOrders as $Silian_avatarId => $Silian_sortOrder) {
+                $Silian_stmt->execute([$Silian_sortOrder, $Silian_avatarId]);
             }
-            
+
             $this->db->commit();
             return true;
-            
-        } catch (\Exception $e) {
+
+        } catch (\Exception $Silian_e) {
             $this->db->rollBack();
             return false;
         }
@@ -562,8 +562,8 @@ class Avatar
      */
     public function getAvatarUsageStats(): array
     {
-        $stmt = $this->db->prepare("
-            SELECT 
+        $Silian_stmt = $this->db->prepare("
+            SELECT
                 a.id,
                 a.name,
                 a.category,
@@ -576,9 +576,9 @@ class Avatar
             GROUP BY a.id, a.name, a.category, a.is_default, a.is_active
             ORDER BY user_count DESC, a.sort_order ASC
         ");
-        $stmt->execute();
-        
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $Silian_stmt->execute();
+
+        return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -597,27 +597,27 @@ class Avatar
     }
 
 
-    private function logErrorWithService(\Throwable $exception, string $contextMessage): void
+    private function logErrorWithService(\Throwable $Silian_exception, string $Silian_contextMessage): void
     {
         if ($this->errorLogService) {
             try {
-                $factory = new ServerRequestFactory();
-                $request = $factory->createServerRequest('GET', '/internal/avatar');
-                $this->errorLogService->logException($exception, $request, ['context_message' => $contextMessage]);
+                $Silian_factory = new ServerRequestFactory();
+                $Silian_request = $Silian_factory->createServerRequest('GET', '/internal/avatar');
+                $this->errorLogService->logException($Silian_exception, $Silian_request, ['context_message' => $Silian_contextMessage]);
                 return;
-            } catch (\Throwable $loggingError) {
+            } catch (\Throwable $Silian_loggingError) {
                 $this->logger->error('ErrorLogService logging failed for avatar model', [
-                    'message' => $loggingError->getMessage(),
-                    'context_message' => $contextMessage,
-                    'exception_type' => get_class($loggingError),
+                    'message' => $Silian_loggingError->getMessage(),
+                    'context_message' => $Silian_contextMessage,
+                    'exception_type' => get_class($Silian_loggingError),
                 ]);
             }
         }
 
-        $this->logger->error(trim($contextMessage . ' ' . $exception->getMessage()), [
-            'exception_type' => get_class($exception),
-            'exception_file' => $exception->getFile(),
-            'exception_line' => $exception->getLine(),
+        $this->logger->error(trim($Silian_contextMessage . ' ' . $Silian_exception->getMessage()), [
+            'exception_type' => get_class($Silian_exception),
+            'exception_file' => $Silian_exception->getFile(),
+            'exception_line' => $Silian_exception->getLine(),
         ]);
     }
 

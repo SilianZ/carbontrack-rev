@@ -1,124 +1,124 @@
-import React from 'react';
-import { ShieldCheck } from 'lucide-react';
-import { useQuery } from 'react-query';
+import Silian_React from 'react';
+import { ShieldCheck as Silian_ShieldCheck } from 'lucide-react';
+import { useQuery as Silian_useQuery } from 'react-query';
 
-import { useTranslation } from '../../hooks/useTranslation';
-import { userAPI } from '../../lib/api';
-import { Alert, AlertDescription, AlertTitle } from '../ui/Alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
-import { Pagination } from '../ui/Pagination';
-import SecurityActivityList from '../security/SecurityActivityList';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { userAPI as Silian_userAPI } from '../../lib/api';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription, AlertTitle as Silian_AlertTitle } from '../ui/Alert';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../ui/Card';
+import { Pagination as Silian_Pagination } from '../ui/Pagination';
+import Silian_SecurityActivityList from '../security/SecurityActivityList';
 
 export function SecurityActivityCard() {
-  const { t } = useTranslation(['common', 'pagination', 'securityActivity']);
-  const [page, setPage] = React.useState(1);
-  const [filters, setFilters] = React.useState({
+  const { t: Silian_t } = Silian_useTranslation(['common', 'pagination', 'securityActivity']);
+  const [Silian_page, Silian_setPage] = Silian_React.useState(1);
+  const [Silian_filters, Silian_setFilters] = Silian_React.useState({
     type: 'all',
     period: 'all',
   });
-  const limit = 10;
+  const Silian_limit = 10;
 
-  const typeOptions = React.useMemo(
+  const Silian_typeOptions = Silian_React.useMemo(
     () => [
-      { value: 'all', label: t('securityActivity.filters.types.all') },
-      { value: 'sign_ins', label: t('securityActivity.filters.types.signIns') },
-      { value: 'passkey_changes', label: t('securityActivity.filters.types.passkeyChanges') },
-      { value: 'password_changes', label: t('securityActivity.filters.types.passwordChanges') },
-      { value: 'logouts', label: t('securityActivity.filters.types.logouts') },
+      { value: 'all', label: Silian_t('securityActivity.filters.types.all') },
+      { value: 'sign_ins', label: Silian_t('securityActivity.filters.types.signIns') },
+      { value: 'passkey_changes', label: Silian_t('securityActivity.filters.types.passkeyChanges') },
+      { value: 'password_changes', label: Silian_t('securityActivity.filters.types.passwordChanges') },
+      { value: 'logouts', label: Silian_t('securityActivity.filters.types.logouts') },
     ],
-    [t]
+    [Silian_t]
   );
-  const periodOptions = React.useMemo(
+  const Silian_periodOptions = Silian_React.useMemo(
     () => [
-      { value: 'all', label: t('securityActivity.filters.periods.all') },
-      { value: '7d', label: t('securityActivity.filters.periods.last7Days') },
-      { value: '30d', label: t('securityActivity.filters.periods.last30Days') },
-      { value: '90d', label: t('securityActivity.filters.periods.last90Days') },
+      { value: 'all', label: Silian_t('securityActivity.filters.periods.all') },
+      { value: '7d', label: Silian_t('securityActivity.filters.periods.last7Days') },
+      { value: '30d', label: Silian_t('securityActivity.filters.periods.last30Days') },
+      { value: '90d', label: Silian_t('securityActivity.filters.periods.last90Days') },
     ],
-    [t]
+    [Silian_t]
   );
 
-  const securityActivityQuery = useQuery(
-    ['securityActivity', page, limit, filters.type, filters.period],
-    () => userAPI.getSecurityActivity({ page, limit, ...filters }),
+  const Silian_securityActivityQuery = Silian_useQuery(
+    ['securityActivity', Silian_page, Silian_limit, Silian_filters.type, Silian_filters.period],
+    () => Silian_userAPI.getSecurityActivity({ page: Silian_page, limit: Silian_limit, ...Silian_filters }),
     { keepPreviousData: true }
   );
 
-  const payload = securityActivityQuery.data?.data?.data || securityActivityQuery.data?.data || {};
-  const items = Array.isArray(payload.items) ? payload.items : [];
-  const pagination = payload.pagination || {};
+  const Silian_payload = Silian_securityActivityQuery.data?.data?.data || Silian_securityActivityQuery.data?.data || {};
+  const Silian_items = Array.isArray(Silian_payload.items) ? Silian_payload.items : [];
+  const Silian_pagination = Silian_payload.pagination || {};
 
-  const handleFilterChange = (key, value) => {
-    setPage(1);
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
+  const Silian_handleFilterChange = (Silian_key, Silian_value) => {
+    Silian_setPage(1);
+    Silian_setFilters((Silian_prev) => ({
+      ...Silian_prev,
+      [Silian_key]: Silian_value,
     }));
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-emerald-600" />
-          {t('securityActivity.title')}
-        </CardTitle>
-        <CardDescription>{t('securityActivity.description')}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {securityActivityQuery.isError ? (
-          <Alert variant="destructive">
-            <AlertTitle>{t('common.error')}</AlertTitle>
-            <AlertDescription>{t('securityActivity.loadError')}</AlertDescription>
-          </Alert>
+    <Silian_Card>
+      <Silian_CardHeader>
+        <Silian_CardTitle className="flex items-center gap-2">
+          <Silian_ShieldCheck className="h-5 w-5 text-emerald-600" />
+          {Silian_t('securityActivity.title')}
+        </Silian_CardTitle>
+        <Silian_CardDescription>{Silian_t('securityActivity.description')}</Silian_CardDescription>
+      </Silian_CardHeader>
+      <Silian_CardContent className="space-y-4">
+        {Silian_securityActivityQuery.isError ? (
+          <Silian_Alert variant="destructive">
+            <Silian_AlertTitle>{Silian_t('common.error')}</Silian_AlertTitle>
+            <Silian_AlertDescription>{Silian_t('securityActivity.loadError')}</Silian_AlertDescription>
+          </Silian_Alert>
         ) : (
           <>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="space-y-1 text-sm">
-                <span className="font-medium text-foreground">{t('securityActivity.filters.typeLabel')}</span>
+                <span className="font-medium text-foreground">{Silian_t('securityActivity.filters.typeLabel')}</span>
                 <select
-                  value={filters.type}
-                  onChange={(event) => handleFilterChange('type', event.target.value)}
+                  value={Silian_filters.type}
+                  onChange={(Silian_event) => Silian_handleFilterChange('type', Silian_event.target.value)}
                   className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
-                  {typeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                  {Silian_typeOptions.map((Silian_option) => (
+                    <option key={Silian_option.value} value={Silian_option.value}>
+                      {Silian_option.label}
                     </option>
                   ))}
                 </select>
               </label>
               <label className="space-y-1 text-sm">
-                <span className="font-medium text-foreground">{t('securityActivity.filters.periodLabel')}</span>
+                <span className="font-medium text-foreground">{Silian_t('securityActivity.filters.periodLabel')}</span>
                 <select
-                  value={filters.period}
-                  onChange={(event) => handleFilterChange('period', event.target.value)}
+                  value={Silian_filters.period}
+                  onChange={(Silian_event) => Silian_handleFilterChange('period', Silian_event.target.value)}
                   className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
-                  {periodOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                  {Silian_periodOptions.map((Silian_option) => (
+                    <option key={Silian_option.value} value={Silian_option.value}>
+                      {Silian_option.label}
                     </option>
                   ))}
                 </select>
               </label>
             </div>
-            <SecurityActivityList
-              items={items}
-              isLoading={securityActivityQuery.isLoading}
-              emptyText={t('securityActivity.empty')}
+            <Silian_SecurityActivityList
+              items={Silian_items}
+              isLoading={Silian_securityActivityQuery.isLoading}
+              emptyText={Silian_t('securityActivity.empty')}
             />
-            <Pagination
-              currentPage={pagination.current_page}
-              totalPages={pagination.total_pages}
-              onPageChange={setPage}
-              itemsPerPage={pagination.per_page}
-              totalItems={pagination.total_items}
+            <Silian_Pagination
+              currentPage={Silian_pagination.current_page}
+              totalPages={Silian_pagination.total_pages}
+              onPageChange={Silian_setPage}
+              itemsPerPage={Silian_pagination.per_page}
+              totalItems={Silian_pagination.total_items}
             />
           </>
         )}
-      </CardContent>
-    </Card>
+      </Silian_CardContent>
+    </Silian_Card>
   );
 }
 

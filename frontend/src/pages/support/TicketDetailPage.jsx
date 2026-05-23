@@ -1,97 +1,97 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'react-hot-toast';
+import Silian_React, { useEffect as Silian_useEffect, useMemo as Silian_useMemo, useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { Link as Silian_Link, useParams as Silian_useParams } from 'react-router-dom';
+import { useMutation as Silian_useMutation, useQuery as Silian_useQuery, useQueryClient as Silian_useQueryClient } from 'react-query';
+import { useForm as Silian_useForm } from 'react-hook-form';
+import { z as Silian_z } from 'zod';
+import { zodResolver as Silian_zodResolver } from '@hookform/resolvers/zod';
+import { toast as Silian_toast } from 'react-hot-toast';
 import {
-  ArrowLeft,
-  Check,
-  CheckCircle2,
-  Headset,
-  ImageIcon,
-  Paperclip,
-  Save,
-  Send,
-  Shield,
-  Star,
-  Shuffle,
-  UserRound,
-  X,
+  ArrowLeft as Silian_ArrowLeft,
+  Check as Silian_Check,
+  CheckCircle2 as Silian_CheckCircle2,
+  Headset as Silian_Headset,
+  ImageIcon as Silian_ImageIcon,
+  Paperclip as Silian_Paperclip,
+  Save as Silian_Save,
+  Send as Silian_Send,
+  Shield as Silian_Shield,
+  Star as Silian_Star,
+  Shuffle as Silian_Shuffle,
+  UserRound as Silian_UserRound,
+  X as Silian_X,
 } from 'lucide-react';
 
-import { useTranslation } from '../../hooks/useTranslation';
-import { supportAPI } from '../../lib/api';
-import { checkAuthStatus } from '../../lib/auth';
-import { buildAvatarDisplayProps } from '../../lib/avatarUtils';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { supportAPI as Silian_supportAPI } from '../../lib/api';
+import { checkAuthStatus as Silian_checkAuthStatus } from '../../lib/auth';
+import { buildAvatarDisplayProps as Silian_buildAvatarDisplayProps } from '../../lib/avatarUtils';
 import {
-  formatSupportDate,
-  getPriorityVariant,
-  getSlaMeta,
-  getSlaMilestoneMeta,
-  getSlaTone,
-  getStatusTone,
-  getTagTone,
-  isImageAttachment,
-  mergeUploadedFiles,
-  TICKET_PRIORITY_OPTIONS,
-  TICKET_STATUS_OPTIONS,
+  formatSupportDate as Silian_formatSupportDate,
+  getPriorityVariant as Silian_getPriorityVariant,
+  getSlaMeta as Silian_getSlaMeta,
+  getSlaMilestoneMeta as Silian_getSlaMilestoneMeta,
+  getSlaTone as Silian_getSlaTone,
+  getStatusTone as Silian_getStatusTone,
+  getTagTone as Silian_getTagTone,
+  isImageAttachment as Silian_isImageAttachment,
+  mergeUploadedFiles as Silian_mergeUploadedFiles,
+  TICKET_PRIORITY_OPTIONS as Silian_TICKET_PRIORITY_OPTIONS,
+  TICKET_STATUS_OPTIONS as Silian_TICKET_STATUS_OPTIONS,
 } from '../../lib/supportTickets';
-import FileUpload from '../../components/FileUpload';
-import R2Image from '../../components/common/R2Image';
-import { Button } from '../../components/ui/Button';
-import { Textarea } from '../../components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/badge';
-import { Alert, AlertDescription } from '../../components/ui/Alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/tooltip';
+import Silian_FileUpload from '../../components/FileUpload';
+import Silian_R2Image from '../../components/common/R2Image';
+import { Button as Silian_Button } from '../../components/ui/Button';
+import { Textarea as Silian_Textarea } from '../../components/ui/textarea';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../../components/ui/Card';
+import { Badge as Silian_Badge } from '../../components/ui/badge';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../../components/ui/Alert';
+import { Tabs as Silian_Tabs, TabsContent as Silian_TabsContent, TabsList as Silian_TabsList, TabsTrigger as Silian_TabsTrigger } from '../../components/ui/Tabs';
+import { Tooltip as Silian_Tooltip, TooltipContent as Silian_TooltipContent, TooltipTrigger as Silian_TooltipTrigger } from '../../components/ui/tooltip';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select as Silian_Select,
+  SelectContent as Silian_SelectContent,
+  SelectItem as Silian_SelectItem,
+  SelectTrigger as Silian_SelectTrigger,
+  SelectValue as Silian_SelectValue,
 } from '../../components/ui/select';
 
-const replySchema = z.object({
-  content: z.string().trim().min(2).max(5000),
+const Silian_replySchema = Silian_z.object({
+  content: Silian_z.string().trim().min(2).max(5000),
 });
 
-function SupportAttachmentList({ attachments }) {
-  if (!attachments?.length) {
+function Silian_SupportAttachmentList({ attachments: Silian_attachments }) {
+  if (!Silian_attachments?.length) {
     return null;
   }
 
-  const imageAttachments = attachments.filter((attachment) => isImageAttachment(attachment));
-  const fileAttachments = attachments.filter((attachment) => !isImageAttachment(attachment));
+  const Silian_imageAttachments = Silian_attachments.filter((Silian_attachment) => Silian_isImageAttachment(Silian_attachment));
+  const Silian_fileAttachments = Silian_attachments.filter((Silian_attachment) => !Silian_isImageAttachment(Silian_attachment));
 
   return (
     <div className="mt-4 space-y-3">
-      {imageAttachments.length > 0 ? (
+      {Silian_imageAttachments.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {imageAttachments.map((attachment) => {
-            const href = attachment.download_url || attachment.public_url || attachment.file_path;
+          {Silian_imageAttachments.map((Silian_attachment) => {
+            const Silian_href = Silian_attachment.download_url || Silian_attachment.public_url || Silian_attachment.file_path;
             return (
               <a
-                key={attachment.id ?? attachment.file_path}
-                href={href}
+                key={Silian_attachment.id ?? Silian_attachment.file_path}
+                href={Silian_href}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-sky-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900"
               >
                 <div className="aspect-square bg-slate-100 dark:bg-slate-800">
                   <img
-                    src={href}
-                    alt={attachment.original_name}
+                    src={Silian_href}
+                    alt={Silian_attachment.original_name}
                     className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.02]"
                     loading="lazy"
                   />
                 </div>
                 <div className="flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
-                  <ImageIcon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{attachment.original_name}</span>
+                  <Silian_ImageIcon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{Silian_attachment.original_name}</span>
                 </div>
               </a>
             );
@@ -99,18 +99,18 @@ function SupportAttachmentList({ attachments }) {
         </div>
       ) : null}
 
-      {fileAttachments.length > 0 ? (
+      {Silian_fileAttachments.length > 0 ? (
         <div className="flex flex-wrap gap-2">
-          {fileAttachments.map((attachment) => (
+          {Silian_fileAttachments.map((Silian_attachment) => (
             <a
-              key={attachment.id ?? attachment.file_path}
-              href={attachment.download_url || attachment.public_url || attachment.file_path}
+              key={Silian_attachment.id ?? Silian_attachment.file_path}
+              href={Silian_attachment.download_url || Silian_attachment.public_url || Silian_attachment.file_path}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             >
-              <Paperclip className="h-3.5 w-3.5" />
-              {attachment.original_name}
+              <Silian_Paperclip className="h-3.5 w-3.5" />
+              {Silian_attachment.original_name}
             </a>
           ))}
         </div>
@@ -119,13 +119,13 @@ function SupportAttachmentList({ attachments }) {
   );
 }
 
-function assigneeLabel(assignee, t) {
-  const identity = assignee.username || assignee.email || `#${assignee.id}`;
-  return `${identity} · ${t('support.portal.workload.assigned')} ${assignee.assigned_total_count ?? 0} · ${t('support.portal.workload.notStarted')} ${assignee.open_count ?? 0} · ${t('support.portal.workload.inProgress')} ${assignee.in_progress_count ?? 0}`;
+function Silian_assigneeLabel(Silian_assignee, Silian_t) {
+  const Silian_identity = Silian_assignee.username || Silian_assignee.email || `#${Silian_assignee.id}`;
+  return `${Silian_identity} · ${Silian_t('support.portal.workload.assigned')} ${Silian_assignee.assigned_total_count ?? 0} · ${Silian_t('support.portal.workload.notStarted')} ${Silian_assignee.open_count ?? 0} · ${Silian_t('support.portal.workload.inProgress')} ${Silian_assignee.in_progress_count ?? 0}`;
 }
 
-function transferStatusTone(status) {
-  switch (status) {
+function Silian_transferStatusTone(Silian_status) {
+  switch (Silian_status) {
     case 'approved':
       return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200';
     case 'rejected':
@@ -137,25 +137,25 @@ function transferStatusTone(status) {
   }
 }
 
-function messageTone(senderRole) {
-  if (senderRole === 'support' || senderRole === 'admin') {
+function Silian_messageTone(Silian_senderRole) {
+  if (Silian_senderRole === 'support' || Silian_senderRole === 'admin') {
     return {
       align: 'justify-end',
       rowDirection: 'flex-row-reverse',
       surface:
-        senderRole === 'admin'
+        Silian_senderRole === 'admin'
           ? 'border-violet-200 bg-violet-50/80 text-slate-900 dark:border-violet-400/30 dark:bg-violet-500/10 dark:text-slate-100'
           : 'border-sky-200 bg-sky-50/80 text-slate-900 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-slate-100',
       avatar:
-        senderRole === 'admin'
+        Silian_senderRole === 'admin'
           ? 'border-violet-200 bg-violet-100 text-violet-700 dark:border-violet-400/30 dark:bg-violet-500/20 dark:text-violet-200'
           : 'border-sky-200 bg-sky-100 text-sky-700 dark:border-sky-400/30 dark:bg-sky-500/20 dark:text-sky-200',
       badge:
-        senderRole === 'admin'
+        Silian_senderRole === 'admin'
           ? 'border-violet-300 bg-white/80 text-violet-700 dark:border-violet-400/30 dark:bg-violet-500/10 dark:text-violet-200'
           : 'border-sky-300 bg-white/80 text-sky-700 dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-200',
-      name: senderRole === 'admin' ? 'text-violet-700 dark:text-violet-200' : 'text-sky-700 dark:text-sky-200',
-      timestamp: senderRole === 'admin' ? 'text-right text-violet-700/70 dark:text-violet-200/70' : 'text-right text-sky-700/70 dark:text-sky-200/70',
+      name: Silian_senderRole === 'admin' ? 'text-violet-700 dark:text-violet-200' : 'text-sky-700 dark:text-sky-200',
+      timestamp: Silian_senderRole === 'admin' ? 'text-right text-violet-700/70 dark:text-violet-200/70' : 'text-right text-sky-700/70 dark:text-sky-200/70',
     };
   }
 
@@ -173,880 +173,880 @@ function messageTone(senderRole) {
   };
 }
 
-function MessageIdentity({ message, senderRole, senderName, t, tone }) {
-  const Icon = senderRole === 'admin' ? Shield : senderRole === 'support' ? Headset : UserRound;
-  const avatarDisplay = buildAvatarDisplayProps({
-    avatar_path: message?.avatar_path,
-    avatar_url: message?.avatar_url,
-    name: senderName || t('support.thread.unknownSender'),
+function Silian_MessageIdentity({ message: Silian_message, senderRole: Silian_senderRole, senderName: Silian_senderName, t: Silian_t, tone: Silian_tone }) {
+  const Silian_Icon = Silian_senderRole === 'admin' ? Silian_Shield : Silian_senderRole === 'support' ? Silian_Headset : Silian_UserRound;
+  const Silian_avatarDisplay = Silian_buildAvatarDisplayProps({
+    avatar_path: Silian_message?.avatar_path,
+    avatar_url: Silian_message?.avatar_url,
+    name: Silian_senderName || Silian_t('support.thread.unknownSender'),
   });
-  const hasAvatar = Boolean(avatarDisplay.src || avatarDisplay.filePath);
+  const Silian_hasAvatar = Boolean(Silian_avatarDisplay.src || Silian_avatarDisplay.filePath);
 
   return (
-    <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border shadow-sm ${tone.avatar}`}>
-      {hasAvatar ? (
-        <R2Image
-          src={avatarDisplay.src || undefined}
-          filePath={!avatarDisplay.src && avatarDisplay.filePath ? avatarDisplay.filePath : undefined}
-          alt={avatarDisplay.alt || senderName || t('support.thread.unknownSender')}
+    <div className={`relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border shadow-sm ${Silian_tone.avatar}`}>
+      {Silian_hasAvatar ? (
+        <Silian_R2Image
+          src={Silian_avatarDisplay.src || undefined}
+          filePath={!Silian_avatarDisplay.src && Silian_avatarDisplay.filePath ? Silian_avatarDisplay.filePath : undefined}
+          alt={Silian_avatarDisplay.alt || Silian_senderName || Silian_t('support.thread.unknownSender')}
           className="h-full w-full object-cover"
         />
       ) : (
-        <Icon className="h-4.5 w-4.5" />
+        <Silian_Icon className="h-4.5 w-4.5" />
       )}
-      <div className={`absolute -bottom-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-background shadow-sm ${tone.badge}`}>
-        <Icon className="h-2.5 w-2.5" />
+      <div className={`absolute -bottom-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-background shadow-sm ${Silian_tone.badge}`}>
+        <Silian_Icon className="h-2.5 w-2.5" />
       </div>
-      <span className="sr-only">{senderName || t('support.thread.unknownSender')}</span>
+      <span className="sr-only">{Silian_senderName || Silian_t('support.thread.unknownSender')}</span>
     </div>
   );
 }
 
-const FEEDBACK_RATING_VALUES = [1, 2, 3, 4, 5];
+const Silian_FEEDBACK_RATING_VALUES = [1, 2, 3, 4, 5];
 
-function FeedbackStars({ value }) {
+function Silian_FeedbackStars({ value: Silian_value }) {
   return (
     <div className="flex items-center gap-1">
-      {FEEDBACK_RATING_VALUES.map((ratingValue) => (
-        <Star
-          key={ratingValue}
-          className={`h-4 w-4 ${ratingValue <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'}`}
+      {Silian_FEEDBACK_RATING_VALUES.map((Silian_ratingValue) => (
+        <Silian_Star
+          key={Silian_ratingValue}
+          className={`h-4 w-4 ${Silian_ratingValue <= Silian_value ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'}`}
         />
       ))}
     </div>
   );
 }
 
-function WorkflowLabelWithTooltip({ label, help }) {
+function Silian_WorkflowLabelWithTooltip({ label: Silian_label, help: Silian_help }) {
   return (
     <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-      <span>{label}</span>
-      <Tooltip>
-        <TooltipTrigger asChild>
+      <span>{Silian_label}</span>
+      <Silian_Tooltip>
+        <Silian_TooltipTrigger asChild>
           <button
             type="button"
             className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 text-[10px] font-semibold text-slate-500 transition hover:border-sky-300 hover:text-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400/50 dark:border-slate-600 dark:text-slate-300 dark:hover:border-sky-400/40 dark:hover:text-sky-200"
-            aria-label={label}
+            aria-label={Silian_label}
           >
             ?
           </button>
-        </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={8} className="max-w-[220px] leading-5">
-          {help}
-        </TooltipContent>
-      </Tooltip>
+        </Silian_TooltipTrigger>
+        <Silian_TooltipContent side="top" sideOffset={8} className="max-w-[220px] leading-5">
+          {Silian_help}
+        </Silian_TooltipContent>
+      </Silian_Tooltip>
     </span>
   );
 }
 
 export default function SupportTicketDetailPage() {
-  const { ticketId } = useParams();
-  const { t, currentLanguage } = useTranslation(['activities', 'common', 'date', 'errors', 'messages', 'support']);
-  const queryClient = useQueryClient();
-  const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
-  const [attachments, setAttachments] = useState([]);
-  const [attachmentGate, setAttachmentGate] = useState({ hasPendingUploads: false, hasUploadErrors: false, isSubmissionBlocked: false });
-  const [status, setStatus] = useState('open');
-  const [priority, setPriority] = useState('normal');
-  const [assignedTo, setAssignedTo] = useState('none');
-  const [ticketWorkflowStateTicketId, setTicketWorkflowStateTicketId] = useState(null);
-  const [transferTo, setTransferTo] = useState('none');
-  const [transferReason, setTransferReason] = useState('');
-  const [reviewNotes, setReviewNotes] = useState({});
-  const [sidePanelTab, setSidePanelTab] = useState('workflow');
-  const [replyMode, setReplyMode] = useState(null);
-  const replyInFlightRef = useRef(false);
+  const { ticketId: Silian_ticketId } = Silian_useParams();
+  const { t: Silian_t, currentLanguage: Silian_currentLanguage } = Silian_useTranslation(['activities', 'common', 'date', 'errors', 'messages', 'support']);
+  const Silian_queryClient = Silian_useQueryClient();
+  const Silian_locale = Silian_currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
+  const [Silian_attachments, Silian_setAttachments] = Silian_useState([]);
+  const [Silian_attachmentGate, Silian_setAttachmentGate] = Silian_useState({ hasPendingUploads: false, hasUploadErrors: false, isSubmissionBlocked: false });
+  const [Silian_status, Silian_setStatus] = Silian_useState('open');
+  const [Silian_priority, Silian_setPriority] = Silian_useState('normal');
+  const [Silian_assignedTo, Silian_setAssignedTo] = Silian_useState('none');
+  const [Silian_ticketWorkflowStateTicketId, Silian_setTicketWorkflowStateTicketId] = Silian_useState(null);
+  const [Silian_transferTo, Silian_setTransferTo] = Silian_useState('none');
+  const [Silian_transferReason, Silian_setTransferReason] = Silian_useState('');
+  const [Silian_reviewNotes, Silian_setReviewNotes] = Silian_useState({});
+  const [Silian_sidePanelTab, Silian_setSidePanelTab] = Silian_useState('workflow');
+  const [Silian_replyMode, Silian_setReplyMode] = Silian_useState(null);
+  const Silian_replyInFlightRef = Silian_useRef(false);
 
-  const authState = useMemo(() => checkAuthStatus(), []);
-  const currentUser = authState.user;
-  const isAdmin = Boolean(currentUser?.is_admin || currentUser?.role === 'admin');
+  const Silian_authState = Silian_useMemo(() => Silian_checkAuthStatus(), []);
+  const Silian_currentUser = Silian_authState.user;
+  const Silian_isAdmin = Boolean(Silian_currentUser?.is_admin || Silian_currentUser?.role === 'admin');
 
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(replySchema),
+    register: Silian_register,
+    handleSubmit: Silian_handleSubmit,
+    reset: Silian_reset,
+    formState: { errors: Silian_errors },
+  } = Silian_useForm({
+    resolver: Silian_zodResolver(Silian_replySchema),
     defaultValues: { content: '' },
   });
 
-  const ticketQuery = useQuery(
-    ['support-ticket-detail', ticketId],
-    () => supportAPI.getTicket(ticketId),
+  const Silian_ticketQuery = Silian_useQuery(
+    ['support-ticket-detail', Silian_ticketId],
+    () => Silian_supportAPI.getTicket(Silian_ticketId),
     {
-      enabled: Boolean(ticketId),
+      enabled: Boolean(Silian_ticketId),
       refetchOnWindowFocus: false,
     }
   );
 
-  const assigneesQuery = useQuery(
+  const Silian_assigneesQuery = Silian_useQuery(
     ['support-assignees'],
     async () => {
-      const response = await supportAPI.getAssignees();
-      return response.data?.data ?? [];
+      const Silian_response = await Silian_supportAPI.getAssignees();
+      return Silian_response.data?.data ?? [];
     },
     {
       refetchOnWindowFocus: false,
     }
   );
 
-  const updateMutation = useMutation(
-    (payload) => supportAPI.updateTicket(ticketId, payload)
+  const Silian_updateMutation = Silian_useMutation(
+    (Silian_payload) => Silian_supportAPI.updateTicket(Silian_ticketId, Silian_payload)
   );
 
-  const replyMutation = useMutation(
-    (payload) => supportAPI.replyTicket(ticketId, payload)
+  const Silian_replyMutation = Silian_useMutation(
+    (Silian_payload) => Silian_supportAPI.replyTicket(Silian_ticketId, Silian_payload)
   );
 
-  const transferRequestMutation = useMutation(
-    (payload) => supportAPI.createTransferRequest(ticketId, payload),
+  const Silian_transferRequestMutation = Silian_useMutation(
+    (Silian_payload) => Silian_supportAPI.createTransferRequest(Silian_ticketId, Silian_payload),
     {
       onSuccess: () => {
-        toast.success(t('support.portal.transfer.requestCreated'));
-        setTransferTo('none');
-        setTransferReason('');
-        queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
+        Silian_toast.success(Silian_t('support.portal.transfer.requestCreated'));
+        Silian_setTransferTo('none');
+        Silian_setTransferReason('');
+        Silian_queryClient.invalidateQueries(['support-ticket-detail', Silian_ticketId]);
       },
-      onError: (error) => {
-        const message = error?.response?.data?.message || error.message || t('errors.operationFailed');
-        toast.error(message);
+      onError: (Silian_error) => {
+        const Silian_message = Silian_error?.response?.data?.message || Silian_error.message || Silian_t('errors.operationFailed');
+        Silian_toast.error(Silian_message);
       },
     }
   );
 
-  const reviewTransferMutation = useMutation(
-    ({ requestId, payload }) => supportAPI.reviewTransferRequest(requestId, payload),
+  const Silian_reviewTransferMutation = Silian_useMutation(
+    ({ requestId: Silian_requestId, payload: Silian_payload }) => Silian_supportAPI.reviewTransferRequest(Silian_requestId, Silian_payload),
     {
       onSuccess: () => {
-        toast.success(t('support.portal.transfer.reviewSaved'));
-        queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
-        queryClient.invalidateQueries(['support-queue']);
-        queryClient.invalidateQueries(['support-assignees']);
+        Silian_toast.success(Silian_t('support.portal.transfer.reviewSaved'));
+        Silian_queryClient.invalidateQueries(['support-ticket-detail', Silian_ticketId]);
+        Silian_queryClient.invalidateQueries(['support-queue']);
+        Silian_queryClient.invalidateQueries(['support-assignees']);
       },
-      onError: (error) => {
-        const message = error?.response?.data?.message || error.message || t('errors.operationFailed');
-        toast.error(message);
+      onError: (Silian_error) => {
+        const Silian_message = Silian_error?.response?.data?.message || Silian_error.message || Silian_t('errors.operationFailed');
+        Silian_toast.error(Silian_message);
       },
     }
   );
 
-  const ticket = ticketQuery.data?.data?.data;
-  const assignees = useMemo(
-    () => assigneesQuery.data ?? [],
-    [assigneesQuery.data]
+  const Silian_ticket = Silian_ticketQuery.data?.data?.data;
+  const Silian_assignees = Silian_useMemo(
+    () => Silian_assigneesQuery.data ?? [],
+    [Silian_assigneesQuery.data]
   );
-  const currentAssignee = useMemo(
-    () => assignees.find((entry) => String(entry.id) === String(ticket?.assigned_to ?? '')),
-    [assignees, ticket?.assigned_to]
+  const Silian_currentAssignee = Silian_useMemo(
+    () => Silian_assignees.find((Silian_entry) => String(Silian_entry.id) === String(Silian_ticket?.assigned_to ?? '')),
+    [Silian_assignees, Silian_ticket?.assigned_to]
   );
-  const isCurrentAssignee = Number(ticket?.assigned_to ?? 0) > 0 && Number(ticket?.assigned_to) === Number(currentUser?.id ?? 0);
-  const canManageWorkflow = isAdmin || isCurrentAssignee;
-  const transferableAssignees = useMemo(
-    () => assignees.filter((entry) => String(entry.id) !== String(ticket?.assigned_to ?? '')),
-    [assignees, ticket?.assigned_to]
+  const Silian_isCurrentAssignee = Number(Silian_ticket?.assigned_to ?? 0) > 0 && Number(Silian_ticket?.assigned_to) === Number(Silian_currentUser?.id ?? 0);
+  const Silian_canManageWorkflow = Silian_isAdmin || Silian_isCurrentAssignee;
+  const Silian_transferableAssignees = Silian_useMemo(
+    () => Silian_assignees.filter((Silian_entry) => String(Silian_entry.id) !== String(Silian_ticket?.assigned_to ?? '')),
+    [Silian_assignees, Silian_ticket?.assigned_to]
   );
-  const pendingTransferRequests = ticket?.transfer_requests?.filter((entry) => entry.status === 'pending') ?? [];
-  const feedbackEntries = ticket?.feedback ?? [];
+  const Silian_pendingTransferRequests = Silian_ticket?.transfer_requests?.filter((Silian_entry) => Silian_entry.status === 'pending') ?? [];
+  const Silian_feedbackEntries = Silian_ticket?.feedback ?? [];
 
-  useEffect(() => {
-    if (!ticket) {
+  Silian_useEffect(() => {
+    if (!Silian_ticket) {
       return;
     }
-    setStatus(ticket.status || 'open');
-    setPriority(ticket.priority || 'normal');
-    setAssignedTo(ticket.assigned_to ? String(ticket.assigned_to) : 'none');
-    setTicketWorkflowStateTicketId(ticket.id ?? null);
-  }, [ticket]);
+    Silian_setStatus(Silian_ticket.status || 'open');
+    Silian_setPriority(Silian_ticket.priority || 'normal');
+    Silian_setAssignedTo(Silian_ticket.assigned_to ? String(Silian_ticket.assigned_to) : 'none');
+    Silian_setTicketWorkflowStateTicketId(Silian_ticket.id ?? null);
+  }, [Silian_ticket]);
 
-  const invalidateSupportViews = ({ includeAssignees = false, includeAdminReports = false, includePendingTransfers = false } = {}) => {
-    queryClient.invalidateQueries(['support-ticket-detail', ticketId]);
-    queryClient.invalidateQueries(['support-queue']);
-    queryClient.invalidateQueries(['support-workbench-tickets']);
-    queryClient.invalidateQueries(['admin-support-tickets']);
-    queryClient.invalidateQueries(['admin-support-ticket-detail', Number(ticketId)]);
-    if (includeAssignees) {
-      queryClient.invalidateQueries(['support-assignees']);
+  const Silian_invalidateSupportViews = ({ includeAssignees: Silian_includeAssignees = false, includeAdminReports: Silian_includeAdminReports = false, includePendingTransfers: Silian_includePendingTransfers = false } = {}) => {
+    Silian_queryClient.invalidateQueries(['support-ticket-detail', Silian_ticketId]);
+    Silian_queryClient.invalidateQueries(['support-queue']);
+    Silian_queryClient.invalidateQueries(['support-workbench-tickets']);
+    Silian_queryClient.invalidateQueries(['admin-support-tickets']);
+    Silian_queryClient.invalidateQueries(['admin-support-ticket-detail', Number(Silian_ticketId)]);
+    if (Silian_includeAssignees) {
+      Silian_queryClient.invalidateQueries(['support-assignees']);
     }
-    if (includeAdminReports) {
-      queryClient.invalidateQueries(['admin-support-reports']);
+    if (Silian_includeAdminReports) {
+      Silian_queryClient.invalidateQueries(['admin-support-reports']);
     }
-    if (includePendingTransfers) {
-      queryClient.invalidateQueries(['support-workbench-pending-transfers']);
+    if (Silian_includePendingTransfers) {
+      Silian_queryClient.invalidateQueries(['support-workbench-pending-transfers']);
     }
   };
 
-  const resetReplyComposer = () => {
-    reset();
-    setAttachments([]);
+  const Silian_resetReplyComposer = () => {
+    Silian_reset();
+    Silian_setAttachments([]);
   };
 
-  const handleWorkflowSave = async () => {
-    if (replyMode !== null || replyInFlightRef.current || updateMutation.isLoading || replyMutation.isLoading || !isTicketWorkflowStateSynced) {
+  const Silian_handleWorkflowSave = async () => {
+    if (Silian_replyMode !== null || Silian_replyInFlightRef.current || Silian_updateMutation.isLoading || Silian_replyMutation.isLoading || !Silian_isTicketWorkflowStateSynced) {
       return;
     }
 
-    const payload = {
-      status,
-      priority,
+    const Silian_payload = {
+      status: Silian_status,
+      priority: Silian_priority,
     };
 
-    if (isAdmin) {
-      payload.assigned_to = assignedTo === 'none' ? null : Number(assignedTo);
+    if (Silian_isAdmin) {
+      Silian_payload.assigned_to = Silian_assignedTo === 'none' ? null : Number(Silian_assignedTo);
     }
 
     try {
-      await updateMutation.mutateAsync(payload);
-      invalidateSupportViews({ includeAssignees: true, includeAdminReports: true });
-      toast.success(t('support.portal.ticketUpdated'));
-    } catch (error) {
-      const message = error?.response?.data?.message || error?.message || t('errors.operationFailed');
-      toast.error(message);
+      await Silian_updateMutation.mutateAsync(Silian_payload);
+      Silian_invalidateSupportViews({ includeAssignees: true, includeAdminReports: true });
+      Silian_toast.success(Silian_t('support.portal.ticketUpdated'));
+    } catch (Silian_error) {
+      const Silian_message = Silian_error?.response?.data?.message || Silian_error?.message || Silian_t('errors.operationFailed');
+      Silian_toast.error(Silian_message);
     }
   };
 
-  const buildReplyPayload = (values, nextStatus = null) => {
-    if (attachmentGate.hasUploadErrors) {
-      toast.error(t('support.attachments.uploadFailedBlocking'));
+  const Silian_buildReplyPayload = (Silian_values, Silian_nextStatus = null) => {
+    if (Silian_attachmentGate.hasUploadErrors) {
+      Silian_toast.error(Silian_t('support.attachments.uploadFailedBlocking'));
       return null;
     }
-    if (attachmentGate.hasPendingUploads) {
-      toast.error(t('support.attachments.uploadRequired'));
+    if (Silian_attachmentGate.hasPendingUploads) {
+      Silian_toast.error(Silian_t('support.attachments.uploadRequired'));
       return null;
     }
 
-    const payload = {
-      content: values.content,
-      attachments: attachments.map((file) => file.file_path),
+    const Silian_payload = {
+      content: Silian_values.content,
+      attachments: Silian_attachments.map((Silian_file) => Silian_file.file_path),
     };
 
-    if (nextStatus) {
-      payload.status = nextStatus;
+    if (Silian_nextStatus) {
+      Silian_payload.status = Silian_nextStatus;
     }
 
-    return payload;
+    return Silian_payload;
   };
 
-  const submitReply = async (values, nextStatus = null) => {
-    if (replyInFlightRef.current) {
+  const Silian_submitReply = async (Silian_values, Silian_nextStatus = null) => {
+    if (Silian_replyInFlightRef.current) {
       return;
     }
 
-    replyInFlightRef.current = true;
-    setReplyMode(nextStatus ? 'resolve' : 'reply');
-    const payload = buildReplyPayload(values, nextStatus);
-    if (!payload) {
-      setReplyMode(null);
-      replyInFlightRef.current = false;
+    Silian_replyInFlightRef.current = true;
+    Silian_setReplyMode(Silian_nextStatus ? 'resolve' : 'reply');
+    const Silian_payload = Silian_buildReplyPayload(Silian_values, Silian_nextStatus);
+    if (!Silian_payload) {
+      Silian_setReplyMode(null);
+      Silian_replyInFlightRef.current = false;
       return;
     }
 
     try {
-      await replyMutation.mutateAsync(payload);
-    } catch (error) {
-      const message = error?.response?.data?.message || error?.message || t('errors.operationFailed');
-      toast.error(message);
-      setReplyMode(null);
-      replyInFlightRef.current = false;
+      await Silian_replyMutation.mutateAsync(Silian_payload);
+    } catch (Silian_error) {
+      const Silian_message = Silian_error?.response?.data?.message || Silian_error?.message || Silian_t('errors.operationFailed');
+      Silian_toast.error(Silian_message);
+      Silian_setReplyMode(null);
+      Silian_replyInFlightRef.current = false;
       return;
     }
 
-    if (nextStatus) {
-      setStatus(nextStatus);
+    if (Silian_nextStatus) {
+      Silian_setStatus(Silian_nextStatus);
     }
 
-    resetReplyComposer();
-    invalidateSupportViews({ includeAssignees: true, includeAdminReports: true });
-    toast.success(nextStatus ? t('support.portal.replyResolveSuccess') : t('support.portal.replyCreated'));
-    setReplyMode(null);
-    replyInFlightRef.current = false;
+    Silian_resetReplyComposer();
+    Silian_invalidateSupportViews({ includeAssignees: true, includeAdminReports: true });
+    Silian_toast.success(Silian_nextStatus ? Silian_t('support.portal.replyResolveSuccess') : Silian_t('support.portal.replyCreated'));
+    Silian_setReplyMode(null);
+    Silian_replyInFlightRef.current = false;
   };
 
-  const onReplySubmit = handleSubmit((values) => {
-    void submitReply(values);
+  const Silian_onReplySubmit = Silian_handleSubmit((Silian_values) => {
+    void Silian_submitReply(Silian_values);
   });
 
-  const onReplyAndResolve = handleSubmit((values) => {
-    void submitReply(values, 'resolved');
+  const Silian_onReplyAndResolve = Silian_handleSubmit((Silian_values) => {
+    void Silian_submitReply(Silian_values, 'resolved');
   });
 
-  const handleCreateTransferRequest = () => {
-    if (transferTo === 'none') {
-      toast.error(t('support.portal.transfer.targetRequired'));
+  const Silian_handleCreateTransferRequest = () => {
+    if (Silian_transferTo === 'none') {
+      Silian_toast.error(Silian_t('support.portal.transfer.targetRequired'));
       return;
     }
 
-    transferRequestMutation.mutate({
-      to_assignee: Number(transferTo),
-      reason: transferReason.trim(),
+    Silian_transferRequestMutation.mutate({
+      to_assignee: Number(Silian_transferTo),
+      reason: Silian_transferReason.trim(),
     });
   };
 
-  const handleReviewTransfer = (requestId, statusValue) => {
-    reviewTransferMutation.mutate({
-      requestId,
+  const Silian_handleReviewTransfer = (Silian_requestId, Silian_statusValue) => {
+    Silian_reviewTransferMutation.mutate({
+      requestId: Silian_requestId,
       payload: {
-        status: statusValue,
-        review_note: reviewNotes[requestId]?.trim() || undefined,
+        status: Silian_statusValue,
+        review_note: Silian_reviewNotes[Silian_requestId]?.trim() || undefined,
       },
     });
   };
 
-  if (ticketQuery.isLoading) {
-    return <p className="text-sm text-slate-500 dark:text-slate-400">{t('common.loading')}</p>;
+  if (Silian_ticketQuery.isLoading) {
+    return <p className="text-sm text-slate-500 dark:text-slate-400">{Silian_t('common.loading')}</p>;
   }
 
-  if (!ticket) {
+  if (!Silian_ticket) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>{t('support.thread.notFound')}</AlertDescription>
-      </Alert>
+      <Silian_Alert variant="destructive">
+        <Silian_AlertDescription>{Silian_t('support.thread.notFound')}</Silian_AlertDescription>
+      </Silian_Alert>
     );
   }
 
-  const slaMeta = getSlaMeta(ticket, locale);
-  const firstResponseMeta = getSlaMilestoneMeta(ticket, 'first_response', locale);
-  const resolutionMeta = getSlaMilestoneMeta(ticket, 'resolution', locale);
-  const isReplySubmitting = replyMutation.isLoading || updateMutation.isLoading;
-  const replyActionsDisabled = attachmentGate.isSubmissionBlocked || isReplySubmitting || replyMode !== null;
-  const isTicketWorkflowStateSynced = Number(ticket?.id ?? 0) > 0 && Number(ticketWorkflowStateTicketId ?? 0) === Number(ticket?.id ?? 0);
-  const workflowActionsDisabled = updateMutation.isLoading || isReplySubmitting || replyMode !== null || !isTicketWorkflowStateSynced;
+  const Silian_slaMeta = Silian_getSlaMeta(Silian_ticket, Silian_locale);
+  const Silian_firstResponseMeta = Silian_getSlaMilestoneMeta(Silian_ticket, 'first_response', Silian_locale);
+  const Silian_resolutionMeta = Silian_getSlaMilestoneMeta(Silian_ticket, 'resolution', Silian_locale);
+  const Silian_isReplySubmitting = Silian_replyMutation.isLoading || Silian_updateMutation.isLoading;
+  const Silian_replyActionsDisabled = Silian_attachmentGate.isSubmissionBlocked || Silian_isReplySubmitting || Silian_replyMode !== null;
+  const Silian_isTicketWorkflowStateSynced = Number(Silian_ticket?.id ?? 0) > 0 && Number(Silian_ticketWorkflowStateTicketId ?? 0) === Number(Silian_ticket?.id ?? 0);
+  const Silian_workflowActionsDisabled = Silian_updateMutation.isLoading || Silian_isReplySubmitting || Silian_replyMode !== null || !Silian_isTicketWorkflowStateSynced;
 
   return (
     <div className="space-y-6">
-      <Link to="/support/tickets" className="inline-flex items-center gap-2 text-sm font-medium text-sky-600 dark:text-sky-300">
-        <ArrowLeft className="h-4 w-4" />
-        {t('support.portal.backToQueue')}
-      </Link>
+      <Silian_Link to="/support/tickets" className="inline-flex items-center gap-2 text-sm font-medium text-sky-600 dark:text-sky-300">
+        <Silian_ArrowLeft className="h-4 w-4" />
+        {Silian_t('support.portal.backToQueue')}
+      </Silian_Link>
 
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">#{ticket.id}</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">{ticket.subject}</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">#{Silian_ticket.id}</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight">{Silian_ticket.subject}</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-            {t('support.portal.threadSubtitle')}
+            {Silian_t('support.portal.threadSubtitle')}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge className={getStatusTone(ticket.status)} variant="outline">
-            {t(`support.statuses.${ticket.status}`)}
-          </Badge>
-          <Badge variant={getPriorityVariant(ticket.priority)}>
-            {t(`support.priorities.${ticket.priority}`)}
-          </Badge>
-          {slaMeta.state ? (
-            <Badge variant="outline" className={getSlaTone(slaMeta.state)}>
-              {t('support.portal.slaBadge', {
-                status: t(`support.slaStatuses.${slaMeta.state}`, { defaultValue: slaMeta.state }),
+          <Silian_Badge className={Silian_getStatusTone(Silian_ticket.status)} variant="outline">
+            {Silian_t(`support.statuses.${Silian_ticket.status}`)}
+          </Silian_Badge>
+          <Silian_Badge variant={Silian_getPriorityVariant(Silian_ticket.priority)}>
+            {Silian_t(`support.priorities.${Silian_ticket.priority}`)}
+          </Silian_Badge>
+          {Silian_slaMeta.state ? (
+            <Silian_Badge variant="outline" className={Silian_getSlaTone(Silian_slaMeta.state)}>
+              {Silian_t('support.portal.slaBadge', {
+                status: Silian_t(`support.slaStatuses.${Silian_slaMeta.state}`, { defaultValue: Silian_slaMeta.state }),
               })}
-            </Badge>
+            </Silian_Badge>
           ) : null}
-          <Badge variant="outline">
-            {t(`support.categories.${ticket.category}`)}
-          </Badge>
+          <Silian_Badge variant="outline">
+            {Silian_t(`support.categories.${Silian_ticket.category}`)}
+          </Silian_Badge>
         </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4">
-          <Card className="border-slate-200/80 shadow-sm dark:border-white/10">
-            <CardHeader>
-              <CardTitle>{t('support.portal.conversationTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {(ticket.messages ?? []).map((message) => {
-                const tone = messageTone(message.sender_role);
+          <Silian_Card className="border-slate-200/80 shadow-sm dark:border-white/10">
+            <Silian_CardHeader>
+              <Silian_CardTitle>{Silian_t('support.portal.conversationTitle')}</Silian_CardTitle>
+            </Silian_CardHeader>
+            <Silian_CardContent className="space-y-4">
+              {(Silian_ticket.messages ?? []).map((Silian_message) => {
+                const Silian_tone = Silian_messageTone(Silian_message.sender_role);
 
                 return (
-                  <div key={message.id} className={`flex ${tone.align}`}>
-                    <div className={`flex w-full max-w-[95%] ${tone.rowDirection} items-end gap-3`}>
-                      <MessageIdentity
-                        message={message}
-                        senderRole={message.sender_role}
-                        senderName={message.sender_name}
-                        t={t}
-                        tone={tone}
+                  <div key={Silian_message.id} className={`flex ${Silian_tone.align}`}>
+                    <div className={`flex w-full max-w-[95%] ${Silian_tone.rowDirection} items-end gap-3`}>
+                      <Silian_MessageIdentity
+                        message={Silian_message}
+                        senderRole={Silian_message.sender_role}
+                        senderName={Silian_message.sender_name}
+                        t={Silian_t}
+                        tone={Silian_tone}
                       />
                       <div
-                        className={`min-w-0 flex-1 rounded-[1.6rem] border px-5 py-4 shadow-sm ${tone.surface}`}
+                        className={`min-w-0 flex-1 rounded-[1.6rem] border px-5 py-4 shadow-sm ${Silian_tone.surface}`}
                       >
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className={`text-sm font-semibold ${tone.name}`}>
-                            {message.sender_name || t('support.thread.unknownSender')}
+                          <p className={`text-sm font-semibold ${Silian_tone.name}`}>
+                            {Silian_message.sender_name || Silian_t('support.thread.unknownSender')}
                           </p>
-                          <Badge variant="outline" className={tone.badge}>
-                            {t(`support.senderRoles.${message.sender_role}`)}
-                          </Badge>
+                          <Silian_Badge variant="outline" className={Silian_tone.badge}>
+                            {Silian_t(`support.senderRoles.${Silian_message.sender_role}`)}
+                          </Silian_Badge>
                         </div>
-                        <p className="mt-4 whitespace-pre-wrap text-sm leading-7">{message.body}</p>
-                        <SupportAttachmentList attachments={message.attachments} />
-                        <p className={`mt-4 text-[11px] font-medium uppercase tracking-[0.18em] ${tone.timestamp}`}>
-                          {formatSupportDate(message.created_at, locale)}
+                        <p className="mt-4 whitespace-pre-wrap text-sm leading-7">{Silian_message.body}</p>
+                        <Silian_SupportAttachmentList attachments={Silian_message.attachments} />
+                        <p className={`mt-4 text-[11px] font-medium uppercase tracking-[0.18em] ${Silian_tone.timestamp}`}>
+                          {Silian_formatSupportDate(Silian_message.created_at, Silian_locale)}
                         </p>
                       </div>
                     </div>
                   </div>
                 );
               })}
-            </CardContent>
-          </Card>
+            </Silian_CardContent>
+          </Silian_Card>
 
-          <Card className="border-slate-200/80 shadow-sm dark:border-white/10">
-            <CardHeader>
-              <CardTitle>{t('support.portal.replyTitle')}</CardTitle>
-              <CardDescription>{t('support.portal.replySubtitle')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {canManageWorkflow ? (
-                <form className="space-y-4" onSubmit={onReplySubmit}>
-                  <Textarea
+          <Silian_Card className="border-slate-200/80 shadow-sm dark:border-white/10">
+            <Silian_CardHeader>
+              <Silian_CardTitle>{Silian_t('support.portal.replyTitle')}</Silian_CardTitle>
+              <Silian_CardDescription>{Silian_t('support.portal.replySubtitle')}</Silian_CardDescription>
+            </Silian_CardHeader>
+            <Silian_CardContent className="space-y-4">
+              {Silian_canManageWorkflow ? (
+                <form className="space-y-4" onSubmit={Silian_onReplySubmit}>
+                  <Silian_Textarea
                     rows={6}
-                    placeholder={t('support.portal.replyPlaceholder')}
-                    {...register('content')}
+                    placeholder={Silian_t('support.portal.replyPlaceholder')}
+                    {...Silian_register('content')}
                   />
-                  {errors.content && <p className="text-sm text-red-600">{errors.content.message}</p>}
+                  {Silian_errors.content && <p className="text-sm text-red-600">{Silian_errors.content.message}</p>}
 
-                  <FileUpload
+                  <Silian_FileUpload
                     multiple
                     maxFiles={4}
                     directory="support-tickets"
                     entityType="support_ticket_message"
                     accept="image/*"
                     compressImages
-                    onStateChange={setAttachmentGate}
-                    onUploadSuccess={(result) => {
-                      setAttachments((current) => mergeUploadedFiles(current, result));
-                      toast.success(t('support.feedback.uploaded'));
+                    onStateChange={Silian_setAttachmentGate}
+                    onUploadSuccess={(Silian_result) => {
+                      Silian_setAttachments((Silian_current) => Silian_mergeUploadedFiles(Silian_current, Silian_result));
+                      Silian_toast.success(Silian_t('support.feedback.uploaded'));
                     }}
-                    onUploadError={(error) => toast.error(error?.message || t('errors.uploadFailed'))}
+                    onUploadError={(Silian_error) => Silian_toast.error(Silian_error?.message || Silian_t('errors.uploadFailed'))}
                   />
 
-                  {attachments.length > 0 && (
+                  {Silian_attachments.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {attachments.map((file) => (
+                      {Silian_attachments.map((Silian_file) => (
                         <button
-                          key={file.file_path}
+                          key={Silian_file.file_path}
                           type="button"
-                          onClick={() => setAttachments((current) => current.filter((entry) => entry.file_path !== file.file_path))}
+                          onClick={() => Silian_setAttachments((Silian_current) => Silian_current.filter((Silian_entry) => Silian_entry.file_path !== Silian_file.file_path))}
                           className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                         >
-                          {file.original_name}
+                          {Silian_file.original_name}
                         </button>
                       ))}
                     </div>
                   )}
-                  {attachmentGate.hasUploadErrors ? (
-                    <Alert>
-                      <AlertDescription>{t('support.attachments.uploadFailedBlocking')}</AlertDescription>
-                    </Alert>
+                  {Silian_attachmentGate.hasUploadErrors ? (
+                    <Silian_Alert>
+                      <Silian_AlertDescription>{Silian_t('support.attachments.uploadFailedBlocking')}</Silian_AlertDescription>
+                    </Silian_Alert>
                   ) : null}
-                  {attachmentGate.hasPendingUploads ? (
-                    <Alert>
-                      <AlertDescription>{t('support.attachments.uploadRequired')}</AlertDescription>
-                    </Alert>
+                  {Silian_attachmentGate.hasPendingUploads ? (
+                    <Silian_Alert>
+                      <Silian_AlertDescription>{Silian_t('support.attachments.uploadRequired')}</Silian_AlertDescription>
+                    </Silian_Alert>
                   ) : null}
 
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <Button
+                    <Silian_Button
                       type="submit"
                       className="w-full rounded-full sm:flex-1"
-                      loading={isReplySubmitting && replyMode === 'reply'}
-                      disabled={replyActionsDisabled}
+                      loading={Silian_isReplySubmitting && Silian_replyMode === 'reply'}
+                      disabled={Silian_replyActionsDisabled}
                     >
-                      <Send className="mr-2 h-4 w-4" />
-                      {t('support.portal.replySubmit')}
-                    </Button>
-                    <Button
+                      <Silian_Send className="mr-2 h-4 w-4" />
+                      {Silian_t('support.portal.replySubmit')}
+                    </Silian_Button>
+                    <Silian_Button
                       type="button"
                       variant="outline"
                       className="w-full rounded-full border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-400/40 dark:text-emerald-200 dark:hover:bg-emerald-500/10 sm:flex-1"
-                      loading={isReplySubmitting && replyMode === 'resolve'}
-                      disabled={replyActionsDisabled}
-                      onClick={onReplyAndResolve}
+                      loading={Silian_isReplySubmitting && Silian_replyMode === 'resolve'}
+                      disabled={Silian_replyActionsDisabled}
+                      onClick={Silian_onReplyAndResolve}
                     >
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                      {t('support.portal.replyResolveSubmit')}
-                    </Button>
+                      <Silian_CheckCircle2 className="mr-2 h-4 w-4" />
+                      {Silian_t('support.portal.replyResolveSubmit')}
+                    </Silian_Button>
                   </div>
                 </form>
               ) : (
-                <Alert>
-                  <AlertDescription>{t('support.portal.actionLockedHint')}</AlertDescription>
-                </Alert>
+                <Silian_Alert>
+                  <Silian_AlertDescription>{Silian_t('support.portal.actionLockedHint')}</Silian_AlertDescription>
+                </Silian_Alert>
               )}
-            </CardContent>
-          </Card>
+            </Silian_CardContent>
+          </Silian_Card>
         </div>
 
         <div className="space-y-4 xl:sticky xl:top-6 xl:self-start">
-          <Card className="border-slate-200/80 shadow-sm dark:border-white/10">
-            <CardHeader>
-              <CardTitle>{t('support.portal.ticketMetaTitle', { defaultValue: t('support.portal.requesterTitle') })}</CardTitle>
-              <CardDescription>{t('support.portal.ticketMetaSubtitle', { defaultValue: t('support.portal.requesterSubtitle') })}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+          <Silian_Card className="border-slate-200/80 shadow-sm dark:border-white/10">
+            <Silian_CardHeader>
+              <Silian_CardTitle>{Silian_t('support.portal.ticketMetaTitle', { defaultValue: Silian_t('support.portal.requesterTitle') })}</Silian_CardTitle>
+              <Silian_CardDescription>{Silian_t('support.portal.ticketMetaSubtitle', { defaultValue: Silian_t('support.portal.requesterSubtitle') })}</Silian_CardDescription>
+            </Silian_CardHeader>
+            <Silian_CardContent className="space-y-3 text-sm">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-slate-500 dark:text-slate-400">{t('support.portal.requesterName')}</span>
-                <span>{ticket.requester?.username || '--'}</span>
+                <span className="text-slate-500 dark:text-slate-400">{Silian_t('support.portal.requesterName')}</span>
+                <span>{Silian_ticket.requester?.username || '--'}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="text-slate-500 dark:text-slate-400">{t('support.portal.requesterEmail')}</span>
-                <span className="truncate">{ticket.requester?.email || '--'}</span>
+                <span className="text-slate-500 dark:text-slate-400">{Silian_t('support.portal.requesterEmail')}</span>
+                <span className="truncate">{Silian_ticket.requester?.email || '--'}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="text-slate-500 dark:text-slate-400">{t('support.portal.createdAt')}</span>
-                <span>{formatSupportDate(ticket.created_at, locale)}</span>
+                <span className="text-slate-500 dark:text-slate-400">{Silian_t('support.portal.createdAt')}</span>
+                <span>{Silian_formatSupportDate(Silian_ticket.created_at, Silian_locale)}</span>
               </div>
-              {(ticket.tags ?? []).length > 0 && (
+              {(Silian_ticket.tags ?? []).length > 0 && (
                 <div className="pt-2">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{t('support.portal.tagsTitle')}</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{Silian_t('support.portal.tagsTitle')}</p>
                   <div className="flex flex-wrap gap-2">
-                    {(ticket.tags ?? []).map((tag) => (
-                      <Badge key={tag.id} variant="outline" className={getTagTone(tag.color)}>
-                        {tag.name}
-                      </Badge>
+                    {(Silian_ticket.tags ?? []).map((Silian_tag) => (
+                      <Silian_Badge key={Silian_tag.id} variant="outline" className={Silian_getTagTone(Silian_tag.color)}>
+                        {Silian_tag.name}
+                      </Silian_Badge>
                     ))}
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </Silian_CardContent>
+          </Silian_Card>
 
-          <Card className="border-slate-200/80 shadow-sm dark:border-white/10">
-            <CardContent className="pt-6">
-              <Tabs value={sidePanelTab} onValueChange={setSidePanelTab} className="space-y-5">
-                <TabsList className="grid w-full grid-cols-3 overflow-hidden rounded-[1.2rem] border-slate-200 bg-slate-100/90 dark:border-white/10 dark:bg-white/5">
-                  <TabsTrigger value="workflow" className="border-r-slate-200 dark:border-r-white/10">
-                    {t('support.portal.workflowTab')}
-                  </TabsTrigger>
-                  <TabsTrigger value="transfer" className="border-r-slate-200 dark:border-r-white/10">
-                    {t('support.portal.transferTab')}
-                  </TabsTrigger>
-                  <TabsTrigger value="feedback">{t('support.portal.feedbackTab')}</TabsTrigger>
-                </TabsList>
+          <Silian_Card className="border-slate-200/80 shadow-sm dark:border-white/10">
+            <Silian_CardContent className="pt-6">
+              <Silian_Tabs value={Silian_sidePanelTab} onValueChange={Silian_setSidePanelTab} className="space-y-5">
+                <Silian_TabsList className="grid w-full grid-cols-3 overflow-hidden rounded-[1.2rem] border-slate-200 bg-slate-100/90 dark:border-white/10 dark:bg-white/5">
+                  <Silian_TabsTrigger value="workflow" className="border-r-slate-200 dark:border-r-white/10">
+                    {Silian_t('support.portal.workflowTab')}
+                  </Silian_TabsTrigger>
+                  <Silian_TabsTrigger value="transfer" className="border-r-slate-200 dark:border-r-white/10">
+                    {Silian_t('support.portal.transferTab')}
+                  </Silian_TabsTrigger>
+                  <Silian_TabsTrigger value="feedback">{Silian_t('support.portal.feedbackTab')}</Silian_TabsTrigger>
+                </Silian_TabsList>
 
-                <TabsContent value="workflow" className="space-y-4">
+                <Silian_TabsContent value="workflow" className="space-y-4">
                   <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
                     <div className="grid gap-3 text-sm">
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-slate-500 dark:text-slate-400">{t('support.portal.firstResponseDueLabel')}</span>
+                        <span className="text-slate-500 dark:text-slate-400">{Silian_t('support.portal.firstResponseDueLabel')}</span>
                         <div className="text-right">
-                          <div>{firstResponseMeta.dueAtLabel}</div>
-                          <div className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{firstResponseMeta.relativeLabel}</div>
+                          <div>{Silian_firstResponseMeta.dueAtLabel}</div>
+                          <div className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{Silian_firstResponseMeta.relativeLabel}</div>
                         </div>
                       </div>
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-slate-500 dark:text-slate-400">{t('support.portal.resolutionDueLabel')}</span>
+                        <span className="text-slate-500 dark:text-slate-400">{Silian_t('support.portal.resolutionDueLabel')}</span>
                         <div className="text-right">
-                          <div>{resolutionMeta.dueAtLabel}</div>
-                          <div className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{resolutionMeta.relativeLabel}</div>
+                          <div>{Silian_resolutionMeta.dueAtLabel}</div>
+                          <div className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{Silian_resolutionMeta.relativeLabel}</div>
                         </div>
                       </div>
                       <div className="flex items-center justify-between gap-4">
-                        <WorkflowLabelWithTooltip
-                          label={t('support.portal.assignmentSourceLabel')}
-                          help={t('support.portal.assignmentSourceHelp')}
+                        <Silian_WorkflowLabelWithTooltip
+                          label={Silian_t('support.portal.assignmentSourceLabel')}
+                          help={Silian_t('support.portal.assignmentSourceHelp')}
                         />
-                        <span>{ticket.assignment_source || '--'}</span>
+                        <span>{Silian_ticket.assignment_source || '--'}</span>
                       </div>
                       <div className="flex items-center justify-between gap-4">
-                        <WorkflowLabelWithTooltip
-                          label={t('support.portal.escalationLevelLabel')}
-                          help={t('support.portal.escalationLevelHelp')}
+                        <Silian_WorkflowLabelWithTooltip
+                          label={Silian_t('support.portal.escalationLevelLabel')}
+                          help={Silian_t('support.portal.escalationLevelHelp')}
                         />
-                        <span>{ticket.escalation_level ?? 0}</span>
+                        <span>{Silian_ticket.escalation_level ?? 0}</span>
                       </div>
-                      {ticket.routing_summary ? (
+                      {Silian_ticket.routing_summary ? (
                         <>
                           <div className="flex items-center justify-between gap-4">
-                            <span className="text-slate-500 dark:text-slate-400">{t('support.portal.routingLastRunLabel')}</span>
-                            <span>#{ticket.routing_summary.last_run_id ?? '--'}</span>
+                            <span className="text-slate-500 dark:text-slate-400">{Silian_t('support.portal.routingLastRunLabel')}</span>
+                            <span>#{Silian_ticket.routing_summary.last_run_id ?? '--'}</span>
                           </div>
                           <div className="flex items-center justify-between gap-4">
-                            <span className="text-slate-500 dark:text-slate-400">{t('support.portal.routingFallbackLabel')}</span>
-                            <span className="text-right">{ticket.routing_summary.fallback_reason || '--'}</span>
+                            <span className="text-slate-500 dark:text-slate-400">{Silian_t('support.portal.routingFallbackLabel')}</span>
+                            <span className="text-right">{Silian_ticket.routing_summary.fallback_reason || '--'}</span>
                           </div>
                         </>
                       ) : null}
                     </div>
                   </div>
 
-                  {canManageWorkflow ? (
+                  {Silian_canManageWorkflow ? (
                     <>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">{t('support.filters.status')}</label>
-                        <Select value={status} onValueChange={setStatus} disabled={workflowActionsDisabled}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {TICKET_STATUS_OPTIONS.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {t(option.labelKey)}
-                              </SelectItem>
+                        <label className="text-sm font-medium">{Silian_t('support.filters.status')}</label>
+                        <Silian_Select value={Silian_status} onValueChange={Silian_setStatus} disabled={Silian_workflowActionsDisabled}>
+                          <Silian_SelectTrigger className="w-full">
+                            <Silian_SelectValue />
+                          </Silian_SelectTrigger>
+                          <Silian_SelectContent>
+                            {Silian_TICKET_STATUS_OPTIONS.map((Silian_option) => (
+                              <Silian_SelectItem key={Silian_option.value} value={Silian_option.value}>
+                                {Silian_t(Silian_option.labelKey)}
+                              </Silian_SelectItem>
                             ))}
-                          </SelectContent>
-                        </Select>
+                          </Silian_SelectContent>
+                        </Silian_Select>
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">{t('support.feedback.fields.priority')}</label>
-                        <Select value={priority} onValueChange={setPriority} disabled={workflowActionsDisabled}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {TICKET_PRIORITY_OPTIONS.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {t(option.labelKey)}
-                              </SelectItem>
+                        <label className="text-sm font-medium">{Silian_t('support.feedback.fields.priority')}</label>
+                        <Silian_Select value={Silian_priority} onValueChange={Silian_setPriority} disabled={Silian_workflowActionsDisabled}>
+                          <Silian_SelectTrigger className="w-full">
+                            <Silian_SelectValue />
+                          </Silian_SelectTrigger>
+                          <Silian_SelectContent>
+                            {Silian_TICKET_PRIORITY_OPTIONS.map((Silian_option) => (
+                              <Silian_SelectItem key={Silian_option.value} value={Silian_option.value}>
+                                {Silian_t(Silian_option.labelKey)}
+                              </Silian_SelectItem>
                             ))}
-                          </SelectContent>
-                        </Select>
+                          </Silian_SelectContent>
+                        </Silian_Select>
                       </div>
 
-                      {isAdmin ? (
+                      {Silian_isAdmin ? (
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">{t('support.portal.assignedTo')}</label>
-                          <Select value={assignedTo} onValueChange={setAssignedTo} disabled={workflowActionsDisabled}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">{t('support.portal.unassigned')}</SelectItem>
-                              {assignees.map((assignee) => (
-                                <SelectItem key={assignee.id} value={String(assignee.id)}>
-                                  {assigneeLabel(assignee, t)}
-                                </SelectItem>
+                          <label className="text-sm font-medium">{Silian_t('support.portal.assignedTo')}</label>
+                          <Silian_Select value={Silian_assignedTo} onValueChange={Silian_setAssignedTo} disabled={Silian_workflowActionsDisabled}>
+                            <Silian_SelectTrigger className="w-full">
+                              <Silian_SelectValue />
+                            </Silian_SelectTrigger>
+                            <Silian_SelectContent>
+                              <Silian_SelectItem value="none">{Silian_t('support.portal.unassigned')}</Silian_SelectItem>
+                              {Silian_assignees.map((Silian_assignee) => (
+                                <Silian_SelectItem key={Silian_assignee.id} value={String(Silian_assignee.id)}>
+                                  {Silian_assigneeLabel(Silian_assignee, Silian_t)}
+                                </Silian_SelectItem>
                               ))}
-                            </SelectContent>
-                          </Select>
+                            </Silian_SelectContent>
+                          </Silian_Select>
                         </div>
                       ) : null}
 
-                      <Button type="button" className="w-full rounded-full" onClick={() => { void handleWorkflowSave(); }} loading={updateMutation.isLoading} disabled={workflowActionsDisabled}>
-                        <Save className="mr-2 h-4 w-4" />
-                        {t('support.portal.saveWorkflow')}
-                      </Button>
+                      <Silian_Button type="button" className="w-full rounded-full" onClick={() => { void Silian_handleWorkflowSave(); }} loading={Silian_updateMutation.isLoading} disabled={Silian_workflowActionsDisabled}>
+                        <Silian_Save className="mr-2 h-4 w-4" />
+                        {Silian_t('support.portal.saveWorkflow')}
+                      </Silian_Button>
                     </>
                   ) : (
-                    <Alert>
-                      <AlertDescription>{t('support.portal.actionLockedHint')}</AlertDescription>
-                    </Alert>
+                    <Silian_Alert>
+                      <Silian_AlertDescription>{Silian_t('support.portal.actionLockedHint')}</Silian_AlertDescription>
+                    </Silian_Alert>
                   )}
 
                   <div className="space-y-3 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-sm font-medium">{t('support.portal.assignedTo')}</span>
-                      <span className="text-right text-sm">{currentAssignee?.username || currentAssignee?.email || t('support.portal.unassigned')}</span>
+                      <span className="text-sm font-medium">{Silian_t('support.portal.assignedTo')}</span>
+                      <span className="text-right text-sm">{Silian_currentAssignee?.username || Silian_currentAssignee?.email || Silian_t('support.portal.unassigned')}</span>
                     </div>
-                    {currentAssignee ? (
+                    {Silian_currentAssignee ? (
                       <div className="grid grid-cols-3 gap-3 text-center">
                         <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                            {t('support.portal.workload.assigned')}
+                            {Silian_t('support.portal.workload.assigned')}
                           </p>
-                          <p className="mt-2 text-xl font-semibold">{currentAssignee.assigned_total_count ?? 0}</p>
+                          <p className="mt-2 text-xl font-semibold">{Silian_currentAssignee.assigned_total_count ?? 0}</p>
                         </div>
                         <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                            {t('support.portal.workload.notStarted')}
+                            {Silian_t('support.portal.workload.notStarted')}
                           </p>
-                          <p className="mt-2 text-xl font-semibold">{currentAssignee.open_count ?? 0}</p>
+                          <p className="mt-2 text-xl font-semibold">{Silian_currentAssignee.open_count ?? 0}</p>
                         </div>
                         <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-white/10 dark:bg-slate-950/70">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                            {t('support.portal.workload.inProgress')}
+                            {Silian_t('support.portal.workload.inProgress')}
                           </p>
-                          <p className="mt-2 text-xl font-semibold">{currentAssignee.in_progress_count ?? 0}</p>
+                          <p className="mt-2 text-xl font-semibold">{Silian_currentAssignee.in_progress_count ?? 0}</p>
                         </div>
                       </div>
                     ) : null}
-                    {ticket.assignment_locked ? (
-                      <Alert>
-                        <AlertDescription>{t('support.portal.assignmentLockedHint')}</AlertDescription>
-                      </Alert>
+                    {Silian_ticket.assignment_locked ? (
+                      <Silian_Alert>
+                        <Silian_AlertDescription>{Silian_t('support.portal.assignmentLockedHint')}</Silian_AlertDescription>
+                      </Silian_Alert>
                     ) : null}
                   </div>
-                </TabsContent>
+                </Silian_TabsContent>
 
-                <TabsContent value="transfer" className="space-y-4">
-                  {!isAdmin && isCurrentAssignee ? (
+                <Silian_TabsContent value="transfer" className="space-y-4">
+                  {!Silian_isAdmin && Silian_isCurrentAssignee ? (
                     <div className="space-y-4 rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
                       <div>
-                        <p className="text-sm font-semibold">{t('support.portal.transfer.title')}</p>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('support.portal.transfer.subtitle')}</p>
+                        <p className="text-sm font-semibold">{Silian_t('support.portal.transfer.title')}</p>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{Silian_t('support.portal.transfer.subtitle')}</p>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">{t('support.portal.transfer.target')}</label>
-                        <Select value={transferTo} onValueChange={setTransferTo}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder={t('support.portal.transfer.targetPlaceholder')} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">{t('support.portal.transfer.targetPlaceholder')}</SelectItem>
-                            {transferableAssignees.map((assignee) => (
-                              <SelectItem key={assignee.id} value={String(assignee.id)}>
-                                {assigneeLabel(assignee, t)}
-                              </SelectItem>
+                        <label className="text-sm font-medium">{Silian_t('support.portal.transfer.target')}</label>
+                        <Silian_Select value={Silian_transferTo} onValueChange={Silian_setTransferTo}>
+                          <Silian_SelectTrigger className="w-full">
+                            <Silian_SelectValue placeholder={Silian_t('support.portal.transfer.targetPlaceholder')} />
+                          </Silian_SelectTrigger>
+                          <Silian_SelectContent>
+                            <Silian_SelectItem value="none">{Silian_t('support.portal.transfer.targetPlaceholder')}</Silian_SelectItem>
+                            {Silian_transferableAssignees.map((Silian_assignee) => (
+                              <Silian_SelectItem key={Silian_assignee.id} value={String(Silian_assignee.id)}>
+                                {Silian_assigneeLabel(Silian_assignee, Silian_t)}
+                              </Silian_SelectItem>
                             ))}
-                          </SelectContent>
-                        </Select>
+                          </Silian_SelectContent>
+                        </Silian_Select>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">{t('support.portal.transfer.reason')}</label>
-                        <Textarea
+                        <label className="text-sm font-medium">{Silian_t('support.portal.transfer.reason')}</label>
+                        <Silian_Textarea
                           rows={4}
-                          value={transferReason}
-                          onChange={(event) => setTransferReason(event.target.value)}
-                          placeholder={t('support.portal.transfer.reasonPlaceholder')}
+                          value={Silian_transferReason}
+                          onChange={(Silian_event) => Silian_setTransferReason(Silian_event.target.value)}
+                          placeholder={Silian_t('support.portal.transfer.reasonPlaceholder')}
                         />
                       </div>
-                      <Button type="button" className="w-full rounded-full" onClick={handleCreateTransferRequest} loading={transferRequestMutation.isLoading}>
-                        <Shuffle className="mr-2 h-4 w-4" />
-                        {t('support.portal.transfer.submit')}
-                      </Button>
+                      <Silian_Button type="button" className="w-full rounded-full" onClick={Silian_handleCreateTransferRequest} loading={Silian_transferRequestMutation.isLoading}>
+                        <Silian_Shuffle className="mr-2 h-4 w-4" />
+                        {Silian_t('support.portal.transfer.submit')}
+                      </Silian_Button>
                     </div>
                   ) : null}
 
                   <div className="space-y-3">
-                    {(ticket.transfer_requests ?? []).length === 0 ? (
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.transfer.empty')}</p>
+                    {(Silian_ticket.transfer_requests ?? []).length === 0 ? (
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{Silian_t('support.portal.transfer.empty')}</p>
                     ) : null}
 
-                    {(ticket.transfer_requests ?? []).map((request) => (
+                    {(Silian_ticket.transfer_requests ?? []).map((Silian_request) => (
                       <div
-                        key={request.id}
+                        key={Silian_request.id}
                         className="space-y-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant="outline" className={transferStatusTone(request.status)}>
-                              {t(`support.transferStatuses.${request.status}`)}
-                            </Badge>
+                            <Silian_Badge variant="outline" className={Silian_transferStatusTone(Silian_request.status)}>
+                              {Silian_t(`support.transferStatuses.${Silian_request.status}`)}
+                            </Silian_Badge>
                             <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                              {formatSupportDate(request.created_at, locale)}
+                              {Silian_formatSupportDate(Silian_request.created_at, Silian_locale)}
                             </span>
                           </div>
                           <span className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                            #{request.id}
+                            #{Silian_request.id}
                           </span>
                         </div>
 
                         <div className="space-y-2 text-sm">
                           <p>
-                            {t('support.portal.transfer.requestLine', {
-                              from: request.from_user?.username || request.from_user?.email || t('support.portal.unassigned'),
-                              to: request.to_user?.username || request.to_user?.email || `#${request.to_assignee}`,
+                            {Silian_t('support.portal.transfer.requestLine', {
+                              from: Silian_request.from_user?.username || Silian_request.from_user?.email || Silian_t('support.portal.unassigned'),
+                              to: Silian_request.to_user?.username || Silian_request.to_user?.email || `#${Silian_request.to_assignee}`,
                             })}
                           </p>
                           <p className="text-slate-500 dark:text-slate-400">
-                            {t('support.portal.transfer.requestedBy', {
-                              name: request.requester?.username || request.requester?.email || `#${request.requested_by}`,
+                            {Silian_t('support.portal.transfer.requestedBy', {
+                              name: Silian_request.requester?.username || Silian_request.requester?.email || `#${Silian_request.requested_by}`,
                             })}
                           </p>
-                          {request.reason ? (
-                            <p className="whitespace-pre-wrap text-slate-500 dark:text-slate-400">{request.reason}</p>
+                          {Silian_request.reason ? (
+                            <p className="whitespace-pre-wrap text-slate-500 dark:text-slate-400">{Silian_request.reason}</p>
                           ) : null}
-                          {request.review_note ? (
+                          {Silian_request.review_note ? (
                             <p className="whitespace-pre-wrap text-slate-500 dark:text-slate-400">
-                              {t('support.portal.transfer.reviewNoteLabel')}: {request.review_note}
+                              {Silian_t('support.portal.transfer.reviewNoteLabel')}: {Silian_request.review_note}
                             </p>
                           ) : null}
                         </div>
 
-                        {request.status === 'pending' && Number(request.to_assignee) === Number(currentUser?.id ?? 0) ? (
+                        {Silian_request.status === 'pending' && Number(Silian_request.to_assignee) === Number(Silian_currentUser?.id ?? 0) ? (
                           <div className="space-y-3">
-                            <Textarea
+                            <Silian_Textarea
                               rows={3}
-                              value={reviewNotes[request.id] ?? ''}
-                              onChange={(event) => setReviewNotes((current) => ({ ...current, [request.id]: event.target.value }))}
-                              placeholder={t('support.portal.transfer.reviewPlaceholder')}
+                              value={Silian_reviewNotes[Silian_request.id] ?? ''}
+                              onChange={(Silian_event) => Silian_setReviewNotes((Silian_current) => ({ ...Silian_current, [Silian_request.id]: Silian_event.target.value }))}
+                              placeholder={Silian_t('support.portal.transfer.reviewPlaceholder')}
                             />
                             <div className="flex flex-wrap gap-2">
-                              <Button
+                              <Silian_Button
                                 type="button"
                                 className="rounded-full"
-                                onClick={() => handleReviewTransfer(request.id, 'approved')}
-                                loading={reviewTransferMutation.isLoading}
+                                onClick={() => Silian_handleReviewTransfer(Silian_request.id, 'approved')}
+                                loading={Silian_reviewTransferMutation.isLoading}
                               >
-                                <Check className="mr-2 h-4 w-4" />
-                                {t('support.portal.transfer.approve')}
-                              </Button>
-                              <Button
+                                <Silian_Check className="mr-2 h-4 w-4" />
+                                {Silian_t('support.portal.transfer.approve')}
+                              </Silian_Button>
+                              <Silian_Button
                                 type="button"
                                 variant="outline"
                                 className="rounded-full"
-                                onClick={() => handleReviewTransfer(request.id, 'rejected')}
-                                loading={reviewTransferMutation.isLoading}
+                                onClick={() => Silian_handleReviewTransfer(Silian_request.id, 'rejected')}
+                                loading={Silian_reviewTransferMutation.isLoading}
                               >
-                                <X className="mr-2 h-4 w-4" />
-                                {t('support.portal.transfer.reject')}
-                              </Button>
+                                <Silian_X className="mr-2 h-4 w-4" />
+                                {Silian_t('support.portal.transfer.reject')}
+                              </Silian_Button>
                             </div>
                           </div>
                         ) : null}
 
-                        {request.status === 'pending' && Number(request.requested_by) === Number(currentUser?.id ?? 0) ? (
-                          <Button
+                        {Silian_request.status === 'pending' && Number(Silian_request.requested_by) === Number(Silian_currentUser?.id ?? 0) ? (
+                          <Silian_Button
                             type="button"
                             variant="outline"
                             className="rounded-full"
-                            onClick={() => handleReviewTransfer(request.id, 'cancelled')}
-                            loading={reviewTransferMutation.isLoading}
+                            onClick={() => Silian_handleReviewTransfer(Silian_request.id, 'cancelled')}
+                            loading={Silian_reviewTransferMutation.isLoading}
                           >
-                            <X className="mr-2 h-4 w-4" />
-                            {t('support.portal.transfer.cancel')}
-                          </Button>
+                            <Silian_X className="mr-2 h-4 w-4" />
+                            {Silian_t('support.portal.transfer.cancel')}
+                          </Silian_Button>
                         ) : null}
                       </div>
                     ))}
 
-                    {pendingTransferRequests.length > 0 ? (
+                    {Silian_pendingTransferRequests.length > 0 ? (
                       <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                        {t('support.portal.transfer.pendingHint', { count: pendingTransferRequests.length })}
+                        {Silian_t('support.portal.transfer.pendingHint', { count: Silian_pendingTransferRequests.length })}
                       </p>
                     ) : null}
                   </div>
-                </TabsContent>
+                </Silian_TabsContent>
 
-                <TabsContent value="feedback" className="space-y-3">
-                  {feedbackEntries.length === 0 ? (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.feedbackEmpty')}</p>
+                <Silian_TabsContent value="feedback" className="space-y-3">
+                  {Silian_feedbackEntries.length === 0 ? (
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{Silian_t('support.portal.feedbackEmpty')}</p>
                   ) : null}
 
-                  {feedbackEntries.map((entry) => (
+                  {Silian_feedbackEntries.map((Silian_entry) => (
                     <div
-                      key={entry.id}
+                      key={Silian_entry.id}
                       className="space-y-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <p className="text-sm font-medium">
-                            {entry.rated_user?.username || entry.rated_user?.email || `#${entry.rated_user_id}`}
+                            {Silian_entry.rated_user?.username || Silian_entry.rated_user?.email || `#${Silian_entry.rated_user_id}`}
                           </p>
                           <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                            {t('support.portal.feedbackRatedBy', {
-                              name: entry.reviewer?.username || entry.reviewer?.email || `#${entry.user_id}`,
+                            {Silian_t('support.portal.feedbackRatedBy', {
+                              name: Silian_entry.reviewer?.username || Silian_entry.reviewer?.email || `#${Silian_entry.user_id}`,
                             })}
                           </p>
                         </div>
                         <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                          <FeedbackStars value={entry.rating} />
-                          <span>{formatSupportDate(entry.updated_at || entry.created_at, locale)}</span>
+                          <Silian_FeedbackStars value={Silian_entry.rating} />
+                          <span>{Silian_formatSupportDate(Silian_entry.updated_at || Silian_entry.created_at, Silian_locale)}</span>
                         </div>
                       </div>
-                      {entry.comment ? (
-                        <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{entry.comment}</p>
+                      {Silian_entry.comment ? (
+                        <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{Silian_entry.comment}</p>
                       ) : (
-                        <p className="text-sm text-slate-500 dark:text-slate-400">{t('support.portal.feedbackNoComment')}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{Silian_t('support.portal.feedbackNoComment')}</p>
                       )}
                     </div>
                   ))}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                </Silian_TabsContent>
+              </Silian_Tabs>
+            </Silian_CardContent>
+          </Silian_Card>
 
         </div>
       </div>

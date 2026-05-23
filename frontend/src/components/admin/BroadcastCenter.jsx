@@ -1,82 +1,82 @@
-import React, { useMemo, useState, useCallback } from "react";
-import { useMutation, useQuery } from "react-query";
-import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import Silian_React, { useMemo as Silian_useMemo, useState as Silian_useState, useCallback as Silian_useCallback } from "react";
+import { useMutation as Silian_useMutation, useQuery as Silian_useQuery } from "react-query";
+import { toast as Silian_toast } from "react-hot-toast";
+import { useNavigate as Silian_useNavigate } from "react-router-dom";
 import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Legend,
-  Tooltip as RechartsTooltip,
-  BarChart,
-  Bar,
-  Cell,
+  ResponsiveContainer as Silian_ResponsiveContainer,
+  LineChart as Silian_LineChart,
+  Line as Silian_Line,
+  CartesianGrid as Silian_CartesianGrid,
+  XAxis as Silian_XAxis,
+  YAxis as Silian_YAxis,
+  Legend as Silian_Legend,
+  Tooltip as Silian_RechartsTooltip,
+  BarChart as Silian_BarChart,
+  Bar as Silian_Bar,
+  Cell as Silian_Cell,
 } from "recharts";
-import { useTranslation } from "../../hooks/useTranslation";
-import { adminAPI } from "../../lib/api";
-import { Button } from "../ui/Button";
+import { useTranslation as Silian_useTranslation } from "../../hooks/useTranslation";
+import { adminAPI as Silian_adminAPI } from "../../lib/api";
+import { Button as Silian_Button } from "../ui/Button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Card as Silian_Card,
+  CardContent as Silian_CardContent,
+  CardDescription as Silian_CardDescription,
+  CardHeader as Silian_CardHeader,
+  CardTitle as Silian_CardTitle,
 } from "../ui/Card";
-import { Input } from "../ui/Input";
-import { Textarea } from "../ui/textarea";
-import { Alert, AlertDescription, AlertTitle } from "../ui/Alert";
-import { Badge } from "../ui/badge";
-import { Switch } from "../ui/switch";
-import { Checkbox } from "../ui/checkbox";
-import { Pagination } from "../ui/Pagination";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
-import { cn } from "../../lib/utils";
+import { Input as Silian_Input } from "../ui/Input";
+import { Textarea as Silian_Textarea } from "../ui/textarea";
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription, AlertTitle as Silian_AlertTitle } from "../ui/Alert";
+import { Badge as Silian_Badge } from "../ui/badge";
+import { Switch as Silian_Switch } from "../ui/switch";
+import { Checkbox as Silian_Checkbox } from "../ui/checkbox";
+import { Pagination as Silian_Pagination } from "../ui/Pagination";
+import { Tabs as Silian_Tabs, TabsContent as Silian_TabsContent, TabsList as Silian_TabsList, TabsTrigger as Silian_TabsTrigger } from "../ui/Tabs";
+import { cn as Silian_cn } from "../../lib/utils";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
+  HoverCard as Silian_HoverCard,
+  HoverCardContent as Silian_HoverCardContent,
+  HoverCardTrigger as Silian_HoverCardTrigger,
 } from "../ui/hover-card";
-import { AnnouncementContent } from "../content/AnnouncementContent";
-import { AnnouncementEmailPreview } from "../content/AnnouncementEmailPreview";
-import { AnnouncementPromptHelper } from "../content/AnnouncementPromptHelper";
-import { AnnouncementTemplateEditor } from "../content/AnnouncementTemplateEditor";
-import { ANNOUNCEMENT_PROMPT_ACTION_GENERATE } from "../../lib/announcementPrompt";
+import { AnnouncementContent as Silian_AnnouncementContent } from "../content/AnnouncementContent";
+import { AnnouncementEmailPreview as Silian_AnnouncementEmailPreview } from "../content/AnnouncementEmailPreview";
+import { AnnouncementPromptHelper as Silian_AnnouncementPromptHelper } from "../content/AnnouncementPromptHelper";
+import { AnnouncementTemplateEditor as Silian_AnnouncementTemplateEditor } from "../content/AnnouncementTemplateEditor";
+import { ANNOUNCEMENT_PROMPT_ACTION_GENERATE as Silian_ANNOUNCEMENT_PROMPT_ACTION_GENERATE } from "../../lib/announcementPrompt";
 import {
-  ANNOUNCEMENT_CONTENT_FORMAT_HTML,
-  ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
-  ANNOUNCEMENT_RENDER_PROFILE_HTML,
-  normalizeAnnouncementContentFormat,
+  ANNOUNCEMENT_CONTENT_FORMAT_HTML as Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML,
+  ANNOUNCEMENT_CONTENT_FORMAT_TEXT as Silian_ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
+  ANNOUNCEMENT_RENDER_PROFILE_HTML as Silian_ANNOUNCEMENT_RENDER_PROFILE_HTML,
+  normalizeAnnouncementContentFormat as Silian_normalizeAnnouncementContentFormat,
 } from "../../lib/announcementHtml";
 
-const PRIORITIES = ["low", "normal", "high", "urgent"];
-const PRIORITY_COLORS = {
+const Silian_PRIORITIES = ["low", "normal", "high", "urgent"];
+const Silian_PRIORITY_COLORS = {
   urgent: "#ef4444",
   high: "#f97316",
   normal: "#3b82f6",
   low: "#10b981",
   default: "#6b7280",
 };
-const INITIAL_FORM = {
+const Silian_INITIAL_FORM = {
   title: "",
   content: "",
-  content_format: ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
+  content_format: Silian_ANNOUNCEMENT_CONTENT_FORMAT_TEXT,
   priority: "normal",
   scope: "all",
   target_users_text: "",
 };
-const MAX_USERS_PREVIEW = 20;
-const HISTORY_DEFAULT_PARAMS = { page: 1, limit: 20 };
-const FILTERS_DEFAULT = {
+const Silian_MAX_USERS_PREVIEW = 20;
+const Silian_HISTORY_DEFAULT_PARAMS = { page: 1, limit: 20 };
+const Silian_FILTERS_DEFAULT = {
   search: "",
   priority: "any",
   scope: "any",
   unreadOnly: false,
 };
 
-const RECIPIENT_SEARCH_DEFAULT = {
+const Silian_RECIPIENT_SEARCH_DEFAULT = {
   search: "",
   fields: "username,email,school,location",
   school: "",
@@ -86,209 +86,209 @@ const RECIPIENT_SEARCH_DEFAULT = {
   limit: 25,
 };
 
-const RECIPIENT_FIELD_LABEL_KEYS = {
+const Silian_RECIPIENT_FIELD_LABEL_KEYS = {
   email: "admin.broadcast.recipientSearch.fields.email",
   school: "admin.broadcast.recipientSearch.fields.school",
   location: "admin.broadcast.recipientSearch.fields.location",
   username: "admin.broadcast.recipientSearch.fields.username",
 };
 
-const parseTargetUserIds = (raw) => {
-  if (!raw) {
+const Silian_parseTargetUserIds = (Silian_raw) => {
+  if (!Silian_raw) {
     return [];
   }
-  const tokens = raw
+  const Silian_tokens = Silian_raw
     .split(/[\s,]+/)
-    .map((value) => value.trim())
+    .map((Silian_value) => Silian_value.trim())
     .filter(Boolean);
 
-  const unique = new Set();
-  tokens.forEach((token) => {
-    const numeric = Number(token);
-    if (Number.isInteger(numeric) && numeric > 0) {
-      unique.add(numeric);
+  const Silian_unique = new Set();
+  Silian_tokens.forEach((Silian_token) => {
+    const Silian_numeric = Number(Silian_token);
+    if (Number.isInteger(Silian_numeric) && Silian_numeric > 0) {
+      Silian_unique.add(Silian_numeric);
     }
   });
-  return Array.from(unique);
+  return Array.from(Silian_unique);
 };
 
-const formatDateTime = (value, locale) => {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
+const Silian_formatDateTime = (Silian_value, Silian_locale) => {
+  if (!Silian_value) return "";
+  const Silian_date = new Date(Silian_value);
+  if (Number.isNaN(Silian_date.getTime())) {
+    return Silian_value;
   }
-  return date.toLocaleString(locale);
+  return Silian_date.toLocaleString(Silian_locale);
 };
 
-const truncateUsers = (users, max = MAX_USERS_PREVIEW) => {
-  if (!Array.isArray(users)) {
+const Silian_truncateUsers = (Silian_users, Silian_max = Silian_MAX_USERS_PREVIEW) => {
+  if (!Array.isArray(Silian_users)) {
     return { list: [], more: 0 };
   }
-  if (users.length <= max) {
-    return { list: users, more: 0 };
+  if (Silian_users.length <= Silian_max) {
+    return { list: Silian_users, more: 0 };
   }
-  return { list: users.slice(0, max), more: users.length - max };
+  return { list: Silian_users.slice(0, Silian_max), more: Silian_users.length - Silian_max };
 };
 
-const getRecipientUuid = (entry) => {
-  if (typeof entry?.uuid === "string" && entry.uuid.trim()) {
-    return entry.uuid.trim().toLowerCase();
+const Silian_getRecipientUuid = (Silian_entry) => {
+  if (typeof Silian_entry?.uuid === "string" && Silian_entry.uuid.trim()) {
+    return Silian_entry.uuid.trim().toLowerCase();
   }
-  if (typeof entry?.user_id === "string" && entry.user_id.trim()) {
-    return entry.user_id.trim().toLowerCase();
+  if (typeof Silian_entry?.user_id === "string" && Silian_entry.user_id.trim()) {
+    return Silian_entry.user_id.trim().toLowerCase();
   }
   return "";
 };
 
-const getRecipientLegacyId = (entry) => {
-  const candidates = [entry?.legacy_user_id, entry?.id, entry?.user_id];
-  for (const candidate of candidates) {
-    const parsed = Number(candidate);
-    if (Number.isInteger(parsed) && parsed > 0) {
-      return parsed;
+const Silian_getRecipientLegacyId = (Silian_entry) => {
+  const Silian_candidates = [Silian_entry?.legacy_user_id, Silian_entry?.id, Silian_entry?.user_id];
+  for (const Silian_candidate of Silian_candidates) {
+    const Silian_parsed = Number(Silian_candidate);
+    if (Number.isInteger(Silian_parsed) && Silian_parsed > 0) {
+      return Silian_parsed;
     }
   }
   return null;
 };
 
-const getRecipientFallbackLabel = (entry) => {
-  const uuid = getRecipientUuid(entry);
-  if (uuid) {
-    return uuid;
+const Silian_getRecipientFallbackLabel = (Silian_entry) => {
+  const Silian_uuid = Silian_getRecipientUuid(Silian_entry);
+  if (Silian_uuid) {
+    return Silian_uuid;
   }
-  const legacyId = getRecipientLegacyId(entry);
-  return legacyId ? `#${legacyId}` : "#?";
+  const Silian_legacyId = Silian_getRecipientLegacyId(Silian_entry);
+  return Silian_legacyId ? `#${Silian_legacyId}` : "#?";
 };
 
-function ResultStat({ label, value, tone = "default" }) {
+function Silian_ResultStat({ label: Silian_label, value: Silian_value, tone: Silian_tone = "default" }) {
   return (
     <div className="bg-card rounded-md border px-4 py-3">
-      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="text-sm text-muted-foreground">{Silian_label}</p>
       <p
-        className={cn(
+        className={Silian_cn(
           "mt-1 text-xl font-semibold",
-          tone === "success" && "text-green-600",
-          tone === "warning" && "text-yellow-600",
-          tone === "danger" && "text-red-600",
+          Silian_tone === "success" && "text-green-600",
+          Silian_tone === "warning" && "text-yellow-600",
+          Silian_tone === "danger" && "text-red-600",
         )}
       >
-        {value}
+        {Silian_value}
       </p>
     </div>
   );
 }
 
-function UserChips({ users, onViewUser, t }) {
-  if (!Array.isArray(users) || users.length === 0) {
+function Silian_UserChips({ users: Silian_users, onViewUser: Silian_onViewUser, t: Silian_t }) {
+  if (!Array.isArray(Silian_users) || Silian_users.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        {t("admin.broadcast.result.none")}
+        {Silian_t("admin.broadcast.result.none")}
       </p>
     );
   }
 
   return (
     <div className="space-y-2">
-      {users.map((entry, index) => {
-        const uuid = getRecipientUuid(entry);
-        const legacyId = getRecipientLegacyId(entry);
-        const identity = uuid || legacyId || index;
-        if (!uuid && !legacyId) {
+      {Silian_users.map((Silian_entry, Silian_index) => {
+        const Silian_uuid = Silian_getRecipientUuid(Silian_entry);
+        const Silian_legacyId = Silian_getRecipientLegacyId(Silian_entry);
+        const Silian_identity = Silian_uuid || Silian_legacyId || Silian_index;
+        if (!Silian_uuid && !Silian_legacyId) {
           return null;
         }
 
-        const label =
-          entry?.username ?? entry?.email ?? getRecipientFallbackLabel(entry);
-        const email = entry?.email ?? entry?.user_email ?? null;
-        const statusValue =
-          typeof entry?.status === "string" ? entry.status.toLowerCase() : "";
-        const statusLabel =
-          statusValue === "active"
-            ? t("admin.users.statusActive")
-            : statusValue === "inactive"
-              ? t("admin.users.statusInactive")
-              : statusValue === "suspended"
-                ? t("admin.users.statusSuspended")
+        const Silian_label =
+          Silian_entry?.username ?? Silian_entry?.email ?? Silian_getRecipientFallbackLabel(Silian_entry);
+        const Silian_email = Silian_entry?.email ?? Silian_entry?.user_email ?? null;
+        const Silian_statusValue =
+          typeof Silian_entry?.status === "string" ? Silian_entry.status.toLowerCase() : "";
+        const Silian_statusLabel =
+          Silian_statusValue === "active"
+            ? Silian_t("admin.users.statusActive")
+            : Silian_statusValue === "inactive"
+              ? Silian_t("admin.users.statusInactive")
+              : Silian_statusValue === "suspended"
+                ? Silian_t("admin.users.statusSuspended")
                 : null;
-        const hasAdminFlag =
-          entry?.is_admin !== undefined &&
-          entry?.is_admin !== null &&
-          `${entry.is_admin}` !== "";
-        const isAdmin =
-          entry?.is_admin === true ||
-          entry?.is_admin === 1 ||
-          entry?.is_admin === "1" ||
-          entry?.is_admin === "true";
+        const Silian_hasAdminFlag =
+          Silian_entry?.is_admin !== undefined &&
+          Silian_entry?.is_admin !== null &&
+          `${Silian_entry.is_admin}` !== "";
+        const Silian_isAdmin =
+          Silian_entry?.is_admin === true ||
+          Silian_entry?.is_admin === 1 ||
+          Silian_entry?.is_admin === "1" ||
+          Silian_entry?.is_admin === "true";
 
-        const handleNavigate = (event) => {
-          if (onViewUser) {
-            onViewUser(event, { ...entry, id: legacyId, uuid });
+        const Silian_handleNavigate = (Silian_event) => {
+          if (Silian_onViewUser) {
+            Silian_onViewUser(Silian_event, { ...Silian_entry, id: Silian_legacyId, uuid: Silian_uuid });
           }
         };
 
         return (
           <div
-            key={`${identity}-${index}`}
+            key={`${Silian_identity}-${Silian_index}`}
             className="bg-muted/40 flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2"
           >
-            <HoverCard>
-              <HoverCardTrigger asChild>
+            <Silian_HoverCard>
+              <Silian_HoverCardTrigger asChild>
                 <span className="cursor-help text-sm font-medium text-foreground hover:text-green-600">
-                  {label}
+                  {Silian_label}
                 </span>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-64 space-y-1 text-xs text-muted-foreground">
-                {legacyId && (
+              </Silian_HoverCardTrigger>
+              <Silian_HoverCardContent className="w-64 space-y-1 text-xs text-muted-foreground">
+                {Silian_legacyId && (
                   <div>
                     <span className="font-medium text-foreground/80">
-                      {t("admin.broadcast.recipientSearch.hover.userId")}
+                      {Silian_t("admin.broadcast.recipientSearch.hover.userId")}
                     </span>{" "}
-                    #{legacyId}
+                    #{Silian_legacyId}
                   </div>
                 )}
-                {uuid && (
+                {Silian_uuid && (
                   <div>
                     <span className="font-medium text-foreground/80">UUID</span>{" "}
-                    {uuid}
+                    {Silian_uuid}
                   </div>
                 )}
-                {email && (
+                {Silian_email && (
                   <div>
                     <span className="font-medium text-foreground/80">
-                      {t("common.email")}
+                      {Silian_t("common.email")}
                     </span>{" "}
-                    {email}
+                    {Silian_email}
                   </div>
                 )}
-                {statusLabel && (
+                {Silian_statusLabel && (
                   <div>
                     <span className="font-medium text-foreground/80">
-                      {t("admin.broadcast.recipientSearch.hover.status")}
+                      {Silian_t("admin.broadcast.recipientSearch.hover.status")}
                     </span>{" "}
-                    {statusLabel}
+                    {Silian_statusLabel}
                   </div>
                 )}
-                {hasAdminFlag && (
+                {Silian_hasAdminFlag && (
                   <div>
                     <span className="font-medium text-foreground/80">
-                      {t("admin.broadcast.recipientSearch.hover.role")}
+                      {Silian_t("admin.broadcast.recipientSearch.hover.role")}
                     </span>{" "}
-                    {isAdmin
-                      ? t("admin.users.roleAdmin")
-                      : t("admin.users.roleUser")}
+                    {Silian_isAdmin
+                      ? Silian_t("admin.users.roleAdmin")
+                      : Silian_t("admin.users.roleUser")}
                   </div>
                 )}
-              </HoverCardContent>
-            </HoverCard>
-            <Button
+              </Silian_HoverCardContent>
+            </Silian_HoverCard>
+            <Silian_Button
               type="button"
               size="sm"
               variant="outline"
-              onClick={handleNavigate}
+              onClick={Silian_handleNavigate}
             >
-              {t("admin.broadcast.recipientSearch.viewProfile")}
-            </Button>
+              {Silian_t("admin.broadcast.recipientSearch.viewProfile")}
+            </Silian_Button>
           </div>
         );
       })}
@@ -297,92 +297,92 @@ function UserChips({ users, onViewUser, t }) {
 }
 
 export function BroadcastCenter() {
-  const { t, currentLanguage } = useTranslation(['admin', 'common', 'date', 'errors', 'messages', 'pagination', 'validation']);
-  const numberFormatter = useMemo(() => new Intl.NumberFormat(currentLanguage), [currentLanguage]);
-  const percentFormatter = useMemo(
+  const { t: Silian_t, currentLanguage: Silian_currentLanguage } = Silian_useTranslation(['admin', 'common', 'date', 'errors', 'messages', 'pagination', 'validation']);
+  const Silian_numberFormatter = Silian_useMemo(() => new Intl.NumberFormat(Silian_currentLanguage), [Silian_currentLanguage]);
+  const Silian_percentFormatter = Silian_useMemo(
     () =>
-      new Intl.NumberFormat(currentLanguage, {
+      new Intl.NumberFormat(Silian_currentLanguage, {
         style: "percent",
         maximumFractionDigits: 1,
       }),
-    [currentLanguage],
+    [Silian_currentLanguage],
   );
-  const shortDateFormatter = useMemo(
+  const Silian_shortDateFormatter = Silian_useMemo(
     () =>
-      new Intl.DateTimeFormat(currentLanguage, { month: "short", day: "numeric" }),
-    [currentLanguage],
+      new Intl.DateTimeFormat(Silian_currentLanguage, { month: "short", day: "numeric" }),
+    [Silian_currentLanguage],
   );
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("compose");
-  const [form, setForm] = useState(INITIAL_FORM);
-  const [preview, setPreview] = useState(null);
-  const [result, setResult] = useState(null);
-  const [errors, setErrors] = useState({});
-  const [expanded, setExpanded] = useState({});
-  const [historyParams, setHistoryParams] = useState(HISTORY_DEFAULT_PARAMS);
-  const [filters, setFilters] = useState(FILTERS_DEFAULT);
-  const [recipientForm, setRecipientForm] = useState(RECIPIENT_SEARCH_DEFAULT);
-  const [recipientResults, setRecipientResults] = useState({
+  const Silian_navigate = Silian_useNavigate();
+  const [Silian_activeTab, Silian_setActiveTab] = Silian_useState("compose");
+  const [Silian_form, Silian_setForm] = Silian_useState(Silian_INITIAL_FORM);
+  const [Silian_preview, Silian_setPreview] = Silian_useState(null);
+  const [Silian_result, Silian_setResult] = Silian_useState(null);
+  const [Silian_errors, Silian_setErrors] = Silian_useState({});
+  const [Silian_expanded, Silian_setExpanded] = Silian_useState({});
+  const [Silian_historyParams, Silian_setHistoryParams] = Silian_useState(Silian_HISTORY_DEFAULT_PARAMS);
+  const [Silian_filters, Silian_setFilters] = Silian_useState(Silian_FILTERS_DEFAULT);
+  const [Silian_recipientForm, Silian_setRecipientForm] = Silian_useState(Silian_RECIPIENT_SEARCH_DEFAULT);
+  const [Silian_recipientResults, Silian_setRecipientResults] = Silian_useState({
     items: [],
     pagination: {
       page: 1,
       has_more: false,
-      limit: RECIPIENT_SEARCH_DEFAULT.limit,
+      limit: Silian_RECIPIENT_SEARCH_DEFAULT.limit,
     },
   });
-  const [recipientLoading, setRecipientLoading] = useState(false);
-  const [recipientError, setRecipientError] = useState(null);
-  const [selectedRecipients, setSelectedRecipients] = useState(() => new Map());
-  const [appliedFilters, setAppliedFilters] = useState([]);
-  const [announcementAiAction, setAnnouncementAiAction] = useState(
-    ANNOUNCEMENT_PROMPT_ACTION_GENERATE,
+  const [Silian_recipientLoading, Silian_setRecipientLoading] = Silian_useState(false);
+  const [Silian_recipientError, Silian_setRecipientError] = Silian_useState(null);
+  const [Silian_selectedRecipients, Silian_setSelectedRecipients] = Silian_useState(() => new Map());
+  const [Silian_appliedFilters, Silian_setAppliedFilters] = Silian_useState([]);
+  const [Silian_announcementAiAction, Silian_setAnnouncementAiAction] = Silian_useState(
+    Silian_ANNOUNCEMENT_PROMPT_ACTION_GENERATE,
   );
-  const [announcementAiInstruction, setAnnouncementAiInstruction] =
-    useState("");
+  const [Silian_announcementAiInstruction, Silian_setAnnouncementAiInstruction] =
+    Silian_useState("");
 
-  const hasRecipientCriteria = useMemo(() => {
+  const Silian_hasRecipientCriteria = Silian_useMemo(() => {
     return Boolean(
-      recipientForm.search.trim() ||
-      recipientForm.school.trim() ||
-      recipientForm.emailSuffix.trim() ||
-      (recipientForm.status && recipientForm.status !== "any") ||
-      (recipientForm.isAdmin && recipientForm.isAdmin !== "any"),
+      Silian_recipientForm.search.trim() ||
+      Silian_recipientForm.school.trim() ||
+      Silian_recipientForm.emailSuffix.trim() ||
+      (Silian_recipientForm.status && Silian_recipientForm.status !== "any") ||
+      (Silian_recipientForm.isAdmin && Silian_recipientForm.isAdmin !== "any"),
     );
-  }, [recipientForm]);
+  }, [Silian_recipientForm]);
 
-  const customTargetIds = useMemo(() => {
-    if (form.scope !== "custom") {
+  const Silian_customTargetIds = Silian_useMemo(() => {
+    if (Silian_form.scope !== "custom") {
       return [];
     }
-    return parseTargetUserIds(form.target_users_text);
-  }, [form.scope, form.target_users_text]);
+    return Silian_parseTargetUserIds(Silian_form.target_users_text);
+  }, [Silian_form.scope, Silian_form.target_users_text]);
 
-  const selectedRecipientList = useMemo(
-    () => Array.from(selectedRecipients.values()),
-    [selectedRecipients],
+  const Silian_selectedRecipientList = Silian_useMemo(
+    () => Array.from(Silian_selectedRecipients.values()),
+    [Silian_selectedRecipients],
   );
-  const selectedRecipientIds = useMemo(
+  const Silian_selectedRecipientIds = Silian_useMemo(
     () =>
-      selectedRecipientList
-        .map((entry) => Number(entry?.id ?? 0))
-        .filter((id) => Number.isInteger(id) && id > 0),
-    [selectedRecipientList],
+      Silian_selectedRecipientList
+        .map((Silian_entry) => Number(Silian_entry?.id ?? 0))
+        .filter((Silian_id) => Number.isInteger(Silian_id) && Silian_id > 0),
+    [Silian_selectedRecipientList],
   );
-  const selectedContentFormat = useMemo(
-    () => normalizeAnnouncementContentFormat(form.content_format),
-    [form.content_format],
+  const Silian_selectedContentFormat = Silian_useMemo(
+    () => Silian_normalizeAnnouncementContentFormat(Silian_form.content_format),
+    [Silian_form.content_format],
   );
 
   const {
-    data: adminStatsData,
-    isLoading: isMessageStatsLoading,
-    isFetching: isMessageStatsFetching,
-    isError: isMessageStatsError,
-    error: messageStatsError,
-    refetch: refetchMessageStats,
-  } = useQuery(
+    data: Silian_adminStatsData,
+    isLoading: Silian_isMessageStatsLoading,
+    isFetching: Silian_isMessageStatsFetching,
+    isError: Silian_isMessageStatsError,
+    error: Silian_messageStatsError,
+    refetch: Silian_refetchMessageStats,
+  } = Silian_useQuery(
     ["admin-message-stats"],
-    () => adminAPI.getStats().then((res) => res.data?.data ?? {}),
+    () => Silian_adminAPI.getStats().then((Silian_res) => Silian_res.data?.data ?? {}),
     {
       staleTime: 60000,
       refetchOnWindowFocus: false,
@@ -390,792 +390,792 @@ export function BroadcastCenter() {
   );
 
   const {
-    data: historyResponse,
-    isLoading: isHistoryLoading,
-    isFetching: isHistoryFetching,
-    error: historyError,
-    refetch: refetchHistory,
-  } = useQuery(
-    ["admin-broadcast-history", historyParams],
-    () => adminAPI.getBroadcasts(historyParams).then((res) => res.data),
+    data: Silian_historyResponse,
+    isLoading: Silian_isHistoryLoading,
+    isFetching: Silian_isHistoryFetching,
+    error: Silian_historyError,
+    refetch: Silian_refetchHistory,
+  } = Silian_useQuery(
+    ["admin-broadcast-history", Silian_historyParams],
+    () => Silian_adminAPI.getBroadcasts(Silian_historyParams).then((Silian_res) => Silian_res.data),
     {
       keepPreviousData: true,
       staleTime: 60000,
     },
   );
 
-  const pagination = historyResponse?.pagination ?? {};
-  const messageOverview = useMemo(() => {
-    const stats = adminStatsData?.messages ?? {};
-    const totalRaw = Number(stats?.total_messages ?? 0);
-    const unreadRaw = Number(stats?.unread_messages ?? 0);
-    let readRaw = Number(stats?.read_messages ?? 0);
-    const total = Number.isFinite(totalRaw) ? Math.max(0, totalRaw) : 0;
-    const unread = Number.isFinite(unreadRaw) ? Math.max(0, unreadRaw) : 0;
-    if (!Number.isFinite(readRaw) || (readRaw === 0 && total >= unread)) {
-      readRaw = total - unread;
+  const Silian_pagination = Silian_historyResponse?.pagination ?? {};
+  const Silian_messageOverview = Silian_useMemo(() => {
+    const Silian_stats = Silian_adminStatsData?.messages ?? {};
+    const Silian_totalRaw = Number(Silian_stats?.total_messages ?? 0);
+    const Silian_unreadRaw = Number(Silian_stats?.unread_messages ?? 0);
+    let Silian_readRaw = Number(Silian_stats?.read_messages ?? 0);
+    const Silian_total = Number.isFinite(Silian_totalRaw) ? Math.max(0, Silian_totalRaw) : 0;
+    const Silian_unread = Number.isFinite(Silian_unreadRaw) ? Math.max(0, Silian_unreadRaw) : 0;
+    if (!Number.isFinite(Silian_readRaw) || (Silian_readRaw === 0 && Silian_total >= Silian_unread)) {
+      Silian_readRaw = Silian_total - Silian_unread;
     }
-    const read = Math.max(
+    const Silian_read = Math.max(
       0,
-      Number.isFinite(readRaw) ? readRaw : total - unread,
+      Number.isFinite(Silian_readRaw) ? Silian_readRaw : Silian_total - Silian_unread,
     );
-    const ratioRaw = Number(
-      stats?.unread_ratio ?? (total > 0 ? unread / Math.max(total, 1) : 0),
+    const Silian_ratioRaw = Number(
+      Silian_stats?.unread_ratio ?? (Silian_total > 0 ? Silian_unread / Math.max(Silian_total, 1) : 0),
     );
-    const unreadRatio = Math.min(
-      Math.max(Number.isFinite(ratioRaw) ? ratioRaw : 0, 0),
+    const Silian_unreadRatio = Math.min(
+      Math.max(Number.isFinite(Silian_ratioRaw) ? Silian_ratioRaw : 0, 0),
       1,
     );
-    return { total, unread, read, unreadRatio };
-  }, [adminStatsData]);
+    return { total: Silian_total, unread: Silian_unread, read: Silian_read, unreadRatio: Silian_unreadRatio };
+  }, [Silian_adminStatsData]);
 
-  const messagePriorityData = useMemo(() => {
-    const rows = adminStatsData?.messages?.priority_breakdown;
-    if (!Array.isArray(rows)) {
+  const Silian_messagePriorityData = Silian_useMemo(() => {
+    const Silian_rows = Silian_adminStatsData?.messages?.priority_breakdown;
+    if (!Array.isArray(Silian_rows)) {
       return [];
     }
-    return rows.map((row) => {
-      const priorityRaw =
-        typeof row?.priority === "string" ? row.priority : "normal";
-      const priority = priorityRaw.toLowerCase() || "normal";
-      const totalRaw = Number(row?.total ?? 0);
-      const unreadRaw = Number(row?.unread ?? 0);
-      let readRaw = Number(row?.read ?? 0);
-      const total = Number.isFinite(totalRaw) ? Math.max(0, totalRaw) : 0;
-      const unread = Number.isFinite(unreadRaw) ? Math.max(0, unreadRaw) : 0;
-      if (!Number.isFinite(readRaw) || (readRaw === 0 && total >= unread)) {
-        readRaw = total - unread;
+    return Silian_rows.map((Silian_row) => {
+      const Silian_priorityRaw =
+        typeof Silian_row?.priority === "string" ? Silian_row.priority : "normal";
+      const Silian_priority = Silian_priorityRaw.toLowerCase() || "normal";
+      const Silian_totalRaw = Number(Silian_row?.total ?? 0);
+      const Silian_unreadRaw = Number(Silian_row?.unread ?? 0);
+      let Silian_readRaw = Number(Silian_row?.read ?? 0);
+      const Silian_total = Number.isFinite(Silian_totalRaw) ? Math.max(0, Silian_totalRaw) : 0;
+      const Silian_unread = Number.isFinite(Silian_unreadRaw) ? Math.max(0, Silian_unreadRaw) : 0;
+      if (!Number.isFinite(Silian_readRaw) || (Silian_readRaw === 0 && Silian_total >= Silian_unread)) {
+        Silian_readRaw = Silian_total - Silian_unread;
       }
-      const read = Math.max(
+      const Silian_read = Math.max(
         0,
-        Number.isFinite(readRaw) ? readRaw : total - unread,
+        Number.isFinite(Silian_readRaw) ? Silian_readRaw : Silian_total - Silian_unread,
       );
-      const ratioRaw = Number(
-        row?.unread_ratio ?? (total > 0 ? unread / Math.max(total, 1) : 0),
+      const Silian_ratioRaw = Number(
+        Silian_row?.unread_ratio ?? (Silian_total > 0 ? Silian_unread / Math.max(Silian_total, 1) : 0),
       );
-      const unreadRatio = Math.min(
-        Math.max(Number.isFinite(ratioRaw) ? ratioRaw : 0, 0),
+      const Silian_unreadRatio = Math.min(
+        Math.max(Number.isFinite(Silian_ratioRaw) ? Silian_ratioRaw : 0, 0),
         1,
       );
-      return { priority, total, unread, read, unreadRatio };
+      return { priority: Silian_priority, total: Silian_total, unread: Silian_unread, read: Silian_read, unreadRatio: Silian_unreadRatio };
     });
-  }, [adminStatsData]);
+  }, [Silian_adminStatsData]);
 
-  const messageTrendData = useMemo(() => {
-    const rows = adminStatsData?.messages?.daily_counts;
-    if (!Array.isArray(rows)) {
+  const Silian_messageTrendData = Silian_useMemo(() => {
+    const Silian_rows = Silian_adminStatsData?.messages?.daily_counts;
+    if (!Array.isArray(Silian_rows)) {
       return [];
     }
-    return rows.map((row) => {
-      const date = typeof row?.date === "string" ? row.date : "";
-      const totalRaw = Number(row?.total ?? 0);
-      const unreadRaw = Number(row?.unread ?? 0);
-      let readRaw = Number(row?.read ?? 0);
-      const total = Number.isFinite(totalRaw) ? Math.max(0, totalRaw) : 0;
-      const unread = Number.isFinite(unreadRaw) ? Math.max(0, unreadRaw) : 0;
-      if (!Number.isFinite(readRaw) || (readRaw === 0 && total >= unread)) {
-        readRaw = total - unread;
+    return Silian_rows.map((Silian_row) => {
+      const Silian_date = typeof Silian_row?.date === "string" ? Silian_row.date : "";
+      const Silian_totalRaw = Number(Silian_row?.total ?? 0);
+      const Silian_unreadRaw = Number(Silian_row?.unread ?? 0);
+      let Silian_readRaw = Number(Silian_row?.read ?? 0);
+      const Silian_total = Number.isFinite(Silian_totalRaw) ? Math.max(0, Silian_totalRaw) : 0;
+      const Silian_unread = Number.isFinite(Silian_unreadRaw) ? Math.max(0, Silian_unreadRaw) : 0;
+      if (!Number.isFinite(Silian_readRaw) || (Silian_readRaw === 0 && Silian_total >= Silian_unread)) {
+        Silian_readRaw = Silian_total - Silian_unread;
       }
-      const read = Math.max(
+      const Silian_read = Math.max(
         0,
-        Number.isFinite(readRaw) ? readRaw : total - unread,
+        Number.isFinite(Silian_readRaw) ? Silian_readRaw : Silian_total - Silian_unread,
       );
-      return { date, total, unread, read };
+      return { date: Silian_date, total: Silian_total, unread: Silian_unread, read: Silian_read };
     });
-  }, [adminStatsData]);
+  }, [Silian_adminStatsData]);
 
-  const messageTrendHasData = useMemo(
-    () => messageTrendData.some((item) => item.total > 0 || item.unread > 0),
-    [messageTrendData],
+  const Silian_messageTrendHasData = Silian_useMemo(
+    () => Silian_messageTrendData.some((Silian_item) => Silian_item.total > 0 || Silian_item.unread > 0),
+    [Silian_messageTrendData],
   );
-  const messagePriorityHasData = useMemo(
-    () => messagePriorityData.some((item) => item.total > 0 || item.unread > 0),
-    [messagePriorityData],
+  const Silian_messagePriorityHasData = Silian_useMemo(
+    () => Silian_messagePriorityData.some((Silian_item) => Silian_item.total > 0 || Silian_item.unread > 0),
+    [Silian_messagePriorityData],
   );
-  const messagePriorityChartData = useMemo(
+  const Silian_messagePriorityChartData = Silian_useMemo(
     () =>
-      messagePriorityData.map((item) => {
+      Silian_messagePriorityData.map((Silian_item) => {
         return {
-          ...item,
-          name: t(`messages.priority.${item.priority}`),
-          color: PRIORITY_COLORS[item.priority] ?? PRIORITY_COLORS.default,
+          ...Silian_item,
+          name: Silian_t(`messages.priority.${Silian_item.priority}`),
+          color: Silian_PRIORITY_COLORS[Silian_item.priority] ?? Silian_PRIORITY_COLORS.default,
         };
       }),
-    [messagePriorityData, t],
+    [Silian_messagePriorityData, Silian_t],
   );
-  const messageStatsInitialLoading = isMessageStatsLoading && !adminStatsData;
+  const Silian_messageStatsInitialLoading = Silian_isMessageStatsLoading && !Silian_adminStatsData;
 
-  const filteredItems = useMemo(() => {
-    const historyItems = Array.isArray(historyResponse?.data)
-      ? historyResponse.data
+  const Silian_filteredItems = Silian_useMemo(() => {
+    const Silian_historyItems = Array.isArray(Silian_historyResponse?.data)
+      ? Silian_historyResponse.data
       : [];
-    if (historyItems.length === 0) {
+    if (Silian_historyItems.length === 0) {
       return [];
     }
-    const search = filters.search.trim().toLowerCase();
-    return historyItems.filter((item) => {
-      if (filters.priority !== "any" && item.priority !== filters.priority) {
+    const Silian_search = Silian_filters.search.trim().toLowerCase();
+    return Silian_historyItems.filter((Silian_item) => {
+      if (Silian_filters.priority !== "any" && Silian_item.priority !== Silian_filters.priority) {
         return false;
       }
-      if (filters.scope !== "any") {
-        const scopeKey = item.scope === "custom" ? "custom" : "all";
-        if (scopeKey !== filters.scope) {
+      if (Silian_filters.scope !== "any") {
+        const Silian_scopeKey = Silian_item.scope === "custom" ? "custom" : "all";
+        if (Silian_scopeKey !== Silian_filters.scope) {
           return false;
         }
       }
-      if (filters.unreadOnly && (item.unread_count ?? 0) === 0) {
+      if (Silian_filters.unreadOnly && (Silian_item.unread_count ?? 0) === 0) {
         return false;
       }
-      if (!search) {
+      if (!Silian_search) {
         return true;
       }
-      const pooled = [
-        item.title,
-        item.content,
-        item.actor_username,
-        item.actor_user_id && `#${item.actor_user_id}`,
+      const Silian_pooled = [
+        Silian_item.title,
+        Silian_item.content,
+        Silian_item.actor_username,
+        Silian_item.actor_user_id && `#${Silian_item.actor_user_id}`,
       ]
         .filter(Boolean)
-        .map((value) => String(value).toLowerCase());
-      return pooled.some((value) => value.includes(search));
+        .map((Silian_value) => String(Silian_value).toLowerCase());
+      return Silian_pooled.some((Silian_value) => Silian_value.includes(Silian_search));
     });
-  }, [historyResponse, filters]);
+  }, [Silian_historyResponse, Silian_filters]);
 
-  const summary = useMemo(() => {
-    const totals = {
-      broadcasts: filteredItems.length,
+  const Silian_summary = Silian_useMemo(() => {
+    const Silian_totals = {
+      broadcasts: Silian_filteredItems.length,
       targets: 0,
       sent: 0,
       read: 0,
       unread: 0,
     };
-    filteredItems.forEach((item) => {
-      totals.targets += item.target_count ?? 0;
-      totals.sent += item.sent_count ?? 0;
-      totals.read += item.read_count ?? 0;
-      totals.unread += item.unread_count ?? 0;
+    Silian_filteredItems.forEach((Silian_item) => {
+      Silian_totals.targets += Silian_item.target_count ?? 0;
+      Silian_totals.sent += Silian_item.sent_count ?? 0;
+      Silian_totals.read += Silian_item.read_count ?? 0;
+      Silian_totals.unread += Silian_item.unread_count ?? 0;
     });
-    return totals;
-  }, [filteredItems]);
+    return Silian_totals;
+  }, [Silian_filteredItems]);
 
-  const setField = (key, value) => {
-    setForm((prev) => {
-      const next = { ...prev, [key]: value };
+  const Silian_setField = (Silian_key, Silian_value) => {
+    Silian_setForm((Silian_prev) => {
+      const Silian_next = { ...Silian_prev, [Silian_key]: Silian_value };
       if (
-        key === "target_users_text" &&
-        typeof value === "string" &&
-        value.trim().length > 0
+        Silian_key === "target_users_text" &&
+        typeof Silian_value === "string" &&
+        Silian_value.trim().length > 0
       ) {
-        next.scope = "custom";
+        Silian_next.scope = "custom";
       }
-      return next;
+      return Silian_next;
     });
   };
 
-  const updateFilters = (partial) => {
-    setFilters((prev) => ({ ...prev, ...partial }));
-    setHistoryParams((prev) => ({ ...prev, page: 1 }));
+  const Silian_updateFilters = (Silian_partial) => {
+    Silian_setFilters((Silian_prev) => ({ ...Silian_prev, ...Silian_partial }));
+    Silian_setHistoryParams((Silian_prev) => ({ ...Silian_prev, page: 1 }));
   };
 
-  const resetFilters = () => {
-    setFilters(FILTERS_DEFAULT);
-    setHistoryParams((prev) => ({ ...prev, page: 1 }));
+  const Silian_resetFilters = () => {
+    Silian_setFilters(Silian_FILTERS_DEFAULT);
+    Silian_setHistoryParams((Silian_prev) => ({ ...Silian_prev, page: 1 }));
   };
 
-  const setRecipientField = (key, value) => {
-    setRecipientForm((prev) => ({ ...prev, [key]: value }));
+  const Silian_setRecipientField = (Silian_key, Silian_value) => {
+    Silian_setRecipientForm((Silian_prev) => ({ ...Silian_prev, [Silian_key]: Silian_value }));
   };
 
-  const ensureCustomScope = useCallback(() => {
-    setForm((prev) =>
-      prev.scope === "custom" ? prev : { ...prev, scope: "custom" },
+  const Silian_ensureCustomScope = Silian_useCallback(() => {
+    Silian_setForm((Silian_prev) =>
+      Silian_prev.scope === "custom" ? Silian_prev : { ...Silian_prev, scope: "custom" },
     );
-  }, [setForm]);
+  }, [Silian_setForm]);
 
-  const buildRecipientParams = useCallback(
-    (overrides = {}) => {
-      const params = {};
-      const search = recipientForm.search.trim();
-      if (search) {
-        params.search = search;
+  const Silian_buildRecipientParams = Silian_useCallback(
+    (Silian_overrides = {}) => {
+      const Silian_params = {};
+      const Silian_search = Silian_recipientForm.search.trim();
+      if (Silian_search) {
+        Silian_params.search = Silian_search;
       }
-      const fields = recipientForm.fields.trim();
-      if (fields) {
-        params.fields = fields;
+      const Silian_fields = Silian_recipientForm.fields.trim();
+      if (Silian_fields) {
+        Silian_params.fields = Silian_fields;
       }
-      const school = recipientForm.school.trim();
-      if (school) {
-        params.school = school;
+      const Silian_school = Silian_recipientForm.school.trim();
+      if (Silian_school) {
+        Silian_params.school = Silian_school;
       }
-      const emailSuffix = recipientForm.emailSuffix.trim();
-      if (emailSuffix) {
-        params.email_suffix = emailSuffix;
+      const Silian_emailSuffix = Silian_recipientForm.emailSuffix.trim();
+      if (Silian_emailSuffix) {
+        Silian_params.email_suffix = Silian_emailSuffix;
       }
-      if (recipientForm.status && recipientForm.status !== "any") {
-        params.status = recipientForm.status;
+      if (Silian_recipientForm.status && Silian_recipientForm.status !== "any") {
+        Silian_params.status = Silian_recipientForm.status;
       }
-      if (recipientForm.isAdmin && recipientForm.isAdmin !== "any") {
-        params.is_admin = recipientForm.isAdmin;
+      if (Silian_recipientForm.isAdmin && Silian_recipientForm.isAdmin !== "any") {
+        Silian_params.is_admin = Silian_recipientForm.isAdmin;
       }
-      const limitRaw = overrides.limit ?? recipientForm.limit ?? 25;
-      const limit = Math.max(10, Math.min(500, Number(limitRaw) || 25));
-      params.limit = limit;
-      const pageRaw = overrides.page ?? 1;
-      params.page = Math.max(1, Number(pageRaw) || 1);
-      return params;
+      const Silian_limitRaw = Silian_overrides.limit ?? Silian_recipientForm.limit ?? 25;
+      const Silian_limit = Math.max(10, Math.min(500, Number(Silian_limitRaw) || 25));
+      Silian_params.limit = Silian_limit;
+      const Silian_pageRaw = Silian_overrides.page ?? 1;
+      Silian_params.page = Math.max(1, Number(Silian_pageRaw) || 1);
+      return Silian_params;
     },
-    [recipientForm],
+    [Silian_recipientForm],
   );
 
-  const buildFilterPayload = useCallback(() => {
-    const payload = {};
-    const search = recipientForm.search.trim();
-    const school = recipientForm.school.trim();
-    const emailSuffix = recipientForm.emailSuffix.trim();
-    const limit = Math.max(
+  const Silian_buildFilterPayload = Silian_useCallback(() => {
+    const Silian_payload = {};
+    const Silian_search = Silian_recipientForm.search.trim();
+    const Silian_school = Silian_recipientForm.school.trim();
+    const Silian_emailSuffix = Silian_recipientForm.emailSuffix.trim();
+    const Silian_limit = Math.max(
       10,
-      Math.min(500, Number(recipientForm.limit) || 25),
+      Math.min(500, Number(Silian_recipientForm.limit) || 25),
     );
 
-    payload.limit = limit;
+    Silian_payload.limit = Silian_limit;
 
-    if (search) {
-      payload.search = search;
+    if (Silian_search) {
+      Silian_payload.search = Silian_search;
       if (
-        recipientForm.fields &&
-        recipientForm.fields !== RECIPIENT_SEARCH_DEFAULT.fields
+        Silian_recipientForm.fields &&
+        Silian_recipientForm.fields !== Silian_RECIPIENT_SEARCH_DEFAULT.fields
       ) {
-        payload.fields = recipientForm.fields;
+        Silian_payload.fields = Silian_recipientForm.fields;
       }
     }
-    if (school) {
-      payload.school = school;
+    if (Silian_school) {
+      Silian_payload.school = Silian_school;
     }
-    if (emailSuffix) {
-      payload.email_suffix = emailSuffix;
+    if (Silian_emailSuffix) {
+      Silian_payload.email_suffix = Silian_emailSuffix;
     }
-    if (recipientForm.status && recipientForm.status !== "any") {
-      payload.status = recipientForm.status;
+    if (Silian_recipientForm.status && Silian_recipientForm.status !== "any") {
+      Silian_payload.status = Silian_recipientForm.status;
     }
-    if (recipientForm.isAdmin && recipientForm.isAdmin !== "any") {
-      payload.is_admin = recipientForm.isAdmin;
+    if (Silian_recipientForm.isAdmin && Silian_recipientForm.isAdmin !== "any") {
+      Silian_payload.is_admin = Silian_recipientForm.isAdmin;
     }
-    return payload;
-  }, [recipientForm]);
+    return Silian_payload;
+  }, [Silian_recipientForm]);
 
-  const describeFilter = useCallback(
-    (filter) => {
-      if (!filter || typeof filter !== "object") {
-        return t("admin.broadcast.recipientFilters.summary.fallback");
+  const Silian_describeFilter = Silian_useCallback(
+    (Silian_filter) => {
+      if (!Silian_filter || typeof Silian_filter !== "object") {
+        return Silian_t("admin.broadcast.recipientFilters.summary.fallback");
       }
 
-      const parts = [];
-      if (filter.search) {
-        parts.push(
-          t("admin.broadcast.recipientFilters.summary.search", {
-            value: filter.search,
+      const Silian_parts = [];
+      if (Silian_filter.search) {
+        Silian_parts.push(
+          Silian_t("admin.broadcast.recipientFilters.summary.search", {
+            value: Silian_filter.search,
           }),
         );
-        if (filter.fields) {
-          const labels = filter.fields
+        if (Silian_filter.fields) {
+          const Silian_labels = Silian_filter.fields
             .split(",")
-            .map((field) => field.trim())
+            .map((Silian_field) => Silian_field.trim())
             .filter(Boolean)
-            .map((field) => {
-              const normalized = field === "school_name" ? "school" : field;
-              const labelKey = RECIPIENT_FIELD_LABEL_KEYS[normalized];
-              return labelKey ? t(labelKey) : null;
+            .map((Silian_field) => {
+              const Silian_normalized = Silian_field === "school_name" ? "school" : Silian_field;
+              const Silian_labelKey = Silian_RECIPIENT_FIELD_LABEL_KEYS[Silian_normalized];
+              return Silian_labelKey ? Silian_t(Silian_labelKey) : null;
             })
             .filter(Boolean);
-          if (labels.length > 0) {
-            parts.push(
-              t("admin.broadcast.recipientFilters.summary.fields", {
-                fields: labels.join(", "),
+          if (Silian_labels.length > 0) {
+            Silian_parts.push(
+              Silian_t("admin.broadcast.recipientFilters.summary.fields", {
+                fields: Silian_labels.join(", "),
               }),
             );
           }
         }
       }
-      if (filter.school) {
-        parts.push(
-          t("admin.broadcast.recipientFilters.summary.school", {
-            value: filter.school,
+      if (Silian_filter.school) {
+        Silian_parts.push(
+          Silian_t("admin.broadcast.recipientFilters.summary.school", {
+            value: Silian_filter.school,
           }),
         );
       }
-      if (filter.email_suffix) {
-        parts.push(
-          t("admin.broadcast.recipientFilters.summary.emailSuffix", {
-            value: filter.email_suffix,
+      if (Silian_filter.email_suffix) {
+        Silian_parts.push(
+          Silian_t("admin.broadcast.recipientFilters.summary.emailSuffix", {
+            value: Silian_filter.email_suffix,
           }),
         );
       }
-      if (filter.status === "active" || filter.status === "inactive") {
-        parts.push(
-          t("admin.broadcast.recipientFilters.summary.status." + filter.status),
+      if (Silian_filter.status === "active" || Silian_filter.status === "inactive") {
+        Silian_parts.push(
+          Silian_t("admin.broadcast.recipientFilters.summary.status." + Silian_filter.status),
         );
       }
       if (
-        filter.is_admin === "1" ||
-        filter.is_admin === 1 ||
-        filter.is_admin === true ||
-        filter.is_admin === "true"
+        Silian_filter.is_admin === "1" ||
+        Silian_filter.is_admin === 1 ||
+        Silian_filter.is_admin === true ||
+        Silian_filter.is_admin === "true"
       ) {
-        parts.push(t("admin.broadcast.recipientFilters.summary.role.admin"));
+        Silian_parts.push(Silian_t("admin.broadcast.recipientFilters.summary.role.admin"));
       } else if (
-        filter.is_admin === "0" ||
-        filter.is_admin === 0 ||
-        filter.is_admin === false ||
-        filter.is_admin === "false"
+        Silian_filter.is_admin === "0" ||
+        Silian_filter.is_admin === 0 ||
+        Silian_filter.is_admin === false ||
+        Silian_filter.is_admin === "false"
       ) {
-        parts.push(t("admin.broadcast.recipientFilters.summary.role.user"));
+        Silian_parts.push(Silian_t("admin.broadcast.recipientFilters.summary.role.user"));
       }
-      if (filter.limit) {
-        parts.push(
-          t("admin.broadcast.recipientFilters.summary.limit", {
-            count: filter.limit,
+      if (Silian_filter.limit) {
+        Silian_parts.push(
+          Silian_t("admin.broadcast.recipientFilters.summary.limit", {
+            count: Silian_filter.limit,
           }),
         );
       }
 
-      if (parts.length === 0) {
-        return t("admin.broadcast.recipientFilters.summary.fallback");
+      if (Silian_parts.length === 0) {
+        return Silian_t("admin.broadcast.recipientFilters.summary.fallback");
       }
 
-      const joiner = t("admin.broadcast.recipientFilters.summary.joiner");
-      return parts.join(joiner);
+      const Silian_joiner = Silian_t("admin.broadcast.recipientFilters.summary.joiner");
+      return Silian_parts.join(Silian_joiner);
     },
-    [t],
+    [Silian_t],
   );
 
-  const loadRecipients = useCallback(
-    async (overrides = {}) => {
-      const params = buildRecipientParams(overrides);
-      setRecipientLoading(true);
-      setRecipientError(null);
+  const Silian_loadRecipients = Silian_useCallback(
+    async (Silian_overrides = {}) => {
+      const Silian_params = Silian_buildRecipientParams(Silian_overrides);
+      Silian_setRecipientLoading(true);
+      Silian_setRecipientError(null);
       try {
-        const res = await adminAPI.searchBroadcastRecipients(params);
-        const payload = res?.data ?? {};
-        const list = Array.isArray(payload.data) ? payload.data : [];
-        const pagination = payload.pagination ?? {};
-        const page = pagination.page ?? params.page ?? 1;
-        const limit =
-          pagination.limit ?? params.limit ?? recipientForm.limit ?? 25;
-        const hasMore = Boolean(pagination.has_more);
-        setRecipientResults({
-          items: list,
-          pagination: { page, limit, has_more: hasMore },
+        const Silian_res = await Silian_adminAPI.searchBroadcastRecipients(Silian_params);
+        const Silian_payload = Silian_res?.data ?? {};
+        const Silian_list = Array.isArray(Silian_payload.data) ? Silian_payload.data : [];
+        const Silian_pagination = Silian_payload.pagination ?? {};
+        const Silian_page = Silian_pagination.page ?? Silian_params.page ?? 1;
+        const Silian_limit =
+          Silian_pagination.limit ?? Silian_params.limit ?? Silian_recipientForm.limit ?? 25;
+        const Silian_hasMore = Boolean(Silian_pagination.has_more);
+        Silian_setRecipientResults({
+          items: Silian_list,
+          pagination: { page: Silian_page, limit: Silian_limit, has_more: Silian_hasMore },
         });
-      } catch (error) {
-        setRecipientError(error);
-        setRecipientResults((prev) => ({ ...prev, items: [] }));
+      } catch (Silian_error) {
+        Silian_setRecipientError(Silian_error);
+        Silian_setRecipientResults((Silian_prev) => ({ ...Silian_prev, items: [] }));
       } finally {
-        setRecipientLoading(false);
+        Silian_setRecipientLoading(false);
       }
     },
-    [buildRecipientParams, recipientForm.limit],
+    [Silian_buildRecipientParams, Silian_recipientForm.limit],
   );
 
-  const handleRecipientSearch = async () => {
-    await loadRecipients({ page: 1 });
+  const Silian_handleRecipientSearch = async () => {
+    await Silian_loadRecipients({ page: 1 });
   };
 
-  const handleRecipientPageChange = (direction) => {
-    if (direction === "prev") {
-      const prevPage = Math.max(1, recipientResults.pagination.page - 1);
-      if (prevPage !== recipientResults.pagination.page) {
-        loadRecipients({ page: prevPage });
+  const Silian_handleRecipientPageChange = (Silian_direction) => {
+    if (Silian_direction === "prev") {
+      const Silian_prevPage = Math.max(1, Silian_recipientResults.pagination.page - 1);
+      if (Silian_prevPage !== Silian_recipientResults.pagination.page) {
+        Silian_loadRecipients({ page: Silian_prevPage });
       }
       return;
     }
-    if (recipientResults.pagination.has_more) {
-      loadRecipients({ page: recipientResults.pagination.page + 1 });
+    if (Silian_recipientResults.pagination.has_more) {
+      Silian_loadRecipients({ page: Silian_recipientResults.pagination.page + 1 });
     }
   };
 
-  const clearRecipientSearch = () => {
-    setRecipientForm(RECIPIENT_SEARCH_DEFAULT);
-    setRecipientResults({
+  const Silian_clearRecipientSearch = () => {
+    Silian_setRecipientForm(Silian_RECIPIENT_SEARCH_DEFAULT);
+    Silian_setRecipientResults({
       items: [],
       pagination: {
         page: 1,
         has_more: false,
-        limit: RECIPIENT_SEARCH_DEFAULT.limit,
+        limit: Silian_RECIPIENT_SEARCH_DEFAULT.limit,
       },
     });
-    setRecipientError(null);
+    Silian_setRecipientError(null);
   };
 
-  const toggleRecipientSelection = useCallback(
-    (recipient) => {
-      if (!recipient || recipient.id === undefined || recipient.id === null) {
+  const Silian_toggleRecipientSelection = Silian_useCallback(
+    (Silian_recipient) => {
+      if (!Silian_recipient || Silian_recipient.id === undefined || Silian_recipient.id === null) {
         return;
       }
-      const id = Number(recipient.id);
-      if (!Number.isInteger(id) || id <= 0) {
+      const Silian_id = Number(Silian_recipient.id);
+      if (!Number.isInteger(Silian_id) || Silian_id <= 0) {
         return;
       }
-      ensureCustomScope();
-      setSelectedRecipients((prev) => {
-        const next = new Map(prev);
-        if (next.has(id)) {
-          next.delete(id);
+      Silian_ensureCustomScope();
+      Silian_setSelectedRecipients((Silian_prev) => {
+        const Silian_next = new Map(Silian_prev);
+        if (Silian_next.has(Silian_id)) {
+          Silian_next.delete(Silian_id);
         } else {
-          next.set(id, {
-            id,
-            username: recipient.username ?? null,
-            email: recipient.email ?? null,
-            school: recipient.school ?? null,
+          Silian_next.set(Silian_id, {
+            id: Silian_id,
+            username: Silian_recipient.username ?? null,
+            email: Silian_recipient.email ?? null,
+            school: Silian_recipient.school ?? null,
           });
         }
-        return next;
+        return Silian_next;
       });
     },
-    [ensureCustomScope],
+    [Silian_ensureCustomScope],
   );
 
-  const handleViewUserProfile = useCallback(
-    (event, recipient) => {
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
+  const Silian_handleViewUserProfile = Silian_useCallback(
+    (Silian_event, Silian_recipient) => {
+      if (Silian_event) {
+        Silian_event.preventDefault();
+        Silian_event.stopPropagation();
       }
-      if (!recipient) {
-        toast.error(t("admin.broadcast.recipientSearch.invalidUser"));
+      if (!Silian_recipient) {
+        Silian_toast.error(Silian_t("admin.broadcast.recipientSearch.invalidUser"));
         return;
       }
-      const userUuid = getRecipientUuid(recipient);
-      if (userUuid) {
-        navigate(`/admin/users?userUuid=${userUuid}`);
+      const Silian_userUuid = Silian_getRecipientUuid(Silian_recipient);
+      if (Silian_userUuid) {
+        Silian_navigate(`/admin/users?userUuid=${Silian_userUuid}`);
         return;
       }
-      if (recipient.id === undefined || recipient.id === null) {
-        toast.error(t("admin.broadcast.recipientSearch.invalidUser"));
+      if (Silian_recipient.id === undefined || Silian_recipient.id === null) {
+        Silian_toast.error(Silian_t("admin.broadcast.recipientSearch.invalidUser"));
         return;
       }
-      const userId = Number(recipient.id);
-      if (!Number.isInteger(userId) || userId <= 0) {
-        toast.error(t("admin.broadcast.recipientSearch.invalidUser"));
+      const Silian_userId = Number(Silian_recipient.id);
+      if (!Number.isInteger(Silian_userId) || Silian_userId <= 0) {
+        Silian_toast.error(Silian_t("admin.broadcast.recipientSearch.invalidUser"));
         return;
       }
-      navigate(`/admin/users?userId=${userId}`);
+      Silian_navigate(`/admin/users?userId=${Silian_userId}`);
     },
-    [navigate, t],
+    [Silian_navigate, Silian_t],
   );
 
-  const removeSelectedRecipient = (id) => {
-    setSelectedRecipients((prev) => {
-      const next = new Map(prev);
-      next.delete(id);
-      return next;
+  const Silian_removeSelectedRecipient = (Silian_id) => {
+    Silian_setSelectedRecipients((Silian_prev) => {
+      const Silian_next = new Map(Silian_prev);
+      Silian_next.delete(Silian_id);
+      return Silian_next;
     });
   };
 
-  const clearSelectedRecipients = () => {
-    setSelectedRecipients(new Map());
+  const Silian_clearSelectedRecipients = () => {
+    Silian_setSelectedRecipients(new Map());
   };
 
-  const addAllRecipientsFromResults = () => {
-    if (!recipientResults.items.length) {
-      toast.error(t("admin.broadcast.recipients.emptySelection"));
+  const Silian_addAllRecipientsFromResults = () => {
+    if (!Silian_recipientResults.items.length) {
+      Silian_toast.error(Silian_t("admin.broadcast.recipients.emptySelection"));
       return;
     }
-    ensureCustomScope();
-    setSelectedRecipients((prev) => {
-      const next = new Map(prev);
-      recipientResults.items.forEach((item) => {
-        const id = Number(item?.id ?? 0);
-        if (Number.isInteger(id) && id > 0) {
-          next.set(id, {
-            id,
-            username: item.username ?? null,
-            email: item.email ?? null,
-            school: item.school ?? null,
+    Silian_ensureCustomScope();
+    Silian_setSelectedRecipients((Silian_prev) => {
+      const Silian_next = new Map(Silian_prev);
+      Silian_recipientResults.items.forEach((Silian_item) => {
+        const Silian_id = Number(Silian_item?.id ?? 0);
+        if (Number.isInteger(Silian_id) && Silian_id > 0) {
+          Silian_next.set(Silian_id, {
+            id: Silian_id,
+            username: Silian_item.username ?? null,
+            email: Silian_item.email ?? null,
+            school: Silian_item.school ?? null,
           });
         }
       });
-      return next;
+      return Silian_next;
     });
-    toast.success(t("admin.broadcast.recipients.addedAll"));
+    Silian_toast.success(Silian_t("admin.broadcast.recipients.addedAll"));
   };
 
-  const addFilterGroup = () => {
-    if (!hasRecipientCriteria) {
-      toast.error(t("admin.broadcast.recipientFilters.requireCondition"));
+  const Silian_addFilterGroup = () => {
+    if (!Silian_hasRecipientCriteria) {
+      Silian_toast.error(Silian_t("admin.broadcast.recipientFilters.requireCondition"));
       return;
     }
-    ensureCustomScope();
-    const payload = buildFilterPayload();
-    setAppliedFilters((prev) => [...prev, payload]);
-    toast.success(t("admin.broadcast.recipientFilters.added"));
+    Silian_ensureCustomScope();
+    const Silian_payload = Silian_buildFilterPayload();
+    Silian_setAppliedFilters((Silian_prev) => [...Silian_prev, Silian_payload]);
+    Silian_toast.success(Silian_t("admin.broadcast.recipientFilters.added"));
   };
 
-  const removeFilterGroup = (index) => {
-    setAppliedFilters((prev) => prev.filter((_, idx) => idx !== index));
+  const Silian_removeFilterGroup = (Silian_index) => {
+    Silian_setAppliedFilters((Silian_prev) => Silian_prev.filter((Silian__, Silian_idx) => Silian_idx !== Silian_index));
   };
 
-  const validateForm = () => {
-    const addAnnouncementMarkers = (title) => {
-      if (!title || typeof title !== "string") return title;
-      const trimmed = title.trim();
-      const lower = trimmed.toLowerCase();
+  const Silian_validateForm = () => {
+    const Silian_addAnnouncementMarkers = (Silian_title) => {
+      if (!Silian_title || typeof Silian_title !== "string") return Silian_title;
+      const Silian_trimmed = Silian_title.trim();
+      const Silian_lower = Silian_trimmed.toLowerCase();
       // If title already contains announcement markers or keywords, don't add
       if (
         /(\[announcement\]|\[公告\]|【公告】|\b(公告|announcement|broadcast|boardcast|system|系统)\b)/i.test(
-          lower,
+          Silian_lower,
         )
       ) {
-        return trimmed;
+        return Silian_trimmed;
       }
       // Prepend English and Chinese markers for clarity
-      return `[Announcement/公告] ${trimmed}`;
+      return `[Announcement/公告] ${Silian_trimmed}`;
     };
 
-    const normalizedPriority = PRIORITIES.includes(form.priority)
-      ? form.priority
+    const Silian_normalizedPriority = Silian_PRIORITIES.includes(Silian_form.priority)
+      ? Silian_form.priority
       : "normal";
-    const payload = {
-      title: addAnnouncementMarkers(form.title.trim()),
-      content: form.content.trim(),
-      content_format: normalizeAnnouncementContentFormat(form.content_format),
-      priority: normalizedPriority,
+    const Silian_payload = {
+      title: Silian_addAnnouncementMarkers(Silian_form.title.trim()),
+      content: Silian_form.content.trim(),
+      content_format: Silian_normalizeAnnouncementContentFormat(Silian_form.content_format),
+      priority: Silian_normalizedPriority,
     };
 
-    if (payload.content_format === ANNOUNCEMENT_CONTENT_FORMAT_HTML) {
-      payload.render_profile = ANNOUNCEMENT_RENDER_PROFILE_HTML;
+    if (Silian_payload.content_format === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML) {
+      Silian_payload.render_profile = Silian_ANNOUNCEMENT_RENDER_PROFILE_HTML;
     }
 
-    const nextErrors = {};
+    const Silian_nextErrors = {};
 
-    if (!payload.title) {
-      nextErrors.title = t("admin.broadcast.validation.titleRequired");
+    if (!Silian_payload.title) {
+      Silian_nextErrors.title = Silian_t("admin.broadcast.validation.titleRequired");
     }
-    if (!payload.content) {
-      nextErrors.content = t("admin.broadcast.validation.contentRequired");
+    if (!Silian_payload.content) {
+      Silian_nextErrors.content = Silian_t("admin.broadcast.validation.contentRequired");
     }
-    if (!PRIORITIES.includes(form.priority)) {
-      nextErrors.priority = t("admin.broadcast.validation.priorityInvalid");
+    if (!Silian_PRIORITIES.includes(Silian_form.priority)) {
+      Silian_nextErrors.priority = Silian_t("admin.broadcast.validation.priorityInvalid");
     }
 
-    if (form.scope === "custom") {
-      const manualInput = form.target_users_text.trim();
-      const combinedIds = new Set(selectedRecipientIds);
+    if (Silian_form.scope === "custom") {
+      const Silian_manualInput = Silian_form.target_users_text.trim();
+      const Silian_combinedIds = new Set(Silian_selectedRecipientIds);
 
-      if (customTargetIds.length > 0) {
-        customTargetIds.forEach((id) => combinedIds.add(id));
-      } else if (manualInput.length > 0 && selectedRecipientIds.length === 0) {
-        nextErrors.target_users_text = t(
+      if (Silian_customTargetIds.length > 0) {
+        Silian_customTargetIds.forEach((Silian_id) => Silian_combinedIds.add(Silian_id));
+      } else if (Silian_manualInput.length > 0 && Silian_selectedRecipientIds.length === 0) {
+        Silian_nextErrors.target_users_text = Silian_t(
           "admin.broadcast.validation.targetsInvalid",
         );
       }
 
-      if (combinedIds.size > 0) {
-        payload.target_users = Array.from(combinedIds);
+      if (Silian_combinedIds.size > 0) {
+        Silian_payload.target_users = Array.from(Silian_combinedIds);
       }
 
-      if (combinedIds.size === 0 && appliedFilters.length === 0) {
-        nextErrors.target_users_text = t(
+      if (Silian_combinedIds.size === 0 && Silian_appliedFilters.length === 0) {
+        Silian_nextErrors.target_users_text = Silian_t(
           "admin.broadcast.validation.targetsRequired",
         );
       }
 
-      if (appliedFilters.length > 0) {
-        payload.target_filters = appliedFilters.map((filter) => ({
-          ...filter,
+      if (Silian_appliedFilters.length > 0) {
+        Silian_payload.target_filters = Silian_appliedFilters.map((Silian_filter) => ({
+          ...Silian_filter,
         }));
       }
     }
 
-    if (form.scope !== "custom") {
-      const combined = new Set();
-      if (selectedRecipientIds.length > 0) {
-        selectedRecipientIds.forEach((id) => combined.add(id));
+    if (Silian_form.scope !== "custom") {
+      const Silian_combined = new Set();
+      if (Silian_selectedRecipientIds.length > 0) {
+        Silian_selectedRecipientIds.forEach((Silian_id) => Silian_combined.add(Silian_id));
       }
-      if (customTargetIds.length > 0) {
-        customTargetIds.forEach((id) => combined.add(id));
+      if (Silian_customTargetIds.length > 0) {
+        Silian_customTargetIds.forEach((Silian_id) => Silian_combined.add(Silian_id));
       }
-      if (combined.size > 0) {
-        payload.target_users = Array.from(combined);
+      if (Silian_combined.size > 0) {
+        Silian_payload.target_users = Array.from(Silian_combined);
       }
-      if (appliedFilters.length > 0) {
-        payload.target_filters = appliedFilters.map((filter) => ({
-          ...filter,
+      if (Silian_appliedFilters.length > 0) {
+        Silian_payload.target_filters = Silian_appliedFilters.map((Silian_filter) => ({
+          ...Silian_filter,
         }));
       }
     }
 
-    setErrors(nextErrors);
-    const firstError = Object.values(nextErrors)[0];
+    Silian_setErrors(Silian_nextErrors);
+    const Silian_firstError = Object.values(Silian_nextErrors)[0];
     return {
-      payload,
-      isValid: Object.keys(nextErrors).length === 0,
-      firstError,
+      payload: Silian_payload,
+      isValid: Object.keys(Silian_nextErrors).length === 0,
+      firstError: Silian_firstError,
     };
   };
 
-  const broadcastMutation = useMutation(
-    (payload) => adminAPI.broadcastMessage(payload),
+  const Silian_broadcastMutation = Silian_useMutation(
+    (Silian_payload) => Silian_adminAPI.broadcastMessage(Silian_payload),
     {
-      onSuccess: (res, variables) => {
-        const data = res?.data ?? {};
-        const failedIds = Array.isArray(data.failed_user_ids)
-          ? data.failed_user_ids
+      onSuccess: (Silian_res, Silian_variables) => {
+        const Silian_data = Silian_res?.data ?? {};
+        const Silian_failedIds = Array.isArray(Silian_data.failed_user_ids)
+          ? Silian_data.failed_user_ids
           : [];
-        const invalidIds = Array.isArray(data.invalid_user_ids)
-          ? data.invalid_user_ids
+        const Silian_invalidIds = Array.isArray(Silian_data.invalid_user_ids)
+          ? Silian_data.invalid_user_ids
           : [];
-        const summaryPayload = {
-          sent: data.sent_count ?? 0,
+        const Silian_summaryPayload = {
+          sent: Silian_data.sent_count ?? 0,
           total:
-            data.total_targets ??
-            (variables?.target_users ? variables.target_users.length : 0),
-          failed: failedIds,
-          invalid: invalidIds,
-          priority: data.priority ?? variables?.priority ?? "normal",
-          emailDelivery: data.email_delivery ?? null,
+            Silian_data.total_targets ??
+            (Silian_variables?.target_users ? Silian_variables.target_users.length : 0),
+          failed: Silian_failedIds,
+          invalid: Silian_invalidIds,
+          priority: Silian_data.priority ?? Silian_variables?.priority ?? "normal",
+          emailDelivery: Silian_data.email_delivery ?? null,
         };
 
-        toast.success(
-          t("admin.broadcast.sendSuccess", { count: summaryPayload.sent }),
+        Silian_toast.success(
+          Silian_t("admin.broadcast.sendSuccess", { count: Silian_summaryPayload.sent }),
         );
-        setPreview(null);
-        setForm(INITIAL_FORM);
-        setErrors({});
-        setResult(summaryPayload);
-        setExpanded({});
-        setSelectedRecipients(new Map());
-        setAppliedFilters([]);
-        refetchHistory();
+        Silian_setPreview(null);
+        Silian_setForm(Silian_INITIAL_FORM);
+        Silian_setErrors({});
+        Silian_setResult(Silian_summaryPayload);
+        Silian_setExpanded({});
+        Silian_setSelectedRecipients(new Map());
+        Silian_setAppliedFilters([]);
+        Silian_refetchHistory();
       },
-      onError: (error) => {
-        const message =
-          error?.response?.data?.error ||
-          error?.message ||
-          t("admin.broadcast.sendFailed");
-        toast.error(message);
+      onError: (Silian_error) => {
+        const Silian_message =
+          Silian_error?.response?.data?.error ||
+          Silian_error?.message ||
+          Silian_t("admin.broadcast.sendFailed");
+        Silian_toast.error(Silian_message);
       },
     },
   );
 
-  const flushBroadcastMutation = useMutation(
-    (params = {}) => adminAPI.flushBroadcastQueue(params),
+  const Silian_flushBroadcastMutation = Silian_useMutation(
+    (Silian_params = {}) => Silian_adminAPI.flushBroadcastQueue(Silian_params),
     {
-      onSuccess: (res) => {
-        const processed = Array.isArray(res?.data?.processed)
-          ? res.data.processed
+      onSuccess: (Silian_res) => {
+        const Silian_processed = Array.isArray(Silian_res?.data?.processed)
+          ? Silian_res.data.processed
           : [];
-        if (processed.length > 0) {
-          toast.success(
-            t("admin.broadcast.history.flushSuccess", {
-              count: processed.length,
+        if (Silian_processed.length > 0) {
+          Silian_toast.success(
+            Silian_t("admin.broadcast.history.flushSuccess", {
+              count: Silian_processed.length,
             }),
           );
         } else {
-          toast(t("admin.broadcast.history.flushEmpty"));
+          Silian_toast(Silian_t("admin.broadcast.history.flushEmpty"));
         }
-        refetchHistory();
+        Silian_refetchHistory();
       },
-      onError: (error) => {
-        const message =
-          error?.response?.data?.error ||
-          error?.message ||
-          t("admin.broadcast.history.flushErrorDefault");
-        toast.error(t("admin.broadcast.history.flushError", { message }));
+      onError: (Silian_error) => {
+        const Silian_message =
+          Silian_error?.response?.data?.error ||
+          Silian_error?.message ||
+          Silian_t("admin.broadcast.history.flushErrorDefault");
+        Silian_toast.error(Silian_t("admin.broadcast.history.flushError", { message: Silian_message }));
       },
     },
   );
 
-  const announcementDraftMutation = useMutation((payload) =>
-    adminAPI.generateAnnouncementDraft(payload),
+  const Silian_announcementDraftMutation = Silian_useMutation((Silian_payload) =>
+    Silian_adminAPI.generateAnnouncementDraft(Silian_payload),
   );
 
-  const handlePreview = () => {
-    const { payload, isValid, firstError } = validateForm();
-    if (!isValid) {
-      toast.error(firstError ?? t("admin.broadcast.validation.general"));
+  const Silian_handlePreview = () => {
+    const { payload: Silian_payload, isValid: Silian_isValid, firstError: Silian_firstError } = Silian_validateForm();
+    if (!Silian_isValid) {
+      Silian_toast.error(Silian_firstError ?? Silian_t("admin.broadcast.validation.general"));
       return;
     }
 
-    setPreview({
-      title: payload.title,
-      content: payload.content,
-      contentFormat: payload.content_format,
-      renderProfile: payload.render_profile ?? null,
-      priority: payload.priority,
-      scope: form.scope,
+    Silian_setPreview({
+      title: Silian_payload.title,
+      content: Silian_payload.content,
+      contentFormat: Silian_payload.content_format,
+      renderProfile: Silian_payload.render_profile ?? null,
+      priority: Silian_payload.priority,
+      scope: Silian_form.scope,
       targetCount:
-        form.scope === "custom" ? (payload.target_users?.length ?? 0) : null,
+        Silian_form.scope === "custom" ? (Silian_payload.target_users?.length ?? 0) : null,
     });
   };
 
-  const handleSend = () => {
-    const { payload, isValid, firstError } = validateForm();
-    if (!isValid) {
-      toast.error(firstError ?? t("admin.broadcast.validation.general"));
+  const Silian_handleSend = () => {
+    const { payload: Silian_payload, isValid: Silian_isValid, firstError: Silian_firstError } = Silian_validateForm();
+    if (!Silian_isValid) {
+      Silian_toast.error(Silian_firstError ?? Silian_t("admin.broadcast.validation.general"));
       return;
     }
-    setResult(null);
-    broadcastMutation.mutate(payload);
+    Silian_setResult(null);
+    Silian_broadcastMutation.mutate(Silian_payload);
   };
 
-  const handleFlushBroadcasts = useCallback(() => {
-    flushBroadcastMutation.mutate({ limit: 10 });
-  }, [flushBroadcastMutation]);
+  const Silian_handleFlushBroadcasts = Silian_useCallback(() => {
+    Silian_flushBroadcastMutation.mutate({ limit: 10 });
+  }, [Silian_flushBroadcastMutation]);
 
-  const handleApplyHtmlTemplate = useCallback((template) => {
-    if (!template || typeof template.content !== "string") {
+  const Silian_handleApplyHtmlTemplate = Silian_useCallback((Silian_template) => {
+    if (!Silian_template || typeof Silian_template.content !== "string") {
       return;
     }
-    setField("content", template.content);
+    Silian_setField("content", Silian_template.content);
   }, []);
 
-  const handleRunAnnouncementAi = useCallback(
-    async (payload) => {
+  const Silian_handleRunAnnouncementAi = Silian_useCallback(
+    async (Silian_payload) => {
       try {
-        const res = await announcementDraftMutation.mutateAsync({
-          action: payload?.action ?? announcementAiAction,
-          title: payload?.title ?? form.title,
-          content: payload?.content ?? form.content,
-          instruction: payload?.instruction ?? announcementAiInstruction,
-          priority: payload?.priority ?? form.priority,
-          content_format: payload?.content_format ?? selectedContentFormat,
-          source: payload?.source ?? "admin:/admin/broadcast",
+        const Silian_res = await Silian_announcementDraftMutation.mutateAsync({
+          action: Silian_payload?.action ?? Silian_announcementAiAction,
+          title: Silian_payload?.title ?? Silian_form.title,
+          content: Silian_payload?.content ?? Silian_form.content,
+          instruction: Silian_payload?.instruction ?? Silian_announcementAiInstruction,
+          priority: Silian_payload?.priority ?? Silian_form.priority,
+          content_format: Silian_payload?.content_format ?? Silian_selectedContentFormat,
+          source: Silian_payload?.source ?? "admin:/admin/broadcast",
         });
-        const data = res?.data?.data ?? {};
-        toast.success(t("admin.broadcast.llmHelper.builtinSuccess"));
-        return data;
-      } catch (error) {
-        const message =
-          error?.response?.data?.error ||
-          error?.message ||
-          t("admin.broadcast.llmHelper.builtinFailed");
-        toast.error(message);
-        throw error;
+        const Silian_data = Silian_res?.data?.data ?? {};
+        Silian_toast.success(Silian_t("admin.broadcast.llmHelper.builtinSuccess"));
+        return Silian_data;
+      } catch (Silian_error) {
+        const Silian_message =
+          Silian_error?.response?.data?.error ||
+          Silian_error?.message ||
+          Silian_t("admin.broadcast.llmHelper.builtinFailed");
+        Silian_toast.error(Silian_message);
+        throw Silian_error;
       }
     },
     [
-      announcementAiAction,
-      announcementAiInstruction,
-      announcementDraftMutation,
-      form.content,
-      form.priority,
-      form.title,
-      selectedContentFormat,
-      t,
+      Silian_announcementAiAction,
+      Silian_announcementAiInstruction,
+      Silian_announcementDraftMutation,
+      Silian_form.content,
+      Silian_form.priority,
+      Silian_form.title,
+      Silian_selectedContentFormat,
+      Silian_t,
     ],
   );
 
-  const toggleDetails = (id) => {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  const Silian_toggleDetails = (Silian_id) => {
+    Silian_setExpanded((Silian_prev) => ({ ...Silian_prev, [Silian_id]: !Silian_prev[Silian_id] }));
   };
 
-  const handleExport = () => {
-    if (!filteredItems.length) {
-      toast.error(t("admin.broadcast.export.empty"));
+  const Silian_handleExport = () => {
+    if (!Silian_filteredItems.length) {
+      Silian_toast.error(Silian_t("admin.broadcast.export.empty"));
       return;
     }
     try {
-      const headers = [
+      const Silian_headers = [
         "id",
         "title",
         "content",
@@ -1192,108 +1192,108 @@ export function BroadcastCenter() {
         "read_users",
         "unread_users",
       ];
-      const escapeCsv = (value) => {
-        if (value === null || value === undefined) {
+      const Silian_escapeCsv = (Silian_value) => {
+        if (Silian_value === null || Silian_value === undefined) {
           return '""';
         }
-        const str = String(value).replace(/"/g, '""');
-        return `"${str}"`;
+        const Silian_str = String(Silian_value).replace(/"/g, '""');
+        return `"${Silian_str}"`;
       };
-      const rows = filteredItems.map((item) => {
-        const actorLabel =
-          item.actor_username ||
-          (item.actor_user_id ? `#${item.actor_user_id}` : t("common.unknown"));
-        const readUsers = Array.isArray(item.read_users)
-          ? item.read_users
+      const Silian_rows = Silian_filteredItems.map((Silian_item) => {
+        const Silian_actorLabel =
+          Silian_item.actor_username ||
+          (Silian_item.actor_user_id ? `#${Silian_item.actor_user_id}` : Silian_t("common.unknown"));
+        const Silian_readUsers = Array.isArray(Silian_item.read_users)
+          ? Silian_item.read_users
               .map(
-                (user) =>
-                  user.username || user.email || getRecipientFallbackLabel(user),
+                (Silian_user) =>
+                  Silian_user.username || Silian_user.email || Silian_getRecipientFallbackLabel(Silian_user),
               )
               .join("; ")
           : "";
-        const unreadUsers = Array.isArray(item.unread_users)
-          ? item.unread_users
+        const Silian_unreadUsers = Array.isArray(Silian_item.unread_users)
+          ? Silian_item.unread_users
               .map(
-                (user) =>
-                  user.username || user.email || getRecipientFallbackLabel(user),
+                (Silian_user) =>
+                  Silian_user.username || Silian_user.email || Silian_getRecipientFallbackLabel(Silian_user),
               )
               .join("; ")
           : "";
         return [
-          item.id,
-          item.title,
-          item.content,
-          item.priority,
-          item.scope,
-          item.target_count,
-          item.sent_count,
-          item.read_count,
-          item.unread_count,
-          Array.isArray(item.failed_user_ids)
-            ? item.failed_user_ids.join(" ")
+          Silian_item.id,
+          Silian_item.title,
+          Silian_item.content,
+          Silian_item.priority,
+          Silian_item.scope,
+          Silian_item.target_count,
+          Silian_item.sent_count,
+          Silian_item.read_count,
+          Silian_item.unread_count,
+          Array.isArray(Silian_item.failed_user_ids)
+            ? Silian_item.failed_user_ids.join(" ")
             : "",
-          Array.isArray(item.invalid_user_ids)
-            ? item.invalid_user_ids.join(" ")
+          Array.isArray(Silian_item.invalid_user_ids)
+            ? Silian_item.invalid_user_ids.join(" ")
             : "",
-          actorLabel,
-          item.created_at,
-          readUsers,
-          unreadUsers,
+          Silian_actorLabel,
+          Silian_item.created_at,
+          Silian_readUsers,
+          Silian_unreadUsers,
         ]
-          .map(escapeCsv)
+          .map(Silian_escapeCsv)
           .join(",");
       });
-      const csvContent = [headers.join(","), ...rows].join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `broadcast-history-${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      toast.success(t("admin.broadcast.export.success"));
+      const Silian_csvContent = [Silian_headers.join(","), ...Silian_rows].join("\n");
+      const Silian_blob = new Blob([Silian_csvContent], { type: "text/csv;charset=utf-8;" });
+      const Silian_url = window.URL.createObjectURL(Silian_blob);
+      const Silian_link = document.createElement("a");
+      Silian_link.href = Silian_url;
+      Silian_link.setAttribute("download", `broadcast-history-${Date.now()}.csv`);
+      document.body.appendChild(Silian_link);
+      Silian_link.click();
+      document.body.removeChild(Silian_link);
+      window.URL.revokeObjectURL(Silian_url);
+      Silian_toast.success(Silian_t("admin.broadcast.export.success"));
     } catch {
-      toast.error(t("admin.broadcast.export.error"));
+      Silian_toast.error(Silian_t("admin.broadcast.export.error"));
     }
   };
 
-  const handlePageChange = (page) => {
-    setExpanded({});
-    setHistoryParams((prev) => ({ ...prev, page }));
+  const Silian_handlePageChange = (Silian_page) => {
+    Silian_setExpanded({});
+    Silian_setHistoryParams((Silian_prev) => ({ ...Silian_prev, page: Silian_page }));
   };
 
-  const isSubmitting = broadcastMutation.isLoading;
-  const invalidCount = result?.invalid?.length ?? 0;
-  const failedCount = result?.failed?.length ?? 0;
-  const exportDisabled = filteredItems.length === 0;
-  const emailResult = useMemo(() => {
-    if (!result?.emailDelivery) {
+  const Silian_isSubmitting = Silian_broadcastMutation.isLoading;
+  const Silian_invalidCount = Silian_result?.invalid?.length ?? 0;
+  const Silian_failedCount = Silian_result?.failed?.length ?? 0;
+  const Silian_exportDisabled = Silian_filteredItems.length === 0;
+  const Silian_emailResult = Silian_useMemo(() => {
+    if (!Silian_result?.emailDelivery) {
       return null;
     }
-    const delivery = result.emailDelivery;
+    const Silian_delivery = Silian_result.emailDelivery;
     return {
-      status: delivery.status ?? "skipped",
-      triggered: Boolean(delivery.triggered),
-      attempted: delivery.attempted_recipients ?? 0,
-      successfulChunks: delivery.successful_chunks ?? 0,
-      failedChunks: delivery.failed_chunks ?? 0,
-      missing: Array.isArray(delivery.missing_email_user_ids)
-        ? delivery.missing_email_user_ids
+      status: Silian_delivery.status ?? "skipped",
+      triggered: Boolean(Silian_delivery.triggered),
+      attempted: Silian_delivery.attempted_recipients ?? 0,
+      successfulChunks: Silian_delivery.successful_chunks ?? 0,
+      failedChunks: Silian_delivery.failed_chunks ?? 0,
+      missing: Array.isArray(Silian_delivery.missing_email_user_ids)
+        ? Silian_delivery.missing_email_user_ids
         : [],
-      failedRecipients: Array.isArray(delivery.failed_recipient_ids)
-        ? delivery.failed_recipient_ids
+      failedRecipients: Array.isArray(Silian_delivery.failed_recipient_ids)
+        ? Silian_delivery.failed_recipient_ids
         : [],
-      errors: Array.isArray(delivery.errors) ? delivery.errors : [],
+      errors: Array.isArray(Silian_delivery.errors) ? Silian_delivery.errors : [],
     };
-  }, [result]);
+  }, [Silian_result]);
 
-  const emailResultVariant = useMemo(() => {
-    if (!emailResult) {
+  const Silian_emailResultVariant = Silian_useMemo(() => {
+    if (!Silian_emailResult) {
       return "info";
     }
-    switch (emailResult.status) {
+    switch (Silian_emailResult.status) {
       case "sent":
         return "success";
       case "partial":
@@ -1305,131 +1305,131 @@ export function BroadcastCenter() {
       default:
         return "info";
     }
-  }, [emailResult]);
+  }, [Silian_emailResult]);
 
-  const livePreview = useMemo(
+  const Silian_livePreview = Silian_useMemo(
     () => ({
-      title: form.title.trim() || t("admin.broadcast.previewFallbackTitle"),
-      content: form.content,
-      contentFormat: selectedContentFormat,
-      priority: form.priority,
-      scope: form.scope,
+      title: Silian_form.title.trim() || Silian_t("admin.broadcast.previewFallbackTitle"),
+      content: Silian_form.content,
+      contentFormat: Silian_selectedContentFormat,
+      priority: Silian_form.priority,
+      scope: Silian_form.scope,
     }),
     [
-      form.content,
-      form.priority,
-      form.scope,
-      form.title,
-      selectedContentFormat,
-      t,
+      Silian_form.content,
+      Silian_form.priority,
+      Silian_form.scope,
+      Silian_form.title,
+      Silian_selectedContentFormat,
+      Silian_t,
     ],
   );
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold tracking-tight">
-        {t("admin.broadcast.title")}
+        {Silian_t("admin.broadcast.title")}
       </h2>
       <p className="text-muted-foreground">
-        {t("admin.broadcast.description")}
+        {Silian_t("admin.broadcast.description")}
       </p>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-6 inline-flex rounded-[0.8rem] border border-border bg-muted/60 p-1.5 shadow-inner">
-          <TabsTrigger
+      <Silian_Tabs value={Silian_activeTab} onValueChange={Silian_setActiveTab} className="w-full">
+        <Silian_TabsList className="mb-6 inline-flex rounded-[0.8rem] border border-border bg-muted/60 p-1.5 shadow-inner">
+          <Silian_TabsTrigger
             value="compose"
             className="rounded-lg py-2 text-sm font-semibold transition-all duration-200 data-[state=active]:bg-card data-[state=active]:shadow"
           >
-            {t("admin.broadcast.pageTabs.compose")}
-          </TabsTrigger>
-          <TabsTrigger
+            {Silian_t("admin.broadcast.pageTabs.compose")}
+          </Silian_TabsTrigger>
+          <Silian_TabsTrigger
             value="history"
             className="rounded-lg py-2 text-sm font-semibold transition-all duration-200 data-[state=active]:bg-card data-[state=active]:shadow"
           >
-            {t("admin.broadcast.pageTabs.history")}
-          </TabsTrigger>
-        </TabsList>
+            {Silian_t("admin.broadcast.pageTabs.history")}
+          </Silian_TabsTrigger>
+        </Silian_TabsList>
 
-        <TabsContent value="compose" className="mt-0 space-y-6">
-          <Card>
-            <CardHeader className="space-y-2">
-              <CardTitle className="text-xl">
-                {t("admin.broadcast.pageTabs.compose")}
-              </CardTitle>
-              <CardDescription>
-                {t("admin.broadcast.sections.contentDescription")}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {Object.keys(errors).length > 0 && (
-                <Alert variant="warning">
-                  <AlertTitle>
-                    {t("admin.broadcast.validation.general")}
-                  </AlertTitle>
-                </Alert>
+        <Silian_TabsContent value="compose" className="mt-0 space-y-6">
+          <Silian_Card>
+            <Silian_CardHeader className="space-y-2">
+              <Silian_CardTitle className="text-xl">
+                {Silian_t("admin.broadcast.pageTabs.compose")}
+              </Silian_CardTitle>
+              <Silian_CardDescription>
+                {Silian_t("admin.broadcast.sections.contentDescription")}
+              </Silian_CardDescription>
+            </Silian_CardHeader>
+            <Silian_CardContent className="space-y-6">
+              {Object.keys(Silian_errors).length > 0 && (
+                <Silian_Alert variant="warning">
+                  <Silian_AlertTitle>
+                    {Silian_t("admin.broadcast.validation.general")}
+                  </Silian_AlertTitle>
+                </Silian_Alert>
               )}
 
               <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
                 <div className="xl:col-span-2">
                   <label className="mb-2 block text-sm font-medium text-foreground">
-                    {t("admin.broadcast.form.title")}
+                    {Silian_t("admin.broadcast.form.title")}
                   </label>
-                  <Input
-                    value={form.title}
-                    onChange={(event) => setField("title", event.target.value)}
-                    error={Boolean(errors.title)}
-                    placeholder={t("admin.broadcast.form.title")}
+                  <Silian_Input
+                    value={Silian_form.title}
+                    onChange={(Silian_event) => Silian_setField("title", Silian_event.target.value)}
+                    error={Boolean(Silian_errors.title)}
+                    placeholder={Silian_t("admin.broadcast.form.title")}
                   />
-                  {errors.title && (
-                    <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+                  {Silian_errors.title && (
+                    <p className="mt-1 text-sm text-red-600">{Silian_errors.title}</p>
                   )}
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
-                    {t("admin.broadcast.form.contentFormat")}
+                    {Silian_t("admin.broadcast.form.contentFormat")}
                   </label>
                   <select
-                    value={selectedContentFormat}
-                    onChange={(event) =>
-                      setField("content_format", event.target.value)
+                    value={Silian_selectedContentFormat}
+                    onChange={(Silian_event) =>
+                      Silian_setField("content_format", Silian_event.target.value)
                     }
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
-                    <option value={ANNOUNCEMENT_CONTENT_FORMAT_TEXT}>
-                      {t("admin.broadcast.format.text")}
+                    <option value={Silian_ANNOUNCEMENT_CONTENT_FORMAT_TEXT}>
+                      {Silian_t("admin.broadcast.format.text")}
                     </option>
-                    <option value={ANNOUNCEMENT_CONTENT_FORMAT_HTML}>
-                      {t("admin.broadcast.format.html")}
+                    <option value={Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML}>
+                      {Silian_t("admin.broadcast.format.html")}
                     </option>
                   </select>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {selectedContentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
-                      ? t("admin.broadcast.format.profileHint")
-                      : t("admin.broadcast.format.textHint")}
+                    {Silian_selectedContentFormat === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                      ? Silian_t("admin.broadcast.format.profileHint")
+                      : Silian_t("admin.broadcast.format.textHint")}
                   </p>
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
-                    {t("admin.broadcast.form.priority")}
+                    {Silian_t("admin.broadcast.form.priority")}
                   </label>
                   <select
-                    value={form.priority}
-                    onChange={(event) => setField("priority", event.target.value)}
-                    className={cn(
+                    value={Silian_form.priority}
+                    onChange={(Silian_event) => Silian_setField("priority", Silian_event.target.value)}
+                    className={Silian_cn(
                       "w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500",
-                      errors.priority && "border-red-500 focus:ring-red-500",
+                      Silian_errors.priority && "border-red-500 focus:ring-red-500",
                     )}
                   >
-                    {PRIORITIES.map((value) => (
-                      <option key={value} value={value}>
-                        {t(`messages.priority.${value}`)}
+                    {Silian_PRIORITIES.map((Silian_value) => (
+                      <option key={Silian_value} value={Silian_value}>
+                        {Silian_t(`messages.priority.${Silian_value}`)}
                       </option>
                     ))}
                   </select>
-                  {errors.priority && (
-                    <p className="mt-1 text-sm text-red-600">{errors.priority}</p>
+                  {Silian_errors.priority && (
+                    <p className="mt-1 text-sm text-red-600">{Silian_errors.priority}</p>
                   )}
                 </div>
               </div>
@@ -1438,70 +1438,70 @@ export function BroadcastCenter() {
                 <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h3 className="text-base font-semibold text-foreground">
-                      {t("admin.broadcast.sections.content")}
+                      {Silian_t("admin.broadcast.sections.content")}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {selectedContentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
-                        ? t("admin.broadcast.form.contentFormatHtmlHint")
-                        : t("admin.broadcast.form.contentFormatTextHint")}
+                      {Silian_selectedContentFormat === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                        ? Silian_t("admin.broadcast.form.contentFormatHtmlHint")
+                        : Silian_t("admin.broadcast.form.contentFormatTextHint")}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline">
-                      {selectedContentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
-                        ? t("admin.broadcast.format.html")
-                        : t("admin.broadcast.format.text")}
-                    </Badge>
-                    <Badge variant="secondary">
-                      {t(`messages.priority.${form.priority}`)}
-                    </Badge>
+                    <Silian_Badge variant="outline">
+                      {Silian_selectedContentFormat === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                        ? Silian_t("admin.broadcast.format.html")
+                        : Silian_t("admin.broadcast.format.text")}
+                    </Silian_Badge>
+                    <Silian_Badge variant="secondary">
+                      {Silian_t(`messages.priority.${Silian_form.priority}`)}
+                    </Silian_Badge>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="rounded-lg border bg-background p-4 shadow-sm">
                     <label className="mb-3 block text-sm font-medium text-foreground">
-                      {t("admin.broadcast.form.content")}
+                      {Silian_t("admin.broadcast.form.content")}
                     </label>
-                    {selectedContentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML ? (
+                    {Silian_selectedContentFormat === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML ? (
                       <div>
-                        <AnnouncementTemplateEditor
-                          value={form.content}
-                          onChange={(value) => setField("content", value)}
-                          onApplyTemplate={handleApplyHtmlTemplate}
-                          title={form.title}
-                          priority={form.priority}
-                          contentFormat={selectedContentFormat}
-                          action={announcementAiAction}
-                          onActionChange={setAnnouncementAiAction}
-                          instruction={announcementAiInstruction}
-                          onInstructionChange={setAnnouncementAiInstruction}
-                          onRunBuiltin={handleRunAnnouncementAi}
-                          isBuiltinLoading={announcementDraftMutation.isLoading}
-                          onUpdateTitle={(nextTitle) => setField("title", nextTitle)}
-                          onUpdateFormat={(nextFormat) =>
-                            setField(
+                        <Silian_AnnouncementTemplateEditor
+                          value={Silian_form.content}
+                          onChange={(Silian_value) => Silian_setField("content", Silian_value)}
+                          onApplyTemplate={Silian_handleApplyHtmlTemplate}
+                          title={Silian_form.title}
+                          priority={Silian_form.priority}
+                          contentFormat={Silian_selectedContentFormat}
+                          action={Silian_announcementAiAction}
+                          onActionChange={Silian_setAnnouncementAiAction}
+                          instruction={Silian_announcementAiInstruction}
+                          onInstructionChange={Silian_setAnnouncementAiInstruction}
+                          onRunBuiltin={Silian_handleRunAnnouncementAi}
+                          isBuiltinLoading={Silian_announcementDraftMutation.isLoading}
+                          onUpdateTitle={(Silian_nextTitle) => Silian_setField("title", Silian_nextTitle)}
+                          onUpdateFormat={(Silian_nextFormat) =>
+                            Silian_setField(
                               "content_format",
-                              normalizeAnnouncementContentFormat(nextFormat),
+                              Silian_normalizeAnnouncementContentFormat(Silian_nextFormat),
                             )
                           }
-                          t={t}
+                          t={Silian_t}
                         />
                       </div>
                     ) : (
-                      <Textarea
-                        value={form.content}
-                        onChange={(event) => setField("content", event.target.value)}
-                        className={cn(
+                      <Silian_Textarea
+                        value={Silian_form.content}
+                        onChange={(Silian_event) => Silian_setField("content", Silian_event.target.value)}
+                        className={Silian_cn(
                           "min-h-[320px] resize-y",
-                          errors.content &&
+                          Silian_errors.content &&
                             "border-red-500 focus-visible:ring-red-500",
                         )}
-                        placeholder={t("admin.broadcast.form.content")}
+                        placeholder={Silian_t("admin.broadcast.form.content")}
                       />
                     )}
-                    {errors.content && (
-                      <p className="mt-2 text-sm text-red-600">{errors.content}</p>
+                    {Silian_errors.content && (
+                      <p className="mt-2 text-sm text-red-600">{Silian_errors.content}</p>
                     )}
                   </div>
 
@@ -1509,11 +1509,11 @@ export function BroadcastCenter() {
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <h4 className="text-sm font-semibold text-foreground">
-                          {t("admin.broadcast.livePreview.title")}
+                          {Silian_t("admin.broadcast.livePreview.title")}
                         </h4>
                         <p className="text-xs text-muted-foreground">
-                          {t("admin.broadcast.previewTargets." + (form.scope === "custom" ? "custom" : "all"), {
-                            count: selectedRecipientIds.length + customTargetIds.length,
+                          {Silian_t("admin.broadcast.previewTargets." + (Silian_form.scope === "custom" ? "custom" : "all"), {
+                            count: Silian_selectedRecipientIds.length + Silian_customTargetIds.length,
                           })}
                         </p>
                       </div>
@@ -1522,21 +1522,21 @@ export function BroadcastCenter() {
                       <div className="rounded-lg border border-border bg-muted/40 p-4">
                         <div className="mb-2 flex items-center justify-between gap-2">
                           <h5 className="text-sm font-semibold text-foreground">
-                            {t("admin.broadcast.livePreview.web")}
+                            {Silian_t("admin.broadcast.livePreview.web")}
                           </h5>
-                          <Badge variant="outline">
-                            {selectedContentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
-                              ? t("admin.broadcast.format.html")
-                              : t("admin.broadcast.format.text")}
-                          </Badge>
+                          <Silian_Badge variant="outline">
+                            {Silian_selectedContentFormat === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                              ? Silian_t("admin.broadcast.format.html")
+                              : Silian_t("admin.broadcast.format.text")}
+                          </Silian_Badge>
                         </div>
                         <div className="rounded-md border bg-background p-4">
                           <h3 className="text-base font-semibold text-foreground">
-                            {livePreview.title}
+                            {Silian_livePreview.title}
                           </h3>
-                          <AnnouncementContent
-                            content={livePreview.content}
-                            contentFormat={livePreview.contentFormat}
+                          <Silian_AnnouncementContent
+                            content={Silian_livePreview.content}
+                            contentFormat={Silian_livePreview.contentFormat}
                             className="mt-3"
                           />
                         </div>
@@ -1545,17 +1545,17 @@ export function BroadcastCenter() {
                       <div className="rounded-lg border border-border bg-muted/40 p-4">
                         <div className="mb-2 flex items-center justify-between gap-2">
                           <h5 className="text-sm font-semibold text-foreground">
-                            {t("admin.broadcast.livePreview.email")}
+                            {Silian_t("admin.broadcast.livePreview.email")}
                           </h5>
-                          <Badge variant="secondary">
-                            {t(`messages.priority.${livePreview.priority}`)}
-                          </Badge>
+                          <Silian_Badge variant="secondary">
+                            {Silian_t(`messages.priority.${Silian_livePreview.priority}`)}
+                          </Silian_Badge>
                         </div>
-                        <AnnouncementEmailPreview
-                          title={livePreview.title}
-                          content={livePreview.content}
-                          contentFormat={livePreview.contentFormat}
-                          priority={livePreview.priority}
+                        <Silian_AnnouncementEmailPreview
+                          title={Silian_livePreview.title}
+                          content={Silian_livePreview.content}
+                          contentFormat={Silian_livePreview.contentFormat}
+                          priority={Silian_livePreview.priority}
                         />
                       </div>
                     </div>
@@ -1563,126 +1563,126 @@ export function BroadcastCenter() {
                 </div>
               </div>
 
-              {selectedContentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML && (
-                <AnnouncementPromptHelper
-                  title={form.title}
-                  content={form.content}
-                  priority={form.priority}
-                  contentFormat={selectedContentFormat}
-                  action={announcementAiAction}
-                  instruction={announcementAiInstruction}
-                  onActionChange={setAnnouncementAiAction}
-                  onInstructionChange={setAnnouncementAiInstruction}
-                  t={t}
+              {Silian_selectedContentFormat === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML && (
+                <Silian_AnnouncementPromptHelper
+                  title={Silian_form.title}
+                  content={Silian_form.content}
+                  priority={Silian_form.priority}
+                  contentFormat={Silian_selectedContentFormat}
+                  action={Silian_announcementAiAction}
+                  instruction={Silian_announcementAiInstruction}
+                  onActionChange={Silian_setAnnouncementAiAction}
+                  onInstructionChange={Silian_setAnnouncementAiInstruction}
+                  t={Silian_t}
                 />
               )}
 
               <div className="border-t pt-6 space-y-4">
                 <div>
                   <h3 className="text-base font-semibold text-foreground">
-                    {t("admin.broadcast.sections.targeting")}
+                    {Silian_t("admin.broadcast.sections.targeting")}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {t("admin.broadcast.sections.targetingDescription")}
+                    {Silian_t("admin.broadcast.sections.targetingDescription")}
                   </p>
                 </div>
 
                 <div>
               <label className="mb-2 block text-sm font-medium text-foreground">
-                {t("admin.broadcast.form.scope")}
+                {Silian_t("admin.broadcast.form.scope")}
               </label>
               <select
-                value={form.scope}
-                onChange={(event) => setField("scope", event.target.value)}
+                value={Silian_form.scope}
+                onChange={(Silian_event) => Silian_setField("scope", Silian_event.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
               >
-                <option value="all">{t("admin.broadcast.scope.all")}</option>
+                <option value="all">{Silian_t("admin.broadcast.scope.all")}</option>
                 <option value="custom">
-                  {t("admin.broadcast.scope.custom")}
+                  {Silian_t("admin.broadcast.scope.custom")}
                 </option>
               </select>
             </div>
 
-            {form.scope === "custom" && (
+            {Silian_form.scope === "custom" && (
               <div className="space-y-4 rounded-lg border border-border border-dashed bg-muted/40 p-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-foreground">
-                      {t("admin.broadcast.form.targetUsers")}
+                      {Silian_t("admin.broadcast.form.targetUsers")}
                     </label>
-                    <Input
-                      placeholder={t(
+                    <Silian_Input
+                      placeholder={Silian_t(
                         "admin.broadcast.form.targetUsersPlaceholder",
                       )}
-                      value={form.target_users_text}
-                      onChange={(event) =>
-                        setField("target_users_text", event.target.value)
+                      value={Silian_form.target_users_text}
+                      onChange={(Silian_event) =>
+                        Silian_setField("target_users_text", Silian_event.target.value)
                       }
-                      error={Boolean(errors.target_users_text)}
+                      error={Boolean(Silian_errors.target_users_text)}
                     />
-                    {errors.target_users_text ? (
+                    {Silian_errors.target_users_text ? (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.target_users_text}
+                        {Silian_errors.target_users_text}
                       </p>
                     ) : (
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {customTargetIds.length > 0
-                          ? t("admin.broadcast.helper.customCount", {
-                              count: customTargetIds.length,
+                        {Silian_customTargetIds.length > 0
+                          ? Silian_t("admin.broadcast.helper.customCount", {
+                              count: Silian_customTargetIds.length,
                             })
-                          : t("admin.broadcast.helper.customEmpty")}
+                          : Silian_t("admin.broadcast.helper.customEmpty")}
                       </p>
                     )}
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-medium text-foreground">
-                        {t("admin.broadcast.recipients.selected")}
+                        {Silian_t("admin.broadcast.recipients.selected")}
                       </h4>
-                      {selectedRecipientIds.length > 0 && (
-                        <Button
+                      {Silian_selectedRecipientIds.length > 0 && (
+                        <Silian_Button
                           variant="ghost"
                           size="sm"
-                          onClick={clearSelectedRecipients}
+                          onClick={Silian_clearSelectedRecipients}
                         >
-                          {t("common.clear")}
-                        </Button>
+                          {Silian_t("common.clear")}
+                        </Silian_Button>
                       )}
                     </div>
-                    {selectedRecipientIds.length === 0 ? (
+                    {Silian_selectedRecipientIds.length === 0 ? (
                       <p className="text-sm text-muted-foreground">
-                        {t("admin.broadcast.recipients.none")}
+                        {Silian_t("admin.broadcast.recipients.none")}
                       </p>
                     ) : (
                       <div className="flex flex-wrap gap-2">
-                        {selectedRecipientList.map((entry) => {
-                          const label =
-                            entry.username || entry.email || `#${entry.id}`;
+                        {Silian_selectedRecipientList.map((Silian_entry) => {
+                          const Silian_label =
+                            Silian_entry.username || Silian_entry.email || `#${Silian_entry.id}`;
                           return (
-                            <Badge
-                              key={entry.id}
+                            <Silian_Badge
+                              key={Silian_entry.id}
                               variant="secondary"
                               className="flex items-center gap-2"
                             >
-                              <span>{label}</span>
+                              <span>{Silian_label}</span>
                               <button
                                 type="button"
                                 onClick={() =>
-                                  removeSelectedRecipient(entry.id)
+                                  Silian_removeSelectedRecipient(Silian_entry.id)
                                 }
                                 className="text-xs text-muted-foreground hover:text-red-600"
-                                aria-label={t("common.remove")}
+                                aria-label={Silian_t("common.remove")}
                               >
                                 ×
                               </button>
-                            </Badge>
+                            </Silian_Badge>
                           );
                         })}
                       </div>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      {t("admin.broadcast.recipients.selectedCount", {
-                        count: selectedRecipientIds.length,
+                      {Silian_t("admin.broadcast.recipients.selectedCount", {
+                        count: Silian_selectedRecipientIds.length,
                       })}
                     </p>
                   </div>
@@ -1691,40 +1691,40 @@ export function BroadcastCenter() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-medium text-foreground">
-                      {t("admin.broadcast.recipientFilters.title")}
+                      {Silian_t("admin.broadcast.recipientFilters.title")}
                     </h4>
-                    {appliedFilters.length > 0 && (
-                      <Button
+                    {Silian_appliedFilters.length > 0 && (
+                      <Silian_Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setAppliedFilters([])}
+                        onClick={() => Silian_setAppliedFilters([])}
                       >
-                        {t("common.clear")}
-                      </Button>
+                        {Silian_t("common.clear")}
+                      </Silian_Button>
                     )}
                   </div>
-                  {appliedFilters.length === 0 ? (
+                  {Silian_appliedFilters.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
-                      {t("admin.broadcast.recipientFilters.none")}
+                      {Silian_t("admin.broadcast.recipientFilters.none")}
                     </p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {appliedFilters.map((filter, index) => (
-                        <Badge
-                          key={index}
+                      {Silian_appliedFilters.map((Silian_filter, Silian_index) => (
+                        <Silian_Badge
+                          key={Silian_index}
                           variant="outline"
                           className="flex items-center gap-2"
                         >
-                          <span>{describeFilter(filter)}</span>
+                          <span>{Silian_describeFilter(Silian_filter)}</span>
                           <button
                             type="button"
-                            onClick={() => removeFilterGroup(index)}
+                            onClick={() => Silian_removeFilterGroup(Silian_index)}
                             className="text-xs text-muted-foreground hover:text-red-600"
-                            aria-label={t("common.remove")}
+                            aria-label={Silian_t("common.remove")}
                           >
                             ×
                           </button>
-                        </Badge>
+                        </Silian_Badge>
                       ))}
                     </div>
                   )}
@@ -1734,132 +1734,132 @@ export function BroadcastCenter() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-medium text-foreground">
-                        {t("admin.broadcast.recipientSearch.title")}
+                        {Silian_t("admin.broadcast.recipientSearch.title")}
                       </h4>
                       <p className="text-xs text-muted-foreground">
-                        {t("admin.broadcast.recipientSearch.description")}
+                        {Silian_t("admin.broadcast.recipientSearch.description")}
                       </p>
                     </div>
-                    <Button
+                    <Silian_Button
                       variant="outline"
                       size="sm"
-                      onClick={addFilterGroup}
-                      disabled={!hasRecipientCriteria}
+                      onClick={Silian_addFilterGroup}
+                      disabled={!Silian_hasRecipientCriteria}
                       title={
-                        !hasRecipientCriteria
-                          ? t("admin.broadcast.recipientFilters.hint")
+                        !Silian_hasRecipientCriteria
+                          ? Silian_t("admin.broadcast.recipientFilters.hint")
                           : undefined
                       }
                     >
-                      {t("admin.broadcast.recipientFilters.add")}
-                    </Button>
+                      {Silian_t("admin.broadcast.recipientFilters.add")}
+                    </Silian_Button>
                   </div>
 
-                  {!hasRecipientCriteria && (
+                  {!Silian_hasRecipientCriteria && (
                     <p className="text-xs text-muted-foreground">
-                      {t("admin.broadcast.recipientFilters.hint")}
+                      {Silian_t("admin.broadcast.recipientFilters.hint")}
                     </p>
                   )}
 
                   <div className="grid gap-3 md:grid-cols-4">
-                    <Input
-                      value={recipientForm.search}
-                      onChange={(event) =>
-                        setRecipientField("search", event.target.value)
+                    <Silian_Input
+                      value={Silian_recipientForm.search}
+                      onChange={(Silian_event) =>
+                        Silian_setRecipientField("search", Silian_event.target.value)
                       }
-                      placeholder={t(
+                      placeholder={Silian_t(
                         "admin.broadcast.recipientSearch.searchPlaceholder",
                       )}
                     />
                     <select
-                      value={recipientForm.fields}
-                      onChange={(event) =>
-                        setRecipientField("fields", event.target.value)
+                      value={Silian_recipientForm.fields}
+                      onChange={(Silian_event) =>
+                        Silian_setRecipientField("fields", Silian_event.target.value)
                       }
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                     >
                       <option value="username,email,school,location">
-                        {t("admin.broadcast.recipientSearch.fields.all")}
+                        {Silian_t("admin.broadcast.recipientSearch.fields.all")}
                       </option>
                       <option value="email">
-                        {t("admin.broadcast.recipientSearch.fields.email")}
+                        {Silian_t("admin.broadcast.recipientSearch.fields.email")}
                       </option>
                       <option value="school,school_name">
-                        {t("admin.broadcast.recipientSearch.fields.school")}
+                        {Silian_t("admin.broadcast.recipientSearch.fields.school")}
                       </option>
                       <option value="location">
-                        {t("admin.broadcast.recipientSearch.fields.location")}
+                        {Silian_t("admin.broadcast.recipientSearch.fields.location")}
                       </option>
                       <option value="username">
-                        {t("admin.broadcast.recipientSearch.fields.username")}
+                        {Silian_t("admin.broadcast.recipientSearch.fields.username")}
                       </option>
                     </select>
-                    <Input
-                      value={recipientForm.school}
-                      onChange={(event) =>
-                        setRecipientField("school", event.target.value)
+                    <Silian_Input
+                      value={Silian_recipientForm.school}
+                      onChange={(Silian_event) =>
+                        Silian_setRecipientField("school", Silian_event.target.value)
                       }
-                      placeholder={t(
+                      placeholder={Silian_t(
                         "admin.broadcast.recipientSearch.schoolPlaceholder",
                       )}
                     />
-                    <Input
-                      value={recipientForm.emailSuffix}
-                      onChange={(event) =>
-                        setRecipientField("emailSuffix", event.target.value)
+                    <Silian_Input
+                      value={Silian_recipientForm.emailSuffix}
+                      onChange={(Silian_event) =>
+                        Silian_setRecipientField("emailSuffix", Silian_event.target.value)
                       }
-                      placeholder={t(
+                      placeholder={Silian_t(
                         "admin.broadcast.recipientSearch.emailPlaceholder",
                       )}
                     />
                     <select
-                      value={recipientForm.status}
-                      onChange={(event) =>
-                        setRecipientField("status", event.target.value)
+                      value={Silian_recipientForm.status}
+                      onChange={(Silian_event) =>
+                        Silian_setRecipientField("status", Silian_event.target.value)
                       }
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                     >
                       <option value="any">
-                        {t("admin.broadcast.recipientSearch.status.any")}
+                        {Silian_t("admin.broadcast.recipientSearch.status.any")}
                       </option>
                       <option value="active">
-                        {t("admin.broadcast.recipientSearch.status.active")}
+                        {Silian_t("admin.broadcast.recipientSearch.status.active")}
                       </option>
                       <option value="inactive">
-                        {t("admin.broadcast.recipientSearch.status.inactive")}
+                        {Silian_t("admin.broadcast.recipientSearch.status.inactive")}
                       </option>
                     </select>
                     <select
-                      value={recipientForm.isAdmin}
-                      onChange={(event) =>
-                        setRecipientField("isAdmin", event.target.value)
+                      value={Silian_recipientForm.isAdmin}
+                      onChange={(Silian_event) =>
+                        Silian_setRecipientField("isAdmin", Silian_event.target.value)
                       }
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                     >
                       <option value="any">
-                        {t("admin.broadcast.recipientSearch.role.any")}
+                        {Silian_t("admin.broadcast.recipientSearch.role.any")}
                       </option>
                       <option value="1">
-                        {t("admin.broadcast.recipientSearch.role.admin")}
+                        {Silian_t("admin.broadcast.recipientSearch.role.admin")}
                       </option>
                       <option value="0">
-                        {t("admin.broadcast.recipientSearch.role.user")}
+                        {Silian_t("admin.broadcast.recipientSearch.role.user")}
                       </option>
                     </select>
                     <select
-                      value={recipientForm.limit}
-                      onChange={(event) =>
-                        setRecipientField(
+                      value={Silian_recipientForm.limit}
+                      onChange={(Silian_event) =>
+                        Silian_setRecipientField(
                           "limit",
-                          Number(event.target.value) || 25,
+                          Number(Silian_event.target.value) || 25,
                         )
                       }
                       className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-transparent"
                     >
-                      {[10, 25, 50, 100].map((value) => (
-                        <option key={value} value={value}>
-                          {t("admin.broadcast.recipientSearch.limit", {
-                            count: value,
+                      {[10, 25, 50, 100].map((Silian_value) => (
+                        <option key={Silian_value} value={Silian_value}>
+                          {Silian_t("admin.broadcast.recipientSearch.limit", {
+                            count: Silian_value,
                           })}
                         </option>
                       ))}
@@ -1867,228 +1867,228 @@ export function BroadcastCenter() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <Button
+                    <Silian_Button
                       type="button"
-                      onClick={handleRecipientSearch}
-                      disabled={recipientLoading}
+                      onClick={Silian_handleRecipientSearch}
+                      disabled={Silian_recipientLoading}
                     >
-                      {recipientLoading
-                        ? t("common.loading")
-                        : t("common.search")}
-                    </Button>
-                    <Button
+                      {Silian_recipientLoading
+                        ? Silian_t("common.loading")
+                        : Silian_t("common.search")}
+                    </Silian_Button>
+                    <Silian_Button
                       type="button"
                       variant="outline"
-                      onClick={addAllRecipientsFromResults}
+                      onClick={Silian_addAllRecipientsFromResults}
                       disabled={
-                        recipientLoading || recipientResults.items.length === 0
+                        Silian_recipientLoading || Silian_recipientResults.items.length === 0
                       }
                     >
-                      {t("admin.broadcast.recipientSearch.addAll")}
-                    </Button>
-                    <Button
+                      {Silian_t("admin.broadcast.recipientSearch.addAll")}
+                    </Silian_Button>
+                    <Silian_Button
                       type="button"
                       variant="ghost"
-                      onClick={clearRecipientSearch}
-                      disabled={recipientLoading}
+                      onClick={Silian_clearRecipientSearch}
+                      disabled={Silian_recipientLoading}
                     >
-                      {t("common.reset")}
-                    </Button>
+                      {Silian_t("common.reset")}
+                    </Silian_Button>
                   </div>
 
-                  {recipientError && (
-                    <Alert variant="destructive">
-                      <AlertTitle>
-                        {t("admin.broadcast.recipientSearch.error")}
-                      </AlertTitle>
-                      <AlertDescription>
-                        {recipientError.message ?? t("common.retry")}
-                      </AlertDescription>
-                    </Alert>
+                  {Silian_recipientError && (
+                    <Silian_Alert variant="destructive">
+                      <Silian_AlertTitle>
+                        {Silian_t("admin.broadcast.recipientSearch.error")}
+                      </Silian_AlertTitle>
+                      <Silian_AlertDescription>
+                        {Silian_recipientError.message ?? Silian_t("common.retry")}
+                      </Silian_AlertDescription>
+                    </Silian_Alert>
                   )}
 
                   <div className="space-y-3">
-                    {recipientLoading && (
+                    {Silian_recipientLoading && (
                       <p className="text-sm text-muted-foreground">
-                        {t("common.loading")}
+                        {Silian_t("common.loading")}
                       </p>
                     )}
-                    {!recipientLoading &&
-                    recipientResults.items.length === 0 ? (
+                    {!Silian_recipientLoading &&
+                    Silian_recipientResults.items.length === 0 ? (
                       <p className="text-sm text-muted-foreground">
-                        {t("admin.broadcast.recipientSearch.noResults")}
+                        {Silian_t("admin.broadcast.recipientSearch.noResults")}
                       </p>
                     ) : (
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground">
-                          {t("admin.broadcast.recipientSearch.resultCount", {
-                            count: recipientResults.items.length,
+                          {Silian_t("admin.broadcast.recipientSearch.resultCount", {
+                            count: Silian_recipientResults.items.length,
                           })}
                         </p>
-                        {recipientResults.items.map((item) => {
-                          const id = Number(item?.id ?? 0);
-                          const checked = selectedRecipients.has(id);
-                          const label = item.username || item.email || `#${id}`;
-                          const statusValue =
-                            typeof item?.status === "string"
-                              ? item.status.toLowerCase()
+                        {Silian_recipientResults.items.map((Silian_item) => {
+                          const Silian_id = Number(Silian_item?.id ?? 0);
+                          const Silian_checked = Silian_selectedRecipients.has(Silian_id);
+                          const Silian_label = Silian_item.username || Silian_item.email || `#${Silian_id}`;
+                          const Silian_statusValue =
+                            typeof Silian_item?.status === "string"
+                              ? Silian_item.status.toLowerCase()
                               : "";
-                          const statusLabel =
-                            statusValue === "active"
-                              ? t("admin.users.statusActive")
-                              : statusValue === "inactive"
-                                ? t("admin.users.statusInactive")
-                                : statusValue === "suspended"
-                                  ? t("admin.users.statusSuspended")
+                          const Silian_statusLabel =
+                            Silian_statusValue === "active"
+                              ? Silian_t("admin.users.statusActive")
+                              : Silian_statusValue === "inactive"
+                                ? Silian_t("admin.users.statusInactive")
+                                : Silian_statusValue === "suspended"
+                                  ? Silian_t("admin.users.statusSuspended")
                                   : "";
-                          const rawAdmin = item?.is_admin;
-                          const hasAdminFlag =
-                            rawAdmin !== undefined &&
-                            rawAdmin !== null &&
-                            `${rawAdmin}` !== "";
-                          const isAdmin =
-                            rawAdmin === true ||
-                            rawAdmin === 1 ||
-                            rawAdmin === "1" ||
-                            rawAdmin === "true";
+                          const Silian_rawAdmin = Silian_item?.is_admin;
+                          const Silian_hasAdminFlag =
+                            Silian_rawAdmin !== undefined &&
+                            Silian_rawAdmin !== null &&
+                            `${Silian_rawAdmin}` !== "";
+                          const Silian_isAdmin =
+                            Silian_rawAdmin === true ||
+                            Silian_rawAdmin === 1 ||
+                            Silian_rawAdmin === "1" ||
+                            Silian_rawAdmin === "true";
                           return (
                             <label
-                              key={id}
+                              key={Silian_id}
                               className="flex items-start gap-3 rounded-md border border-border bg-card p-3 shadow-sm"
                             >
-                              <Checkbox
-                                checked={checked}
+                              <Silian_Checkbox
+                                checked={Silian_checked}
                                 onCheckedChange={() =>
-                                  toggleRecipientSelection(item)
+                                  Silian_toggleRecipientSelection(Silian_item)
                                 }
                               />
                               <div className="flex-1 space-y-1">
                                 <div className="flex flex-wrap items-center justify-between gap-2">
-                                  <HoverCard>
-                                    <HoverCardTrigger asChild>
+                                  <Silian_HoverCard>
+                                    <Silian_HoverCardTrigger asChild>
                                       <span className="cursor-help text-sm font-medium text-foreground transition-colors hover:text-green-600">
-                                        {label}
+                                        {Silian_label}
                                       </span>
-                                    </HoverCardTrigger>
-                                    <HoverCardContent className="w-72">
+                                    </Silian_HoverCardTrigger>
+                                    <Silian_HoverCardContent className="w-72">
                                       <div className="space-y-2">
                                         <p className="text-sm font-semibold text-foreground">
-                                          {label}
+                                          {Silian_label}
                                         </p>
                                         <div className="space-y-1 text-xs text-muted-foreground">
                                           <div>
                                             <span className="font-medium text-foreground/80">
-                                              {t(
+                                              {Silian_t(
                                                 "admin.broadcast.recipientSearch.hover.userId",
                                               )}
                                               :
                                             </span>{" "}
-                                            #{id}
+                                            #{Silian_id}
                                           </div>
-                                          {item.uuid && (
+                                          {Silian_item.uuid && (
                                             <div>
                                               <span className="font-medium text-foreground/80">
                                                 UUID:
                                               </span>{" "}
-                                              {item.uuid}
+                                              {Silian_item.uuid}
                                             </div>
                                           )}
-                                          {item.email && (
+                                          {Silian_item.email && (
                                             <div>
                                               <span className="font-medium text-foreground/80">
-                                                {t("common.email")}:
+                                                {Silian_t("common.email")}:
                                               </span>{" "}
-                                              {item.email}
+                                              {Silian_item.email}
                                             </div>
                                           )}
-                                          {item.school && (
+                                          {Silian_item.school && (
                                             <div>
                                               <span className="font-medium text-foreground/80">
-                                                {t(
+                                                {Silian_t(
                                                   "admin.broadcast.recipientSearch.hover.school",
                                                 )}
                                                 :
                                               </span>{" "}
-                                              {item.school}
+                                              {Silian_item.school}
                                             </div>
                                           )}
-                                          {item.location && (
+                                          {Silian_item.location && (
                                             <div>
                                               <span className="font-medium text-foreground/80">
-                                                {t(
+                                                {Silian_t(
                                                   "admin.broadcast.recipientSearch.hover.location",
                                                 )}
                                                 :
                                               </span>{" "}
-                                              {item.location}
+                                              {Silian_item.location}
                                             </div>
                                           )}
-                                          {(statusLabel || hasAdminFlag) && (
+                                          {(Silian_statusLabel || Silian_hasAdminFlag) && (
                                             <div className="flex flex-wrap items-center gap-2">
-                                              {statusLabel && (
+                                              {Silian_statusLabel && (
                                                 <span
-                                                  className={cn(
+                                                  className={Silian_cn(
                                                     "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                                                    statusValue === "active"
+                                                    Silian_statusValue === "active"
                                                       ? "bg-green-100 text-green-800"
                                                       : "bg-amber-100 text-amber-800",
                                                   )}
                                                 >
-                                                  {statusLabel}
+                                                  {Silian_statusLabel}
                                                 </span>
                                               )}
-                                              {hasAdminFlag && (
+                                              {Silian_hasAdminFlag && (
                                                 <span className="inline-flex items-center rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                                                  {isAdmin
-                                                    ? t("admin.users.roleAdmin")
-                                                    : t("admin.users.roleUser")}
+                                                  {Silian_isAdmin
+                                                    ? Silian_t("admin.users.roleAdmin")
+                                                    : Silian_t("admin.users.roleUser")}
                                                 </span>
                                               )}
                                             </div>
                                           )}
                                         </div>
                                       </div>
-                                    </HoverCardContent>
-                                  </HoverCard>
-                                  <Button
+                                    </Silian_HoverCardContent>
+                                  </Silian_HoverCard>
+                                  <Silian_Button
                                     type="button"
                                     size="sm"
                                     variant="outline"
-                                    onClick={(event) =>
-                                      handleViewUserProfile(event, item)
+                                    onClick={(Silian_event) =>
+                                      Silian_handleViewUserProfile(Silian_event, Silian_item)
                                     }
                                   >
-                                    {t(
+                                    {Silian_t(
                                       "admin.broadcast.recipientSearch.viewProfile",
                                     )}
-                                  </Button>
+                                  </Silian_Button>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                  {item.email
-                                    ? item.email
-                                    : t(
+                                  {Silian_item.email
+                                    ? Silian_item.email
+                                    : Silian_t(
                                         "admin.broadcast.recipientSearch.noEmail",
                                       )}
-                                  {item.school ? ` • ${item.school}` : ""}
+                                  {Silian_item.school ? ` • ${Silian_item.school}` : ""}
                                 </p>
                                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                  <span>#{id}</span>
-                                  {statusLabel && (
+                                  <span>#{Silian_id}</span>
+                                  {Silian_statusLabel && (
                                     <span
                                       className={
-                                        statusValue === "active"
+                                        Silian_statusValue === "active"
                                           ? "font-medium text-green-600"
                                           : "font-medium text-amber-700"
                                       }
                                     >
-                                      {statusLabel}
+                                      {Silian_statusLabel}
                                     </span>
                                   )}
-                                  {hasAdminFlag && (
+                                  {Silian_hasAdminFlag && (
                                     <span className="font-medium text-foreground/80">
-                                      {isAdmin
-                                        ? t("admin.users.roleAdmin")
-                                        : t("admin.users.roleUser")}
+                                      {Silian_isAdmin
+                                        ? Silian_t("admin.users.roleAdmin")
+                                        : Silian_t("admin.users.roleUser")}
                                     </span>
                                   )}
                                 </div>
@@ -2099,35 +2099,35 @@ export function BroadcastCenter() {
 
                         <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
                           <p className="text-xs text-muted-foreground">
-                            {t("admin.broadcast.recipientSearch.pageInfo", {
-                              page: recipientResults.pagination.page,
+                            {Silian_t("admin.broadcast.recipientSearch.pageInfo", {
+                              page: Silian_recipientResults.pagination.page,
                             })}
                           </p>
                           <div className="flex gap-2">
-                            <Button
+                            <Silian_Button
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => handleRecipientPageChange("prev")}
+                              onClick={() => Silian_handleRecipientPageChange("prev")}
                               disabled={
-                                recipientLoading ||
-                                recipientResults.pagination.page === 1
+                                Silian_recipientLoading ||
+                                Silian_recipientResults.pagination.page === 1
                               }
                             >
-                              {t("common.previous")}
-                            </Button>
-                            <Button
+                              {Silian_t("common.previous")}
+                            </Silian_Button>
+                            <Silian_Button
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => handleRecipientPageChange("next")}
+                              onClick={() => Silian_handleRecipientPageChange("next")}
                               disabled={
-                                recipientLoading ||
-                                !recipientResults.pagination.has_more
+                                Silian_recipientLoading ||
+                                !Silian_recipientResults.pagination.has_more
                               }
                             >
-                              {t("common.next")}
-                            </Button>
+                              {Silian_t("common.next")}
+                            </Silian_Button>
                           </div>
                         </div>
                       </div>
@@ -2138,290 +2138,290 @@ export function BroadcastCenter() {
             )}
 
                 <div className="flex justify-end gap-2">
-              <Button
+              <Silian_Button
                 type="button"
                 variant="outline"
-                onClick={handlePreview}
-                disabled={isSubmitting}
+                onClick={Silian_handlePreview}
+                disabled={Silian_isSubmitting}
               >
-                {t("admin.broadcast.preview")}
-              </Button>
-              <Button
+                {Silian_t("admin.broadcast.preview")}
+              </Silian_Button>
+              <Silian_Button
                 type="button"
-                onClick={handleSend}
-                disabled={isSubmitting}
+                onClick={Silian_handleSend}
+                disabled={Silian_isSubmitting}
               >
-                {isSubmitting ? t("common.sending") : t("admin.broadcast.send")}
-              </Button>
+                {Silian_isSubmitting ? Silian_t("common.sending") : Silian_t("admin.broadcast.send")}
+              </Silian_Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </Silian_CardContent>
+          </Silian_Card>
 
-          {preview && (
-            <Card>
-              <CardHeader className="pb-3">
+          {Silian_preview && (
+            <Silian_Card>
+              <Silian_CardHeader className="pb-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <CardTitle className="text-lg">
-                  {t("admin.broadcast.previewPanel")}
-                </CardTitle>
+                <Silian_CardTitle className="text-lg">
+                  {Silian_t("admin.broadcast.previewPanel")}
+                </Silian_CardTitle>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary">
-                    {t(`messages.priority.${preview.priority}`)}
-                  </Badge>
-                  <Badge variant="outline">
-                    {preview.contentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
-                      ? t("admin.broadcast.format.html")
-                      : t("admin.broadcast.format.text")}
-                  </Badge>
+                  <Silian_Badge variant="secondary">
+                    {Silian_t(`messages.priority.${Silian_preview.priority}`)}
+                  </Silian_Badge>
+                  <Silian_Badge variant="outline">
+                    {Silian_preview.contentFormat === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                      ? Silian_t("admin.broadcast.format.html")
+                      : Silian_t("admin.broadcast.format.text")}
+                  </Silian_Badge>
                 </div>
               </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
+              </Silian_CardHeader>
+              <Silian_CardContent className="space-y-2">
                 <div className="text-sm text-muted-foreground">
-                  {preview.scope === "custom"
-                    ? t("admin.broadcast.previewTargets.custom", {
-                        count: preview.targetCount ?? 0,
+                  {Silian_preview.scope === "custom"
+                    ? Silian_t("admin.broadcast.previewTargets.custom", {
+                        count: Silian_preview.targetCount ?? 0,
                       })
-                    : t("admin.broadcast.previewTargets.all")}
+                    : Silian_t("admin.broadcast.previewTargets.all")}
                 </div>
                 <div className="space-y-4">
                   <div>
                     <div className="mb-2 text-sm text-muted-foreground">
-                      {t("admin.broadcast.livePreview.web")}
+                      {Silian_t("admin.broadcast.livePreview.web")}
                     </div>
                     <div className="rounded-md border border-border bg-muted/40 p-4">
                       <div className="font-medium text-foreground">
-                        {preview.title}
+                        {Silian_preview.title}
                       </div>
-                      <AnnouncementContent
-                        content={preview.content}
-                        contentFormat={preview.contentFormat}
+                      <Silian_AnnouncementContent
+                        content={Silian_preview.content}
+                        contentFormat={Silian_preview.contentFormat}
                         className="mt-2"
                       />
                     </div>
                   </div>
                   <div>
                     <div className="mb-2 text-sm text-muted-foreground">
-                      {t("admin.broadcast.livePreview.email")}
+                      {Silian_t("admin.broadcast.livePreview.email")}
                     </div>
-                    <AnnouncementEmailPreview
-                      title={preview.title}
-                      content={preview.content}
-                      contentFormat={preview.contentFormat}
-                      priority={preview.priority}
+                    <Silian_AnnouncementEmailPreview
+                      title={Silian_preview.title}
+                      content={Silian_preview.content}
+                      contentFormat={Silian_preview.contentFormat}
+                      priority={Silian_preview.priority}
                     />
                   </div>
                 </div>
-              <Alert className="mt-4" variant="info">
-                <AlertTitle>{t("admin.broadcast.noticeTitle")}</AlertTitle>
-                <AlertDescription>
-                  {preview.contentFormat === ANNOUNCEMENT_CONTENT_FORMAT_HTML
-                    ? t("admin.broadcast.noticeHtmlDesc")
-                    : t("admin.broadcast.noticeDesc")}
-                </AlertDescription>
-              </Alert>
-              </CardContent>
-            </Card>
+              <Silian_Alert className="mt-4" variant="info">
+                <Silian_AlertTitle>{Silian_t("admin.broadcast.noticeTitle")}</Silian_AlertTitle>
+                <Silian_AlertDescription>
+                  {Silian_preview.contentFormat === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                    ? Silian_t("admin.broadcast.noticeHtmlDesc")
+                    : Silian_t("admin.broadcast.noticeDesc")}
+                </Silian_AlertDescription>
+              </Silian_Alert>
+              </Silian_CardContent>
+            </Silian_Card>
           )}
 
-          {result && (
-            <Card className="mb-6">
-              <CardHeader className="pb-3">
+          {Silian_result && (
+            <Silian_Card className="mb-6">
+              <Silian_CardHeader className="pb-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <CardTitle className="text-lg">
-                  {t("admin.broadcast.result.title")}
-                </CardTitle>
-                <Badge variant="outline">
-                  {t(`messages.priority.${result.priority}`)}
-                </Badge>
+                <Silian_CardTitle className="text-lg">
+                  {Silian_t("admin.broadcast.result.title")}
+                </Silian_CardTitle>
+                <Silian_Badge variant="outline">
+                  {Silian_t(`messages.priority.${Silian_result.priority}`)}
+                </Silian_Badge>
               </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              </Silian_CardHeader>
+              <Silian_CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-4">
-                <ResultStat
-                  label={t("admin.broadcast.result.sent")}
-                  value={result.sent}
+                <Silian_ResultStat
+                  label={Silian_t("admin.broadcast.result.sent")}
+                  value={Silian_result.sent}
                   tone="success"
                 />
-                <ResultStat
-                  label={t("admin.broadcast.result.targets")}
-                  value={result.total}
+                <Silian_ResultStat
+                  label={Silian_t("admin.broadcast.result.targets")}
+                  value={Silian_result.total}
                 />
-                <ResultStat
-                  label={t("admin.broadcast.result.failed")}
-                  value={failedCount || t("admin.broadcast.result.none")}
-                  tone={failedCount ? "danger" : "default"}
+                <Silian_ResultStat
+                  label={Silian_t("admin.broadcast.result.failed")}
+                  value={Silian_failedCount || Silian_t("admin.broadcast.result.none")}
+                  tone={Silian_failedCount ? "danger" : "default"}
                 />
-                <ResultStat
-                  label={t("admin.broadcast.result.invalid")}
-                  value={invalidCount || t("admin.broadcast.result.none")}
-                  tone={invalidCount ? "warning" : "default"}
+                <Silian_ResultStat
+                  label={Silian_t("admin.broadcast.result.invalid")}
+                  value={Silian_invalidCount || Silian_t("admin.broadcast.result.none")}
+                  tone={Silian_invalidCount ? "warning" : "default"}
                 />
               </div>
 
-              {failedCount > 0 && (
-                <Alert variant="destructive">
-                  <AlertTitle>{t("admin.broadcast.result.failed")}</AlertTitle>
-                  <AlertDescription>
-                    <p>{t("admin.broadcast.result.failedHint")}</p>
+              {Silian_failedCount > 0 && (
+                <Silian_Alert variant="destructive">
+                  <Silian_AlertTitle>{Silian_t("admin.broadcast.result.failed")}</Silian_AlertTitle>
+                  <Silian_AlertDescription>
+                    <p>{Silian_t("admin.broadcast.result.failedHint")}</p>
                     <span className="mt-2 block font-mono text-xs">
-                      {result.failed.join(", ")}
+                      {Silian_result.failed.join(", ")}
                     </span>
-                  </AlertDescription>
-                </Alert>
+                  </Silian_AlertDescription>
+                </Silian_Alert>
               )}
 
-              {invalidCount > 0 && (
-                <Alert variant="warning">
-                  <AlertTitle>{t("admin.broadcast.result.invalid")}</AlertTitle>
-                  <AlertDescription>
-                    <p>{t("admin.broadcast.result.invalidHint")}</p>
+              {Silian_invalidCount > 0 && (
+                <Silian_Alert variant="warning">
+                  <Silian_AlertTitle>{Silian_t("admin.broadcast.result.invalid")}</Silian_AlertTitle>
+                  <Silian_AlertDescription>
+                    <p>{Silian_t("admin.broadcast.result.invalidHint")}</p>
                     <span className="mt-2 block font-mono text-xs">
-                      {result.invalid.join(", ")}
+                      {Silian_result.invalid.join(", ")}
                     </span>
-                  </AlertDescription>
-                </Alert>
+                  </Silian_AlertDescription>
+                </Silian_Alert>
               )}
 
-              {emailResult && (
-                <Alert variant={emailResultVariant}>
-                  <AlertTitle>
-                    {t(`admin.broadcast.email.status.${emailResult.status}`)}
-                  </AlertTitle>
-                  <AlertDescription>
+              {Silian_emailResult && (
+                <Silian_Alert variant={Silian_emailResultVariant}>
+                  <Silian_AlertTitle>
+                    {Silian_t(`admin.broadcast.email.status.${Silian_emailResult.status}`)}
+                  </Silian_AlertTitle>
+                  <Silian_AlertDescription>
                     <p>
-                      {emailResult.status === "queued"
-                        ? t("admin.broadcast.email.queuedSummary", {
-                            count: emailResult.attempted,
+                      {Silian_emailResult.status === "queued"
+                        ? Silian_t("admin.broadcast.email.queuedSummary", {
+                            count: Silian_emailResult.attempted,
                           })
-                        : t("admin.broadcast.email.summary", {
-                            attempted: emailResult.attempted,
-                            success: emailResult.successfulChunks,
-                            failed: emailResult.failedChunks,
+                        : Silian_t("admin.broadcast.email.summary", {
+                            attempted: Silian_emailResult.attempted,
+                            success: Silian_emailResult.successfulChunks,
+                            failed: Silian_emailResult.failedChunks,
                           })}
                     </p>
-                    {emailResult.missing.length > 0 && (
+                    {Silian_emailResult.missing.length > 0 && (
                       <p className="mt-2 text-xs text-muted-foreground">
-                        {t("admin.broadcast.email.missing", {
-                          count: emailResult.missing.length,
+                        {Silian_t("admin.broadcast.email.missing", {
+                          count: Silian_emailResult.missing.length,
                         })}
                         <span className="ml-1 font-mono">
-                          {emailResult.missing.join(", ")}
+                          {Silian_emailResult.missing.join(", ")}
                         </span>
                       </p>
                     )}
-                    {emailResult.errors.length > 0 && (
+                    {Silian_emailResult.errors.length > 0 && (
                       <div className="mt-2">
                         <p className="text-xs font-medium text-muted-foreground">
-                          {t("admin.broadcast.email.errorsTitle")}
+                          {Silian_t("admin.broadcast.email.errorsTitle")}
                         </p>
                         <ul className="mt-1 space-y-1 text-xs font-mono">
-                          {emailResult.errors.map((error, index) => (
-                            <li key={`${error}-${index}`}>{error}</li>
+                          {Silian_emailResult.errors.map((Silian_error, Silian_index) => (
+                            <li key={`${Silian_error}-${Silian_index}`}>{Silian_error}</li>
                           ))}
                         </ul>
                       </div>
                     )}
-                  </AlertDescription>
-                </Alert>
+                  </Silian_AlertDescription>
+                </Silian_Alert>
               )}
-              </CardContent>
-            </Card>
+              </Silian_CardContent>
+            </Silian_Card>
           )}
-        </TabsContent>
-        <TabsContent value="history" className="mt-0 space-y-6">
+        </Silian_TabsContent>
+        <Silian_TabsContent value="history" className="mt-0 space-y-6">
           <div className="space-y-4 rounded-lg border border-border bg-card p-6 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-lg font-semibold">
-                  {t("admin.broadcast.pageTabs.history")}
+                  {Silian_t("admin.broadcast.pageTabs.history")}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {t("admin.broadcast.history.description")}
+                  {Silian_t("admin.broadcast.history.description")}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button
+                <Silian_Button
                   variant="outline"
                   size="sm"
-                  onClick={() => resetFilters()}
-                  disabled={isHistoryLoading || isHistoryFetching}
+                  onClick={() => Silian_resetFilters()}
+                  disabled={Silian_isHistoryLoading || Silian_isHistoryFetching}
                 >
-                  {t("common.reset")}
-                </Button>
-                <Button
+                  {Silian_t("common.reset")}
+                </Silian_Button>
+                <Silian_Button
                   variant="outline"
                   size="sm"
-                  onClick={() => refetchHistory()}
-                  disabled={isHistoryLoading}
+                  onClick={() => Silian_refetchHistory()}
+                  disabled={Silian_isHistoryLoading}
                 >
-                  {t("common.refresh")}
-                </Button>
-                <Button
+                  {Silian_t("common.refresh")}
+                </Silian_Button>
+                <Silian_Button
                   variant="outline"
                   size="sm"
-                  onClick={handleFlushBroadcasts}
-                  disabled={flushBroadcastMutation.isLoading}
+                  onClick={Silian_handleFlushBroadcasts}
+                  disabled={Silian_flushBroadcastMutation.isLoading}
                 >
-                  {flushBroadcastMutation.isLoading
-                    ? t("admin.broadcast.history.flushLoading")
-                    : t("admin.broadcast.history.flushButton")}
-                </Button>
-                <Button
+                  {Silian_flushBroadcastMutation.isLoading
+                    ? Silian_t("admin.broadcast.history.flushLoading")
+                    : Silian_t("admin.broadcast.history.flushButton")}
+                </Silian_Button>
+                <Silian_Button
                   size="sm"
-                  onClick={handleExport}
-                  disabled={exportDisabled || isHistoryLoading}
+                  onClick={Silian_handleExport}
+                  disabled={Silian_exportDisabled || Silian_isHistoryLoading}
                 >
-                  {t("admin.broadcast.export.label")}
-                </Button>
+                  {Silian_t("admin.broadcast.export.label")}
+                </Silian_Button>
               </div>
             </div>
 
-            {historyError && (
-              <Alert variant="destructive">
-                <AlertTitle>{t("admin.broadcast.sendFailed")}</AlertTitle>
-                <AlertDescription>
-                  {historyError.message ??
-                    t("admin.broadcast.history.loadFailed")}
-                </AlertDescription>
-              </Alert>
+            {Silian_historyError && (
+              <Silian_Alert variant="destructive">
+                <Silian_AlertTitle>{Silian_t("admin.broadcast.sendFailed")}</Silian_AlertTitle>
+                <Silian_AlertDescription>
+                  {Silian_historyError.message ??
+                    Silian_t("admin.broadcast.history.loadFailed")}
+                </Silian_AlertDescription>
+              </Silian_Alert>
             )}
 
             <div className="grid gap-4 md:grid-cols-5">
-              <ResultStat
-                label={t("admin.broadcast.summary.broadcasts")}
-                value={summary.broadcasts}
+              <Silian_ResultStat
+                label={Silian_t("admin.broadcast.summary.broadcasts")}
+                value={Silian_summary.broadcasts}
               />
-              <ResultStat
-                label={t("admin.broadcast.summary.targets")}
-                value={summary.targets}
+              <Silian_ResultStat
+                label={Silian_t("admin.broadcast.summary.targets")}
+                value={Silian_summary.targets}
               />
-              <ResultStat
-                label={t("admin.broadcast.summary.delivered")}
-                value={summary.sent}
+              <Silian_ResultStat
+                label={Silian_t("admin.broadcast.summary.delivered")}
+                value={Silian_summary.sent}
                 tone="success"
               />
-              <ResultStat
-                label={t("admin.broadcast.summary.read")}
-                value={summary.read}
+              <Silian_ResultStat
+                label={Silian_t("admin.broadcast.summary.read")}
+                value={Silian_summary.read}
               />
-              <ResultStat
-                label={t("admin.broadcast.summary.unread")}
-                value={summary.unread}
-                tone={summary.unread ? "warning" : "default"}
+              <Silian_ResultStat
+                label={Silian_t("admin.broadcast.summary.unread")}
+                value={Silian_summary.unread}
+                tone={Silian_summary.unread ? "warning" : "default"}
               />
             </div>
 
-            {isMessageStatsError && (
-              <Alert variant="destructive">
-                <AlertTitle>
-                  {t("admin.broadcast.analytics.loadFailedTitle")}
-                </AlertTitle>
-                <AlertDescription>
-                  {messageStatsError?.message ?? t("common.retry")}
-                </AlertDescription>
-              </Alert>
+            {Silian_isMessageStatsError && (
+              <Silian_Alert variant="destructive">
+                <Silian_AlertTitle>
+                  {Silian_t("admin.broadcast.analytics.loadFailedTitle")}
+                </Silian_AlertTitle>
+                <Silian_AlertDescription>
+                  {Silian_messageStatsError?.message ?? Silian_t("common.retry")}
+                </Silian_AlertDescription>
+              </Silian_Alert>
             )}
 
             <div className="space-y-4">
@@ -2429,82 +2429,82 @@ export function BroadcastCenter() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-semibold text-foreground">
-                      {t("admin.broadcast.analytics.trendTitle")}
+                      {Silian_t("admin.broadcast.analytics.trendTitle")}
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      {t("admin.broadcast.analytics.trendSubtitle")}
+                      {Silian_t("admin.broadcast.analytics.trendSubtitle")}
                     </p>
                   </div>
-                  <Button
+                  <Silian_Button
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => refetchMessageStats()}
-                    disabled={isMessageStatsFetching}
+                    onClick={() => Silian_refetchMessageStats()}
+                    disabled={Silian_isMessageStatsFetching}
                   >
-                    {isMessageStatsFetching
-                      ? t("admin.broadcast.analytics.refreshing")
-                      : t("common.refresh")}
-                  </Button>
+                    {Silian_isMessageStatsFetching
+                      ? Silian_t("admin.broadcast.analytics.refreshing")
+                      : Silian_t("common.refresh")}
+                  </Silian_Button>
                 </div>
                 <div className="mt-4 h-72">
-                  {messageStatsInitialLoading ? (
+                  {Silian_messageStatsInitialLoading ? (
                     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                      {t("common.loading")}
+                      {Silian_t("common.loading")}
                     </div>
-                  ) : messageTrendHasData ? (
-                    <ResponsiveContainer>
-                      <LineChart data={messageTrendData}>
-                        <CartesianGrid strokeDasharray="4 4" stroke="#e2e8f0" />
-                        <XAxis
+                  ) : Silian_messageTrendHasData ? (
+                    <Silian_ResponsiveContainer>
+                      <Silian_LineChart data={Silian_messageTrendData}>
+                        <Silian_CartesianGrid strokeDasharray="4 4" stroke="#e2e8f0" />
+                        <Silian_XAxis
                           dataKey="date"
-                          tickFormatter={(value) => {
-                            if (!value) return value;
-                            const date = new Date(`${value}T00:00:00`);
-                            return Number.isNaN(date.getTime())
-                              ? value
-                              : shortDateFormatter.format(date);
+                          tickFormatter={(Silian_value) => {
+                            if (!Silian_value) return Silian_value;
+                            const Silian_date = new Date(`${Silian_value}T00:00:00`);
+                            return Number.isNaN(Silian_date.getTime())
+                              ? Silian_value
+                              : Silian_shortDateFormatter.format(Silian_date);
                           }}
                           stroke="#475569"
                           fontSize={12}
                         />
-                        <YAxis
+                        <Silian_YAxis
                           allowDecimals={false}
                           stroke="#475569"
                           fontSize={12}
                         />
-                        <RechartsTooltip
-                          formatter={(value) => numberFormatter.format(value)}
-                          labelFormatter={(label) => {
-                            if (!label) return label;
-                            const date = new Date(`${label}T00:00:00`);
-                            return Number.isNaN(date.getTime())
-                              ? label
-                              : shortDateFormatter.format(date);
+                        <Silian_RechartsTooltip
+                          formatter={(Silian_value) => Silian_numberFormatter.format(Silian_value)}
+                          labelFormatter={(Silian_label) => {
+                            if (!Silian_label) return Silian_label;
+                            const Silian_date = new Date(`${Silian_label}T00:00:00`);
+                            return Number.isNaN(Silian_date.getTime())
+                              ? Silian_label
+                              : Silian_shortDateFormatter.format(Silian_date);
                           }}
                         />
-                        <Legend />
-                        <Line
+                        <Silian_Legend />
+                        <Silian_Line
                           type="monotone"
                           dataKey="total"
                           stroke="#2563eb"
                           strokeWidth={2}
                           dot={false}
-                          name={t("admin.broadcast.analytics.totalSeries")}
+                          name={Silian_t("admin.broadcast.analytics.totalSeries")}
                         />
-                        <Line
+                        <Silian_Line
                           type="monotone"
                           dataKey="unread"
                           stroke="#f97316"
                           strokeWidth={2}
                           dot={false}
-                          name={t("admin.broadcast.analytics.unreadSeries")}
+                          name={Silian_t("admin.broadcast.analytics.unreadSeries")}
                         />
-                      </LineChart>
-                    </ResponsiveContainer>
+                      </Silian_LineChart>
+                    </Silian_ResponsiveContainer>
                   ) : (
                     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                      {t("admin.broadcast.analytics.trendEmpty")}
+                      {Silian_t("admin.broadcast.analytics.trendEmpty")}
                     </div>
                   )}
                 </div>
@@ -2513,109 +2513,109 @@ export function BroadcastCenter() {
               <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="text-lg font-semibold text-foreground">
-                    {t("admin.broadcast.analytics.priorityTitle")}
+                    {Silian_t("admin.broadcast.analytics.priorityTitle")}
                   </h3>
                   <span className="text-xs text-muted-foreground">
-                    {t("admin.broadcast.analytics.prioritySubtitle")}
+                    {Silian_t("admin.broadcast.analytics.prioritySubtitle")}
                   </span>
                 </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                  <ResultStat
-                    label={t("admin.broadcast.analytics.totalMessages")}
-                    value={numberFormatter.format(messageOverview.total)}
+                  <Silian_ResultStat
+                    label={Silian_t("admin.broadcast.analytics.totalMessages")}
+                    value={Silian_numberFormatter.format(Silian_messageOverview.total)}
                   />
-                  <ResultStat
-                    label={t("admin.broadcast.analytics.readMessages")}
-                    value={numberFormatter.format(messageOverview.read)}
+                  <Silian_ResultStat
+                    label={Silian_t("admin.broadcast.analytics.readMessages")}
+                    value={Silian_numberFormatter.format(Silian_messageOverview.read)}
                     tone="success"
                   />
-                  <ResultStat
-                    label={t("admin.broadcast.analytics.unreadMessages")}
-                    value={numberFormatter.format(messageOverview.unread)}
-                    tone={messageOverview.unread ? "warning" : "default"}
+                  <Silian_ResultStat
+                    label={Silian_t("admin.broadcast.analytics.unreadMessages")}
+                    value={Silian_numberFormatter.format(Silian_messageOverview.unread)}
+                    tone={Silian_messageOverview.unread ? "warning" : "default"}
                   />
                 </div>
                 <p className="mt-3 text-xs text-muted-foreground">
-                  {t("admin.broadcast.analytics.unreadRatio")}{" "}
+                  {Silian_t("admin.broadcast.analytics.unreadRatio")}{" "}
                   <span className="font-semibold text-orange-500">
-                    {percentFormatter.format(messageOverview.unreadRatio || 0)}
+                    {Silian_percentFormatter.format(Silian_messageOverview.unreadRatio || 0)}
                   </span>
                 </p>
                 <div className="mt-4 h-64">
-                  {messageStatsInitialLoading ? (
+                  {Silian_messageStatsInitialLoading ? (
                     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                      {t("common.loading")}
+                      {Silian_t("common.loading")}
                     </div>
-                  ) : messagePriorityHasData ? (
-                    <ResponsiveContainer>
-                      <BarChart
-                        data={messagePriorityChartData}
+                  ) : Silian_messagePriorityHasData ? (
+                    <Silian_ResponsiveContainer>
+                      <Silian_BarChart
+                        data={Silian_messagePriorityChartData}
                         layout="vertical"
                       >
-                        <CartesianGrid strokeDasharray="4 4" stroke="#e2e8f0" />
-                        <XAxis
+                        <Silian_CartesianGrid strokeDasharray="4 4" stroke="#e2e8f0" />
+                        <Silian_XAxis
                           type="number"
                           allowDecimals={false}
                           stroke="#475569"
                           fontSize={12}
                         />
-                        <YAxis
+                        <Silian_YAxis
                           type="category"
                           dataKey="name"
                           stroke="#475569"
                           fontSize={12}
                           width={90}
                         />
-                        <RechartsTooltip
-                          formatter={(value) => numberFormatter.format(value)}
+                        <Silian_RechartsTooltip
+                          formatter={(Silian_value) => Silian_numberFormatter.format(Silian_value)}
                         />
-                        <Legend />
-                        <Bar
+                        <Silian_Legend />
+                        <Silian_Bar
                           dataKey="total"
-                          name={t("admin.broadcast.analytics.totalSeries")}
+                          name={Silian_t("admin.broadcast.analytics.totalSeries")}
                           barSize={14}
                         >
-                          {messagePriorityChartData.map((item) => (
-                            <Cell
-                              key={`priority-total-${item.priority}`}
-                              fill={item.color}
+                          {Silian_messagePriorityChartData.map((Silian_item) => (
+                            <Silian_Cell
+                              key={`priority-total-${Silian_item.priority}`}
+                              fill={Silian_item.color}
                             />
                           ))}
-                        </Bar>
-                        <Bar
+                        </Silian_Bar>
+                        <Silian_Bar
                           dataKey="unread"
-                          name={t("admin.broadcast.analytics.unreadSeries")}
+                          name={Silian_t("admin.broadcast.analytics.unreadSeries")}
                           barSize={14}
                           fill="#f97316"
                         />
-                      </BarChart>
-                    </ResponsiveContainer>
+                      </Silian_BarChart>
+                    </Silian_ResponsiveContainer>
                   ) : (
                     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                      {t("admin.broadcast.analytics.priorityEmpty")}
+                      {Silian_t("admin.broadcast.analytics.priorityEmpty")}
                     </div>
                   )}
                 </div>
                 <div className="mt-4 space-y-2 text-xs text-muted-foreground">
-                  {messagePriorityChartData.map((entry) => (
+                  {Silian_messagePriorityChartData.map((Silian_entry) => (
                     <div
-                      key={entry.priority}
+                      key={Silian_entry.priority}
                       className="flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-2">
                         <span
                           className="h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: entry.color }}
+                          style={{ backgroundColor: Silian_entry.color }}
                         />
                         <span className="font-medium text-foreground/80">
-                          {entry.name}
+                          {Silian_entry.name}
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span>{numberFormatter.format(entry.total)}</span>
+                        <span>{Silian_numberFormatter.format(Silian_entry.total)}</span>
                         <span className="text-sky-600">
-                          {t("admin.broadcast.analytics.unreadLabelShort")}{" "}
-                          {numberFormatter.format(entry.unread)}
+                          {Silian_t("admin.broadcast.analytics.unreadLabelShort")}{" "}
+                          {Silian_numberFormatter.format(Silian_entry.unread)}
                         </span>
                       </div>
                     </div>
@@ -2627,316 +2627,316 @@ export function BroadcastCenter() {
             <div className="grid gap-4 md:grid-cols-4">
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  {t("admin.broadcast.filters.search")}
+                  {Silian_t("admin.broadcast.filters.search")}
                 </label>
-                <Input
-                  value={filters.search}
-                  onChange={(event) =>
-                    updateFilters({ search: event.target.value })
+                <Silian_Input
+                  value={Silian_filters.search}
+                  onChange={(Silian_event) =>
+                    Silian_updateFilters({ search: Silian_event.target.value })
                   }
-                  placeholder={t("admin.broadcast.filters.searchPlaceholder")}
+                  placeholder={Silian_t("admin.broadcast.filters.searchPlaceholder")}
                 />
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  {t("admin.broadcast.filters.priority")}
+                  {Silian_t("admin.broadcast.filters.priority")}
                 </label>
                 <select
-                  value={filters.priority}
-                  onChange={(event) =>
-                    updateFilters({ priority: event.target.value })
+                  value={Silian_filters.priority}
+                  onChange={(Silian_event) =>
+                    Silian_updateFilters({ priority: Silian_event.target.value })
                   }
                   className="bg-background w-full rounded-md border border-input px-3 py-2 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  <option value="any">{t("common.all")}</option>
-                  {PRIORITIES.map((value) => (
-                    <option key={value} value={value}>
-                      {t(`messages.priority.${value}`)}
+                  <option value="any">{Silian_t("common.all")}</option>
+                  {Silian_PRIORITIES.map((Silian_value) => (
+                    <option key={Silian_value} value={Silian_value}>
+                      {Silian_t(`messages.priority.${Silian_value}`)}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  {t("admin.broadcast.filters.scope")}
+                  {Silian_t("admin.broadcast.filters.scope")}
                 </label>
                 <select
-                  value={filters.scope}
-                  onChange={(event) =>
-                    updateFilters({ scope: event.target.value })
+                  value={Silian_filters.scope}
+                  onChange={(Silian_event) =>
+                    Silian_updateFilters({ scope: Silian_event.target.value })
                   }
                   className="bg-background w-full rounded-md border border-input px-3 py-2 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  <option value="any">{t("common.all")}</option>
-                  <option value="all">{t("admin.broadcast.scope.all")}</option>
+                  <option value="any">{Silian_t("common.all")}</option>
+                  <option value="all">{Silian_t("admin.broadcast.scope.all")}</option>
                   <option value="custom">
-                    {t("admin.broadcast.scope.custom")}
+                    {Silian_t("admin.broadcast.scope.custom")}
                   </option>
                 </select>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <Switch
+              <Silian_Switch
                 id="broadcast-unread-toggle"
-                checked={filters.unreadOnly}
-                onCheckedChange={(checked) =>
-                  updateFilters({ unreadOnly: Boolean(checked) })
+                checked={Silian_filters.unreadOnly}
+                onCheckedChange={(Silian_checked) =>
+                  Silian_updateFilters({ unreadOnly: Boolean(Silian_checked) })
                 }
               />
               <label
                 htmlFor="broadcast-unread-toggle"
                 className="text-sm text-muted-foreground"
               >
-                {t("admin.broadcast.filters.onlyUnread")}
+                {Silian_t("admin.broadcast.filters.onlyUnread")}
               </label>
             </div>
 
-            {isHistoryLoading ? (
+            {Silian_isHistoryLoading ? (
               <p className="text-sm text-muted-foreground">
-                {t("common.loading")}
+                {Silian_t("common.loading")}
               </p>
-            ) : filteredItems.length === 0 ? (
+            ) : Silian_filteredItems.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                {t("admin.broadcast.history.empty")}
+                {Silian_t("admin.broadcast.history.empty")}
               </p>
             ) : (
               <div className="space-y-4">
-                {filteredItems.map((item) => {
-                  const isExpanded = !!expanded[item.id];
-                  const read = truncateUsers(item.read_users ?? []);
-                  const unread = truncateUsers(item.unread_users ?? []);
-                  const invalidIds = item.invalid_user_ids ?? [];
-                  const failedIds = item.failed_user_ids ?? [];
-                  const actorLabel =
-                    item.actor_username ||
-                    (item.actor_user_id
-                      ? `#${item.actor_user_id}`
-                      : t("common.unknown"));
-                  const delivery = item.email_delivery ?? {};
-                  const emailStatus = delivery?.status ?? "skipped";
-                  const emailErrors = Array.isArray(delivery?.errors)
-                    ? delivery.errors
+                {Silian_filteredItems.map((Silian_item) => {
+                  const Silian_isExpanded = !!Silian_expanded[Silian_item.id];
+                  const Silian_read = Silian_truncateUsers(Silian_item.read_users ?? []);
+                  const Silian_unread = Silian_truncateUsers(Silian_item.unread_users ?? []);
+                  const Silian_invalidIds = Silian_item.invalid_user_ids ?? [];
+                  const Silian_failedIds = Silian_item.failed_user_ids ?? [];
+                  const Silian_actorLabel =
+                    Silian_item.actor_username ||
+                    (Silian_item.actor_user_id
+                      ? `#${Silian_item.actor_user_id}`
+                      : Silian_t("common.unknown"));
+                  const Silian_delivery = Silian_item.email_delivery ?? {};
+                  const Silian_emailStatus = Silian_delivery?.status ?? "skipped";
+                  const Silian_emailErrors = Array.isArray(Silian_delivery?.errors)
+                    ? Silian_delivery.errors
                     : [];
-                  const emailBadgeVariant =
+                  const Silian_emailBadgeVariant =
                     {
                       sent: "secondary",
                       partial: "high",
                       failed: "destructive",
                       queued: "secondary",
                       skipped: "outline",
-                    }[emailStatus] ?? "outline";
+                    }[Silian_emailStatus] ?? "outline";
 
                   return (
                     <div
-                      key={item.id}
+                      key={Silian_item.id}
                       className="rounded-lg border p-5 space-y-4"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div className="space-y-1">
                           <h4 className="text-lg font-semibold">
-                            {item.title}
+                            {Silian_item.title}
                           </h4>
                           <p className="text-sm text-muted-foreground">
-                            {formatDateTime(item.created_at, currentLanguage)}
+                            {Silian_formatDateTime(Silian_item.created_at, Silian_currentLanguage)}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {t("admin.broadcast.sentBy", {
-                              actor: actorLabel,
-                              id: item.actor_user_id ?? t("common.unknown"),
+                            {Silian_t("admin.broadcast.sentBy", {
+                              actor: Silian_actorLabel,
+                              id: Silian_item.actor_user_id ?? Silian_t("common.unknown"),
                             })}
                           </p>
-                          <AnnouncementContent
-                            content={item.content}
-                            contentFormat={normalizeAnnouncementContentFormat(
-                              item.content_format,
+                          <Silian_AnnouncementContent
+                            content={Silian_item.content}
+                            contentFormat={Silian_normalizeAnnouncementContentFormat(
+                              Silian_item.content_format,
                             )}
                             className="bg-muted/50 rounded-md p-4"
                           />
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <Badge variant="outline">
-                            {t(`messages.priority.${item.priority}`)}
-                          </Badge>
-                          <Badge variant="secondary">
-                            {t(
-                              `admin.broadcast.scope.${item.scope === "custom" ? "custom" : "all"}`,
+                          <Silian_Badge variant="outline">
+                            {Silian_t(`messages.priority.${Silian_item.priority}`)}
+                          </Silian_Badge>
+                          <Silian_Badge variant="secondary">
+                            {Silian_t(
+                              `admin.broadcast.scope.${Silian_item.scope === "custom" ? "custom" : "all"}`,
                             )}
-                          </Badge>
-                          <Badge variant="outline">
-                            {normalizeAnnouncementContentFormat(
-                              item.content_format,
-                            ) === ANNOUNCEMENT_CONTENT_FORMAT_HTML
-                              ? t("admin.broadcast.format.html")
-                              : t("admin.broadcast.format.text")}
-                          </Badge>
-                          <Badge variant={emailBadgeVariant}>
-                            {t(`admin.broadcast.email.status.${emailStatus}`)}
-                          </Badge>
+                          </Silian_Badge>
+                          <Silian_Badge variant="outline">
+                            {Silian_normalizeAnnouncementContentFormat(
+                              Silian_item.content_format,
+                            ) === Silian_ANNOUNCEMENT_CONTENT_FORMAT_HTML
+                              ? Silian_t("admin.broadcast.format.html")
+                              : Silian_t("admin.broadcast.format.text")}
+                          </Silian_Badge>
+                          <Silian_Badge variant={Silian_emailBadgeVariant}>
+                            {Silian_t(`admin.broadcast.email.status.${Silian_emailStatus}`)}
+                          </Silian_Badge>
                         </div>
                       </div>
 
                       <div className="grid gap-4 md:grid-cols-4">
-                        <ResultStat
-                          label={t("admin.broadcast.result.sent")}
-                          value={item.sent_count}
+                        <Silian_ResultStat
+                          label={Silian_t("admin.broadcast.result.sent")}
+                          value={Silian_item.sent_count}
                           tone="success"
                         />
-                        <ResultStat
-                          label={t("admin.broadcast.result.targets")}
-                          value={item.target_count}
+                        <Silian_ResultStat
+                          label={Silian_t("admin.broadcast.result.targets")}
+                          value={Silian_item.target_count}
                         />
-                        <ResultStat
-                          label={t("admin.broadcast.result.failed")}
+                        <Silian_ResultStat
+                          label={Silian_t("admin.broadcast.result.failed")}
                           value={
-                            failedIds.length || t("admin.broadcast.result.none")
+                            Silian_failedIds.length || Silian_t("admin.broadcast.result.none")
                           }
                           tone={
-                            (failedIds.length ?? 0) > 0 ? "danger" : "default"
+                            (Silian_failedIds.length ?? 0) > 0 ? "danger" : "default"
                           }
                         />
-                        <ResultStat
-                          label={t("admin.broadcast.result.invalid")}
+                        <Silian_ResultStat
+                          label={Silian_t("admin.broadcast.result.invalid")}
                           value={
-                            invalidIds.length ||
-                            t("admin.broadcast.result.none")
+                            Silian_invalidIds.length ||
+                            Silian_t("admin.broadcast.result.none")
                           }
                           tone={
-                            (invalidIds.length ?? 0) > 0 ? "warning" : "default"
+                            (Silian_invalidIds.length ?? 0) > 0 ? "warning" : "default"
                           }
                         />
                       </div>
 
-                      {failedIds.length > 0 && (
-                        <Alert variant="destructive">
-                          <AlertTitle>
-                            {t("admin.broadcast.result.failed")}
-                          </AlertTitle>
-                          <AlertDescription>
+                      {Silian_failedIds.length > 0 && (
+                        <Silian_Alert variant="destructive">
+                          <Silian_AlertTitle>
+                            {Silian_t("admin.broadcast.result.failed")}
+                          </Silian_AlertTitle>
+                          <Silian_AlertDescription>
                             <span className="font-mono text-xs">
-                              {failedIds.join(", ")}
+                              {Silian_failedIds.join(", ")}
                             </span>
-                          </AlertDescription>
-                        </Alert>
+                          </Silian_AlertDescription>
+                        </Silian_Alert>
                       )}
 
-                      {invalidIds.length > 0 && (
-                        <Alert variant="warning">
-                          <AlertTitle>
-                            {t("admin.broadcast.result.invalid")}
-                          </AlertTitle>
-                          <AlertDescription>
+                      {Silian_invalidIds.length > 0 && (
+                        <Silian_Alert variant="warning">
+                          <Silian_AlertTitle>
+                            {Silian_t("admin.broadcast.result.invalid")}
+                          </Silian_AlertTitle>
+                          <Silian_AlertDescription>
                             <span className="font-mono text-xs">
-                              {invalidIds.join(", ")}
+                              {Silian_invalidIds.join(", ")}
                             </span>
-                          </AlertDescription>
-                        </Alert>
+                          </Silian_AlertDescription>
+                        </Silian_Alert>
                       )}
 
-                      {delivery &&
-                        (emailStatus !== "sent" ||
-                          emailErrors.length > 0 ||
-                          (delivery.missing_email_user_ids ?? []).length >
+                      {Silian_delivery &&
+                        (Silian_emailStatus !== "sent" ||
+                          Silian_emailErrors.length > 0 ||
+                          (Silian_delivery.missing_email_user_ids ?? []).length >
                             0) && (
-                          <Alert
+                          <Silian_Alert
                             variant={
-                              emailStatus === "failed"
+                              Silian_emailStatus === "failed"
                                 ? "destructive"
-                                : emailStatus === "partial"
+                                : Silian_emailStatus === "partial"
                                   ? "warning"
                                   : "info"
                             }
                           >
-                            <AlertTitle>
-                              {t(`admin.broadcast.email.status.${emailStatus}`)}
-                            </AlertTitle>
-                            <AlertDescription>
+                            <Silian_AlertTitle>
+                              {Silian_t(`admin.broadcast.email.status.${Silian_emailStatus}`)}
+                            </Silian_AlertTitle>
+                            <Silian_AlertDescription>
                               <p>
-                                {emailStatus === "queued"
-                                  ? t("admin.broadcast.email.queuedSummary", {
-                                      count: delivery.attempted_recipients ?? 0,
+                                {Silian_emailStatus === "queued"
+                                  ? Silian_t("admin.broadcast.email.queuedSummary", {
+                                      count: Silian_delivery.attempted_recipients ?? 0,
                                     })
-                                  : t("admin.broadcast.email.summary", {
+                                  : Silian_t("admin.broadcast.email.summary", {
                                       attempted:
-                                        delivery.attempted_recipients ?? 0,
-                                      success: delivery.successful_chunks ?? 0,
-                                      failed: delivery.failed_chunks ?? 0,
+                                        Silian_delivery.attempted_recipients ?? 0,
+                                      success: Silian_delivery.successful_chunks ?? 0,
+                                      failed: Silian_delivery.failed_chunks ?? 0,
                                     })}
                               </p>
-                              {Array.isArray(delivery.missing_email_user_ids) &&
-                                delivery.missing_email_user_ids.length > 0 && (
+                              {Array.isArray(Silian_delivery.missing_email_user_ids) &&
+                                Silian_delivery.missing_email_user_ids.length > 0 && (
                                   <p className="mt-2 text-xs text-muted-foreground">
-                                    {t("admin.broadcast.email.missing", {
+                                    {Silian_t("admin.broadcast.email.missing", {
                                       count:
-                                        delivery.missing_email_user_ids.length,
+                                        Silian_delivery.missing_email_user_ids.length,
                                     })}
                                     <span className="ml-1 font-mono">
-                                      {delivery.missing_email_user_ids.join(
+                                      {Silian_delivery.missing_email_user_ids.join(
                                         ", ",
                                       )}
                                     </span>
                                   </p>
                                 )}
-                              {emailErrors.length > 0 && (
+                              {Silian_emailErrors.length > 0 && (
                                 <div className="mt-2">
                                   <p className="text-xs font-medium text-muted-foreground">
-                                    {t("admin.broadcast.email.errorsTitle")}
+                                    {Silian_t("admin.broadcast.email.errorsTitle")}
                                   </p>
                                   <ul className="mt-1 space-y-1 text-xs font-mono">
-                                    {emailErrors.map((error, index) => (
-                                      <li key={`${error}-${index}`}>{error}</li>
+                                    {Silian_emailErrors.map((Silian_error, Silian_index) => (
+                                      <li key={`${Silian_error}-${Silian_index}`}>{Silian_error}</li>
                                     ))}
                                   </ul>
                                 </div>
                               )}
-                            </AlertDescription>
-                          </Alert>
+                            </Silian_AlertDescription>
+                          </Silian_Alert>
                         )}
 
-                      <Button
+                      <Silian_Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toggleDetails(item.id)}
+                        onClick={() => Silian_toggleDetails(Silian_item.id)}
                       >
-                        {isExpanded
-                          ? t("admin.broadcast.history.hideDetails")
-                          : t("admin.broadcast.history.showDetails")}
-                      </Button>
+                        {Silian_isExpanded
+                          ? Silian_t("admin.broadcast.history.hideDetails")
+                          : Silian_t("admin.broadcast.history.showDetails")}
+                      </Silian_Button>
 
-                      {isExpanded && (
+                      {Silian_isExpanded && (
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-2">
                             <h5 className="text-sm font-medium text-green-700">
-                              {t("admin.broadcast.result.sent")} (
-                              {item.read_count ?? read.list.length})
+                              {Silian_t("admin.broadcast.result.sent")} (
+                              {Silian_item.read_count ?? Silian_read.list.length})
                             </h5>
-                            <UserChips
-                              users={read.list}
-                              onViewUser={handleViewUserProfile}
-                              t={t}
+                            <Silian_UserChips
+                              users={Silian_read.list}
+                              onViewUser={Silian_handleViewUserProfile}
+                              t={Silian_t}
                             />
-                            {read.more > 0 && (
+                            {Silian_read.more > 0 && (
                               <p className="text-xs text-muted-foreground">
-                                {t("admin.broadcast.history.more", {
-                                  count: read.more,
+                                {Silian_t("admin.broadcast.history.more", {
+                                  count: Silian_read.more,
                                 })}
                               </p>
                             )}
                           </div>
                           <div className="space-y-2">
                             <h5 className="text-sm font-medium text-yellow-700">
-                              {t("admin.broadcast.result.unread")} (
-                              {item.unread_count ?? unread.list.length})
+                              {Silian_t("admin.broadcast.result.unread")} (
+                              {Silian_item.unread_count ?? Silian_unread.list.length})
                             </h5>
-                            <UserChips
-                              users={unread.list}
-                              onViewUser={handleViewUserProfile}
-                              t={t}
+                            <Silian_UserChips
+                              users={Silian_unread.list}
+                              onViewUser={Silian_handleViewUserProfile}
+                              t={Silian_t}
                             />
-                            {unread.more > 0 && (
+                            {Silian_unread.more > 0 && (
                               <p className="text-xs text-muted-foreground">
-                                {t("admin.broadcast.history.more", {
-                                  count: unread.more,
+                                {Silian_t("admin.broadcast.history.more", {
+                                  count: Silian_unread.more,
                                 })}
                               </p>
                             )}
@@ -2949,17 +2949,17 @@ export function BroadcastCenter() {
               </div>
             )}
 
-            <Pagination
-              currentPage={pagination.page ?? historyParams.page}
-              totalPages={pagination.pages ?? 1}
-              onPageChange={handlePageChange}
-              itemsPerPage={pagination.limit ?? historyParams.limit}
-              totalItems={pagination.total ?? filteredItems.length}
+            <Silian_Pagination
+              currentPage={Silian_pagination.page ?? Silian_historyParams.page}
+              totalPages={Silian_pagination.pages ?? 1}
+              onPageChange={Silian_handlePageChange}
+              itemsPerPage={Silian_pagination.limit ?? Silian_historyParams.limit}
+              totalItems={Silian_pagination.total ?? Silian_filteredItems.length}
               className="pt-2"
             />
           </div>
-        </TabsContent>
-      </Tabs>
+        </Silian_TabsContent>
+      </Silian_Tabs>
     </div>
   );
 }

@@ -1,350 +1,350 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useTranslation } from '../../hooks/useTranslation';
-import { passkeyAPI } from '../../lib/api/passkey';
-import { 
-  IS_PASSKEY_ENABLED, 
-  getPasskeySupport,
-  PASSKEY_SUPPORT_REASONS,
-  prepareRegistrationOptions, 
-  encodeRegistrationResponse 
+import Silian_React, { useState as Silian_useState } from 'react';
+import { useQuery as Silian_useQuery, useMutation as Silian_useMutation, useQueryClient as Silian_useQueryClient } from 'react-query';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { passkeyAPI as Silian_passkeyAPI } from '../../lib/api/passkey';
+import {
+  IS_PASSKEY_ENABLED as Silian_IS_PASSKEY_ENABLED,
+  getPasskeySupport as Silian_getPasskeySupport,
+  PASSKEY_SUPPORT_REASONS as Silian_PASSKEY_SUPPORT_REASONS,
+  prepareRegistrationOptions as Silian_prepareRegistrationOptions,
+  encodeRegistrationResponse as Silian_encodeRegistrationResponse
 } from '../../lib/passkey';
-import { Button } from '../ui/Button';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/Card';
-import { Alert, AlertTitle, AlertDescription } from '../ui/Alert';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Input } from '../ui/Input';
-import { 
-  Fingerprint, 
-  Plus, 
-  Trash2, 
-  Loader2, 
-  AlertCircle, 
-  ShieldCheck,
-  Smartphone,
-  Calendar,
-  Pencil
+import { Button as Silian_Button } from '../ui/Button';
+import { Card as Silian_Card, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription } from '../ui/Card';
+import { Alert as Silian_Alert, AlertTitle as Silian_AlertTitle, AlertDescription as Silian_AlertDescription } from '../ui/Alert';
+import { Dialog as Silian_Dialog, DialogContent as Silian_DialogContent, DialogDescription as Silian_DialogDescription, DialogFooter as Silian_DialogFooter, DialogHeader as Silian_DialogHeader, DialogTitle as Silian_DialogTitle } from '../ui/dialog';
+import { Input as Silian_Input } from '../ui/Input';
+import {
+  Fingerprint as Silian_Fingerprint,
+  Plus as Silian_Plus,
+  Trash2 as Silian_Trash2,
+  Loader2 as Silian_Loader2,
+  AlertCircle as Silian_AlertCircle,
+  ShieldCheck as Silian_ShieldCheck,
+  Smartphone as Silian_Smartphone,
+  Calendar as Silian_Calendar,
+  Pencil as Silian_Pencil
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { formatDateSafe } from '../../lib/utils';
+import { toast as Silian_toast } from 'react-hot-toast';
+import { formatDateSafe as Silian_formatDateSafe } from '../../lib/utils';
 
 export function PasskeyManagement() {
-  const { t } = useTranslation(['common', 'profile']);
-  const queryClient = useQueryClient();
-  const [passkeySupport, setPasskeySupport] = useState(null);
-  const [editingPasskey, setEditingPasskey] = useState(null);
-  const [labelDraft, setLabelDraft] = useState('');
+  const { t: Silian_t } = Silian_useTranslation(['common', 'profile']);
+  const Silian_queryClient = Silian_useQueryClient();
+  const [Silian_passkeySupport, Silian_setPasskeySupport] = Silian_useState(null);
+  const [Silian_editingPasskey, Silian_setEditingPasskey] = Silian_useState(null);
+  const [Silian_labelDraft, Silian_setLabelDraft] = Silian_useState('');
 
   // Check support on mount
-  React.useEffect(() => {
-    getPasskeySupport().then(setPasskeySupport);
+  Silian_React.useEffect(() => {
+    Silian_getPasskeySupport().then(Silian_setPasskeySupport);
   }, []);
 
-  const { data: passkeysData, isLoading, error } = useQuery(
+  const { data: Silian_passkeysData, isLoading: Silian_isLoading, error: Silian_error } = Silian_useQuery(
     'passkeys',
-    () => passkeyAPI.listPasskeys(),
-    { 
-      enabled: IS_PASSKEY_ENABLED && passkeySupport?.canRegister === true,
+    () => Silian_passkeyAPI.listPasskeys(),
+    {
+      enabled: Silian_IS_PASSKEY_ENABLED && Silian_passkeySupport?.canRegister === true,
       retry: false,
-      onError: (err) => {
+      onError: (Silian_err) => {
         // If 404, backend might not have the endpoint yet, which is fine for Phase A
-        if (err.response?.status === 404) {
+        if (Silian_err.response?.status === 404) {
           console.warn('Passkey endpoints not found on backend');
         }
       }
     }
   );
 
-  const passkeySupportMessage = (() => {
-    if (!passkeySupport || passkeySupport.canRegister) {
+  const Silian_passkeySupportMessage = (() => {
+    if (!Silian_passkeySupport || Silian_passkeySupport.canRegister) {
       return '';
     }
 
-    switch (passkeySupport.reason) {
-      case PASSKEY_SUPPORT_REASONS.INSECURE_CONTEXT:
-        return t('profile.passkey.supportReasonInsecureContext');
-      case PASSKEY_SUPPORT_REASONS.MISSING_PUBLIC_KEY_CREDENTIAL:
-        return t('profile.passkey.supportReasonMissingWebauthn');
-      case PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API:
-        return t('profile.passkey.supportReasonMissingCredentialsApi');
+    switch (Silian_passkeySupport.reason) {
+      case Silian_PASSKEY_SUPPORT_REASONS.INSECURE_CONTEXT:
+        return Silian_t('profile.passkey.supportReasonInsecureContext');
+      case Silian_PASSKEY_SUPPORT_REASONS.MISSING_PUBLIC_KEY_CREDENTIAL:
+        return Silian_t('profile.passkey.supportReasonMissingWebauthn');
+      case Silian_PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API:
+        return Silian_t('profile.passkey.supportReasonMissingCredentialsApi');
       default:
-        return t('profile.passkey.notSupported');
+        return Silian_t('profile.passkey.notSupported');
     }
   })();
 
-  const registerMutation = useMutation(
+  const Silian_registerMutation = Silian_useMutation(
     async () => {
       // 1. Get options from backend
-      const optionsRes = await passkeyAPI.getRegistrationOptions();
-      const optionsData = optionsRes.data?.data || optionsRes.data;
-      const publicKeyOptions = optionsData.public_key || optionsData;
-      
+      const Silian_optionsRes = await Silian_passkeyAPI.getRegistrationOptions();
+      const Silian_optionsData = Silian_optionsRes.data?.data || Silian_optionsRes.data;
+      const Silian_publicKeyOptions = Silian_optionsData.public_key || Silian_optionsData;
+
       // 2. Prepare options for the browser
-      const publicKeyCredentialCreationOptions = prepareRegistrationOptions(publicKeyOptions);
-      
+      const Silian_publicKeyCredentialCreationOptions = Silian_prepareRegistrationOptions(Silian_publicKeyOptions);
+
       // 3. Create credential in browser
-      const credential = await navigator.credentials.create(publicKeyCredentialCreationOptions);
-      if (!credential) {
-        const cancellationError = new Error('Passkey registration was cancelled.');
-        cancellationError.code = 'PASSKEY_REGISTRATION_CANCELLED';
-        throw cancellationError;
+      const Silian_credential = await navigator.credentials.create(Silian_publicKeyCredentialCreationOptions);
+      if (!Silian_credential) {
+        const Silian_cancellationError = new Error('Passkey registration was cancelled.');
+        Silian_cancellationError.code = 'PASSKEY_REGISTRATION_CANCELLED';
+        throw Silian_cancellationError;
       }
-      
+
       // 4. Encode and send to backend
-      const encodedCredential = encodeRegistrationResponse(credential);
-      return passkeyAPI.register({
-        challenge_id: optionsData.challenge_id,
-        credential: encodedCredential,
+      const Silian_encodedCredential = Silian_encodeRegistrationResponse(Silian_credential);
+      return Silian_passkeyAPI.register({
+        challenge_id: Silian_optionsData.challenge_id,
+        credential: Silian_encodedCredential,
         label: `Passkey ${new Date().toLocaleDateString()}`
       });
     },
     {
       onSuccess: () => {
-        toast.success(t('profile.passkey.registerSuccess'));
-        queryClient.invalidateQueries('passkeys');
-        queryClient.invalidateQueries('securityActivity');
+        Silian_toast.success(Silian_t('profile.passkey.registerSuccess'));
+        Silian_queryClient.invalidateQueries('passkeys');
+        Silian_queryClient.invalidateQueries('securityActivity');
       },
-      onError: (err) => {
-        console.error('Passkey registration error:', err);
-        if (err?.code === 'PASSKEY_REGISTRATION_CANCELLED') {
-          toast.error(t('profile.passkey.registerCancelled'));
+      onError: (Silian_err) => {
+        console.error('Passkey registration error:', Silian_err);
+        if (Silian_err?.code === 'PASSKEY_REGISTRATION_CANCELLED') {
+          Silian_toast.error(Silian_t('profile.passkey.registerCancelled'));
           return;
         }
-        toast.error(t('profile.passkey.registerFailed'));
+        Silian_toast.error(Silian_t('profile.passkey.registerFailed'));
       }
     }
   );
 
-  const deleteMutation = useMutation(
-    (id) => passkeyAPI.deletePasskey(id),
+  const Silian_deleteMutation = Silian_useMutation(
+    (Silian_id) => Silian_passkeyAPI.deletePasskey(Silian_id),
     {
       onSuccess: () => {
-        toast.success(t('profile.passkey.deleteSuccess'));
-        queryClient.invalidateQueries('passkeys');
-        queryClient.invalidateQueries('securityActivity');
+        Silian_toast.success(Silian_t('profile.passkey.deleteSuccess'));
+        Silian_queryClient.invalidateQueries('passkeys');
+        Silian_queryClient.invalidateQueries('securityActivity');
       },
-      onError: (err) => {
-        const status = err.response?.status;
-        if (status === 404 || status === 405) {
-          toast.error(t('profile.passkey.deleteUnavailable'));
+      onError: (Silian_err) => {
+        const Silian_status = Silian_err.response?.status;
+        if (Silian_status === 404 || Silian_status === 405) {
+          Silian_toast.error(Silian_t('profile.passkey.deleteUnavailable'));
           return;
         }
-        toast.error(t('profile.passkey.deleteFailed'));
+        Silian_toast.error(Silian_t('profile.passkey.deleteFailed'));
       }
     }
   );
 
-  const updateMutation = useMutation(
-    ({ id, label }) => passkeyAPI.updatePasskey(id, { label }),
+  const Silian_updateMutation = Silian_useMutation(
+    ({ id: Silian_id, label: Silian_label }) => Silian_passkeyAPI.updatePasskey(Silian_id, { label: Silian_label }),
     {
       onSuccess: () => {
-        toast.success(t('profile.passkey.editSuccess'));
-        queryClient.invalidateQueries('passkeys');
-        queryClient.invalidateQueries('securityActivity');
-        setEditingPasskey(null);
-        setLabelDraft('');
+        Silian_toast.success(Silian_t('profile.passkey.editSuccess'));
+        Silian_queryClient.invalidateQueries('passkeys');
+        Silian_queryClient.invalidateQueries('securityActivity');
+        Silian_setEditingPasskey(null);
+        Silian_setLabelDraft('');
       },
       onError: () => {
-        toast.error(t('profile.passkey.editFailed'));
+        Silian_toast.error(Silian_t('profile.passkey.editFailed'));
       }
     }
   );
 
-  if (!IS_PASSKEY_ENABLED) {
+  if (!Silian_IS_PASSKEY_ENABLED) {
     return (
-      <Card className="opacity-60">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Fingerprint className="h-5 w-5" />
-            {t('profile.passkey.title')}
-          </CardTitle>
-          <CardDescription>
-            {t('profile.passkey.disabled')}
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Silian_Card className="opacity-60">
+        <Silian_CardHeader>
+          <Silian_CardTitle className="flex items-center gap-2">
+            <Silian_Fingerprint className="h-5 w-5" />
+            {Silian_t('profile.passkey.title')}
+          </Silian_CardTitle>
+          <Silian_CardDescription>
+            {Silian_t('profile.passkey.disabled')}
+          </Silian_CardDescription>
+        </Silian_CardHeader>
+      </Silian_Card>
     );
   }
 
-  if (passkeySupport === null) {
+  if (Silian_passkeySupport === null) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Fingerprint className="h-5 w-5 text-muted-foreground" />
-            {t('profile.passkey.title')}
-          </CardTitle>
-          <CardDescription className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            {t('common.loading')}
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Silian_Card>
+        <Silian_CardHeader>
+          <Silian_CardTitle className="flex items-center gap-2">
+            <Silian_Fingerprint className="h-5 w-5 text-muted-foreground" />
+            {Silian_t('profile.passkey.title')}
+          </Silian_CardTitle>
+          <Silian_CardDescription className="flex items-center gap-2">
+            <Silian_Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            {Silian_t('common.loading')}
+          </Silian_CardDescription>
+        </Silian_CardHeader>
+      </Silian_Card>
     );
   }
 
-  if (passkeySupport.canRegister === false) {
+  if (Silian_passkeySupport.canRegister === false) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Fingerprint className="h-5 w-5" />
-            {t('profile.passkey.title')}
-          </CardTitle>
-          <CardDescription className="text-amber-600 flex items-center gap-1">
-            <AlertCircle className="h-4 w-4" />
-            {passkeySupportMessage}
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <Silian_Card>
+        <Silian_CardHeader>
+          <Silian_CardTitle className="flex items-center gap-2">
+            <Silian_Fingerprint className="h-5 w-5" />
+            {Silian_t('profile.passkey.title')}
+          </Silian_CardTitle>
+          <Silian_CardDescription className="text-amber-600 flex items-center gap-1">
+            <Silian_AlertCircle className="h-4 w-4" />
+            {Silian_passkeySupportMessage}
+          </Silian_CardDescription>
+        </Silian_CardHeader>
+      </Silian_Card>
     );
   }
 
-  const passkeys = passkeysData?.data?.data?.passkeys || [];
+  const Silian_passkeys = Silian_passkeysData?.data?.data?.passkeys || [];
 
-  const openEditDialog = (passkey) => {
-    setEditingPasskey(passkey);
-    setLabelDraft(passkey?.label || '');
+  const Silian_openEditDialog = (Silian_passkey) => {
+    Silian_setEditingPasskey(Silian_passkey);
+    Silian_setLabelDraft(Silian_passkey?.label || '');
   };
 
-  const closeEditDialog = () => {
-    setEditingPasskey(null);
-    setLabelDraft('');
+  const Silian_closeEditDialog = () => {
+    Silian_setEditingPasskey(null);
+    Silian_setLabelDraft('');
   };
 
   return (
     <>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Silian_Card>
+        <Silian_CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="space-y-1">
-            <CardTitle className="flex items-center gap-2">
-              <Fingerprint className="h-5 w-5 text-green-600" />
-              {t('profile.passkey.title')}
-            </CardTitle>
-            <CardDescription>
-              {t('profile.passkey.description')}
-            </CardDescription>
+            <Silian_CardTitle className="flex items-center gap-2">
+              <Silian_Fingerprint className="h-5 w-5 text-green-600" />
+              {Silian_t('profile.passkey.title')}
+            </Silian_CardTitle>
+            <Silian_CardDescription>
+              {Silian_t('profile.passkey.description')}
+            </Silian_CardDescription>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => registerMutation.mutate()}
-            disabled={registerMutation.isLoading}
+          <Silian_Button
+            variant="outline"
+            size="sm"
+            onClick={() => Silian_registerMutation.mutate()}
+            disabled={Silian_registerMutation.isLoading}
             className="flex items-center gap-1"
           >
-            {registerMutation.isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+            {Silian_registerMutation.isLoading ? (
+              <Silian_Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Plus className="h-4 w-4" />
+              <Silian_Plus className="h-4 w-4" />
             )}
-            {t('profile.passkey.add')}
-          </Button>
-        </CardHeader>
-        <CardContent className="pt-4">
-          {isLoading ? (
+            {Silian_t('profile.passkey.add')}
+          </Silian_Button>
+        </Silian_CardHeader>
+        <Silian_CardContent className="pt-4">
+          {Silian_isLoading ? (
             <div className="flex justify-center py-4">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <Silian_Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ) : error && error.response?.status !== 404 ? (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>{t('common.error')}</AlertTitle>
-              <AlertDescription>{t('profile.passkey.loadError')}</AlertDescription>
-            </Alert>
-          ) : passkeys.length === 0 ? (
+          ) : Silian_error && Silian_error.response?.status !== 404 ? (
+            <Silian_Alert variant="destructive">
+              <Silian_AlertCircle className="h-4 w-4" />
+              <Silian_AlertTitle>{Silian_t('common.error')}</Silian_AlertTitle>
+              <Silian_AlertDescription>{Silian_t('profile.passkey.loadError')}</Silian_AlertDescription>
+            </Silian_Alert>
+          ) : Silian_passkeys.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border bg-muted/40 py-8 text-center">
-              <Smartphone className="mx-auto mb-2 h-10 w-10 text-muted-foreground/60" />
-              <p className="text-sm text-muted-foreground">{t('profile.passkey.empty')}</p>
+              <Silian_Smartphone className="mx-auto mb-2 h-10 w-10 text-muted-foreground/60" />
+              <p className="text-sm text-muted-foreground">{Silian_t('profile.passkey.empty')}</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {passkeys.map((pk) => (
-                <div 
-                  key={pk.id} 
+              {Silian_passkeys.map((Silian_pk) => (
+                <div
+                  key={Silian_pk.id}
                   className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-green-500/30"
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
-                      <ShieldCheck className="h-5 w-5 text-green-600" />
+                      <Silian_ShieldCheck className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        {pk.label || t('profile.passkey.unnamed')}
+                        {Silian_pk.label || Silian_t('profile.passkey.unnamed')}
                       </p>
                       <div className="mt-0.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDateSafe(pk.created_at)}
+                          <Silian_Calendar className="h-3 w-3" />
+                          {Silian_formatDateSafe(Silian_pk.created_at)}
                         </span>
-                        {pk.last_used_at && (
+                        {Silian_pk.last_used_at && (
                           <span>
-                            {t('profile.passkey.lastUsed')}: {formatDateSafe(pk.last_used_at)}
+                            {Silian_t('profile.passkey.lastUsed')}: {Silian_formatDateSafe(Silian_pk.last_used_at)}
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button
+                    <Silian_Button
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      onClick={() => openEditDialog(pk)}
-                      title={t('profile.passkey.edit')}
-                      disabled={updateMutation.isLoading}
+                      onClick={() => Silian_openEditDialog(Silian_pk)}
+                      title={Silian_t('profile.passkey.edit')}
+                      disabled={Silian_updateMutation.isLoading}
                     >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                      <Silian_Pencil className="h-4 w-4" />
+                    </Silian_Button>
+                    <Silian_Button
+                      variant="ghost"
+                      size="icon"
                       className="h-8 w-8 text-muted-foreground hover:text-red-500"
                       onClick={() => {
-                        if (window.confirm(t('profile.passkey.deleteConfirm'))) {
-                          deleteMutation.mutate(pk.id);
+                        if (window.confirm(Silian_t('profile.passkey.deleteConfirm'))) {
+                          Silian_deleteMutation.mutate(Silian_pk.id);
                         }
                       }}
-                      disabled={deleteMutation.isLoading}
+                      disabled={Silian_deleteMutation.isLoading}
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                      <Silian_Trash2 className="h-4 w-4" />
+                    </Silian_Button>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </Silian_CardContent>
+      </Silian_Card>
 
-      <Dialog open={Boolean(editingPasskey)} onOpenChange={(open) => (!open ? closeEditDialog() : null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('profile.passkey.editTitle')}</DialogTitle>
-            <DialogDescription>{t('profile.passkey.editDescription')}</DialogDescription>
-          </DialogHeader>
+      <Silian_Dialog open={Boolean(Silian_editingPasskey)} onOpenChange={(Silian_open) => (!Silian_open ? Silian_closeEditDialog() : null)}>
+        <Silian_DialogContent>
+          <Silian_DialogHeader>
+            <Silian_DialogTitle>{Silian_t('profile.passkey.editTitle')}</Silian_DialogTitle>
+            <Silian_DialogDescription>{Silian_t('profile.passkey.editDescription')}</Silian_DialogDescription>
+          </Silian_DialogHeader>
           <div className="space-y-2">
-            <Input
-              value={labelDraft}
-              onChange={(event) => setLabelDraft(event.target.value)}
+            <Silian_Input
+              value={Silian_labelDraft}
+              onChange={(Silian_event) => Silian_setLabelDraft(Silian_event.target.value)}
               maxLength={100}
-              placeholder={t('profile.passkey.editPlaceholder')}
+              placeholder={Silian_t('profile.passkey.editPlaceholder')}
             />
-            <p className="text-xs text-muted-foreground">{t('profile.passkey.editHint')}</p>
+            <p className="text-xs text-muted-foreground">{Silian_t('profile.passkey.editHint')}</p>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={closeEditDialog}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              onClick={() => updateMutation.mutate({ id: editingPasskey?.id, label: labelDraft })}
-              disabled={!editingPasskey || updateMutation.isLoading}
+          <Silian_DialogFooter>
+            <Silian_Button variant="ghost" onClick={Silian_closeEditDialog}>
+              {Silian_t('common.cancel')}
+            </Silian_Button>
+            <Silian_Button
+              onClick={() => Silian_updateMutation.mutate({ id: Silian_editingPasskey?.id, label: Silian_labelDraft })}
+              disabled={!Silian_editingPasskey || Silian_updateMutation.isLoading}
             >
-              {updateMutation.isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('common.save')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              {Silian_updateMutation.isLoading && <Silian_Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {Silian_t('common.save')}
+            </Silian_Button>
+          </Silian_DialogFooter>
+        </Silian_DialogContent>
+      </Silian_Dialog>
     </>
   );
 }

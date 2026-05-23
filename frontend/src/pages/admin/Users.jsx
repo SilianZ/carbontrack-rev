@@ -1,6 +1,6 @@
-import React from 'react';
-import { UserManagement } from '../../components/admin/UserManagement';
+import Silian_React from 'react';
+import { UserManagement as Silian_UserManagement } from '../../components/admin/UserManagement';
 
 export default function AdminUsersPage() {
-  return <UserManagement />;
+  return <Silian_UserManagement />;
 }

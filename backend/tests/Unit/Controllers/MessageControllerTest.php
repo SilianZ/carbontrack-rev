@@ -16,26 +16,26 @@ use CarbonTrack\Models\Message;
 
 class MessageControllerTest extends TestCase
 {
-    private function makeUserProfileViewService(?RegionService $regionService = null): UserProfileViewService
+    private function makeUserProfileViewService(?RegionService $Silian_regionService = null): UserProfileViewService
     {
-        return new UserProfileViewService($regionService ?? new RegionService(null, null, null, null));
+        return new UserProfileViewService($Silian_regionService ?? new RegionService(null, null, null, null));
     }
 
     private function makeController(
-        \PDO $pdo,
-        MessageService $svc,
-        AuditLogService $audit,
-        AuthService $auth,
-        ?EmailService $emailService = null,
-        ?UserProfileViewService $userProfileViewService = null
+        \PDO $Silian_pdo,
+        MessageService $Silian_svc,
+        AuditLogService $Silian_audit,
+        AuthService $Silian_auth,
+        ?EmailService $Silian_emailService = null,
+        ?UserProfileViewService $Silian_userProfileViewService = null
     ): MessageController {
         return new MessageController(
-            $pdo,
-            $svc,
-            $audit,
-            $auth,
-            $userProfileViewService ?? $this->makeUserProfileViewService(),
-            $emailService,
+            $Silian_pdo,
+            $Silian_svc,
+            $Silian_audit,
+            $Silian_auth,
+            $Silian_userProfileViewService ?? $this->makeUserProfileViewService(),
+            $Silian_emailService,
             null
         );
     }
@@ -47,48 +47,48 @@ class MessageControllerTest extends TestCase
 
     public function testGetUserMessagesReturnsPaged(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 1]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1]);
 
-        $countStmt = $this->createMock(\PDOStatement::class);
-        $countStmt->method('execute')->willReturn(true);
-        $countStmt->method('fetch')->willReturn(['total' => 2]);
+        $Silian_countStmt = $this->createMock(\PDOStatement::class);
+        $Silian_countStmt->method('execute')->willReturn(true);
+        $Silian_countStmt->method('fetch')->willReturn(['total' => 2]);
 
-        $listStmt = $this->createMock(\PDOStatement::class);
-        $listStmt->method('bindValue')->willReturn(true);
-        $listStmt->method('execute')->willReturn(true);
-        $listStmt->method('fetchAll')->willReturn([
+        $Silian_listStmt = $this->createMock(\PDOStatement::class);
+        $Silian_listStmt->method('bindValue')->willReturn(true);
+        $Silian_listStmt->method('execute')->willReturn(true);
+        $Silian_listStmt->method('fetchAll')->willReturn([
             ['id'=>1,'title'=>'t1','content'=>'c1','read_at'=>null],
             ['id'=>2,'title'=>'t2','content'=>'c2','read_at'=>'2025-01-01']
         ]);
 
-        $pdo->method('prepare')->willReturnOnConsecutiveCalls($countStmt, $listStmt);
+        $Silian_pdo->method('prepare')->willReturnOnConsecutiveCalls($Silian_countStmt, $Silian_listStmt);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('GET', '/messages');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->getUserMessages($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertEquals(2, $json['pagination']['total']);
-        $this->assertFalse($json['data'][0]['is_read']);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('GET', '/messages');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->getUserMessages($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertEquals(2, $Silian_json['pagination']['total']);
+        $this->assertFalse($Silian_json['data'][0]['is_read']);
     }
 
     public function testGetUserMessagesUsesDistinctSearchBindings(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 1]);
-        $listBound = [];
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1]);
+        $Silian_listBound = [];
 
-        $countStmt = $this->createMock(\PDOStatement::class);
-        $countStmt->expects($this->once())
+        $Silian_countStmt = $this->createMock(\PDOStatement::class);
+        $Silian_countStmt->expects($this->once())
             ->method('execute')
             ->with([
                 'user_id' => 1,
@@ -96,304 +96,304 @@ class MessageControllerTest extends TestCase
                 'search_content' => '%eco%',
             ])
             ->willReturn(true);
-        $countStmt->expects($this->once())->method('fetch')->willReturn(['total' => 0]);
+        $Silian_countStmt->expects($this->once())->method('fetch')->willReturn(['total' => 0]);
 
-        $listStmt = $this->createMock(\PDOStatement::class);
-        $listStmt->expects($this->exactly(5))
+        $Silian_listStmt = $this->createMock(\PDOStatement::class);
+        $Silian_listStmt->expects($this->exactly(5))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$listBound) {
-                $listBound[$key] = [$value, $type];
+            ->willReturnCallback(function (string $Silian_key, $Silian_value, ?int $Silian_type = null) use (&$Silian_listBound) {
+                $Silian_listBound[$Silian_key] = [$Silian_value, $Silian_type];
                 return true;
             });
-        $listStmt->expects($this->once())->method('execute')->willReturn(true);
-        $listStmt->expects($this->once())->method('fetchAll')->willReturn([]);
+        $Silian_listStmt->expects($this->once())->method('execute')->willReturn(true);
+        $Silian_listStmt->expects($this->once())->method('fetchAll')->willReturn([]);
 
-        $pdo->expects($this->exactly(2))
+        $Silian_pdo->expects($this->exactly(2))
             ->method('prepare')
-            ->willReturnCallback(function (string $sql) use ($countStmt, $listStmt) {
-                static $prepareCalls = 0;
-                $prepareCalls++;
-                $this->assertStringContainsString('m.title LIKE :search_title', $sql);
-                $this->assertStringContainsString('m.content LIKE :search_content', $sql);
-                return $prepareCalls === 1 ? $countStmt : $listStmt;
+            ->willReturnCallback(function (string $Silian_sql) use ($Silian_countStmt, $Silian_listStmt) {
+                static $Silian_prepareCalls = 0;
+                $Silian_prepareCalls++;
+                $this->assertStringContainsString('m.title LIKE :search_title', $Silian_sql);
+                $this->assertStringContainsString('m.content LIKE :search_content', $Silian_sql);
+                return $Silian_prepareCalls === 1 ? $Silian_countStmt : $Silian_listStmt;
             });
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('GET', '/messages', null, ['search' => 'eco']);
-        $response = new \Slim\Psr7\Response();
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('GET', '/messages', null, ['search' => 'eco']);
+        $Silian_response = new \Slim\Psr7\Response();
 
-        $resp = $controller->getUserMessages($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $this->assertSame(1, $listBound['user_id'][0] ?? null);
-        $this->assertSame('%eco%', $listBound['search_title'][0] ?? null);
-        $this->assertSame('%eco%', $listBound['search_content'][0] ?? null);
-        $this->assertSame(20, $listBound['limit'][0] ?? null);
-        $this->assertSame(0, $listBound['offset'][0] ?? null);
+        $Silian_resp = $Silian_controller->getUserMessages($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $this->assertSame(1, $Silian_listBound['user_id'][0] ?? null);
+        $this->assertSame('%eco%', $Silian_listBound['search_title'][0] ?? null);
+        $this->assertSame('%eco%', $Silian_listBound['search_content'][0] ?? null);
+        $this->assertSame(20, $Silian_listBound['limit'][0] ?? null);
+        $this->assertSame(0, $Silian_listBound['offset'][0] ?? null);
     }
 
     public function testGetMessageDetailMarksRead(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 9]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 9]);
 
         // select message
-        $select = $this->createMock(\PDOStatement::class);
-        $select->method('execute')->willReturn(true);
-        $select->method('fetch')->willReturn([
+        $Silian_select = $this->createMock(\PDOStatement::class);
+        $Silian_select->method('execute')->willReturn(true);
+        $Silian_select->method('fetch')->willReturn([
             'id' => 100, 'is_read' => false
         ]);
         // update read_at
-        $update = $this->createMock(\PDOStatement::class);
-        $update->method('execute')->willReturn(true);
-        
-        $pdo->method('prepare')->willReturnOnConsecutiveCalls($select, $update);
+        $Silian_update = $this->createMock(\PDOStatement::class);
+        $Silian_update->method('execute')->willReturn(true);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('GET', '/messages/100');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->getMessageDetail($request, $response, ['id'=>100]);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertEquals(100, $json['data']['id']);
+        $Silian_pdo->method('prepare')->willReturnOnConsecutiveCalls($Silian_select, $Silian_update);
+
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('GET', '/messages/100');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->getMessageDetail($Silian_request, $Silian_response, ['id'=>100]);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertEquals(100, $Silian_json['data']['id']);
     }
 
     public function testGetUnreadCount(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 3]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 3]);
 
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $stmt->method('fetch')->willReturn([
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->method('execute')->willReturn(true);
+        $Silian_stmt->method('fetch')->willReturn([
             'total_unread'=>7,'urgent_unread'=>1,'high_unread'=>2,'system_unread'=>3,'notification_unread'=>4
         ]);
-        $pdo->method('prepare')->willReturn($stmt);
+        $Silian_pdo->method('prepare')->willReturn($Silian_stmt);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('GET', '/messages/unread-count');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->getUnreadCount($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertEquals(7, $json['data']['total_unread']);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('GET', '/messages/unread-count');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->getUnreadCount($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertEquals(7, $Silian_json['data']['total_unread']);
     }
 
     public function testMarkAllAsReadMarksWhenEmptyIds(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 10]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 10]);
 
-        $updateStmt = $this->createMock(\PDOStatement::class);
-        $updateStmt->method('execute')->willReturn(true);
-        $updateStmt->method('rowCount')->willReturn(5);
-        $pdo->method('prepare')->willReturn($updateStmt);
+        $Silian_updateStmt = $this->createMock(\PDOStatement::class);
+        $Silian_updateStmt->method('execute')->willReturn(true);
+        $Silian_updateStmt->method('rowCount')->willReturn(5);
+        $Silian_pdo->method('prepare')->willReturn($Silian_updateStmt);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('PUT', '/messages/mark-all-read', []);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->markAllAsRead($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertEquals(5, $json['affected_rows']);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('PUT', '/messages/mark-all-read', []);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->markAllAsRead($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertEquals(5, $Silian_json['affected_rows']);
     }
 
     public function testMarkAllAsReadWithIds(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 10]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 10]);
 
-        $updateStmt = $this->createMock(\PDOStatement::class);
-        $updateStmt->method('execute')->willReturn(true);
-        $updateStmt->method('rowCount')->willReturn(2);
-        $pdo->method('prepare')->willReturn($updateStmt);
+        $Silian_updateStmt = $this->createMock(\PDOStatement::class);
+        $Silian_updateStmt->method('execute')->willReturn(true);
+        $Silian_updateStmt->method('rowCount')->willReturn(2);
+        $Silian_pdo->method('prepare')->willReturn($Silian_updateStmt);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('PUT', '/messages/mark-all-read', ['message_ids' => [1,2]]);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->markAllAsRead($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertEquals(2, $json['affected_rows']);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('PUT', '/messages/mark-all-read', ['message_ids' => [1,2]]);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->markAllAsRead($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertEquals(2, $Silian_json['affected_rows']);
     }
 
     public function testMarkAsReadNotOwnedReturns404(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 20]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 20]);
 
-        $select = $this->createMock(\PDOStatement::class);
-        $select->method('execute')->willReturn(true);
-        $select->method('fetch')->willReturn(false);
-        $pdo->method('prepare')->willReturn($select);
+        $Silian_select = $this->createMock(\PDOStatement::class);
+        $Silian_select->method('execute')->willReturn(true);
+        $Silian_select->method('fetch')->willReturn(false);
+        $Silian_pdo->method('prepare')->willReturn($Silian_select);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('PUT', '/messages/9/read');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->markAsRead($request, $response, ['id' => 9]);
-        $this->assertEquals(404, $resp->getStatusCode());
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('PUT', '/messages/9/read');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->markAsRead($Silian_request, $Silian_response, ['id' => 9]);
+        $this->assertEquals(404, $Silian_resp->getStatusCode());
     }
 
     public function testMarkAsReadSuccess(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 21]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 21]);
 
-        $select = $this->createMock(\PDOStatement::class);
-        $select->method('execute')->willReturn(true);
-        $select->method('fetch')->willReturn(['id' => 300]);
+        $Silian_select = $this->createMock(\PDOStatement::class);
+        $Silian_select->method('execute')->willReturn(true);
+        $Silian_select->method('fetch')->willReturn(['id' => 300]);
 
-        $update = $this->createMock(\PDOStatement::class);
-        $update->method('execute')->willReturn(true);
+        $Silian_update = $this->createMock(\PDOStatement::class);
+        $Silian_update->method('execute')->willReturn(true);
 
-        $pdo->method('prepare')->willReturnOnConsecutiveCalls($select, $update);
+        $Silian_pdo->method('prepare')->willReturnOnConsecutiveCalls($Silian_select, $Silian_update);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('PUT', '/messages/300/read');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->markAsRead($request, $response, ['id' => 300]);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('PUT', '/messages/300/read');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->markAsRead($Silian_request, $Silian_response, ['id' => 300]);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
     }
 
     public function testDeleteMessageNotOwned(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 22]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 22]);
 
-        $select = $this->createMock(\PDOStatement::class);
-        $select->method('execute')->willReturn(true);
-        $select->method('fetch')->willReturn(false);
-        $pdo->method('prepare')->willReturn($select);
+        $Silian_select = $this->createMock(\PDOStatement::class);
+        $Silian_select->method('execute')->willReturn(true);
+        $Silian_select->method('fetch')->willReturn(false);
+        $Silian_pdo->method('prepare')->willReturn($Silian_select);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('DELETE', '/messages/12');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->deleteMessage($request, $response, ['id' => 12]);
-        $this->assertEquals(404, $resp->getStatusCode());
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('DELETE', '/messages/12');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->deleteMessage($Silian_request, $Silian_response, ['id' => 12]);
+        $this->assertEquals(404, $Silian_resp->getStatusCode());
     }
 
     public function testDeleteMessageSuccess(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 23]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 23]);
 
-        $select = $this->createMock(\PDOStatement::class);
-        $select->method('execute')->willReturn(true);
-        $select->method('fetch')->willReturn(['id' => 77]);
+        $Silian_select = $this->createMock(\PDOStatement::class);
+        $Silian_select->method('execute')->willReturn(true);
+        $Silian_select->method('fetch')->willReturn(['id' => 77]);
 
-        $update = $this->createMock(\PDOStatement::class);
-        $update->method('execute')->willReturn(true);
+        $Silian_update = $this->createMock(\PDOStatement::class);
+        $Silian_update->method('execute')->willReturn(true);
 
-        $pdo->method('prepare')->willReturnOnConsecutiveCalls($select, $update);
+        $Silian_pdo->method('prepare')->willReturnOnConsecutiveCalls($Silian_select, $Silian_update);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('DELETE', '/messages/77');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->deleteMessage($request, $response, ['id' => 77]);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('DELETE', '/messages/77');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->deleteMessage($Silian_request, $Silian_response, ['id' => 77]);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
     }
 
     public function testGetMessageStatsAggregates(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 30]);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 30]);
 
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $stmt->method('fetchAll')->willReturn([
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->method('execute')->willReturn(true);
+        $Silian_stmt->method('fetchAll')->willReturn([
             ['type' => 'system', 'priority' => 'high', 'count' => 2, 'unread_count' => 1],
             ['type' => 'notification', 'priority' => 'low', 'count' => 3, 'unread_count' => 0],
         ]);
-        $pdo->method('prepare')->willReturn($stmt);
+        $Silian_pdo->method('prepare')->willReturn($Silian_stmt);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('GET', '/messages/stats');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->getMessageStats($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertEquals(5, $json['data']['by_type']['system']['total'] + $json['data']['by_type']['notification']['total']);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('GET', '/messages/stats');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->getMessageStats($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertEquals(5, $Silian_json['data']['by_type']['system']['total'] + $Silian_json['data']['by_type']['notification']['total']);
     }
 
     public function testBroadcastRequiresAdmin(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 5, 'is_admin' => false]);
-        $auth->method('isAdminUser')->willReturn(false);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 5, 'is_admin' => false]);
+        $Silian_auth->method('isAdminUser')->willReturn(false);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('POST', '/admin/messages/broadcast', ['title' => 'Hello', 'content' => 'World']);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->sendSystemMessage($request, $response);
-        $this->assertEquals(403, $resp->getStatusCode());
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('POST', '/admin/messages/broadcast', ['title' => 'Hello', 'content' => 'World']);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->sendSystemMessage($Silian_request, $Silian_response);
+        $this->assertEquals(403, $Silian_resp->getStatusCode());
     }
 
     public function testBroadcastValidatesPriority(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 6, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 6, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('POST', '/admin/messages/broadcast', [
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('POST', '/admin/messages/broadcast', [
             'title' => 'Test',
             'content' => 'Payload',
             'priority' => 'unknown-level'
         ]);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->sendSystemMessage($request, $response);
-        $this->assertEquals(422, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertSame('Invalid priority value', $json['error']);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->sendSystemMessage($Silian_request, $Silian_response);
+        $this->assertEquals(422, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertSame('Invalid priority value', $Silian_json['error']);
     }
 
     public function testBroadcastSendsMessagesAndReportsInvalidIds(): void
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $Silian_pdo = new \PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $pdo->exec('CREATE TABLE users (
+        $Silian_pdo->exec('CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             username TEXT,
             email TEXT,
@@ -403,17 +403,17 @@ class MessageControllerTest extends TestCase
             status TEXT,
             deleted_at TEXT
         )');
-        $pdo->exec('CREATE TABLE schools (
+        $Silian_pdo->exec('CREATE TABLE schools (
             id INTEGER PRIMARY KEY,
             name TEXT
         )');
 
-        $pdo->exec('CREATE TABLE system_logs (
+        $Silian_pdo->exec('CREATE TABLE system_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT
         )');
 
-        $pdo->exec('CREATE TABLE message_broadcasts (
+        $Silian_pdo->exec('CREATE TABLE message_broadcasts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT,
             audit_log_id INTEGER,
@@ -439,18 +439,18 @@ class MessageControllerTest extends TestCase
             updated_at TEXT
         )');
 
-        $insertUser = $pdo->prepare('INSERT INTO users (id, username, email, is_admin, status, deleted_at) VALUES (?,?,?,?,?,?)');
-        $insertUser->execute([1, 'User One', 'one@example.com', 0, 'active', null]);
-        $insertUser->execute([3, 'User Three', 'three@example.com', 0, 'active', null]);
+        $Silian_insertUser = $Silian_pdo->prepare('INSERT INTO users (id, username, email, is_admin, status, deleted_at) VALUES (?,?,?,?,?,?)');
+        $Silian_insertUser->execute([1, 'User One', 'one@example.com', 0, 'active', null]);
+        $Silian_insertUser->execute([3, 'User Three', 'three@example.com', 0, 'active', null]);
 
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 42, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 42, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $svc->expects($this->exactly(2))
+        $Silian_svc->expects($this->exactly(2))
             ->method('sendSystemMessage')
             ->withConsecutive(
                 [1, 'Announcement', 'Broadcast body', Message::TYPE_SYSTEM, 'high'],
@@ -461,42 +461,42 @@ class MessageControllerTest extends TestCase
                 $this->createMock(Message::class)
             );
 
-        $svc->expects($this->once())
+        $Silian_svc->expects($this->once())
             ->method('queueBroadcastEmail')
             ->willReturn(['error' => 'Email service unavailable']);
 
-        $audit->expects($this->once())->method('log');
+        $Silian_audit->expects($this->once())->method('log');
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('POST', '/admin/messages/broadcast', [
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('POST', '/admin/messages/broadcast', [
             'title' => 'Announcement',
             'content' => 'Broadcast body',
             'priority' => 'high',
             'target_users' => [1, 2, 3]
         ]);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->sendSystemMessage($request, $response);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->sendSystemMessage($Silian_request, $Silian_response);
 
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertSame(2, $json['sent_count']);
-        $this->assertSame(2, $json['total_targets']);
-        $this->assertSame([2], $json['invalid_user_ids']);
-        $this->assertSame('custom', $json['scope']);
-        $this->assertSame('high', $json['priority']);
-        $this->assertFalse($json['email_delivery']['triggered']);
-        $this->assertSame('failed', $json['email_delivery']['status']);
-        $this->assertContains('Email service unavailable', $json['email_delivery']['errors']);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertSame(2, $Silian_json['sent_count']);
+        $this->assertSame(2, $Silian_json['total_targets']);
+        $this->assertSame([2], $Silian_json['invalid_user_ids']);
+        $this->assertSame('custom', $Silian_json['scope']);
+        $this->assertSame('high', $Silian_json['priority']);
+        $this->assertFalse($Silian_json['email_delivery']['triggered']);
+        $this->assertSame('failed', $Silian_json['email_delivery']['status']);
+        $this->assertContains('Email service unavailable', $Silian_json['email_delivery']['errors']);
     }
 
 
     public function testHighPriorityBroadcastTriggersEmailBcc(): void
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $Silian_pdo = new \PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $pdo->exec('CREATE TABLE users (
+        $Silian_pdo->exec('CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             username TEXT,
             email TEXT,
@@ -506,17 +506,17 @@ class MessageControllerTest extends TestCase
             status TEXT,
             deleted_at TEXT
         )');
-        $pdo->exec('CREATE TABLE schools (
+        $Silian_pdo->exec('CREATE TABLE schools (
             id INTEGER PRIMARY KEY,
             name TEXT
         )');
 
-        $pdo->exec('CREATE TABLE system_logs (
+        $Silian_pdo->exec('CREATE TABLE system_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT
         )');
 
-        $pdo->exec('CREATE TABLE message_broadcasts (
+        $Silian_pdo->exec('CREATE TABLE message_broadcasts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT,
             audit_log_id INTEGER,
@@ -542,53 +542,53 @@ class MessageControllerTest extends TestCase
             updated_at TEXT
         )');
 
-        $pdo->prepare('INSERT INTO users (id, username, email, is_admin, status, deleted_at) VALUES (?,?,?,?,?,?)')
+        $Silian_pdo->prepare('INSERT INTO users (id, username, email, is_admin, status, deleted_at) VALUES (?,?,?,?,?,?)')
             ->execute([5, 'User Five', 'user@example.com', 0, 'active', null]);
 
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 7, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 7, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $svc->expects($this->once())
+        $Silian_svc->expects($this->once())
             ->method('sendSystemMessage')
             ->with(5, 'Alert', 'System high priority', Message::TYPE_SYSTEM, 'urgent')
             ->willReturn($this->createMock(Message::class));
 
-        $svc->expects($this->once())
+        $Silian_svc->expects($this->once())
             ->method('queueBroadcastEmail')
             ->willReturn(['queued' => true]);
 
-        $audit->expects($this->once())->method('log');
+        $Silian_audit->expects($this->once())->method('log');
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('POST', '/admin/messages/broadcast', [
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('POST', '/admin/messages/broadcast', [
             'title' => 'Alert',
             'content' => 'System high priority',
             'priority' => 'urgent',
             'target_users' => [5]
         ]);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->sendSystemMessage($request, $response);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->sendSystemMessage($Silian_request, $Silian_response);
 
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertTrue($json['email_delivery']['triggered']);
-        $this->assertSame(1, $json['email_delivery']['attempted_recipients']);
-        $this->assertSame(0, $json['email_delivery']['successful_chunks']);
-        $this->assertSame([], $json['email_delivery']['failed_recipient_ids']);
-        $this->assertSame('queued', $json['email_delivery']['status']);
-        $this->assertSame([], $json['email_delivery']['errors']);
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertTrue($Silian_json['email_delivery']['triggered']);
+        $this->assertSame(1, $Silian_json['email_delivery']['attempted_recipients']);
+        $this->assertSame(0, $Silian_json['email_delivery']['successful_chunks']);
+        $this->assertSame([], $Silian_json['email_delivery']['failed_recipient_ids']);
+        $this->assertSame('queued', $Silian_json['email_delivery']['status']);
+        $this->assertSame([], $Silian_json['email_delivery']['errors']);
     }
 
     public function testBroadcastSupportsHtmlContentFormatMetadata(): void
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $Silian_pdo = new \PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $pdo->exec('CREATE TABLE users (
+        $Silian_pdo->exec('CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             username TEXT,
             email TEXT,
@@ -598,17 +598,17 @@ class MessageControllerTest extends TestCase
             status TEXT,
             deleted_at TEXT
         )');
-        $pdo->exec('CREATE TABLE schools (
+        $Silian_pdo->exec('CREATE TABLE schools (
             id INTEGER PRIMARY KEY,
             name TEXT
         )');
 
-        $pdo->exec('CREATE TABLE system_logs (
+        $Silian_pdo->exec('CREATE TABLE system_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT
         )');
 
-        $pdo->exec('CREATE TABLE message_broadcasts (
+        $Silian_pdo->exec('CREATE TABLE message_broadcasts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT,
             audit_log_id INTEGER,
@@ -634,51 +634,51 @@ class MessageControllerTest extends TestCase
             updated_at TEXT
         )');
 
-        $pdo->prepare('INSERT INTO users (id, username, email, is_admin, status, deleted_at) VALUES (?,?,?,?,?,?)')
+        $Silian_pdo->prepare('INSERT INTO users (id, username, email, is_admin, status, deleted_at) VALUES (?,?,?,?,?,?)')
             ->execute([5, 'User Five', 'user@example.com', 0, 'active', null]);
 
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 7, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 7, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $svc->expects($this->once())
+        $Silian_svc->expects($this->once())
             ->method('sendSystemMessage')
             ->with(
                 5,
                 'Alert',
-                $this->callback(static function (string $content): bool {
-                    return str_contains($content, '<h1>Headline</h1>')
-                        && str_contains($content, '<p>Body</p>')
-                        && !str_contains($content, '<script');
+                $this->callback(static function (string $Silian_content): bool {
+                    return str_contains($Silian_content, '<h1>Headline</h1>')
+                        && str_contains($Silian_content, '<p>Body</p>')
+                        && !str_contains($Silian_content, '<script');
                 }),
                 Message::TYPE_SYSTEM,
                 'high'
             )
             ->willReturn($this->createMock(Message::class));
 
-        $svc->expects($this->once())
+        $Silian_svc->expects($this->once())
             ->method('queueBroadcastEmail')
             ->with(
                 $this->anything(),
                 'Alert',
-                $this->callback(static fn (string $content): bool => !str_contains($content, '<script')),
+                $this->callback(static fn (string $Silian_content): bool => !str_contains($Silian_content, '<script')),
                 'high',
-                $this->callback(static function (array $context): bool {
-                    return ($context['content_format'] ?? null) === 'html'
-                        && ($context['render_profile'] ?? null) === 'announcement_html_v1'
-                        && ($context['render_version'] ?? null) === 1
-                        && ($context['source_kind'] ?? null) === 'admin_broadcast';
+                $this->callback(static function (array $Silian_context): bool {
+                    return ($Silian_context['content_format'] ?? null) === 'html'
+                        && ($Silian_context['render_profile'] ?? null) === 'announcement_html_v1'
+                        && ($Silian_context['render_version'] ?? null) === 1
+                        && ($Silian_context['source_kind'] ?? null) === 'admin_broadcast';
                 })
             )
             ->willReturn(['queued' => true, 'recipient_count' => 1]);
 
-        $audit->expects($this->once())->method('log');
+        $Silian_audit->expects($this->once())->method('log');
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('POST', '/admin/messages/broadcast', [
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('POST', '/admin/messages/broadcast', [
             'title' => 'Alert',
             'content' => '<h1>Headline</h1><script>alert(1)</script><p>Body</p>',
             'content_format' => 'html',
@@ -686,32 +686,32 @@ class MessageControllerTest extends TestCase
             'priority' => 'high',
             'target_users' => [5]
         ]);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->sendSystemMessage($request, $response);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->sendSystemMessage($Silian_request, $Silian_response);
 
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertSame('html', $json['content_format']);
-        $this->assertSame('announcement_html_v1', $json['render_profile']);
-        $this->assertSame(1, $json['render_version']);
-        $this->assertSame('admin_broadcast', $json['source_kind']);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertSame('html', $Silian_json['content_format']);
+        $this->assertSame('announcement_html_v1', $Silian_json['render_profile']);
+        $this->assertSame(1, $Silian_json['render_version']);
+        $this->assertSame('admin_broadcast', $Silian_json['source_kind']);
 
-        $metaRow = $pdo->query('SELECT meta FROM message_broadcasts ORDER BY id DESC LIMIT 1')->fetchColumn();
-        $this->assertNotFalse($metaRow);
-        $meta = json_decode((string)$metaRow, true);
-        $this->assertSame('html', $meta['content_format']);
-        $this->assertSame('announcement_html_v1', $meta['render_profile']);
-        $this->assertSame(1, $meta['render_version']);
-        $this->assertSame('admin_broadcast', $meta['source_kind']);
+        $Silian_metaRow = $Silian_pdo->query('SELECT meta FROM message_broadcasts ORDER BY id DESC LIMIT 1')->fetchColumn();
+        $this->assertNotFalse($Silian_metaRow);
+        $Silian_meta = json_decode((string)$Silian_metaRow, true);
+        $this->assertSame('html', $Silian_meta['content_format']);
+        $this->assertSame('announcement_html_v1', $Silian_meta['render_profile']);
+        $this->assertSame(1, $Silian_meta['render_version']);
+        $this->assertSame('admin_broadcast', $Silian_meta['source_kind']);
     }
 
     public function testBroadcastSanitizerRemovesBlockedTagsNestedInsideUnsupportedWrappers(): void
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $Silian_pdo = new \PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $pdo->exec('CREATE TABLE users (
+        $Silian_pdo->exec('CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             username TEXT,
             email TEXT,
@@ -721,17 +721,17 @@ class MessageControllerTest extends TestCase
             status TEXT,
             deleted_at TEXT
         )');
-        $pdo->exec('CREATE TABLE schools (
+        $Silian_pdo->exec('CREATE TABLE schools (
             id INTEGER PRIMARY KEY,
             name TEXT
         )');
 
-        $pdo->exec('CREATE TABLE system_logs (
+        $Silian_pdo->exec('CREATE TABLE system_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT
         )');
 
-        $pdo->exec('CREATE TABLE message_broadcasts (
+        $Silian_pdo->exec('CREATE TABLE message_broadcasts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT,
             audit_log_id INTEGER,
@@ -757,59 +757,59 @@ class MessageControllerTest extends TestCase
             updated_at TEXT
         )');
 
-        $pdo->prepare('INSERT INTO users (id, username, email, is_admin, status, deleted_at) VALUES (?,?,?,?,?,?)')
+        $Silian_pdo->prepare('INSERT INTO users (id, username, email, is_admin, status, deleted_at) VALUES (?,?,?,?,?,?)')
             ->execute([5, 'User Five', 'user@example.com', 0, 'active', null]);
 
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 7, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 7, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $svc->expects($this->once())
+        $Silian_svc->expects($this->once())
             ->method('sendSystemMessage')
             ->with(
                 5,
                 'Alert',
-                $this->callback(static function (string $content): bool {
-                    return str_contains($content, '<p>Safe body</p>')
-                        && !str_contains($content, '<script')
-                        && !str_contains($content, 'alert(1)')
-                        && !str_contains($content, '<svg')
-                        && !str_contains($content, '<span');
+                $this->callback(static function (string $Silian_content): bool {
+                    return str_contains($Silian_content, '<p>Safe body</p>')
+                        && !str_contains($Silian_content, '<script')
+                        && !str_contains($Silian_content, 'alert(1)')
+                        && !str_contains($Silian_content, '<svg')
+                        && !str_contains($Silian_content, '<span');
                 }),
                 Message::TYPE_SYSTEM,
                 'high'
             )
             ->willReturn($this->createMock(Message::class));
 
-        $svc->expects($this->once())
+        $Silian_svc->expects($this->once())
             ->method('queueBroadcastEmail')
             ->with(
                 $this->anything(),
                 'Alert',
-                $this->callback(static function (string $content): bool {
-                    return str_contains($content, '<p>Safe body</p>')
-                        && !str_contains($content, '<script')
-                        && !str_contains($content, 'alert(1)')
-                        && !str_contains($content, '<svg')
-                        && !str_contains($content, '<span');
+                $this->callback(static function (string $Silian_content): bool {
+                    return str_contains($Silian_content, '<p>Safe body</p>')
+                        && !str_contains($Silian_content, '<script')
+                        && !str_contains($Silian_content, 'alert(1)')
+                        && !str_contains($Silian_content, '<svg')
+                        && !str_contains($Silian_content, '<span');
                 }),
                 'high',
-                $this->callback(static function (array $context): bool {
-                    return ($context['content_format'] ?? null) === 'html'
-                        && ($context['render_profile'] ?? null) === 'announcement_html_v1'
-                        && ($context['render_version'] ?? null) === 1
-                        && ($context['source_kind'] ?? null) === 'admin_broadcast';
+                $this->callback(static function (array $Silian_context): bool {
+                    return ($Silian_context['content_format'] ?? null) === 'html'
+                        && ($Silian_context['render_profile'] ?? null) === 'announcement_html_v1'
+                        && ($Silian_context['render_version'] ?? null) === 1
+                        && ($Silian_context['source_kind'] ?? null) === 'admin_broadcast';
                 })
             )
             ->willReturn(['queued' => true, 'recipient_count' => 1]);
 
-        $audit->expects($this->once())->method('log');
+        $Silian_audit->expects($this->once())->method('log');
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('POST', '/admin/messages/broadcast', [
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('POST', '/admin/messages/broadcast', [
             'title' => 'Alert',
             'content' => '<span><script>alert(1)</script></span><svg><script>alert(1)</script></svg><p>Safe body</p>',
             'content_format' => 'html',
@@ -817,51 +817,51 @@ class MessageControllerTest extends TestCase
             'priority' => 'high',
             'target_users' => [5]
         ]);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->sendSystemMessage($request, $response);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->sendSystemMessage($Silian_request, $Silian_response);
 
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertSame('html', $json['content_format']);
-        $this->assertSame(1, $json['render_version']);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertSame('html', $Silian_json['content_format']);
+        $this->assertSame(1, $Silian_json['render_version']);
 
-        $row = $pdo->query('SELECT content, meta FROM message_broadcasts ORDER BY id DESC LIMIT 1')->fetch(\PDO::FETCH_ASSOC);
-        $this->assertIsArray($row);
-        $this->assertStringContainsString('<p>Safe body</p>', (string)$row['content']);
-        $this->assertStringNotContainsString('<script', (string)$row['content']);
-        $this->assertStringNotContainsString('alert(1)', (string)$row['content']);
-        $this->assertStringNotContainsString('<svg', (string)$row['content']);
-        $this->assertStringNotContainsString('<span', (string)$row['content']);
+        $Silian_row = $Silian_pdo->query('SELECT content, meta FROM message_broadcasts ORDER BY id DESC LIMIT 1')->fetch(\PDO::FETCH_ASSOC);
+        $this->assertIsArray($Silian_row);
+        $this->assertStringContainsString('<p>Safe body</p>', (string)$Silian_row['content']);
+        $this->assertStringNotContainsString('<script', (string)$Silian_row['content']);
+        $this->assertStringNotContainsString('alert(1)', (string)$Silian_row['content']);
+        $this->assertStringNotContainsString('<svg', (string)$Silian_row['content']);
+        $this->assertStringNotContainsString('<span', (string)$Silian_row['content']);
 
-        $meta = json_decode((string)$row['meta'], true);
-        $this->assertSame(1, $meta['render_version']);
+        $Silian_meta = json_decode((string)$Silian_row['meta'], true);
+        $this->assertSame(1, $Silian_meta['render_version']);
     }
 
 
     public function testSearchBroadcastRecipientsReturnsData(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->method('bindValue')->willReturn(true);
-        $stmt->method('execute')->willReturn(true);
-        $stmt->method('fetchAll')->willReturn([
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->method('bindValue')->willReturn(true);
+        $Silian_stmt->method('execute')->willReturn(true);
+        $Silian_stmt->method('fetchAll')->willReturn([
             ['id' => 10, 'username' => 'Alice', 'email' => 'alice@example.com', 'school_id' => 1, 'school_name' => 'Canonical Green', 'region_code' => 'US-UM-81', 'is_admin' => 0, 'status' => 'active'],
             ['id' => 11, 'username' => 'Bob', 'email' => 'bob@example.com', 'school_id' => 2, 'school_name' => 'Harbor Green', 'region_code' => null, 'is_admin' => 0, 'status' => 'active'],
         ]);
 
-        $pdo->method('prepare')->willReturn($stmt);
+        $Silian_pdo->method('prepare')->willReturn($Silian_stmt);
 
-        $region = $this->createMock(RegionService::class);
-        $region->method('getRegionContext')->willReturnCallback(static function (?string $value): ?array {
-            if ($value !== 'US-UM-81') {
+        $Silian_region = $this->createMock(RegionService::class);
+        $Silian_region->method('getRegionContext')->willReturnCallback(static function (?string $Silian_value): ?array {
+            if ($Silian_value !== 'US-UM-81') {
                 return null;
             }
 
@@ -875,87 +875,87 @@ class MessageControllerTest extends TestCase
             ];
         });
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth, null, $this->makeUserProfileViewService($region));
-        $request = makeRequest('GET', '/admin/messages/broadcast/recipients', null, ['search' => 'example', 'limit' => 1]);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->searchBroadcastRecipients($request, $response);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth, null, $this->makeUserProfileViewService($Silian_region));
+        $Silian_request = makeRequest('GET', '/admin/messages/broadcast/recipients', null, ['search' => 'example', 'limit' => 1]);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->searchBroadcastRecipients($Silian_request, $Silian_response);
 
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertCount(1, $json['data']);
-        $this->assertTrue($json['pagination']['has_more']);
-        $this->assertSame(1, $json['pagination']['page']);
-        $this->assertSame('Canonical Green', $json['data'][0]['school']);
-        $this->assertSame('US-UM-81', $json['data'][0]['location']);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertCount(1, $Silian_json['data']);
+        $this->assertTrue($Silian_json['pagination']['has_more']);
+        $this->assertSame(1, $Silian_json['pagination']['page']);
+        $this->assertSame('Canonical Green', $Silian_json['data'][0]['school']);
+        $this->assertSame('US-UM-81', $Silian_json['data'][0]['location']);
     }
 
     public function testSearchBroadcastRecipientsUsesNamedSearchAndIdBindings(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $bound = [];
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_bound = [];
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->expects($this->exactly(6))
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->expects($this->exactly(6))
             ->method('bindValue')
-            ->willReturnCallback(function ($key, $value, ?int $type = null) use (&$bound) {
-                $bound[$key] = [$value, $type];
+            ->willReturnCallback(function ($Silian_key, $Silian_value, ?int $Silian_type = null) use (&$Silian_bound) {
+                $Silian_bound[$Silian_key] = [$Silian_value, $Silian_type];
                 return true;
             });
-        $stmt->expects($this->once())->method('execute')->willReturn(true);
-        $stmt->expects($this->once())->method('fetchAll')->willReturn([]);
+        $Silian_stmt->expects($this->once())->method('execute')->willReturn(true);
+        $Silian_stmt->expects($this->once())->method('fetchAll')->willReturn([]);
 
-        $pdo->expects($this->once())
+        $Silian_pdo->expects($this->once())
             ->method('prepare')
-            ->with($this->callback(static function (string $sql): bool {
-                return str_contains($sql, 'u.username LIKE :search_0')
-                    && str_contains($sql, 'u.email LIKE :search_1')
-                    && str_contains($sql, 'u.id IN (:include_id_0,:include_id_1)');
+            ->with($this->callback(static function (string $Silian_sql): bool {
+                return str_contains($Silian_sql, 'u.username LIKE :search_0')
+                    && str_contains($Silian_sql, 'u.email LIKE :search_1')
+                    && str_contains($Silian_sql, 'u.id IN (:include_id_0,:include_id_1)');
             }))
-            ->willReturn($stmt);
+            ->willReturn($Silian_stmt);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('GET', '/admin/messages/broadcast/recipients', null, [
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('GET', '/admin/messages/broadcast/recipients', null, [
             'search' => 'alice',
             'fields' => 'username,email',
             'include_ids' => [10, 11],
             'limit' => 1,
         ]);
-        $response = new \Slim\Psr7\Response();
+        $Silian_response = new \Slim\Psr7\Response();
 
-        $resp = $controller->searchBroadcastRecipients($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $this->assertSame('%alice%', $bound[':search_0'][0] ?? null);
-        $this->assertSame('%alice%', $bound[':search_1'][0] ?? null);
-        $this->assertSame(10, $bound[':include_id_0'][0] ?? null);
-        $this->assertSame(11, $bound[':include_id_1'][0] ?? null);
-        $this->assertSame(2, $bound[':limit'][0] ?? null);
-        $this->assertSame(0, $bound[':offset'][0] ?? null);
+        $Silian_resp = $Silian_controller->searchBroadcastRecipients($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $this->assertSame('%alice%', $Silian_bound[':search_0'][0] ?? null);
+        $this->assertSame('%alice%', $Silian_bound[':search_1'][0] ?? null);
+        $this->assertSame(10, $Silian_bound[':include_id_0'][0] ?? null);
+        $this->assertSame(11, $Silian_bound[':include_id_1'][0] ?? null);
+        $this->assertSame(2, $Silian_bound[':limit'][0] ?? null);
+        $this->assertSame(0, $Silian_bound[':offset'][0] ?? null);
     }
 
     public function testResolveExplicitRecipientsUsesDisplayAliasesFromCanonicalFields(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
 
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $stmt->method('fetchAll')->willReturn([
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->method('execute')->willReturn(true);
+        $Silian_stmt->method('fetchAll')->willReturn([
             ['id' => 10, 'username' => 'Alice', 'email' => 'alice@example.com', 'school_id' => 1, 'school_name' => 'Canonical Green', 'region_code' => 'US-UM-81', 'is_admin' => 0, 'status' => 'active'],
         ]);
-        $pdo->method('prepare')->willReturn($stmt);
+        $Silian_pdo->method('prepare')->willReturn($Silian_stmt);
 
-        $region = $this->createMock(RegionService::class);
-        $region->method('getRegionContext')->willReturnCallback(static function (?string $value): ?array {
-            if ($value !== 'US-UM-81') {
+        $Silian_region = $this->createMock(RegionService::class);
+        $Silian_region->method('getRegionContext')->willReturnCallback(static function (?string $Silian_value): ?array {
+            if ($Silian_value !== 'US-UM-81') {
                 return null;
             }
 
@@ -969,23 +969,23 @@ class MessageControllerTest extends TestCase
             ];
         });
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth, null, $this->makeUserProfileViewService($region));
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth, null, $this->makeUserProfileViewService($Silian_region));
 
-        $method = new \ReflectionMethod($controller, 'resolveExplicitRecipients');
-        $method->setAccessible(true);
-        $result = $method->invoke($controller, [10]);
+        $Silian_method = new \ReflectionMethod($Silian_controller, 'resolveExplicitRecipients');
+        $Silian_method->setAccessible(true);
+        $Silian_result = $Silian_method->invoke($Silian_controller, [10]);
 
-        $this->assertNull($result['error']);
-        $this->assertSame('Canonical Green', $result['records'][10]['school']);
-        $this->assertSame('US-UM-81', $result['records'][10]['location']);
+        $this->assertNull($Silian_result['error']);
+        $this->assertSame('Canonical Green', $Silian_result['records'][10]['school']);
+        $this->assertSame('US-UM-81', $Silian_result['records'][10]['location']);
     }
 
     public function testGetBroadcastHistoryReturnsAggregatedData(): void
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $Silian_pdo = new \PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $pdo->exec('CREATE TABLE message_broadcasts (
+        $Silian_pdo->exec('CREATE TABLE message_broadcasts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             request_id TEXT,
             audit_log_id INTEGER,
@@ -1011,7 +1011,7 @@ class MessageControllerTest extends TestCase
             updated_at TEXT
         )');
 
-        $pdo->exec('CREATE TABLE messages (
+        $Silian_pdo->exec('CREATE TABLE messages (
             id INTEGER PRIMARY KEY,
             receiver_id INTEGER,
             title TEXT,
@@ -1021,7 +1021,7 @@ class MessageControllerTest extends TestCase
             deleted_at TEXT
         )');
 
-        $pdo->exec('CREATE TABLE users (
+        $Silian_pdo->exec('CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             uuid TEXT,
             username TEXT,
@@ -1030,11 +1030,11 @@ class MessageControllerTest extends TestCase
             is_admin INTEGER
         )');
 
-        $title = 'Hello world';
-        $content = 'Broadcast content';
-        $createdAt = '2025-09-22 10:00:00';
-        $contentHash = hash('sha256', $title . '||' . $content);
-        $emailSnapshot = [
+        $Silian_title = 'Hello world';
+        $Silian_content = 'Broadcast content';
+        $Silian_createdAt = '2025-09-22 10:00:00';
+        $Silian_contentHash = hash('sha256', $Silian_title . '||' . $Silian_content);
+        $Silian_emailSnapshot = [
             'triggered' => true,
             'attempted_recipients' => 2,
             'successful_chunks' => 1,
@@ -1045,14 +1045,14 @@ class MessageControllerTest extends TestCase
             'errors' => [],
         ];
 
-        $insertBroadcast = $pdo->prepare('INSERT INTO message_broadcasts (request_id, audit_log_id, system_log_id, error_log_ids, title, content, priority, scope, target_count, sent_count, invalid_user_ids, failed_user_ids, message_ids_snapshot, message_map_snapshot, message_id_count, content_hash, email_delivery_snapshot, filters_snapshot, meta, created_by, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
-        $insertBroadcast->execute([
+        $Silian_insertBroadcast = $Silian_pdo->prepare('INSERT INTO message_broadcasts (request_id, audit_log_id, system_log_id, error_log_ids, title, content, priority, scope, target_count, sent_count, invalid_user_ids, failed_user_ids, message_ids_snapshot, message_map_snapshot, message_id_count, content_hash, email_delivery_snapshot, filters_snapshot, meta, created_by, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+        $Silian_insertBroadcast->execute([
             'abc-123',
             321,
             654,
             json_encode([555]),
-            $title,
-            $content,
+            $Silian_title,
+            $Silian_content,
             'high',
             'custom',
             2,
@@ -1062,8 +1062,8 @@ class MessageControllerTest extends TestCase
             json_encode([900, 901]),
             json_encode(['1' => 900, '2' => 901]),
             2,
-            $contentHash,
-            json_encode($emailSnapshot),
+            $Silian_contentHash,
+            json_encode($Silian_emailSnapshot),
             json_encode(['scope' => 'custom']),
             json_encode([
                 'content_format' => 'html',
@@ -1072,71 +1072,71 @@ class MessageControllerTest extends TestCase
                 'source_kind' => 'admin_broadcast',
             ]),
             42,
-            $createdAt,
-            $createdAt,
+            $Silian_createdAt,
+            $Silian_createdAt,
         ]);
 
-        $msgStmt = $pdo->prepare('INSERT INTO messages (id, receiver_id, title, content, is_read, created_at, deleted_at) VALUES (?,?,?,?,?,?,?)');
-        $msgStmt->execute([900, 1, $title, $content, 1, $createdAt, null]);
-        $msgStmt->execute([901, 2, $title, $content, 0, $createdAt, null]);
+        $Silian_msgStmt = $Silian_pdo->prepare('INSERT INTO messages (id, receiver_id, title, content, is_read, created_at, deleted_at) VALUES (?,?,?,?,?,?,?)');
+        $Silian_msgStmt->execute([900, 1, $Silian_title, $Silian_content, 1, $Silian_createdAt, null]);
+        $Silian_msgStmt->execute([901, 2, $Silian_title, $Silian_content, 0, $Silian_createdAt, null]);
 
-        $userStmt = $pdo->prepare('INSERT INTO users (id, uuid, username, email, status, is_admin) VALUES (?,?,?,?,?,?)');
-        $userStmt->execute([42, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'AdminUser', 'admin@example.com', 'active', 1]);
-        $userStmt->execute([1, '11111111-1111-4111-8111-111111111111', 'Alice', 'alice@example.com', 'active', 0]);
-        $userStmt->execute([2, '22222222-2222-4222-8222-222222222222', 'Bob', 'bob@example.com', 'inactive', 0]);
+        $Silian_userStmt = $Silian_pdo->prepare('INSERT INTO users (id, uuid, username, email, status, is_admin) VALUES (?,?,?,?,?,?)');
+        $Silian_userStmt->execute([42, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'AdminUser', 'admin@example.com', 'active', 1]);
+        $Silian_userStmt->execute([1, '11111111-1111-4111-8111-111111111111', 'Alice', 'alice@example.com', 'active', 0]);
+        $Silian_userStmt->execute([2, '22222222-2222-4222-8222-222222222222', 'Bob', 'bob@example.com', 'inactive', 0]);
 
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 99, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 99, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('GET', '/admin/messages/broadcasts');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->getBroadcastHistory($request, $response);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('GET', '/admin/messages/broadcasts');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->getBroadcastHistory($Silian_request, $Silian_response);
 
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertCount(1, $json['data']);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertCount(1, $Silian_json['data']);
 
-        $item = $json['data'][0];
-        $this->assertSame('Hello world', $item['title']);
-        $this->assertSame(1, $item['read_count']);
-        $this->assertSame(1, $item['unread_count']);
-        $this->assertSame([7], $item['invalid_user_ids']);
-        $this->assertSame('AdminUser', $item['actor_username']);
-        $this->assertSame('abc-123', $item['request_id']);
-        $this->assertSame(321, $item['audit_log_id']);
-        $this->assertSame(654, $item['system_log_id']);
-        $this->assertSame([555], $item['error_log_ids']);
-        $this->assertSame([900, 901], $item['message_ids']);
-        $this->assertSame('html', $item['content_format']);
-        $this->assertSame('announcement_html_v1', $item['render_profile']);
-        $this->assertSame(1, $item['render_version']);
-        $this->assertSame('admin_broadcast', $item['source_kind']);
-        $this->assertSame('sent', $item['email_delivery']['status']);
-        $this->assertSame([7], $item['email_delivery']['missing_email_user_ids']);
-        $this->assertSame([], $item['email_delivery']['errors']);
-        $this->assertSame('11111111-1111-4111-8111-111111111111', $item['read_users'][0]['user_id']);
-        $this->assertSame('11111111-1111-4111-8111-111111111111', $item['read_users'][0]['uuid']);
-        $this->assertSame(1, $item['read_users'][0]['legacy_user_id']);
-        $this->assertSame('active', $item['read_users'][0]['status']);
-        $this->assertFalse($item['read_users'][0]['is_admin']);
-        $this->assertSame('22222222-2222-4222-8222-222222222222', $item['unread_users'][0]['user_id']);
-        $this->assertSame(2, $item['unread_users'][0]['legacy_user_id']);
+        $Silian_item = $Silian_json['data'][0];
+        $this->assertSame('Hello world', $Silian_item['title']);
+        $this->assertSame(1, $Silian_item['read_count']);
+        $this->assertSame(1, $Silian_item['unread_count']);
+        $this->assertSame([7], $Silian_item['invalid_user_ids']);
+        $this->assertSame('AdminUser', $Silian_item['actor_username']);
+        $this->assertSame('abc-123', $Silian_item['request_id']);
+        $this->assertSame(321, $Silian_item['audit_log_id']);
+        $this->assertSame(654, $Silian_item['system_log_id']);
+        $this->assertSame([555], $Silian_item['error_log_ids']);
+        $this->assertSame([900, 901], $Silian_item['message_ids']);
+        $this->assertSame('html', $Silian_item['content_format']);
+        $this->assertSame('announcement_html_v1', $Silian_item['render_profile']);
+        $this->assertSame(1, $Silian_item['render_version']);
+        $this->assertSame('admin_broadcast', $Silian_item['source_kind']);
+        $this->assertSame('sent', $Silian_item['email_delivery']['status']);
+        $this->assertSame([7], $Silian_item['email_delivery']['missing_email_user_ids']);
+        $this->assertSame([], $Silian_item['email_delivery']['errors']);
+        $this->assertSame('11111111-1111-4111-8111-111111111111', $Silian_item['read_users'][0]['user_id']);
+        $this->assertSame('11111111-1111-4111-8111-111111111111', $Silian_item['read_users'][0]['uuid']);
+        $this->assertSame(1, $Silian_item['read_users'][0]['legacy_user_id']);
+        $this->assertSame('active', $Silian_item['read_users'][0]['status']);
+        $this->assertFalse($Silian_item['read_users'][0]['is_admin']);
+        $this->assertSame('22222222-2222-4222-8222-222222222222', $Silian_item['unread_users'][0]['user_id']);
+        $this->assertSame(2, $Silian_item['unread_users'][0]['legacy_user_id']);
     }
 
     public function testFlushBroadcastQueueMarksQueuedAsSentWithoutForce(): void
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $pdo->sqliteCreateFunction('NOW', fn(): string => date('Y-m-d H:i:s'));
+        $Silian_pdo = new \PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $Silian_pdo->sqliteCreateFunction('NOW', fn(): string => date('Y-m-d H:i:s'));
 
-        $pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, email TEXT, deleted_at TEXT)');
-        $pdo->exec('CREATE TABLE messages (id INTEGER PRIMARY KEY, receiver_id INTEGER, title TEXT, content TEXT, is_read INTEGER DEFAULT 0, created_at TEXT, deleted_at TEXT)');
-        $pdo->exec('CREATE TABLE message_broadcasts (
+        $Silian_pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, email TEXT, deleted_at TEXT)');
+        $Silian_pdo->exec('CREATE TABLE messages (id INTEGER PRIMARY KEY, receiver_id INTEGER, title TEXT, content TEXT, is_read INTEGER DEFAULT 0, created_at TEXT, deleted_at TEXT)');
+        $Silian_pdo->exec('CREATE TABLE message_broadcasts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT,
             content TEXT,
@@ -1148,19 +1148,19 @@ class MessageControllerTest extends TestCase
             updated_at TEXT
         )');
 
-        $title = 'Queue Notice';
-        $content = 'Please review the latest announcement.';
-        $priority = 'urgent';
-        $createdAt = '2025-01-01 10:00:00';
-        $hash = hash('sha256', $title . '||' . $content);
+        $Silian_title = 'Queue Notice';
+        $Silian_content = 'Please review the latest announcement.';
+        $Silian_priority = 'urgent';
+        $Silian_createdAt = '2025-01-01 10:00:00';
+        $Silian_hash = hash('sha256', $Silian_title . '||' . $Silian_content);
 
-        $pdo->prepare('INSERT INTO users (id, username, email) VALUES (?,?,?)')
+        $Silian_pdo->prepare('INSERT INTO users (id, username, email) VALUES (?,?,?)')
             ->execute([10, 'QueueUser', 'queue@example.com']);
 
-        $pdo->prepare('INSERT INTO messages (id, receiver_id, title, content, is_read, created_at) VALUES (?,?,?,?,?,?)')
-            ->execute([501, 10, $title, $content, 0, $createdAt]);
+        $Silian_pdo->prepare('INSERT INTO messages (id, receiver_id, title, content, is_read, created_at) VALUES (?,?,?,?,?,?)')
+            ->execute([501, 10, $Silian_title, $Silian_content, 0, $Silian_createdAt]);
 
-        $snapshot = json_encode([
+        $Silian_snapshot = json_encode([
             'triggered' => true,
             'attempted_recipients' => 1,
             'successful_chunks' => 0,
@@ -1172,43 +1172,43 @@ class MessageControllerTest extends TestCase
             'completed_at' => null,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        $pdo->prepare('INSERT INTO message_broadcasts (id, title, content, priority, created_at, email_delivery_snapshot, message_ids_snapshot, content_hash) VALUES (?,?,?,?,?,?,?,?)')
-            ->execute([1, $title, $content, $priority, $createdAt, $snapshot, json_encode([501]), $hash]);
+        $Silian_pdo->prepare('INSERT INTO message_broadcasts (id, title, content, priority, created_at, email_delivery_snapshot, message_ids_snapshot, content_hash) VALUES (?,?,?,?,?,?,?,?)')
+            ->execute([1, $Silian_title, $Silian_content, $Silian_priority, $Silian_createdAt, $Silian_snapshot, json_encode([501]), $Silian_hash]);
 
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('log');
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 88, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('log');
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 88, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth);
-        $request = makeRequest('POST', '/admin/messages/broadcasts/flush', ['limit' => 5]);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->flushBroadcastEmailQueue($request, $response);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth);
+        $Silian_request = makeRequest('POST', '/admin/messages/broadcasts/flush', ['limit' => 5]);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->flushBroadcastEmailQueue($Silian_request, $Silian_response);
 
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertSame(1, $json['count']);
-        $this->assertSame('sent', $json['processed'][0]['status']);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertSame(1, $Silian_json['count']);
+        $this->assertSame('sent', $Silian_json['processed'][0]['status']);
 
-        $snapshotRow = $pdo->query('SELECT email_delivery_snapshot FROM message_broadcasts WHERE id = 1')->fetchColumn();
-        $this->assertNotFalse($snapshotRow);
-        $decoded = json_decode((string)$snapshotRow, true);
-        $this->assertSame('sent', $decoded['status']);
-        $this->assertNotEmpty($decoded['completed_at']);
+        $Silian_snapshotRow = $Silian_pdo->query('SELECT email_delivery_snapshot FROM message_broadcasts WHERE id = 1')->fetchColumn();
+        $this->assertNotFalse($Silian_snapshotRow);
+        $Silian_decoded = json_decode((string)$Silian_snapshotRow, true);
+        $this->assertSame('sent', $Silian_decoded['status']);
+        $this->assertNotEmpty($Silian_decoded['completed_at']);
     }
 
     public function testFlushBroadcastQueueForceSendFailure(): void
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $pdo->sqliteCreateFunction('NOW', fn(): string => date('Y-m-d H:i:s'));
+        $Silian_pdo = new \PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $Silian_pdo->sqliteCreateFunction('NOW', fn(): string => date('Y-m-d H:i:s'));
 
-        $pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, email TEXT, deleted_at TEXT)');
-        $pdo->exec('CREATE TABLE messages (id INTEGER PRIMARY KEY, receiver_id INTEGER, title TEXT, content TEXT, is_read INTEGER DEFAULT 0, created_at TEXT, deleted_at TEXT)');
-        $pdo->exec('CREATE TABLE message_broadcasts (
+        $Silian_pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, email TEXT, deleted_at TEXT)');
+        $Silian_pdo->exec('CREATE TABLE messages (id INTEGER PRIMARY KEY, receiver_id INTEGER, title TEXT, content TEXT, is_read INTEGER DEFAULT 0, created_at TEXT, deleted_at TEXT)');
+        $Silian_pdo->exec('CREATE TABLE message_broadcasts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT,
             content TEXT,
@@ -1220,19 +1220,19 @@ class MessageControllerTest extends TestCase
             updated_at TEXT
         )');
 
-        $title = 'Force Send';
-        $content = 'Force send announcement';
-        $priority = 'high';
-        $createdAt = '2025-02-02 09:00:00';
-        $hash = hash('sha256', $title . '||' . $content);
+        $Silian_title = 'Force Send';
+        $Silian_content = 'Force send announcement';
+        $Silian_priority = 'high';
+        $Silian_createdAt = '2025-02-02 09:00:00';
+        $Silian_hash = hash('sha256', $Silian_title . '||' . $Silian_content);
 
-        $pdo->prepare('INSERT INTO users (id, username, email) VALUES (?,?,?)')
+        $Silian_pdo->prepare('INSERT INTO users (id, username, email) VALUES (?,?,?)')
             ->execute([20, 'ForceUser', 'force@example.com']);
 
-        $pdo->prepare('INSERT INTO messages (id, receiver_id, title, content, is_read, created_at) VALUES (?,?,?,?,?,?)')
-            ->execute([701, 20, $title, $content, 0, $createdAt]);
+        $Silian_pdo->prepare('INSERT INTO messages (id, receiver_id, title, content, is_read, created_at) VALUES (?,?,?,?,?,?)')
+            ->execute([701, 20, $Silian_title, $Silian_content, 0, $Silian_createdAt]);
 
-        $snapshot = json_encode([
+        $Silian_snapshot = json_encode([
             'triggered' => true,
             'attempted_recipients' => 1,
             'successful_chunks' => 0,
@@ -1244,38 +1244,38 @@ class MessageControllerTest extends TestCase
             'completed_at' => null,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        $pdo->prepare('INSERT INTO message_broadcasts (id, title, content, priority, created_at, email_delivery_snapshot, message_ids_snapshot, content_hash) VALUES (?,?,?,?,?,?,?,?)')
-            ->execute([2, $title, $content, $priority, $createdAt, $snapshot, json_encode([701]), $hash]);
+        $Silian_pdo->prepare('INSERT INTO message_broadcasts (id, title, content, priority, created_at, email_delivery_snapshot, message_ids_snapshot, content_hash) VALUES (?,?,?,?,?,?,?,?)')
+            ->execute([2, $Silian_title, $Silian_content, $Silian_priority, $Silian_createdAt, $Silian_snapshot, json_encode([701]), $Silian_hash]);
 
-        $svc = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('log');
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 59, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_svc = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('log');
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 59, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $emailService = $this->createMock(EmailService::class);
-        $emailService->expects($this->once())
+        $Silian_emailService = $this->createMock(EmailService::class);
+        $Silian_emailService->expects($this->once())
             ->method('sendAnnouncementBroadcast')
             ->willReturn(false);
-        $emailService->method('getLastError')->willReturn('mailer down');
+        $Silian_emailService->method('getLastError')->willReturn('mailer down');
 
-        $controller = $this->makeController($pdo, $svc, $audit, $auth, $emailService);
-        $request = makeRequest('POST', '/admin/messages/broadcasts/flush', ['limit' => 5, 'force' => 1]);
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->flushBroadcastEmailQueue($request, $response);
+        $Silian_controller = $this->makeController($Silian_pdo, $Silian_svc, $Silian_audit, $Silian_auth, $Silian_emailService);
+        $Silian_request = makeRequest('POST', '/admin/messages/broadcasts/flush', ['limit' => 5, 'force' => 1]);
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->flushBroadcastEmailQueue($Silian_request, $Silian_response);
 
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertSame('failed', $json['processed'][0]['status']);
-        $this->assertContains('mailer down', $json['processed'][0]['errors']);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertSame('failed', $Silian_json['processed'][0]['status']);
+        $this->assertContains('mailer down', $Silian_json['processed'][0]['errors']);
 
-        $snapshotRow = $pdo->query('SELECT email_delivery_snapshot FROM message_broadcasts WHERE id = 2')->fetchColumn();
-        $this->assertNotFalse($snapshotRow);
-        $decoded = json_decode((string)$snapshotRow, true);
-        $this->assertSame('failed', $decoded['status']);
-        $this->assertContains('mailer down', $decoded['errors']);
+        $Silian_snapshotRow = $Silian_pdo->query('SELECT email_delivery_snapshot FROM message_broadcasts WHERE id = 2')->fetchColumn();
+        $this->assertNotFalse($Silian_snapshotRow);
+        $Silian_decoded = json_decode((string)$Silian_snapshotRow, true);
+        $this->assertSame('failed', $Silian_decoded['status']);
+        $this->assertContains('mailer down', $Silian_decoded['errors']);
     }
 }
 

@@ -27,349 +27,349 @@ class AdminSupportController
     ) {
     }
 
-    public function listAssignees(Request $request, Response $response): Response
+    public function listAssignees(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportAutomationService->listAssignableUsers()]);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support assignees');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportAutomationService->listAssignableUsers()]);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support assignees');
         }
     }
 
-    public function getAssigneeDetail(Request $request, Response $response, array $args): Response
+    public function getAssigneeDetail(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $detail = $this->supportAutomationService->getAssignableUserDetail($this->numericId($args, 'id'));
-            if ($detail === null) {
-                return $this->json($response, ['success' => false, 'message' => 'Support assignee not found', 'code' => 'ASSIGNEE_NOT_FOUND'], 404);
+            $Silian_detail = $this->supportAutomationService->getAssignableUserDetail($this->numericId($Silian_args, 'id'));
+            if ($Silian_detail === null) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Support assignee not found', 'code' => 'ASSIGNEE_NOT_FOUND'], 404);
             }
-            return $this->json($response, ['success' => true, 'data' => $detail]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support assignee detail');
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_detail]);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support assignee detail');
         }
     }
 
-    public function getRoutingSettings(Request $request, Response $response): Response
+    public function getRoutingSettings(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportAutomationService->getRoutingSettings()]);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support routing settings');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportAutomationService->getRoutingSettings()]);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support routing settings');
         }
     }
 
-    public function updateRoutingSettings(Request $request, Response $response): Response
+    public function updateRoutingSettings(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $actor = $this->currentUser($request);
-            return $this->json($response, ['success' => true, 'data' => $this->supportAutomationService->saveRoutingSettings($actor, $this->body($request))]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to save support routing settings');
+            $Silian_actor = $this->currentUser($Silian_request);
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportAutomationService->saveRoutingSettings($Silian_actor, $this->body($Silian_request))]);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to save support routing settings');
         }
     }
 
-    public function getAssigneeRoutingProfile(Request $request, Response $response, array $args): Response
+    public function getAssigneeRoutingProfile(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $profile = $this->supportAutomationService->getAssigneeRoutingProfile($this->numericId($args, 'id'));
-            if ($profile === null) {
-                return $this->json($response, ['success' => false, 'message' => 'Support assignee not found', 'code' => 'ASSIGNEE_NOT_FOUND'], 404);
+            $Silian_profile = $this->supportAutomationService->getAssigneeRoutingProfile($this->numericId($Silian_args, 'id'));
+            if ($Silian_profile === null) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Support assignee not found', 'code' => 'ASSIGNEE_NOT_FOUND'], 404);
             }
-            return $this->json($response, ['success' => true, 'data' => $profile]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support assignee routing profile');
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_profile]);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support assignee routing profile');
         }
     }
 
-    public function updateAssigneeRoutingProfile(Request $request, Response $response, array $args): Response
+    public function updateAssigneeRoutingProfile(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $actor = $this->currentUser($request);
-            return $this->json($response, [
+            $Silian_actor = $this->currentUser($Silian_request);
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $this->supportAutomationService->saveAssigneeRoutingProfile($actor, $this->numericId($args, 'id'), $this->body($request)),
+                'data' => $this->supportAutomationService->saveAssigneeRoutingProfile($Silian_actor, $this->numericId($Silian_args, 'id'), $this->body($Silian_request)),
             ]);
-        } catch (\RuntimeException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'ASSIGNEE_NOT_FOUND'], 404);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to save support assignee routing profile');
+        } catch (\RuntimeException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'ASSIGNEE_NOT_FOUND'], 404);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to save support assignee routing profile');
         }
     }
 
-    public function listTags(Request $request, Response $response): Response
+    public function listTags(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportAutomationService->listTags()]);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support tags');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportAutomationService->listTags()]);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support tags');
         }
     }
 
-    public function createTag(Request $request, Response $response): Response
+    public function createTag(Request $Silian_request, Response $Silian_response): Response
     {
-        return $this->saveTag($request, $response, null, 201);
+        return $this->saveTag($Silian_request, $Silian_response, null, 201);
     }
 
-    public function updateTag(Request $request, Response $response, array $args): Response
+    public function updateTag(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            return $this->saveTag($request, $response, $this->numericId($args, 'id'), 200);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+            return $this->saveTag($Silian_request, $Silian_response, $this->numericId($Silian_args, 'id'), 200);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
         }
     }
 
-    public function listRules(Request $request, Response $response): Response
+    public function listRules(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportAutomationService->listRules()]);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support automation rules');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportAutomationService->listRules()]);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support automation rules');
         }
     }
 
-    public function createRule(Request $request, Response $response): Response
+    public function createRule(Request $Silian_request, Response $Silian_response): Response
     {
-        return $this->saveRule($request, $response, null, 201);
+        return $this->saveRule($Silian_request, $Silian_response, null, 201);
     }
 
-    public function updateRule(Request $request, Response $response, array $args): Response
+    public function updateRule(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            return $this->saveRule($request, $response, $this->numericId($args, 'id'), 200);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+            return $this->saveRule($Silian_request, $Silian_response, $this->numericId($Silian_args, 'id'), 200);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
         }
     }
 
-    public function reports(Request $request, Response $response): Response
+    public function reports(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportAutomationService->getReports($request->getQueryParams())]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support reports');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportAutomationService->getReports($Silian_request->getQueryParams())]);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support reports');
         }
     }
 
-    public function listTickets(Request $request, Response $response): Response
+    public function listTickets(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $actor = $this->currentUser($request);
-            $query = $request->getQueryParams();
-            $result = $this->supportTicketService->listSupportTickets($actor, $query);
-            $this->auditLogService->logAdminOperation('admin_support_tickets_listed', $this->actorId($actor), 'admin_support', [
+            $Silian_actor = $this->currentUser($Silian_request);
+            $Silian_query = $Silian_request->getQueryParams();
+            $Silian_result = $this->supportTicketService->listSupportTickets($Silian_actor, $Silian_query);
+            $this->auditLogService->logAdminOperation('admin_support_tickets_listed', $this->actorId($Silian_actor), 'admin_support', [
                 'table' => 'support_tickets',
-                'request_data' => $query,
-                'request_id' => $request->getAttribute('request_id'),
+                'request_data' => $Silian_query,
+                'request_id' => $Silian_request->getAttribute('request_id'),
                 'status' => 'success',
-                'new_data' => ['count' => count($result['items'] ?? [])],
+                'new_data' => ['count' => count($Silian_result['items'] ?? [])],
             ]);
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $result,
+                'data' => $Silian_result,
             ]);
-        } catch (\InvalidArgumentException $e) {
-            $this->auditLogService->logAdminOperation('admin_support_tickets_list_failed', $this->actorId($this->currentUser($request)), 'admin_support', [
+        } catch (\InvalidArgumentException $Silian_e) {
+            $this->auditLogService->logAdminOperation('admin_support_tickets_list_failed', $this->actorId($this->currentUser($Silian_request)), 'admin_support', [
                 'table' => 'support_tickets',
-                'request_data' => $request->getQueryParams(),
-                'request_id' => $request->getAttribute('request_id'),
+                'request_data' => $Silian_request->getQueryParams(),
+                'request_id' => $Silian_request->getAttribute('request_id'),
                 'status' => 'failed',
-                'data' => ['error' => $e->getMessage()],
+                'data' => ['error' => $Silian_e->getMessage()],
             ]);
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            $this->auditLogService->logAdminOperation('admin_support_tickets_list_failed', $this->actorId($this->currentUser($request)), 'admin_support', [
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            $this->auditLogService->logAdminOperation('admin_support_tickets_list_failed', $this->actorId($this->currentUser($Silian_request)), 'admin_support', [
                 'table' => 'support_tickets',
-                'request_data' => $request->getQueryParams(),
-                'request_id' => $request->getAttribute('request_id'),
+                'request_data' => $Silian_request->getQueryParams(),
+                'request_id' => $Silian_request->getAttribute('request_id'),
                 'status' => 'failed',
-                'data' => ['error' => $e->getMessage()],
+                'data' => ['error' => $Silian_e->getMessage()],
             ]);
-            return $this->error($request, $response, $e, 'Failed to load support tickets');
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support tickets');
         }
     }
 
-    public function getTicketDetail(Request $request, Response $response, array $args): Response
+    public function getTicketDetail(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $ticketId = $this->numericId($args, 'id');
-            $actor = $this->currentUser($request);
-            $detail = $this->supportTicketService->getTicketDetailForSupport($actor, $ticketId);
-            $limit = (int) ($_ENV['SUPPORT_ROUTING_AUDIT_LIMIT'] ?? 10);
-            $detail['routing_runs'] = $this->supportRoutingEngineService->getRoutingRunsForTicket($ticketId, max(1, $limit));
-            $this->auditLogService->logAdminOperation('admin_support_ticket_detail_viewed', $this->actorId($actor), 'admin_support', [
+            $Silian_ticketId = $this->numericId($Silian_args, 'id');
+            $Silian_actor = $this->currentUser($Silian_request);
+            $Silian_detail = $this->supportTicketService->getTicketDetailForSupport($Silian_actor, $Silian_ticketId);
+            $Silian_limit = (int) ($_ENV['SUPPORT_ROUTING_AUDIT_LIMIT'] ?? 10);
+            $Silian_detail['routing_runs'] = $this->supportRoutingEngineService->getRoutingRunsForTicket($Silian_ticketId, max(1, $Silian_limit));
+            $this->auditLogService->logAdminOperation('admin_support_ticket_detail_viewed', $this->actorId($Silian_actor), 'admin_support', [
                 'table' => 'support_tickets',
-                'record_id' => $ticketId,
-                'request_data' => ['routing_audit_limit' => max(1, $limit)],
-                'request_id' => $request->getAttribute('request_id'),
+                'record_id' => $Silian_ticketId,
+                'request_data' => ['routing_audit_limit' => max(1, $Silian_limit)],
+                'request_id' => $Silian_request->getAttribute('request_id'),
                 'status' => 'success',
             ]);
-            return $this->json($response, ['success' => true, 'data' => $detail]);
-        } catch (\RuntimeException $e) {
-            $this->auditLogService->logAdminOperation('admin_support_ticket_detail_failed', $this->actorId($this->currentUser($request)), 'admin_support', [
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_detail]);
+        } catch (\RuntimeException $Silian_e) {
+            $this->auditLogService->logAdminOperation('admin_support_ticket_detail_failed', $this->actorId($this->currentUser($Silian_request)), 'admin_support', [
                 'table' => 'support_tickets',
-                'record_id' => isset($args['id']) && is_numeric($args['id']) ? (int) $args['id'] : null,
-                'request_id' => $request->getAttribute('request_id'),
+                'record_id' => isset($Silian_args['id']) && is_numeric($Silian_args['id']) ? (int) $Silian_args['id'] : null,
+                'request_id' => $Silian_request->getAttribute('request_id'),
                 'status' => 'failed',
-                'data' => ['error' => $e->getMessage()],
+                'data' => ['error' => $Silian_e->getMessage()],
             ]);
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'TICKET_NOT_FOUND'], 404);
-        } catch (\InvalidArgumentException $e) {
-            $this->auditLogService->logAdminOperation('admin_support_ticket_detail_failed', $this->actorId($this->currentUser($request)), 'admin_support', [
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'TICKET_NOT_FOUND'], 404);
+        } catch (\InvalidArgumentException $Silian_e) {
+            $this->auditLogService->logAdminOperation('admin_support_ticket_detail_failed', $this->actorId($this->currentUser($Silian_request)), 'admin_support', [
                 'table' => 'support_tickets',
-                'record_id' => isset($args['id']) && is_numeric($args['id']) ? (int) $args['id'] : null,
-                'request_id' => $request->getAttribute('request_id'),
+                'record_id' => isset($Silian_args['id']) && is_numeric($Silian_args['id']) ? (int) $Silian_args['id'] : null,
+                'request_id' => $Silian_request->getAttribute('request_id'),
                 'status' => 'failed',
-                'data' => ['error' => $e->getMessage()],
+                'data' => ['error' => $Silian_e->getMessage()],
             ]);
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            $this->auditLogService->logAdminOperation('admin_support_ticket_detail_failed', $this->actorId($this->currentUser($request)), 'admin_support', [
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            $this->auditLogService->logAdminOperation('admin_support_ticket_detail_failed', $this->actorId($this->currentUser($Silian_request)), 'admin_support', [
                 'table' => 'support_tickets',
-                'record_id' => isset($args['id']) && is_numeric($args['id']) ? (int) $args['id'] : null,
-                'request_id' => $request->getAttribute('request_id'),
+                'record_id' => isset($Silian_args['id']) && is_numeric($Silian_args['id']) ? (int) $Silian_args['id'] : null,
+                'request_id' => $Silian_request->getAttribute('request_id'),
                 'status' => 'failed',
-                'data' => ['error' => $e->getMessage()],
+                'data' => ['error' => $Silian_e->getMessage()],
             ]);
-            return $this->error($request, $response, $e, 'Failed to load support ticket detail');
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support ticket detail');
         }
     }
 
-    public function updateTicket(Request $request, Response $response, array $args): Response
+    public function updateTicket(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
-        $actor = $this->currentUser($request);
-        $ticketId = null;
-        $requestData = $this->body($request);
+        $Silian_actor = $this->currentUser($Silian_request);
+        $Silian_ticketId = null;
+        $Silian_requestData = $this->body($Silian_request);
 
         try {
-            $ticketId = $this->numericId($args, 'id');
-            $detail = $this->supportTicketService->updateTicketFromSupport($actor, $ticketId, $requestData);
-            $this->auditLogService->logAdminOperation('admin_support_ticket_updated', $this->actorId($actor), 'admin_support', [
+            $Silian_ticketId = $this->numericId($Silian_args, 'id');
+            $Silian_detail = $this->supportTicketService->updateTicketFromSupport($Silian_actor, $Silian_ticketId, $Silian_requestData);
+            $this->auditLogService->logAdminOperation('admin_support_ticket_updated', $this->actorId($Silian_actor), 'admin_support', [
                 'table' => 'support_tickets',
-                'record_id' => $ticketId,
-                'request_data' => $requestData,
-                'request_id' => $request->getAttribute('request_id'),
+                'record_id' => $Silian_ticketId,
+                'request_data' => $Silian_requestData,
+                'request_id' => $Silian_request->getAttribute('request_id'),
                 'status' => 'success',
             ]);
-            return $this->json($response, ['success' => true, 'data' => $detail]);
-        } catch (\DomainException $e) {
-            $this->logTicketUpdateFailure($request, $actor, $ticketId, $requestData, $e);
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'FORBIDDEN'], 403);
-        } catch (\RuntimeException $e) {
-            $this->logTicketUpdateFailure($request, $actor, $ticketId, $requestData, $e);
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'TICKET_NOT_FOUND'], 404);
-        } catch (\InvalidArgumentException $e) {
-            $this->logTicketUpdateFailure($request, $actor, $ticketId, $requestData, $e);
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            $this->logTicketUpdateFailure($request, $actor, $ticketId, $requestData, $e);
-            return $this->error($request, $response, $e, 'Failed to update support ticket');
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_detail]);
+        } catch (\DomainException $Silian_e) {
+            $this->logTicketUpdateFailure($Silian_request, $Silian_actor, $Silian_ticketId, $Silian_requestData, $Silian_e);
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'FORBIDDEN'], 403);
+        } catch (\RuntimeException $Silian_e) {
+            $this->logTicketUpdateFailure($Silian_request, $Silian_actor, $Silian_ticketId, $Silian_requestData, $Silian_e);
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'TICKET_NOT_FOUND'], 404);
+        } catch (\InvalidArgumentException $Silian_e) {
+            $this->logTicketUpdateFailure($Silian_request, $Silian_actor, $Silian_ticketId, $Silian_requestData, $Silian_e);
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            $this->logTicketUpdateFailure($Silian_request, $Silian_actor, $Silian_ticketId, $Silian_requestData, $Silian_e);
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to update support ticket');
         }
     }
 
-    private function logTicketUpdateFailure(Request $request, array $actor, ?int $ticketId, array $requestData, \Throwable $exception): void
+    private function logTicketUpdateFailure(Request $Silian_request, array $Silian_actor, ?int $Silian_ticketId, array $Silian_requestData, \Throwable $Silian_exception): void
     {
-        $this->auditLogService->logAdminOperation('admin_support_ticket_update_failed', $this->actorId($actor), 'admin_support', [
+        $this->auditLogService->logAdminOperation('admin_support_ticket_update_failed', $this->actorId($Silian_actor), 'admin_support', [
             'table' => 'support_tickets',
-            'record_id' => $ticketId,
-            'request_data' => $requestData,
-            'request_id' => $request->getAttribute('request_id'),
+            'record_id' => $Silian_ticketId,
+            'request_data' => $Silian_requestData,
+            'request_id' => $Silian_request->getAttribute('request_id'),
             'status' => 'failed',
-            'data' => ['error' => $exception->getMessage()],
+            'data' => ['error' => $Silian_exception->getMessage()],
         ]);
 
         try {
-            $this->errorLogService->logException($exception, $request, [
+            $this->errorLogService->logException($Silian_exception, $Silian_request, [
                 'context_message' => 'Admin support ticket update failed',
-                'ticket_id' => $ticketId,
-                'request_data' => $requestData,
+                'ticket_id' => $Silian_ticketId,
+                'request_data' => $Silian_requestData,
             ]);
-        } catch (\Throwable $loggingError) {
+        } catch (\Throwable $Silian_loggingError) {
             $this->logger->error('Admin support ticket update failure logging failed', [
-                'error' => $loggingError->getMessage(),
-                'ticket_id' => $ticketId,
+                'error' => $Silian_loggingError->getMessage(),
+                'ticket_id' => $Silian_ticketId,
             ]);
         }
     }
 
-    private function saveTag(Request $request, Response $response, ?int $tagId, int $status): Response
+    private function saveTag(Request $Silian_request, Response $Silian_response, ?int $Silian_tagId, int $Silian_status): Response
     {
         try {
-            $actor = $this->currentUser($request);
-            return $this->json($response, ['success' => true, 'data' => $this->supportAutomationService->saveTag($actor, $this->body($request), $tagId)], $status);
-        } catch (\RuntimeException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'TAG_NOT_FOUND'], 404);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to save support tag');
+            $Silian_actor = $this->currentUser($Silian_request);
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportAutomationService->saveTag($Silian_actor, $this->body($Silian_request), $Silian_tagId)], $Silian_status);
+        } catch (\RuntimeException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'TAG_NOT_FOUND'], 404);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to save support tag');
         }
     }
 
-    private function saveRule(Request $request, Response $response, ?int $ruleId, int $status): Response
+    private function saveRule(Request $Silian_request, Response $Silian_response, ?int $Silian_ruleId, int $Silian_status): Response
     {
         try {
-            $actor = $this->currentUser($request);
-            return $this->json($response, ['success' => true, 'data' => $this->supportAutomationService->saveRule($actor, $this->body($request), $ruleId)], $status);
-        } catch (\RuntimeException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'RULE_NOT_FOUND'], 404);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to save support automation rule');
+            $Silian_actor = $this->currentUser($Silian_request);
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportAutomationService->saveRule($Silian_actor, $this->body($Silian_request), $Silian_ruleId)], $Silian_status);
+        } catch (\RuntimeException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'RULE_NOT_FOUND'], 404);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to save support automation rule');
         }
     }
 
-    private function currentUser(Request $request): array
+    private function currentUser(Request $Silian_request): array
     {
-        $user = $this->authService->getCurrentUser($request);
-        return is_array($user) ? $user : [];
+        $Silian_user = $this->authService->getCurrentUser($Silian_request);
+        return is_array($Silian_user) ? $Silian_user : [];
     }
 
-    private function body(Request $request): array
+    private function body(Request $Silian_request): array
     {
-        $body = $request->getParsedBody();
-        return is_array($body) ? $body : [];
+        $Silian_body = $Silian_request->getParsedBody();
+        return is_array($Silian_body) ? $Silian_body : [];
     }
 
-    private function numericId(array $args, string $key): int
+    private function numericId(array $Silian_args, string $Silian_key): int
     {
-        $value = isset($args[$key]) ? (int) $args[$key] : 0;
-        if ($value <= 0) {
+        $Silian_value = isset($Silian_args[$Silian_key]) ? (int) $Silian_args[$Silian_key] : 0;
+        if ($Silian_value <= 0) {
             throw new \InvalidArgumentException('Invalid id');
         }
-        return $value;
+        return $Silian_value;
     }
 
-    private function error(Request $request, Response $response, \Throwable $e, string $message): Response
+    private function error(Request $Silian_request, Response $Silian_response, \Throwable $Silian_e, string $Silian_message): Response
     {
-        $this->logger->error($message, ['error' => $e->getMessage()]);
+        $this->logger->error($Silian_message, ['error' => $Silian_e->getMessage()]);
         try {
-            $this->errorLogService->logException($e, $request, ['context_message' => $message]);
-        } catch (\Throwable $loggingError) {
-            $this->logger->error('Admin support logging failed', ['error' => $loggingError->getMessage()]);
+            $this->errorLogService->logException($Silian_e, $Silian_request, ['context_message' => $Silian_message]);
+        } catch (\Throwable $Silian_loggingError) {
+            $this->logger->error('Admin support logging failed', ['error' => $Silian_loggingError->getMessage()]);
         }
-        return $this->json($response, ['success' => false, 'message' => $message, 'code' => 'INTERNAL_ERROR'], 500);
+        return $this->json($Silian_response, ['success' => false, 'message' => $Silian_message, 'code' => 'INTERNAL_ERROR'], 500);
     }
 
-    private function actorId(array $actor): ?int
+    private function actorId(array $Silian_actor): ?int
     {
-        return isset($actor['id']) && is_numeric($actor['id']) ? (int) $actor['id'] : null;
+        return isset($Silian_actor['id']) && is_numeric($Silian_actor['id']) ? (int) $Silian_actor['id'] : null;
     }
 
-    private function json(Response $response, array $payload, int $status = 200): Response
+    private function json(Response $Silian_response, array $Silian_payload, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($payload));
-        return $response->withStatus($status)->withHeader('Content-Type', 'application/json');
+        $Silian_response->getBody()->write(json_encode($Silian_payload));
+        return $Silian_response->withStatus($Silian_status)->withHeader('Content-Type', 'application/json');
     }
 }

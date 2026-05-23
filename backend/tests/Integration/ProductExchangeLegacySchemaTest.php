@@ -22,14 +22,14 @@ class ProductExchangeLegacySchemaTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $tmp = tempnam(sys_get_temp_dir(), 'carbontrack_legacy_');
-        if ($tmp !== false) {
-            @unlink($tmp);
-            $path = $tmp . '.sqlite';
+        $Silian_tmp = tempnam(sys_get_temp_dir(), 'carbontrack_legacy_');
+        if ($Silian_tmp !== false) {
+            @unlink($Silian_tmp);
+            $Silian_path = $Silian_tmp . '.sqlite';
         } else {
-            $path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('carbontrack_legacy_', true) . '.sqlite';
+            $Silian_path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('carbontrack_legacy_', true) . '.sqlite';
         }
-        $this->dbPath = $path;
+        $this->dbPath = $Silian_path;
     }
 
     protected function tearDown(): void
@@ -43,58 +43,58 @@ class ProductExchangeLegacySchemaTest extends TestCase
 
     public function testExchangeProductWithLegacySchema(): void
     {
-        $pdo = new PDO('sqlite:' . $this->dbPath);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        if (method_exists($pdo, 'sqliteCreateFunction')) {
-            $pdo->sqliteCreateFunction('NOW', static fn() => date('Y-m-d H:i:s'));
+        $Silian_pdo = new PDO('sqlite:' . $this->dbPath);
+        $Silian_pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        if (method_exists($Silian_pdo, 'sqliteCreateFunction')) {
+            $Silian_pdo->sqliteCreateFunction('NOW', static fn() => date('Y-m-d H:i:s'));
         }
 
-        $this->createLegacySchema($pdo);
-        $this->seedLegacyData($pdo);
+        $this->createLegacySchema($Silian_pdo);
+        $this->seedLegacyData($Silian_pdo);
 
-        $logger = new Logger('legacy-test');
-        $logger->pushHandler(new NullHandler());
+        $Silian_logger = new Logger('legacy-test');
+        $Silian_logger->pushHandler(new NullHandler());
 
-        $auditLogMock = $this->createMock(AuditLogService::class);
-        $auditLogMock->expects($this->atLeastOnce())->method('log');
+        $Silian_auditLogMock = $this->createMock(AuditLogService::class);
+        $Silian_auditLogMock->expects($this->atLeastOnce())->method('log');
 
-        $messageService = new class($logger, $auditLogMock, $pdo) extends MessageService {
+        $Silian_messageService = new class($Silian_logger, $Silian_auditLogMock, $Silian_pdo) extends MessageService {
             private PDO $pdo;
 
-            public function __construct(Logger $logger, AuditLogService $auditLogService, PDO $pdo)
+            public function __construct(Logger $Silian_logger, AuditLogService $Silian_auditLogService, PDO $Silian_pdo)
             {
-                parent::__construct($logger, $auditLogService);
-                $this->pdo = $pdo;
+                parent::__construct($Silian_logger, $Silian_auditLogService);
+                $this->pdo = $Silian_pdo;
             }
 
             public function sendMessage(
-                int $receiverId,
-                string $type,
-                string $title,
-                string $content,
-                string $priority = Message::PRIORITY_NORMAL,
-                ?int $senderId = null,
-                bool $sendEmail = true
+                int $Silian_receiverId,
+                string $Silian_type,
+                string $Silian_title,
+                string $Silian_content,
+                string $Silian_priority = Message::PRIORITY_NORMAL,
+                ?int $Silian_senderId = null,
+                bool $Silian_sendEmail = true
             ): Message {
-                $stmt = $this->pdo->prepare('INSERT INTO messages (sender_id, receiver_id, title, content, is_read, created_at, updated_at) VALUES (:sender_id, :receiver_id, :title, :content, 0, :now, :now)');
-                $now = date('Y-m-d H:i:s');
-                $stmt->execute([
-                    'sender_id' => $senderId,
-                    'receiver_id' => $receiverId,
-                    'title' => $title,
-                    'content' => $content,
-                    'now' => $now
+                $Silian_stmt = $this->pdo->prepare('INSERT INTO messages (sender_id, receiver_id, title, content, is_read, created_at, updated_at) VALUES (:sender_id, :receiver_id, :title, :content, 0, :now, :now)');
+                $Silian_now = date('Y-m-d H:i:s');
+                $Silian_stmt->execute([
+                    'sender_id' => $Silian_senderId,
+                    'receiver_id' => $Silian_receiverId,
+                    'title' => $Silian_title,
+                    'content' => $Silian_content,
+                    'now' => $Silian_now
                 ]);
 
-                $message = new Message();
-                $message->receiver_id = $receiverId;
-                $message->title = $title;
-                $message->content = $content;
-                return $message;
+                $Silian_message = new Message();
+                $Silian_message->receiver_id = $Silian_receiverId;
+                $Silian_message->title = $Silian_title;
+                $Silian_message->content = $Silian_content;
+                return $Silian_message;
             }
         };
 
-        $userPayload = [
+        $Silian_userPayload = [
             'id' => 1,
             'username' => 'legacy_user',
             'email' => 'legacy@example.com',
@@ -102,73 +102,73 @@ class ProductExchangeLegacySchemaTest extends TestCase
             'is_admin' => false
         ];
 
-        $authService = new class('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', 'HS256', 3600, $userPayload) extends AuthService {
+        $Silian_authService = new class('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', 'HS256', 3600, $Silian_userPayload) extends AuthService {
             private array $mockUser;
 
-            public function __construct($secret, $alg, $exp, array $user)
+            public function __construct($Silian_secret, $Silian_alg, $Silian_exp, array $Silian_user)
             {
-                parent::__construct($secret, $alg, $exp);
-                $this->mockUser = $user;
+                parent::__construct($Silian_secret, $Silian_alg, $Silian_exp);
+                $this->mockUser = $Silian_user;
             }
 
-            public function getCurrentUser(\Psr\Http\Message\ServerRequestInterface $request): ?array
+            public function getCurrentUser(\Psr\Http\Message\ServerRequestInterface $Silian_request): ?array
             {
                 return $this->mockUser;
             }
         };
 
-        $controller = new ProductController($pdo, $messageService, $auditLogMock, $authService);
+        $Silian_controller = new ProductController($Silian_pdo, $Silian_messageService, $Silian_auditLogMock, $Silian_authService);
 
-        $request = makeRequest('POST', '/products/exchange', [
+        $Silian_request = makeRequest('POST', '/products/exchange', [
             'product_id' => 1,
             'quantity' => 2,
             'delivery_address' => '测试地址',
             'contact_phone' => '13800000000'
         ]);
-        $response = new Response();
+        $Silian_response = new Response();
 
-        $result = $controller->exchangeProduct($request, $response);
+        $Silian_result = $Silian_controller->exchangeProduct($Silian_request, $Silian_response);
 
-        $this->assertSame(200, $result->getStatusCode(), (string)$result->getBody());
-        $payload = json_decode((string)$result->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertTrue($payload['success']);
-        $this->assertSame(200, $payload['points_used']);
-        $this->assertArrayHasKey('exchange_id', $payload);
+        $this->assertSame(200, $Silian_result->getStatusCode(), (string)$Silian_result->getBody());
+        $Silian_payload = json_decode((string)$Silian_result->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertSame(200, $Silian_payload['points_used']);
+        $this->assertArrayHasKey('exchange_id', $Silian_payload);
 
-        $exchangeStmt = $pdo->prepare('SELECT * FROM point_exchanges WHERE id = :id');
-        $exchangeStmt->execute(['id' => $payload['exchange_id']]);
-        $exchangeRow = $exchangeStmt->fetch(PDO::FETCH_ASSOC);
-        $this->assertNotEmpty($exchangeRow);
-        $this->assertSame(1, (int)$exchangeRow['user_id']);
-        $this->assertSame(1, (int)$exchangeRow['product_id']);
-        $this->assertSame(2, (int)$exchangeRow['quantity']);
-        $this->assertSame(200, (int)$exchangeRow['points_used']);
-        $this->assertSame('pending', $exchangeRow['status']);
+        $Silian_exchangeStmt = $Silian_pdo->prepare('SELECT * FROM point_exchanges WHERE id = :id');
+        $Silian_exchangeStmt->execute(['id' => $Silian_payload['exchange_id']]);
+        $Silian_exchangeRow = $Silian_exchangeStmt->fetch(PDO::FETCH_ASSOC);
+        $this->assertNotEmpty($Silian_exchangeRow);
+        $this->assertSame(1, (int)$Silian_exchangeRow['user_id']);
+        $this->assertSame(1, (int)$Silian_exchangeRow['product_id']);
+        $this->assertSame(2, (int)$Silian_exchangeRow['quantity']);
+        $this->assertSame(200, (int)$Silian_exchangeRow['points_used']);
+        $this->assertSame('pending', $Silian_exchangeRow['status']);
 
-        $pointsTxRow = $pdo->query('SELECT * FROM points_transactions ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
-        $this->assertNotEmpty($pointsTxRow);
-        $this->assertSame('legacy@example.com', $pointsTxRow['email']);
-        $this->assertSame('legacy_user', $pointsTxRow['username']);
-        $this->assertSame('product_exchange', $pointsTxRow['auth']);
-        $this->assertSame('spend', $pointsTxRow['type']);
-        $this->assertSame('approved', $pointsTxRow['status']);
-        $this->assertEquals(-200, (int)$pointsTxRow['points']);
-        $this->assertEquals(200, (int)$pointsTxRow['raw']);
-        $this->assertNotEmpty($pointsTxRow['time']);
+        $Silian_pointsTxRow = $Silian_pdo->query('SELECT * FROM points_transactions ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+        $this->assertNotEmpty($Silian_pointsTxRow);
+        $this->assertSame('legacy@example.com', $Silian_pointsTxRow['email']);
+        $this->assertSame('legacy_user', $Silian_pointsTxRow['username']);
+        $this->assertSame('product_exchange', $Silian_pointsTxRow['auth']);
+        $this->assertSame('spend', $Silian_pointsTxRow['type']);
+        $this->assertSame('approved', $Silian_pointsTxRow['status']);
+        $this->assertEquals(-200, (int)$Silian_pointsTxRow['points']);
+        $this->assertEquals(200, (int)$Silian_pointsTxRow['raw']);
+        $this->assertNotEmpty($Silian_pointsTxRow['time']);
 
-        $updatedPoints = (int)$pdo->query('SELECT points FROM users WHERE id = 1')->fetchColumn();
-        $this->assertSame(300, $updatedPoints);
+        $Silian_updatedPoints = (int)$Silian_pdo->query('SELECT points FROM users WHERE id = 1')->fetchColumn();
+        $this->assertSame(300, $Silian_updatedPoints);
 
-        $messageRow = $pdo->query('SELECT * FROM messages ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
-        $this->assertNotEmpty($messageRow);
-        $this->assertSame(1, (int)$messageRow['receiver_id']);
-        $this->assertSame('商品兑换成功', $messageRow['title']);
-        $this->assertSame(0, (int)$messageRow['is_read']);
+        $Silian_messageRow = $Silian_pdo->query('SELECT * FROM messages ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+        $this->assertNotEmpty($Silian_messageRow);
+        $this->assertSame(1, (int)$Silian_messageRow['receiver_id']);
+        $this->assertSame('商品兑换成功', $Silian_messageRow['title']);
+        $this->assertSame(0, (int)$Silian_messageRow['is_read']);
     }
 
-    private function createLegacySchema(PDO $pdo): void
+    private function createLegacySchema(PDO $Silian_pdo): void
     {
-        $pdo->exec('CREATE TABLE users (
+        $Silian_pdo->exec('CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             username TEXT NOT NULL,
             email TEXT NOT NULL,
@@ -188,7 +188,7 @@ class ProductExchangeLegacySchemaTest extends TestCase
             notification_email_mask INTEGER NOT NULL DEFAULT 0
         )');
 
-        $pdo->exec('CREATE TABLE products (
+        $Silian_pdo->exec('CREATE TABLE products (
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
             description TEXT,
@@ -202,7 +202,7 @@ class ProductExchangeLegacySchemaTest extends TestCase
             deleted_at TEXT
         )');
 
-        $pdo->exec('CREATE TABLE point_exchanges (
+        $Silian_pdo->exec('CREATE TABLE point_exchanges (
             id TEXT PRIMARY KEY,
             user_id INTEGER NOT NULL,
             product_id INTEGER NOT NULL,
@@ -221,7 +221,7 @@ class ProductExchangeLegacySchemaTest extends TestCase
             deleted_at TEXT
         )');
 
-        $pdo->exec('CREATE TABLE points_transactions (
+        $Silian_pdo->exec('CREATE TABLE points_transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT,
             email TEXT NOT NULL,
@@ -244,7 +244,7 @@ class ProductExchangeLegacySchemaTest extends TestCase
             deleted_at TEXT
         )');
 
-        $pdo->exec('CREATE TABLE messages (
+        $Silian_pdo->exec('CREATE TABLE messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sender_id INTEGER,
             receiver_id INTEGER NOT NULL,
@@ -257,10 +257,10 @@ class ProductExchangeLegacySchemaTest extends TestCase
         )');
     }
 
-    private function seedLegacyData(PDO $pdo): void
+    private function seedLegacyData(PDO $Silian_pdo): void
     {
-        $pdo->exec("INSERT INTO users (id, username, email, points, is_admin, status) VALUES (1, 'legacy_user', 'legacy@example.com', 500, 0, 'active')");
-        $pdo->exec("INSERT INTO products (id, name, description, category, category_slug, images, image_path, stock, points_required, status) VALUES (
+        $Silian_pdo->exec("INSERT INTO users (id, username, email, points, is_admin, status) VALUES (1, 'legacy_user', 'legacy@example.com', 500, 0, 'active')");
+        $Silian_pdo->exec("INSERT INTO products (id, name, description, category, category_slug, images, image_path, stock, points_required, status) VALUES (
             1,
             '环保水杯',
             '易于携带的环保水杯',

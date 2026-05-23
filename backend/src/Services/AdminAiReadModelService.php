@@ -19,30 +19,30 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    public function execute(string $actionName, array $payload): array
+    public function execute(string $Silian_actionName, array $Silian_payload): array
     {
-        return match ($actionName) {
+        return match ($Silian_actionName) {
             'get_admin_stats' => [
                 'scope' => 'admin_stats',
                 'data' => $this->statisticsService?->getAdminStats(false) ?? [],
             ],
-            'get_pending_carbon_records' => $this->queryPendingCarbonRecords($payload),
-            'get_llm_usage_analytics' => $this->queryLlmUsageAnalytics((int) ($payload['days'] ?? 30)),
-            'get_activity_statistics' => $this->queryActivityStatistics($payload),
-            'generate_admin_report' => $this->buildAdminReport((int) ($payload['days'] ?? 30)),
-            'search_users' => $this->queryUsers($payload),
-            'get_user_overview' => $this->queryUserOverview($payload),
-            'get_exchange_orders' => $this->queryExchangeOrders($payload),
-            'get_exchange_order_detail' => $this->queryExchangeOrderDetail($payload),
-            'get_product_catalog' => $this->queryProductCatalog($payload),
+            'get_pending_carbon_records' => $this->queryPendingCarbonRecords($Silian_payload),
+            'get_llm_usage_analytics' => $this->queryLlmUsageAnalytics((int) ($Silian_payload['days'] ?? 30)),
+            'get_activity_statistics' => $this->queryActivityStatistics($Silian_payload),
+            'generate_admin_report' => $this->buildAdminReport((int) ($Silian_payload['days'] ?? 30)),
+            'search_users' => $this->queryUsers($Silian_payload),
+            'get_user_overview' => $this->queryUserOverview($Silian_payload),
+            'get_exchange_orders' => $this->queryExchangeOrders($Silian_payload),
+            'get_exchange_order_detail' => $this->queryExchangeOrderDetail($Silian_payload),
+            'get_product_catalog' => $this->queryProductCatalog($Silian_payload),
             'get_passkey_admin_stats' => $this->queryPasskeyAdminStats(),
-            'get_passkey_admin_list' => $this->queryPasskeyAdminList($payload),
+            'get_passkey_admin_list' => $this->queryPasskeyAdminList($Silian_payload),
             'get_cron_tasks' => $this->queryCronTasks(),
-            'get_cron_runs' => $this->queryCronRuns($payload),
-            'search_system_logs' => $this->querySystemLogs($payload),
-            'get_broadcast_history' => $this->queryBroadcastHistory($payload),
-            'search_broadcast_recipients' => $this->queryBroadcastRecipients($payload),
-            default => throw new \RuntimeException('Unsupported read action: ' . $actionName),
+            'get_cron_runs' => $this->queryCronRuns($Silian_payload),
+            'search_system_logs' => $this->querySystemLogs($Silian_payload),
+            'get_broadcast_history' => $this->queryBroadcastHistory($Silian_payload),
+            'search_broadcast_recipients' => $this->queryBroadcastRecipients($Silian_payload),
+            default => throw new \RuntimeException('Unsupported read action: ' . $Silian_actionName),
         };
     }
 
@@ -50,102 +50,102 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryPendingCarbonRecords(array $payload): array
+    private function queryPendingCarbonRecords(array $Silian_payload): array
     {
-        $limit = max(1, min(20, (int) ($payload['limit'] ?? 5)));
-        $status = trim((string) ($payload['status'] ?? 'pending'));
-        $where = ['r.deleted_at IS NULL', 'r.status = :status'];
-        $params = [':status' => $status];
+        $Silian_limit = max(1, min(20, (int) ($Silian_payload['limit'] ?? 5)));
+        $Silian_status = trim((string) ($Silian_payload['status'] ?? 'pending'));
+        $Silian_where = ['r.deleted_at IS NULL', 'r.status = :status'];
+        $Silian_params = [':status' => $Silian_status];
 
-        if (!empty($payload['record_ids']) && is_array($payload['record_ids'])) {
-            $placeholders = [];
-            foreach (array_values($payload['record_ids']) as $index => $id) {
-                $placeholder = ':record_id_' . $index;
-                $placeholders[] = $placeholder;
-                $params[$placeholder] = (string) $id;
+        if (!empty($Silian_payload['record_ids']) && is_array($Silian_payload['record_ids'])) {
+            $Silian_placeholders = [];
+            foreach (array_values($Silian_payload['record_ids']) as $Silian_index => $Silian_id) {
+                $Silian_placeholder = ':record_id_' . $Silian_index;
+                $Silian_placeholders[] = $Silian_placeholder;
+                $Silian_params[$Silian_placeholder] = (string) $Silian_id;
             }
-            if ($placeholders !== []) {
-                $where[] = 'r.id IN (' . implode(',', $placeholders) . ')';
+            if ($Silian_placeholders !== []) {
+                $Silian_where[] = 'r.id IN (' . implode(',', $Silian_placeholders) . ')';
             }
         }
 
-        $sql = "SELECT r.id, r.status, r.date, r.carbon_saved, r.points_earned, u.username, u.email,
+        $Silian_sql = "SELECT r.id, r.status, r.date, r.carbon_saved, r.points_earned, u.username, u.email,
                        a.name_zh AS activity_name_zh, a.name_en AS activity_name_en
                 FROM carbon_records r
                 LEFT JOIN users u ON u.id = r.user_id
                 LEFT JOIN carbon_activities a ON a.id = r.activity_id
-                WHERE " . implode(' AND ', $where) . "
+                WHERE " . implode(' AND ', $Silian_where) . "
                 ORDER BY r.created_at DESC
                 LIMIT :limit";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue($Silian_key, $Silian_value);
         }
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
 
-        $items = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-            $items[] = [
-                'id' => $row['id'],
-                'status' => $row['status'],
-                'date' => $row['date'],
-                'carbon_saved' => $row['carbon_saved'] !== null ? (float) $row['carbon_saved'] : null,
-                'points_earned' => $row['points_earned'] !== null ? (int) $row['points_earned'] : null,
-                'username' => $row['username'],
-                'email' => $row['email'],
-                'activity_name' => $row['activity_name_zh'] ?: ($row['activity_name_en'] ?: null),
+        $Silian_items = [];
+        foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+            $Silian_items[] = [
+                'id' => $Silian_row['id'],
+                'status' => $Silian_row['status'],
+                'date' => $Silian_row['date'],
+                'carbon_saved' => $Silian_row['carbon_saved'] !== null ? (float) $Silian_row['carbon_saved'] : null,
+                'points_earned' => $Silian_row['points_earned'] !== null ? (int) $Silian_row['points_earned'] : null,
+                'username' => $Silian_row['username'],
+                'email' => $Silian_row['email'],
+                'activity_name' => $Silian_row['activity_name_zh'] ?: ($Silian_row['activity_name_en'] ?: null),
             ];
         }
 
-        $countStmt = $this->db->prepare("SELECT COUNT(*) FROM carbon_records r WHERE " . implode(' AND ', $where));
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue($key, $value);
+        $Silian_countStmt = $this->db->prepare("SELECT COUNT(*) FROM carbon_records r WHERE " . implode(' AND ', $Silian_where));
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_countStmt->bindValue($Silian_key, $Silian_value);
         }
-        $countStmt->execute();
+        $Silian_countStmt->execute();
 
         return [
             'scope' => 'pending_carbon_records',
-            'status' => $status,
-            'total' => (int) $countStmt->fetchColumn(),
-            'items' => $items,
+            'status' => $Silian_status,
+            'total' => (int) $Silian_countStmt->fetchColumn(),
+            'items' => $Silian_items,
         ];
     }
 
     /**
      * @return array<string,mixed>
      */
-    private function queryLlmUsageAnalytics(int $days): array
+    private function queryLlmUsageAnalytics(int $Silian_days): array
     {
-        $days = max(7, min(90, $days));
-        $since = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
-            ->modify('-' . max(0, $days - 1) . ' days')
+        $Silian_days = max(7, min(90, $Silian_days));
+        $Silian_since = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
+            ->modify('-' . max(0, $Silian_days - 1) . ' days')
             ->setTime(0, 0, 0)
             ->format('Y-m-d H:i:s');
 
-        $summaryStmt = $this->db->prepare("SELECT COUNT(*) AS total_calls, COALESCE(SUM(total_tokens), 0) AS total_tokens,
+        $Silian_summaryStmt = $this->db->prepare("SELECT COUNT(*) AS total_calls, COALESCE(SUM(total_tokens), 0) AS total_tokens,
                 AVG(latency_ms) AS avg_latency_ms, SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) AS success_calls
             FROM llm_logs WHERE created_at >= :since");
-        $summaryStmt->execute([':since' => $since]);
-        $summary = $summaryStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_summaryStmt->execute([':since' => $Silian_since]);
+        $Silian_summary = $Silian_summaryStmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $topModelStmt = $this->db->prepare("SELECT model, COUNT(*) AS calls FROM llm_logs WHERE created_at >= :since GROUP BY model ORDER BY calls DESC LIMIT 1");
-        $topModelStmt->execute([':since' => $since]);
-        $topModel = $topModelStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        $Silian_topModelStmt = $this->db->prepare("SELECT model, COUNT(*) AS calls FROM llm_logs WHERE created_at >= :since GROUP BY model ORDER BY calls DESC LIMIT 1");
+        $Silian_topModelStmt->execute([':since' => $Silian_since]);
+        $Silian_topModel = $Silian_topModelStmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
-        $topSourceStmt = $this->db->prepare("SELECT source, COUNT(*) AS calls FROM llm_logs WHERE created_at >= :since GROUP BY source ORDER BY calls DESC LIMIT 1");
-        $topSourceStmt->execute([':since' => $since]);
-        $topSource = $topSourceStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        $Silian_topSourceStmt = $this->db->prepare("SELECT source, COUNT(*) AS calls FROM llm_logs WHERE created_at >= :since GROUP BY source ORDER BY calls DESC LIMIT 1");
+        $Silian_topSourceStmt->execute([':since' => $Silian_since]);
+        $Silian_topSource = $Silian_topSourceStmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
         return [
             'scope' => 'llm_usage_analytics',
-            'days' => $days,
-            'total_calls' => (int) ($summary['total_calls'] ?? 0),
-            'total_tokens' => (int) ($summary['total_tokens'] ?? 0),
-            'avg_latency_ms' => isset($summary['avg_latency_ms']) ? round((float) $summary['avg_latency_ms'], 2) : null,
-            'success_calls' => (int) ($summary['success_calls'] ?? 0),
-            'top_model' => $topModel['model'] ?? null,
-            'top_source' => $topSource['source'] ?? null,
+            'days' => $Silian_days,
+            'total_calls' => (int) ($Silian_summary['total_calls'] ?? 0),
+            'total_tokens' => (int) ($Silian_summary['total_tokens'] ?? 0),
+            'avg_latency_ms' => isset($Silian_summary['avg_latency_ms']) ? round((float) $Silian_summary['avg_latency_ms'], 2) : null,
+            'success_calls' => (int) ($Silian_summary['success_calls'] ?? 0),
+            'top_model' => $Silian_topModel['model'] ?? null,
+            'top_source' => $Silian_topSource['source'] ?? null,
         ];
     }
 
@@ -153,62 +153,62 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryActivityStatistics(array $payload): array
+    private function queryActivityStatistics(array $Silian_payload): array
     {
-        $activityId = trim((string) ($payload['activity_id'] ?? ''));
-        $where = ['r.deleted_at IS NULL'];
-        $params = [];
-        if ($activityId !== '') {
-            $where[] = 'r.activity_id = :activity_id';
-            $params[':activity_id'] = $activityId;
+        $Silian_activityId = trim((string) ($Silian_payload['activity_id'] ?? ''));
+        $Silian_where = ['r.deleted_at IS NULL'];
+        $Silian_params = [];
+        if ($Silian_activityId !== '') {
+            $Silian_where[] = 'r.activity_id = :activity_id';
+            $Silian_params[':activity_id'] = $Silian_activityId;
         }
 
-        $sql = "SELECT r.activity_id, a.name_zh AS activity_name_zh, a.name_en AS activity_name_en,
+        $Silian_sql = "SELECT r.activity_id, a.name_zh AS activity_name_zh, a.name_en AS activity_name_en,
                        COUNT(*) AS record_count,
                        SUM(CASE WHEN r.status = 'approved' THEN 1 ELSE 0 END) AS approved_count,
                        SUM(CASE WHEN r.status = 'pending' THEN 1 ELSE 0 END) AS pending_count,
                        COALESCE(SUM(CASE WHEN r.status = 'approved' THEN r.carbon_saved ELSE 0 END), 0) AS approved_carbon_saved
                 FROM carbon_records r
                 LEFT JOIN carbon_activities a ON a.id = r.activity_id
-                WHERE " . implode(' AND ', $where) . "
+                WHERE " . implode(' AND ', $Silian_where) . "
                 GROUP BY r.activity_id, a.name_zh, a.name_en
                 ORDER BY approved_carbon_saved DESC
                 LIMIT 10";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue($Silian_key, $Silian_value);
         }
-        $stmt->execute();
+        $Silian_stmt->execute();
 
-        $items = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-            $items[] = [
-                'activity_id' => $row['activity_id'],
-                'activity_name' => $row['activity_name_zh'] ?: ($row['activity_name_en'] ?: null),
-                'record_count' => (int) ($row['record_count'] ?? 0),
-                'approved_count' => (int) ($row['approved_count'] ?? 0),
-                'pending_count' => (int) ($row['pending_count'] ?? 0),
-                'approved_carbon_saved' => (float) ($row['approved_carbon_saved'] ?? 0),
+        $Silian_items = [];
+        foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+            $Silian_items[] = [
+                'activity_id' => $Silian_row['activity_id'],
+                'activity_name' => $Silian_row['activity_name_zh'] ?: ($Silian_row['activity_name_en'] ?: null),
+                'record_count' => (int) ($Silian_row['record_count'] ?? 0),
+                'approved_count' => (int) ($Silian_row['approved_count'] ?? 0),
+                'pending_count' => (int) ($Silian_row['pending_count'] ?? 0),
+                'approved_carbon_saved' => (float) ($Silian_row['approved_carbon_saved'] ?? 0),
             ];
         }
 
         return [
             'scope' => 'activity_statistics',
-            'activity_id' => $activityId !== '' ? $activityId : null,
-            'items' => $items,
+            'activity_id' => $Silian_activityId !== '' ? $Silian_activityId : null,
+            'items' => $Silian_items,
         ];
     }
 
     /**
      * @return array<string,mixed>
      */
-    private function buildAdminReport(int $days): array
+    private function buildAdminReport(int $Silian_days): array
     {
         return [
             'scope' => 'admin_report',
-            'days' => $days,
+            'days' => $Silian_days,
             'stats' => $this->statisticsService?->getAdminStats(false) ?? [],
-            'llm' => $this->queryLlmUsageAnalytics($days),
+            'llm' => $this->queryLlmUsageAnalytics($Silian_days),
             'pending' => $this->queryPendingCarbonRecords(['status' => 'pending', 'limit' => 5]),
         ];
     }
@@ -217,46 +217,46 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryUsers(array $payload): array
+    private function queryUsers(array $Silian_payload): array
     {
-        $limit = max(1, min(20, (int) ($payload['limit'] ?? 10)));
-        $search = trim((string) ($payload['search'] ?? $payload['q'] ?? $payload['keyword'] ?? $payload['query'] ?? ''));
-        $status = trim((string) ($payload['status'] ?? ''));
-        $userUuid = strtolower(trim((string) ($payload['user_uuid'] ?? '')));
-        $schoolId = isset($payload['school_id']) && is_numeric((string) $payload['school_id']) ? (int) $payload['school_id'] : null;
-        $role = strtolower(trim((string) ($payload['role'] ?? '')));
+        $Silian_limit = max(1, min(20, (int) ($Silian_payload['limit'] ?? 10)));
+        $Silian_search = trim((string) ($Silian_payload['search'] ?? $Silian_payload['q'] ?? $Silian_payload['keyword'] ?? $Silian_payload['query'] ?? ''));
+        $Silian_status = trim((string) ($Silian_payload['status'] ?? ''));
+        $Silian_userUuid = strtolower(trim((string) ($Silian_payload['user_uuid'] ?? '')));
+        $Silian_schoolId = isset($Silian_payload['school_id']) && is_numeric((string) $Silian_payload['school_id']) ? (int) $Silian_payload['school_id'] : null;
+        $Silian_role = strtolower(trim((string) ($Silian_payload['role'] ?? '')));
 
-        $where = ['u.deleted_at IS NULL'];
-        $params = [];
-        if ($search !== '') {
-            [$searchCondition, $searchParams] = $this->buildLikeCondition(
+        $Silian_where = ['u.deleted_at IS NULL'];
+        $Silian_params = [];
+        if ($Silian_search !== '') {
+            [$Silian_searchCondition, $Silian_searchParams] = $this->buildLikeCondition(
                 ['u.username', 'u.email', 'u.uuid'],
                 'user_search',
-                '%' . $search . '%'
+                '%' . $Silian_search . '%'
             );
-            $where[] = $searchCondition;
-            $params += $searchParams;
+            $Silian_where[] = $Silian_searchCondition;
+            $Silian_params += $Silian_searchParams;
         }
-        if ($status !== '') {
-            $where[] = 'u.status = :status';
-            $params[':status'] = $status;
+        if ($Silian_status !== '') {
+            $Silian_where[] = 'u.status = :status';
+            $Silian_params[':status'] = $Silian_status;
         }
-        if ($userUuid !== '') {
-            $where[] = 'LOWER(u.uuid) = :user_uuid';
-            $params[':user_uuid'] = $userUuid;
+        if ($Silian_userUuid !== '') {
+            $Silian_where[] = 'LOWER(u.uuid) = :user_uuid';
+            $Silian_params[':user_uuid'] = $Silian_userUuid;
         }
-        if ($schoolId !== null && $schoolId > 0) {
-            $where[] = 'u.school_id = :school_id';
-            $params[':school_id'] = $schoolId;
+        if ($Silian_schoolId !== null && $Silian_schoolId > 0) {
+            $Silian_where[] = 'u.school_id = :school_id';
+            $Silian_params[':school_id'] = $Silian_schoolId;
         }
-        if ($role === 'admin') {
-            $where[] = 'u.is_admin = 1';
-        } elseif ($role === 'user') {
-            $where[] = 'u.is_admin = 0';
+        if ($Silian_role === 'admin') {
+            $Silian_where[] = 'u.is_admin = 1';
+        } elseif ($Silian_role === 'user') {
+            $Silian_where[] = 'u.is_admin = 0';
         }
 
-        $sort = strtolower(trim((string) ($payload['sort'] ?? 'created_at_desc')));
-        $orderBy = match ($sort) {
+        $Silian_sort = strtolower(trim((string) ($Silian_payload['sort'] ?? 'created_at_desc')));
+        $Silian_orderBy = match ($Silian_sort) {
             'username_asc' => 'u.username ASC, u.id ASC',
             'username_desc' => 'u.username DESC, u.id DESC',
             'points_asc' => 'u.points ASC, u.id ASC',
@@ -265,7 +265,7 @@ class AdminAiReadModelService
             default => 'u.created_at DESC, u.id DESC',
         };
 
-        $sql = "SELECT u.id, u.uuid, u.username, u.email, u.status, u.points, u.is_admin, u.created_at,
+        $Silian_sql = "SELECT u.id, u.uuid, u.username, u.email, u.status, u.points, u.is_admin, u.created_at,
                        s.name AS school_name, COALESCE(pk.passkey_count, 0) AS passkey_count
                 FROM users u
                 LEFT JOIN schools s ON s.id = u.school_id
@@ -275,43 +275,43 @@ class AdminAiReadModelService
                     WHERE disabled_at IS NULL
                     GROUP BY user_uuid
                 ) pk ON LOWER(pk.user_uuid) = LOWER(u.uuid)
-                WHERE " . implode(' AND ', $where) . "
-                ORDER BY {$orderBy}
+                WHERE " . implode(' AND ', $Silian_where) . "
+                ORDER BY {$Silian_orderBy}
                 LIMIT :limit";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue($Silian_key, $Silian_value);
         }
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
 
-        $items = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-            $items[] = [
-                'id' => isset($row['id']) ? (int) $row['id'] : null,
-                'uuid' => $row['uuid'] ?? null,
-                'username' => $row['username'] ?? null,
-                'email' => $row['email'] ?? null,
-                'status' => $row['status'] ?? null,
-                'points' => isset($row['points']) ? (int) $row['points'] : 0,
-                'is_admin' => !empty($row['is_admin']),
-                'school_name' => $row['school_name'] ?? null,
-                'passkey_count' => isset($row['passkey_count']) ? (int) $row['passkey_count'] : 0,
-                'created_at' => $row['created_at'] ?? null,
+        $Silian_items = [];
+        foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+            $Silian_items[] = [
+                'id' => isset($Silian_row['id']) ? (int) $Silian_row['id'] : null,
+                'uuid' => $Silian_row['uuid'] ?? null,
+                'username' => $Silian_row['username'] ?? null,
+                'email' => $Silian_row['email'] ?? null,
+                'status' => $Silian_row['status'] ?? null,
+                'points' => isset($Silian_row['points']) ? (int) $Silian_row['points'] : 0,
+                'is_admin' => !empty($Silian_row['is_admin']),
+                'school_name' => $Silian_row['school_name'] ?? null,
+                'passkey_count' => isset($Silian_row['passkey_count']) ? (int) $Silian_row['passkey_count'] : 0,
+                'created_at' => $Silian_row['created_at'] ?? null,
             ];
         }
 
-        $countStmt = $this->db->prepare("SELECT COUNT(*) FROM users u WHERE " . implode(' AND ', $where));
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue($key, $value);
+        $Silian_countStmt = $this->db->prepare("SELECT COUNT(*) FROM users u WHERE " . implode(' AND ', $Silian_where));
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_countStmt->bindValue($Silian_key, $Silian_value);
         }
-        $countStmt->execute();
+        $Silian_countStmt->execute();
 
         return [
             'scope' => 'users',
-            'search' => $search !== '' ? $search : null,
-            'total' => (int) $countStmt->fetchColumn(),
-            'items' => $items,
+            'search' => $Silian_search !== '' ? $Silian_search : null,
+            'total' => (int) $Silian_countStmt->fetchColumn(),
+            'items' => $Silian_items,
         ];
     }
 
@@ -319,66 +319,66 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryUserOverview(array $payload): array
+    private function queryUserOverview(array $Silian_payload): array
     {
-        $user = $this->resolveUserRowFromPayload($payload);
-        if ($user === null) {
+        $Silian_user = $this->resolveUserRowFromPayload($Silian_payload);
+        if ($Silian_user === null) {
             throw new \RuntimeException('User not found.');
         }
 
-        $userId = (int) ($user['id'] ?? 0);
-        $userUuid = strtolower((string) ($user['uuid'] ?? ''));
+        $Silian_userId = (int) ($Silian_user['id'] ?? 0);
+        $Silian_userUuid = strtolower((string) ($Silian_user['uuid'] ?? ''));
 
-        $carbonStmt = $this->db->prepare("SELECT
+        $Silian_carbonStmt = $this->db->prepare("SELECT
                 COALESCE(SUM(CASE WHEN status = 'approved' THEN carbon_saved ELSE 0 END), 0) AS total_carbon_saved,
                 SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved_records,
                 SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending_records
             FROM carbon_records
             WHERE user_id = :user_id
               AND deleted_at IS NULL");
-        $carbonStmt->execute([':user_id' => $userId]);
-        $carbon = $carbonStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_carbonStmt->execute([':user_id' => $Silian_userId]);
+        $Silian_carbon = $Silian_carbonStmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $checkinStmt = $this->db->prepare("SELECT COUNT(*) AS checkin_days, MAX(checkin_date) AS last_checkin_date
+        $Silian_checkinStmt = $this->db->prepare("SELECT COUNT(*) AS checkin_days, MAX(checkin_date) AS last_checkin_date
             FROM user_checkins WHERE user_id = :user_id");
-        $checkinStmt->execute([':user_id' => $userId]);
-        $checkins = $checkinStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_checkinStmt->execute([':user_id' => $Silian_userId]);
+        $Silian_checkins = $Silian_checkinStmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $badgeStmt = $this->db->prepare("SELECT COUNT(*) AS badge_count FROM user_badges WHERE user_id = :user_id");
-        $badgeStmt->execute([':user_id' => $userId]);
-        $badgeCount = (int) $badgeStmt->fetchColumn();
+        $Silian_badgeStmt = $this->db->prepare("SELECT COUNT(*) AS badge_count FROM user_badges WHERE user_id = :user_id");
+        $Silian_badgeStmt->execute([':user_id' => $Silian_userId]);
+        $Silian_badgeCount = (int) $Silian_badgeStmt->fetchColumn();
 
-        $passkeyStmt = $this->db->prepare("SELECT COUNT(*) AS passkey_count, MAX(last_used_at) AS last_used_at
+        $Silian_passkeyStmt = $this->db->prepare("SELECT COUNT(*) AS passkey_count, MAX(last_used_at) AS last_used_at
             FROM user_passkeys
             WHERE disabled_at IS NULL
               AND LOWER(user_uuid) = :user_uuid");
-        $passkeyStmt->execute([':user_uuid' => $userUuid]);
-        $passkeys = $passkeyStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_passkeyStmt->execute([':user_uuid' => $Silian_userUuid]);
+        $Silian_passkeys = $Silian_passkeyStmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
         return [
             'scope' => 'user_overview',
             'user' => [
-                'id' => $userId,
-                'uuid' => $user['uuid'] ?? null,
-                'username' => $user['username'] ?? null,
-                'email' => $user['email'] ?? null,
-                'status' => $user['status'] ?? null,
-                'points' => isset($user['points']) ? (int) $user['points'] : 0,
-                'is_admin' => !empty($user['is_admin']),
-                'school_name' => $user['school_name'] ?? null,
-                'group_name' => $user['group_name'] ?? null,
-                'created_at' => $user['created_at'] ?? null,
-                'last_login_at' => $user['lastlgn'] ?? null,
+                'id' => $Silian_userId,
+                'uuid' => $Silian_user['uuid'] ?? null,
+                'username' => $Silian_user['username'] ?? null,
+                'email' => $Silian_user['email'] ?? null,
+                'status' => $Silian_user['status'] ?? null,
+                'points' => isset($Silian_user['points']) ? (int) $Silian_user['points'] : 0,
+                'is_admin' => !empty($Silian_user['is_admin']),
+                'school_name' => $Silian_user['school_name'] ?? null,
+                'group_name' => $Silian_user['group_name'] ?? null,
+                'created_at' => $Silian_user['created_at'] ?? null,
+                'last_login_at' => $Silian_user['lastlgn'] ?? null,
             ],
             'metrics' => [
-                'total_carbon_saved' => isset($carbon['total_carbon_saved']) ? (float) $carbon['total_carbon_saved'] : 0.0,
-                'approved_records' => (int) ($carbon['approved_records'] ?? 0),
-                'pending_records' => (int) ($carbon['pending_records'] ?? 0),
-                'checkin_days' => (int) ($checkins['checkin_days'] ?? 0),
-                'last_checkin_date' => $checkins['last_checkin_date'] ?? null,
-                'badge_count' => $badgeCount,
-                'passkey_count' => (int) ($passkeys['passkey_count'] ?? 0),
-                'last_passkey_used_at' => $passkeys['last_used_at'] ?? null,
+                'total_carbon_saved' => isset($Silian_carbon['total_carbon_saved']) ? (float) $Silian_carbon['total_carbon_saved'] : 0.0,
+                'approved_records' => (int) ($Silian_carbon['approved_records'] ?? 0),
+                'pending_records' => (int) ($Silian_carbon['pending_records'] ?? 0),
+                'checkin_days' => (int) ($Silian_checkins['checkin_days'] ?? 0),
+                'last_checkin_date' => $Silian_checkins['last_checkin_date'] ?? null,
+                'badge_count' => $Silian_badgeCount,
+                'passkey_count' => (int) ($Silian_passkeys['passkey_count'] ?? 0),
+                'last_passkey_used_at' => $Silian_passkeys['last_used_at'] ?? null,
             ],
         ];
     }
@@ -387,26 +387,26 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryExchangeOrders(array $payload): array
+    private function queryExchangeOrders(array $Silian_payload): array
     {
-        $limit = max(1, min(20, (int) ($payload['limit'] ?? 10)));
-        $status = strtolower(trim((string) ($payload['status'] ?? '')));
-        $search = trim((string) ($payload['search'] ?? $payload['q'] ?? ''));
-        $userId = isset($payload['user_id']) && is_numeric((string) $payload['user_id']) ? (int) $payload['user_id'] : null;
-        $userColumn = $this->resolvePointExchangeUserColumn();
+        $Silian_limit = max(1, min(20, (int) ($Silian_payload['limit'] ?? 10)));
+        $Silian_status = strtolower(trim((string) ($Silian_payload['status'] ?? '')));
+        $Silian_search = trim((string) ($Silian_payload['search'] ?? $Silian_payload['q'] ?? ''));
+        $Silian_userId = isset($Silian_payload['user_id']) && is_numeric((string) $Silian_payload['user_id']) ? (int) $Silian_payload['user_id'] : null;
+        $Silian_userColumn = $this->resolvePointExchangeUserColumn();
 
-        $where = ['e.deleted_at IS NULL'];
-        $params = [];
-        if ($status !== '') {
-            $where[] = 'LOWER(e.status) = :status';
-            $params[':status'] = $status;
+        $Silian_where = ['e.deleted_at IS NULL'];
+        $Silian_params = [];
+        if ($Silian_status !== '') {
+            $Silian_where[] = 'LOWER(e.status) = :status';
+            $Silian_params[':status'] = $Silian_status;
         }
-        if ($userId !== null && $userId > 0) {
-            $where[] = "e.{$userColumn} = :user_id";
-            $params[':user_id'] = $userId;
+        if ($Silian_userId !== null && $Silian_userId > 0) {
+            $Silian_where[] = "e.{$Silian_userColumn} = :user_id";
+            $Silian_params[':user_id'] = $Silian_userId;
         }
-        if ($search !== '') {
-            [$searchCondition, $searchParams] = $this->buildLikeCondition(
+        if ($Silian_search !== '') {
+            [$Silian_searchCondition, $Silian_searchParams] = $this->buildLikeCondition(
                 [
                     'LOWER(e.id)',
                     'LOWER(COALESCE(e.product_name, \'\'))',
@@ -415,65 +415,65 @@ class AdminAiReadModelService
                     'LOWER(COALESCE(u.email, \'\'))',
                 ],
                 'exchange_search',
-                '%' . strtolower($search) . '%'
+                '%' . strtolower($Silian_search) . '%'
             );
-            $where[] = $searchCondition;
-            $params += $searchParams;
+            $Silian_where[] = $Silian_searchCondition;
+            $Silian_params += $Silian_searchParams;
         }
 
-        $sort = strtolower(trim((string) ($payload['sort'] ?? 'created_at_desc')));
-        $orderBy = match ($sort) {
+        $Silian_sort = strtolower(trim((string) ($Silian_payload['sort'] ?? 'created_at_desc')));
+        $Silian_orderBy = match ($Silian_sort) {
             'created_at_asc' => 'e.created_at ASC, e.id ASC',
             'status_asc' => 'e.status ASC, e.created_at DESC',
             'points_desc' => 'e.points_used DESC, e.created_at DESC',
             default => 'e.created_at DESC, e.id DESC',
         };
 
-        $sql = "SELECT e.id, e.status, e.product_name, e.quantity, e.points_used, e.tracking_number, e.created_at,
-                       e.updated_at, e.notes, e.{$userColumn} AS exchange_user_id, u.username, u.email
+        $Silian_sql = "SELECT e.id, e.status, e.product_name, e.quantity, e.points_used, e.tracking_number, e.created_at,
+                       e.updated_at, e.notes, e.{$Silian_userColumn} AS exchange_user_id, u.username, u.email
                 FROM point_exchanges e
-                LEFT JOIN users u ON u.id = e.{$userColumn}
-                WHERE " . implode(' AND ', $where) . "
-                ORDER BY {$orderBy}
+                LEFT JOIN users u ON u.id = e.{$Silian_userColumn}
+                WHERE " . implode(' AND ', $Silian_where) . "
+                ORDER BY {$Silian_orderBy}
                 LIMIT :limit";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue($Silian_key, $Silian_value);
         }
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
 
-        $items = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-            $items[] = [
-                'id' => $row['id'] ?? null,
-                'status' => $row['status'] ?? null,
-                'product_name' => $row['product_name'] ?? null,
-                'quantity' => isset($row['quantity']) ? (int) $row['quantity'] : null,
-                'points_used' => isset($row['points_used']) ? (int) $row['points_used'] : null,
-                'tracking_number' => $row['tracking_number'] ?? null,
-                'user_id' => isset($row['exchange_user_id']) ? (int) $row['exchange_user_id'] : null,
-                'username' => $row['username'] ?? null,
-                'email' => $row['email'] ?? null,
-                'created_at' => $row['created_at'] ?? null,
-                'updated_at' => $row['updated_at'] ?? null,
+        $Silian_items = [];
+        foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+            $Silian_items[] = [
+                'id' => $Silian_row['id'] ?? null,
+                'status' => $Silian_row['status'] ?? null,
+                'product_name' => $Silian_row['product_name'] ?? null,
+                'quantity' => isset($Silian_row['quantity']) ? (int) $Silian_row['quantity'] : null,
+                'points_used' => isset($Silian_row['points_used']) ? (int) $Silian_row['points_used'] : null,
+                'tracking_number' => $Silian_row['tracking_number'] ?? null,
+                'user_id' => isset($Silian_row['exchange_user_id']) ? (int) $Silian_row['exchange_user_id'] : null,
+                'username' => $Silian_row['username'] ?? null,
+                'email' => $Silian_row['email'] ?? null,
+                'created_at' => $Silian_row['created_at'] ?? null,
+                'updated_at' => $Silian_row['updated_at'] ?? null,
             ];
         }
 
-        $countStmt = $this->db->prepare("SELECT COUNT(*)
+        $Silian_countStmt = $this->db->prepare("SELECT COUNT(*)
             FROM point_exchanges e
-            LEFT JOIN users u ON u.id = e.{$userColumn}
-            WHERE " . implode(' AND ', $where));
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue($key, $value);
+            LEFT JOIN users u ON u.id = e.{$Silian_userColumn}
+            WHERE " . implode(' AND ', $Silian_where));
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_countStmt->bindValue($Silian_key, $Silian_value);
         }
-        $countStmt->execute();
+        $Silian_countStmt->execute();
 
         return [
             'scope' => 'exchange_orders',
-            'status' => $status !== '' ? $status : null,
-            'total' => (int) $countStmt->fetchColumn(),
-            'items' => $items,
+            'status' => $Silian_status !== '' ? $Silian_status : null,
+            'total' => (int) $Silian_countStmt->fetchColumn(),
+            'items' => $Silian_items,
         ];
     }
 
@@ -481,38 +481,38 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryExchangeOrderDetail(array $payload): array
+    private function queryExchangeOrderDetail(array $Silian_payload): array
     {
-        $exchangeId = trim((string) ($payload['exchange_id'] ?? ''));
-        if ($exchangeId === '') {
+        $Silian_exchangeId = trim((string) ($Silian_payload['exchange_id'] ?? ''));
+        if ($Silian_exchangeId === '') {
             throw new \RuntimeException('exchange_id is required.');
         }
 
-        $exchange = $this->fetchExchangeRecordById($exchangeId);
-        if ($exchange === null) {
+        $Silian_exchange = $this->fetchExchangeRecordById($Silian_exchangeId);
+        if ($Silian_exchange === null) {
             throw new \RuntimeException('Exchange order not found.');
         }
 
-        $userColumn = $this->resolvePointExchangeUserColumn();
+        $Silian_userColumn = $this->resolvePointExchangeUserColumn();
 
         return [
             'scope' => 'exchange_order_detail',
             'exchange' => [
-                'id' => $exchange['id'] ?? null,
-                'status' => $exchange['status'] ?? null,
-                'product_id' => isset($exchange['product_id']) ? (int) $exchange['product_id'] : null,
-                'product_name' => $exchange['product_name'] ?? null,
-                'quantity' => isset($exchange['quantity']) ? (int) $exchange['quantity'] : null,
-                'points_used' => isset($exchange['points_used']) ? (int) $exchange['points_used'] : null,
-                'tracking_number' => $exchange['tracking_number'] ?? null,
-                'delivery_address' => $exchange['delivery_address'] ?? null,
-                'contact_phone' => $exchange['contact_phone'] ?? null,
-                'notes' => $exchange['notes'] ?? null,
-                'user_id' => isset($exchange[$userColumn]) ? (int) $exchange[$userColumn] : null,
-                'username' => $exchange['username'] ?? null,
-                'email' => $exchange['email'] ?? null,
-                'created_at' => $exchange['created_at'] ?? null,
-                'updated_at' => $exchange['updated_at'] ?? null,
+                'id' => $Silian_exchange['id'] ?? null,
+                'status' => $Silian_exchange['status'] ?? null,
+                'product_id' => isset($Silian_exchange['product_id']) ? (int) $Silian_exchange['product_id'] : null,
+                'product_name' => $Silian_exchange['product_name'] ?? null,
+                'quantity' => isset($Silian_exchange['quantity']) ? (int) $Silian_exchange['quantity'] : null,
+                'points_used' => isset($Silian_exchange['points_used']) ? (int) $Silian_exchange['points_used'] : null,
+                'tracking_number' => $Silian_exchange['tracking_number'] ?? null,
+                'delivery_address' => $Silian_exchange['delivery_address'] ?? null,
+                'contact_phone' => $Silian_exchange['contact_phone'] ?? null,
+                'notes' => $Silian_exchange['notes'] ?? null,
+                'user_id' => isset($Silian_exchange[$Silian_userColumn]) ? (int) $Silian_exchange[$Silian_userColumn] : null,
+                'username' => $Silian_exchange['username'] ?? null,
+                'email' => $Silian_exchange['email'] ?? null,
+                'created_at' => $Silian_exchange['created_at'] ?? null,
+                'updated_at' => $Silian_exchange['updated_at'] ?? null,
             ],
         ];
     }
@@ -521,36 +521,36 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryProductCatalog(array $payload): array
+    private function queryProductCatalog(array $Silian_payload): array
     {
-        $limit = max(1, min(20, (int) ($payload['limit'] ?? 10)));
-        $status = strtolower(trim((string) ($payload['status'] ?? '')));
-        $category = trim((string) ($payload['category'] ?? ''));
-        $search = trim((string) ($payload['search'] ?? $payload['q'] ?? ''));
+        $Silian_limit = max(1, min(20, (int) ($Silian_payload['limit'] ?? 10)));
+        $Silian_status = strtolower(trim((string) ($Silian_payload['status'] ?? '')));
+        $Silian_category = trim((string) ($Silian_payload['category'] ?? ''));
+        $Silian_search = trim((string) ($Silian_payload['search'] ?? $Silian_payload['q'] ?? ''));
 
-        $where = ['p.deleted_at IS NULL'];
-        $params = [];
-        if ($status !== '') {
-            $where[] = 'LOWER(p.status) = :status';
-            $params[':status'] = $status;
+        $Silian_where = ['p.deleted_at IS NULL'];
+        $Silian_params = [];
+        if ($Silian_status !== '') {
+            $Silian_where[] = 'LOWER(p.status) = :status';
+            $Silian_params[':status'] = $Silian_status;
         }
-        if ($category !== '') {
-            $where[] = '(p.category = :category OR p.category_slug = :category_slug)';
-            $params[':category'] = $category;
-            $params[':category_slug'] = strtolower($category);
+        if ($Silian_category !== '') {
+            $Silian_where[] = '(p.category = :category OR p.category_slug = :category_slug)';
+            $Silian_params[':category'] = $Silian_category;
+            $Silian_params[':category_slug'] = strtolower($Silian_category);
         }
-        if ($search !== '') {
-            [$searchCondition, $searchParams] = $this->buildLikeCondition(
+        if ($Silian_search !== '') {
+            [$Silian_searchCondition, $Silian_searchParams] = $this->buildLikeCondition(
                 ['LOWER(p.name)', 'LOWER(COALESCE(p.description, \'\'))'],
                 'product_search',
-                '%' . strtolower($search) . '%'
+                '%' . strtolower($Silian_search) . '%'
             );
-            $where[] = $searchCondition;
-            $params += $searchParams;
+            $Silian_where[] = $Silian_searchCondition;
+            $Silian_params += $Silian_searchParams;
         }
 
-        $sort = strtolower(trim((string) ($payload['sort'] ?? 'created_at_desc')));
-        $orderBy = match ($sort) {
+        $Silian_sort = strtolower(trim((string) ($Silian_payload['sort'] ?? 'created_at_desc')));
+        $Silian_orderBy = match ($Silian_sort) {
             'points_asc' => 'p.points_required ASC, p.id ASC',
             'points_desc' => 'p.points_required DESC, p.id DESC',
             'stock_desc' => 'p.stock DESC, p.id DESC',
@@ -558,7 +558,7 @@ class AdminAiReadModelService
             default => 'p.created_at DESC, p.id DESC',
         };
 
-        $sql = "SELECT p.id, p.name, p.category, p.category_slug, p.points_required, p.stock, p.status, p.created_at,
+        $Silian_sql = "SELECT p.id, p.name, p.category, p.category_slug, p.points_required, p.stock, p.status, p.created_at,
                        COALESCE(e.total_exchanged, 0) AS total_exchanged
                 FROM products p
                 LEFT JOIN (
@@ -567,41 +567,41 @@ class AdminAiReadModelService
                     WHERE deleted_at IS NULL
                     GROUP BY product_id
                 ) e ON e.product_id = p.id
-                WHERE " . implode(' AND ', $where) . "
-                ORDER BY {$orderBy}
+                WHERE " . implode(' AND ', $Silian_where) . "
+                ORDER BY {$Silian_orderBy}
                 LIMIT :limit";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue($Silian_key, $Silian_value);
         }
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
 
-        $items = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-            $items[] = [
-                'id' => isset($row['id']) ? (int) $row['id'] : null,
-                'name' => $row['name'] ?? null,
-                'category' => $row['category'] ?? null,
-                'category_slug' => $row['category_slug'] ?? null,
-                'points_required' => isset($row['points_required']) ? (int) $row['points_required'] : 0,
-                'stock' => isset($row['stock']) ? (int) $row['stock'] : 0,
-                'status' => $row['status'] ?? null,
-                'total_exchanged' => isset($row['total_exchanged']) ? (int) $row['total_exchanged'] : 0,
-                'created_at' => $row['created_at'] ?? null,
+        $Silian_items = [];
+        foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+            $Silian_items[] = [
+                'id' => isset($Silian_row['id']) ? (int) $Silian_row['id'] : null,
+                'name' => $Silian_row['name'] ?? null,
+                'category' => $Silian_row['category'] ?? null,
+                'category_slug' => $Silian_row['category_slug'] ?? null,
+                'points_required' => isset($Silian_row['points_required']) ? (int) $Silian_row['points_required'] : 0,
+                'stock' => isset($Silian_row['stock']) ? (int) $Silian_row['stock'] : 0,
+                'status' => $Silian_row['status'] ?? null,
+                'total_exchanged' => isset($Silian_row['total_exchanged']) ? (int) $Silian_row['total_exchanged'] : 0,
+                'created_at' => $Silian_row['created_at'] ?? null,
             ];
         }
 
-        $countStmt = $this->db->prepare("SELECT COUNT(*) FROM products p WHERE " . implode(' AND ', $where));
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue($key, $value);
+        $Silian_countStmt = $this->db->prepare("SELECT COUNT(*) FROM products p WHERE " . implode(' AND ', $Silian_where));
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_countStmt->bindValue($Silian_key, $Silian_value);
         }
-        $countStmt->execute();
+        $Silian_countStmt->execute();
 
         return [
             'scope' => 'product_catalog',
-            'total' => (int) $countStmt->fetchColumn(),
-            'items' => $items,
+            'total' => (int) $Silian_countStmt->fetchColumn(),
+            'items' => $Silian_items,
         ];
     }
 
@@ -610,7 +610,7 @@ class AdminAiReadModelService
      */
     private function queryPasskeyAdminStats(): array
     {
-        $statsStmt = $this->db->query("SELECT
+        $Silian_statsStmt = $this->db->query("SELECT
                 COUNT(*) AS total_passkeys,
                 COUNT(DISTINCT user_uuid) AS users_with_passkeys,
                 SUM(CASE WHEN backup_eligible = 1 THEN 1 ELSE 0 END) AS backup_eligible_count,
@@ -619,22 +619,22 @@ class AdminAiReadModelService
                 MAX(last_used_at) AS last_used_at
             FROM user_passkeys
             WHERE disabled_at IS NULL");
-        $stats = $statsStmt instanceof \PDOStatement ? ($statsStmt->fetch(PDO::FETCH_ASSOC) ?: []) : [];
+        $Silian_stats = $Silian_statsStmt instanceof \PDOStatement ? ($Silian_statsStmt->fetch(PDO::FETCH_ASSOC) ?: []) : [];
 
-        $recentStmt = $this->db->query("SELECT COUNT(*) FROM user_passkeys
+        $Silian_recentStmt = $this->db->query("SELECT COUNT(*) FROM user_passkeys
             WHERE disabled_at IS NULL
               AND last_used_at IS NOT NULL
               AND last_used_at >= datetime('now', '-30 day')");
 
         return [
             'scope' => 'passkey_admin_stats',
-            'total_passkeys' => (int) ($stats['total_passkeys'] ?? 0),
-            'users_with_passkeys' => (int) ($stats['users_with_passkeys'] ?? 0),
-            'backup_eligible_count' => (int) ($stats['backup_eligible_count'] ?? 0),
-            'backup_state_count' => (int) ($stats['backup_state_count'] ?? 0),
-            'never_used_count' => (int) ($stats['never_used_count'] ?? 0),
-            'used_recently_30d' => (int) (($recentStmt instanceof \PDOStatement ? $recentStmt->fetchColumn() : 0) ?: 0),
-            'last_used_at' => $stats['last_used_at'] ?? null,
+            'total_passkeys' => (int) ($Silian_stats['total_passkeys'] ?? 0),
+            'users_with_passkeys' => (int) ($Silian_stats['users_with_passkeys'] ?? 0),
+            'backup_eligible_count' => (int) ($Silian_stats['backup_eligible_count'] ?? 0),
+            'backup_state_count' => (int) ($Silian_stats['backup_state_count'] ?? 0),
+            'never_used_count' => (int) ($Silian_stats['never_used_count'] ?? 0),
+            'used_recently_30d' => (int) (($Silian_recentStmt instanceof \PDOStatement ? $Silian_recentStmt->fetchColumn() : 0) ?: 0),
+            'last_used_at' => $Silian_stats['last_used_at'] ?? null,
         ];
     }
 
@@ -642,16 +642,16 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryPasskeyAdminList(array $payload): array
+    private function queryPasskeyAdminList(array $Silian_payload): array
     {
-        $limit = max(1, min(20, (int) ($payload['limit'] ?? 10)));
-        $search = trim((string) ($payload['search'] ?? $payload['q'] ?? ''));
-        $userId = isset($payload['user_id']) && is_numeric((string) $payload['user_id']) ? (int) $payload['user_id'] : null;
+        $Silian_limit = max(1, min(20, (int) ($Silian_payload['limit'] ?? 10)));
+        $Silian_search = trim((string) ($Silian_payload['search'] ?? $Silian_payload['q'] ?? ''));
+        $Silian_userId = isset($Silian_payload['user_id']) && is_numeric((string) $Silian_payload['user_id']) ? (int) $Silian_payload['user_id'] : null;
 
-        $where = ['pk.disabled_at IS NULL'];
-        $params = [];
-        if ($search !== '') {
-            [$searchCondition, $searchParams] = $this->buildLikeCondition(
+        $Silian_where = ['pk.disabled_at IS NULL'];
+        $Silian_params = [];
+        if ($Silian_search !== '') {
+            [$Silian_searchCondition, $Silian_searchParams] = $this->buildLikeCondition(
                 [
                     'LOWER(COALESCE(pk.label, \'\'))',
                     'LOWER(COALESCE(u.username, \'\'))',
@@ -659,67 +659,67 @@ class AdminAiReadModelService
                     'LOWER(COALESCE(pk.user_uuid, \'\'))',
                 ],
                 'passkey_search',
-                '%' . strtolower($search) . '%'
+                '%' . strtolower($Silian_search) . '%'
             );
-            $where[] = $searchCondition;
-            $params += $searchParams;
+            $Silian_where[] = $Silian_searchCondition;
+            $Silian_params += $Silian_searchParams;
         }
-        if ($userId !== null && $userId > 0) {
-            $where[] = 'u.id = :user_id';
-            $params[':user_id'] = $userId;
+        if ($Silian_userId !== null && $Silian_userId > 0) {
+            $Silian_where[] = 'u.id = :user_id';
+            $Silian_params[':user_id'] = $Silian_userId;
         }
 
-        $sort = strtolower(trim((string) ($payload['sort'] ?? 'last_used_at_desc')));
-        $orderBy = match ($sort) {
+        $Silian_sort = strtolower(trim((string) ($Silian_payload['sort'] ?? 'last_used_at_desc')));
+        $Silian_orderBy = match ($Silian_sort) {
             'created_at_desc' => 'pk.created_at DESC, pk.id DESC',
             'sign_count_desc' => 'pk.sign_count DESC, pk.id DESC',
             default => 'pk.last_used_at DESC, pk.id DESC',
         };
 
-        $sql = "SELECT pk.id, pk.user_uuid, pk.label, pk.sign_count, pk.backup_eligible, pk.backup_state,
+        $Silian_sql = "SELECT pk.id, pk.user_uuid, pk.label, pk.sign_count, pk.backup_eligible, pk.backup_state,
                        pk.last_used_at, pk.created_at, u.id AS user_id, u.username, u.email
                 FROM user_passkeys pk
                 LEFT JOIN users u ON LOWER(u.uuid) = LOWER(pk.user_uuid)
-                WHERE " . implode(' AND ', $where) . "
-                ORDER BY {$orderBy}
+                WHERE " . implode(' AND ', $Silian_where) . "
+                ORDER BY {$Silian_orderBy}
                 LIMIT :limit";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue($Silian_key, $Silian_value);
         }
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
 
-        $items = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-            $items[] = [
-                'id' => isset($row['id']) ? (int) $row['id'] : null,
-                'user_id' => isset($row['user_id']) ? (int) $row['user_id'] : null,
-                'user_uuid' => $row['user_uuid'] ?? null,
-                'username' => $row['username'] ?? null,
-                'email' => $row['email'] ?? null,
-                'label' => $row['label'] ?? null,
-                'sign_count' => isset($row['sign_count']) ? (int) $row['sign_count'] : 0,
-                'backup_eligible' => !empty($row['backup_eligible']),
-                'backup_state' => !empty($row['backup_state']),
-                'last_used_at' => $row['last_used_at'] ?? null,
-                'created_at' => $row['created_at'] ?? null,
+        $Silian_items = [];
+        foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+            $Silian_items[] = [
+                'id' => isset($Silian_row['id']) ? (int) $Silian_row['id'] : null,
+                'user_id' => isset($Silian_row['user_id']) ? (int) $Silian_row['user_id'] : null,
+                'user_uuid' => $Silian_row['user_uuid'] ?? null,
+                'username' => $Silian_row['username'] ?? null,
+                'email' => $Silian_row['email'] ?? null,
+                'label' => $Silian_row['label'] ?? null,
+                'sign_count' => isset($Silian_row['sign_count']) ? (int) $Silian_row['sign_count'] : 0,
+                'backup_eligible' => !empty($Silian_row['backup_eligible']),
+                'backup_state' => !empty($Silian_row['backup_state']),
+                'last_used_at' => $Silian_row['last_used_at'] ?? null,
+                'created_at' => $Silian_row['created_at'] ?? null,
             ];
         }
 
-        $countStmt = $this->db->prepare("SELECT COUNT(*)
+        $Silian_countStmt = $this->db->prepare("SELECT COUNT(*)
             FROM user_passkeys pk
             LEFT JOIN users u ON LOWER(u.uuid) = LOWER(pk.user_uuid)
-            WHERE " . implode(' AND ', $where));
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue($key, $value);
+            WHERE " . implode(' AND ', $Silian_where));
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_countStmt->bindValue($Silian_key, $Silian_value);
         }
-        $countStmt->execute();
+        $Silian_countStmt->execute();
 
         return [
             'scope' => 'passkey_admin_list',
-            'total' => (int) $countStmt->fetchColumn(),
-            'items' => $items,
+            'total' => (int) $Silian_countStmt->fetchColumn(),
+            'items' => $Silian_items,
         ];
     }
 
@@ -729,15 +729,15 @@ class AdminAiReadModelService
     private function queryCronTasks(): array
     {
         if ($this->cronSchedulerService !== null) {
-            $items = $this->cronSchedulerService->listTasks();
+            $Silian_items = $this->cronSchedulerService->listTasks();
             return [
                 'scope' => 'cron_tasks',
-                'total' => count($items),
-                'items' => $items,
+                'total' => count($Silian_items),
+                'items' => $Silian_items,
             ];
         }
 
-        $stmt = $this->db->query("SELECT
+        $Silian_stmt = $this->db->query("SELECT
                 task_key,
                 task_name,
                 description,
@@ -756,33 +756,33 @@ class AdminAiReadModelService
             FROM cron_tasks
             ORDER BY task_key ASC");
 
-        $items = [];
-        foreach (($stmt?->fetchAll(PDO::FETCH_ASSOC)) ?: [] as $row) {
-            $settings = $this->decodeJson($row['settings_json'] ?? null);
-            $items[] = [
-                'task_key' => $row['task_key'] ?? null,
-                'task_name' => $row['task_name'] ?? null,
-                'description' => $row['description'] ?? null,
-                'interval_minutes' => isset($row['interval_minutes']) ? (int) $row['interval_minutes'] : 0,
-                'enabled' => !empty($row['enabled']),
-                'next_run_at' => $row['next_run_at'] ?? null,
-                'last_started_at' => $row['last_started_at'] ?? null,
-                'last_finished_at' => $row['last_finished_at'] ?? null,
-                'last_status' => $row['last_status'] ?? null,
-                'last_error' => $row['last_error'] ?? null,
-                'last_duration_ms' => isset($row['last_duration_ms']) ? (int) $row['last_duration_ms'] : null,
-                'consecutive_failures' => isset($row['consecutive_failures']) ? (int) $row['consecutive_failures'] : 0,
-                'locked_at' => $row['locked_at'] ?? null,
-                'settings' => $settings,
-                'is_due' => !empty($row['enabled']) && !empty($row['next_run_at']) && ($row['next_run_at'] <= $this->currentCronNow()),
-                'is_locked' => !empty($row['lock_token']) && !empty($row['locked_at']),
+        $Silian_items = [];
+        foreach (($Silian_stmt?->fetchAll(PDO::FETCH_ASSOC)) ?: [] as $Silian_row) {
+            $Silian_settings = $this->decodeJson($Silian_row['settings_json'] ?? null);
+            $Silian_items[] = [
+                'task_key' => $Silian_row['task_key'] ?? null,
+                'task_name' => $Silian_row['task_name'] ?? null,
+                'description' => $Silian_row['description'] ?? null,
+                'interval_minutes' => isset($Silian_row['interval_minutes']) ? (int) $Silian_row['interval_minutes'] : 0,
+                'enabled' => !empty($Silian_row['enabled']),
+                'next_run_at' => $Silian_row['next_run_at'] ?? null,
+                'last_started_at' => $Silian_row['last_started_at'] ?? null,
+                'last_finished_at' => $Silian_row['last_finished_at'] ?? null,
+                'last_status' => $Silian_row['last_status'] ?? null,
+                'last_error' => $Silian_row['last_error'] ?? null,
+                'last_duration_ms' => isset($Silian_row['last_duration_ms']) ? (int) $Silian_row['last_duration_ms'] : null,
+                'consecutive_failures' => isset($Silian_row['consecutive_failures']) ? (int) $Silian_row['consecutive_failures'] : 0,
+                'locked_at' => $Silian_row['locked_at'] ?? null,
+                'settings' => $Silian_settings,
+                'is_due' => !empty($Silian_row['enabled']) && !empty($Silian_row['next_run_at']) && ($Silian_row['next_run_at'] <= $this->currentCronNow()),
+                'is_locked' => !empty($Silian_row['lock_token']) && !empty($Silian_row['locked_at']),
             ];
         }
 
         return [
             'scope' => 'cron_tasks',
-            'total' => count($items),
-            'items' => $items,
+            'total' => count($Silian_items),
+            'items' => $Silian_items,
         ];
     }
 
@@ -790,92 +790,92 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryCronRuns(array $payload): array
+    private function queryCronRuns(array $Silian_payload): array
     {
         if ($this->cronSchedulerService !== null) {
-            $result = $this->cronSchedulerService->listRuns($payload);
+            $Silian_result = $this->cronSchedulerService->listRuns($Silian_payload);
             return [
                 'scope' => 'cron_runs',
-                'total' => (int) (($result['pagination']['total'] ?? 0)),
-                'items' => $result['items'] ?? [],
-                'pagination' => $result['pagination'] ?? null,
+                'total' => (int) (($Silian_result['pagination']['total'] ?? 0)),
+                'items' => $Silian_result['items'] ?? [],
+                'pagination' => $Silian_result['pagination'] ?? null,
             ];
         }
 
-        $page = max(1, (int) ($payload['page'] ?? 1));
-        $limit = max(1, min(100, (int) ($payload['limit'] ?? 20)));
-        $status = strtolower(trim((string) ($payload['status'] ?? '')));
-        $taskKey = trim((string) ($payload['task_key'] ?? ''));
-        $triggerSource = strtolower(trim((string) ($payload['trigger_source'] ?? '')));
-        $validStatuses = ['success', 'failed', 'skipped'];
-        $validSources = ['cron_endpoint', 'legacy_endpoint', 'admin_manual'];
+        $Silian_page = max(1, (int) ($Silian_payload['page'] ?? 1));
+        $Silian_limit = max(1, min(100, (int) ($Silian_payload['limit'] ?? 20)));
+        $Silian_status = strtolower(trim((string) ($Silian_payload['status'] ?? '')));
+        $Silian_taskKey = trim((string) ($Silian_payload['task_key'] ?? ''));
+        $Silian_triggerSource = strtolower(trim((string) ($Silian_payload['trigger_source'] ?? '')));
+        $Silian_validStatuses = ['success', 'failed', 'skipped'];
+        $Silian_validSources = ['cron_endpoint', 'legacy_endpoint', 'admin_manual'];
 
-        $where = ['1 = 1'];
-        $params = [];
-        if ($taskKey !== '') {
-            $where[] = 'task_key = :task_key';
-            $params[':task_key'] = $taskKey;
+        $Silian_where = ['1 = 1'];
+        $Silian_params = [];
+        if ($Silian_taskKey !== '') {
+            $Silian_where[] = 'task_key = :task_key';
+            $Silian_params[':task_key'] = $Silian_taskKey;
         }
-        if ($status !== '') {
-            if (!in_array($status, $validStatuses, true)) {
+        if ($Silian_status !== '') {
+            if (!in_array($Silian_status, $Silian_validStatuses, true)) {
                 throw new \InvalidArgumentException('Invalid cron run status');
             }
-            $where[] = 'status = :status';
-            $params[':status'] = $status;
+            $Silian_where[] = 'status = :status';
+            $Silian_params[':status'] = $Silian_status;
         }
-        if ($triggerSource !== '') {
-            if (!in_array($triggerSource, $validSources, true)) {
+        if ($Silian_triggerSource !== '') {
+            if (!in_array($Silian_triggerSource, $Silian_validSources, true)) {
                 throw new \InvalidArgumentException('Invalid cron trigger source');
             }
-            $where[] = 'trigger_source = :trigger_source';
-            $params[':trigger_source'] = $triggerSource;
+            $Silian_where[] = 'trigger_source = :trigger_source';
+            $Silian_params[':trigger_source'] = $Silian_triggerSource;
         }
 
-        $countStmt = $this->db->prepare('SELECT COUNT(*) FROM cron_runs WHERE ' . implode(' AND ', $where));
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue($key, $value);
+        $Silian_countStmt = $this->db->prepare('SELECT COUNT(*) FROM cron_runs WHERE ' . implode(' AND ', $Silian_where));
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_countStmt->bindValue($Silian_key, $Silian_value);
         }
-        $countStmt->execute();
-        $total = (int) $countStmt->fetchColumn();
+        $Silian_countStmt->execute();
+        $Silian_total = (int) $Silian_countStmt->fetchColumn();
 
-        $sql = 'SELECT id, task_key, trigger_source, request_id, status, started_at, finished_at, duration_ms, result_json, error_message, created_at
+        $Silian_sql = 'SELECT id, task_key, trigger_source, request_id, status, started_at, finished_at, duration_ms, result_json, error_message, created_at
             FROM cron_runs
-            WHERE ' . implode(' AND ', $where) . '
+            WHERE ' . implode(' AND ', $Silian_where) . '
             ORDER BY id DESC
             LIMIT :limit OFFSET :offset';
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue($Silian_key, $Silian_value);
         }
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', ($page - 1) * $limit, PDO::PARAM_INT);
-        $stmt->execute();
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->bindValue(':offset', ($Silian_page - 1) * $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
 
-        $items = [];
-        foreach (($stmt->fetchAll(PDO::FETCH_ASSOC)) ?: [] as $row) {
-            $items[] = [
-                'id' => isset($row['id']) ? (int) $row['id'] : null,
-                'task_key' => $row['task_key'] ?? null,
-                'trigger_source' => $row['trigger_source'] ?? null,
-                'request_id' => $row['request_id'] ?? null,
-                'status' => $row['status'] ?? null,
-                'started_at' => $row['started_at'] ?? null,
-                'finished_at' => $row['finished_at'] ?? null,
-                'duration_ms' => isset($row['duration_ms']) ? (int) $row['duration_ms'] : null,
-                'result' => $this->decodeJson($row['result_json'] ?? null),
-                'error_message' => $row['error_message'] ?? null,
-                'created_at' => $row['created_at'] ?? null,
+        $Silian_items = [];
+        foreach (($Silian_stmt->fetchAll(PDO::FETCH_ASSOC)) ?: [] as $Silian_row) {
+            $Silian_items[] = [
+                'id' => isset($Silian_row['id']) ? (int) $Silian_row['id'] : null,
+                'task_key' => $Silian_row['task_key'] ?? null,
+                'trigger_source' => $Silian_row['trigger_source'] ?? null,
+                'request_id' => $Silian_row['request_id'] ?? null,
+                'status' => $Silian_row['status'] ?? null,
+                'started_at' => $Silian_row['started_at'] ?? null,
+                'finished_at' => $Silian_row['finished_at'] ?? null,
+                'duration_ms' => isset($Silian_row['duration_ms']) ? (int) $Silian_row['duration_ms'] : null,
+                'result' => $this->decodeJson($Silian_row['result_json'] ?? null),
+                'error_message' => $Silian_row['error_message'] ?? null,
+                'created_at' => $Silian_row['created_at'] ?? null,
             ];
         }
 
         return [
             'scope' => 'cron_runs',
-            'total' => $total,
-            'items' => $items,
+            'total' => $Silian_total,
+            'items' => $Silian_items,
             'pagination' => [
-                'page' => $page,
-                'limit' => $limit,
-                'total' => $total,
+                'page' => $Silian_page,
+                'limit' => $Silian_limit,
+                'total' => $Silian_total,
             ],
         ];
     }
@@ -884,191 +884,191 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function querySystemLogs(array $payload): array
+    private function querySystemLogs(array $Silian_payload): array
     {
-        $limit = max(1, min(20, (int) ($payload['limit'] ?? 10)));
-        $search = trim((string) ($payload['q'] ?? $payload['search'] ?? ''));
-        $requestId = trim((string) ($payload['request_id'] ?? ''));
-        $conversationId = $this->normalizeConversationId(isset($payload['conversation_id']) ? (string) $payload['conversation_id'] : null);
-        $requestedTypes = is_array($payload['types'] ?? null) ? $payload['types'] : ['audit', 'llm', 'error'];
-        $allowedTypes = ['audit', 'llm', 'error', 'system'];
-        $types = array_values(array_intersect($allowedTypes, array_map(static fn ($item) => strtolower(trim((string) $item)), $requestedTypes)));
-        if ($types === []) {
-            $types = ['audit', 'llm', 'error'];
+        $Silian_limit = max(1, min(20, (int) ($Silian_payload['limit'] ?? 10)));
+        $Silian_search = trim((string) ($Silian_payload['q'] ?? $Silian_payload['search'] ?? ''));
+        $Silian_requestId = trim((string) ($Silian_payload['request_id'] ?? ''));
+        $Silian_conversationId = $this->normalizeConversationId(isset($Silian_payload['conversation_id']) ? (string) $Silian_payload['conversation_id'] : null);
+        $Silian_requestedTypes = is_array($Silian_payload['types'] ?? null) ? $Silian_payload['types'] : ['audit', 'llm', 'error'];
+        $Silian_allowedTypes = ['audit', 'llm', 'error', 'system'];
+        $Silian_types = array_values(array_intersect($Silian_allowedTypes, array_map(static fn ($Silian_item) => strtolower(trim((string) $Silian_item)), $Silian_requestedTypes)));
+        if ($Silian_types === []) {
+            $Silian_types = ['audit', 'llm', 'error'];
         }
 
-        $items = [];
-        $searchLike = $search !== '' ? '%' . strtolower($search) . '%' : null;
+        $Silian_items = [];
+        $Silian_searchLike = $Silian_search !== '' ? '%' . strtolower($Silian_search) . '%' : null;
 
-        if (in_array('audit', $types, true)) {
-            $sql = "SELECT id, action, request_id, conversation_id, data, created_at
+        if (in_array('audit', $Silian_types, true)) {
+            $Silian_sql = "SELECT id, action, request_id, conversation_id, data, created_at
                 FROM audit_logs
                 WHERE operation_category = 'admin_ai'";
-            $params = [];
-            if ($requestId !== '') {
-                $sql .= " AND request_id = :request_id";
-                $params[':request_id'] = $requestId;
+            $Silian_params = [];
+            if ($Silian_requestId !== '') {
+                $Silian_sql .= " AND request_id = :request_id";
+                $Silian_params[':request_id'] = $Silian_requestId;
             }
-            if ($conversationId !== null) {
-                $sql .= " AND conversation_id = :conversation_id";
-                $params[':conversation_id'] = $conversationId;
+            if ($Silian_conversationId !== null) {
+                $Silian_sql .= " AND conversation_id = :conversation_id";
+                $Silian_params[':conversation_id'] = $Silian_conversationId;
             }
-            if ($searchLike !== null) {
-                [$searchCondition, $searchParams] = $this->buildLikeCondition(
+            if ($Silian_searchLike !== null) {
+                [$Silian_searchCondition, $Silian_searchParams] = $this->buildLikeCondition(
                     ['LOWER(action)', 'LOWER(COALESCE(data, \'\'))'],
                     'audit_search',
-                    $searchLike
+                    $Silian_searchLike
                 );
-                $sql .= " AND {$searchCondition}";
-                $params += $searchParams;
+                $Silian_sql .= " AND {$Silian_searchCondition}";
+                $Silian_params += $Silian_searchParams;
             }
-            $sql .= " ORDER BY created_at DESC, id DESC LIMIT :limit";
-            $stmt = $this->db->prepare($sql);
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_sql .= " ORDER BY created_at DESC, id DESC LIMIT :limit";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_params as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-                $data = $this->decodeJson($row['data'] ?? null);
-                $items[] = [
+            $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+                $Silian_data = $this->decodeJson($Silian_row['data'] ?? null);
+                $Silian_items[] = [
                     'type' => 'audit',
-                    'id' => (int) ($row['id'] ?? 0),
-                    'request_id' => $row['request_id'] ?? null,
-                    'conversation_id' => $row['conversation_id'] ?? null,
-                    'summary' => $data['visible_text'] ?? ($row['action'] ?? null),
-                    'created_at' => $row['created_at'] ?? null,
+                    'id' => (int) ($Silian_row['id'] ?? 0),
+                    'request_id' => $Silian_row['request_id'] ?? null,
+                    'conversation_id' => $Silian_row['conversation_id'] ?? null,
+                    'summary' => $Silian_data['visible_text'] ?? ($Silian_row['action'] ?? null),
+                    'created_at' => $Silian_row['created_at'] ?? null,
                 ];
             }
         }
 
-        if (in_array('llm', $types, true)) {
-            $sql = "SELECT id, request_id, conversation_id, turn_no, model, total_tokens, created_at
+        if (in_array('llm', $Silian_types, true)) {
+            $Silian_sql = "SELECT id, request_id, conversation_id, turn_no, model, total_tokens, created_at
                 FROM llm_logs
                 WHERE 1 = 1";
-            $params = [];
-            if ($requestId !== '') {
-                $sql .= " AND request_id = :request_id";
-                $params[':request_id'] = $requestId;
+            $Silian_params = [];
+            if ($Silian_requestId !== '') {
+                $Silian_sql .= " AND request_id = :request_id";
+                $Silian_params[':request_id'] = $Silian_requestId;
             }
-            if ($conversationId !== null) {
-                $sql .= " AND conversation_id = :conversation_id";
-                $params[':conversation_id'] = $conversationId;
+            if ($Silian_conversationId !== null) {
+                $Silian_sql .= " AND conversation_id = :conversation_id";
+                $Silian_params[':conversation_id'] = $Silian_conversationId;
             }
-            if ($searchLike !== null) {
-                [$searchCondition, $searchParams] = $this->buildLikeCondition(
+            if ($Silian_searchLike !== null) {
+                [$Silian_searchCondition, $Silian_searchParams] = $this->buildLikeCondition(
                     [
                         'LOWER(COALESCE(model, \'\'))',
                         'LOWER(COALESCE(prompt, \'\'))',
                         'LOWER(COALESCE(response_raw, \'\'))',
                     ],
                     'llm_search',
-                    $searchLike
+                    $Silian_searchLike
                 );
-                $sql .= " AND {$searchCondition}";
-                $params += $searchParams;
+                $Silian_sql .= " AND {$Silian_searchCondition}";
+                $Silian_params += $Silian_searchParams;
             }
-            $sql .= " ORDER BY created_at DESC, id DESC LIMIT :limit";
-            $stmt = $this->db->prepare($sql);
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_sql .= " ORDER BY created_at DESC, id DESC LIMIT :limit";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_params as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-                $items[] = [
+            $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+                $Silian_items[] = [
                     'type' => 'llm',
-                    'id' => (int) ($row['id'] ?? 0),
-                    'request_id' => $row['request_id'] ?? null,
-                    'conversation_id' => $row['conversation_id'] ?? null,
-                    'turn_no' => isset($row['turn_no']) ? (int) $row['turn_no'] : null,
-                    'summary' => sprintf('%s / %s tokens', (string) ($row['model'] ?? 'unknown-model'), (string) ($row['total_tokens'] ?? 0)),
-                    'created_at' => $row['created_at'] ?? null,
+                    'id' => (int) ($Silian_row['id'] ?? 0),
+                    'request_id' => $Silian_row['request_id'] ?? null,
+                    'conversation_id' => $Silian_row['conversation_id'] ?? null,
+                    'turn_no' => isset($Silian_row['turn_no']) ? (int) $Silian_row['turn_no'] : null,
+                    'summary' => sprintf('%s / %s tokens', (string) ($Silian_row['model'] ?? 'unknown-model'), (string) ($Silian_row['total_tokens'] ?? 0)),
+                    'created_at' => $Silian_row['created_at'] ?? null,
                 ];
             }
         }
 
-        if (in_array('error', $types, true)) {
-            $sql = "SELECT id, request_id, error_type, error_message, created_at
+        if (in_array('error', $Silian_types, true)) {
+            $Silian_sql = "SELECT id, request_id, error_type, error_message, created_at
                 FROM error_logs
                 WHERE 1 = 1";
-            $params = [];
-            if ($requestId !== '') {
-                $sql .= " AND request_id = :request_id";
-                $params[':request_id'] = $requestId;
+            $Silian_params = [];
+            if ($Silian_requestId !== '') {
+                $Silian_sql .= " AND request_id = :request_id";
+                $Silian_params[':request_id'] = $Silian_requestId;
             }
-            if ($searchLike !== null) {
-                [$searchCondition, $searchParams] = $this->buildLikeCondition(
+            if ($Silian_searchLike !== null) {
+                [$Silian_searchCondition, $Silian_searchParams] = $this->buildLikeCondition(
                     ['LOWER(COALESCE(error_type, \'\'))', 'LOWER(COALESCE(error_message, \'\'))'],
                     'error_search',
-                    $searchLike
+                    $Silian_searchLike
                 );
-                $sql .= " AND {$searchCondition}";
-                $params += $searchParams;
+                $Silian_sql .= " AND {$Silian_searchCondition}";
+                $Silian_params += $Silian_searchParams;
             }
-            $sql .= " ORDER BY created_at DESC, id DESC LIMIT :limit";
-            $stmt = $this->db->prepare($sql);
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_sql .= " ORDER BY created_at DESC, id DESC LIMIT :limit";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_params as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-                $items[] = [
+            $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+                $Silian_items[] = [
                     'type' => 'error',
-                    'id' => (int) ($row['id'] ?? 0),
-                    'request_id' => $row['request_id'] ?? null,
-                    'summary' => trim((string) (($row['error_type'] ?? 'error') . ': ' . ($row['error_message'] ?? ''))),
-                    'created_at' => $row['created_at'] ?? null,
+                    'id' => (int) ($Silian_row['id'] ?? 0),
+                    'request_id' => $Silian_row['request_id'] ?? null,
+                    'summary' => trim((string) (($Silian_row['error_type'] ?? 'error') . ': ' . ($Silian_row['error_message'] ?? ''))),
+                    'created_at' => $Silian_row['created_at'] ?? null,
                 ];
             }
         }
 
-        if (in_array('system', $types, true)) {
-            $sql = "SELECT id, request_id, method, path, status_code, created_at
+        if (in_array('system', $Silian_types, true)) {
+            $Silian_sql = "SELECT id, request_id, method, path, status_code, created_at
                 FROM system_logs
                 WHERE 1 = 1";
-            $params = [];
-            if ($requestId !== '') {
-                $sql .= " AND request_id = :request_id";
-                $params[':request_id'] = $requestId;
+            $Silian_params = [];
+            if ($Silian_requestId !== '') {
+                $Silian_sql .= " AND request_id = :request_id";
+                $Silian_params[':request_id'] = $Silian_requestId;
             }
-            if ($searchLike !== null) {
-                [$searchCondition, $searchParams] = $this->buildLikeCondition(
+            if ($Silian_searchLike !== null) {
+                [$Silian_searchCondition, $Silian_searchParams] = $this->buildLikeCondition(
                     ['LOWER(COALESCE(method, \'\'))', 'LOWER(COALESCE(path, \'\'))'],
                     'system_search',
-                    $searchLike
+                    $Silian_searchLike
                 );
-                $sql .= " AND {$searchCondition}";
-                $params += $searchParams;
+                $Silian_sql .= " AND {$Silian_searchCondition}";
+                $Silian_params += $Silian_searchParams;
             }
-            $sql .= " ORDER BY created_at DESC, id DESC LIMIT :limit";
-            $stmt = $this->db->prepare($sql);
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_sql .= " ORDER BY created_at DESC, id DESC LIMIT :limit";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_params as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-                $items[] = [
+            $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+                $Silian_items[] = [
                     'type' => 'system',
-                    'id' => (int) ($row['id'] ?? 0),
-                    'request_id' => $row['request_id'] ?? null,
-                    'summary' => trim((string) (($row['method'] ?? 'GET') . ' ' . ($row['path'] ?? '/') . ' [' . ($row['status_code'] ?? '?') . ']')),
-                    'created_at' => $row['created_at'] ?? null,
+                    'id' => (int) ($Silian_row['id'] ?? 0),
+                    'request_id' => $Silian_row['request_id'] ?? null,
+                    'summary' => trim((string) (($Silian_row['method'] ?? 'GET') . ' ' . ($Silian_row['path'] ?? '/') . ' [' . ($Silian_row['status_code'] ?? '?') . ']')),
+                    'created_at' => $Silian_row['created_at'] ?? null,
                 ];
             }
         }
 
-        usort($items, static function (array $left, array $right): int {
-            return strcmp((string) ($right['created_at'] ?? ''), (string) ($left['created_at'] ?? ''));
+        usort($Silian_items, static function (array $Silian_left, array $Silian_right): int {
+            return strcmp((string) ($Silian_right['created_at'] ?? ''), (string) ($Silian_left['created_at'] ?? ''));
         });
-        $items = array_slice($items, 0, $limit);
+        $Silian_items = array_slice($Silian_items, 0, $Silian_limit);
 
         return [
             'scope' => 'system_logs',
-            'returned_count' => count($items),
-            'items' => $items,
+            'returned_count' => count($Silian_items),
+            'items' => $Silian_items,
         ];
     }
 
@@ -1076,37 +1076,37 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryBroadcastHistory(array $payload): array
+    private function queryBroadcastHistory(array $Silian_payload): array
     {
-        $limit = max(1, min(20, (int) ($payload['limit'] ?? 10)));
-        $sql = "SELECT id, title, priority, scope, target_count, sent_count, created_by, created_at
+        $Silian_limit = max(1, min(20, (int) ($Silian_payload['limit'] ?? 10)));
+        $Silian_sql = "SELECT id, title, priority, scope, target_count, sent_count, created_by, created_at
             FROM message_broadcasts
             ORDER BY id DESC
             LIMIT :limit";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
 
-        $items = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
-            $items[] = [
-                'id' => isset($row['id']) ? (int) $row['id'] : null,
-                'title' => $row['title'] ?? null,
-                'priority' => $row['priority'] ?? null,
-                'scope' => $row['scope'] ?? null,
-                'target_count' => isset($row['target_count']) ? (int) $row['target_count'] : 0,
-                'sent_count' => isset($row['sent_count']) ? (int) $row['sent_count'] : 0,
-                'created_by' => isset($row['created_by']) ? (int) $row['created_by'] : null,
-                'created_at' => $row['created_at'] ?? null,
+        $Silian_items = [];
+        foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $Silian_row) {
+            $Silian_items[] = [
+                'id' => isset($Silian_row['id']) ? (int) $Silian_row['id'] : null,
+                'title' => $Silian_row['title'] ?? null,
+                'priority' => $Silian_row['priority'] ?? null,
+                'scope' => $Silian_row['scope'] ?? null,
+                'target_count' => isset($Silian_row['target_count']) ? (int) $Silian_row['target_count'] : 0,
+                'sent_count' => isset($Silian_row['sent_count']) ? (int) $Silian_row['sent_count'] : 0,
+                'created_by' => isset($Silian_row['created_by']) ? (int) $Silian_row['created_by'] : null,
+                'created_at' => $Silian_row['created_at'] ?? null,
             ];
         }
 
-        $countStmt = $this->db->query("SELECT COUNT(*) FROM message_broadcasts");
+        $Silian_countStmt = $this->db->query("SELECT COUNT(*) FROM message_broadcasts");
 
         return [
             'scope' => 'broadcast_history',
-            'total' => (int) (($countStmt instanceof \PDOStatement ? $countStmt->fetchColumn() : 0) ?: 0),
-            'items' => $items,
+            'total' => (int) (($Silian_countStmt instanceof \PDOStatement ? $Silian_countStmt->fetchColumn() : 0) ?: 0),
+            'items' => $Silian_items,
         ];
     }
 
@@ -1114,18 +1114,18 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function queryBroadcastRecipients(array $payload): array
+    private function queryBroadcastRecipients(array $Silian_payload): array
     {
-        $users = $this->queryUsers([
-            'search' => $payload['search'] ?? $payload['q'] ?? '',
-            'status' => $payload['status'] ?? null,
-            'limit' => $payload['limit'] ?? 20,
+        $Silian_users = $this->queryUsers([
+            'search' => $Silian_payload['search'] ?? $Silian_payload['q'] ?? '',
+            'status' => $Silian_payload['status'] ?? null,
+            'limit' => $Silian_payload['limit'] ?? 20,
         ]);
 
         return [
             'scope' => 'broadcast_recipients',
-            'total' => $users['total'] ?? 0,
-            'items' => $users['items'] ?? [],
+            'total' => $Silian_users['total'] ?? 0,
+            'items' => $Silian_users['items'] ?? [],
         ];
     }
 
@@ -1133,91 +1133,91 @@ class AdminAiReadModelService
      * @param array<string,mixed> $payload
      * @return array<string,mixed>|null
      */
-    private function resolveUserRowFromPayload(array $payload): ?array
+    private function resolveUserRowFromPayload(array $Silian_payload): ?array
     {
-        $userId = isset($payload['user_id']) && is_numeric((string) $payload['user_id']) ? (int) $payload['user_id'] : null;
-        $userUuid = strtolower(trim((string) ($payload['user_uuid'] ?? '')));
+        $Silian_userId = isset($Silian_payload['user_id']) && is_numeric((string) $Silian_payload['user_id']) ? (int) $Silian_payload['user_id'] : null;
+        $Silian_userUuid = strtolower(trim((string) ($Silian_payload['user_uuid'] ?? '')));
 
-        $where = ['u.deleted_at IS NULL'];
-        $params = [];
-        if ($userId !== null && $userId > 0) {
-            $where[] = 'u.id = :user_id';
-            $params[':user_id'] = $userId;
-        } elseif ($userUuid !== '') {
-            $where[] = 'LOWER(u.uuid) = :user_uuid';
-            $params[':user_uuid'] = $userUuid;
+        $Silian_where = ['u.deleted_at IS NULL'];
+        $Silian_params = [];
+        if ($Silian_userId !== null && $Silian_userId > 0) {
+            $Silian_where[] = 'u.id = :user_id';
+            $Silian_params[':user_id'] = $Silian_userId;
+        } elseif ($Silian_userUuid !== '') {
+            $Silian_where[] = 'LOWER(u.uuid) = :user_uuid';
+            $Silian_params[':user_uuid'] = $Silian_userUuid;
         } else {
             return null;
         }
 
-        $stmt = $this->db->prepare("SELECT u.*, s.name AS school_name, g.name AS group_name
+        $Silian_stmt = $this->db->prepare("SELECT u.*, s.name AS school_name, g.name AS group_name
             FROM users u
             LEFT JOIN schools s ON s.id = u.school_id
             LEFT JOIN user_groups g ON g.id = u.group_id
-            WHERE " . implode(' AND ', $where) . "
+            WHERE " . implode(' AND ', $Silian_where) . "
             LIMIT 1");
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue($Silian_key, $Silian_value);
         }
-        $stmt->execute();
+        $Silian_stmt->execute();
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return is_array($row) ? $row : null;
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($Silian_row) ? $Silian_row : null;
     }
 
     private function resolvePointExchangeUserColumn(): string
     {
-        static $resolved = null;
-        if ($resolved !== null) {
-            return $resolved;
+        static $Silian_resolved = null;
+        if ($Silian_resolved !== null) {
+            return $Silian_resolved;
         }
 
-        $resolved = 'user_id';
+        $Silian_resolved = 'user_id';
         try {
-            $driver = (string) ($this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql');
-            if ($driver === 'sqlite') {
-                $stmt = $this->db->query("PRAGMA table_info(point_exchanges)");
-                $columns = $stmt ? ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []) : [];
-                $names = array_map(static fn (array $column): string => (string) ($column['name'] ?? ''), $columns);
-                if (!in_array('user_id', $names, true) && in_array('uid', $names, true)) {
-                    $resolved = 'uid';
+            $Silian_driver = (string) ($this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql');
+            if ($Silian_driver === 'sqlite') {
+                $Silian_stmt = $this->db->query("PRAGMA table_info(point_exchanges)");
+                $Silian_columns = $Silian_stmt ? ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []) : [];
+                $Silian_names = array_map(static fn (array $Silian_column): string => (string) ($Silian_column['name'] ?? ''), $Silian_columns);
+                if (!in_array('user_id', $Silian_names, true) && in_array('uid', $Silian_names, true)) {
+                    $Silian_resolved = 'uid';
                 }
             }
         } catch (\Throwable) {
         }
 
-        return $resolved;
+        return $Silian_resolved;
     }
 
     /**
      * @return array<string,mixed>|null
      */
-    private function fetchExchangeRecordById(string $exchangeId): ?array
+    private function fetchExchangeRecordById(string $Silian_exchangeId): ?array
     {
-        $userColumn = $this->resolvePointExchangeUserColumn();
-        $stmt = $this->db->prepare("SELECT e.*, u.username, u.email
+        $Silian_userColumn = $this->resolvePointExchangeUserColumn();
+        $Silian_stmt = $this->db->prepare("SELECT e.*, u.username, u.email
             FROM point_exchanges e
-            LEFT JOIN users u ON u.id = e.{$userColumn}
+            LEFT JOIN users u ON u.id = e.{$Silian_userColumn}
             WHERE e.id = :exchange_id
               AND e.deleted_at IS NULL
             LIMIT 1");
-        $stmt->execute([':exchange_id' => $exchangeId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return is_array($row) ? $row : null;
+        $Silian_stmt->execute([':exchange_id' => $Silian_exchangeId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($Silian_row) ? $Silian_row : null;
     }
 
-    private function normalizeConversationId(?string $conversationId): ?string
+    private function normalizeConversationId(?string $Silian_conversationId): ?string
     {
-        if (!is_string($conversationId)) {
+        if (!is_string($Silian_conversationId)) {
             return null;
         }
 
-        $normalized = trim($conversationId);
-        if ($normalized === '') {
+        $Silian_normalized = trim($Silian_conversationId);
+        if ($Silian_normalized === '') {
             return null;
         }
 
-        return preg_match('/^[A-Za-z0-9._:-]{8,64}$/', $normalized) === 1 ? $normalized : null;
+        return preg_match('/^[A-Za-z0-9._:-]{8,64}$/', $Silian_normalized) === 1 ? $Silian_normalized : null;
     }
 
     private function currentCronNow(): string
@@ -1228,31 +1228,31 @@ class AdminAiReadModelService
     /**
      * @return array<string,mixed>
      */
-    private function decodeJson(mixed $raw): array
+    private function decodeJson(mixed $Silian_raw): array
     {
-        if (!is_string($raw) || $raw === '') {
+        if (!is_string($Silian_raw) || $Silian_raw === '') {
             return [];
         }
 
-        $decoded = json_decode($raw, true);
-        return is_array($decoded) ? $decoded : [];
+        $Silian_decoded = json_decode($Silian_raw, true);
+        return is_array($Silian_decoded) ? $Silian_decoded : [];
     }
 
     /**
      * @param array<int,string> $expressions
      * @return array{0:string,1:array<string,string>}
      */
-    private function buildLikeCondition(array $expressions, string $prefix, string $pattern): array
+    private function buildLikeCondition(array $Silian_expressions, string $Silian_prefix, string $Silian_pattern): array
     {
-        $parts = [];
-        $params = [];
+        $Silian_parts = [];
+        $Silian_params = [];
 
-        foreach (array_values($expressions) as $index => $expression) {
-            $placeholder = ':' . $prefix . '_' . $index;
-            $parts[] = $expression . ' LIKE ' . $placeholder;
-            $params[$placeholder] = $pattern;
+        foreach (array_values($Silian_expressions) as $Silian_index => $Silian_expression) {
+            $Silian_placeholder = ':' . $Silian_prefix . '_' . $Silian_index;
+            $Silian_parts[] = $Silian_expression . ' LIKE ' . $Silian_placeholder;
+            $Silian_params[$Silian_placeholder] = $Silian_pattern;
         }
 
-        return ['(' . implode(' OR ', $parts) . ')', $params];
+        return ['(' . implode(' OR ', $Silian_parts) . ')', $Silian_params];
     }
 }

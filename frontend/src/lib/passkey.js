@@ -11,39 +11,39 @@ export const PASSKEY_SUPPORT_REASONS = {
 
 /**
  * Converts a Base64URL string to an ArrayBuffer.
- * @param {string} base64url 
+ * @param {string} base64url
  * @returns {ArrayBuffer}
  */
-export function base64urlToArrayBuffer(base64url) {
-  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
-  const padLen = (4 - (base64.length % 4)) % 4;
-  const paddedBase64 = base64 + '='.repeat(padLen);
-  const binary = window.atob(paddedBase64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
+export function base64urlToArrayBuffer(Silian_base64url) {
+  const Silian_base64 = Silian_base64url.replace(/-/g, '+').replace(/_/g, '/');
+  const Silian_padLen = (4 - (Silian_base64.length % 4)) % 4;
+  const Silian_paddedBase64 = Silian_base64 + '='.repeat(Silian_padLen);
+  const Silian_binary = window.atob(Silian_paddedBase64);
+  const Silian_bytes = new Uint8Array(Silian_binary.length);
+  for (let Silian_i = 0; Silian_i < Silian_binary.length; Silian_i++) {
+    Silian_bytes[Silian_i] = Silian_binary.charCodeAt(Silian_i);
   }
-  return bytes.buffer;
+  return Silian_bytes.buffer;
 }
 
 /**
  * Converts an ArrayBuffer to a Base64URL string.
- * @param {ArrayBuffer} buffer 
+ * @param {ArrayBuffer} buffer
  * @returns {string}
  */
-export function arrayBufferToBase64url(buffer) {
-  const bytes = new Uint8Array(buffer);
-  const len = bytes.byteLength;
-  const CHUNK_SIZE = 8192;
-  const chunks = [];
-  
-  for (let i = 0; i < len; i += CHUNK_SIZE) {
-    chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK_SIZE)));
+export function arrayBufferToBase64url(Silian_buffer) {
+  const Silian_bytes = new Uint8Array(Silian_buffer);
+  const Silian_len = Silian_bytes.byteLength;
+  const Silian_CHUNK_SIZE = 8192;
+  const Silian_chunks = [];
+
+  for (let Silian_i = 0; Silian_i < Silian_len; Silian_i += Silian_CHUNK_SIZE) {
+    Silian_chunks.push(String.fromCharCode.apply(null, Silian_bytes.subarray(Silian_i, Silian_i + Silian_CHUNK_SIZE)));
   }
-  
-  const binary = chunks.join('');
-  const base64 = window.btoa(binary);
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+
+  const Silian_binary = Silian_chunks.join('');
+  const Silian_base64 = window.btoa(Silian_binary);
+  return Silian_base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 /**
@@ -69,23 +69,23 @@ export async function getPasskeySupport() {
     };
   }
 
-  const canAuthenticate = Boolean(navigator.credentials && typeof navigator.credentials.get === 'function');
-  const canRegister = Boolean(navigator.credentials && typeof navigator.credentials.create === 'function');
+  const Silian_canAuthenticate = Boolean(navigator.credentials && typeof navigator.credentials.get === 'function');
+  const Silian_canRegister = Boolean(navigator.credentials && typeof navigator.credentials.create === 'function');
 
-  if (!canAuthenticate) {
+  if (!Silian_canAuthenticate) {
     return {
       supported: false,
-      canAuthenticate,
-      canRegister,
+      canAuthenticate: Silian_canAuthenticate,
+      canRegister: Silian_canRegister,
       reason: PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API,
     };
   }
 
   return {
     supported: true,
-    canAuthenticate,
-    canRegister,
-    reason: canRegister ? null : PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API,
+    canAuthenticate: Silian_canAuthenticate,
+    canRegister: Silian_canRegister,
+    reason: Silian_canRegister ? null : PASSKEY_SUPPORT_REASONS.MISSING_CREDENTIALS_API,
   };
 }
 
@@ -94,95 +94,95 @@ export async function getPasskeySupport() {
  * @returns {Promise<boolean>}
  */
 export async function isPasskeySupported() {
-  const support = await getPasskeySupport();
-  return support.supported;
+  const Silian_support = await getPasskeySupport();
+  return Silian_support.supported;
 }
 
 /**
  * Prepares registration options for navigator.credentials.create.
  * Converts Base64URL strings to ArrayBuffers.
- * @param {Object} options 
+ * @param {Object} options
  * @returns {Object}
  */
-export function prepareRegistrationOptions(options) {
-  const credentialOptions = {
-    ...options,
-    challenge: base64urlToArrayBuffer(options.challenge),
+export function prepareRegistrationOptions(Silian_options) {
+  const Silian_credentialOptions = {
+    ...Silian_options,
+    challenge: base64urlToArrayBuffer(Silian_options.challenge),
     user: {
-      ...options.user,
-      id: base64urlToArrayBuffer(options.user.id),
+      ...Silian_options.user,
+      id: base64urlToArrayBuffer(Silian_options.user.id),
     },
   };
 
-  if (options.excludeCredentials) {
-    credentialOptions.excludeCredentials = options.excludeCredentials.map((cred) => ({
-      ...cred,
-      id: base64urlToArrayBuffer(cred.id),
+  if (Silian_options.excludeCredentials) {
+    Silian_credentialOptions.excludeCredentials = Silian_options.excludeCredentials.map((Silian_cred) => ({
+      ...Silian_cred,
+      id: base64urlToArrayBuffer(Silian_cred.id),
     }));
   }
 
-  return { publicKey: credentialOptions };
+  return { publicKey: Silian_credentialOptions };
 }
 
 /**
  * Prepares authentication options for navigator.credentials.get.
  * Converts Base64URL strings to ArrayBuffers.
- * @param {Object} options 
+ * @param {Object} options
  * @returns {Object}
  */
-export function prepareAuthenticationOptions(options) {
-  const credentialOptions = {
-    ...options,
-    challenge: base64urlToArrayBuffer(options.challenge),
+export function prepareAuthenticationOptions(Silian_options) {
+  const Silian_credentialOptions = {
+    ...Silian_options,
+    challenge: base64urlToArrayBuffer(Silian_options.challenge),
   };
 
-  if (options.allowCredentials) {
-    credentialOptions.allowCredentials = options.allowCredentials.map((cred) => ({
-      ...cred,
-      id: base64urlToArrayBuffer(cred.id),
+  if (Silian_options.allowCredentials) {
+    Silian_credentialOptions.allowCredentials = Silian_options.allowCredentials.map((Silian_cred) => ({
+      ...Silian_cred,
+      id: base64urlToArrayBuffer(Silian_cred.id),
     }));
   }
 
-  return { publicKey: credentialOptions };
+  return { publicKey: Silian_credentialOptions };
 }
 
 /**
  * Encodes the credential object from navigator.credentials.create for the backend.
- * @param {PublicKeyCredential} credential 
+ * @param {PublicKeyCredential} credential
  * @returns {Object}
  */
-export function encodeRegistrationResponse(credential) {
-  const response = credential.response;
+export function encodeRegistrationResponse(Silian_credential) {
+  const Silian_response = Silian_credential.response;
   return {
-    id: credential.id,
-    rawId: arrayBufferToBase64url(credential.rawId),
-    type: credential.type,
+    id: Silian_credential.id,
+    rawId: arrayBufferToBase64url(Silian_credential.rawId),
+    type: Silian_credential.type,
     response: {
-      attestationObject: arrayBufferToBase64url(response.attestationObject),
-      clientDataJSON: arrayBufferToBase64url(response.clientDataJSON),
+      attestationObject: arrayBufferToBase64url(Silian_response.attestationObject),
+      clientDataJSON: arrayBufferToBase64url(Silian_response.clientDataJSON),
     },
-    authenticatorAttachment: credential.authenticatorAttachment,
+    authenticatorAttachment: Silian_credential.authenticatorAttachment,
   };
 }
 
 /**
  * Encodes the credential object from navigator.credentials.get for the backend.
- * @param {PublicKeyCredential} credential 
+ * @param {PublicKeyCredential} credential
  * @returns {Object}
  */
-export function encodeAuthenticationResponse(credential) {
-  const response = credential.response;
+export function encodeAuthenticationResponse(Silian_credential) {
+  const Silian_response = Silian_credential.response;
   return {
-    id: credential.id,
-    rawId: arrayBufferToBase64url(credential.rawId),
-    type: credential.type,
+    id: Silian_credential.id,
+    rawId: arrayBufferToBase64url(Silian_credential.rawId),
+    type: Silian_credential.type,
     response: {
-      authenticatorData: arrayBufferToBase64url(response.authenticatorData),
-      clientDataJSON: arrayBufferToBase64url(response.clientDataJSON),
-      signature: arrayBufferToBase64url(response.signature),
-      userHandle: response.userHandle ? arrayBufferToBase64url(response.userHandle) : null,
+      authenticatorData: arrayBufferToBase64url(Silian_response.authenticatorData),
+      clientDataJSON: arrayBufferToBase64url(Silian_response.clientDataJSON),
+      signature: arrayBufferToBase64url(Silian_response.signature),
+      userHandle: Silian_response.userHandle ? arrayBufferToBase64url(Silian_response.userHandle) : null,
     },
-    authenticatorAttachment: credential.authenticatorAttachment,
+    authenticatorAttachment: Silian_credential.authenticatorAttachment,
   };
 }
 

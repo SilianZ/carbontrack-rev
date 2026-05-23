@@ -24,248 +24,248 @@ class AdminBadgeController
         private ?Logger $logger = null
     ) {}
 
-    public function list(Request $request, Response $response): Response
+    public function list(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $admin = $this->requireAdmin($request);
-            if (!$admin) {
-                return $this->json($response, ['success' => false, 'message' => 'Access denied'], 403);
+            $Silian_admin = $this->requireAdmin($Silian_request);
+            if (!$Silian_admin) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Access denied'], 403);
             }
 
-            $query = $request->getQueryParams();
-            $includeInactive = !empty($query['include_inactive']) && filter_var($query['include_inactive'], FILTER_VALIDATE_BOOLEAN);
-            $badges = $this->badgeService->listBadges($includeInactive);
-            $badgeIds = array_map(function ($badge) {
-                return (int) $badge->id;
-            }, $badges);
-            $statsByBadge = $this->badgeService->getBadgeAwardStats($badgeIds);
-            $defaultStats = $this->defaultBadgeStats();
-            $data = [];
-            foreach ($badges as $badge) {
-                $payload = $this->formatBadge($badge->toArray());
-                $payload['stats'] = $statsByBadge[$badge->id] ?? $defaultStats;
-                $data[] = $payload;
+            $Silian_query = $Silian_request->getQueryParams();
+            $Silian_includeInactive = !empty($Silian_query['include_inactive']) && filter_var($Silian_query['include_inactive'], FILTER_VALIDATE_BOOLEAN);
+            $Silian_badges = $this->badgeService->listBadges($Silian_includeInactive);
+            $Silian_badgeIds = array_map(function ($Silian_badge) {
+                return (int) $Silian_badge->id;
+            }, $Silian_badges);
+            $Silian_statsByBadge = $this->badgeService->getBadgeAwardStats($Silian_badgeIds);
+            $Silian_defaultStats = $this->defaultBadgeStats();
+            $Silian_data = [];
+            foreach ($Silian_badges as $Silian_badge) {
+                $Silian_payload = $this->formatBadge($Silian_badge->toArray());
+                $Silian_payload['stats'] = $Silian_statsByBadge[$Silian_badge->id] ?? $Silian_defaultStats;
+                $Silian_data[] = $Silian_payload;
             }
 
-            return $this->json($response, ['success' => true, 'data' => $data]);
-        } catch (\Throwable $e) {
-            $this->logError($e, $request, 'admin_badge_list_failed');
-            return $this->json($response, ['success' => false, 'message' => 'Failed to load badges'], 500);
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_data]);
+        } catch (\Throwable $Silian_e) {
+            $this->logError($Silian_e, $Silian_request, 'admin_badge_list_failed');
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Failed to load badges'], 500);
         }
     }
 
-    public function detail(Request $request, Response $response, array $args): Response
+    public function detail(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $admin = $this->requireAdmin($request);
-            if (!$admin) {
-                return $this->json($response, ['success' => false, 'message' => 'Access denied'], 403);
+            $Silian_admin = $this->requireAdmin($Silian_request);
+            if (!$Silian_admin) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Access denied'], 403);
             }
 
-            $badgeId = (int) ($args['id'] ?? 0);
-            $badge = $this->badgeService->findBadge($badgeId);
-            if (!$badge) {
-                return $this->json($response, ['success' => false, 'message' => 'Badge not found'], 404);
+            $Silian_badgeId = (int) ($Silian_args['id'] ?? 0);
+            $Silian_badge = $this->badgeService->findBadge($Silian_badgeId);
+            if (!$Silian_badge) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Badge not found'], 404);
             }
 
-            $payload = $this->formatBadge($badge->toArray());
-            $stats = $this->badgeService->getBadgeAwardStats([$badgeId]);
-            $payload['stats'] = $stats[$badgeId] ?? $this->defaultBadgeStats();
-            $recent = $this->badgeService->getBadgeRecipients($badgeId, [
+            $Silian_payload = $this->formatBadge($Silian_badge->toArray());
+            $Silian_stats = $this->badgeService->getBadgeAwardStats([$Silian_badgeId]);
+            $Silian_payload['stats'] = $Silian_stats[$Silian_badgeId] ?? $this->defaultBadgeStats();
+            $Silian_recent = $this->badgeService->getBadgeRecipients($Silian_badgeId, [
                 'per_page' => 5,
                 'include_revoked' => true,
             ]);
-            $payload['recent_awards'] = $recent['items'];
-            $payload['recent_awards_pagination'] = $recent['pagination'];
+            $Silian_payload['recent_awards'] = $Silian_recent['items'];
+            $Silian_payload['recent_awards_pagination'] = $Silian_recent['pagination'];
 
-            return $this->json($response, ['success' => true, 'data' => $payload]);
-        } catch (\Throwable $e) {
-            $this->logError($e, $request, 'admin_badge_detail_failed');
-            return $this->json($response, ['success' => false, 'message' => 'Failed to load badge'], 500);
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_payload]);
+        } catch (\Throwable $Silian_e) {
+            $this->logError($Silian_e, $Silian_request, 'admin_badge_detail_failed');
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Failed to load badge'], 500);
         }
     }
 
-    public function create(Request $request, Response $response): Response
+    public function create(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $admin = $this->requireAdmin($request);
-            if (!$admin) {
-                return $this->json($response, ['success' => false, 'message' => 'Access denied'], 403);
+            $Silian_admin = $this->requireAdmin($Silian_request);
+            if (!$Silian_admin) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Access denied'], 403);
             }
 
-            $data = $request->getParsedBody() ?: [];
-            $badge = $this->badgeService->createBadge($data, (int) $admin['id']);
-            return $this->json($response, ['success' => true, 'data' => $this->formatBadge($badge->toArray())], 201);
-        } catch (\Throwable $e) {
-            $this->logError($e, $request, 'admin_badge_create_failed');
-            return $this->json($response, ['success' => false, 'message' => 'Failed to create badge'], 500);
+            $Silian_data = $Silian_request->getParsedBody() ?: [];
+            $Silian_badge = $this->badgeService->createBadge($Silian_data, (int) $Silian_admin['id']);
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->formatBadge($Silian_badge->toArray())], 201);
+        } catch (\Throwable $Silian_e) {
+            $this->logError($Silian_e, $Silian_request, 'admin_badge_create_failed');
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Failed to create badge'], 500);
         }
     }
 
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $admin = $this->requireAdmin($request);
-            if (!$admin) {
-                return $this->json($response, ['success' => false, 'message' => 'Access denied'], 403);
+            $Silian_admin = $this->requireAdmin($Silian_request);
+            if (!$Silian_admin) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Access denied'], 403);
             }
 
-            $data = $request->getParsedBody() ?: [];
-            $badge = $this->badgeService->updateBadge((int) ($args['id'] ?? 0), $data, (int) $admin['id']);
-            if (!$badge) {
-                return $this->json($response, ['success' => false, 'message' => 'Badge not found'], 404);
+            $Silian_data = $Silian_request->getParsedBody() ?: [];
+            $Silian_badge = $this->badgeService->updateBadge((int) ($Silian_args['id'] ?? 0), $Silian_data, (int) $Silian_admin['id']);
+            if (!$Silian_badge) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Badge not found'], 404);
             }
 
-            return $this->json($response, ['success' => true, 'data' => $this->formatBadge($badge->toArray())]);
-        } catch (\Throwable $e) {
-            $this->logError($e, $request, 'admin_badge_update_failed');
-            return $this->json($response, ['success' => false, 'message' => 'Failed to update badge'], 500);
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->formatBadge($Silian_badge->toArray())]);
+        } catch (\Throwable $Silian_e) {
+            $this->logError($Silian_e, $Silian_request, 'admin_badge_update_failed');
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Failed to update badge'], 500);
         }
     }
 
-    public function award(Request $request, Response $response, array $args): Response
+    public function award(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $admin = $this->requireAdmin($request);
-            if (!$admin) {
-                return $this->json($response, ['success' => false, 'message' => 'Access denied'], 403);
+            $Silian_admin = $this->requireAdmin($Silian_request);
+            if (!$Silian_admin) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Access denied'], 403);
             }
 
-            $data = $request->getParsedBody() ?: [];
-            $userId = isset($data['user_id']) ? (int) $data['user_id'] : 0;
-            if ($userId <= 0) {
-                return $this->json($response, ['success' => false, 'message' => 'user_id is required'], 400);
+            $Silian_data = $Silian_request->getParsedBody() ?: [];
+            $Silian_userId = isset($Silian_data['user_id']) ? (int) $Silian_data['user_id'] : 0;
+            if ($Silian_userId <= 0) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'user_id is required'], 400);
             }
 
-            $userBadge = $this->badgeService->awardBadge((int) ($args['id'] ?? 0), $userId, [
+            $Silian_userBadge = $this->badgeService->awardBadge((int) ($Silian_args['id'] ?? 0), $Silian_userId, [
                 'source' => 'manual',
-                'admin_id' => (int) $admin['id'],
-                'notes' => $data['notes'] ?? null,
+                'admin_id' => (int) $Silian_admin['id'],
+                'notes' => $Silian_data['notes'] ?? null,
             ]);
-            if (!$userBadge) {
-                return $this->json($response, ['success' => false, 'message' => 'Badge or user not found'], 404);
+            if (!$Silian_userBadge) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Badge or user not found'], 404);
             }
 
-            return $this->json($response, ['success' => true, 'data' => $userBadge->toArray()]);
-        } catch (\Throwable $e) {
-            $this->logError($e, $request, 'admin_badge_award_failed');
-            return $this->json($response, ['success' => false, 'message' => 'Failed to award badge'], 500);
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_userBadge->toArray()]);
+        } catch (\Throwable $Silian_e) {
+            $this->logError($Silian_e, $Silian_request, 'admin_badge_award_failed');
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Failed to award badge'], 500);
         }
     }
 
-    public function revoke(Request $request, Response $response, array $args): Response
+    public function revoke(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $admin = $this->requireAdmin($request);
-            if (!$admin) {
-                return $this->json($response, ['success' => false, 'message' => 'Access denied'], 403);
+            $Silian_admin = $this->requireAdmin($Silian_request);
+            if (!$Silian_admin) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Access denied'], 403);
             }
 
-            $data = $request->getParsedBody() ?: [];
-            $userId = isset($data['user_id']) ? (int) $data['user_id'] : 0;
-            if ($userId <= 0) {
-                return $this->json($response, ['success' => false, 'message' => 'user_id is required'], 400);
+            $Silian_data = $Silian_request->getParsedBody() ?: [];
+            $Silian_userId = isset($Silian_data['user_id']) ? (int) $Silian_data['user_id'] : 0;
+            if ($Silian_userId <= 0) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'user_id is required'], 400);
             }
 
-            $ok = $this->badgeService->revokeBadge((int) ($args['id'] ?? 0), $userId, (int) $admin['id'], $data['notes'] ?? null);
-            if (!$ok) {
-                return $this->json($response, ['success' => false, 'message' => 'Badge record not found or already revoked'], 404);
+            $Silian_ok = $this->badgeService->revokeBadge((int) ($Silian_args['id'] ?? 0), $Silian_userId, (int) $Silian_admin['id'], $Silian_data['notes'] ?? null);
+            if (!$Silian_ok) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Badge record not found or already revoked'], 404);
             }
 
-            return $this->json($response, ['success' => true]);
-        } catch (\Throwable $e) {
-            $this->logError($e, $request, 'admin_badge_revoke_failed');
-            return $this->json($response, ['success' => false, 'message' => 'Failed to revoke badge'], 500);
+            return $this->json($Silian_response, ['success' => true]);
+        } catch (\Throwable $Silian_e) {
+            $this->logError($Silian_e, $Silian_request, 'admin_badge_revoke_failed');
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Failed to revoke badge'], 500);
         }
     }
 
-    public function triggerAuto(Request $request, Response $response): Response
+    public function triggerAuto(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $admin = $this->requireAdmin($request);
-            if (!$admin) {
-                return $this->json($response, ['success' => false, 'message' => 'Access denied'], 403);
+            $Silian_admin = $this->requireAdmin($Silian_request);
+            if (!$Silian_admin) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Access denied'], 403);
             }
 
-            $query = $request->getQueryParams();
-            $badgeId = isset($query['badge_id']) ? (int) $query['badge_id'] : null;
-            $userId = isset($query['user_id']) ? (int) $query['user_id'] : null;
-            if ($badgeId === 0) {
-                $badgeId = null;
+            $Silian_query = $Silian_request->getQueryParams();
+            $Silian_badgeId = isset($Silian_query['badge_id']) ? (int) $Silian_query['badge_id'] : null;
+            $Silian_userId = isset($Silian_query['user_id']) ? (int) $Silian_query['user_id'] : null;
+            if ($Silian_badgeId === 0) {
+                $Silian_badgeId = null;
             }
-            if ($userId === 0) {
-                $userId = null;
+            if ($Silian_userId === 0) {
+                $Silian_userId = null;
             }
 
-            $result = $this->badgeService->runAutoGrant($badgeId, $userId);
+            $Silian_result = $this->badgeService->runAutoGrant($Silian_badgeId, $Silian_userId);
 
             $this->auditLogService->log([
-                'user_id' => $admin['id'],
+                'user_id' => $Silian_admin['id'],
                 'action' => 'badge_auto_triggered',
                 'entity_type' => 'achievement_badge',
-                'new_value' => json_encode($result, JSON_UNESCAPED_UNICODE),
+                'new_value' => json_encode($Silian_result, JSON_UNESCAPED_UNICODE),
                 'notes' => 'Manual trigger by admin',
             ]);
 
-            return $this->json($response, ['success' => true, 'data' => $result]);
-        } catch (\Throwable $e) {
-            $this->logError($e, $request, 'admin_badge_auto_failed');
-            return $this->json($response, ['success' => false, 'message' => 'Failed to run auto grant'], 500);
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_result]);
+        } catch (\Throwable $Silian_e) {
+            $this->logError($Silian_e, $Silian_request, 'admin_badge_auto_failed');
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Failed to run auto grant'], 500);
         }
-    }    public function recipients(Request $request, Response $response, array $args): Response
+    }    public function recipients(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $admin = $this->requireAdmin($request);
-            if (!$admin) {
-                return $this->json($response, ['success' => false, 'message' => 'Access denied'], 403);
+            $Silian_admin = $this->requireAdmin($Silian_request);
+            if (!$Silian_admin) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Access denied'], 403);
             }
 
-            $badgeId = (int) ($args['id'] ?? 0);
-            if ($badgeId <= 0) {
-                return $this->json($response, ['success' => false, 'message' => 'Invalid badge id'], 400);
+            $Silian_badgeId = (int) ($Silian_args['id'] ?? 0);
+            if ($Silian_badgeId <= 0) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Invalid badge id'], 400);
             }
 
-            $badge = $this->badgeService->findBadge($badgeId);
-            if (!$badge) {
-                return $this->json($response, ['success' => false, 'message' => 'Badge not found'], 404);
+            $Silian_badge = $this->badgeService->findBadge($Silian_badgeId);
+            if (!$Silian_badge) {
+                return $this->json($Silian_response, ['success' => false, 'message' => 'Badge not found'], 404);
             }
 
-            $query = $request->getQueryParams();
-            $options = [
-                'page' => isset($query['page']) ? (int) $query['page'] : 1,
-                'per_page' => isset($query['per_page']) ? (int) $query['per_page'] : 20,
-                'include_revoked' => !empty($query['include_revoked']) && filter_var($query['include_revoked'], FILTER_VALIDATE_BOOLEAN),
+            $Silian_query = $Silian_request->getQueryParams();
+            $Silian_options = [
+                'page' => isset($Silian_query['page']) ? (int) $Silian_query['page'] : 1,
+                'per_page' => isset($Silian_query['per_page']) ? (int) $Silian_query['per_page'] : 20,
+                'include_revoked' => !empty($Silian_query['include_revoked']) && filter_var($Silian_query['include_revoked'], FILTER_VALIDATE_BOOLEAN),
             ];
-            if (!empty($query['status']) && in_array($query['status'], ['awarded', 'revoked'], true)) {
-                $options['status'] = $query['status'];
+            if (!empty($Silian_query['status']) && in_array($Silian_query['status'], ['awarded', 'revoked'], true)) {
+                $Silian_options['status'] = $Silian_query['status'];
             }
-            $searchTerm = $query['q'] ?? ($query['search'] ?? null);
-            if (is_string($searchTerm) && trim($searchTerm) !== '') {
-                $options['search'] = trim($searchTerm);
+            $Silian_searchTerm = $Silian_query['q'] ?? ($Silian_query['search'] ?? null);
+            if (is_string($Silian_searchTerm) && trim($Silian_searchTerm) !== '') {
+                $Silian_options['search'] = trim($Silian_searchTerm);
             }
-            $options['page'] = max(1, (int) $options['page']);
-            $options['per_page'] = min(100, max(1, (int) $options['per_page']));
+            $Silian_options['page'] = max(1, (int) $Silian_options['page']);
+            $Silian_options['per_page'] = min(100, max(1, (int) $Silian_options['per_page']));
 
-            $result = $this->badgeService->getBadgeRecipients($badgeId, $options);
-            $payload = $result;
-            $payload['badge'] = $this->formatBadge($badge->toArray());
+            $Silian_result = $this->badgeService->getBadgeRecipients($Silian_badgeId, $Silian_options);
+            $Silian_payload = $Silian_result;
+            $Silian_payload['badge'] = $this->formatBadge($Silian_badge->toArray());
 
-            return $this->json($response, ['success' => true, 'data' => $payload]);
-        } catch (\Throwable $e) {
-            $this->logError($e, $request, 'admin_badge_recipients_failed');
-            return $this->json($response, ['success' => false, 'message' => 'Failed to load badge recipients'], 500);
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_payload]);
+        } catch (\Throwable $Silian_e) {
+            $this->logError($Silian_e, $Silian_request, 'admin_badge_recipients_failed');
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Failed to load badge recipients'], 500);
         }
     }
 
 
 
-    private function requireAdmin(Request $request): ?array
+    private function requireAdmin(Request $Silian_request): ?array
     {
-        $user = $this->authService->getCurrentUser($request);
-        if (!$user || !$this->authService->isAdminUser($user)) {
+        $Silian_user = $this->authService->getCurrentUser($Silian_request);
+        if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
             return null;
         }
-        return $user;
+        return $Silian_user;
     }    private function defaultBadgeStats(): array
     {
         return [
@@ -280,43 +280,43 @@ class AdminBadgeController
 
 
 
-    private function formatBadge(array $badge): array
+    private function formatBadge(array $Silian_badge): array
     {
-        if ($this->r2Service && !empty($badge['icon_path'])) {
+        if ($this->r2Service && !empty($Silian_badge['icon_path'])) {
             try {
-                $badge['icon_url'] = $this->r2Service->getPublicUrl($badge['icon_path']);
-                $badge['icon_presigned_url'] = $this->r2Service->generatePresignedUrl($badge['icon_path'], 600);
-            } catch (\Throwable $e) {
+                $Silian_badge['icon_url'] = $this->r2Service->getPublicUrl($Silian_badge['icon_path']);
+                $Silian_badge['icon_presigned_url'] = $this->r2Service->generatePresignedUrl($Silian_badge['icon_path'], 600);
+            } catch (\Throwable $Silian_e) {
                 if ($this->logger) {
-                    $this->logger->warning('Failed to build badge icon URLs', ['error' => $e->getMessage(), 'icon_path' => $badge['icon_path']]);
+                    $this->logger->warning('Failed to build badge icon URLs', ['error' => $Silian_e->getMessage(), 'icon_path' => $Silian_badge['icon_path']]);
                 }
             }
         }
-        if ($this->r2Service && !empty($badge['icon_thumbnail_path'])) {
+        if ($this->r2Service && !empty($Silian_badge['icon_thumbnail_path'])) {
             try {
-                $badge['icon_thumbnail_url'] = $this->r2Service->getPublicUrl($badge['icon_thumbnail_path']);
-            } catch (\Throwable $ignore) {}
+                $Silian_badge['icon_thumbnail_url'] = $this->r2Service->getPublicUrl($Silian_badge['icon_thumbnail_path']);
+            } catch (\Throwable $Silian_ignore) {}
         }
-        return $badge;
+        return $Silian_badge;
     }
 
-    private function json(Response $response, array $payload, int $status = 200): Response
+    private function json(Response $Silian_response, array $Silian_payload, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_UNICODE));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus($status);
+        $Silian_response->getBody()->write(json_encode($Silian_payload, JSON_UNESCAPED_UNICODE));
+        return $Silian_response->withHeader('Content-Type', 'application/json')->withStatus($Silian_status);
     }
 
-    private function logError(\Throwable $e, Request $request, string $type): void
+    private function logError(\Throwable $Silian_e, Request $Silian_request, string $Silian_type): void
     {
         if ($this->logger) {
-            $this->logger->error($type, ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->logger->error($Silian_type, ['error' => $Silian_e->getMessage(), 'trace' => $Silian_e->getTraceAsString()]);
         }
         if ($this->errorLogService) {
             try {
-                $this->errorLogService->logException($e, $request);
-            } catch (\Throwable $ignore) {
+                $this->errorLogService->logException($Silian_e, $Silian_request);
+            } catch (\Throwable $Silian_ignore) {
                 if ($this->logger) {
-                    $this->logger->error('ErrorLogService failed', ['error' => $ignore->getMessage()]);
+                    $this->logger->error('ErrorLogService failed', ['error' => $Silian_ignore->getMessage()]);
                 }
             }
         }

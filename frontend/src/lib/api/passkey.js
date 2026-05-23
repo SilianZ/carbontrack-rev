@@ -1,4 +1,4 @@
-import api from '../api';
+import Silian_api from '../api';
 
 /**
  * Passkey API client
@@ -8,37 +8,37 @@ export const passkeyAPI = {
    * Get registration options from the server
    * @returns {Promise<Object>}
    */
-  getRegistrationOptions: () => api.post('/users/me/passkeys/registration/options'),
+  getRegistrationOptions: () => Silian_api.post('/users/me/passkeys/registration/options'),
 
   /**
    * Send the registration response to the server
    * @param {Object} data Must contain challenge_id and credential
    * @returns {Promise<Object>}
    */
-  register: (data) => api.post('/users/me/passkeys/registration/verify', data),
+  register: (Silian_data) => Silian_api.post('/users/me/passkeys/registration/verify', Silian_data),
 
   /**
    * Get authentication options from the server
    * @param {string} identifier email or username
    * @returns {Promise<Object>}
    */
-  getAuthenticationOptions: (identifier) => api.post(
+  getAuthenticationOptions: (Silian_identifier) => Silian_api.post(
     '/auth/passkey/login/options',
-    identifier ? { identifier } : {}
+    Silian_identifier ? { identifier: Silian_identifier } : {}
   ),
 
   /**
    * Send the authentication response to the server
-   * @param {Object} data 
+   * @param {Object} data
    * @returns {Promise<Object>}
    */
-  login: (data) => api.post('/auth/passkey/login/verify', data),
+  login: (Silian_data) => Silian_api.post('/auth/passkey/login/verify', Silian_data),
 
   /**
    * List user's registered passkeys
    * @returns {Promise<Array>}
    */
-  listPasskeys: () => api.get('/users/me/passkeys'),
+  listPasskeys: () => Silian_api.get('/users/me/passkeys'),
 
   /**
    * Update a registered passkey label
@@ -46,14 +46,14 @@ export const passkeyAPI = {
    * @param {Object} data
    * @returns {Promise<Object>}
    */
-  updatePasskey: (id, data) => api.patch(`/users/me/passkeys/${id}`, data),
+  updatePasskey: (Silian_id, Silian_data) => Silian_api.patch(`/users/me/passkeys/${Silian_id}`, Silian_data),
 
   /**
    * Delete a registered passkey
-   * @param {string} id 
+   * @param {string} id
    * @returns {Promise<Object>}
    */
-  deletePasskey: (id) => api.delete(`/users/me/passkeys/${id}`),
+  deletePasskey: (Silian_id) => Silian_api.delete(`/users/me/passkeys/${Silian_id}`),
 };
 
 export default passkeyAPI;

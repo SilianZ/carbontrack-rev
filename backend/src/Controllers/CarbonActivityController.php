@@ -20,538 +20,538 @@ class CarbonActivityController
     private ErrorLogService $errorLogService;
 
     public function __construct(
-        CarbonCalculatorService $carbonCalculatorService,
-        AuditLogService $auditLogService,
-        ErrorLogService $errorLogService
+        CarbonCalculatorService $Silian_carbonCalculatorService,
+        AuditLogService $Silian_auditLogService,
+        ErrorLogService $Silian_errorLogService
     ) {
-        $this->carbonCalculatorService = $carbonCalculatorService;
-        $this->auditLogService = $auditLogService;
-        $this->errorLogService = $errorLogService;
+        $this->carbonCalculatorService = $Silian_carbonCalculatorService;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->errorLogService = $Silian_errorLogService;
     }
 
     /**
      * Get all carbon activities (public endpoint)
      */
-    public function getActivities(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function getActivities(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response): ResponseInterface
     {
         try {
-            $queryParams = $request->getQueryParams();
-            $category = $queryParams['category'] ?? null;
-            $search = $queryParams['search'] ?? null;
-            $grouped = isset($queryParams['grouped']) && $queryParams['grouped'] === 'true';
+            $Silian_queryParams = $Silian_request->getQueryParams();
+            $Silian_category = $Silian_queryParams['category'] ?? null;
+            $Silian_search = $Silian_queryParams['search'] ?? null;
+            $Silian_grouped = isset($Silian_queryParams['grouped']) && $Silian_queryParams['grouped'] === 'true';
 
-            if ($grouped) {
-                $activities = $this->carbonCalculatorService->getActivitiesGroupedByCategory();
-                $total = array_reduce($activities, static function (int $carry, array $group): int {
-                    if (isset($group['count']) && is_numeric($group['count'])) {
-                        return $carry + (int) $group['count'];
+            if ($Silian_grouped) {
+                $Silian_activities = $this->carbonCalculatorService->getActivitiesGroupedByCategory();
+                $Silian_total = array_reduce($Silian_activities, static function (int $Silian_carry, array $Silian_group): int {
+                    if (isset($Silian_group['count']) && is_numeric($Silian_group['count'])) {
+                        return $Silian_carry + (int) $Silian_group['count'];
                     }
 
-                    $items = $group['activities'] ?? [];
-                    return $carry + (is_array($items) ? count($items) : 0);
+                    $Silian_items = $Silian_group['activities'] ?? [];
+                    return $Silian_carry + (is_array($Silian_items) ? count($Silian_items) : 0);
                 }, 0);
             } else {
-                $activities = $this->carbonCalculatorService->getAvailableActivities($category, $search);
-                $total = count($activities);
+                $Silian_activities = $this->carbonCalculatorService->getAvailableActivities($Silian_category, $Silian_search);
+                $Silian_total = count($Silian_activities);
             }
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
                 'data' => [
-                    'grouped' => $grouped,
-                    'activities' => $activities,
+                    'grouped' => $Silian_grouped,
+                    'activities' => $Silian_activities,
                     'categories' => $this->carbonCalculatorService->getCategories(),
-                    'total' => $total
+                    'total' => $Silian_total
                 ]
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::getActivities error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to fetch activities: ' . $e->getMessage(), 500);
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::getActivities error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to fetch activities: ' . $Silian_e->getMessage(), 500);
         }
     }
 
     /**
      * Get carbon activity categories list (legacy alias payload)
      */
-    public function getCategories(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function getCategories(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response): ResponseInterface
     {
-        $userIdAttr = $request->getAttribute('user_id');
-        $userId = (is_int($userIdAttr) || (is_string($userIdAttr) && ctype_digit($userIdAttr)))
-            ? (int) $userIdAttr
+        $Silian_userIdAttr = $Silian_request->getAttribute('user_id');
+        $Silian_userId = (is_int($Silian_userIdAttr) || (is_string($Silian_userIdAttr) && ctype_digit($Silian_userIdAttr)))
+            ? (int) $Silian_userIdAttr
             : null;
-        $requestId = $request->getHeaderLine('X-Request-ID') ?: null;
+        $Silian_requestId = $Silian_request->getHeaderLine('X-Request-ID') ?: null;
 
         try {
-            $categories = $this->carbonCalculatorService->getCategories();
+            $Silian_categories = $this->carbonCalculatorService->getCategories();
 
             $this->auditLogService->logAudit([
                 'operation_category' => 'carbon_management',
                 'action' => 'carbon_activity_categories_alias_read',
-                'user_id' => $userId,
+                'user_id' => $Silian_userId,
                 'actor_type' => 'user',
                 'change_type' => 'read',
                 'request_method' => 'GET',
                 'endpoint' => '/api/v1/activities/categories',
                 'status' => 'success',
-                'request_id' => $requestId,
+                'request_id' => $Silian_requestId,
                 'data' => [
                     'deprecated_alias' => true,
-                    'category_count' => count($categories),
+                    'category_count' => count($Silian_categories),
                 ],
             ]);
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
-                'data' => $categories,
+                'data' => $Silian_categories,
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             $this->auditLogService->logAudit([
                 'operation_category' => 'carbon_management',
                 'action' => 'carbon_activity_categories_alias_read',
-                'user_id' => $userId,
+                'user_id' => $Silian_userId,
                 'actor_type' => 'user',
                 'change_type' => 'read',
                 'request_method' => 'GET',
                 'endpoint' => '/api/v1/activities/categories',
                 'status' => 'failed',
-                'request_id' => $requestId,
+                'request_id' => $Silian_requestId,
                 'data' => [
                     'deprecated_alias' => true,
-                    'error' => $e->getMessage(),
+                    'error' => $Silian_e->getMessage(),
                 ],
             ]);
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::getCategories error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to fetch categories', 500);
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::getCategories error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to fetch categories', 500);
         }
     }
 
     /**
      * Get single carbon activity (public endpoint)
      */
-    public function getActivity(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function getActivity(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response, array $Silian_args): ResponseInterface
     {
         try {
-            $activityId = $args['id'];
-            $activity = CarbonActivity::find($activityId);
+            $Silian_activityId = $Silian_args['id'];
+            $Silian_activity = CarbonActivity::find($Silian_activityId);
 
-            if (!$activity) {
-                return $this->errorResponse($response, 'Activity not found', 404);
+            if (!$Silian_activity) {
+                return $this->errorResponse($Silian_response, 'Activity not found', 404);
             }
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
-                'data' => $this->presentActivity($activity)
+                'data' => $this->presentActivity($Silian_activity)
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::getActivity error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to fetch activity: ' . $e->getMessage(), 500);
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::getActivity error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to fetch activity: ' . $Silian_e->getMessage(), 500);
         }
     }
 
     /**
      * Get all activities for admin management (admin only)
      */
-    public function getActivitiesForAdmin(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function getActivitiesForAdmin(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response): ResponseInterface
     {
         try {
-            $queryParams = $request->getQueryParams();
-            $page = max(1, (int)($queryParams['page'] ?? 1));
-            $limit = min(100, max(10, (int)($queryParams['limit'] ?? 20)));
-            $category = $queryParams['category'] ?? null;
-            $search = $queryParams['search'] ?? null;
-            $includeInactive = isset($queryParams['include_inactive']) && $queryParams['include_inactive'] === 'true';
-            $includeDeleted = isset($queryParams['include_deleted']) && $queryParams['include_deleted'] === 'true';
-            $status = $queryParams['status'] ?? null;
+            $Silian_queryParams = $Silian_request->getQueryParams();
+            $Silian_page = max(1, (int)($Silian_queryParams['page'] ?? 1));
+            $Silian_limit = min(100, max(10, (int)($Silian_queryParams['limit'] ?? 20)));
+            $Silian_category = $Silian_queryParams['category'] ?? null;
+            $Silian_search = $Silian_queryParams['search'] ?? null;
+            $Silian_includeInactive = isset($Silian_queryParams['include_inactive']) && $Silian_queryParams['include_inactive'] === 'true';
+            $Silian_includeDeleted = isset($Silian_queryParams['include_deleted']) && $Silian_queryParams['include_deleted'] === 'true';
+            $Silian_status = $Silian_queryParams['status'] ?? null;
 
-            if ($status === 'inactive') {
-                $includeInactive = true;
+            if ($Silian_status === 'inactive') {
+                $Silian_includeInactive = true;
             }
 
-            if ($status === 'deleted') {
-                $includeDeleted = true;
+            if ($Silian_status === 'deleted') {
+                $Silian_includeDeleted = true;
             }
 
-            $filteredQuery = $includeDeleted ? CarbonActivity::withTrashed() : CarbonActivity::query();
+            $Silian_filteredQuery = $Silian_includeDeleted ? CarbonActivity::withTrashed() : CarbonActivity::query();
 
-            if ($status === 'deleted') {
-                $filteredQuery->onlyTrashed();
+            if ($Silian_status === 'deleted') {
+                $Silian_filteredQuery->onlyTrashed();
             } else {
-                if (!$includeDeleted) {
-                    $filteredQuery->whereNull('deleted_at');
+                if (!$Silian_includeDeleted) {
+                    $Silian_filteredQuery->whereNull('deleted_at');
                 }
 
-                if (!$includeInactive) {
-                    $filteredQuery->where('is_active', true);
+                if (!$Silian_includeInactive) {
+                    $Silian_filteredQuery->where('is_active', true);
                 }
 
-                if ($status === 'active') {
-                    $filteredQuery->where('is_active', true);
-                } elseif ($status === 'inactive') {
-                    $filteredQuery->where('is_active', false);
+                if ($Silian_status === 'active') {
+                    $Silian_filteredQuery->where('is_active', true);
+                } elseif ($Silian_status === 'inactive') {
+                    $Silian_filteredQuery->where('is_active', false);
                 }
             }
 
-            if ($category) {
-                $filteredQuery->byCategory($category);
+            if ($Silian_category) {
+                $Silian_filteredQuery->byCategory($Silian_category);
             }
 
-            if ($search) {
-                $filteredQuery->search($search);
+            if ($Silian_search) {
+                $Silian_filteredQuery->search($Silian_search);
             }
 
-            $total = (clone $filteredQuery)->count();
-            $activities = (clone $filteredQuery)
+            $Silian_total = (clone $Silian_filteredQuery)->count();
+            $Silian_activities = (clone $Silian_filteredQuery)
                 ->ordered()
-                ->skip(($page - 1) * $limit)
-                ->take($limit)
+                ->skip(($Silian_page - 1) * $Silian_limit)
+                ->take($Silian_limit)
                 ->get();
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
                 'data' => [
-                    'activities' => $activities->map(fn (CarbonActivity $activity) => $this->presentActivity($activity))->toArray(),
+                    'activities' => $Silian_activities->map(fn (CarbonActivity $Silian_activity) => $this->presentActivity($Silian_activity))->toArray(),
                     'pagination' => [
-                        'page' => $page,
-                        'limit' => $limit,
-                        'total' => $total,
-                        'pages' => (int) ceil($total / $limit)
+                        'page' => $Silian_page,
+                        'limit' => $Silian_limit,
+                        'total' => $Silian_total,
+                        'pages' => (int) ceil($Silian_total / $Silian_limit)
                     ],
-                    'categories' => $this->carbonCalculatorService->getCategories($includeInactive, $includeDeleted)
+                    'categories' => $this->carbonCalculatorService->getCategories($Silian_includeInactive, $Silian_includeDeleted)
                 ]
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::createActivity error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to fetch activities: ' . $e->getMessage(), 500);
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::createActivity error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to fetch activities: ' . $Silian_e->getMessage(), 500);
         }
     }
 
     /**
      * Create new carbon activity (admin only)
      */
-    public function createActivity(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function createActivity(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response): ResponseInterface
     {
         try {
-            $data = $request->getParsedBody();
-            $userId = $request->getAttribute('user_id');
+            $Silian_data = $Silian_request->getParsedBody();
+            $Silian_userId = $Silian_request->getAttribute('user_id');
 
-            if (!is_array($data)) {
-                $data = [];
+            if (!is_array($Silian_data)) {
+                $Silian_data = [];
             }
 
-            $payload = $this->sanitizeActivityInput($data);
+            $Silian_payload = $this->sanitizeActivityInput($Silian_data);
 
-            if (!$this->carbonCalculatorService->validateActivityData($payload, false)) {
-                return $this->errorResponse($response, 'Validation failed', 400);
+            if (!$this->carbonCalculatorService->validateActivityData($Silian_payload, false)) {
+                return $this->errorResponse($Silian_response, 'Validation failed', 400);
             }
 
-            $activityAttributes = array_merge([
+            $Silian_activityAttributes = array_merge([
                 'id' => (string) Str::uuid(),
                 'is_active' => true,
                 'sort_order' => 0,
-            ], $payload);
+            ], $Silian_payload);
 
-            if (!array_key_exists('is_active', $payload)) {
-                $activityAttributes['is_active'] = true;
+            if (!array_key_exists('is_active', $Silian_payload)) {
+                $Silian_activityAttributes['is_active'] = true;
             }
 
-            if (!array_key_exists('sort_order', $payload)) {
-                $activityAttributes['sort_order'] = 0;
+            if (!array_key_exists('sort_order', $Silian_payload)) {
+                $Silian_activityAttributes['sort_order'] = 0;
             }
 
-            $activity = CarbonActivity::create($activityAttributes);
-            $activity->refresh();
+            $Silian_activity = CarbonActivity::create($Silian_activityAttributes);
+            $Silian_activity->refresh();
 
             $this->auditLogService->logAdminOperation(
                 'carbon_activity_created',
-                $userId,
+                $Silian_userId,
                 'carbon_management',
                 [
                     'table' => 'carbon_activities',
-                    'record_id' => $activity->id,
-                    'new_data' => $activityAttributes
+                    'record_id' => $Silian_activity->id,
+                    'new_data' => $Silian_activityAttributes
                 ]
             );
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
                 'message' => 'Carbon activity created successfully',
-                'data' => $this->presentActivity($activity)
+                'data' => $this->presentActivity($Silian_activity)
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withStatus(201)->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::updateActivity error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to create activity: ' . $e->getMessage(), 500);
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::updateActivity error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to create activity: ' . $Silian_e->getMessage(), 500);
         }
     }
 
     /**
      * Update carbon activity (admin only)
      */
-    public function updateActivity(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function updateActivity(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response, array $Silian_args): ResponseInterface
     {
         try {
-            $activityId = $args['id'];
-            $data = $request->getParsedBody();
-            $userId = $request->getAttribute('user_id');
+            $Silian_activityId = $Silian_args['id'];
+            $Silian_data = $Silian_request->getParsedBody();
+            $Silian_userId = $Silian_request->getAttribute('user_id');
 
-            if (!is_array($data)) {
-                $data = [];
+            if (!is_array($Silian_data)) {
+                $Silian_data = [];
             }
 
-            $activity = CarbonActivity::find($activityId);
-            if (!$activity) {
-                return $this->errorResponse($response, 'Activity not found', 404);
+            $Silian_activity = CarbonActivity::find($Silian_activityId);
+            if (!$Silian_activity) {
+                return $this->errorResponse($Silian_response, 'Activity not found', 404);
             }
 
-            $payload = $this->sanitizeActivityInput($data, true);
+            $Silian_payload = $this->sanitizeActivityInput($Silian_data, true);
 
-            if (!$this->carbonCalculatorService->validateActivityData($payload, true)) {
-                return $this->errorResponse($response, 'Validation failed', 400);
+            if (!$this->carbonCalculatorService->validateActivityData($Silian_payload, true)) {
+                return $this->errorResponse($Silian_response, 'Validation failed', 400);
             }
 
-            if (empty($payload)) {
-                return $this->errorResponse($response, 'No fields to update', 400);
+            if (empty($Silian_payload)) {
+                return $this->errorResponse($Silian_response, 'No fields to update', 400);
             }
 
-            $oldValues = $activity->toArray();
+            $Silian_oldValues = $Silian_activity->toArray();
 
-            $activity->fill($payload);
+            $Silian_activity->fill($Silian_payload);
 
-            if (!$activity->isDirty()) {
-                $noChange = [
+            if (!$Silian_activity->isDirty()) {
+                $Silian_noChange = [
                     'success' => true,
                     'message' => 'No changes detected',
-                    'data' => $this->presentActivity($activity)
+                    'data' => $this->presentActivity($Silian_activity)
                 ];
 
-                $response->getBody()->write(json_encode($noChange));
-                return $response->withHeader('Content-Type', 'application/json');
+                $Silian_response->getBody()->write(json_encode($Silian_noChange));
+                return $Silian_response->withHeader('Content-Type', 'application/json');
             }
 
-            $activity->save();
-            $activity->refresh();
+            $Silian_activity->save();
+            $Silian_activity->refresh();
 
             $this->auditLogService->logAdminOperation(
                 'carbon_activity_updated',
-                $userId,
+                $Silian_userId,
                 'carbon_management',
                 [
                     'table' => 'carbon_activities',
-                    'record_id' => $activity->id,
-                    'old_data' => $oldValues,
-                    'new_data' => $payload
+                    'record_id' => $Silian_activity->id,
+                    'old_data' => $Silian_oldValues,
+                    'new_data' => $Silian_payload
                 ]
             );
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
                 'message' => 'Carbon activity updated successfully',
-                'data' => $this->presentActivity($activity)
+                'data' => $this->presentActivity($Silian_activity)
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::deleteActivity error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to update activity: ' . $e->getMessage(), 500);
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::deleteActivity error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to update activity: ' . $Silian_e->getMessage(), 500);
         }
     }
 
     /**
      * Delete carbon activity (admin only)
      */
-    public function deleteActivity(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function deleteActivity(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response, array $Silian_args): ResponseInterface
     {
         try {
-            $activityId = $args['id'];
-            $userId = $request->getAttribute('user_id');
+            $Silian_activityId = $Silian_args['id'];
+            $Silian_userId = $Silian_request->getAttribute('user_id');
 
-            $activity = CarbonActivity::find($activityId);
-            if (!$activity) {
-                return $this->errorResponse($response, 'Activity not found', 404);
+            $Silian_activity = CarbonActivity::find($Silian_activityId);
+            if (!$Silian_activity) {
+                return $this->errorResponse($Silian_response, 'Activity not found', 404);
             }
 
             // Check if activity has associated transactions
-            $transactionCount = $activity->pointsTransactions()->count();
-            $oldValues = $activity->toArray();
-            $deletedAt = null;
+            $Silian_transactionCount = $Silian_activity->pointsTransactions()->count();
+            $Silian_oldValues = $Silian_activity->toArray();
+            $Silian_deletedAt = null;
 
-            if ($transactionCount > 0) {
+            if ($Silian_transactionCount > 0) {
                 // Soft delete instead of hard delete if there are associated transactions
-                $activity->delete();
-                $action = 'soft_deleted';
-                $message = 'Carbon activity soft deleted successfully (has associated transactions)';
+                $Silian_activity->delete();
+                $Silian_action = 'soft_deleted';
+                $Silian_message = 'Carbon activity soft deleted successfully (has associated transactions)';
                 try {
-                    $activity->refresh();
-                    $deletedAt = $this->formatDate($activity->deleted_at);
-                } catch (\Throwable $ignore) {
-                    $deletedAt = null;
+                    $Silian_activity->refresh();
+                    $Silian_deletedAt = $this->formatDate($Silian_activity->deleted_at);
+                } catch (\Throwable $Silian_ignore) {
+                    $Silian_deletedAt = null;
                 }
             } else {
                 // Hard delete if no associated transactions
-                $activity->forceDelete();
-                $action = 'hard_deleted';
-                $message = 'Carbon activity deleted successfully';
+                $Silian_activity->forceDelete();
+                $Silian_action = 'hard_deleted';
+                $Silian_message = 'Carbon activity deleted successfully';
             }
 
             // Log the deletion
             $this->auditLogService->logAdminOperation(
-                'carbon_activity_' . $action,
-                $userId,
+                'carbon_activity_' . $Silian_action,
+                $Silian_userId,
                 'carbon_management',
                 [
                     'table' => 'carbon_activities',
-                    'record_id' => $activityId,
-                    'old_data' => $oldValues,
-                    'transaction_count' => $transactionCount,
-                    'deleted_at' => $deletedAt
+                    'record_id' => $Silian_activityId,
+                    'old_data' => $Silian_oldValues,
+                    'transaction_count' => $Silian_transactionCount,
+                    'deleted_at' => $Silian_deletedAt
                 ]
             );
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
-                'message' => $message,
+                'message' => $Silian_message,
                 'data' => [
-                    'id' => $activityId,
-                    'action' => $action,
-                    'transaction_count' => $transactionCount,
-                    'deleted_at' => $deletedAt
+                    'id' => $Silian_activityId,
+                    'action' => $Silian_action,
+                    'transaction_count' => $Silian_transactionCount,
+                    'deleted_at' => $Silian_deletedAt
                 ]
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::restoreActivity error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to delete activity: ' . $e->getMessage(), 500);
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::restoreActivity error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to delete activity: ' . $Silian_e->getMessage(), 500);
         }
     }
 
     /**
      * Restore soft deleted activity (admin only)
      */
-    public function restoreActivity(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function restoreActivity(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response, array $Silian_args): ResponseInterface
     {
         try {
-            $activityId = $args['id'];
-            $userId = $request->getAttribute('user_id');
+            $Silian_activityId = $Silian_args['id'];
+            $Silian_userId = $Silian_request->getAttribute('user_id');
 
-            $activity = CarbonActivity::withTrashed()->find($activityId);
-            if (!$activity) {
-                return $this->errorResponse($response, 'Activity not found', 404);
+            $Silian_activity = CarbonActivity::withTrashed()->find($Silian_activityId);
+            if (!$Silian_activity) {
+                return $this->errorResponse($Silian_response, 'Activity not found', 404);
             }
 
-            if (!$activity->trashed()) {
-                return $this->errorResponse($response, 'Activity is not deleted', 400);
+            if (!$Silian_activity->trashed()) {
+                return $this->errorResponse($Silian_response, 'Activity is not deleted', 400);
             }
 
-            $activity->restore();
-            $activity->refresh();
+            $Silian_activity->restore();
+            $Silian_activity->refresh();
 
             // Log the restoration
             $this->auditLogService->logAdminOperation(
                 'carbon_activity_restored',
-                $userId,
+                $Silian_userId,
                 'carbon_management',
                 [
                     'table' => 'carbon_activities',
-                    'record_id' => $activity->id,
-                    'new_data' => $activity->toArray()
+                    'record_id' => $Silian_activity->id,
+                    'new_data' => $Silian_activity->toArray()
                 ]
             );
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
                 'message' => 'Carbon activity restored successfully',
-                'data' => $this->presentActivity($activity)
+                'data' => $this->presentActivity($Silian_activity)
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::getActivityStatistics error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to restore activity: ' . $e->getMessage(), 500);
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::getActivityStatistics error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to restore activity: ' . $Silian_e->getMessage(), 500);
         }
     }
 
     /**
      * Get activity statistics (admin only)
      */
-    public function getActivityStatistics(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function getActivityStatistics(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response, array $Silian_args): ResponseInterface
     {
         try {
-            $activityId = $args['id'] ?? null;
-            $statistics = $this->carbonCalculatorService->getActivityStatistics($activityId);
+            $Silian_activityId = $Silian_args['id'] ?? null;
+            $Silian_statistics = $this->carbonCalculatorService->getActivityStatistics($Silian_activityId);
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
-                'data' => $statistics
+                'data' => $Silian_statistics
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::getActivitiesForAdmin error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to fetch statistics: ' . $e->getMessage(), 500);
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::getActivitiesForAdmin error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to fetch statistics: ' . $Silian_e->getMessage(), 500);
         }
     }
 
     /**
      * Bulk update activity sort orders (admin only)
      */
-    public function updateSortOrders(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function updateSortOrders(ServerRequestInterface $Silian_request, ResponseInterface $Silian_response): ResponseInterface
     {
         try {
-            $data = $request->getParsedBody();
-            $userId = $request->getAttribute('user_id');
+            $Silian_data = $Silian_request->getParsedBody();
+            $Silian_userId = $Silian_request->getAttribute('user_id');
 
-            if (!isset($data['activities']) || !is_array($data['activities'])) {
-                return $this->errorResponse($response, 'Invalid request format', 400);
+            if (!isset($Silian_data['activities']) || !is_array($Silian_data['activities'])) {
+                return $this->errorResponse($Silian_response, 'Invalid request format', 400);
             }
 
-            $updated = [];
-            foreach ($data['activities'] as $item) {
-                if (!isset($item['id']) || !isset($item['sort_order'])) {
+            $Silian_updated = [];
+            foreach ($Silian_data['activities'] as $Silian_item) {
+                if (!isset($Silian_item['id']) || !isset($Silian_item['sort_order'])) {
                     continue;
                 }
 
                 try {
-                    $activity = CarbonActivity::find($item['id']);
-                    if ($activity) {
-                        $oldSortOrder = $activity->sort_order;
-                        $activity->update(['sort_order' => (int) $item['sort_order']]);
-                        
-                        $updated[] = [
-                            'id' => $activity->id,
-                            'name' => $activity->getCombinedName(),
-                            'old_sort_order' => $oldSortOrder,
-                            'new_sort_order' => $activity->sort_order
+                    $Silian_activity = CarbonActivity::find($Silian_item['id']);
+                    if ($Silian_activity) {
+                        $Silian_oldSortOrder = $Silian_activity->sort_order;
+                        $Silian_activity->update(['sort_order' => (int) $Silian_item['sort_order']]);
+
+                        $Silian_updated[] = [
+                            'id' => $Silian_activity->id,
+                            'name' => $Silian_activity->getCombinedName(),
+                            'old_sort_order' => $Silian_oldSortOrder,
+                            'new_sort_order' => $Silian_activity->sort_order
                         ];
                     }
-                } catch (\Throwable $e) {
+                } catch (\Throwable $Silian_e) {
                     // Skip update errors to allow partial updates in test environment without DB
                     continue;
                 }
@@ -560,184 +560,184 @@ class CarbonActivityController
             // Log the bulk update
             $this->auditLogService->logAdminOperation(
                 'carbon_activities_sort_order_updated',
-                $userId,
+                $Silian_userId,
                 'carbon_management',
                 [
                     'table' => 'carbon_activities',
-                    'updated_count' => count($updated),
-                    'updated_activities' => $updated
+                    'updated_count' => count($Silian_updated),
+                    'updated_activities' => $Silian_updated
                 ]
             );
 
-            $responseData = [
+            $Silian_responseData = [
                 'success' => true,
                 'message' => 'Sort orders updated successfully',
                 'data' => [
-                    'updated_count' => count($updated),
-                    'updated_activities' => $updated
+                    'updated_count' => count($Silian_updated),
+                    'updated_activities' => $Silian_updated
                 ]
             ];
 
-            $response->getBody()->write(json_encode($responseData));
-            return $response->withHeader('Content-Type', 'application/json');
+            $Silian_response->getBody()->write(json_encode($Silian_responseData));
+            return $Silian_response->withHeader('Content-Type', 'application/json');
 
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'CarbonActivityController::updateSortOrders error: ' . $e->getMessage());
-            return $this->errorResponse($response, 'Failed to update sort orders: ' . $e->getMessage(), 500);
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'CarbonActivityController::updateSortOrders error: ' . $Silian_e->getMessage());
+            return $this->errorResponse($Silian_response, 'Failed to update sort orders: ' . $Silian_e->getMessage(), 500);
         }
     }
 
-    private function sanitizeActivityInput(array $input, bool $isUpdate = false): array
+    private function sanitizeActivityInput(array $Silian_input, bool $Silian_isUpdate = false): array
     {
-        $clean = [];
+        $Silian_clean = [];
 
-        if (array_key_exists('name_zh', $input)) {
-            $clean['name_zh'] = is_string($input['name_zh']) ? trim($input['name_zh']) : (string) $input['name_zh'];
+        if (array_key_exists('name_zh', $Silian_input)) {
+            $Silian_clean['name_zh'] = is_string($Silian_input['name_zh']) ? trim($Silian_input['name_zh']) : (string) $Silian_input['name_zh'];
         }
 
-        if (array_key_exists('name_en', $input)) {
-            $clean['name_en'] = is_string($input['name_en']) ? trim($input['name_en']) : (string) $input['name_en'];
+        if (array_key_exists('name_en', $Silian_input)) {
+            $Silian_clean['name_en'] = is_string($Silian_input['name_en']) ? trim($Silian_input['name_en']) : (string) $Silian_input['name_en'];
         }
 
-        if (array_key_exists('category', $input)) {
-            $clean['category'] = is_string($input['category']) ? trim($input['category']) : (string) $input['category'];
+        if (array_key_exists('category', $Silian_input)) {
+            $Silian_clean['category'] = is_string($Silian_input['category']) ? trim($Silian_input['category']) : (string) $Silian_input['category'];
         }
 
-        if (array_key_exists('unit', $input)) {
-            $clean['unit'] = is_string($input['unit']) ? trim($input['unit']) : (string) $input['unit'];
+        if (array_key_exists('unit', $Silian_input)) {
+            $Silian_clean['unit'] = is_string($Silian_input['unit']) ? trim($Silian_input['unit']) : (string) $Silian_input['unit'];
         }
 
-        if (array_key_exists('description_zh', $input)) {
-            $clean['description_zh'] = $this->nullIfBlank($input['description_zh']);
+        if (array_key_exists('description_zh', $Silian_input)) {
+            $Silian_clean['description_zh'] = $this->nullIfBlank($Silian_input['description_zh']);
         }
 
-        if (array_key_exists('description_en', $input)) {
-            $clean['description_en'] = $this->nullIfBlank($input['description_en']);
+        if (array_key_exists('description_en', $Silian_input)) {
+            $Silian_clean['description_en'] = $this->nullIfBlank($Silian_input['description_en']);
         }
 
-        if (array_key_exists('icon', $input)) {
-            $clean['icon'] = $this->nullIfBlank($input['icon']);
+        if (array_key_exists('icon', $Silian_input)) {
+            $Silian_clean['icon'] = $this->nullIfBlank($Silian_input['icon']);
         }
 
-        if (array_key_exists('carbon_factor', $input)) {
-            $clean['carbon_factor'] = round((float) $input['carbon_factor'], 4);
+        if (array_key_exists('carbon_factor', $Silian_input)) {
+            $Silian_clean['carbon_factor'] = round((float) $Silian_input['carbon_factor'], 4);
         }
 
-        if (array_key_exists('sort_order', $input)) {
-            $clean['sort_order'] = (int) $input['sort_order'];
+        if (array_key_exists('sort_order', $Silian_input)) {
+            $Silian_clean['sort_order'] = (int) $Silian_input['sort_order'];
         }
 
-        if (array_key_exists('is_active', $input)) {
-            $clean['is_active'] = $this->normalizeBoolean($input['is_active']);
+        if (array_key_exists('is_active', $Silian_input)) {
+            $Silian_clean['is_active'] = $this->normalizeBoolean($Silian_input['is_active']);
         }
 
-        return $clean;
+        return $Silian_clean;
     }
 
-    private function normalizeBoolean($value, bool $default = true): bool
+    private function normalizeBoolean($Silian_value, bool $Silian_default = true): bool
     {
-        if (is_bool($value)) {
-            return $value;
+        if (is_bool($Silian_value)) {
+            return $Silian_value;
         }
 
-        if ($value === null) {
-            return $default;
+        if ($Silian_value === null) {
+            return $Silian_default;
         }
 
-        if (is_numeric($value)) {
-            return (int) $value === 1;
+        if (is_numeric($Silian_value)) {
+            return (int) $Silian_value === 1;
         }
 
-        if (is_string($value)) {
-            $normalized = strtolower(trim($value));
-            if (in_array($normalized, ['1', 'true', 'yes', 'on'], true)) {
+        if (is_string($Silian_value)) {
+            $Silian_normalized = strtolower(trim($Silian_value));
+            if (in_array($Silian_normalized, ['1', 'true', 'yes', 'on'], true)) {
                 return true;
             }
-            if (in_array($normalized, ['0', 'false', 'no', 'off'], true)) {
+            if (in_array($Silian_normalized, ['0', 'false', 'no', 'off'], true)) {
                 return false;
             }
         }
 
-        return $default;
+        return $Silian_default;
     }
 
-    private function nullIfBlank($value): ?string
+    private function nullIfBlank($Silian_value): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
 
-        $string = is_string($value) ? trim($value) : trim((string) $value);
+        $Silian_string = is_string($Silian_value) ? trim($Silian_value) : trim((string) $Silian_value);
 
-        return $string === '' ? null : $string;
+        return $Silian_string === '' ? null : $Silian_string;
     }
 
-    private function presentActivity(CarbonActivity $activity): array
+    private function presentActivity(CarbonActivity $Silian_activity): array
     {
         return [
-            'id' => $activity->id,
-            'name_zh' => $activity->name_zh,
-            'name_en' => $activity->name_en,
-            'combined_name' => $activity->getCombinedName(),
-            'category' => $activity->category,
-            'carbon_factor' => (float) $activity->carbon_factor,
-            'unit' => $activity->unit,
-            'description_zh' => $activity->description_zh,
-            'description_en' => $activity->description_en,
-            'icon' => $activity->icon,
-            'is_active' => (bool) $activity->is_active,
-            'sort_order' => (int) $activity->sort_order,
-            'statistics' => $activity->getStatistics(),
-            'created_at' => $this->formatDate($activity->created_at),
-            'updated_at' => $this->formatDate($activity->updated_at),
-            'deleted_at' => $this->formatDate($activity->deleted_at),
+            'id' => $Silian_activity->id,
+            'name_zh' => $Silian_activity->name_zh,
+            'name_en' => $Silian_activity->name_en,
+            'combined_name' => $Silian_activity->getCombinedName(),
+            'category' => $Silian_activity->category,
+            'carbon_factor' => (float) $Silian_activity->carbon_factor,
+            'unit' => $Silian_activity->unit,
+            'description_zh' => $Silian_activity->description_zh,
+            'description_en' => $Silian_activity->description_en,
+            'icon' => $Silian_activity->icon,
+            'is_active' => (bool) $Silian_activity->is_active,
+            'sort_order' => (int) $Silian_activity->sort_order,
+            'statistics' => $Silian_activity->getStatistics(),
+            'created_at' => $this->formatDate($Silian_activity->created_at),
+            'updated_at' => $this->formatDate($Silian_activity->updated_at),
+            'deleted_at' => $this->formatDate($Silian_activity->deleted_at),
         ];
     }
 
-    private function formatDate($value): ?string
+    private function formatDate($Silian_value): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
 
-        if ($value instanceof \DateTimeInterface) {
-            return $value->format(DATE_ATOM);
+        if ($Silian_value instanceof \DateTimeInterface) {
+            return $Silian_value->format(DATE_ATOM);
         }
 
-        return (string) $value;
+        return (string) $Silian_value;
     }
 
-    private function errorResponse(ResponseInterface $response, string $message, int $status = 400, array $errors = null): ResponseInterface
+    private function errorResponse(ResponseInterface $Silian_response, string $Silian_message, int $Silian_status = 400, array $Silian_errors = null): ResponseInterface
     {
-        $data = [
+        $Silian_data = [
             'success' => false,
-            'message' => $message
+            'message' => $Silian_message
         ];
 
-        if ($errors) {
-            $data['errors'] = $errors;
+        if ($Silian_errors) {
+            $Silian_data['errors'] = $Silian_errors;
         }
 
-        $response->getBody()->write(json_encode($data));
-        return $response->withStatus($status)->withHeader('Content-Type', 'application/json');
+        $Silian_response->getBody()->write(json_encode($Silian_data));
+        return $Silian_response->withStatus($Silian_status)->withHeader('Content-Type', 'application/json');
     }
 
 
-    private function logExceptionWithFallback(\Throwable $exception, ServerRequestInterface $request, string $contextMessage = ''): void
+    private function logExceptionWithFallback(\Throwable $Silian_exception, ServerRequestInterface $Silian_request, string $Silian_contextMessage = ''): void
     {
         if ($this->errorLogService) {
             try {
-                $extra = $contextMessage !== '' ? ['context_message' => $contextMessage] : [];
-                $this->errorLogService->logException($exception, $request, $extra);
+                $Silian_extra = $Silian_contextMessage !== '' ? ['context_message' => $Silian_contextMessage] : [];
+                $this->errorLogService->logException($Silian_exception, $Silian_request, $Silian_extra);
                 return;
-            } catch (\Throwable $loggingError) {
-                error_log('ErrorLogService failed: ' . $loggingError->getMessage());
+            } catch (\Throwable $Silian_loggingError) {
+                error_log('ErrorLogService failed: ' . $Silian_loggingError->getMessage());
             }
         }
-        if ($contextMessage !== '') {
-            error_log($contextMessage);
+        if ($Silian_contextMessage !== '') {
+            error_log($Silian_contextMessage);
         } else {
-            error_log($exception->getMessage());
+            error_log($Silian_exception->getMessage());
         }
     }
 

@@ -11,7 +11,7 @@ class UserTest extends TestCase
 {
     public function testUserModelCreation(): void
     {
-        $userData = [
+        $Silian_userData = [
             'id' => 1,
             'username' => 'testuser',
             'email' => 'test@example.com',
@@ -22,20 +22,20 @@ class UserTest extends TestCase
             'updated_at' => '2025-01-01 00:00:00'
         ];
 
-        $user = new User($userData);
+        $Silian_user = new User($Silian_userData);
 
-        $this->assertEquals(1, $user->getId());
-        $this->assertEquals('testuser', $user->getUsername());
-        $this->assertEquals('test@example.com', $user->getEmail());
+        $this->assertEquals(1, $Silian_user->getId());
+        $this->assertEquals('testuser', $Silian_user->getUsername());
+        $this->assertEquals('test@example.com', $Silian_user->getEmail());
     // real_name 已废弃，不再测试
-        $this->assertEquals('user', $user->getRole());
-        $this->assertEquals('active', $user->getStatus());
-        $this->assertEquals(100, $user->getPoints());
+        $this->assertEquals('user', $Silian_user->getRole());
+        $this->assertEquals('active', $Silian_user->getStatus());
+        $this->assertEquals(100, $Silian_user->getPoints());
     }
 
     public function testUserModelToArray(): void
     {
-        $userData = [
+        $Silian_userData = [
             'id' => 1,
             'username' => 'testuser',
             'email' => 'test@example.com',
@@ -44,22 +44,22 @@ class UserTest extends TestCase
             'points' => 100
         ];
 
-        $user = new User($userData);
-        $array = $user->toArray();
+        $Silian_user = new User($Silian_userData);
+        $Silian_array = $Silian_user->toArray();
 
-        $this->assertIsArray($array);
-        $this->assertEquals($userData['id'], $array['id']);
-        $this->assertEquals($userData['username'], $array['username']);
-        $this->assertEquals($userData['email'], $array['email']);
-    $this->assertArrayNotHasKey('real_name', $array);
-        $this->assertEquals($userData['role'], $array['role']);
-        $this->assertEquals($userData['status'], $array['status']);
-        $this->assertEquals($userData['points'], $array['points']);
+        $this->assertIsArray($Silian_array);
+        $this->assertEquals($Silian_userData['id'], $Silian_array['id']);
+        $this->assertEquals($Silian_userData['username'], $Silian_array['username']);
+        $this->assertEquals($Silian_userData['email'], $Silian_array['email']);
+    $this->assertArrayNotHasKey('real_name', $Silian_array);
+        $this->assertEquals($Silian_userData['role'], $Silian_array['role']);
+        $this->assertEquals($Silian_userData['status'], $Silian_array['status']);
+        $this->assertEquals($Silian_userData['points'], $Silian_array['points']);
     }
 
     public function testUserModelToArrayExcludesPassword(): void
     {
-        $userData = [
+        $Silian_userData = [
             'id' => 1,
             'username' => 'testuser',
             'email' => 'test@example.com',
@@ -67,116 +67,116 @@ class UserTest extends TestCase
             'role' => 'user'
         ];
 
-        $user = new User($userData);
-        $array = $user->toArray();
+        $Silian_user = new User($Silian_userData);
+        $Silian_array = $Silian_user->toArray();
 
-        $this->assertArrayNotHasKey('password', $array);
+        $this->assertArrayNotHasKey('password', $Silian_array);
     }
 
     public function testUserModelIsAdmin(): void
     {
-        $adminUser = new User(['role' => 'admin']);
-        $regularUser = new User(['role' => 'user']);
-        $supportUser = new User(['role' => 'support']);
+        $Silian_adminUser = new User(['role' => 'admin']);
+        $Silian_regularUser = new User(['role' => 'user']);
+        $Silian_supportUser = new User(['role' => 'support']);
 
-        $this->assertTrue($adminUser->isAdmin());
-        $this->assertFalse($regularUser->isAdmin());
-        $this->assertFalse($supportUser->isAdmin());
+        $this->assertTrue($Silian_adminUser->isAdmin());
+        $this->assertFalse($Silian_regularUser->isAdmin());
+        $this->assertFalse($Silian_supportUser->isAdmin());
     }
 
     public function testUserModelIsActive(): void
     {
-        $activeUser = new User(['status' => 'active']);
-        $inactiveUser = new User(['status' => 'inactive']);
-        $suspendedUser = new User(['status' => 'suspended']);
+        $Silian_activeUser = new User(['status' => 'active']);
+        $Silian_inactiveUser = new User(['status' => 'inactive']);
+        $Silian_suspendedUser = new User(['status' => 'suspended']);
 
-        $this->assertTrue($activeUser->isActive());
-        $this->assertFalse($inactiveUser->isActive());
-        $this->assertFalse($suspendedUser->isActive());
+        $this->assertTrue($Silian_activeUser->isActive());
+        $this->assertFalse($Silian_inactiveUser->isActive());
+        $this->assertFalse($Silian_suspendedUser->isActive());
     }
 
     public function testUserModelHasSufficientPoints(): void
     {
-        $user = new User(['points' => 100]);
+        $Silian_user = new User(['points' => 100]);
 
-        $this->assertTrue($user->hasSufficientPoints(50));
-        $this->assertTrue($user->hasSufficientPoints(100));
-        $this->assertFalse($user->hasSufficientPoints(150));
+        $this->assertTrue($Silian_user->hasSufficientPoints(50));
+        $this->assertTrue($Silian_user->hasSufficientPoints(100));
+        $this->assertFalse($Silian_user->hasSufficientPoints(150));
     }
 
     public function testUserModelAddPoints(): void
     {
-        $user = new User(['points' => 100]);
+        $Silian_user = new User(['points' => 100]);
 
-        $user->addPoints(50);
-        $this->assertEquals(150, $user->getPoints());
+        $Silian_user->addPoints(50);
+        $this->assertEquals(150, $Silian_user->getPoints());
 
-        $user->addPoints(0);
-        $this->assertEquals(150, $user->getPoints());
+        $Silian_user->addPoints(0);
+        $this->assertEquals(150, $Silian_user->getPoints());
     }
 
     public function testUserModelSubtractPoints(): void
     {
-        $user = new User(['points' => 100]);
+        $Silian_user = new User(['points' => 100]);
 
-        $result = $user->subtractPoints(30);
-        $this->assertTrue($result);
-        $this->assertEquals(70, $user->getPoints());
+        $Silian_result = $Silian_user->subtractPoints(30);
+        $this->assertTrue($Silian_result);
+        $this->assertEquals(70, $Silian_user->getPoints());
 
-        $result = $user->subtractPoints(100);
-        $this->assertFalse($result);
-        $this->assertEquals(70, $user->getPoints()); // Should not change
+        $Silian_result = $Silian_user->subtractPoints(100);
+        $this->assertFalse($Silian_result);
+        $this->assertEquals(70, $Silian_user->getPoints()); // Should not change
     }
 
     public function testUserModelGetDisplayName(): void
     {
-        $userA = new User([
+        $Silian_userA = new User([
             'username' => 'testuser'
         ]);
-        $this->assertEquals('testuser', $userA->getDisplayName());
+        $this->assertEquals('testuser', $Silian_userA->getDisplayName());
     }
 
     public function testUserModelValidation(): void
     {
         // Valid user data
-        $validData = [
+        $Silian_validData = [
             'username' => 'testuser',
             'email' => 'test@example.com',
             'role' => 'user',
             'status' => 'active'
         ];
 
-        $user = new User($validData);
-        $this->assertTrue($user->isValid());
+        $Silian_user = new User($Silian_validData);
+        $this->assertTrue($Silian_user->isValid());
 
         // Invalid user data - missing required fields
-        $invalidData = [
+        $Silian_invalidData = [
             'username' => 'testuser'
             // Missing email, role, status
         ];
 
-        $invalidUser = new User($invalidData);
-        $this->assertFalse($invalidUser->isValid());
+        $Silian_invalidUser = new User($Silian_invalidData);
+        $this->assertFalse($Silian_invalidUser->isValid());
     }
 
     public function testUserModelGetValidationErrors(): void
     {
-        $invalidData = [
+        $Silian_invalidData = [
             'username' => '', // Empty username
             'email' => 'invalid-email', // Invalid email format
             'role' => 'invalid_role', // Invalid role
             'status' => 'invalid_status' // Invalid status
         ];
 
-        $user = new User($invalidData);
-        $errors = $user->getValidationErrors();
+        $Silian_user = new User($Silian_invalidData);
+        $Silian_errors = $Silian_user->getValidationErrors();
 
-        $this->assertIsArray($errors);
-        $this->assertNotEmpty($errors);
-        $this->assertContains('Username is required', $errors);
-        $this->assertContains('Invalid email format', $errors);
-        $this->assertContains('Invalid role', $errors);
-        $this->assertContains('Invalid status', $errors);
+        $this->assertIsArray($Silian_errors);
+        $this->assertNotEmpty($Silian_errors);
+        $this->assertContains('Username is required', $Silian_errors);
+        $this->assertContains('Invalid email format', $Silian_errors);
+        $this->assertContains('Invalid role', $Silian_errors);
+        $this->assertContains('Invalid status', $Silian_errors);
     }
 }
 

@@ -24,11 +24,11 @@ class StatisticsService
         private ?AuditLogService $auditLogService = null,
         private ?ErrorLogService $errorLogService = null
     ) {
-        $tzName = $_ENV['APP_TIMEZONE'] ?? date_default_timezone_get();
-        if (!$tzName) {
-            $tzName = 'UTC';
+        $Silian_tzName = $_ENV['APP_TIMEZONE'] ?? date_default_timezone_get();
+        if (!$Silian_tzName) {
+            $Silian_tzName = 'UTC';
         }
-        $this->timezone = new DateTimeZone($tzName);
+        $this->timezone = new DateTimeZone($Silian_tzName);
         if ($this->cacheDir === null) {
             $this->cacheDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'cache';
         }
@@ -36,203 +36,203 @@ class StatisticsService
         $this->adminTtlSeconds = $this->validateTtl($this->adminTtlSeconds, (int)($_ENV['STATS_ADMIN_CACHE_TTL'] ?? 180));
     }
 
-    public function getAdminStats(bool $forceRefresh = false): array
+    public function getAdminStats(bool $Silian_forceRefresh = false): array
     {
         try {
-            if (!$forceRefresh) {
-                $cached = $this->readCache('admin', $this->adminTtlSeconds);
-                if ($cached !== null) {
+            if (!$Silian_forceRefresh) {
+                $Silian_cached = $this->readCache('admin', $this->adminTtlSeconds);
+                if ($Silian_cached !== null) {
                     $this->logAudit('statistics_admin_cache_hit', 'success', ['force_refresh' => false]);
-                    return $cached['data'];
+                    return $Silian_cached['data'];
                 }
             }
 
-            $data = $this->computeAdminStats();
-            $this->writeCache('admin', $data, $this->adminTtlSeconds);
+            $Silian_data = $this->computeAdminStats();
+            $this->writeCache('admin', $Silian_data, $this->adminTtlSeconds);
 
             // Refresh public cache alongside admin stats so homepage stays in sync.
-            $public = $this->buildPublicSummary($data);
-            $this->writeCache('public', $public, $this->publicTtlSeconds);
-            $this->logAudit('statistics_admin_computed', 'success', ['force_refresh' => $forceRefresh]);
+            $Silian_public = $this->buildPublicSummary($Silian_data);
+            $this->writeCache('public', $Silian_public, $this->publicTtlSeconds);
+            $this->logAudit('statistics_admin_computed', 'success', ['force_refresh' => $Silian_forceRefresh]);
 
-            return $data;
-        } catch (\Throwable $exception) {
-            $this->logAudit('statistics_admin_failed', 'failed', ['force_refresh' => $forceRefresh, 'error' => $exception->getMessage()]);
-            $this->logError($exception, '/internal/statistics/admin', ['force_refresh' => $forceRefresh]);
-            throw $exception;
+            return $Silian_data;
+        } catch (\Throwable $Silian_exception) {
+            $this->logAudit('statistics_admin_failed', 'failed', ['force_refresh' => $Silian_forceRefresh, 'error' => $Silian_exception->getMessage()]);
+            $this->logError($Silian_exception, '/internal/statistics/admin', ['force_refresh' => $Silian_forceRefresh]);
+            throw $Silian_exception;
         }
     }
 
-    public function getPublicStats(bool $forceRefresh = false): array
+    public function getPublicStats(bool $Silian_forceRefresh = false): array
     {
         try {
-            if (!$forceRefresh) {
-                $cached = $this->readCache('public', $this->publicTtlSeconds);
-                if ($cached !== null) {
+            if (!$Silian_forceRefresh) {
+                $Silian_cached = $this->readCache('public', $this->publicTtlSeconds);
+                if ($Silian_cached !== null) {
                     $this->logAudit('statistics_public_cache_hit', 'success', ['force_refresh' => false]);
-                    return $cached['data'];
+                    return $Silian_cached['data'];
                 }
             }
 
-            $adminData = $this->getAdminStats(true);
-            $summary = $this->buildPublicSummary($adminData);
-            $this->writeCache('public', $summary, $this->publicTtlSeconds);
-            $this->logAudit('statistics_public_computed', 'success', ['force_refresh' => $forceRefresh]);
+            $Silian_adminData = $this->getAdminStats(true);
+            $Silian_summary = $this->buildPublicSummary($Silian_adminData);
+            $this->writeCache('public', $Silian_summary, $this->publicTtlSeconds);
+            $this->logAudit('statistics_public_computed', 'success', ['force_refresh' => $Silian_forceRefresh]);
 
-            return $summary;
-        } catch (\Throwable $exception) {
-            $this->logAudit('statistics_public_failed', 'failed', ['force_refresh' => $forceRefresh, 'error' => $exception->getMessage()]);
-            $this->logError($exception, '/internal/statistics/public', ['force_refresh' => $forceRefresh]);
-            throw $exception;
+            return $Silian_summary;
+        } catch (\Throwable $Silian_exception) {
+            $this->logAudit('statistics_public_failed', 'failed', ['force_refresh' => $Silian_forceRefresh, 'error' => $Silian_exception->getMessage()]);
+            $this->logError($Silian_exception, '/internal/statistics/public', ['force_refresh' => $Silian_forceRefresh]);
+            throw $Silian_exception;
         }
     }
 
     private function computeAdminStats(): array
     {
-        $now = new DateTimeImmutable('now', $this->timezone);
-        $thirtyDaysAgo = $now->modify('-30 days')->format('Y-m-d H:i:s');
-        $sevenDaysAgo = $now->modify('-7 days')->format('Y-m-d H:i:s');
+        $Silian_now = new DateTimeImmutable('now', $this->timezone);
+        $Silian_thirtyDaysAgo = $Silian_now->modify('-30 days')->format('Y-m-d H:i:s');
+        $Silian_sevenDaysAgo = $Silian_now->modify('-7 days')->format('Y-m-d H:i:s');
 
-        $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
-        $dateExpr = $driver === 'sqlite' ? "substr(created_at,1,10)" : "DATE(created_at)";
+        $Silian_driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $Silian_dateExpr = $Silian_driver === 'sqlite' ? "substr(created_at,1,10)" : "DATE(created_at)";
 
-        $carbonDeletedCondition = $driver === 'sqlite' ? 'deleted_at IS NULL' : "(deleted_at IS NULL OR deleted_at = '0000-00-00 00:00:00')";
-        $carbonDeletedConditionAliasedCr = $driver === 'sqlite' ? 'cr.deleted_at IS NULL' : "(cr.deleted_at IS NULL OR cr.deleted_at = '0000-00-00 00:00:00')";
-        $activityDeletedCondition = $driver === 'sqlite' ? 'deleted_at IS NULL' : "(deleted_at IS NULL OR deleted_at = '0000-00-00 00:00:00')";
+        $Silian_carbonDeletedCondition = $Silian_driver === 'sqlite' ? 'deleted_at IS NULL' : "(deleted_at IS NULL OR deleted_at = '0000-00-00 00:00:00')";
+        $Silian_carbonDeletedConditionAliasedCr = $Silian_driver === 'sqlite' ? 'cr.deleted_at IS NULL' : "(cr.deleted_at IS NULL OR cr.deleted_at = '0000-00-00 00:00:00')";
+        $Silian_activityDeletedCondition = $Silian_driver === 'sqlite' ? 'deleted_at IS NULL' : "(deleted_at IS NULL OR deleted_at = '0000-00-00 00:00:00')";
 
-        $stmtUser = $this->db->prepare("SELECT COUNT(*) AS total_users,
+        $Silian_stmtUser = $this->db->prepare("SELECT COUNT(*) AS total_users,
                 SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) AS active_users,
                 SUM(CASE WHEN status IN ('inactive','suspended') THEN 1 ELSE 0 END) AS inactive_users,
                 SUM(CASE WHEN created_at >= :d30 THEN 1 ELSE 0 END) AS new_users_30d
                 FROM users WHERE deleted_at IS NULL");
-        $stmtUser->execute([':d30' => $thirtyDaysAgo]);
-        $userStatsRaw = $stmtUser->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmtUser->execute([':d30' => $Silian_thirtyDaysAgo]);
+        $Silian_userStatsRaw = $Silian_stmtUser->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $transactionStatsRaw = $this->db->query("SELECT COUNT(*) AS total_transactions,
+        $Silian_transactionStatsRaw = $this->db->query("SELECT COUNT(*) AS total_transactions,
                 SUM(CASE WHEN LOWER(status) = 'pending' THEN 1 ELSE 0 END) AS pending_transactions,
                 SUM(CASE WHEN LOWER(status) = 'approved' THEN 1 ELSE 0 END) AS approved_transactions,
                 SUM(CASE WHEN LOWER(status) = 'rejected' THEN 1 ELSE 0 END) AS rejected_transactions,
                 COALESCE(SUM(CASE WHEN LOWER(status) = 'approved' THEN points ELSE 0 END), 0) AS total_points_awarded
-                FROM points_transactions WHERE {$activityDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
+                FROM points_transactions WHERE {$Silian_activityDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $txWindowStmt = $this->db->prepare("SELECT COUNT(*) AS total_transactions,
+        $Silian_txWindowStmt = $this->db->prepare("SELECT COUNT(*) AS total_transactions,
                 COALESCE(SUM(CASE WHEN LOWER(status) = 'approved' THEN points ELSE 0 END), 0) AS total_points_awarded
                 FROM points_transactions
-                WHERE {$activityDeletedCondition} AND created_at >= :d7");
-        $txWindowStmt->execute([':d7' => $sevenDaysAgo]);
-        $txWindowRaw = $txWindowStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+                WHERE {$Silian_activityDeletedCondition} AND created_at >= :d7");
+        $Silian_txWindowStmt->execute([':d7' => $Silian_sevenDaysAgo]);
+        $Silian_txWindowRaw = $Silian_txWindowStmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $exchangeStatsRaw = $this->db->query("SELECT COUNT(*) AS total_exchanges,
+        $Silian_exchangeStatsRaw = $this->db->query("SELECT COUNT(*) AS total_exchanges,
                 SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) AS pending_exchanges,
                 SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) AS completed_exchanges,
                 SUM(CASE WHEN status NOT IN ('pending','completed') THEN 1 ELSE 0 END) AS other_exchanges,
                 COALESCE(SUM(points_used), 0) AS total_points_spent
-                FROM point_exchanges WHERE {$activityDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
+                FROM point_exchanges WHERE {$Silian_activityDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $messageStatsRaw = $this->db->query("SELECT COUNT(*) AS total_messages,
+        $Silian_messageStatsRaw = $this->db->query("SELECT COUNT(*) AS total_messages,
                 SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) AS unread_messages,
                 SUM(CASE WHEN is_read = 1 THEN 1 ELSE 0 END) AS read_messages
                 FROM messages WHERE deleted_at IS NULL")?->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $messagePriorityRows = [];
+        $Silian_messagePriorityRows = [];
         try {
-            $prioritySql = "SELECT COALESCE(priority, 'normal') AS priority,
+            $Silian_prioritySql = "SELECT COALESCE(priority, 'normal') AS priority,
                     COUNT(*) AS total,
                     SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) AS unread,
                     SUM(CASE WHEN is_read = 1 THEN 1 ELSE 0 END) AS read
                 FROM messages
                 WHERE deleted_at IS NULL
                 GROUP BY COALESCE(priority, 'normal')";
-            $priorityStmt = $this->db->query($prioritySql);
-            if ($priorityStmt) {
-                $messagePriorityRows = $priorityStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_priorityStmt = $this->db->query($Silian_prioritySql);
+            if ($Silian_priorityStmt) {
+                $Silian_messagePriorityRows = $Silian_priorityStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
             }
-        } catch (\Throwable $ignore) {
-            $messagePriorityRows = [];
+        } catch (\Throwable $Silian_ignore) {
+            $Silian_messagePriorityRows = [];
         }
 
-        $messageTrendRows = [];
-        $messageTrendStart = $now
+        $Silian_messageTrendRows = [];
+        $Silian_messageTrendStart = $Silian_now
             ->modify('-' . (self::MESSAGE_TREND_WINDOW_DAYS - 1) . ' days')
             ->setTime(0, 0, 0);
         try {
-            $trendSql = "SELECT {$dateExpr} AS day_label,
+            $Silian_trendSql = "SELECT {$Silian_dateExpr} AS day_label,
                     COUNT(*) AS total,
                     SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END) AS unread,
                     SUM(CASE WHEN is_read = 1 THEN 1 ELSE 0 END) AS read
                 FROM messages
                 WHERE deleted_at IS NULL AND created_at >= :start_date
-                GROUP BY {$dateExpr}
-                ORDER BY {$dateExpr}";
-            $trendStmt = $this->db->prepare($trendSql);
-            if ($trendStmt) {
-                $trendStmt->execute([':start_date' => $messageTrendStart->format('Y-m-d H:i:s')]);
-                $messageTrendRows = $trendStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                GROUP BY {$Silian_dateExpr}
+                ORDER BY {$Silian_dateExpr}";
+            $Silian_trendStmt = $this->db->prepare($Silian_trendSql);
+            if ($Silian_trendStmt) {
+                $Silian_trendStmt->execute([':start_date' => $Silian_messageTrendStart->format('Y-m-d H:i:s')]);
+                $Silian_messageTrendRows = $Silian_trendStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
             }
-        } catch (\Throwable $ignore) {
-            $messageTrendRows = [];
+        } catch (\Throwable $Silian_ignore) {
+            $Silian_messageTrendRows = [];
         }
 
-        $activityRecordStatsRaw = $this->db->query("SELECT COUNT(*) AS total_records,
+        $Silian_activityRecordStatsRaw = $this->db->query("SELECT COUNT(*) AS total_records,
                 SUM(CASE WHEN LOWER(status) = 'pending' THEN 1 ELSE 0 END) AS pending_records,
                 SUM(CASE WHEN LOWER(status) = 'approved' THEN 1 ELSE 0 END) AS approved_records,
                 SUM(CASE WHEN LOWER(status) = 'rejected' THEN 1 ELSE 0 END) AS rejected_records
-                FROM carbon_records WHERE {$carbonDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
+                FROM carbon_records WHERE {$Silian_carbonDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $activityCatalogStatsRaw = $this->db->query("SELECT COUNT(*) AS total_activities,
+        $Silian_activityCatalogStatsRaw = $this->db->query("SELECT COUNT(*) AS total_activities,
                 SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) AS active_activities,
                 SUM(CASE WHEN is_active = 0 OR is_active IS NULL THEN 1 ELSE 0 END) AS inactive_activities
-                FROM carbon_activities WHERE {$activityDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
+                FROM carbon_activities WHERE {$Silian_activityDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $carbonStatsRaw = $this->db->query("SELECT COUNT(*) AS total_records,
+        $Silian_carbonStatsRaw = $this->db->query("SELECT COUNT(*) AS total_records,
                 SUM(CASE WHEN LOWER(status) = 'pending' THEN 1 ELSE 0 END) AS pending_records,
                 SUM(CASE WHEN LOWER(status) = 'approved' THEN 1 ELSE 0 END) AS approved_records,
                 SUM(CASE WHEN LOWER(status) = 'rejected' THEN 1 ELSE 0 END) AS rejected_records,
                 COALESCE(SUM(CASE WHEN LOWER(status) = 'approved' THEN carbon_saved ELSE 0 END), 0) AS total_carbon_saved,
                 COALESCE(SUM(CASE WHEN LOWER(status) = 'approved' THEN points_earned ELSE 0 END), 0) AS total_points_earned
-                FROM carbon_records WHERE {$carbonDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
+                FROM carbon_records WHERE {$Silian_carbonDeletedCondition}")?->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $carbonWindowStmt = $this->db->prepare("SELECT
+        $Silian_carbonWindowStmt = $this->db->prepare("SELECT
                     COALESCE(SUM(CASE WHEN LOWER(status) = 'approved' THEN carbon_saved ELSE 0 END), 0) AS carbon_saved,
                     COALESCE(SUM(CASE WHEN LOWER(status) = 'approved' THEN points_earned ELSE 0 END), 0) AS points_earned,
                     SUM(CASE WHEN LOWER(status) = 'pending' THEN 1 ELSE 0 END) AS pending_records,
                     SUM(CASE WHEN LOWER(status) = 'approved' THEN 1 ELSE 0 END) AS approved_records
                 FROM carbon_records
-                WHERE {$carbonDeletedCondition} AND created_at >= :d7");
-        $carbonWindowStmt->execute([':d7' => $sevenDaysAgo]);
-        $carbonWindowRaw = $carbonWindowStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+                WHERE {$Silian_carbonDeletedCondition} AND created_at >= :d7");
+        $Silian_carbonWindowStmt->execute([':d7' => $Silian_sevenDaysAgo]);
+        $Silian_carbonWindowRaw = $Silian_carbonWindowStmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $trendTransactions = [];
+        $Silian_trendTransactions = [];
         try {
-            $trendTxStmt = $this->db->prepare("SELECT {$dateExpr} AS date,
+            $Silian_trendTxStmt = $this->db->prepare("SELECT {$Silian_dateExpr} AS date,
                         COUNT(*) AS transactions,
                         COALESCE(SUM(CASE WHEN LOWER(status) = 'approved' THEN points ELSE 0 END), 0) AS points_awarded
                     FROM points_transactions
-                    WHERE {$activityDeletedCondition} AND created_at >= :d30
-                    GROUP BY {$dateExpr}");
-            $trendTxStmt->execute([':d30' => $thirtyDaysAgo]);
-            $trendTransactions = $trendTxStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (\Throwable $ignore) {
+                    WHERE {$Silian_activityDeletedCondition} AND created_at >= :d30
+                    GROUP BY {$Silian_dateExpr}");
+            $Silian_trendTxStmt->execute([':d30' => $Silian_thirtyDaysAgo]);
+            $Silian_trendTransactions = $Silian_trendTxStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable $Silian_ignore) {
         }
 
-        $trendCarbon = [];
+        $Silian_trendCarbon = [];
         try {
-            $trendCarbonStmt = $this->db->prepare("SELECT {$dateExpr} AS date,
+            $Silian_trendCarbonStmt = $this->db->prepare("SELECT {$Silian_dateExpr} AS date,
                         COALESCE(SUM(carbon_saved), 0) AS carbon_saved,
                         COUNT(*) AS approved_records
                     FROM carbon_records
-                    WHERE {$carbonDeletedCondition} AND created_at >= :d30 AND LOWER(status) = 'approved'
-                    GROUP BY {$dateExpr}");
-            $trendCarbonStmt->execute([':d30' => $thirtyDaysAgo]);
-            $trendCarbon = $trendCarbonStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (\Throwable $ignore) {
+                    WHERE {$Silian_carbonDeletedCondition} AND created_at >= :d30 AND LOWER(status) = 'approved'
+                    GROUP BY {$Silian_dateExpr}");
+            $Silian_trendCarbonStmt->execute([':d30' => $Silian_thirtyDaysAgo]);
+            $Silian_trendCarbon = $Silian_trendCarbonStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable $Silian_ignore) {
         }
 
-        $trendMap = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $dateKey = $now->modify("-{$i} days")->format('Y-m-d');
-            $trendMap[$dateKey] = [
-                'date' => $dateKey,
+        $Silian_trendMap = [];
+        for ($Silian_i = 29; $Silian_i >= 0; $Silian_i--) {
+            $Silian_dateKey = $Silian_now->modify("-{$Silian_i} days")->format('Y-m-d');
+            $Silian_trendMap[$Silian_dateKey] = [
+                'date' => $Silian_dateKey,
                 'transactions' => 0,
                 'carbon_saved' => 0.0,
                 'points_awarded' => 0.0,
@@ -240,620 +240,620 @@ class StatisticsService
             ];
         }
 
-        foreach ($trendTransactions as $row) {
-            $d = (string)($row['date'] ?? '');
-            if ($d !== '' && isset($trendMap[$d])) {
-                $trendMap[$d]['transactions'] = $this->toInt($row['transactions'] ?? 0);
-                $trendMap[$d]['points_awarded'] = $this->toFloat($row['points_awarded'] ?? 0);
+        foreach ($Silian_trendTransactions as $Silian_row) {
+            $Silian_d = (string)($Silian_row['date'] ?? '');
+            if ($Silian_d !== '' && isset($Silian_trendMap[$Silian_d])) {
+                $Silian_trendMap[$Silian_d]['transactions'] = $this->toInt($Silian_row['transactions'] ?? 0);
+                $Silian_trendMap[$Silian_d]['points_awarded'] = $this->toFloat($Silian_row['points_awarded'] ?? 0);
             }
         }
 
-        foreach ($trendCarbon as $row) {
-            $d = (string)($row['date'] ?? '');
-            if ($d !== '' && isset($trendMap[$d])) {
-                $trendMap[$d]['carbon_saved'] = $this->toFloat($row['carbon_saved'] ?? 0);
-                $trendMap[$d]['approved_records'] = $this->toInt($row['approved_records'] ?? 0);
+        foreach ($Silian_trendCarbon as $Silian_row) {
+            $Silian_d = (string)($Silian_row['date'] ?? '');
+            if ($Silian_d !== '' && isset($Silian_trendMap[$Silian_d])) {
+                $Silian_trendMap[$Silian_d]['carbon_saved'] = $this->toFloat($Silian_row['carbon_saved'] ?? 0);
+                $Silian_trendMap[$Silian_d]['approved_records'] = $this->toInt($Silian_row['approved_records'] ?? 0);
             }
         }
 
-        $trendData = array_values($trendMap);
-        $trendCount = count($trendData);
-        $trendTotals = [
+        $Silian_trendData = array_values($Silian_trendMap);
+        $Silian_trendCount = count($Silian_trendData);
+        $Silian_trendTotals = [
             'transactions' => 0,
             'carbon_saved' => 0.0,
             'points_awarded' => 0.0,
             'approved_records' => 0,
         ];
-        foreach ($trendData as $entry) {
-            $trendTotals['transactions'] += $entry['transactions'];
-            $trendTotals['carbon_saved'] += $entry['carbon_saved'];
-            $trendTotals['points_awarded'] += $entry['points_awarded'];
-            $trendTotals['approved_records'] += $entry['approved_records'];
+        foreach ($Silian_trendData as $Silian_entry) {
+            $Silian_trendTotals['transactions'] += $Silian_entry['transactions'];
+            $Silian_trendTotals['carbon_saved'] += $Silian_entry['carbon_saved'];
+            $Silian_trendTotals['points_awarded'] += $Silian_entry['points_awarded'];
+            $Silian_trendTotals['approved_records'] += $Silian_entry['approved_records'];
         }
 
-        $last7 = $trendCount > 7 ? array_slice($trendData, -7) : $trendData;
-        $prev7 = [];
-        if ($trendCount > 7) {
-            $prev7 = array_slice($trendData, max(0, $trendCount - 14), max(0, min(7, $trendCount - 7)));
+        $Silian_last7 = $Silian_trendCount > 7 ? array_slice($Silian_trendData, -7) : $Silian_trendData;
+        $Silian_prev7 = [];
+        if ($Silian_trendCount > 7) {
+            $Silian_prev7 = array_slice($Silian_trendData, max(0, $Silian_trendCount - 14), max(0, min(7, $Silian_trendCount - 7)));
         }
 
-        $sumColumn = static function (array $rows, string $key): float {
-            $total = 0.0;
-            foreach ($rows as $row) {
-                $value = $row[$key] ?? 0;
-                $total += is_numeric($value) ? (float) $value : 0.0;
+        $Silian_sumColumn = static function (array $Silian_rows, string $Silian_key): float {
+            $Silian_total = 0.0;
+            foreach ($Silian_rows as $Silian_row) {
+                $Silian_value = $Silian_row[$Silian_key] ?? 0;
+                $Silian_total += is_numeric($Silian_value) ? (float) $Silian_value : 0.0;
             }
-            return $total;
+            return $Silian_total;
         };
 
-        $carbonLast7 = $sumColumn($last7, 'carbon_saved');
-        $carbonPrev7 = $sumColumn($prev7, 'carbon_saved');
-        $transactionsLast7 = (int) round($sumColumn($last7, 'transactions'));
-        $pointsLast7 = $sumColumn($last7, 'points_awarded');
+        $Silian_carbonLast7 = $Silian_sumColumn($Silian_last7, 'carbon_saved');
+        $Silian_carbonPrev7 = $Silian_sumColumn($Silian_prev7, 'carbon_saved');
+        $Silian_transactionsLast7 = (int) round($Silian_sumColumn($Silian_last7, 'transactions'));
+        $Silian_pointsLast7 = $Silian_sumColumn($Silian_last7, 'points_awarded');
 
-        $trendSummary = [
-            'carbon_last7' => $carbonLast7,
-            'carbon_prev7' => $carbonPrev7,
-            'carbon_delta' => $carbonLast7 - $carbonPrev7,
-            'carbon_delta_rate' => $this->safeDivide($carbonLast7 - $carbonPrev7, max($carbonPrev7, 1)),
-            'transactions_last7' => $transactionsLast7,
-            'points_last7' => $pointsLast7,
-            'average_daily_carbon_30d' => $trendCount > 0 ? $trendTotals['carbon_saved'] / max($trendCount, 1) : 0.0,
+        $Silian_trendSummary = [
+            'carbon_last7' => $Silian_carbonLast7,
+            'carbon_prev7' => $Silian_carbonPrev7,
+            'carbon_delta' => $Silian_carbonLast7 - $Silian_carbonPrev7,
+            'carbon_delta_rate' => $this->safeDivide($Silian_carbonLast7 - $Silian_carbonPrev7, max($Silian_carbonPrev7, 1)),
+            'transactions_last7' => $Silian_transactionsLast7,
+            'points_last7' => $Silian_pointsLast7,
+            'average_daily_carbon_30d' => $Silian_trendCount > 0 ? $Silian_trendTotals['carbon_saved'] / max($Silian_trendCount, 1) : 0.0,
         ];
 
-        $pendingTxStmt = $this->db->prepare("SELECT id, uid AS user_id, username, points, status, created_at
+        $Silian_pendingTxStmt = $this->db->prepare("SELECT id, uid AS user_id, username, points, status, created_at
                 FROM points_transactions
-                WHERE {$activityDeletedCondition} AND LOWER(status) = 'pending'
+                WHERE {$Silian_activityDeletedCondition} AND LOWER(status) = 'pending'
                 ORDER BY created_at DESC
                 LIMIT 5");
-        $pendingTxStmt->execute();
-        $pendingTransactionsList = $pendingTxStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_pendingTxStmt->execute();
+        $Silian_pendingTransactionsList = $Silian_pendingTxStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $pendingRecordsStmt = $this->db->prepare("SELECT cr.id, cr.user_id, u.username, cr.activity_id,
+        $Silian_pendingRecordsStmt = $this->db->prepare("SELECT cr.id, cr.user_id, u.username, cr.activity_id,
                     ca.name_zh AS activity_name_zh, ca.name_en AS activity_name_en,
                     cr.carbon_saved, cr.points_earned, cr.created_at
                 FROM carbon_records cr
                 LEFT JOIN users u ON u.id = cr.user_id
                 LEFT JOIN carbon_activities ca ON ca.id = cr.activity_id
-                WHERE {$carbonDeletedConditionAliasedCr} AND LOWER(cr.status) = 'pending'
+                WHERE {$Silian_carbonDeletedConditionAliasedCr} AND LOWER(cr.status) = 'pending'
                 ORDER BY cr.created_at DESC
                 LIMIT 5");
-        $pendingRecordsStmt->execute();
-        $pendingRecordsList = $pendingRecordsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_pendingRecordsStmt->execute();
+        $Silian_pendingRecordsList = $Silian_pendingRecordsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $latestUsersStmt = $this->db->prepare("SELECT id, username, email, status, created_at
+        $Silian_latestUsersStmt = $this->db->prepare("SELECT id, username, email, status, created_at
                 FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 5");
-        $latestUsersStmt->execute();
-        $latestUsers = $latestUsersStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_latestUsersStmt->execute();
+        $Silian_latestUsers = $Silian_latestUsersStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $users = $this->normalizeUsersStats($userStatsRaw);
-        $transactions = $this->normalizeTransactionStats($transactionStatsRaw, $txWindowRaw, $carbonStatsRaw, $carbonWindowRaw);
-        $exchanges = $this->normalizeExchangeStats($exchangeStatsRaw);
-        $messagesSummary = $this->normalizeMessageStats($messageStatsRaw);
-        $priorityStats = $this->normalizeMessagePriorityBreakdown($messagePriorityRows, $messagesSummary);
-        $trendSeries = $this->normalizeMessageDailySeries($messageTrendRows, $messageTrendStart, $now, $messagesSummary);
+        $Silian_users = $this->normalizeUsersStats($Silian_userStatsRaw);
+        $Silian_transactions = $this->normalizeTransactionStats($Silian_transactionStatsRaw, $Silian_txWindowRaw, $Silian_carbonStatsRaw, $Silian_carbonWindowRaw);
+        $Silian_exchanges = $this->normalizeExchangeStats($Silian_exchangeStatsRaw);
+        $Silian_messagesSummary = $this->normalizeMessageStats($Silian_messageStatsRaw);
+        $Silian_priorityStats = $this->normalizeMessagePriorityBreakdown($Silian_messagePriorityRows, $Silian_messagesSummary);
+        $Silian_trendSeries = $this->normalizeMessageDailySeries($Silian_messageTrendRows, $Silian_messageTrendStart, $Silian_now, $Silian_messagesSummary);
 
-        $messages = $messagesSummary;
-        $messages['priority_breakdown'] = $priorityStats;
-        $messages['daily_counts'] = $trendSeries;
-        $activities = $this->normalizeActivityStats($activityRecordStatsRaw, $activityCatalogStatsRaw);
-        $carbon = $this->normalizeCarbonStats($carbonStatsRaw, $carbonWindowRaw, $trendTotals, $trendCount);
+        $Silian_messages = $Silian_messagesSummary;
+        $Silian_messages['priority_breakdown'] = $Silian_priorityStats;
+        $Silian_messages['daily_counts'] = $Silian_trendSeries;
+        $Silian_activities = $this->normalizeActivityStats($Silian_activityRecordStatsRaw, $Silian_activityCatalogStatsRaw);
+        $Silian_carbon = $this->normalizeCarbonStats($Silian_carbonStatsRaw, $Silian_carbonWindowRaw, $Silian_trendTotals, $Silian_trendCount);
 
-        $recent = [
-            'pending_transactions' => $this->formatPendingTransactions($pendingTransactionsList),
-            'pending_carbon_records' => $this->formatPendingCarbonRecords($pendingRecordsList),
-            'latest_users' => $this->formatLatestUsers($latestUsers),
+        $Silian_recent = [
+            'pending_transactions' => $this->formatPendingTransactions($Silian_pendingTransactionsList),
+            'pending_carbon_records' => $this->formatPendingCarbonRecords($Silian_pendingRecordsList),
+            'latest_users' => $this->formatLatestUsers($Silian_latestUsers),
         ];
 
         return [
-            'users' => $users,
-            'transactions' => $transactions,
-            'exchanges' => $exchanges,
-            'messages' => $messages,
-            'activities' => $activities,
-            'carbon' => $carbon,
-            'trends' => $trendData,
-            'trend_summary' => $trendSummary,
-            'recent' => $recent,
-            'generated_at' => $now->format(DATE_ATOM),
+            'users' => $Silian_users,
+            'transactions' => $Silian_transactions,
+            'exchanges' => $Silian_exchanges,
+            'messages' => $Silian_messages,
+            'activities' => $Silian_activities,
+            'carbon' => $Silian_carbon,
+            'trends' => $Silian_trendData,
+            'trend_summary' => $Silian_trendSummary,
+            'recent' => $Silian_recent,
+            'generated_at' => $Silian_now->format(DATE_ATOM),
         ];
     }
 
-    private function buildPublicSummary(array $adminData): array
+    private function buildPublicSummary(array $Silian_adminData): array
     {
-        $generatedAt = new DateTimeImmutable('now', $this->timezone);
-        $users = $adminData['users'] ?? [];
-        $carbon = $adminData['carbon'] ?? [];
-        $activities = $adminData['activities'] ?? [];
-        $transactions = $adminData['transactions'] ?? [];
-        $messagesSummary = $adminData['messages'] ?? [];
-        $trend = $adminData['trend_summary'] ?? [];
+        $Silian_generatedAt = new DateTimeImmutable('now', $this->timezone);
+        $Silian_users = $Silian_adminData['users'] ?? [];
+        $Silian_carbon = $Silian_adminData['carbon'] ?? [];
+        $Silian_activities = $Silian_adminData['activities'] ?? [];
+        $Silian_transactions = $Silian_adminData['transactions'] ?? [];
+        $Silian_messagesSummary = $Silian_adminData['messages'] ?? [];
+        $Silian_trend = $Silian_adminData['trend_summary'] ?? [];
 
         return [
-            'generated_at' => $generatedAt->format(DATE_ATOM),
-            'total_users' => $this->toInt($users['total_users'] ?? 0),
-            'active_users' => $this->toInt($users['active_users'] ?? 0),
-            'new_users_30d' => $this->toInt($users['new_users_30d'] ?? 0),
-            'total_records' => $this->toInt($activities['total_records'] ?? ($carbon['total_records'] ?? 0)),
-            'approved_records' => $this->toInt($activities['approved_records'] ?? ($carbon['approved_records'] ?? 0)),
-            'pending_records' => $this->toInt($activities['pending_records'] ?? ($carbon['pending_records'] ?? 0)),
-            'total_carbon_saved' => round($this->toFloat($carbon['total_carbon_saved'] ?? 0.0), 2),
-            'average_daily_carbon_30d' => round($this->toFloat($trend['average_daily_carbon_30d'] ?? 0.0), 2),
-            'carbon_last7' => round($this->toFloat($trend['carbon_last7'] ?? 0.0), 2),
-            'total_points_awarded' => round($this->toFloat($transactions['total_points_awarded'] ?? ($carbon['total_points_earned'] ?? 0.0)), 2),
-            'transactions_last7' => $this->toInt($trend['transactions_last7'] ?? 0),
-            'total_messages' => $this->toInt($messagesSummary['total_messages'] ?? 0),
-            'unread_messages' => $this->toInt($messagesSummary['unread_messages'] ?? 0),
-            'read_messages' => $this->toInt($messagesSummary['read_messages'] ?? 0),
-            'unread_ratio' => round($this->toFloat($messagesSummary['unread_ratio'] ?? 0.0), 4),
+            'generated_at' => $Silian_generatedAt->format(DATE_ATOM),
+            'total_users' => $this->toInt($Silian_users['total_users'] ?? 0),
+            'active_users' => $this->toInt($Silian_users['active_users'] ?? 0),
+            'new_users_30d' => $this->toInt($Silian_users['new_users_30d'] ?? 0),
+            'total_records' => $this->toInt($Silian_activities['total_records'] ?? ($Silian_carbon['total_records'] ?? 0)),
+            'approved_records' => $this->toInt($Silian_activities['approved_records'] ?? ($Silian_carbon['approved_records'] ?? 0)),
+            'pending_records' => $this->toInt($Silian_activities['pending_records'] ?? ($Silian_carbon['pending_records'] ?? 0)),
+            'total_carbon_saved' => round($this->toFloat($Silian_carbon['total_carbon_saved'] ?? 0.0), 2),
+            'average_daily_carbon_30d' => round($this->toFloat($Silian_trend['average_daily_carbon_30d'] ?? 0.0), 2),
+            'carbon_last7' => round($this->toFloat($Silian_trend['carbon_last7'] ?? 0.0), 2),
+            'total_points_awarded' => round($this->toFloat($Silian_transactions['total_points_awarded'] ?? ($Silian_carbon['total_points_earned'] ?? 0.0)), 2),
+            'transactions_last7' => $this->toInt($Silian_trend['transactions_last7'] ?? 0),
+            'total_messages' => $this->toInt($Silian_messagesSummary['total_messages'] ?? 0),
+            'unread_messages' => $this->toInt($Silian_messagesSummary['unread_messages'] ?? 0),
+            'read_messages' => $this->toInt($Silian_messagesSummary['read_messages'] ?? 0),
+            'unread_ratio' => round($this->toFloat($Silian_messagesSummary['unread_ratio'] ?? 0.0), 4),
             'messages' => [
-                'total_messages' => $this->toInt($messagesSummary['total_messages'] ?? 0),
-                'unread_messages' => $this->toInt($messagesSummary['unread_messages'] ?? 0),
-                'read_messages' => $this->toInt($messagesSummary['read_messages'] ?? 0),
-                'unread_ratio' => round($this->toFloat($messagesSummary['unread_ratio'] ?? 0.0), 4),
+                'total_messages' => $this->toInt($Silian_messagesSummary['total_messages'] ?? 0),
+                'unread_messages' => $this->toInt($Silian_messagesSummary['unread_messages'] ?? 0),
+                'read_messages' => $this->toInt($Silian_messagesSummary['read_messages'] ?? 0),
+                'unread_ratio' => round($this->toFloat($Silian_messagesSummary['unread_ratio'] ?? 0.0), 4),
             ],
         ];
     }
 
-    private function normalizeUsersStats(array $row): array
+    private function normalizeUsersStats(array $Silian_row): array
     {
-        $total = $this->toInt($row['total_users'] ?? 0);
-        $active = $this->toInt($row['active_users'] ?? 0);
-        $inactive = $this->toInt($row['inactive_users'] ?? 0);
-        if ($inactive === 0 && $total >= $active) {
-            $inactive = max(0, $total - $active);
+        $Silian_total = $this->toInt($Silian_row['total_users'] ?? 0);
+        $Silian_active = $this->toInt($Silian_row['active_users'] ?? 0);
+        $Silian_inactive = $this->toInt($Silian_row['inactive_users'] ?? 0);
+        if ($Silian_inactive === 0 && $Silian_total >= $Silian_active) {
+            $Silian_inactive = max(0, $Silian_total - $Silian_active);
         }
-        $newThirty = $this->toInt($row['new_users_30d'] ?? 0);
+        $Silian_newThirty = $this->toInt($Silian_row['new_users_30d'] ?? 0);
 
         return [
-            'total_users' => $total,
-            'active_users' => $active,
-            'inactive_users' => $inactive,
-            'new_users_30d' => $newThirty,
-            'active_ratio' => $this->safeDivide((float) $active, max($total, 1)),
-            'new_users_ratio' => $this->safeDivide((float) $newThirty, max($total, 1)),
+            'total_users' => $Silian_total,
+            'active_users' => $Silian_active,
+            'inactive_users' => $Silian_inactive,
+            'new_users_30d' => $Silian_newThirty,
+            'active_ratio' => $this->safeDivide((float) $Silian_active, max($Silian_total, 1)),
+            'new_users_ratio' => $this->safeDivide((float) $Silian_newThirty, max($Silian_total, 1)),
         ];
     }
 
-    private function normalizeTransactionStats(array $row, array $windowRow, array $carbonRow, array $carbonWindowRow): array
+    private function normalizeTransactionStats(array $Silian_row, array $Silian_windowRow, array $Silian_carbonRow, array $Silian_carbonWindowRow): array
     {
-        $total = $this->toInt($row['total_transactions'] ?? 0);
-        $pending = $this->toInt($row['pending_transactions'] ?? 0);
-        $approved = $this->toInt($row['approved_transactions'] ?? 0);
-        $rejected = $this->toInt($row['rejected_transactions'] ?? 0);
-        $points = $this->toFloat($row['total_points_awarded'] ?? 0);
-        if ($points <= 0.0) {
-            $points = $this->toFloat($carbonRow['total_points_earned'] ?? 0);
+        $Silian_total = $this->toInt($Silian_row['total_transactions'] ?? 0);
+        $Silian_pending = $this->toInt($Silian_row['pending_transactions'] ?? 0);
+        $Silian_approved = $this->toInt($Silian_row['approved_transactions'] ?? 0);
+        $Silian_rejected = $this->toInt($Silian_row['rejected_transactions'] ?? 0);
+        $Silian_points = $this->toFloat($Silian_row['total_points_awarded'] ?? 0);
+        if ($Silian_points <= 0.0) {
+            $Silian_points = $this->toFloat($Silian_carbonRow['total_points_earned'] ?? 0);
         }
-        $windowTransactions = $this->toInt($windowRow['total_transactions'] ?? 0);
-        $windowPoints = $this->toFloat($windowRow['total_points_awarded'] ?? 0);
-        if ($windowPoints <= 0.0) {
-            $windowPoints = $this->toFloat($carbonWindowRow['points_earned'] ?? 0);
+        $Silian_windowTransactions = $this->toInt($Silian_windowRow['total_transactions'] ?? 0);
+        $Silian_windowPoints = $this->toFloat($Silian_windowRow['total_points_awarded'] ?? 0);
+        if ($Silian_windowPoints <= 0.0) {
+            $Silian_windowPoints = $this->toFloat($Silian_carbonWindowRow['points_earned'] ?? 0);
         }
-        $totalCarbon = $this->toFloat($carbonRow['total_carbon_saved'] ?? 0);
+        $Silian_totalCarbon = $this->toFloat($Silian_carbonRow['total_carbon_saved'] ?? 0);
 
-        $approvedForAverage = $approved > 0 ? $approved : $this->toInt($carbonRow['approved_records'] ?? 0);
-        $avgPoints = $approvedForAverage > 0 ? round($points / $approvedForAverage, 2) : 0.0;
+        $Silian_approvedForAverage = $Silian_approved > 0 ? $Silian_approved : $this->toInt($Silian_carbonRow['approved_records'] ?? 0);
+        $Silian_avgPoints = $Silian_approvedForAverage > 0 ? round($Silian_points / $Silian_approvedForAverage, 2) : 0.0;
 
         return [
-            'total_transactions' => $total,
-            'pending_transactions' => $pending,
-            'approved_transactions' => $approved,
-            'rejected_transactions' => $rejected,
-            'total_points_awarded' => $points,
-            'approval_rate' => $this->safeDivide((float) $approved, max($total, 1)),
-            'pending_ratio' => $this->safeDivide((float) $pending, max($total, 1)),
-            'avg_points_per_transaction' => $avgPoints,
-            'last7_transactions' => $windowTransactions,
-            'last7_points_awarded' => $windowPoints,
-            'total_carbon_saved' => $totalCarbon,
+            'total_transactions' => $Silian_total,
+            'pending_transactions' => $Silian_pending,
+            'approved_transactions' => $Silian_approved,
+            'rejected_transactions' => $Silian_rejected,
+            'total_points_awarded' => $Silian_points,
+            'approval_rate' => $this->safeDivide((float) $Silian_approved, max($Silian_total, 1)),
+            'pending_ratio' => $this->safeDivide((float) $Silian_pending, max($Silian_total, 1)),
+            'avg_points_per_transaction' => $Silian_avgPoints,
+            'last7_transactions' => $Silian_windowTransactions,
+            'last7_points_awarded' => $Silian_windowPoints,
+            'total_carbon_saved' => $Silian_totalCarbon,
         ];
     }
 
-    private function normalizeExchangeStats(array $row): array
+    private function normalizeExchangeStats(array $Silian_row): array
     {
-        $total = $this->toInt($row['total_exchanges'] ?? 0);
-        $pending = $this->toInt($row['pending_exchanges'] ?? 0);
-        $completed = $this->toInt($row['completed_exchanges'] ?? 0);
-        $other = $this->toInt($row['other_exchanges'] ?? 0);
-        if ($other === 0 && $total >= ($pending + $completed)) {
-            $other = max(0, $total - $pending - $completed);
+        $Silian_total = $this->toInt($Silian_row['total_exchanges'] ?? 0);
+        $Silian_pending = $this->toInt($Silian_row['pending_exchanges'] ?? 0);
+        $Silian_completed = $this->toInt($Silian_row['completed_exchanges'] ?? 0);
+        $Silian_other = $this->toInt($Silian_row['other_exchanges'] ?? 0);
+        if ($Silian_other === 0 && $Silian_total >= ($Silian_pending + $Silian_completed)) {
+            $Silian_other = max(0, $Silian_total - $Silian_pending - $Silian_completed);
         }
-        $pointsSpent = $this->toFloat($row['total_points_spent'] ?? 0);
+        $Silian_pointsSpent = $this->toFloat($Silian_row['total_points_spent'] ?? 0);
 
         return [
-            'total_exchanges' => $total,
-            'pending_exchanges' => $pending,
-            'completed_exchanges' => $completed,
-            'other_exchanges' => $other,
-            'total_points_spent' => $pointsSpent,
-            'completion_rate' => $this->safeDivide((float) $completed, max($total, 1)),
+            'total_exchanges' => $Silian_total,
+            'pending_exchanges' => $Silian_pending,
+            'completed_exchanges' => $Silian_completed,
+            'other_exchanges' => $Silian_other,
+            'total_points_spent' => $Silian_pointsSpent,
+            'completion_rate' => $this->safeDivide((float) $Silian_completed, max($Silian_total, 1)),
         ];
     }
 
-    private function normalizeMessageStats(array $row): array
+    private function normalizeMessageStats(array $Silian_row): array
     {
-        $total = $this->toInt($row['total_messages'] ?? 0);
-        $unread = $this->toInt($row['unread_messages'] ?? 0);
-        $read = $this->toInt($row['read_messages'] ?? 0);
-        if ($read === 0 && $total >= $unread) {
-            $read = max(0, $total - $unread);
+        $Silian_total = $this->toInt($Silian_row['total_messages'] ?? 0);
+        $Silian_unread = $this->toInt($Silian_row['unread_messages'] ?? 0);
+        $Silian_read = $this->toInt($Silian_row['read_messages'] ?? 0);
+        if ($Silian_read === 0 && $Silian_total >= $Silian_unread) {
+            $Silian_read = max(0, $Silian_total - $Silian_unread);
         }
 
         return [
-            'total_messages' => $total,
-            'unread_messages' => $unread,
-            'read_messages' => $read,
-            'unread_ratio' => $this->safeDivide((float) $unread, max($total, 1)),
+            'total_messages' => $Silian_total,
+            'unread_messages' => $Silian_unread,
+            'read_messages' => $Silian_read,
+            'unread_ratio' => $this->safeDivide((float) $Silian_unread, max($Silian_total, 1)),
         ];
     }
 
-    private function normalizeMessagePriorityBreakdown(array $rows, array $summary): array
+    private function normalizeMessagePriorityBreakdown(array $Silian_rows, array $Silian_summary): array
     {
-        if (empty($rows) && (($summary['total_messages'] ?? 0) <= 0)) {
+        if (empty($Silian_rows) && (($Silian_summary['total_messages'] ?? 0) <= 0)) {
             return [];
         }
 
-        $orderMap = [
+        $Silian_orderMap = [
             'urgent' => 0,
             'high' => 1,
             'normal' => 2,
             'low' => 3,
         ];
-        $result = [];
+        $Silian_result = [];
 
-        foreach ($rows as $row) {
-            $priorityRaw = (string) ($row['priority'] ?? 'normal');
-            $priority = strtolower(trim($priorityRaw));
-            if ($priority === '') {
-                $priority = 'normal';
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_priorityRaw = (string) ($Silian_row['priority'] ?? 'normal');
+            $Silian_priority = strtolower(trim($Silian_priorityRaw));
+            if ($Silian_priority === '') {
+                $Silian_priority = 'normal';
             }
-            $total = $this->toInt($row['total'] ?? 0);
-            $unread = $this->toInt($row['unread'] ?? 0);
-            $read = $this->toInt($row['read'] ?? 0);
-            if ($read === 0 && $total >= $unread) {
-                $read = max(0, $total - $unread);
+            $Silian_total = $this->toInt($Silian_row['total'] ?? 0);
+            $Silian_unread = $this->toInt($Silian_row['unread'] ?? 0);
+            $Silian_read = $this->toInt($Silian_row['read'] ?? 0);
+            if ($Silian_read === 0 && $Silian_total >= $Silian_unread) {
+                $Silian_read = max(0, $Silian_total - $Silian_unread);
             }
 
-            $result[] = [
-                'priority' => $priority,
-                'total' => $total,
-                'unread' => $unread,
-                'read' => $read,
-                'unread_ratio' => $this->safeDivide((float) $unread, max($total, 1)),
-                '_order' => $orderMap[$priority] ?? 99,
+            $Silian_result[] = [
+                'priority' => $Silian_priority,
+                'total' => $Silian_total,
+                'unread' => $Silian_unread,
+                'read' => $Silian_read,
+                'unread_ratio' => $this->safeDivide((float) $Silian_unread, max($Silian_total, 1)),
+                '_order' => $Silian_orderMap[$Silian_priority] ?? 99,
             ];
         }
 
-        usort($result, static function (array $a, array $b): int {
-            if ($a['_order'] === $b['_order']) {
-                return strcmp((string) $a['priority'], (string) $b['priority']);
+        usort($Silian_result, static function (array $Silian_a, array $Silian_b): int {
+            if ($Silian_a['_order'] === $Silian_b['_order']) {
+                return strcmp((string) $Silian_a['priority'], (string) $Silian_b['priority']);
             }
-            return $a['_order'] <=> $b['_order'];
+            return $Silian_a['_order'] <=> $Silian_b['_order'];
         });
 
-        $normalized = array_map(static function (array $entry): array {
-            unset($entry['_order']);
-            return $entry;
-        }, $result);
+        $Silian_normalized = array_map(static function (array $Silian_entry): array {
+            unset($Silian_entry['_order']);
+            return $Silian_entry;
+        }, $Silian_result);
 
-        if (empty($normalized) && ($summary['total_messages'] ?? 0) > 0) {
-            $total = $this->toInt($summary['total_messages']);
-            $unread = $this->toInt($summary['unread_messages'] ?? 0);
-            $read = $this->toInt($summary['read_messages'] ?? max(0, $total - $unread));
+        if (empty($Silian_normalized) && ($Silian_summary['total_messages'] ?? 0) > 0) {
+            $Silian_total = $this->toInt($Silian_summary['total_messages']);
+            $Silian_unread = $this->toInt($Silian_summary['unread_messages'] ?? 0);
+            $Silian_read = $this->toInt($Silian_summary['read_messages'] ?? max(0, $Silian_total - $Silian_unread));
 
-            $normalized[] = [
+            $Silian_normalized[] = [
                 'priority' => 'normal',
-                'total' => $total,
-                'unread' => $unread,
-                'read' => max(0, $total - $unread),
-                'unread_ratio' => $this->safeDivide((float) $unread, max($total, 1)),
+                'total' => $Silian_total,
+                'unread' => $Silian_unread,
+                'read' => max(0, $Silian_total - $Silian_unread),
+                'unread_ratio' => $this->safeDivide((float) $Silian_unread, max($Silian_total, 1)),
             ];
         }
 
-        return $normalized;
+        return $Silian_normalized;
     }
 
     private function normalizeMessageDailySeries(
-        array $rows,
-        \DateTimeImmutable $start,
-        \DateTimeImmutable $end,
-        array $summary
+        array $Silian_rows,
+        \DateTimeImmutable $Silian_start,
+        \DateTimeImmutable $Silian_end,
+        array $Silian_summary
     ): array
     {
-        $map = [];
-        foreach ($rows as $row) {
-            $labelRaw = (string) ($row['day_label'] ?? '');
-            if ($labelRaw === '') {
+        $Silian_map = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_labelRaw = (string) ($Silian_row['day_label'] ?? '');
+            if ($Silian_labelRaw === '') {
                 continue;
             }
-            $label = substr($labelRaw, 0, 10);
-            $total = $this->toInt($row['total'] ?? 0);
-            $unread = $this->toInt($row['unread'] ?? 0);
-            $read = $this->toInt($row['read'] ?? 0);
-            if ($read === 0 && $total >= $unread) {
-                $read = max(0, $total - $unread);
+            $Silian_label = substr($Silian_labelRaw, 0, 10);
+            $Silian_total = $this->toInt($Silian_row['total'] ?? 0);
+            $Silian_unread = $this->toInt($Silian_row['unread'] ?? 0);
+            $Silian_read = $this->toInt($Silian_row['read'] ?? 0);
+            if ($Silian_read === 0 && $Silian_total >= $Silian_unread) {
+                $Silian_read = max(0, $Silian_total - $Silian_unread);
             }
-            $map[$label] = [
-                'total' => $total,
-                'unread' => $unread,
-                'read' => $read,
+            $Silian_map[$Silian_label] = [
+                'total' => $Silian_total,
+                'unread' => $Silian_unread,
+                'read' => $Silian_read,
             ];
         }
 
-        $series = [];
-        $current = $start->setTime(0, 0, 0);
-        $endDate = $end->setTime(0, 0, 0);
-        $hasData = false;
+        $Silian_series = [];
+        $Silian_current = $Silian_start->setTime(0, 0, 0);
+        $Silian_endDate = $Silian_end->setTime(0, 0, 0);
+        $Silian_hasData = false;
 
-        while ($current <= $endDate) {
-            $label = $current->format('Y-m-d');
-            $stats = $map[$label] ?? ['total' => 0, 'unread' => 0, 'read' => 0];
-            $series[] = [
-                'date' => $label,
-                'total' => $stats['total'],
-                'unread' => $stats['unread'],
-                'read' => $stats['read'],
+        while ($Silian_current <= $Silian_endDate) {
+            $Silian_label = $Silian_current->format('Y-m-d');
+            $Silian_stats = $Silian_map[$Silian_label] ?? ['total' => 0, 'unread' => 0, 'read' => 0];
+            $Silian_series[] = [
+                'date' => $Silian_label,
+                'total' => $Silian_stats['total'],
+                'unread' => $Silian_stats['unread'],
+                'read' => $Silian_stats['read'],
             ];
-            if ($stats['total'] > 0 || $stats['unread'] > 0) {
-                $hasData = true;
+            if ($Silian_stats['total'] > 0 || $Silian_stats['unread'] > 0) {
+                $Silian_hasData = true;
             }
-            $current = $current->modify('+1 day');
+            $Silian_current = $Silian_current->modify('+1 day');
         }
 
-        if (!$hasData && ($summary['total_messages'] ?? 0) > 0) {
-            $total = $this->toInt($summary['total_messages']);
-            $unread = $this->toInt($summary['unread_messages'] ?? 0);
-            $read = $this->toInt($summary['read_messages'] ?? max(0, $total - $unread));
+        if (!$Silian_hasData && ($Silian_summary['total_messages'] ?? 0) > 0) {
+            $Silian_total = $this->toInt($Silian_summary['total_messages']);
+            $Silian_unread = $this->toInt($Silian_summary['unread_messages'] ?? 0);
+            $Silian_read = $this->toInt($Silian_summary['read_messages'] ?? max(0, $Silian_total - $Silian_unread));
 
             return [[
-                'date' => $endDate->format('Y-m-d'),
-                'total' => $total,
-                'unread' => $unread,
-                'read' => $read,
+                'date' => $Silian_endDate->format('Y-m-d'),
+                'total' => $Silian_total,
+                'unread' => $Silian_unread,
+                'read' => $Silian_read,
             ]];
         }
 
-        return $series;
+        return $Silian_series;
     }
 
-    private function normalizeActivityStats(array $recordRow, array $catalogRow): array
+    private function normalizeActivityStats(array $Silian_recordRow, array $Silian_catalogRow): array
     {
-        $totalRecords = $this->toInt($recordRow['total_records'] ?? 0);
-        $approvedRecords = $this->toInt($recordRow['approved_records'] ?? 0);
-        $pendingRecords = $this->toInt($recordRow['pending_records'] ?? 0);
-        $rejectedRecords = $this->toInt($recordRow['rejected_records'] ?? 0);
+        $Silian_totalRecords = $this->toInt($Silian_recordRow['total_records'] ?? 0);
+        $Silian_approvedRecords = $this->toInt($Silian_recordRow['approved_records'] ?? 0);
+        $Silian_pendingRecords = $this->toInt($Silian_recordRow['pending_records'] ?? 0);
+        $Silian_rejectedRecords = $this->toInt($Silian_recordRow['rejected_records'] ?? 0);
 
-        $totalCatalog = $this->toInt($catalogRow['total_activities'] ?? 0);
-        $activeCatalog = $this->toInt($catalogRow['active_activities'] ?? 0);
-        $inactiveCatalog = $this->toInt($catalogRow['inactive_activities'] ?? max(0, $totalCatalog - $activeCatalog));
+        $Silian_totalCatalog = $this->toInt($Silian_catalogRow['total_activities'] ?? 0);
+        $Silian_activeCatalog = $this->toInt($Silian_catalogRow['active_activities'] ?? 0);
+        $Silian_inactiveCatalog = $this->toInt($Silian_catalogRow['inactive_activities'] ?? max(0, $Silian_totalCatalog - $Silian_activeCatalog));
 
         return [
-            'total_records' => $totalRecords,
-            'approved_records' => $approvedRecords,
-            'pending_records' => $pendingRecords,
-            'rejected_records' => $rejectedRecords,
-            'approved_activities' => $approvedRecords,
-            'pending_activities' => $pendingRecords,
-            'rejected_activities' => $rejectedRecords,
-            'total_activities' => $totalCatalog,
-            'active_activities' => $activeCatalog,
-            'inactive_activities' => $inactiveCatalog,
+            'total_records' => $Silian_totalRecords,
+            'approved_records' => $Silian_approvedRecords,
+            'pending_records' => $Silian_pendingRecords,
+            'rejected_records' => $Silian_rejectedRecords,
+            'approved_activities' => $Silian_approvedRecords,
+            'pending_activities' => $Silian_pendingRecords,
+            'rejected_activities' => $Silian_rejectedRecords,
+            'total_activities' => $Silian_totalCatalog,
+            'active_activities' => $Silian_activeCatalog,
+            'inactive_activities' => $Silian_inactiveCatalog,
         ];
     }
 
-    private function normalizeCarbonStats(array $row, array $windowRow, array $trendTotals, int $trendCount): array
+    private function normalizeCarbonStats(array $Silian_row, array $Silian_windowRow, array $Silian_trendTotals, int $Silian_trendCount): array
     {
-        $totalRecords = $this->toInt($row['total_records'] ?? 0);
-        $pendingRecords = $this->toInt($row['pending_records'] ?? 0);
-        $approvedRecords = $this->toInt($row['approved_records'] ?? 0);
-        $rejectedRecords = $this->toInt($row['rejected_records'] ?? 0);
-        $totalCarbon = $this->toFloat($row['total_carbon_saved'] ?? 0);
-        $totalPointsEarned = $this->toFloat($row['total_points_earned'] ?? 0);
-        $windowCarbon = $this->toFloat($windowRow['carbon_saved'] ?? 0);
-        $windowPoints = $this->toFloat($windowRow['points_earned'] ?? 0);
-        $windowPending = $this->toInt($windowRow['pending_records'] ?? 0);
-        $windowApproved = $this->toInt($windowRow['approved_records'] ?? 0);
-        $averageDaily = $trendCount > 0
-            ? $trendTotals['carbon_saved'] / max($trendCount, 1)
-            : ($approvedRecords > 0 ? $totalCarbon / $approvedRecords : 0.0);
+        $Silian_totalRecords = $this->toInt($Silian_row['total_records'] ?? 0);
+        $Silian_pendingRecords = $this->toInt($Silian_row['pending_records'] ?? 0);
+        $Silian_approvedRecords = $this->toInt($Silian_row['approved_records'] ?? 0);
+        $Silian_rejectedRecords = $this->toInt($Silian_row['rejected_records'] ?? 0);
+        $Silian_totalCarbon = $this->toFloat($Silian_row['total_carbon_saved'] ?? 0);
+        $Silian_totalPointsEarned = $this->toFloat($Silian_row['total_points_earned'] ?? 0);
+        $Silian_windowCarbon = $this->toFloat($Silian_windowRow['carbon_saved'] ?? 0);
+        $Silian_windowPoints = $this->toFloat($Silian_windowRow['points_earned'] ?? 0);
+        $Silian_windowPending = $this->toInt($Silian_windowRow['pending_records'] ?? 0);
+        $Silian_windowApproved = $this->toInt($Silian_windowRow['approved_records'] ?? 0);
+        $Silian_averageDaily = $Silian_trendCount > 0
+            ? $Silian_trendTotals['carbon_saved'] / max($Silian_trendCount, 1)
+            : ($Silian_approvedRecords > 0 ? $Silian_totalCarbon / $Silian_approvedRecords : 0.0);
 
         return [
-            'total_records' => $totalRecords,
-            'pending_records' => $pendingRecords,
-            'approved_records' => $approvedRecords,
-            'rejected_records' => $rejectedRecords,
-            'total_carbon_saved' => $totalCarbon,
-            'total_points_earned' => $totalPointsEarned,
-            'last7_carbon_saved' => $windowCarbon,
-            'last7_points_earned' => $windowPoints,
-            'last7_pending_records' => $windowPending,
-            'last7_approved_records' => $windowApproved,
-            'approval_rate' => $this->safeDivide((float) $approvedRecords, max($totalRecords, 1)),
-            'average_carbon_per_record' => $approvedRecords > 0 ? round($totalCarbon / $approvedRecords, 4) : 0.0,
-            'average_daily_carbon' => round($averageDaily, 4),
+            'total_records' => $Silian_totalRecords,
+            'pending_records' => $Silian_pendingRecords,
+            'approved_records' => $Silian_approvedRecords,
+            'rejected_records' => $Silian_rejectedRecords,
+            'total_carbon_saved' => $Silian_totalCarbon,
+            'total_points_earned' => $Silian_totalPointsEarned,
+            'last7_carbon_saved' => $Silian_windowCarbon,
+            'last7_points_earned' => $Silian_windowPoints,
+            'last7_pending_records' => $Silian_windowPending,
+            'last7_approved_records' => $Silian_windowApproved,
+            'approval_rate' => $this->safeDivide((float) $Silian_approvedRecords, max($Silian_totalRecords, 1)),
+            'average_carbon_per_record' => $Silian_approvedRecords > 0 ? round($Silian_totalCarbon / $Silian_approvedRecords, 4) : 0.0,
+            'average_daily_carbon' => round($Silian_averageDaily, 4),
         ];
     }
 
-    private function formatPendingTransactions(array $rows): array
+    private function formatPendingTransactions(array $Silian_rows): array
     {
-        return array_values(array_map(function (array $row): array {
+        return array_values(array_map(function (array $Silian_row): array {
             return [
-                'id' => $this->toInt($row['id'] ?? 0),
-                'user_id' => $this->toInt($row['user_id'] ?? $row['uid'] ?? 0),
-                'username' => $row['username'] ?? null,
-                'points' => $this->toFloat($row['points'] ?? 0),
-                'status' => $row['status'] ?? null,
-                'created_at' => $row['created_at'] ?? null,
+                'id' => $this->toInt($Silian_row['id'] ?? 0),
+                'user_id' => $this->toInt($Silian_row['user_id'] ?? $Silian_row['uid'] ?? 0),
+                'username' => $Silian_row['username'] ?? null,
+                'points' => $this->toFloat($Silian_row['points'] ?? 0),
+                'status' => $Silian_row['status'] ?? null,
+                'created_at' => $Silian_row['created_at'] ?? null,
             ];
-        }, $rows));
+        }, $Silian_rows));
     }
 
-    private function formatPendingCarbonRecords(array $rows): array
+    private function formatPendingCarbonRecords(array $Silian_rows): array
     {
-        return array_values(array_map(function (array $row): array {
+        return array_values(array_map(function (array $Silian_row): array {
             return [
-                'id' => $this->toInt($row['id'] ?? 0),
-                'user_id' => $this->toInt($row['user_id'] ?? 0),
-                'username' => $row['username'] ?? null,
-                'activity_id' => $this->toInt($row['activity_id'] ?? 0),
-                'activity_name_zh' => $row['activity_name_zh'] ?? null,
-                'activity_name_en' => $row['activity_name_en'] ?? null,
-                'carbon_saved' => $this->toFloat($row['carbon_saved'] ?? 0),
-                'points_earned' => $this->toFloat($row['points_earned'] ?? 0),
-                'created_at' => $row['created_at'] ?? null,
+                'id' => $this->toInt($Silian_row['id'] ?? 0),
+                'user_id' => $this->toInt($Silian_row['user_id'] ?? 0),
+                'username' => $Silian_row['username'] ?? null,
+                'activity_id' => $this->toInt($Silian_row['activity_id'] ?? 0),
+                'activity_name_zh' => $Silian_row['activity_name_zh'] ?? null,
+                'activity_name_en' => $Silian_row['activity_name_en'] ?? null,
+                'carbon_saved' => $this->toFloat($Silian_row['carbon_saved'] ?? 0),
+                'points_earned' => $this->toFloat($Silian_row['points_earned'] ?? 0),
+                'created_at' => $Silian_row['created_at'] ?? null,
             ];
-        }, $rows));
+        }, $Silian_rows));
     }
 
-    private function formatLatestUsers(array $rows): array
+    private function formatLatestUsers(array $Silian_rows): array
     {
-        return array_values(array_map(function (array $row): array {
+        return array_values(array_map(function (array $Silian_row): array {
             return [
-                'id' => $this->toInt($row['id'] ?? 0),
-                'username' => $row['username'] ?? null,
-                'email' => $row['email'] ?? null,
-                'status' => $row['status'] ?? null,
-                'created_at' => $row['created_at'] ?? null,
+                'id' => $this->toInt($Silian_row['id'] ?? 0),
+                'username' => $Silian_row['username'] ?? null,
+                'email' => $Silian_row['email'] ?? null,
+                'status' => $Silian_row['status'] ?? null,
+                'created_at' => $Silian_row['created_at'] ?? null,
             ];
-        }, $rows));
+        }, $Silian_rows));
     }
 
-    private function toInt(mixed $value): int
+    private function toInt(mixed $Silian_value): int
     {
-        if ($value === null || $value === '') {
+        if ($Silian_value === null || $Silian_value === '') {
             return 0;
         }
-        if (is_bool($value)) {
-            return $value ? 1 : 0;
+        if (is_bool($Silian_value)) {
+            return $Silian_value ? 1 : 0;
         }
-        if (is_numeric($value)) {
-            return (int) $value;
+        if (is_numeric($Silian_value)) {
+            return (int) $Silian_value;
         }
-        if (is_string($value)) {
-            $filtered = preg_replace('/[^0-9\\-]/', '', $value);
-            return (int) ($filtered ?? 0);
+        if (is_string($Silian_value)) {
+            $Silian_filtered = preg_replace('/[^0-9\\-]/', '', $Silian_value);
+            return (int) ($Silian_filtered ?? 0);
         }
-        return (int) $value;
+        return (int) $Silian_value;
     }
 
-    private function toFloat(mixed $value): float
+    private function toFloat(mixed $Silian_value): float
     {
-        if ($value === null || $value === '') {
+        if ($Silian_value === null || $Silian_value === '') {
             return 0.0;
         }
-        if (is_numeric($value)) {
-            return (float) $value;
+        if (is_numeric($Silian_value)) {
+            return (float) $Silian_value;
         }
-        if (is_string($value)) {
-            $filtered = preg_replace('/[^0-9\\-\\.]/', '', $value);
-            return (float) ($filtered ?? 0);
+        if (is_string($Silian_value)) {
+            $Silian_filtered = preg_replace('/[^0-9\\-\\.]/', '', $Silian_value);
+            return (float) ($Silian_filtered ?? 0);
         }
-        return (float) $value;
+        return (float) $Silian_value;
     }
 
-    private function safeDivide(float $numerator, float $denominator, int $scale = 4): float
+    private function safeDivide(float $Silian_numerator, float $Silian_denominator, int $Silian_scale = 4): float
     {
-        if ($denominator <= 0.0) {
+        if ($Silian_denominator <= 0.0) {
             return 0.0;
         }
-        return round($numerator / $denominator, $scale);
+        return round($Silian_numerator / $Silian_denominator, $Silian_scale);
     }
 
-    private function validateTtl(?int $provided, int $default): int
+    private function validateTtl(?int $Silian_provided, int $Silian_default): int
     {
-        $ttl = $provided ?? $default;
-        if ($ttl <= 0) {
-            return $default > 0 ? $default : 300;
+        $Silian_ttl = $Silian_provided ?? $Silian_default;
+        if ($Silian_ttl <= 0) {
+            return $Silian_default > 0 ? $Silian_default : 300;
         }
-        return $ttl;
+        return $Silian_ttl;
     }
 
-    private function readCache(string $key, int $ttl): ?array
+    private function readCache(string $Silian_key, int $Silian_ttl): ?array
     {
-        $file = $this->getCacheFilePath($key);
-        if (!is_file($file)) {
+        $Silian_file = $this->getCacheFilePath($Silian_key);
+        if (!is_file($Silian_file)) {
             return null;
         }
-        $content = @file_get_contents($file);
-        if ($content === false) {
+        $Silian_content = @file_get_contents($Silian_file);
+        if ($Silian_content === false) {
             return null;
         }
-        $data = json_decode($content, true);
-        if (!is_array($data) || !isset($data['generated_at'], $data['data'])) {
+        $Silian_data = json_decode($Silian_content, true);
+        if (!is_array($Silian_data) || !isset($Silian_data['generated_at'], $Silian_data['data'])) {
             return null;
         }
         try {
-            $generated = new DateTimeImmutable((string) $data['generated_at']);
-        } catch (\Throwable $e) {
+            $Silian_generated = new DateTimeImmutable((string) $Silian_data['generated_at']);
+        } catch (\Throwable $Silian_e) {
             return null;
         }
-        $expires = $generated->add(new DateInterval('PT' . max($ttl, 1) . 'S'));
-        if ($expires <= new DateTimeImmutable('now', $this->timezone)) {
+        $Silian_expires = $Silian_generated->add(new DateInterval('PT' . max($Silian_ttl, 1) . 'S'));
+        if ($Silian_expires <= new DateTimeImmutable('now', $this->timezone)) {
             return null;
         }
         return [
-            'generated_at' => $data['generated_at'],
-            'data' => $data['data'],
+            'generated_at' => $Silian_data['generated_at'],
+            'data' => $Silian_data['data'],
         ];
     }
 
-    private function writeCache(string $key, array $data, int $ttl): void
+    private function writeCache(string $Silian_key, array $Silian_data, int $Silian_ttl): void
     {
-        $file = $this->getCacheFilePath($key);
-        $dir = dirname($file);
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0775, true);
+        $Silian_file = $this->getCacheFilePath($Silian_key);
+        $Silian_dir = dirname($Silian_file);
+        if (!is_dir($Silian_dir)) {
+            @mkdir($Silian_dir, 0775, true);
         }
-        $generated = new DateTimeImmutable('now', $this->timezone);
-        $payload = [
-            'generated_at' => $generated->format(DATE_ATOM),
-            'expires_at' => $generated->add(new DateInterval('PT' . max($ttl, 1) . 'S'))->format(DATE_ATOM),
-            'data' => $data,
+        $Silian_generated = new DateTimeImmutable('now', $this->timezone);
+        $Silian_payload = [
+            'generated_at' => $Silian_generated->format(DATE_ATOM),
+            'expires_at' => $Silian_generated->add(new DateInterval('PT' . max($Silian_ttl, 1) . 'S'))->format(DATE_ATOM),
+            'data' => $Silian_data,
         ];
 
-        $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-        if ($encoded === false) {
+        $Silian_encoded = json_encode($Silian_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        if ($Silian_encoded === false) {
             return;
         }
 
-        @file_put_contents($file, $encoded, LOCK_EX);
+        @file_put_contents($Silian_file, $Silian_encoded, LOCK_EX);
     }
 
-    private function getCacheFilePath(string $key): string
+    private function getCacheFilePath(string $Silian_key): string
     {
-        $sanitized = preg_replace('/[^a-zA-Z0-9_\\-]/', '_', $key);
-        return $this->cacheDir . DIRECTORY_SEPARATOR . $sanitized . '_stats.json';
+        $Silian_sanitized = preg_replace('/[^a-zA-Z0-9_\\-]/', '_', $Silian_key);
+        return $this->cacheDir . DIRECTORY_SEPARATOR . $Silian_sanitized . '_stats.json';
     }
 
-    private function logAudit(string $action, string $status, array $data = []): void
+    private function logAudit(string $Silian_action, string $Silian_status, array $Silian_data = []): void
     {
         if (!$this->auditLogService) {
             return;
         }
 
         try {
-            $this->auditLogService->logSystemEvent($action, 'statistics_service', [
-                'status' => $status,
+            $this->auditLogService->logSystemEvent($Silian_action, 'statistics_service', [
+                'status' => $Silian_status,
                 'endpoint' => '/internal/statistics',
                 'request_method' => 'SYSTEM',
-                'request_data' => $data,
+                'request_data' => $Silian_data,
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // 审计日志失败不阻断主流程
         }
     }
 
-    private function logError(\Throwable $exception, string $path, array $context = []): void
+    private function logError(\Throwable $Silian_exception, string $Silian_path, array $Silian_context = []): void
     {
         if (!$this->errorLogService) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext($path, 'SYSTEM', null, [], $context, ['PHP_SAPI' => PHP_SAPI]);
-            $this->errorLogService->logException($exception, $request, $context);
-        } catch (\Throwable $ignore) {
+            $Silian_request = SyntheticRequestFactory::fromContext($Silian_path, 'SYSTEM', null, [], $Silian_context, ['PHP_SAPI' => PHP_SAPI]);
+            $this->errorLogService->logException($Silian_exception, $Silian_request, $Silian_context);
+        } catch (\Throwable $Silian_ignore) {
             // swallow secondary logging failure
         }
     }

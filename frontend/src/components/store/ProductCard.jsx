@@ -1,35 +1,35 @@
-import React from 'react';
-import { ShoppingCart, Star, Package, Clock } from 'lucide-react';
-import { useTranslation } from '../../hooks/useTranslation';
-import { formatNumber } from '../../lib/utils';
-import { Button } from '../ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
-import R2Image from '../common/R2Image';
-import { Badge } from '../ui/badge';
+import Silian_React from 'react';
+import { ShoppingCart as Silian_ShoppingCart, Star as Silian_Star, Package as Silian_Package, Clock as Silian_Clock } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { formatNumber as Silian_formatNumber } from '../../lib/utils';
+import { Button as Silian_Button } from '../ui/Button';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../ui/Card';
+import Silian_R2Image from '../common/R2Image';
+import { Badge as Silian_Badge } from '../ui/badge';
 
-export function ProductCard({ product, onExchange, userPoints = 0 }) {
-  const { t } = useTranslation(['common', 'date', 'images', 'store']);
+export function ProductCard({ product: Silian_product, onExchange: Silian_onExchange, userPoints: Silian_userPoints = 0 }) {
+  const { t: Silian_t } = Silian_useTranslation(['common', 'date', 'images', 'store']);
 
-  const canAfford = userPoints >= product.points_required;
-  const isAvailable = product.is_available;
-  const isInStock = product.stock > 0 || product.stock === -1;
+  const Silian_canAfford = Silian_userPoints >= Silian_product.points_required;
+  const Silian_isAvailable = Silian_product.is_available;
+  const Silian_isInStock = Silian_product.stock > 0 || Silian_product.stock === -1;
 
-  const getStockStatus = () => {
-    if (product.stock === -1) return t('store.unlimited');
-    if (product.stock === 0) return t('store.outOfStock');
-    if (product.stock <= 5) return t('store.lowStock', { count: product.stock });
-    return t('store.inStock', { count: product.stock });
+  const Silian_getStockStatus = () => {
+    if (Silian_product.stock === -1) return Silian_t('store.unlimited');
+    if (Silian_product.stock === 0) return Silian_t('store.outOfStock');
+    if (Silian_product.stock <= 5) return Silian_t('store.lowStock', { count: Silian_product.stock });
+    return Silian_t('store.inStock', { count: Silian_product.stock });
   };
 
-  const getStockColor = () => {
-    if (product.stock === -1) return 'text-green-600';
-    if (product.stock === 0) return 'text-red-600';
-    if (product.stock <= 5) return 'text-orange-600';
+  const Silian_getStockColor = () => {
+    if (Silian_product.stock === -1) return 'text-green-600';
+    if (Silian_product.stock === 0) return 'text-red-600';
+    if (Silian_product.stock <= 5) return 'text-orange-600';
     return 'text-green-600';
   };
 
-  const getCategoryIcon = () => {
-    const iconMap = {
+  const Silian_getCategoryIcon = () => {
+    const Silian_iconMap = {
       'electronics': '📱',
       'books': '📚',
       'lifestyle': '🎁',
@@ -39,90 +39,90 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
       'eco': '🌱',
       'default': '🎁'
     };
-    return iconMap[product.category] || iconMap.default;
+    return Silian_iconMap[Silian_product.category] || Silian_iconMap.default;
   };
 
-  const isHttpUrl = (value) => typeof value === 'string' && /^https?:\/\//.test(value);
+  const Silian_isHttpUrl = (Silian_value) => typeof Silian_value === 'string' && /^https?:\/\//.test(Silian_value);
 
-  const resolveImageCandidate = (candidate) => {
-    if (!candidate) {
+  const Silian_resolveImageCandidate = (Silian_candidate) => {
+    if (!Silian_candidate) {
       return { src: null, path: null };
     }
-    if (typeof candidate === 'string') {
-      return isHttpUrl(candidate)
-        ? { src: candidate, path: null }
-        : { src: null, path: candidate };
+    if (typeof Silian_candidate === 'string') {
+      return Silian_isHttpUrl(Silian_candidate)
+        ? { src: Silian_candidate, path: null }
+        : { src: null, path: Silian_candidate };
     }
-    if (Array.isArray(candidate) && candidate.length) {
-      return resolveImageCandidate(candidate[0]);
+    if (Array.isArray(Silian_candidate) && Silian_candidate.length) {
+      return Silian_resolveImageCandidate(Silian_candidate[0]);
     }
-    if (typeof candidate === 'object') {
-      const rawUrl = typeof candidate.public_url === 'string' && candidate.public_url
-        ? candidate.public_url
-        : (typeof candidate.url === 'string' && candidate.url ? candidate.url : null);
-      const presigned = typeof candidate.presigned_url === 'string' && candidate.presigned_url ? candidate.presigned_url : null;
-      let src = (rawUrl && isHttpUrl(rawUrl) ? rawUrl : null) || presigned;
-      let path = typeof candidate.file_path === 'string' && candidate.file_path !== '' ? candidate.file_path : null;
-      if (!path && rawUrl && !isHttpUrl(rawUrl)) {
-        path = rawUrl;
+    if (typeof Silian_candidate === 'object') {
+      const Silian_rawUrl = typeof Silian_candidate.public_url === 'string' && Silian_candidate.public_url
+        ? Silian_candidate.public_url
+        : (typeof Silian_candidate.url === 'string' && Silian_candidate.url ? Silian_candidate.url : null);
+      const Silian_presigned = typeof Silian_candidate.presigned_url === 'string' && Silian_candidate.presigned_url ? Silian_candidate.presigned_url : null;
+      let Silian_src = (Silian_rawUrl && Silian_isHttpUrl(Silian_rawUrl) ? Silian_rawUrl : null) || Silian_presigned;
+      let Silian_path = typeof Silian_candidate.file_path === 'string' && Silian_candidate.file_path !== '' ? Silian_candidate.file_path : null;
+      if (!Silian_path && Silian_rawUrl && !Silian_isHttpUrl(Silian_rawUrl)) {
+        Silian_path = Silian_rawUrl;
       }
-      if (!path && typeof candidate.path === 'string' && candidate.path !== '') {
-        path = candidate.path;
+      if (!Silian_path && typeof Silian_candidate.path === 'string' && Silian_candidate.path !== '') {
+        Silian_path = Silian_candidate.path;
       }
-      return { src, path };
+      return { src: Silian_src, path: Silian_path };
     }
     return { src: null, path: null };
   };
 
-  const primaryImageCandidate = Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : product.images;
-  const candidateMeta = resolveImageCandidate(primaryImageCandidate);
-  const fallbackMeta = resolveImageCandidate(product.image_url || product.image_presigned_url || product.image_path);
-  const imageSrc = candidateMeta.src || fallbackMeta.src;
-  const imagePath = candidateMeta.path || fallbackMeta.path;
-  const hasImage = Boolean(imageSrc || imagePath);
+  const Silian_primaryImageCandidate = Array.isArray(Silian_product.images) && Silian_product.images.length > 0 ? Silian_product.images[0] : Silian_product.images;
+  const Silian_candidateMeta = Silian_resolveImageCandidate(Silian_primaryImageCandidate);
+  const Silian_fallbackMeta = Silian_resolveImageCandidate(Silian_product.image_url || Silian_product.image_presigned_url || Silian_product.image_path);
+  const Silian_imageSrc = Silian_candidateMeta.src || Silian_fallbackMeta.src;
+  const Silian_imagePath = Silian_candidateMeta.path || Silian_fallbackMeta.path;
+  const Silian_hasImage = Boolean(Silian_imageSrc || Silian_imagePath);
 
   return (
-    <Card className={`h-full ${!isAvailable || !canAfford ? 'opacity-75' : ''}`}>
-      <CardHeader className="pb-3">
+    <Silian_Card className={`h-full ${!Silian_isAvailable || !Silian_canAfford ? 'opacity-75' : ''}`}>
+      <Silian_CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl">{getCategoryIcon()}</span>
+            <span className="text-2xl">{Silian_getCategoryIcon()}</span>
             <div>
-              <CardTitle className="text-lg line-clamp-2">{product.name}</CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                {t(`store.categories.${product.category}`, product.category)}
-              </CardDescription>
+              <Silian_CardTitle className="text-lg line-clamp-2">{Silian_product.name}</Silian_CardTitle>
+              <Silian_CardDescription className="text-sm text-muted-foreground">
+                {Silian_t(`store.categories.${Silian_product.category}`, Silian_product.category)}
+              </Silian_CardDescription>
             </div>
           </div>
-          {product.is_featured && (
+          {Silian_product.is_featured && (
             <div className="flex items-center space-x-1 rounded-full bg-yellow-500/15 px-2 py-1 text-xs text-yellow-500">
-              <Star className="h-3 w-3 fill-current" />
-              <span>{t('store.featured')}</span>
+              <Silian_Star className="h-3 w-3 fill-current" />
+              <span>{Silian_t('store.featured')}</span>
             </div>
           )}
         </div>
-      </CardHeader>
+      </Silian_CardHeader>
 
-      <CardContent className="space-y-4">
+      <Silian_CardContent className="space-y-4">
         {/* Product image */}
-        {hasImage && (
+        {Silian_hasImage && (
           <div className="aspect-video overflow-hidden rounded-lg bg-muted">
-            <R2Image
-              src={imageSrc || undefined}
-              filePath={imagePath || undefined}
-              alt={product.name}
+            <Silian_R2Image
+              src={Silian_imageSrc || undefined}
+              filePath={Silian_imagePath || undefined}
+              alt={Silian_product.name}
               className="w-full h-full object-cover"
             />
           </div>
         )}
-        <p className="line-clamp-3 text-sm text-muted-foreground">{product.description}</p>
+        <p className="line-clamp-3 text-sm text-muted-foreground">{Silian_product.description}</p>
 
-        {Array.isArray(product.tags) && product.tags.length > 0 && (
+        {Array.isArray(Silian_product.tags) && Silian_product.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {product.tags.map((tag, index) => (
-              <Badge key={`product-tag-${product.id}-${tag.id ?? tag.slug ?? index}`} variant="secondary" className="text-xs uppercase">
-                {tag.name}
-              </Badge>
+            {Silian_product.tags.map((Silian_tag, Silian_index) => (
+              <Silian_Badge key={`product-tag-${Silian_product.id}-${Silian_tag.id ?? Silian_tag.slug ?? Silian_index}`} variant="secondary" className="text-xs uppercase">
+                {Silian_tag.name}
+              </Silian_Badge>
             ))}
           </div>
         )}
@@ -131,62 +131,62 @@ export function ProductCard({ product, onExchange, userPoints = 0 }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <span className="text-2xl font-bold text-green-600">
-                {formatNumber(product.points_required)}
+                {Silian_formatNumber(Silian_product.points_required)}
               </span>
-              <span className="text-sm text-muted-foreground">{t('common.points')}</span>
+              <span className="text-sm text-muted-foreground">{Silian_t('common.points')}</span>
             </div>
-            <div className={`flex items-center space-x-1 text-sm ${getStockColor()}`}>
-              <Package className="h-4 w-4" />
-              <span>{getStockStatus()}</span>
+            <div className={`flex items-center space-x-1 text-sm ${Silian_getStockColor()}`}>
+              <Silian_Package className="h-4 w-4" />
+              <span>{Silian_getStockStatus()}</span>
             </div>
           </div>
 
           {/* 兑换统计 */}
-          {product.total_exchanged > 0 && (
+          {Silian_product.total_exchanged > 0 && (
             <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>{t('store.exchangedCount', { count: product.total_exchanged })}</span>
+              <Silian_Clock className="h-3 w-3" />
+              <span>{Silian_t('store.exchangedCount', { count: Silian_product.total_exchanged })}</span>
             </div>
           )}
         </div>
 
         {/* 操作按钮 */}
         <div className="pt-2">
-          {!isAvailable ? (
-            <Button disabled className="w-full">
-              {t('store.unavailable')}
-            </Button>
-          ) : !isInStock ? (
-            <Button disabled className="w-full">
-              {t('store.outOfStock')}
-            </Button>
-          ) : !canAfford ? (
-            <Button disabled className="w-full">
+          {!Silian_isAvailable ? (
+            <Silian_Button disabled className="w-full">
+              {Silian_t('store.unavailable')}
+            </Silian_Button>
+          ) : !Silian_isInStock ? (
+            <Silian_Button disabled className="w-full">
+              {Silian_t('store.outOfStock')}
+            </Silian_Button>
+          ) : !Silian_canAfford ? (
+            <Silian_Button disabled className="w-full">
               <span className="flex items-center justify-center space-x-2">
-                <span>{t('store.insufficientPoints')}</span>
+                <span>{Silian_t('store.insufficientPoints')}</span>
                 <span className="text-xs">
-                  ({t('store.need')} {formatNumber(product.points_required - userPoints)})
+                  ({Silian_t('store.need')} {Silian_formatNumber(Silian_product.points_required - Silian_userPoints)})
                 </span>
               </span>
-            </Button>
+            </Silian_Button>
           ) : (
-            <Button 
-              onClick={() => onExchange(product)} 
+            <Silian_Button
+              onClick={() => Silian_onExchange(Silian_product)}
               className="w-full bg-green-600 hover:bg-green-700"
             >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              {t('store.exchange.button')}
-            </Button>
+              <Silian_ShoppingCart className="h-4 w-4 mr-2" />
+              {Silian_t('store.exchange.button')}
+            </Silian_Button>
           )}
         </div>
 
         {/* 用户积分提示 */}
-        {canAfford && isAvailable && isInStock && (
+        {Silian_canAfford && Silian_isAvailable && Silian_isInStock && (
           <div className="text-center text-xs text-muted-foreground">
-            {t('store.afterExchange')}: {formatNumber(userPoints - product.points_required)} {t('common.points')}
+            {Silian_t('store.afterExchange')}: {Silian_formatNumber(Silian_userPoints - Silian_product.points_required)} {Silian_t('common.points')}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </Silian_CardContent>
+    </Silian_Card>
   );
 }

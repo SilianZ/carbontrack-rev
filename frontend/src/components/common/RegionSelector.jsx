@@ -1,69 +1,69 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from '../../hooks/useTranslation';
-import { Input } from '../ui/Input';
+import Silian_React, { useEffect as Silian_useEffect, useState as Silian_useState } from 'react';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { Input as Silian_Input } from '../ui/Input';
 
-export function RegionSelector({ 
-  countryCode, 
-  stateCode, 
-  onCountryChange, 
-  onStateChange, 
-  errors = {} 
+export function RegionSelector({
+  countryCode: Silian_countryCode,
+  stateCode: Silian_stateCode,
+  onCountryChange: Silian_onCountryChange,
+  onStateChange: Silian_onStateChange,
+  errors: Silian_errors = {}
 }) {
-  const { t, i18n } = useTranslation(['auth', 'errors']);
-  const [countries, setCountries] = useState([]);
-  const [states, setStates] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { t: Silian_t, i18n: Silian_i18n } = Silian_useTranslation(['auth', 'errors']);
+  const [Silian_countries, Silian_setCountries] = Silian_useState([]);
+  const [Silian_states, Silian_setStates] = Silian_useState([]);
+  const [Silian_loading, Silian_setLoading] = Silian_useState(true);
 
-  useEffect(() => {
-    const fetchCountries = async () => {
+  Silian_useEffect(() => {
+    const Silian_fetchCountries = async () => {
       try {
-        const response = await fetch('/locales/states.json');
-        const data = await response.json();
-        setCountries(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Failed to load countries data:', error);
-        setLoading(false);
+        const Silian_response = await fetch('/locales/states.json');
+        const Silian_data = await Silian_response.json();
+        Silian_setCountries(Silian_data);
+        Silian_setLoading(false);
+      } catch (Silian_error) {
+        console.error('Failed to load countries data:', Silian_error);
+        Silian_setLoading(false);
       }
     };
 
-    fetchCountries();
+    Silian_fetchCountries();
   }, []);
 
-  useEffect(() => {
-    if (countryCode && countries.length > 0) {
-      const selectedCountry = countries.find(c => c.iso2 === countryCode);
-      if (selectedCountry) {
-        setStates(selectedCountry.states || []);
+  Silian_useEffect(() => {
+    if (Silian_countryCode && Silian_countries.length > 0) {
+      const Silian_selectedCountry = Silian_countries.find(Silian_c => Silian_c.iso2 === Silian_countryCode);
+      if (Silian_selectedCountry) {
+        Silian_setStates(Silian_selectedCountry.states || []);
       } else {
-        setStates([]);
+        Silian_setStates([]);
       }
     } else {
-      setStates([]);
+      Silian_setStates([]);
     }
-  }, [countryCode, countries]);
+  }, [Silian_countryCode, Silian_countries]);
 
-  const handleCountryChange = (e) => {
-    const newCountryCode = e.target.value;
-    onCountryChange(newCountryCode);
-    onStateChange(''); // Reset state when country changes
+  const Silian_handleCountryChange = (Silian_e) => {
+    const Silian_newCountryCode = Silian_e.target.value;
+    Silian_onCountryChange(Silian_newCountryCode);
+    Silian_onStateChange(''); // Reset state when country changes
   };
 
-  const handleStateChange = (e) => {
-    onStateChange(e.target.value);
+  const Silian_handleStateChange = (Silian_e) => {
+    Silian_onStateChange(Silian_e.target.value);
   };
 
   // Helper to get translated country name if available, otherwise use English name
-  const getCountryName = (country) => {
-    const lang = i18n.language; // e.g., 'en', 'zh-CN'
-    if (lang.startsWith('zh') && country.translations?.cn) {
-      return country.translations.cn;
+  const Silian_getCountryName = (Silian_country) => {
+    const Silian_lang = Silian_i18n.language; // e.g., 'en', 'zh-CN'
+    if (Silian_lang.startsWith('zh') && Silian_country.translations?.cn) {
+      return Silian_country.translations.cn;
     }
     // Add other languages if needed
-    return country.name;
+    return Silian_country.name;
   };
 
-  if (loading) {
+  if (Silian_loading) {
     return <div className="text-sm text-muted-foreground">Loading regions...</div>;
   }
 
@@ -71,25 +71,25 @@ export function RegionSelector({
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
       <div>
         <label htmlFor="country" className="block text-sm font-medium text-foreground">
-          {t('auth.country')}
+          {Silian_t('auth.country')}
         </label>
         <div className="mt-1">
           <select
             id="country"
-            value={countryCode}
-            onChange={handleCountryChange}
+            value={Silian_countryCode}
+            onChange={Silian_handleCountryChange}
             className="block w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
           >
-            <option value="">{t('auth.selectCountry')}</option>
-            {countries.map((country) => (
-              <option key={country.iso2} value={country.iso2}>
-                {getCountryName(country)}
+            <option value="">{Silian_t('auth.selectCountry')}</option>
+            {Silian_countries.map((Silian_country) => (
+              <option key={Silian_country.iso2} value={Silian_country.iso2}>
+                {Silian_getCountryName(Silian_country)}
               </option>
             ))}
           </select>
-          {errors.country && (
+          {Silian_errors.country && (
             <p className="mt-1 text-sm text-red-600">
-              {errors.country.message || t('auth.countryRequired')}
+              {Silian_errors.country.message || Silian_t('auth.countryRequired')}
             </p>
           )}
         </div>
@@ -97,37 +97,37 @@ export function RegionSelector({
 
       <div>
         <label htmlFor="state" className="block text-sm font-medium text-foreground">
-          {t('auth.state')}
+          {Silian_t('auth.state')}
         </label>
         <div className="mt-1">
-          {states.length > 0 ? (
+          {Silian_states.length > 0 ? (
             <select
               id="state"
-              value={stateCode}
-              onChange={handleStateChange}
+              value={Silian_stateCode}
+              onChange={Silian_handleStateChange}
               className="block w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
-              disabled={!countryCode}
+              disabled={!Silian_countryCode}
             >
-              <option value="">{t('auth.selectState')}</option>
-              {states.map((state) => (
-                <option key={state.id} value={state.state_code}>
-                  {state.name}
+              <option value="">{Silian_t('auth.selectState')}</option>
+              {Silian_states.map((Silian_state) => (
+                <option key={Silian_state.id} value={Silian_state.state_code}>
+                  {Silian_state.name}
                 </option>
               ))}
             </select>
           ) : (
-            <Input
+            <Silian_Input
               id="state"
               type="text"
-              value={stateCode}
-              onChange={handleStateChange}
-              placeholder={t('auth.statePlaceholder')}
-              disabled={!countryCode}
+              value={Silian_stateCode}
+              onChange={Silian_handleStateChange}
+              placeholder={Silian_t('auth.statePlaceholder')}
+              disabled={!Silian_countryCode}
             />
           )}
-          {errors.state && (
+          {Silian_errors.state && (
             <p className="mt-1 text-sm text-red-600">
-              {errors.state.message || t('auth.stateRequired')}
+              {Silian_errors.state.message || Silian_t('auth.stateRequired')}
             </p>
           )}
         </div>

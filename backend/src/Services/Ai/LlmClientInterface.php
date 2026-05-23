@@ -17,6 +17,6 @@ interface LlmClientInterface
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    public function createChatCompletion(array $payload): array;
+    public function createChatCompletion(array $Silian_payload): array;
 }
 

@@ -53,13 +53,13 @@ class MessagePriorityStub extends Message
         return self::$priorityColumnPresent;
     }
 
-    public static function create(array $attributes = [])
+    public static function create(array $Silian_attributes = [])
     {
-        self::$lastPayload = $attributes;
-        $message = new self();
-        foreach ($attributes as $key => $value) {
-            $message->setAttribute($key, $value);
+        self::$lastPayload = $Silian_attributes;
+        $Silian_message = new self();
+        foreach ($Silian_attributes as $Silian_key => $Silian_value) {
+            $Silian_message->setAttribute($Silian_key, $Silian_value);
         }
-        return $message;
+        return $Silian_message;
     }
 }

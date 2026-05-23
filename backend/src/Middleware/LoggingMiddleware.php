@@ -16,100 +16,100 @@ class LoggingMiddleware implements MiddlewareInterface
     private LoggerInterface $logger;
     private ?ErrorLogService $errorLogService;
 
-    public function __construct(LoggerInterface $logger, ?ErrorLogService $errorLogService = null)
+    public function __construct(LoggerInterface $Silian_logger, ?ErrorLogService $Silian_errorLogService = null)
     {
-        $this->logger = $logger;
-        $this->errorLogService = $errorLogService;
+        $this->logger = $Silian_logger;
+        $this->errorLogService = $Silian_errorLogService;
     }
 
-    public function process(Request $request, RequestHandler $handler): Response
+    public function process(Request $Silian_request, RequestHandler $Silian_handler): Response
     {
-        $start = microtime(true);
-        
+        $Silian_start = microtime(true);
+
         // Log request with error handling
         try {
             $this->logger->info('Request received', [
-                'method' => $request->getMethod(),
-                'uri' => (string) $request->getUri(),
-                'ip' => $this->getClientIp($request),
-                'user_agent' => $request->getHeaderLine('User-Agent')
+                'method' => $Silian_request->getMethod(),
+                'uri' => (string) $Silian_request->getUri(),
+                'ip' => $this->getClientIp($Silian_request),
+                'user_agent' => $Silian_request->getHeaderLine('User-Agent')
             ]);
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             // 如果日志记录失败，不要中断请求处理
-            $this->logExceptionWithFallback($e, $request, 'LoggingMiddleware request logging failed: ' . $e->getMessage());
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'LoggingMiddleware request logging failed: ' . $Silian_e->getMessage());
         }
 
         try {
-            $response = $handler->handle($request);
-            
-            $duration = microtime(true) - $start;
-            
+            $Silian_response = $Silian_handler->handle($Silian_request);
+
+            $Silian_duration = microtime(true) - $Silian_start;
+
             // Log response with error handling
             try {
                 $this->logger->info('Request completed', [
-                    'method' => $request->getMethod(),
-                    'uri' => (string) $request->getUri(),
-                    'status' => $response->getStatusCode(),
-                    'duration' => round($duration * 1000, 2) . 'ms'
+                    'method' => $Silian_request->getMethod(),
+                    'uri' => (string) $Silian_request->getUri(),
+                    'status' => $Silian_response->getStatusCode(),
+                    'duration' => round($Silian_duration * 1000, 2) . 'ms'
                 ]);
-            } catch (\Exception $e) {
+            } catch (\Exception $Silian_e) {
                 // 如果日志记录失败，不要中断响应
-                $this->logExceptionWithFallback($e, $request, 'LoggingMiddleware request logging failed: ' . $e->getMessage());
+                $this->logExceptionWithFallback($Silian_e, $Silian_request, 'LoggingMiddleware request logging failed: ' . $Silian_e->getMessage());
             }
-            
-            return $response;
-            
-        } catch (\Exception $e) {
-            $duration = microtime(true) - $start;
-            
+
+            return $Silian_response;
+
+        } catch (\Exception $Silian_e) {
+            $Silian_duration = microtime(true) - $Silian_start;
+
             // Log error with error handling
             try {
                 $this->logger->error('Request failed', [
-                    'method' => $request->getMethod(),
-                    'uri' => (string) $request->getUri(),
-                    'error' => $e->getMessage(),
-                    'duration' => round($duration * 1000, 2) . 'ms'
+                    'method' => $Silian_request->getMethod(),
+                    'uri' => (string) $Silian_request->getUri(),
+                    'error' => $Silian_e->getMessage(),
+                    'duration' => round($Silian_duration * 1000, 2) . 'ms'
                 ]);
-            } catch (\Exception $logError) {
+            } catch (\Exception $Silian_logError) {
                 // 如果日志记录失败，至少记录到error_log
-                $this->logExceptionWithFallback($logError, $request, 'LoggingMiddleware error logging failed: ' . $logError->getMessage() . ' | Original error: ' . $e->getMessage());
+                $this->logExceptionWithFallback($Silian_logError, $Silian_request, 'LoggingMiddleware error logging failed: ' . $Silian_logError->getMessage() . ' | Original error: ' . $Silian_e->getMessage());
             }
-            
-            throw $e;
+
+            throw $Silian_e;
         }
     }
 
-    private function getClientIp(Request $request): string
+    private function getClientIp(Request $Silian_request): string
     {
-        $serverParams = $request->getServerParams();
+        $Silian_serverParams = $Silian_request->getServerParams();
 
-        if (!empty($serverParams['HTTP_CF_CONNECTING_IP'])) {
-            return $serverParams['HTTP_CF_CONNECTING_IP'];
+        if (!empty($Silian_serverParams['HTTP_CF_CONNECTING_IP'])) {
+            return $Silian_serverParams['HTTP_CF_CONNECTING_IP'];
         }
 
-        if (!empty($serverParams['HTTP_X_FORWARDED_FOR'])) {
-            return explode(',', $serverParams['HTTP_X_FORWARDED_FOR'])[0];
+        if (!empty($Silian_serverParams['HTTP_X_FORWARDED_FOR'])) {
+            return explode(',', $Silian_serverParams['HTTP_X_FORWARDED_FOR'])[0];
         }
-        
-        if (!empty($serverParams['HTTP_X_REAL_IP'])) {
-            return $serverParams['HTTP_X_REAL_IP'];
+
+        if (!empty($Silian_serverParams['HTTP_X_REAL_IP'])) {
+            return $Silian_serverParams['HTTP_X_REAL_IP'];
         }
-        
-        return $serverParams['REMOTE_ADDR'] ?? 'unknown';
+
+        return $Silian_serverParams['REMOTE_ADDR'] ?? 'unknown';
     }
 
 
-    private function logExceptionWithFallback(\Throwable $exception, Request $request, string $contextMessage): void
+    private function logExceptionWithFallback(\Throwable $Silian_exception, Request $Silian_request, string $Silian_contextMessage): void
     {
         if ($this->errorLogService) {
             try {
-                $this->errorLogService->logException($exception, $request, ['context_message' => $contextMessage]);
+                $this->errorLogService->logException($Silian_exception, $Silian_request, ['context_message' => $Silian_contextMessage]);
                 return;
-            } catch (\Throwable $loggingError) {
-                error_log('ErrorLogService logging failed: ' . $loggingError->getMessage());
+            } catch (\Throwable $Silian_loggingError) {
+                error_log('ErrorLogService logging failed: ' . $Silian_loggingError->getMessage());
             }
         }
-        error_log($contextMessage);
+        error_log($Silian_contextMessage);
     }
 
 }

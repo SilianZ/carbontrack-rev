@@ -37,11 +37,11 @@ class WebauthnChallengeTest extends TestCase
             'expires_at' => gmdate('Y-m-d H:i:s', time() + 300),
         ]);
 
-        $record = $this->model->findActive('challenge-future', 'registration', '550e8400-e29b-41d4-a716-4466554400aa');
+        $Silian_record = $this->model->findActive('challenge-future', 'registration', '550e8400-e29b-41d4-a716-4466554400aa');
 
-        $this->assertIsArray($record);
-        $this->assertSame('challenge-future', $record['challenge_id']);
-        $this->assertSame(['label' => 'Desk Key'], $record['context']);
+        $this->assertIsArray($Silian_record);
+        $this->assertSame('challenge-future', $Silian_record['challenge_id']);
+        $this->assertSame(['label' => 'Desk Key'], $Silian_record['context']);
     }
 
     public function testFindActiveRejectsExpiredChallenge(): void
@@ -54,9 +54,9 @@ class WebauthnChallengeTest extends TestCase
             'expires_at' => gmdate('Y-m-d H:i:s', time() - 5),
         ]);
 
-        $record = $this->model->findActive('challenge-expired', 'registration', '550e8400-e29b-41d4-a716-4466554400aa');
+        $Silian_record = $this->model->findActive('challenge-expired', 'registration', '550e8400-e29b-41d4-a716-4466554400aa');
 
-        $this->assertNull($record);
+        $this->assertNull($Silian_record);
     }
 
     public function testDeleteExpiredRemovesOnlyExpiredRows(): void
@@ -76,9 +76,9 @@ class WebauthnChallengeTest extends TestCase
             'expires_at' => gmdate('Y-m-d H:i:s', time() + 60),
         ]);
 
-        $deleted = $this->model->deleteExpired();
+        $Silian_deleted = $this->model->deleteExpired();
 
-        $this->assertSame(1, $deleted);
+        $this->assertSame(1, $Silian_deleted);
         $this->assertNull($this->model->findActive('challenge-old', 'registration', '550e8400-e29b-41d4-a716-4466554400aa'));
         $this->assertIsArray($this->model->findActive('challenge-new', 'registration', '550e8400-e29b-41d4-a716-4466554400aa'));
     }

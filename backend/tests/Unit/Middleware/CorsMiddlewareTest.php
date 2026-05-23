@@ -20,39 +20,39 @@ class CorsMiddlewareTest extends TestCase
         $_ENV['CORS_ALLOWED_METHODS'] = 'GET,POST,PUT,DELETE,OPTIONS';
         $_ENV['CORS_ALLOWED_HEADERS'] = 'Content-Type,Authorization,X-Request-ID';
 
-        $mw = new CorsMiddleware();
-        $request = makeRequest('OPTIONS', '/api/v1/ping', null, null, [
+        $Silian_mw = new CorsMiddleware();
+        $Silian_request = makeRequest('OPTIONS', '/api/v1/ping', null, null, [
             'Origin' => ['https://example.com']
         ]);
-        $handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
-            public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+        $Silian_handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
+            public function handle(\Psr\Http\Message\ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface {
                 return new \Slim\Psr7\Response();
             }
         };
 
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(204, $resp->getStatusCode());
-        $this->assertNotEmpty($resp->getHeaderLine('Access-Control-Allow-Methods'));
-        $this->assertNotEmpty($resp->getHeaderLine('Access-Control-Allow-Headers'));
-        $this->assertSame('true', $resp->getHeaderLine('Access-Control-Allow-Credentials'));
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(204, $Silian_resp->getStatusCode());
+        $this->assertNotEmpty($Silian_resp->getHeaderLine('Access-Control-Allow-Methods'));
+        $this->assertNotEmpty($Silian_resp->getHeaderLine('Access-Control-Allow-Headers'));
+        $this->assertSame('true', $Silian_resp->getHeaderLine('Access-Control-Allow-Credentials'));
     }
 
     public function testGetWithAllowedOriginSetsAllowOriginHeader(): void
     {
         $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://a.com,https://b.com';
-        $mw = new CorsMiddleware();
-        $request = makeRequest('GET', '/api/v1/ping', null, null, [
+        $Silian_mw = new CorsMiddleware();
+        $Silian_request = makeRequest('GET', '/api/v1/ping', null, null, [
             'Origin' => ['https://a.com']
         ]);
-        $handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
-            public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
-                $r = new \Slim\Psr7\Response(204);
-                return $r;
+        $Silian_handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
+            public function handle(\Psr\Http\Message\ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface {
+                $Silian_r = new \Slim\Psr7\Response(204);
+                return $Silian_r;
             }
         };
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(204, $resp->getStatusCode());
-        $this->assertEquals('https://a.com', $resp->getHeaderLine('Access-Control-Allow-Origin'));
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(204, $Silian_resp->getStatusCode());
+        $this->assertEquals('https://a.com', $Silian_resp->getHeaderLine('Access-Control-Allow-Origin'));
     }
 }
 

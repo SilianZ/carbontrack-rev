@@ -21,30 +21,30 @@ class AuthControllerTest extends TestCase
     public function testAuthControllerCanBeInstantiated(): void
     {
         // Create mocks
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockEmailService = $this->createMock(EmailService::class);
-        $mockTurnstileService = $this->createMock(TurnstileService::class);
-        $mockAuditLogService = $this->createMock(AuditLogService::class);
-        $mockMessageService = $this->createMock(MessageService::class);
-        $mockR2Service = $this->createMock(CloudflareR2Service::class);
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockPdo = $this->createMock(\PDO::class);
-        $mockRegion = $this->createMock(RegionService::class);
+        $Silian_mockAuthService = $this->createMock(AuthService::class);
+        $Silian_mockEmailService = $this->createMock(EmailService::class);
+        $Silian_mockTurnstileService = $this->createMock(TurnstileService::class);
+        $Silian_mockAuditLogService = $this->createMock(AuditLogService::class);
+        $Silian_mockMessageService = $this->createMock(MessageService::class);
+        $Silian_mockR2Service = $this->createMock(CloudflareR2Service::class);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mockPdo = $this->createMock(\PDO::class);
+        $Silian_mockRegion = $this->createMock(RegionService::class);
 
-        $authController = new AuthController(
-            $mockAuthService,
-            $mockEmailService,
-            $mockTurnstileService,
-            $mockAuditLogService,
-            $mockMessageService,
-            $mockR2Service,
-            $mockLogger,
-            $mockPdo,
+        $Silian_authController = new AuthController(
+            $Silian_mockAuthService,
+            $Silian_mockEmailService,
+            $Silian_mockTurnstileService,
+            $Silian_mockAuditLogService,
+            $Silian_mockMessageService,
+            $Silian_mockR2Service,
+            $Silian_mockLogger,
+            $Silian_mockPdo,
             $this->createMock(\CarbonTrack\Services\ErrorLogService::class),
-            $mockRegion
+            $Silian_mockRegion
         );
 
-        $this->assertInstanceOf(AuthController::class, $authController);
+        $this->assertInstanceOf(AuthController::class, $Silian_authController);
     }
 
     public function testAuthControllerHasRequiredMethods(): void
@@ -62,31 +62,31 @@ class AuthControllerTest extends TestCase
 
     public function testAuthControllerMethodsArePublic(): void
     {
-        $reflection = new \ReflectionClass(AuthController::class);
-        
-        $registerMethod = $reflection->getMethod('register');
-        $this->assertTrue($registerMethod->isPublic());
-        
-        $loginMethod = $reflection->getMethod('login');
-        $this->assertTrue($loginMethod->isPublic());
-        
-        $logoutMethod = $reflection->getMethod('logout');
-        $this->assertTrue($logoutMethod->isPublic());
-        
-        $meMethod = $reflection->getMethod('me');
-        $this->assertTrue($meMethod->isPublic());
+        $Silian_reflection = new \ReflectionClass(AuthController::class);
+
+        $Silian_registerMethod = $Silian_reflection->getMethod('register');
+        $this->assertTrue($Silian_registerMethod->isPublic());
+
+        $Silian_loginMethod = $Silian_reflection->getMethod('login');
+        $this->assertTrue($Silian_loginMethod->isPublic());
+
+        $Silian_logoutMethod = $Silian_reflection->getMethod('logout');
+        $this->assertTrue($Silian_logoutMethod->isPublic());
+
+        $Silian_meMethod = $Silian_reflection->getMethod('me');
+        $this->assertTrue($Silian_meMethod->isPublic());
     }
 
     public function testMeUsesCompatibleSchoolAndRegionFields(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockEmailService = $this->createMock(EmailService::class);
-        $mockTurnstileService = $this->createMock(TurnstileService::class);
-        $mockAuditLogService = $this->createMock(AuditLogService::class);
-        $mockMessageService = $this->createMock(MessageService::class);
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockRegion = $this->createMock(RegionService::class);
-        $mockRegion->method('getRegionContext')
+        $Silian_mockAuthService = $this->createMock(AuthService::class);
+        $Silian_mockEmailService = $this->createMock(EmailService::class);
+        $Silian_mockTurnstileService = $this->createMock(TurnstileService::class);
+        $Silian_mockAuditLogService = $this->createMock(AuditLogService::class);
+        $Silian_mockMessageService = $this->createMock(MessageService::class);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mockRegion = $this->createMock(RegionService::class);
+        $Silian_mockRegion->method('getRegionContext')
             ->with('US-UM-81')
             ->willReturn([
                 'region_code' => 'US-UM-81',
@@ -97,9 +97,9 @@ class AuthControllerTest extends TestCase
                 'state_name' => null,
             ]);
 
-        $selectStmt = $this->createMock(\PDOStatement::class);
-        $selectStmt->method('execute')->willReturn(true);
-        $selectStmt->method('fetch')->willReturn([
+        $Silian_selectStmt = $this->createMock(\PDOStatement::class);
+        $Silian_selectStmt->method('execute')->willReturn(true);
+        $Silian_selectStmt->method('fetch')->willReturn([
             'id' => 5,
             'uuid' => 'u-5',
             'username' => 'legacy-user',
@@ -116,51 +116,51 @@ class AuthControllerTest extends TestCase
             'created_at' => '2025-01-01 00:00:00',
         ]);
 
-        $unreadStmt = $this->createMock(\PDOStatement::class);
-        $unreadStmt->method('execute')->willReturn(true);
-        $unreadStmt->method('fetchColumn')->willReturn(3);
+        $Silian_unreadStmt = $this->createMock(\PDOStatement::class);
+        $Silian_unreadStmt->method('execute')->willReturn(true);
+        $Silian_unreadStmt->method('fetchColumn')->willReturn(3);
 
-        $mockPdo = $this->createMock(\PDO::class);
-        $mockPdo->method('prepare')->willReturnOnConsecutiveCalls($selectStmt, $unreadStmt);
+        $Silian_mockPdo = $this->createMock(\PDO::class);
+        $Silian_mockPdo->method('prepare')->willReturnOnConsecutiveCalls($Silian_selectStmt, $Silian_unreadStmt);
 
-        $mockAuthService->method('getCurrentUser')->willReturn(['id' => 5]);
+        $Silian_mockAuthService->method('getCurrentUser')->willReturn(['id' => 5]);
 
-        $controller = new AuthController(
-            $mockAuthService,
-            $mockEmailService,
-            $mockTurnstileService,
-            $mockAuditLogService,
-            $mockMessageService,
+        $Silian_controller = new AuthController(
+            $Silian_mockAuthService,
+            $Silian_mockEmailService,
+            $Silian_mockTurnstileService,
+            $Silian_mockAuditLogService,
+            $Silian_mockMessageService,
             null,
-            $mockLogger,
-            $mockPdo,
+            $Silian_mockLogger,
+            $Silian_mockPdo,
             $this->createMock(\CarbonTrack\Services\ErrorLogService::class),
-            $mockRegion,
+            $Silian_mockRegion,
             null,
-            new UserProfileViewService($mockRegion)
+            new UserProfileViewService($Silian_mockRegion)
         );
 
-        $request = makeRequest('GET', '/auth/me');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->me($request, $response);
+        $Silian_request = makeRequest('GET', '/auth/me');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->me($Silian_request, $Silian_response);
 
-        $this->assertSame(200, $resp->getStatusCode());
-        $json = json_decode((string) $resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertSame('Legacy Academy', $json['data']['school_name']);
-        $this->assertSame('US-UM-81', $json['data']['region_code']);
-        $this->assertSame(3, $json['data']['unread_messages']);
+        $this->assertSame(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string) $Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertSame('Legacy Academy', $Silian_json['data']['school_name']);
+        $this->assertSame('US-UM-81', $Silian_json['data']['region_code']);
+        $this->assertSame(3, $Silian_json['data']['unread_messages']);
     }
 
     public function testAuthControllerHasCorrectDependencies(): void
     {
-        $reflection = new \ReflectionClass(AuthController::class);
-        $constructor = $reflection->getConstructor();
-        $parameters = $constructor->getParameters();
+        $Silian_reflection = new \ReflectionClass(AuthController::class);
+        $Silian_constructor = $Silian_reflection->getConstructor();
+        $Silian_parameters = $Silian_constructor->getParameters();
 
-        $this->assertCount(12, $parameters);
+        $this->assertCount(12, $Silian_parameters);
 
-        $expectedTypes = [
+        $Silian_expectedTypes = [
             'CarbonTrack\Services\AuthService',
             'CarbonTrack\Services\EmailService',
             'CarbonTrack\Services\TurnstileService',
@@ -174,16 +174,16 @@ class AuthControllerTest extends TestCase
             'CarbonTrack\Services\CheckinService',
             'CarbonTrack\Services\UserProfileViewService'
         ];
-        $nullableIndexes = [5, 8, 10, 11];
+        $Silian_nullableIndexes = [5, 8, 10, 11];
 
-        foreach ($parameters as $index => $parameter) {
-            $type = $parameter->getType();
-            if ($type instanceof \ReflectionNamedType) {
-                $this->assertEquals($expectedTypes[$index], $type->getName());
-                if (in_array($index, $nullableIndexes, true)) {
-                    $this->assertTrue($type->allowsNull());
+        foreach ($Silian_parameters as $Silian_index => $Silian_parameter) {
+            $Silian_type = $Silian_parameter->getType();
+            if ($Silian_type instanceof \ReflectionNamedType) {
+                $this->assertEquals($Silian_expectedTypes[$Silian_index], $Silian_type->getName());
+                if (in_array($Silian_index, $Silian_nullableIndexes, true)) {
+                    $this->assertTrue($Silian_type->allowsNull());
                 } else {
-                    $this->assertFalse($type->allowsNull());
+                    $this->assertFalse($Silian_type->allowsNull());
                 }
             }
         }
@@ -192,19 +192,19 @@ class AuthControllerTest extends TestCase
 
     public function testLoginCallsAuthAndWritesAudit(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockEmailService = $this->createMock(EmailService::class);
-        $mockTurnstileService = $this->createMock(TurnstileService::class);
-        $mockAuditLogService = $this->createMock(AuditLogService::class);
-        $mockMessageService = $this->createMock(MessageService::class);
-        $mockR2Service = $this->createMock(CloudflareR2Service::class);
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockRegion = $this->createMock(RegionService::class);
+        $Silian_mockAuthService = $this->createMock(AuthService::class);
+        $Silian_mockEmailService = $this->createMock(EmailService::class);
+        $Silian_mockTurnstileService = $this->createMock(TurnstileService::class);
+        $Silian_mockAuditLogService = $this->createMock(AuditLogService::class);
+        $Silian_mockMessageService = $this->createMock(MessageService::class);
+        $Silian_mockR2Service = $this->createMock(CloudflareR2Service::class);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mockRegion = $this->createMock(RegionService::class);
 
         // mock PDO for selecting user and updating last login
-        $selectStmt = $this->createMock(\PDOStatement::class);
-        $selectStmt->method('execute')->willReturn(true);
-        $selectStmt->method('fetch')->willReturn([
+        $Silian_selectStmt = $this->createMock(\PDOStatement::class);
+        $Silian_selectStmt->method('execute')->willReturn(true);
+        $Silian_selectStmt->method('fetch')->willReturn([
             'id' => 1,
             'uuid' => 'u-1',
             'username' => 'john',
@@ -222,64 +222,64 @@ class AuthControllerTest extends TestCase
             'verification_send_count' => 0,
             'verification_last_sent_at' => null
         ]);
-        $updateStmt = $this->createMock(\PDOStatement::class);
-        $updateStmt->method('execute')->willReturn(true);
-        $verificationStmt = $this->createMock(\PDOStatement::class);
-        $verificationStmt->method('execute')->willReturn(true);
-        $mockPdo = $this->createMock(\PDO::class);
-        $mockPdo->method('prepare')->willReturnOnConsecutiveCalls($selectStmt, $updateStmt, $verificationStmt);
+        $Silian_updateStmt = $this->createMock(\PDOStatement::class);
+        $Silian_updateStmt->method('execute')->willReturn(true);
+        $Silian_verificationStmt = $this->createMock(\PDOStatement::class);
+        $Silian_verificationStmt->method('execute')->willReturn(true);
+        $Silian_mockPdo = $this->createMock(\PDO::class);
+        $Silian_mockPdo->method('prepare')->willReturnOnConsecutiveCalls($Silian_selectStmt, $Silian_updateStmt, $Silian_verificationStmt);
 
-        $mockAuthService->method('generateToken')->willReturn('fake.jwt.token');
-        $mockAuditLogService->expects($this->atLeastOnce())->method('log');
-        $mockAuditLogService->expects($this->any())->method('logAuthOperation');
-        $mockEmailService->expects($this->once())->method('sendVerificationCode')->willReturn(true);
+        $Silian_mockAuthService->method('generateToken')->willReturn('fake.jwt.token');
+        $Silian_mockAuditLogService->expects($this->atLeastOnce())->method('log');
+        $Silian_mockAuditLogService->expects($this->any())->method('logAuthOperation');
+        $Silian_mockEmailService->expects($this->once())->method('sendVerificationCode')->willReturn(true);
 
-        $controller = new AuthController(
-            $mockAuthService,
-            $mockEmailService,
-            $mockTurnstileService,
-            $mockAuditLogService,
-            $mockMessageService,
-            $mockR2Service,
-            $mockLogger,
-            $mockPdo,
+        $Silian_controller = new AuthController(
+            $Silian_mockAuthService,
+            $Silian_mockEmailService,
+            $Silian_mockTurnstileService,
+            $Silian_mockAuditLogService,
+            $Silian_mockMessageService,
+            $Silian_mockR2Service,
+            $Silian_mockLogger,
+            $Silian_mockPdo,
             $this->createMock(\CarbonTrack\Services\ErrorLogService::class),
-            $mockRegion
+            $Silian_mockRegion
         );
 
-        $request = makeRequest('POST', '/login', ['username' => 'john', 'password' => 'secret']);
-        $response = new \Slim\Psr7\Response();
+        $Silian_request = makeRequest('POST', '/login', ['username' => 'john', 'password' => 'secret']);
+        $Silian_response = new \Slim\Psr7\Response();
 
-        $resp = $controller->login($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string) $resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertEquals('fake.jwt.token', $json['data']['token']);
-        $this->assertEquals('john', $json['data']['user']['username']);
-        $this->assertTrue($json['data']['email_verification_required']);
-        $this->assertTrue($json['data']['email_verification_sent']);
-        $this->assertNotEmpty($json['data']['verification_expires_at']);
+        $Silian_resp = $Silian_controller->login($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string) $Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertEquals('fake.jwt.token', $Silian_json['data']['token']);
+        $this->assertEquals('john', $Silian_json['data']['user']['username']);
+        $this->assertTrue($Silian_json['data']['email_verification_required']);
+        $this->assertTrue($Silian_json['data']['email_verification_sent']);
+        $this->assertNotEmpty($Silian_json['data']['verification_expires_at']);
     }
 
     public function testLoginDoesNotResendWhenVerificationStillValid(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockEmailService = $this->createMock(EmailService::class);
-        $mockTurnstileService = $this->createMock(TurnstileService::class);
-        $mockAuditLogService = $this->createMock(AuditLogService::class);
-        $mockMessageService = $this->createMock(MessageService::class);
-        $mockR2Service = $this->createMock(CloudflareR2Service::class);
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockRegion = $this->createMock(RegionService::class);
+        $Silian_mockAuthService = $this->createMock(AuthService::class);
+        $Silian_mockEmailService = $this->createMock(EmailService::class);
+        $Silian_mockTurnstileService = $this->createMock(TurnstileService::class);
+        $Silian_mockAuditLogService = $this->createMock(AuditLogService::class);
+        $Silian_mockMessageService = $this->createMock(MessageService::class);
+        $Silian_mockR2Service = $this->createMock(CloudflareR2Service::class);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mockRegion = $this->createMock(RegionService::class);
 
-        $now = new \DateTimeImmutable('now');
-        $futureExpiry = $now->modify('+30 minutes')->format('Y-m-d H:i:s');
-        $lastSentAt = $now->modify('-30 minutes')->format('Y-m-d H:i:s');
-        $resendAvailableAt = (new \DateTimeImmutable($lastSentAt))->modify('+1 hour')->format('Y-m-d H:i:s');
+        $Silian_now = new \DateTimeImmutable('now');
+        $Silian_futureExpiry = $Silian_now->modify('+30 minutes')->format('Y-m-d H:i:s');
+        $Silian_lastSentAt = $Silian_now->modify('-30 minutes')->format('Y-m-d H:i:s');
+        $Silian_resendAvailableAt = (new \DateTimeImmutable($Silian_lastSentAt))->modify('+1 hour')->format('Y-m-d H:i:s');
 
-        $selectStmt = $this->createMock(\PDOStatement::class);
-        $selectStmt->method('execute')->willReturn(true);
-        $selectStmt->method('fetch')->willReturn([
+        $Silian_selectStmt = $this->createMock(\PDOStatement::class);
+        $Silian_selectStmt->method('execute')->willReturn(true);
+        $Silian_selectStmt->method('fetch')->willReturn([
             'id' => 2,
             'uuid' => 'u-2',
             'username' => 'alice',
@@ -293,248 +293,248 @@ class AuthControllerTest extends TestCase
             'password_hash' => password_hash('secret', PASSWORD_DEFAULT),
             'email_verified_at' => null,
             'verification_code' => '123456',
-            'verification_code_expires_at' => $futureExpiry,
+            'verification_code_expires_at' => $Silian_futureExpiry,
             'verification_send_count' => 1,
-            'verification_last_sent_at' => $lastSentAt
+            'verification_last_sent_at' => $Silian_lastSentAt
         ]);
-        $updateStmt = $this->createMock(\PDOStatement::class);
-        $updateStmt->method('execute')->willReturn(true);
-        $mockPdo = $this->createMock(\PDO::class);
-        $mockPdo->method('prepare')->willReturnOnConsecutiveCalls($selectStmt, $updateStmt);
+        $Silian_updateStmt = $this->createMock(\PDOStatement::class);
+        $Silian_updateStmt->method('execute')->willReturn(true);
+        $Silian_mockPdo = $this->createMock(\PDO::class);
+        $Silian_mockPdo->method('prepare')->willReturnOnConsecutiveCalls($Silian_selectStmt, $Silian_updateStmt);
 
-        $mockAuthService->method('generateToken')->willReturn('fake.jwt.token');
-        $mockAuditLogService->expects($this->atLeastOnce())->method('log');
-        $mockAuditLogService->expects($this->any())->method('logAuthOperation');
-        $mockEmailService->expects($this->never())->method('sendVerificationCode');
+        $Silian_mockAuthService->method('generateToken')->willReturn('fake.jwt.token');
+        $Silian_mockAuditLogService->expects($this->atLeastOnce())->method('log');
+        $Silian_mockAuditLogService->expects($this->any())->method('logAuthOperation');
+        $Silian_mockEmailService->expects($this->never())->method('sendVerificationCode');
 
-        $controller = new AuthController(
-            $mockAuthService,
-            $mockEmailService,
-            $mockTurnstileService,
-            $mockAuditLogService,
-            $mockMessageService,
-            $mockR2Service,
-            $mockLogger,
-            $mockPdo,
+        $Silian_controller = new AuthController(
+            $Silian_mockAuthService,
+            $Silian_mockEmailService,
+            $Silian_mockTurnstileService,
+            $Silian_mockAuditLogService,
+            $Silian_mockMessageService,
+            $Silian_mockR2Service,
+            $Silian_mockLogger,
+            $Silian_mockPdo,
             $this->createMock(\CarbonTrack\Services\ErrorLogService::class),
-            $mockRegion
+            $Silian_mockRegion
         );
 
-        $request = makeRequest('POST', '/login', ['identifier' => 'alice@example.com', 'password' => 'secret']);
-        $response = new \Slim\Psr7\Response();
+        $Silian_request = makeRequest('POST', '/login', ['identifier' => 'alice@example.com', 'password' => 'secret']);
+        $Silian_response = new \Slim\Psr7\Response();
 
-        $resp = $controller->login($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string) $resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertEquals('fake.jwt.token', $json['data']['token']);
-        $this->assertEquals('alice', $json['data']['user']['username']);
-        $this->assertTrue($json['data']['email_verification_required']);
-        $this->assertFalse($json['data']['email_verification_sent']);
-        $this->assertSame($futureExpiry, $json['data']['verification_expires_at']);
-        $this->assertSame($resendAvailableAt, $json['data']['verification_resend_available_at']);
+        $Silian_resp = $Silian_controller->login($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string) $Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertEquals('fake.jwt.token', $Silian_json['data']['token']);
+        $this->assertEquals('alice', $Silian_json['data']['user']['username']);
+        $this->assertTrue($Silian_json['data']['email_verification_required']);
+        $this->assertFalse($Silian_json['data']['email_verification_sent']);
+        $this->assertSame($Silian_futureExpiry, $Silian_json['data']['verification_expires_at']);
+        $this->assertSame($Silian_resendAvailableAt, $Silian_json['data']['verification_resend_available_at']);
     }
 
     public function testResolveAvatarPrefersPublicUrl(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockEmailService = $this->createMock(EmailService::class);
-        $mockTurnstileService = $this->createMock(TurnstileService::class);
-        $mockAuditLogService = $this->createMock(AuditLogService::class);
-        $mockMessageService = $this->createMock(MessageService::class);
-        $mockR2Service = $this->createMock(CloudflareR2Service::class);
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockPdo = $this->createMock(\PDO::class);
-        $mockRegion = $this->createMock(RegionService::class);
+        $Silian_mockAuthService = $this->createMock(AuthService::class);
+        $Silian_mockEmailService = $this->createMock(EmailService::class);
+        $Silian_mockTurnstileService = $this->createMock(TurnstileService::class);
+        $Silian_mockAuditLogService = $this->createMock(AuditLogService::class);
+        $Silian_mockMessageService = $this->createMock(MessageService::class);
+        $Silian_mockR2Service = $this->createMock(CloudflareR2Service::class);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mockPdo = $this->createMock(\PDO::class);
+        $Silian_mockRegion = $this->createMock(RegionService::class);
 
-        $mockR2Service->expects($this->once())
+        $Silian_mockR2Service->expects($this->once())
             ->method('getPublicUrl')
             ->with('avatars/default/avatar_01.png')
             ->willReturn('https://r2-dev.carbontrackapp.com/avatars/default/avatar_01.png');
-        $mockR2Service->expects($this->never())->method('generatePresignedUrl');
+        $Silian_mockR2Service->expects($this->never())->method('generatePresignedUrl');
 
-        $controller = new AuthController(
-            $mockAuthService,
-            $mockEmailService,
-            $mockTurnstileService,
-            $mockAuditLogService,
-            $mockMessageService,
-            $mockR2Service,
-            $mockLogger,
-            $mockPdo,
+        $Silian_controller = new AuthController(
+            $Silian_mockAuthService,
+            $Silian_mockEmailService,
+            $Silian_mockTurnstileService,
+            $Silian_mockAuditLogService,
+            $Silian_mockMessageService,
+            $Silian_mockR2Service,
+            $Silian_mockLogger,
+            $Silian_mockPdo,
             $this->createMock(\CarbonTrack\Services\ErrorLogService::class),
-            $mockRegion
+            $Silian_mockRegion
         );
 
-        $method = new \ReflectionMethod(AuthController::class, 'resolveAvatar');
-        $method->setAccessible(true);
-        $result = $method->invoke($controller, '/avatars/default/avatar_01.png');
+        $Silian_method = new \ReflectionMethod(AuthController::class, 'resolveAvatar');
+        $Silian_method->setAccessible(true);
+        $Silian_result = $Silian_method->invoke($Silian_controller, '/avatars/default/avatar_01.png');
 
-        $this->assertSame('/avatars/default/avatar_01.png', $result['avatar_path']);
-        $this->assertSame('https://r2-dev.carbontrackapp.com/avatars/default/avatar_01.png', $result['avatar_url']);
+        $this->assertSame('/avatars/default/avatar_01.png', $Silian_result['avatar_path']);
+        $this->assertSame('https://r2-dev.carbontrackapp.com/avatars/default/avatar_01.png', $Silian_result['avatar_url']);
     }
 
     public function testForgotPasswordRequiresTurnstile(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockEmailService = $this->createMock(EmailService::class);
-        $mockTurnstileService = $this->createMock(TurnstileService::class);
-        $mockAuditLogService = $this->createMock(AuditLogService::class);
-        $mockMessageService = $this->createMock(MessageService::class);
-        $mockR2Service = $this->createMock(CloudflareR2Service::class);
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockPdo = $this->createMock(\PDO::class);
-        $mockRegion = $this->createMock(RegionService::class);
+        $Silian_mockAuthService = $this->createMock(AuthService::class);
+        $Silian_mockEmailService = $this->createMock(EmailService::class);
+        $Silian_mockTurnstileService = $this->createMock(TurnstileService::class);
+        $Silian_mockAuditLogService = $this->createMock(AuditLogService::class);
+        $Silian_mockMessageService = $this->createMock(MessageService::class);
+        $Silian_mockR2Service = $this->createMock(CloudflareR2Service::class);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mockPdo = $this->createMock(\PDO::class);
+        $Silian_mockRegion = $this->createMock(RegionService::class);
 
-        $mockTurnstileService->expects($this->never())->method('verify');
+        $Silian_mockTurnstileService->expects($this->never())->method('verify');
 
-        $controller = new AuthController(
-            $mockAuthService,
-            $mockEmailService,
-            $mockTurnstileService,
-            $mockAuditLogService,
-            $mockMessageService,
-            $mockR2Service,
-            $mockLogger,
-            $mockPdo,
+        $Silian_controller = new AuthController(
+            $Silian_mockAuthService,
+            $Silian_mockEmailService,
+            $Silian_mockTurnstileService,
+            $Silian_mockAuditLogService,
+            $Silian_mockMessageService,
+            $Silian_mockR2Service,
+            $Silian_mockLogger,
+            $Silian_mockPdo,
             $this->createMock(\CarbonTrack\Services\ErrorLogService::class),
-            $mockRegion
+            $Silian_mockRegion
         );
 
-        $request = makeRequest('POST', '/auth/forgot-password', ['email' => 'john@example.com']);
-        $response = new \Slim\Psr7\Response();
+        $Silian_request = makeRequest('POST', '/auth/forgot-password', ['email' => 'john@example.com']);
+        $Silian_response = new \Slim\Psr7\Response();
 
-        $resp = $controller->forgotPassword($request, $response);
-        $this->assertEquals(400, $resp->getStatusCode());
-        $json = json_decode((string) $resp->getBody(), true);
-        $this->assertFalse($json['success']);
-        $this->assertSame('TURNSTILE_FAILED', $json['code']);
+        $Silian_resp = $Silian_controller->forgotPassword($Silian_request, $Silian_response);
+        $this->assertEquals(400, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string) $Silian_resp->getBody(), true);
+        $this->assertFalse($Silian_json['success']);
+        $this->assertSame('TURNSTILE_FAILED', $Silian_json['code']);
     }
 
     public function testSendVerificationCodeRequiresTurnstile(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockEmailService = $this->createMock(EmailService::class);
-        $mockTurnstileService = $this->createMock(TurnstileService::class);
-        $mockAuditLogService = $this->createMock(AuditLogService::class);
-        $mockMessageService = $this->createMock(MessageService::class);
-        $mockR2Service = $this->createMock(CloudflareR2Service::class);
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockPdo = $this->createMock(\PDO::class);
-        $mockRegion = $this->createMock(RegionService::class);
+        $Silian_mockAuthService = $this->createMock(AuthService::class);
+        $Silian_mockEmailService = $this->createMock(EmailService::class);
+        $Silian_mockTurnstileService = $this->createMock(TurnstileService::class);
+        $Silian_mockAuditLogService = $this->createMock(AuditLogService::class);
+        $Silian_mockMessageService = $this->createMock(MessageService::class);
+        $Silian_mockR2Service = $this->createMock(CloudflareR2Service::class);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mockPdo = $this->createMock(\PDO::class);
+        $Silian_mockRegion = $this->createMock(RegionService::class);
 
-        $mockTurnstileService->expects($this->never())->method('verify');
+        $Silian_mockTurnstileService->expects($this->never())->method('verify');
 
-        $controller = new AuthController(
-            $mockAuthService,
-            $mockEmailService,
-            $mockTurnstileService,
-            $mockAuditLogService,
-            $mockMessageService,
-            $mockR2Service,
-            $mockLogger,
-            $mockPdo,
+        $Silian_controller = new AuthController(
+            $Silian_mockAuthService,
+            $Silian_mockEmailService,
+            $Silian_mockTurnstileService,
+            $Silian_mockAuditLogService,
+            $Silian_mockMessageService,
+            $Silian_mockR2Service,
+            $Silian_mockLogger,
+            $Silian_mockPdo,
             $this->createMock(\CarbonTrack\Services\ErrorLogService::class),
-            $mockRegion
+            $Silian_mockRegion
         );
 
-        $request = makeRequest('POST', '/auth/send-verification-code', ['email' => 'john@example.com']);
-        $response = new \Slim\Psr7\Response();
+        $Silian_request = makeRequest('POST', '/auth/send-verification-code', ['email' => 'john@example.com']);
+        $Silian_response = new \Slim\Psr7\Response();
 
-        $resp = $controller->sendVerificationCode($request, $response);
-        $this->assertEquals(400, $resp->getStatusCode());
-        $json = json_decode((string) $resp->getBody(), true);
-        $this->assertFalse($json['success']);
-        $this->assertSame('TURNSTILE_FAILED', $json['code']);
+        $Silian_resp = $Silian_controller->sendVerificationCode($Silian_request, $Silian_response);
+        $this->assertEquals(400, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string) $Silian_resp->getBody(), true);
+        $this->assertFalse($Silian_json['success']);
+        $this->assertSame('TURNSTILE_FAILED', $Silian_json['code']);
     }
 
     public function testRegisterRejectsFailedTurnstileVerification(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockEmailService = $this->createMock(EmailService::class);
-        $mockTurnstileService = $this->createMock(TurnstileService::class);
-        $mockAuditLogService = $this->createMock(AuditLogService::class);
-        $mockMessageService = $this->createMock(MessageService::class);
-        $mockR2Service = $this->createMock(CloudflareR2Service::class);
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockPdo = $this->createMock(\PDO::class);
-        $mockRegion = $this->createMock(RegionService::class);
+        $Silian_mockAuthService = $this->createMock(AuthService::class);
+        $Silian_mockEmailService = $this->createMock(EmailService::class);
+        $Silian_mockTurnstileService = $this->createMock(TurnstileService::class);
+        $Silian_mockAuditLogService = $this->createMock(AuditLogService::class);
+        $Silian_mockMessageService = $this->createMock(MessageService::class);
+        $Silian_mockR2Service = $this->createMock(CloudflareR2Service::class);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mockPdo = $this->createMock(\PDO::class);
+        $Silian_mockRegion = $this->createMock(RegionService::class);
 
-        $mockTurnstileService->expects($this->once())
+        $Silian_mockTurnstileService->expects($this->once())
             ->method('verify')
             ->with('bad-token')
             ->willReturn(['success' => false, 'error' => 'invalid-input-secret']);
 
-        $controller = new AuthController(
-            $mockAuthService,
-            $mockEmailService,
-            $mockTurnstileService,
-            $mockAuditLogService,
-            $mockMessageService,
-            $mockR2Service,
-            $mockLogger,
-            $mockPdo,
+        $Silian_controller = new AuthController(
+            $Silian_mockAuthService,
+            $Silian_mockEmailService,
+            $Silian_mockTurnstileService,
+            $Silian_mockAuditLogService,
+            $Silian_mockMessageService,
+            $Silian_mockR2Service,
+            $Silian_mockLogger,
+            $Silian_mockPdo,
             $this->createMock(\CarbonTrack\Services\ErrorLogService::class),
-            $mockRegion
+            $Silian_mockRegion
         );
 
-        $request = makeRequest('POST', '/auth/register', [
+        $Silian_request = makeRequest('POST', '/auth/register', [
             'username' => 'john',
             'email' => 'john@example.com',
             'password' => 'secret123',
             'confirm_password' => 'secret123',
             'cf_turnstile_response' => 'bad-token',
         ]);
-        $response = new \Slim\Psr7\Response();
+        $Silian_response = new \Slim\Psr7\Response();
 
-        $resp = $controller->register($request, $response);
-        $this->assertSame(400, $resp->getStatusCode());
-        $json = json_decode((string) $resp->getBody(), true);
-        $this->assertFalse($json['success']);
-        $this->assertSame('TURNSTILE_FAILED', $json['code']);
+        $Silian_resp = $Silian_controller->register($Silian_request, $Silian_response);
+        $this->assertSame(400, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string) $Silian_resp->getBody(), true);
+        $this->assertFalse($Silian_json['success']);
+        $this->assertSame('TURNSTILE_FAILED', $Silian_json['code']);
     }
 
     public function testLoginRejectsFailedTurnstileVerification(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockEmailService = $this->createMock(EmailService::class);
-        $mockTurnstileService = $this->createMock(TurnstileService::class);
-        $mockAuditLogService = $this->createMock(AuditLogService::class);
-        $mockMessageService = $this->createMock(MessageService::class);
-        $mockR2Service = $this->createMock(CloudflareR2Service::class);
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockPdo = $this->createMock(\PDO::class);
-        $mockRegion = $this->createMock(RegionService::class);
+        $Silian_mockAuthService = $this->createMock(AuthService::class);
+        $Silian_mockEmailService = $this->createMock(EmailService::class);
+        $Silian_mockTurnstileService = $this->createMock(TurnstileService::class);
+        $Silian_mockAuditLogService = $this->createMock(AuditLogService::class);
+        $Silian_mockMessageService = $this->createMock(MessageService::class);
+        $Silian_mockR2Service = $this->createMock(CloudflareR2Service::class);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mockPdo = $this->createMock(\PDO::class);
+        $Silian_mockRegion = $this->createMock(RegionService::class);
 
-        $mockTurnstileService->expects($this->once())
+        $Silian_mockTurnstileService->expects($this->once())
             ->method('verify')
             ->with('bad-token')
             ->willReturn(['success' => false, 'error' => 'invalid-input-secret']);
 
-        $controller = new AuthController(
-            $mockAuthService,
-            $mockEmailService,
-            $mockTurnstileService,
-            $mockAuditLogService,
-            $mockMessageService,
-            $mockR2Service,
-            $mockLogger,
-            $mockPdo,
+        $Silian_controller = new AuthController(
+            $Silian_mockAuthService,
+            $Silian_mockEmailService,
+            $Silian_mockTurnstileService,
+            $Silian_mockAuditLogService,
+            $Silian_mockMessageService,
+            $Silian_mockR2Service,
+            $Silian_mockLogger,
+            $Silian_mockPdo,
             $this->createMock(\CarbonTrack\Services\ErrorLogService::class),
-            $mockRegion
+            $Silian_mockRegion
         );
 
-        $request = makeRequest('POST', '/auth/login', [
+        $Silian_request = makeRequest('POST', '/auth/login', [
             'identifier' => 'john@example.com',
             'password' => 'secret123',
             'cf_turnstile_response' => 'bad-token',
         ]);
-        $response = new \Slim\Psr7\Response();
+        $Silian_response = new \Slim\Psr7\Response();
 
-        $resp = $controller->login($request, $response);
-        $this->assertSame(400, $resp->getStatusCode());
-        $json = json_decode((string) $resp->getBody(), true);
-        $this->assertFalse($json['success']);
-        $this->assertSame('TURNSTILE_FAILED', $json['code']);
+        $Silian_resp = $Silian_controller->login($Silian_request, $Silian_response);
+        $this->assertSame(400, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string) $Silian_resp->getBody(), true);
+        $this->assertFalse($Silian_json['success']);
+        $this->assertSame('TURNSTILE_FAILED', $Silian_json['code']);
     }
 }

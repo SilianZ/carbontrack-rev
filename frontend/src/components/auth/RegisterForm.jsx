@@ -1,115 +1,115 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, UserPlus } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { useTranslation } from '../../hooks/useTranslation';
-import { authAPI, getValidationRules } from '../../lib/auth';
-import { schoolAPI } from '../../lib/api';
-import { RegionSelector } from '../common/RegionSelector';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
-import { Alert, AlertDescription } from '../ui/Alert';
-import Turnstile from '../common/Turnstile';
+import Silian_React, { useEffect as Silian_useEffect, useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { useForm as Silian_useForm } from 'react-hook-form';
+import { Link as Silian_Link, useNavigate as Silian_useNavigate } from 'react-router-dom';
+import { Eye as Silian_Eye, EyeOff as Silian_EyeOff, UserPlus as Silian_UserPlus } from 'lucide-react';
+import { toast as Silian_toast } from 'react-hot-toast';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { authAPI as Silian_authAPI, getValidationRules as Silian_getValidationRules } from '../../lib/auth';
+import { schoolAPI as Silian_schoolAPI } from '../../lib/api';
+import { RegionSelector as Silian_RegionSelector } from '../common/RegionSelector';
+import { Button as Silian_Button } from '../ui/Button';
+import { Input as Silian_Input } from '../ui/Input';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../ui/Card';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../ui/Alert';
+import Silian_Turnstile from '../common/Turnstile';
 
 export function RegisterForm() {
-  const { t } = useTranslation(['auth', 'common', 'errors', 'success']);
-  const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [schools, setSchools] = useState([]);
-  const [customSchool, setCustomSchool] = useState('');
-  const turnstileRef = useRef(null);
-  const [turnstileToken, setTurnstileToken] = useState('');
+  const { t: Silian_t } = Silian_useTranslation(['auth', 'common', 'errors', 'success']);
+  const Silian_navigate = Silian_useNavigate();
+  const [Silian_showPassword, Silian_setShowPassword] = Silian_useState(false);
+  const [Silian_showConfirmPassword, Silian_setShowConfirmPassword] = Silian_useState(false);
+  const [Silian_error, Silian_setError] = Silian_useState('');
+  const [Silian_success, Silian_setSuccess] = Silian_useState('');
+  const [Silian_isLoading, Silian_setIsLoading] = Silian_useState(false);
+  const [Silian_schools, Silian_setSchools] = Silian_useState([]);
+  const [Silian_customSchool, Silian_setCustomSchool] = Silian_useState('');
+  const Silian_turnstileRef = Silian_useRef(null);
+  const [Silian_turnstileToken, Silian_setTurnstileToken] = Silian_useState('');
 
   const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors }
-  } = useForm();
-  const validationRules = getValidationRules();
+    register: Silian_register,
+    handleSubmit: Silian_handleSubmit,
+    watch: Silian_watch,
+    setValue: Silian_setValue,
+    formState: { errors: Silian_errors }
+  } = Silian_useForm();
+  const Silian_validationRules = Silian_getValidationRules();
 
-  const password = watch('password');
-  const countryCode = watch('country_code');
-  const stateCode = watch('state_code');
+  const Silian_password = Silian_watch('password');
+  const Silian_countryCode = Silian_watch('country_code');
+  const Silian_stateCode = Silian_watch('state_code');
 
-  useEffect(() => {
-    register('country_code', { required: t('auth.countryRequired') });
-    register('state_code', { required: t('auth.stateRequired') });
-  }, [register, t]);
+  Silian_useEffect(() => {
+    Silian_register('country_code', { required: Silian_t('auth.countryRequired') });
+    Silian_register('state_code', { required: Silian_t('auth.stateRequired') });
+  }, [Silian_register, Silian_t]);
 
   // 获取学校列表
-  useEffect(() => {
-    const fetchSchools = async () => {
+  Silian_useEffect(() => {
+    const Silian_fetchSchools = async () => {
       try {
-        const response = await schoolAPI.getSchools({ limit: 100, page: 1 });
-        if (response.data?.success) {
-          const list = response.data?.data?.schools || [];
-          setSchools(list);
+        const Silian_response = await Silian_schoolAPI.getSchools({ limit: 100, page: 1 });
+        if (Silian_response.data?.success) {
+          const Silian_list = Silian_response.data?.data?.schools || [];
+          Silian_setSchools(Silian_list);
         }
-      } catch (error) {
-        console.error('Failed to fetch schools:', error);
+      } catch (Silian_error) {
+        console.error('Failed to fetch schools:', Silian_error);
       }
     };
 
-    fetchSchools();
+    Silian_fetchSchools();
   }, []);
 
-  const onSubmit = async (data) => {
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
+  const Silian_onSubmit = async (Silian_data) => {
+    Silian_setIsLoading(true);
+    Silian_setError('');
+    Silian_setSuccess('');
 
     try {
-      const payload = {
-        username: data.username,
-        email: data.email,
-        password: data.password,
-        confirm_password: data.confirmPassword,
-        country_code: data.country_code,
-        state_code: data.state_code,
+      const Silian_payload = {
+        username: Silian_data.username,
+        email: Silian_data.email,
+        password: Silian_data.password,
+        confirm_password: Silian_data.confirmPassword,
+        country_code: Silian_data.country_code,
+        state_code: Silian_data.state_code,
   // real_name 已废弃，不再发送
-        cf_turnstile_response: turnstileToken || undefined
+        cf_turnstile_response: Silian_turnstileToken || undefined
       };
-      if (data.schoolId) {
-        const sid = parseInt(data.schoolId, 10);
-        if (!Number.isNaN(sid)) payload.school_id = sid;
-      } else if (customSchool.trim()) {
-        payload.new_school_name = customSchool.trim();
+      if (Silian_data.schoolId) {
+        const Silian_sid = parseInt(Silian_data.schoolId, 10);
+        if (!Number.isNaN(Silian_sid)) Silian_payload.school_id = Silian_sid;
+      } else if (Silian_customSchool.trim()) {
+        Silian_payload.new_school_name = Silian_customSchool.trim();
       }
       // class_name 已废弃
 
-      const result = await authAPI.register(payload);
+      const Silian_result = await Silian_authAPI.register(Silian_payload);
 
-      if (result.success) {
-        const verificationEmail = data.email;
-        const verificationData = result.data ?? {};
-        sessionStorage.setItem('pending_verification_email', verificationEmail);
-        if (verificationData.verification_resend_available_at) {
-          sessionStorage.setItem('verification_resend_available_at', verificationData.verification_resend_available_at);
+      if (Silian_result.success) {
+        const Silian_verificationEmail = Silian_data.email;
+        const Silian_verificationData = Silian_result.data ?? {};
+        sessionStorage.setItem('pending_verification_email', Silian_verificationEmail);
+        if (Silian_verificationData.verification_resend_available_at) {
+          sessionStorage.setItem('verification_resend_available_at', Silian_verificationData.verification_resend_available_at);
         } else {
           sessionStorage.removeItem('verification_resend_available_at');
         }
         sessionStorage.setItem('verification_return_path', '/dashboard');
-        const successMessage = t('auth.verification.checkInbox', { email: verificationEmail });
-        setSuccess(successMessage);
-        toast.success(successMessage);
-        navigate(`/auth/verify-email?email=${encodeURIComponent(verificationEmail)}`, { replace: true });
+        const Silian_successMessage = Silian_t('auth.verification.checkInbox', { email: Silian_verificationEmail });
+        Silian_setSuccess(Silian_successMessage);
+        Silian_toast.success(Silian_successMessage);
+        Silian_navigate(`/auth/verify-email?email=${encodeURIComponent(Silian_verificationEmail)}`, { replace: true });
       } else {
-        setError(result.message || t('auth.registerFailed'));
+        Silian_setError(Silian_result.message || Silian_t('auth.registerFailed'));
       }
-    } catch (err) {
-      setError(err.message || t('auth.registerFailed'));
+    } catch (Silian_err) {
+      Silian_setError(Silian_err.message || Silian_t('auth.registerFailed'));
       // 失败时重置（容错）
-      turnstileRef.current?.reset?.();
+      Silian_turnstileRef.current?.reset?.();
     } finally {
-      setIsLoading(false);
+      Silian_setIsLoading(false);
     }
   };
 
@@ -118,61 +118,61 @@ export function RegisterForm() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-100">
-            <UserPlus className="h-6 w-6 text-green-600" />
+            <Silian_UserPlus className="h-6 w-6 text-green-600" />
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-foreground">
-            {t('auth.createAccount')}
+            {Silian_t('auth.createAccount')}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            {t('auth.orSignInPrompt')}{' '}
-            <Link
+            {Silian_t('auth.orSignInPrompt')}{' '}
+            <Silian_Link
               to="/auth/login"
               className="font-medium text-green-600 hover:text-green-500"
             >
-              {t('auth.signIn')}
-            </Link>
+              {Silian_t('auth.signIn')}
+            </Silian_Link>
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('auth.signUp')}</CardTitle>
-            <CardDescription>
-              {t('auth.fillInformation')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+        <Silian_Card>
+          <Silian_CardHeader>
+            <Silian_CardTitle>{Silian_t('auth.signUp')}</Silian_CardTitle>
+            <Silian_CardDescription>
+              {Silian_t('auth.fillInformation')}
+            </Silian_CardDescription>
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            <form onSubmit={Silian_handleSubmit(Silian_onSubmit)} className="space-y-6">
+              {Silian_error && (
+                <Silian_Alert variant="destructive">
+                  <Silian_AlertDescription>{Silian_error}</Silian_AlertDescription>
+                </Silian_Alert>
               )}
 
-              {success && (
-                <Alert variant="success">
-                  <AlertDescription>{success}</AlertDescription>
-                </Alert>
+              {Silian_success && (
+                <Silian_Alert variant="success">
+                  <Silian_AlertDescription>{Silian_success}</Silian_AlertDescription>
+                </Silian_Alert>
               )}
 
               <div className="grid grid-cols-1 gap-6">
                 {/* 用户名 */}
                 <div>
                   <label htmlFor="username" className="block text-sm font-medium text-foreground">
-                    {t('auth.username')}
+                    {Silian_t('auth.username')}
                   </label>
                   <div className="mt-1">
-                    <Input
+                    <Silian_Input
                       id="username"
                       type="text"
                       autoComplete="username"
-                      placeholder={t('auth.usernamePlaceholder')}
-                      error={errors.username}
-                      {...register('username', validationRules.username)}
+                      placeholder={Silian_t('auth.usernamePlaceholder')}
+                      error={Silian_errors.username}
+                      {...Silian_register('username', Silian_validationRules.username)}
                     />
-                    {errors.username && (
+                    {Silian_errors.username && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.username.message}
+                        {Silian_errors.username.message}
                       </p>
                     )}
                   </div>
@@ -181,20 +181,20 @@ export function RegisterForm() {
                 {/* 邮箱 */}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-foreground">
-                    {t('auth.email')}
+                    {Silian_t('auth.email')}
                   </label>
                   <div className="mt-1">
-                    <Input
+                    <Silian_Input
                       id="email"
                       type="email"
                       autoComplete="email"
-                      placeholder={t('auth.emailPlaceholder')}
-                      error={errors.email}
-                      {...register('email', validationRules.email)}
+                      placeholder={Silian_t('auth.emailPlaceholder')}
+                      error={Silian_errors.email}
+                      {...Silian_register('email', Silian_validationRules.email)}
                     />
-                    {errors.email && (
+                    {Silian_errors.email && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.email.message}
+                        {Silian_errors.email.message}
                       </p>
                     )}
                   </div>
@@ -202,53 +202,53 @@ export function RegisterForm() {
 
                 {/* real_name 字段已移除 */}
 
-                <RegionSelector
-                  countryCode={countryCode}
-                  stateCode={stateCode}
-                  onCountryChange={(val) => setValue('country_code', val, { shouldValidate: true })}
-                  onStateChange={(val) => setValue('state_code', val, { shouldValidate: true })}
+                <Silian_RegionSelector
+                  countryCode={Silian_countryCode}
+                  stateCode={Silian_stateCode}
+                  onCountryChange={(Silian_val) => Silian_setValue('country_code', Silian_val, { shouldValidate: true })}
+                  onStateChange={(Silian_val) => Silian_setValue('state_code', Silian_val, { shouldValidate: true })}
                   errors={{
-                    country: errors.country_code,
-                    state: errors.state_code
+                    country: Silian_errors.country_code,
+                    state: Silian_errors.state_code
                   }}
                 />
 
                 {/* 学校（可选，可选择或自定义新学校） */}
                 <div>
                   <label htmlFor="schoolId" className="block text-sm font-medium text-foreground">
-                    {t('auth.school')}（{t('common.optional') || '可选'}）
+                    {Silian_t('auth.school')}（{Silian_t('common.optional') || '可选'}）
                   </label>
                   <div className="mt-1 space-y-2">
                     <select
                       id="schoolId"
                       className="block w-full rounded-md border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500"
-                      {...register('schoolId')}
-                      onChange={(e)=>{ if(e.target.value) setCustomSchool(''); }}
+                      {...Silian_register('schoolId')}
+                      onChange={(Silian_e)=>{ if(Silian_e.target.value) Silian_setCustomSchool(''); }}
                     >
-                      <option value="">{t('auth.selectSchool')}</option>
-                      {schools.map((school) => (
-                        <option key={school.id} value={school.id}>
-                          {school.name}
+                      <option value="">{Silian_t('auth.selectSchool')}</option>
+                      {Silian_schools.map((Silian_school) => (
+                        <option key={Silian_school.id} value={Silian_school.id}>
+                          {Silian_school.name}
                         </option>
                       ))}
                     </select>
                     <div className="relative">
-                      <Input
+                      <Silian_Input
                         type="text"
-                        placeholder={t('auth.schoolPlaceholder')}
-                        value={customSchool}
-                        onChange={(e)=>{ setCustomSchool(e.target.value); if(e.target.value) { /* 清空选择 */ } }}
-                        disabled={!!watch('schoolId')}
+                        placeholder={Silian_t('auth.schoolPlaceholder')}
+                        value={Silian_customSchool}
+                        onChange={(Silian_e)=>{ Silian_setCustomSchool(Silian_e.target.value); if(Silian_e.target.value) { /* 清空选择 */ } }}
+                        disabled={!!Silian_watch('schoolId')}
                       />
-                      {watch('schoolId') && (
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{t('common.selected')}</span>
+                      {Silian_watch('schoolId') && (
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{Silian_t('common.selected')}</span>
                       )}
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {t('auth.schoolOptionalHint')}
+                      {Silian_t('auth.schoolOptionalHint')}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground/80">
-                      {t('auth.newSchoolNote')}
+                      {Silian_t('auth.newSchoolNote')}
                     </p>
                   </div>
                 </div>
@@ -258,31 +258,31 @@ export function RegisterForm() {
                 {/* 密码 */}
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                    {t('auth.password')}
+                    {Silian_t('auth.password')}
                   </label>
                   <div className="mt-1 relative">
-                    <Input
+                    <Silian_Input
                       id="password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={Silian_showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
-                      placeholder={t('auth.passwordPlaceholder')}
-                      error={errors.password}
-                      {...register('password', validationRules.password)}
+                      placeholder={Silian_t('auth.passwordPlaceholder')}
+                      error={Silian_errors.password}
+                      {...Silian_register('password', Silian_validationRules.password)}
                     />
                     <button
                       type="button"
                       className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => Silian_setShowPassword(!Silian_showPassword)}
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      {Silian_showPassword ? (
+                        <Silian_EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <Silian_Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
-                    {errors.password && (
+                    {Silian_errors.password && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.password.message}
+                        {Silian_errors.password.message}
                       </p>
                     )}
                   </div>
@@ -291,34 +291,34 @@ export function RegisterForm() {
                 {/* 确认密码 */}
                 <div>
                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
-                    {t('auth.confirmPassword')}
+                    {Silian_t('auth.confirmPassword')}
                   </label>
                   <div className="mt-1 relative">
-                    <Input
+                    <Silian_Input
                       id="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={Silian_showConfirmPassword ? 'text' : 'password'}
                       autoComplete="new-password"
-                      placeholder={t('auth.confirmPasswordPlaceholder')}
-                      error={errors.confirmPassword}
-                      {...register('confirmPassword', {
-                        required: t('auth.confirmPasswordRequired'),
-                        validate: value => value === password || t('auth.passwordMismatch')
+                      placeholder={Silian_t('auth.confirmPasswordPlaceholder')}
+                      error={Silian_errors.confirmPassword}
+                      {...Silian_register('confirmPassword', {
+                        required: Silian_t('auth.confirmPasswordRequired'),
+                        validate: Silian_value => Silian_value === Silian_password || Silian_t('auth.passwordMismatch')
                       })}
                     />
                     <button
                       type="button"
                       className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() => Silian_setShowConfirmPassword(!Silian_showConfirmPassword)}
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      {Silian_showConfirmPassword ? (
+                        <Silian_EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <Silian_Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
-                    {errors.confirmPassword && (
+                    {Silian_errors.confirmPassword && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.confirmPassword.message}
+                        {Silian_errors.confirmPassword.message}
                       </p>
                     )}
                   </div>
@@ -327,51 +327,51 @@ export function RegisterForm() {
 
               {/* Turnstile 验证码 */}
               <div className="flex justify-center">
-                <Turnstile
-                  ref={turnstileRef}
+                <Silian_Turnstile
+                  ref={Silian_turnstileRef}
                   className="mt-2"
-                  onVerify={(tk) => setTurnstileToken(tk)}
-                  onExpire={() => setTurnstileToken('')}
-                  onError={() => setTurnstileToken('')}
+                  onVerify={(Silian_tk) => Silian_setTurnstileToken(Silian_tk)}
+                  onExpire={() => Silian_setTurnstileToken('')}
+                  onError={() => Silian_setTurnstileToken('')}
                 />
               </div>
 
               <div>
-                <Button
+                <Silian_Button
                   type="submit"
                   className="w-full"
-                  loading={isLoading}
-                  disabled={isLoading || (!!import.meta.env?.VITE_TURNSTILE_SITE_KEY && !turnstileToken)}
+                  loading={Silian_isLoading}
+                  disabled={Silian_isLoading || (!!import.meta.env?.VITE_TURNSTILE_SITE_KEY && !Silian_turnstileToken)}
                 >
-                  {isLoading ? t('auth.registering') : t('auth.signUp')}
-                </Button>
+                  {Silian_isLoading ? Silian_t('auth.registering') : Silian_t('auth.signUp')}
+                </Silian_Button>
               </div>
 
               <div className="text-sm text-muted-foreground">
                 <p>
-                  {t('auth.agreementText')}{' '}
-                  <Link to="/terms" className="text-green-600 hover:text-green-500">
-                    {t('auth.termsOfService')}
-                  </Link>{' '}
-                  {t('auth.and')}{' '}
-                  <Link to="/privacy" className="text-green-600 hover:text-green-500">
-                    {t('auth.privacyPolicy')}
-                  </Link>
+                  {Silian_t('auth.agreementText')}{' '}
+                  <Silian_Link to="/terms" className="text-green-600 hover:text-green-500">
+                    {Silian_t('auth.termsOfService')}
+                  </Silian_Link>{' '}
+                  {Silian_t('auth.and')}{' '}
+                  <Silian_Link to="/privacy" className="text-green-600 hover:text-green-500">
+                    {Silian_t('auth.privacyPolicy')}
+                  </Silian_Link>
                 </p>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </Silian_CardContent>
+        </Silian_Card>
 
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
-            {t('auth.haveAccount')}{' '}
-            <Link
+            {Silian_t('auth.haveAccount')}{' '}
+            <Silian_Link
               to="/auth/login"
               className="font-medium text-green-600 hover:text-green-500"
             >
-              {t('auth.signInNow')}
-            </Link>
+              {Silian_t('auth.signInNow')}
+            </Silian_Link>
           </p>
         </div>
       </div>

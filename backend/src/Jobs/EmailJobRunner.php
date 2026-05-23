@@ -20,117 +20,117 @@ class EmailJobRunner
      * @param array<string,mixed> $payload
      */
     public static function run(
-        EmailService $emailService,
-        Logger $logger,
-        string $jobType,
-        array $payload,
-        ?AuditLogService $auditLogService = null,
-        ?ErrorLogService $errorLogService = null
+        EmailService $Silian_emailService,
+        Logger $Silian_logger,
+        string $Silian_jobType,
+        array $Silian_payload,
+        ?AuditLogService $Silian_auditLogService = null,
+        ?ErrorLogService $Silian_errorLogService = null
     ): void
     {
-        if ($jobType === '') {
-            $logger->warning('Email job received without a job type.');
-            self::logAudit($auditLogService, 'email_job_missing_type', $jobType, $payload, 'failed');
+        if ($Silian_jobType === '') {
+            $Silian_logger->warning('Email job received without a job type.');
+            self::logAudit($Silian_auditLogService, 'email_job_missing_type', $Silian_jobType, $Silian_payload, 'failed');
             return;
         }
 
         try {
-            switch ($jobType) {
+            switch ($Silian_jobType) {
                 case 'message_notification':
-                    self::runMessageNotificationJob($emailService, $logger, $payload);
+                    self::runMessageNotificationJob($Silian_emailService, $Silian_logger, $Silian_payload);
                     break;
 
                 case 'message_notification_bulk':
-                    self::runBulkNotificationJob($emailService, $logger, $payload);
+                    self::runBulkNotificationJob($Silian_emailService, $Silian_logger, $Silian_payload);
                     break;
 
                 case 'exchange_confirmation':
-                    self::runExchangeConfirmationJob($emailService, $logger, $payload);
+                    self::runExchangeConfirmationJob($Silian_emailService, $Silian_logger, $Silian_payload);
                     break;
 
                 case 'exchange_status_update':
-                    self::runExchangeStatusUpdateJob($emailService, $logger, $payload);
+                    self::runExchangeStatusUpdateJob($Silian_emailService, $Silian_logger, $Silian_payload);
                     break;
 
                 case 'activity_approved_notification':
-                    self::runActivityApprovedJob($emailService, $logger, $payload);
+                    self::runActivityApprovedJob($Silian_emailService, $Silian_logger, $Silian_payload);
                     break;
 
                 case 'activity_rejected_notification':
-                    self::runActivityRejectedJob($emailService, $logger, $payload);
+                    self::runActivityRejectedJob($Silian_emailService, $Silian_logger, $Silian_payload);
                     break;
 
                 case 'broadcast_announcement':
-                    self::runBroadcastAnnouncementJob($emailService, $logger, $payload);
+                    self::runBroadcastAnnouncementJob($Silian_emailService, $Silian_logger, $Silian_payload);
                     break;
 
                 case 'carbon_record_review_summary':
-                    self::runCarbonRecordReviewSummaryJob($emailService, $logger, $payload);
+                    self::runCarbonRecordReviewSummaryJob($Silian_emailService, $Silian_logger, $Silian_payload);
                     break;
 
                 default:
-                    $logger->warning('Unknown email job type received', ['job_type' => $jobType]);
-                    self::logAudit($auditLogService, 'email_job_unknown_type', $jobType, $payload, 'failed');
+                    $Silian_logger->warning('Unknown email job type received', ['job_type' => $Silian_jobType]);
+                    self::logAudit($Silian_auditLogService, 'email_job_unknown_type', $Silian_jobType, $Silian_payload, 'failed');
                     break;
             }
 
-            self::logAudit($auditLogService, 'email_job_processed', $jobType, $payload);
-        } catch (\Throwable $e) {
-            $logger->error('Unhandled exception while executing email job', [
-                'job_type' => $jobType,
-                'error' => $e->getMessage(),
+            self::logAudit($Silian_auditLogService, 'email_job_processed', $Silian_jobType, $Silian_payload);
+        } catch (\Throwable $Silian_e) {
+            $Silian_logger->error('Unhandled exception while executing email job', [
+                'job_type' => $Silian_jobType,
+                'error' => $Silian_e->getMessage(),
             ]);
-            self::logAudit($auditLogService, 'email_job_failed', $jobType, $payload, 'failed', ['error' => $e->getMessage()]);
-            self::logError($errorLogService, $e, $jobType, $payload);
+            self::logAudit($Silian_auditLogService, 'email_job_failed', $Silian_jobType, $Silian_payload, 'failed', ['error' => $Silian_e->getMessage()]);
+            self::logError($Silian_errorLogService, $Silian_e, $Silian_jobType, $Silian_payload);
         }
     }
 
     private static function logAudit(
-        ?AuditLogService $auditLogService,
-        string $action,
-        string $jobType,
-        array $payload,
-        string $status = 'success',
-        array $extra = []
+        ?AuditLogService $Silian_auditLogService,
+        string $Silian_action,
+        string $Silian_jobType,
+        array $Silian_payload,
+        string $Silian_status = 'success',
+        array $Silian_extra = []
     ): void {
-        if (!$auditLogService) {
+        if (!$Silian_auditLogService) {
             return;
         }
 
         try {
-            $auditLogService->logSystemEvent($action, 'email_job', [
-                'status' => $status,
+            $Silian_auditLogService->logSystemEvent($Silian_action, 'email_job', [
+                'status' => $Silian_status,
                 'request_method' => 'CLI',
-                'endpoint' => '/jobs/email/' . ($jobType !== '' ? $jobType : 'unknown'),
+                'endpoint' => '/jobs/email/' . ($Silian_jobType !== '' ? $Silian_jobType : 'unknown'),
                 'request_data' => array_merge([
-                    'job_type' => $jobType,
-                    'payload_keys' => array_keys($payload),
-                ], $extra),
+                    'job_type' => $Silian_jobType,
+                    'payload_keys' => array_keys($Silian_payload),
+                ], $Silian_extra),
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // 审计日志失败不阻断任务
         }
     }
 
-    private static function logError(?ErrorLogService $errorLogService, \Throwable $exception, string $jobType, array $payload): void
+    private static function logError(?ErrorLogService $Silian_errorLogService, \Throwable $Silian_exception, string $Silian_jobType, array $Silian_payload): void
     {
-        if (!$errorLogService) {
+        if (!$Silian_errorLogService) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext(
-                '/jobs/email/' . ($jobType !== '' ? $jobType : 'unknown'),
+            $Silian_request = SyntheticRequestFactory::fromContext(
+                '/jobs/email/' . ($Silian_jobType !== '' ? $Silian_jobType : 'unknown'),
                 'CLI',
                 null,
                 [],
-                ['job_type' => $jobType, 'payload' => $payload],
+                ['job_type' => $Silian_jobType, 'payload' => $Silian_payload],
                 ['PHP_SAPI' => PHP_SAPI]
             );
-            $errorLogService->logException($exception, $request, [
-                'job_type' => $jobType,
+            $Silian_errorLogService->logException($Silian_exception, $Silian_request, [
+                'job_type' => $Silian_jobType,
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // swallow secondary logging failure
         }
     }
@@ -138,31 +138,31 @@ class EmailJobRunner
     /**
      * @param array<string,mixed> $payload
      */
-    private static function runMessageNotificationJob(EmailService $emailService, Logger $logger, array $payload): void
+    private static function runMessageNotificationJob(EmailService $Silian_emailService, Logger $Silian_logger, array $Silian_payload): void
     {
-        $email = (string) ($payload['email'] ?? '');
-        $name = (string) ($payload['name'] ?? '');
-        $subject = (string) ($payload['subject'] ?? '');
-        $content = (string) ($payload['content'] ?? '');
-        $category = (string) ($payload['category'] ?? NotificationPreferenceService::CATEGORY_SYSTEM);
-        $priority = (string) ($payload['priority'] ?? Message::PRIORITY_NORMAL);
-        $receiverId = isset($payload['receiver_id']) ? (int) $payload['receiver_id'] : 0;
-        $notificationType = (string) ($payload['type'] ?? '');
+        $Silian_email = (string) ($Silian_payload['email'] ?? '');
+        $Silian_name = (string) ($Silian_payload['name'] ?? '');
+        $Silian_subject = (string) ($Silian_payload['subject'] ?? '');
+        $Silian_content = (string) ($Silian_payload['content'] ?? '');
+        $Silian_category = (string) ($Silian_payload['category'] ?? NotificationPreferenceService::CATEGORY_SYSTEM);
+        $Silian_priority = (string) ($Silian_payload['priority'] ?? Message::PRIORITY_NORMAL);
+        $Silian_receiverId = isset($Silian_payload['receiver_id']) ? (int) $Silian_payload['receiver_id'] : 0;
+        $Silian_notificationType = (string) ($Silian_payload['type'] ?? '');
 
-        $sent = $emailService->sendMessageNotification(
-            $email,
-            $name !== '' ? $name : $email,
-            $subject,
-            $content,
-            $category,
-            $priority
+        $Silian_sent = $Silian_emailService->sendMessageNotification(
+            $Silian_email,
+            $Silian_name !== '' ? $Silian_name : $Silian_email,
+            $Silian_subject,
+            $Silian_content,
+            $Silian_category,
+            $Silian_priority
         );
 
-        if (!$sent) {
-            $logger->debug('Message email was skipped due to user preferences or simulation mode', [
-                'receiver_id' => $receiverId,
-                'category' => $category,
-                'notification_type' => $notificationType,
+        if (!$Silian_sent) {
+            $Silian_logger->debug('Message email was skipped due to user preferences or simulation mode', [
+                'receiver_id' => $Silian_receiverId,
+                'category' => $Silian_category,
+                'notification_type' => $Silian_notificationType,
             ]);
         }
     }
@@ -170,35 +170,35 @@ class EmailJobRunner
     /**
      * @param array<string,mixed> $payload
      */
-    private static function runBulkNotificationJob(EmailService $emailService, Logger $logger, array $payload): void
+    private static function runBulkNotificationJob(EmailService $Silian_emailService, Logger $Silian_logger, array $Silian_payload): void
     {
-        $recipients = $payload['recipients'] ?? [];
-        if (!is_array($recipients)) {
-            $logger->warning('Bulk email job received invalid recipients payload.');
+        $Silian_recipients = $Silian_payload['recipients'] ?? [];
+        if (!is_array($Silian_recipients)) {
+            $Silian_logger->warning('Bulk email job received invalid recipients payload.');
             return;
         }
 
-        $subject = (string) ($payload['subject'] ?? '');
-        $content = (string) ($payload['content'] ?? '');
-        $category = (string) ($payload['category'] ?? NotificationPreferenceService::CATEGORY_SYSTEM);
-        $priority = (string) ($payload['priority'] ?? Message::PRIORITY_NORMAL);
-        $notificationType = (string) ($payload['type'] ?? '');
+        $Silian_subject = (string) ($Silian_payload['subject'] ?? '');
+        $Silian_content = (string) ($Silian_payload['content'] ?? '');
+        $Silian_category = (string) ($Silian_payload['category'] ?? NotificationPreferenceService::CATEGORY_SYSTEM);
+        $Silian_priority = (string) ($Silian_payload['priority'] ?? Message::PRIORITY_NORMAL);
+        $Silian_notificationType = (string) ($Silian_payload['type'] ?? '');
 
-        $sent = $emailService->sendMessageNotificationToMany(
-            $recipients,
-            $subject,
-            $content,
-            $category,
-            $priority
+        $Silian_sent = $Silian_emailService->sendMessageNotificationToMany(
+            $Silian_recipients,
+            $Silian_subject,
+            $Silian_content,
+            $Silian_category,
+            $Silian_priority
         );
 
-        if (!$sent) {
-            $logger->debug('Bulk message email was skipped', [
-                'subject' => $subject,
-                'category' => $category,
-                'priority' => $priority,
-                'notification_type' => $notificationType,
-                'recipient_count' => count($recipients),
+        if (!$Silian_sent) {
+            $Silian_logger->debug('Bulk message email was skipped', [
+                'subject' => $Silian_subject,
+                'category' => $Silian_category,
+                'priority' => $Silian_priority,
+                'notification_type' => $Silian_notificationType,
+                'recipient_count' => count($Silian_recipients),
             ]);
         }
     }
@@ -206,30 +206,30 @@ class EmailJobRunner
     /**
      * @param array<string,mixed> $payload
      */
-    private static function runActivityApprovedJob(EmailService $emailService, Logger $logger, array $payload): void
+    private static function runActivityApprovedJob(EmailService $Silian_emailService, Logger $Silian_logger, array $Silian_payload): void
     {
-        $email = (string) ($payload['email'] ?? '');
-        if ($email === '') {
-            $logger->warning('Activity approved job missing recipient email.');
+        $Silian_email = (string) ($Silian_payload['email'] ?? '');
+        if ($Silian_email === '') {
+            $Silian_logger->warning('Activity approved job missing recipient email.');
             return;
         }
 
-        $name = (string) ($payload['name'] ?? $email);
-        $activity = (string) ($payload['activity_name'] ?? '');
-        $points = (float) ($payload['points'] ?? 0);
-        $userId = isset($payload['user_id']) ? (int) $payload['user_id'] : 0;
+        $Silian_name = (string) ($Silian_payload['name'] ?? $Silian_email);
+        $Silian_activity = (string) ($Silian_payload['activity_name'] ?? '');
+        $Silian_points = (float) ($Silian_payload['points'] ?? 0);
+        $Silian_userId = isset($Silian_payload['user_id']) ? (int) $Silian_payload['user_id'] : 0;
 
         try {
-            $emailService->sendActivityApprovedNotification(
-                $email,
-                $name !== '' ? $name : $email,
-                $activity,
-                $points
+            $Silian_emailService->sendActivityApprovedNotification(
+                $Silian_email,
+                $Silian_name !== '' ? $Silian_name : $Silian_email,
+                $Silian_activity,
+                $Silian_points
             );
-        } catch (\Throwable $e) {
-            $logger->warning('Failed to send activity approved email', [
-                'user_id' => $userId,
-                'error' => $e->getMessage(),
+        } catch (\Throwable $Silian_e) {
+            $Silian_logger->warning('Failed to send activity approved email', [
+                'user_id' => $Silian_userId,
+                'error' => $Silian_e->getMessage(),
             ]);
         }
     }
@@ -237,30 +237,30 @@ class EmailJobRunner
     /**
      * @param array<string,mixed> $payload
      */
-    private static function runActivityRejectedJob(EmailService $emailService, Logger $logger, array $payload): void
+    private static function runActivityRejectedJob(EmailService $Silian_emailService, Logger $Silian_logger, array $Silian_payload): void
     {
-        $email = (string) ($payload['email'] ?? '');
-        if ($email === '') {
-            $logger->warning('Activity rejected job missing recipient email.');
+        $Silian_email = (string) ($Silian_payload['email'] ?? '');
+        if ($Silian_email === '') {
+            $Silian_logger->warning('Activity rejected job missing recipient email.');
             return;
         }
 
-        $name = (string) ($payload['name'] ?? $email);
-        $activity = (string) ($payload['activity_name'] ?? '');
-        $reason = (string) ($payload['reason'] ?? '');
-        $userId = isset($payload['user_id']) ? (int) $payload['user_id'] : 0;
+        $Silian_name = (string) ($Silian_payload['name'] ?? $Silian_email);
+        $Silian_activity = (string) ($Silian_payload['activity_name'] ?? '');
+        $Silian_reason = (string) ($Silian_payload['reason'] ?? '');
+        $Silian_userId = isset($Silian_payload['user_id']) ? (int) $Silian_payload['user_id'] : 0;
 
         try {
-            $emailService->sendActivityRejectedNotification(
-                $email,
-                $name !== '' ? $name : $email,
-                $activity,
-                $reason
+            $Silian_emailService->sendActivityRejectedNotification(
+                $Silian_email,
+                $Silian_name !== '' ? $Silian_name : $Silian_email,
+                $Silian_activity,
+                $Silian_reason
             );
-        } catch (\Throwable $e) {
-            $logger->warning('Failed to send activity rejected email', [
-                'user_id' => $userId,
-                'error' => $e->getMessage(),
+        } catch (\Throwable $Silian_e) {
+            $Silian_logger->warning('Failed to send activity rejected email', [
+                'user_id' => $Silian_userId,
+                'error' => $Silian_e->getMessage(),
             ]);
         }
     }
@@ -268,68 +268,68 @@ class EmailJobRunner
     /**
      * @param array<string,mixed> $payload
      */
-    private static function runBroadcastAnnouncementJob(EmailService $emailService, Logger $logger, array $payload): void
+    private static function runBroadcastAnnouncementJob(EmailService $Silian_emailService, Logger $Silian_logger, array $Silian_payload): void
     {
-        $recipients = $payload['recipients'] ?? [];
-        if (!is_array($recipients) || empty($recipients)) {
-            $logger->debug('Broadcast announcement job skipped due to empty recipients.');
+        $Silian_recipients = $Silian_payload['recipients'] ?? [];
+        if (!is_array($Silian_recipients) || empty($Silian_recipients)) {
+            $Silian_logger->debug('Broadcast announcement job skipped due to empty recipients.');
             return;
         }
 
-        $title = (string) ($payload['title'] ?? '');
-        $content = (string) ($payload['content'] ?? '');
-        $priority = (string) ($payload['priority'] ?? Message::PRIORITY_NORMAL);
-        $context = isset($payload['context']) && is_array($payload['context']) ? $payload['context'] : [];
-        $contentFormat = (string) ($payload['content_format'] ?? ($context['content_format'] ?? 'text'));
-        $renderProfile = $payload['render_profile'] ?? ($context['render_profile'] ?? null);
-        $renderVersion = isset($payload['render_version']) ? (int) $payload['render_version'] : (($context['render_version'] ?? null) !== null ? (int) $context['render_version'] : null);
-        $sourceKind = $payload['source_kind'] ?? ($context['source_kind'] ?? null);
+        $Silian_title = (string) ($Silian_payload['title'] ?? '');
+        $Silian_content = (string) ($Silian_payload['content'] ?? '');
+        $Silian_priority = (string) ($Silian_payload['priority'] ?? Message::PRIORITY_NORMAL);
+        $Silian_context = isset($Silian_payload['context']) && is_array($Silian_payload['context']) ? $Silian_payload['context'] : [];
+        $Silian_contentFormat = (string) ($Silian_payload['content_format'] ?? ($Silian_context['content_format'] ?? 'text'));
+        $Silian_renderProfile = $Silian_payload['render_profile'] ?? ($Silian_context['render_profile'] ?? null);
+        $Silian_renderVersion = isset($Silian_payload['render_version']) ? (int) $Silian_payload['render_version'] : (($Silian_context['render_version'] ?? null) !== null ? (int) $Silian_context['render_version'] : null);
+        $Silian_sourceKind = $Silian_payload['source_kind'] ?? ($Silian_context['source_kind'] ?? null);
 
-        $cleanedRecipients = [];
-        foreach ($recipients as $entry) {
-            if (!is_array($entry)) {
+        $Silian_cleanedRecipients = [];
+        foreach ($Silian_recipients as $Silian_entry) {
+            if (!is_array($Silian_entry)) {
                 continue;
             }
-            $email = isset($entry['email']) ? trim((string) $entry['email']) : '';
-            if ($email === '') {
+            $Silian_email = isset($Silian_entry['email']) ? trim((string) $Silian_entry['email']) : '';
+            if ($Silian_email === '') {
                 continue;
             }
-            $name = isset($entry['name']) && $entry['name'] !== ''
-                ? (string) $entry['name']
-                : $email;
-            $cleanedRecipients[] = [
-                'email' => $email,
-                'name' => $name,
+            $Silian_name = isset($Silian_entry['name']) && $Silian_entry['name'] !== ''
+                ? (string) $Silian_entry['name']
+                : $Silian_email;
+            $Silian_cleanedRecipients[] = [
+                'email' => $Silian_email,
+                'name' => $Silian_name,
             ];
         }
 
-        if (empty($cleanedRecipients)) {
-            $logger->debug('Broadcast announcement job skipped after cleaning recipients.');
+        if (empty($Silian_cleanedRecipients)) {
+            $Silian_logger->debug('Broadcast announcement job skipped after cleaning recipients.');
             return;
         }
 
         try {
-            $sent = $emailService->sendAnnouncementBroadcast(
-                $cleanedRecipients,
-                $title,
-                $content,
-                $priority,
-                $contentFormat,
-                is_string($renderProfile) ? $renderProfile : null,
-                $renderVersion,
-                is_string($sourceKind) ? $sourceKind : null
+            $Silian_sent = $Silian_emailService->sendAnnouncementBroadcast(
+                $Silian_cleanedRecipients,
+                $Silian_title,
+                $Silian_content,
+                $Silian_priority,
+                $Silian_contentFormat,
+                is_string($Silian_renderProfile) ? $Silian_renderProfile : null,
+                $Silian_renderVersion,
+                is_string($Silian_sourceKind) ? $Silian_sourceKind : null
             );
 
-            if (!$sent) {
-                $logger->debug('Broadcast announcement email was not dispatched.', [
-                    'recipient_count' => count($cleanedRecipients),
-                    'priority' => $priority,
+            if (!$Silian_sent) {
+                $Silian_logger->debug('Broadcast announcement email was not dispatched.', [
+                    'recipient_count' => count($Silian_cleanedRecipients),
+                    'priority' => $Silian_priority,
                 ]);
             }
-        } catch (\Throwable $e) {
-            $logger->error('Failed to send broadcast announcement email', [
-                'error' => $e->getMessage(),
-                'recipient_count' => count($cleanedRecipients),
+        } catch (\Throwable $Silian_e) {
+            $Silian_logger->error('Failed to send broadcast announcement email', [
+                'error' => $Silian_e->getMessage(),
+                'recipient_count' => count($Silian_cleanedRecipients),
             ]);
         }
     }
@@ -337,69 +337,69 @@ class EmailJobRunner
     /**
      * @param array<string,mixed> $payload
      */
-    private static function runCarbonRecordReviewSummaryJob(EmailService $emailService, Logger $logger, array $payload): void
+    private static function runCarbonRecordReviewSummaryJob(EmailService $Silian_emailService, Logger $Silian_logger, array $Silian_payload): void
     {
-        $email = (string) ($payload['email'] ?? '');
-        if ($email === '') {
-            $logger->warning('Carbon record review summary job missing recipient email.');
+        $Silian_email = (string) ($Silian_payload['email'] ?? '');
+        if ($Silian_email === '') {
+            $Silian_logger->warning('Carbon record review summary job missing recipient email.');
             return;
         }
 
-        $name = (string) ($payload['name'] ?? $email);
-        $action = strtolower((string) ($payload['action'] ?? 'approve')) === 'approve' ? 'approve' : 'reject';
-        $title = (string) ($payload['title'] ?? ($action === 'approve' ? 'Carbon record review approved' : 'Carbon record review result'));
-        $records = $payload['records'] ?? [];
-        if (!is_array($records)) {
-            $records = [];
+        $Silian_name = (string) ($Silian_payload['name'] ?? $Silian_email);
+        $Silian_action = strtolower((string) ($Silian_payload['action'] ?? 'approve')) === 'approve' ? 'approve' : 'reject';
+        $Silian_title = (string) ($Silian_payload['title'] ?? ($Silian_action === 'approve' ? 'Carbon record review approved' : 'Carbon record review result'));
+        $Silian_records = $Silian_payload['records'] ?? [];
+        if (!is_array($Silian_records)) {
+            $Silian_records = [];
         }
-        $reviewNote = isset($payload['review_note']) ? (string) $payload['review_note'] : null;
-        $reviewedBy = isset($payload['reviewed_by']) ? (string) $payload['reviewed_by'] : null;
+        $Silian_reviewNote = isset($Silian_payload['review_note']) ? (string) $Silian_payload['review_note'] : null;
+        $Silian_reviewedBy = isset($Silian_payload['reviewed_by']) ? (string) $Silian_payload['reviewed_by'] : null;
 
         try {
-            $emailService->sendCarbonRecordReviewSummaryEmail(
-                $email,
-                $name,
-                $action,
-                $records,
-                $title,
-                $reviewNote,
-                $reviewedBy
+            $Silian_emailService->sendCarbonRecordReviewSummaryEmail(
+                $Silian_email,
+                $Silian_name,
+                $Silian_action,
+                $Silian_records,
+                $Silian_title,
+                $Silian_reviewNote,
+                $Silian_reviewedBy
             );
-        } catch (\Throwable $e) {
-            $logger->warning('Failed to send carbon record review summary email', [
-                'email' => $email,
-                'error' => $e->getMessage(),
+        } catch (\Throwable $Silian_e) {
+            $Silian_logger->warning('Failed to send carbon record review summary email', [
+                'email' => $Silian_email,
+                'error' => $Silian_e->getMessage(),
             ]);
         }
     }
 
-    private static function runExchangeConfirmationJob(EmailService $emailService, Logger $logger, array $payload): void
+    private static function runExchangeConfirmationJob(EmailService $Silian_emailService, Logger $Silian_logger, array $Silian_payload): void
 
     {
-        $email = (string) ($payload['email'] ?? '');
-        if ($email === '') {
-            $logger->warning('Exchange confirmation job missing recipient email.');
+        $Silian_email = (string) ($Silian_payload['email'] ?? '');
+        if ($Silian_email === '') {
+            $Silian_logger->warning('Exchange confirmation job missing recipient email.');
             return;
         }
 
-        $name = (string) ($payload['name'] ?? $email);
-        $product = (string) ($payload['product_name'] ?? '');
-        $quantity = (int) ($payload['quantity'] ?? 1);
-        $points = (float) ($payload['points_spent'] ?? 0);
-        $userId = isset($payload['user_id']) ? (int) $payload['user_id'] : 0;
+        $Silian_name = (string) ($Silian_payload['name'] ?? $Silian_email);
+        $Silian_product = (string) ($Silian_payload['product_name'] ?? '');
+        $Silian_quantity = (int) ($Silian_payload['quantity'] ?? 1);
+        $Silian_points = (float) ($Silian_payload['points_spent'] ?? 0);
+        $Silian_userId = isset($Silian_payload['user_id']) ? (int) $Silian_payload['user_id'] : 0;
 
         try {
-            $emailService->sendExchangeConfirmation(
-                $email,
-                $name !== '' ? $name : $email,
-                $product,
-                $quantity,
-                $points
+            $Silian_emailService->sendExchangeConfirmation(
+                $Silian_email,
+                $Silian_name !== '' ? $Silian_name : $Silian_email,
+                $Silian_product,
+                $Silian_quantity,
+                $Silian_points
             );
-        } catch (\Throwable $e) {
-            $logger->warning('Failed to send exchange confirmation email', [
-                'user_id' => $userId,
-                'error' => $e->getMessage(),
+        } catch (\Throwable $Silian_e) {
+            $Silian_logger->warning('Failed to send exchange confirmation email', [
+                'user_id' => $Silian_userId,
+                'error' => $Silian_e->getMessage(),
             ]);
         }
     }
@@ -407,32 +407,32 @@ class EmailJobRunner
     /**
      * @param array<string,mixed> $payload
      */
-    private static function runExchangeStatusUpdateJob(EmailService $emailService, Logger $logger, array $payload): void
+    private static function runExchangeStatusUpdateJob(EmailService $Silian_emailService, Logger $Silian_logger, array $Silian_payload): void
     {
-        $email = (string) ($payload['email'] ?? '');
-        if ($email === '') {
-            $logger->warning('Exchange status update job missing recipient email.');
+        $Silian_email = (string) ($Silian_payload['email'] ?? '');
+        if ($Silian_email === '') {
+            $Silian_logger->warning('Exchange status update job missing recipient email.');
             return;
         }
 
-        $name = (string) ($payload['name'] ?? $email);
-        $product = (string) ($payload['product_name'] ?? '');
-        $status = (string) ($payload['status'] ?? '');
-        $notes = (string) ($payload['notes'] ?? '');
-        $userId = isset($payload['user_id']) ? (int) $payload['user_id'] : 0;
+        $Silian_name = (string) ($Silian_payload['name'] ?? $Silian_email);
+        $Silian_product = (string) ($Silian_payload['product_name'] ?? '');
+        $Silian_status = (string) ($Silian_payload['status'] ?? '');
+        $Silian_notes = (string) ($Silian_payload['notes'] ?? '');
+        $Silian_userId = isset($Silian_payload['user_id']) ? (int) $Silian_payload['user_id'] : 0;
 
         try {
-            $emailService->sendExchangeStatusUpdate(
-                $email,
-                $name !== '' ? $name : $email,
-                $product,
-                $status,
-                $notes
+            $Silian_emailService->sendExchangeStatusUpdate(
+                $Silian_email,
+                $Silian_name !== '' ? $Silian_name : $Silian_email,
+                $Silian_product,
+                $Silian_status,
+                $Silian_notes
             );
-        } catch (\Throwable $e) {
-            $logger->warning('Failed to send exchange status update email', [
-                'user_id' => $userId,
-                'error' => $e->getMessage(),
+        } catch (\Throwable $Silian_e) {
+            $Silian_logger->warning('Failed to send exchange status update email', [
+                'user_id' => $Silian_userId,
+                'error' => $Silian_e->getMessage(),
             ]);
         }
     }

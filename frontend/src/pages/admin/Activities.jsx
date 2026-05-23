@@ -1,57 +1,57 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import ActivityLibrary from '../../components/admin/ActivityLibrary';
-import { ActivityReview } from '../../components/admin/ActivityReview';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
-import { useTranslation } from '../../hooks/useTranslation';
+import Silian_React, { useEffect as Silian_useEffect, useState as Silian_useState } from 'react';
+import { useSearchParams as Silian_useSearchParams } from 'react-router-dom';
+import Silian_ActivityLibrary from '../../components/admin/ActivityLibrary';
+import { ActivityReview as Silian_ActivityReview } from '../../components/admin/ActivityReview';
+import { Tabs as Silian_Tabs, TabsList as Silian_TabsList, TabsTrigger as Silian_TabsTrigger, TabsContent as Silian_TabsContent } from '../../components/ui/Tabs';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
 
 export default function AdminActivitiesPage() {
-  const { t } = useTranslation(['activities', 'admin']);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [tab, setTab] = useState('library');
+  const { t: Silian_t } = Silian_useTranslation(['activities', 'admin']);
+  const [Silian_searchParams, Silian_setSearchParams] = Silian_useSearchParams();
+  const [Silian_tab, Silian_setTab] = Silian_useState('library');
 
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if ((tabParam === 'library' || tabParam === 'review') && tabParam !== tab) {
-      setTab(tabParam);
+  Silian_useEffect(() => {
+    const Silian_tabParam = Silian_searchParams.get('tab');
+    if ((Silian_tabParam === 'library' || Silian_tabParam === 'review') && Silian_tabParam !== Silian_tab) {
+      Silian_setTab(Silian_tabParam);
     }
-  }, [searchParams, tab]);
+  }, [Silian_searchParams, Silian_tab]);
 
-  const handleTabChange = (nextTab) => {
-    setTab(nextTab);
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (nextTab === 'library') {
-        next.delete('tab');
+  const Silian_handleTabChange = (Silian_nextTab) => {
+    Silian_setTab(Silian_nextTab);
+    Silian_setSearchParams((Silian_prev) => {
+      const Silian_next = new URLSearchParams(Silian_prev);
+      if (Silian_nextTab === 'library') {
+        Silian_next.delete('tab');
       } else {
-        next.set('tab', nextTab);
+        Silian_next.set('tab', Silian_nextTab);
       }
-      return next;
+      return Silian_next;
     });
   };
 
   return (
-    <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
-      <TabsList className="mb-6 inline-flex rounded-[0.8rem] border border-border bg-muted/60 p-1.5 shadow-inner">
-        <TabsTrigger
+    <Silian_Tabs value={Silian_tab} onValueChange={Silian_handleTabChange} className="space-y-6">
+      <Silian_TabsList className="mb-6 inline-flex rounded-[0.8rem] border border-border bg-muted/60 p-1.5 shadow-inner">
+        <Silian_TabsTrigger
           value="library"
           className="rounded-lg py-2 text-sm font-semibold transition-all duration-200 data-[state=active]:bg-card data-[state=active]:shadow"
         >
-          {t('admin.activities.tab.library', 'Activity Library')}
-        </TabsTrigger>
-        <TabsTrigger
+          {Silian_t('admin.activities.tab.library', 'Activity Library')}
+        </Silian_TabsTrigger>
+        <Silian_TabsTrigger
           value="review"
           className="rounded-lg py-2 text-sm font-semibold transition-all duration-200 data-[state=active]:bg-card data-[state=active]:shadow"
         >
-          {t('admin.activities.tab.review', 'Record Review')}
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="library">
-        <ActivityLibrary />
-      </TabsContent>
-      <TabsContent value="review">
-        <ActivityReview />
-      </TabsContent>
-    </Tabs>
+          {Silian_t('admin.activities.tab.review', 'Record Review')}
+        </Silian_TabsTrigger>
+      </Silian_TabsList>
+      <Silian_TabsContent value="library">
+        <Silian_ActivityLibrary />
+      </Silian_TabsContent>
+      <Silian_TabsContent value="review">
+        <Silian_ActivityReview />
+      </Silian_TabsContent>
+    </Silian_Tabs>
   );
 }

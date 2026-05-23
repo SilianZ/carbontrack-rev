@@ -1,15 +1,15 @@
-import React from 'react';
-import { m as Motion, LazyMotion, domAnimation } from 'framer-motion';
-import PropTypes from 'prop-types';
-import { Trans } from 'react-i18next';
-import { Card, CardContent } from '../components/ui/Card';
-import { Cookie, Settings, Info, Eye } from 'lucide-react';
-import { useTranslation } from '../hooks/useTranslation';
+import Silian_React from 'react';
+import { m as Silian_Motion, LazyMotion as Silian_LazyMotion, domAnimation as Silian_domAnimation } from 'framer-motion';
+import Silian_PropTypes from 'prop-types';
+import { Trans as Silian_Trans } from 'react-i18next';
+import { Card as Silian_Card, CardContent as Silian_CardContent } from '../components/ui/Card';
+import { Cookie as Silian_Cookie, Settings as Silian_Settings, Info as Silian_Info, Eye as Silian_Eye } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../hooks/useTranslation';
 
-const toItemKey = (prefix, item) => `${prefix}-${String(item).trim()}`;
+const Silian_toItemKey = (Silian_prefix, Silian_item) => `${Silian_prefix}-${String(Silian_item).trim()}`;
 
-const Section = ({ title, icon: Icon, children }) => (
-    <Motion.div
+const Silian_Section = ({ title: Silian_title, icon: Silian_Icon, children: Silian_children }) => (
+    <Silian_Motion.div
         className="mb-8"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -17,113 +17,113 @@ const Section = ({ title, icon: Icon, children }) => (
         transition={{ duration: 0.5 }}
     >
         <h2 className="text-xl md:text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-            {Icon && <Icon className="h-6 w-6 text-orange-600" />}
-            {title}
+            {Silian_Icon && <Silian_Icon className="h-6 w-6 text-orange-600" />}
+            {Silian_title}
         </h2>
         <div className="text-muted-foreground leading-relaxed space-y-4">
-            {children}
+            {Silian_children}
         </div>
-    </Motion.div>
+    </Silian_Motion.div>
 );
 
-Section.propTypes = {
-    title: PropTypes.node.isRequired,
-    icon: PropTypes.elementType,
-    children: PropTypes.node,
+Silian_Section.propTypes = {
+    title: Silian_PropTypes.node.isRequired,
+    icon: Silian_PropTypes.elementType,
+    children: Silian_PropTypes.node,
 };
 
-const CookiePolicyPage = () => {
-    const { t } = useTranslation(['legal']);
-    const currentDate = new Date().toLocaleDateString();
+const Silian_CookiePolicyPage = () => {
+    const { t: Silian_t } = Silian_useTranslation(['legal']);
+    const Silian_currentDate = new Date().toLocaleDateString();
 
-    const thirdPartyItems = t('legal.cookies.sections.thirdParty.items', { returnObjects: true });
+    const Silian_thirdPartyItems = Silian_t('legal.cookies.sections.thirdParty.items', { returnObjects: true });
 
     return (
-        <LazyMotion features={domAnimation}>
+        <Silian_LazyMotion features={Silian_domAnimation}>
             <div className="min-h-screen bg-background text-foreground py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
-                    <Motion.div
+                    <Silian_Motion.div
                         className="text-center mb-12"
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <h1 className="text-4xl font-extrabold text-foreground mb-4">{t('legal.cookies.title')}</h1>
+                        <h1 className="text-4xl font-extrabold text-foreground mb-4">{Silian_t('legal.cookies.title')}</h1>
                         <p className="text-lg text-muted-foreground">
-                            {t('legal.lastUpdated', { date: currentDate })}
+                            {Silian_t('legal.lastUpdated', { date: Silian_currentDate })}
                         </p>
                         <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-                            {t('legal.cookies.intro')}
+                            {Silian_t('legal.cookies.intro')}
                         </p>
-                    </Motion.div>
+                    </Silian_Motion.div>
 
-                    <Card className="border-border/60 bg-card/85 backdrop-blur shadow-xl">
-                        <CardContent className="p-8 md:p-12">
-                            <Section title={t('legal.cookies.sections.what.title')} icon={Info}>
-                                <p>{t('legal.cookies.sections.what.content')}</p>
-                            </Section>
+                    <Silian_Card className="border-border/60 bg-card/85 backdrop-blur shadow-xl">
+                        <Silian_CardContent className="p-8 md:p-12">
+                            <Silian_Section title={Silian_t('legal.cookies.sections.what.title')} icon={Silian_Info}>
+                                <p>{Silian_t('legal.cookies.sections.what.content')}</p>
+                            </Silian_Section>
 
-                            <Section title={t('legal.cookies.sections.how.title')} icon={Cookie}>
-                                <p>{t('legal.cookies.sections.how.intro')}</p>
+                            <Silian_Section title={Silian_t('legal.cookies.sections.how.title')} icon={Silian_Cookie}>
+                                <p>{Silian_t('legal.cookies.sections.how.intro')}</p>
                                 <div className="space-y-4 mt-4">
                                     <div className="rounded-lg border border-border bg-muted/50 p-4">
                                         <h3 className="font-bold text-foreground mb-2">
-                                            {t('legal.cookies.sections.how.types.essential.title')}
+                                            {Silian_t('legal.cookies.sections.how.types.essential.title')}
                                         </h3>
                                         <p className="text-sm">
-                                            {t('legal.cookies.sections.how.types.essential.desc')}
+                                            {Silian_t('legal.cookies.sections.how.types.essential.desc')}
                                         </p>
                                     </div>
                                     <div className="rounded-lg border border-border bg-muted/50 p-4">
                                         <h3 className="font-bold text-foreground mb-2">
-                                            {t('legal.cookies.sections.how.types.performance.title')}
+                                            {Silian_t('legal.cookies.sections.how.types.performance.title')}
                                         </h3>
                                         <p className="text-sm">
-                                            {t('legal.cookies.sections.how.types.performance.desc')}
+                                            {Silian_t('legal.cookies.sections.how.types.performance.desc')}
                                         </p>
                                     </div>
                                     <div className="rounded-lg border border-border bg-muted/50 p-4">
                                         <h3 className="font-bold text-foreground mb-2">
-                                            {t('legal.cookies.sections.how.types.functionality.title')}
+                                            {Silian_t('legal.cookies.sections.how.types.functionality.title')}
                                         </h3>
                                         <p className="text-sm">
-                                            {t('legal.cookies.sections.how.types.functionality.desc')}
+                                            {Silian_t('legal.cookies.sections.how.types.functionality.desc')}
                                         </p>
                                     </div>
                                 </div>
-                            </Section>
+                            </Silian_Section>
 
-                            <Section title={t('legal.cookies.sections.thirdParty.title')} icon={Eye}>
-                                <p>{t('legal.cookies.sections.thirdParty.intro')}</p>
+                            <Silian_Section title={Silian_t('legal.cookies.sections.thirdParty.title')} icon={Silian_Eye}>
+                                <p>{Silian_t('legal.cookies.sections.thirdParty.intro')}</p>
                                 <ul className="list-disc pl-5">
-                                    {Array.isArray(thirdPartyItems) && thirdPartyItems.map((item, index) => (
-                                        <li key={toItemKey(`third-party-${index}`, item)}>
-                                            <Trans defaults={item} components={{ strong: <strong /> }} />
+                                    {Array.isArray(Silian_thirdPartyItems) && Silian_thirdPartyItems.map((Silian_item, Silian_index) => (
+                                        <li key={Silian_toItemKey(`third-party-${Silian_index}`, Silian_item)}>
+                                            <Silian_Trans defaults={Silian_item} components={{ strong: <strong /> }} />
                                         </li>
                                     ))}
                                 </ul>
-                            </Section>
+                            </Silian_Section>
 
-                            <Section title={t('legal.cookies.sections.managing.title')} icon={Settings}>
+                            <Silian_Section title={Silian_t('legal.cookies.sections.managing.title')} icon={Silian_Settings}>
                                 <p>
-                                    {t('legal.cookies.sections.managing.content1')}
+                                    {Silian_t('legal.cookies.sections.managing.content1')}
                                 </p>
                                 <p>
-                                    {t('legal.cookies.sections.managing.content2')}
+                                    {Silian_t('legal.cookies.sections.managing.content2')}
                                 </p>
-                            </Section>
+                            </Silian_Section>
 
-                            <Section title={t('legal.cookies.sections.updates.title')} icon={Info}>
+                            <Silian_Section title={Silian_t('legal.cookies.sections.updates.title')} icon={Silian_Info}>
                                 <p>
-                                    {t('legal.cookies.sections.updates.content')}
+                                    {Silian_t('legal.cookies.sections.updates.content')}
                                 </p>
-                            </Section>
-                        </CardContent>
-                    </Card>
+                            </Silian_Section>
+                        </Silian_CardContent>
+                    </Silian_Card>
                 </div>
             </div>
-        </LazyMotion>
+        </Silian_LazyMotion>
     );
 };
 
-export default CookiePolicyPage;
+export default Silian_CookiePolicyPage;

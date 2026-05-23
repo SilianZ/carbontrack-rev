@@ -11,13 +11,13 @@ class CarbonActivityTest extends TestCase
 {
     public function testFindByIdUsesPdo(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $stmt->method('fetch')->willReturn(['id'=>'a1','unit'=>'km']);
-        $pdo->method('prepare')->willReturn($stmt);
-        $row = CarbonActivity::findById($pdo, 'a1');
-        $this->assertEquals('a1', $row['id']);
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->method('execute')->willReturn(true);
+        $Silian_stmt->method('fetch')->willReturn(['id'=>'a1','unit'=>'km']);
+        $Silian_pdo->method('prepare')->willReturn($Silian_stmt);
+        $Silian_row = CarbonActivity::findById($Silian_pdo, 'a1');
+        $this->assertEquals('a1', $Silian_row['id']);
     }
 }
 

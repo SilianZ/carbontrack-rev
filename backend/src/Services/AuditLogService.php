@@ -36,10 +36,10 @@ class AuditLogService
         'response_code',
     ];
 
-    public function __construct(PDO $db, Logger $logger)
+    public function __construct(PDO $Silian_db, Logger $Silian_logger)
     {
-        $this->db = $db;
-        $this->logger = $logger;
+        $this->db = $Silian_db;
+        $this->logger = $Silian_logger;
     }
 
     /**
@@ -47,94 +47,94 @@ class AuditLogService
      *  1) log(array $payload) 直接写入
      *  2) log(string $action, string $category, array $context = []) 推导并调用 logDataChange
      */
-    public function log($arg1, $arg2 = null, $arg3 = null): bool
+    public function log($Silian_arg1, $Silian_arg2 = null, $Silian_arg3 = null): bool
     {
         $this->lastInsertId = null;
-        $result = false;
+        $Silian_result = false;
         try {
-            if (is_array($arg1)) {
-                $payload = $arg1;
-                if (!isset($payload['operation_category']) || $payload['operation_category'] === '') {
-                    $actionName = $payload['action'] ?? '';
-                    $payload['operation_category'] = str_starts_with($actionName, 'auth_') ? 'authentication' : 'general';
+            if (is_array($Silian_arg1)) {
+                $Silian_payload = $Silian_arg1;
+                if (!isset($Silian_payload['operation_category']) || $Silian_payload['operation_category'] === '') {
+                    $Silian_actionName = $Silian_payload['action'] ?? '';
+                    $Silian_payload['operation_category'] = str_starts_with($Silian_actionName, 'auth_') ? 'authentication' : 'general';
                 }
-                if (!isset($payload['actor_type'])) {
-                    $payload['actor_type'] = ($payload['user_id'] ?? null) ? 'user' : 'system';
+                if (!isset($Silian_payload['actor_type'])) {
+                    $Silian_payload['actor_type'] = ($Silian_payload['user_id'] ?? null) ? 'user' : 'system';
                 }
-                $result = $this->logAudit($payload);
+                $Silian_result = $this->logAudit($Silian_payload);
             } else {
-                $action = (string)$arg1;
-                $userId = null;
-                $category = null;
-                $context = [];
+                $Silian_action = (string)$Silian_arg1;
+                $Silian_userId = null;
+                $Silian_category = null;
+                $Silian_context = [];
                 // Determine signature form
-                if (is_string($arg2) && !is_numeric($arg2)) {
+                if (is_string($Silian_arg2) && !is_numeric($Silian_arg2)) {
                     // (action, category, context?)
-                    $category = $arg2;
-                    $context = is_array($arg3) ? $arg3 : [];
-                } elseif (is_int($arg2) || (is_numeric($arg2) && (string)(int)$arg2 === (string)$arg2)) {
+                    $Silian_category = $Silian_arg2;
+                    $Silian_context = is_array($Silian_arg3) ? $Silian_arg3 : [];
+                } elseif (is_int($Silian_arg2) || (is_numeric($Silian_arg2) && (string)(int)$Silian_arg2 === (string)$Silian_arg2)) {
                     // Legacy (action, userId, context|string)
-                    $userId = (int)$arg2;
-                    if (is_array($arg3)) { $context = $arg3; }
-                    elseif ($arg3 !== null) { $context = ['message' => (string)$arg3]; }
-                    $category = $context['operation_category'] ?? 'general';
+                    $Silian_userId = (int)$Silian_arg2;
+                    if (is_array($Silian_arg3)) { $Silian_context = $Silian_arg3; }
+                    elseif ($Silian_arg3 !== null) { $Silian_context = ['message' => (string)$Silian_arg3]; }
+                    $Silian_category = $Silian_context['operation_category'] ?? 'general';
                 } else {
                     // Unsupported combination
-                    $category = 'general';
+                    $Silian_category = 'general';
                 }
-                if (!$category) { $category = 'general'; }
-                $userIdRaw   = $context['user_id'] ?? $context['uid'] ?? $userId;
-                $recordIdRaw = $context['record_id'] ?? $context['affected_id'] ?? null;
-                $finalUserId  = (is_int($userIdRaw) || (is_numeric($userIdRaw) && (string)(int)$userIdRaw === (string)$userIdRaw)) ? (int)$userIdRaw : null;
-                $recordId = (is_int($recordIdRaw) || (is_numeric($recordIdRaw) && (string)(int)$recordIdRaw === (string)$recordIdRaw)) ? (int)$recordIdRaw : null;
-                $actorType = $context['actor_type'] ?? ($context['is_admin'] ?? false ? 'admin' : 'user');
-                $table = $context['table'] ?? $context['affected_table'] ?? null;
-                $oldData = $context['old_data'] ?? null;
-                $newData = $context['new_data'] ?? null;
-                $result = $this->logDataChange(
-                    $category,
-                    $action,
-                    $finalUserId,
-                    $actorType,
-                    $table,
-                    $recordId,
-                    is_array($oldData) ? $oldData : null,
-                    is_array($newData) ? $newData : null,
-                    $context
+                if (!$Silian_category) { $Silian_category = 'general'; }
+                $Silian_userIdRaw   = $Silian_context['user_id'] ?? $Silian_context['uid'] ?? $Silian_userId;
+                $Silian_recordIdRaw = $Silian_context['record_id'] ?? $Silian_context['affected_id'] ?? null;
+                $Silian_finalUserId  = (is_int($Silian_userIdRaw) || (is_numeric($Silian_userIdRaw) && (string)(int)$Silian_userIdRaw === (string)$Silian_userIdRaw)) ? (int)$Silian_userIdRaw : null;
+                $Silian_recordId = (is_int($Silian_recordIdRaw) || (is_numeric($Silian_recordIdRaw) && (string)(int)$Silian_recordIdRaw === (string)$Silian_recordIdRaw)) ? (int)$Silian_recordIdRaw : null;
+                $Silian_actorType = $Silian_context['actor_type'] ?? ($Silian_context['is_admin'] ?? false ? 'admin' : 'user');
+                $Silian_table = $Silian_context['table'] ?? $Silian_context['affected_table'] ?? null;
+                $Silian_oldData = $Silian_context['old_data'] ?? null;
+                $Silian_newData = $Silian_context['new_data'] ?? null;
+                $Silian_result = $this->logDataChange(
+                    $Silian_category,
+                    $Silian_action,
+                    $Silian_finalUserId,
+                    $Silian_actorType,
+                    $Silian_table,
+                    $Silian_recordId,
+                    is_array($Silian_oldData) ? $Silian_oldData : null,
+                    is_array($Silian_newData) ? $Silian_newData : null,
+                    $Silian_context
                 );
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('AuditLogService::log failed', [
-                'error' => $e->getMessage(),
+                'error' => $Silian_e->getMessage(),
             ]);
-            $result = false;
+            $Silian_result = false;
         }
-        return $result;
+        return $Silian_result;
     }
 
     /**
      * 核心写入方法
      */
-    public function logAudit(array $logData): bool
+    public function logAudit(array $Silian_logData): bool
     {
         if ($this->isWriteDisabled()) {
             return false;
         }
 
         try {
-            foreach (['action','operation_category'] as $req) {
-                if (empty($logData[$req])) {
-                    $this->logger->warning('Audit log missing required field', ['field' => $req]);
+            foreach (['action','operation_category'] as $Silian_req) {
+                if (empty($Silian_logData[$Silian_req])) {
+                    $this->logger->warning('Audit log missing required field', ['field' => $Silian_req]);
                     return false;
                 }
             }
 
-            $data = $this->sanitizeAuditData($logData);
-            foreach (['data','old_data','new_data'] as $opt) {
-                if (!array_key_exists($opt, $data)) { $data[$opt] = null; }
+            $Silian_data = $this->sanitizeAuditData($Silian_logData);
+            foreach (['data','old_data','new_data'] as $Silian_opt) {
+                if (!array_key_exists($Silian_opt, $Silian_data)) { $Silian_data[$Silian_opt] = null; }
             }
 
-            $stmt = $this->db->prepare(
+            $Silian_stmt = $this->db->prepare(
                 "INSERT INTO audit_logs (
                     user_id, user_uuid, conversation_id, actor_type, action, data, ip_address, user_agent,
                     request_method, endpoint, old_data, new_data, affected_table,
@@ -144,49 +144,49 @@ class AuditLogService
             );
 
             // request_id 优先来自显式字段，其次全局 $_SERVER（由中间件注入）
-            $requestId = $data['request_id'] ?? ($_SERVER['HTTP_X_REQUEST_ID'] ?? null);
-            $userUuid = $this->resolveUserUuid($data);
+            $Silian_requestId = $Silian_data['request_id'] ?? ($_SERVER['HTTP_X_REQUEST_ID'] ?? null);
+            $Silian_userUuid = $this->resolveUserUuid($Silian_data);
 
-            $ok = $stmt->execute([
-                $data['user_id'] ?? null,
-                $userUuid,
-                $data['conversation_id'] ?? null,
-                $data['actor_type'] ?? 'user',
-                $data['action'],
-                $data['data'] ?? null,
-                $data['ip_address'] ?? ($_SERVER['REMOTE_ADDR'] ?? null),
-                $data['user_agent'] ?? ($_SERVER['HTTP_USER_AGENT'] ?? null),
-                $data['request_method'] ?? ($_SERVER['REQUEST_METHOD'] ?? null),
-                $data['endpoint'] ?? ($_SERVER['REQUEST_URI'] ?? null),
-                $data['old_data'] ?? null,
-                $data['new_data'] ?? null,
-                $data['affected_table'] ?? null,
-                $data['affected_id'] ?? null,
-                $data['status'] ?? 'success',
-                $data['response_code'] ?? (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' ? 200 : null),
-                $data['session_id'] ?? (function_exists('session_id') ? session_id() : null),
-                $data['referrer'] ?? ($_SERVER['HTTP_REFERER'] ?? null),
-                $data['operation_category'],
-                $data['operation_subtype'] ?? null,
-                $data['change_type'] ?? 'other',
-                $requestId
+            $Silian_ok = $Silian_stmt->execute([
+                $Silian_data['user_id'] ?? null,
+                $Silian_userUuid,
+                $Silian_data['conversation_id'] ?? null,
+                $Silian_data['actor_type'] ?? 'user',
+                $Silian_data['action'],
+                $Silian_data['data'] ?? null,
+                $Silian_data['ip_address'] ?? ($_SERVER['REMOTE_ADDR'] ?? null),
+                $Silian_data['user_agent'] ?? ($_SERVER['HTTP_USER_AGENT'] ?? null),
+                $Silian_data['request_method'] ?? ($_SERVER['REQUEST_METHOD'] ?? null),
+                $Silian_data['endpoint'] ?? ($_SERVER['REQUEST_URI'] ?? null),
+                $Silian_data['old_data'] ?? null,
+                $Silian_data['new_data'] ?? null,
+                $Silian_data['affected_table'] ?? null,
+                $Silian_data['affected_id'] ?? null,
+                $Silian_data['status'] ?? 'success',
+                $Silian_data['response_code'] ?? (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' ? 200 : null),
+                $Silian_data['session_id'] ?? (function_exists('session_id') ? session_id() : null),
+                $Silian_data['referrer'] ?? ($_SERVER['HTTP_REFERER'] ?? null),
+                $Silian_data['operation_category'],
+                $Silian_data['operation_subtype'] ?? null,
+                $Silian_data['change_type'] ?? 'other',
+                $Silian_requestId
             ]);
 
-            if (!$ok) {
+            if (!$Silian_ok) {
                 $this->lastInsertId = null;
                 $this->logger->warning('Audit log insert returned false', [
-                    'action' => $data['action'],
-                    'category' => $data['operation_category']
+                    'action' => $Silian_data['action'],
+                    'category' => $Silian_data['operation_category']
                 ]);
                 return false;
             }
-            $insertId = (int) $this->db->lastInsertId();
-            $this->lastInsertId = $insertId > 0 ? $insertId : null;
+            $Silian_insertId = (int) $this->db->lastInsertId();
+            $this->lastInsertId = $Silian_insertId > 0 ? $Silian_insertId : null;
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Audit logging exception', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'message' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
             ]);
             return false;
         }
@@ -196,75 +196,75 @@ class AuditLogService
      * 记录数据变更操作
      */
     public function logDataChange(
-        string $category,
-        string $action,
-        ?int $userId,
-        string $actorType = 'user',
-        ?string $table = null,
-        string|int|null $recordId = null,
-        ?array $oldData = null,
-        ?array $newData = null,
-        array $context = []
+        string $Silian_category,
+        string $Silian_action,
+        ?int $Silian_userId,
+        string $Silian_actorType = 'user',
+        ?string $Silian_table = null,
+        string|int|null $Silian_recordId = null,
+        ?array $Silian_oldData = null,
+        ?array $Silian_newData = null,
+        array $Silian_context = []
     ): bool {
-        $affectedId = null;
-        if ($recordId !== null && (is_int($recordId) || (ctype_digit((string)$recordId) && (string)$recordId === (string)(int)$recordId))) {
-            $affectedId = (int)$recordId;
-        } elseif ($recordId !== null) {
-            $context['non_numeric_record_id'] = (string)$recordId;
+        $Silian_affectedId = null;
+        if ($Silian_recordId !== null && (is_int($Silian_recordId) || (ctype_digit((string)$Silian_recordId) && (string)$Silian_recordId === (string)(int)$Silian_recordId))) {
+            $Silian_affectedId = (int)$Silian_recordId;
+        } elseif ($Silian_recordId !== null) {
+            $Silian_context['non_numeric_record_id'] = (string)$Silian_recordId;
         }
 
-        $logData = [
-            'action' => $action,
-            'operation_category' => $category,
-            'user_id' => $userId,
-            'user_uuid' => $context['user_uuid'] ?? ($context['uuid'] ?? null),
-            'conversation_id' => $context['conversation_id'] ?? null,
-            'actor_type' => $actorType,
-            'affected_table' => $table,
-            'affected_id' => $affectedId,
-            'old_data' => $oldData ? $this->sanitizeData($oldData) : null,
-            'new_data' => $newData ? $this->sanitizeData($newData) : null,
-            'change_type' => $this->determineChangeType($oldData, $newData),
-            'operation_subtype' => $context['subtype'] ?? null,
-            'data' => $context['request_data'] ?? $this->getRequestData(),
-            'request_id' => $context['request_id'] ?? ($_SERVER['HTTP_X_REQUEST_ID'] ?? null),
-            'status' => $context['status'] ?? 'success'
+        $Silian_logData = [
+            'action' => $Silian_action,
+            'operation_category' => $Silian_category,
+            'user_id' => $Silian_userId,
+            'user_uuid' => $Silian_context['user_uuid'] ?? ($Silian_context['uuid'] ?? null),
+            'conversation_id' => $Silian_context['conversation_id'] ?? null,
+            'actor_type' => $Silian_actorType,
+            'affected_table' => $Silian_table,
+            'affected_id' => $Silian_affectedId,
+            'old_data' => $Silian_oldData ? $this->sanitizeData($Silian_oldData) : null,
+            'new_data' => $Silian_newData ? $this->sanitizeData($Silian_newData) : null,
+            'change_type' => $this->determineChangeType($Silian_oldData, $Silian_newData),
+            'operation_subtype' => $Silian_context['subtype'] ?? null,
+            'data' => $Silian_context['request_data'] ?? $this->getRequestData(),
+            'request_id' => $Silian_context['request_id'] ?? ($_SERVER['HTTP_X_REQUEST_ID'] ?? null),
+            'status' => $Silian_context['status'] ?? 'success'
         ];
-        return $this->logAudit($logData);
+        return $this->logAudit($Silian_logData);
     }
 
-    public function logAuthOperation(string $action, ?int $userId, bool $success, array $context = []): bool
+    public function logAuthOperation(string $Silian_action, ?int $Silian_userId, bool $Silian_success, array $Silian_context = []): bool
     {
         // Route through legacy log() to satisfy tests that mock log()
-        $payload = [
-            'action' => $action,
+        $Silian_payload = [
+            'action' => $Silian_action,
             'operation_category' => 'authentication',
-            'user_id' => $userId,
+            'user_id' => $Silian_userId,
             'actor_type' => 'user',
             'affected_table' => 'users',
-            'affected_id' => $userId,
-            'status' => $success ? 'success' : 'failed',
-            'operation_subtype' => $success ? 'success' : 'failed',
-            'request_id' => $context['request_id'] ?? null,
-            'data' => $context['request_data'] ?? ($context['data'] ?? null),
+            'affected_id' => $Silian_userId,
+            'status' => $Silian_success ? 'success' : 'failed',
+            'operation_subtype' => $Silian_success ? 'success' : 'failed',
+            'request_id' => $Silian_context['request_id'] ?? null,
+            'data' => $Silian_context['request_data'] ?? ($Silian_context['data'] ?? null),
             'old_data' => null,
             'new_data' => null
         ];
-        return $this->log($payload);
+        return $this->log($Silian_payload);
     }
 
-    public function logAdminOperation(string $action, ?int $adminId, string $category, array $context = []): bool
+    public function logAdminOperation(string $Silian_action, ?int $Silian_adminId, string $Silian_category, array $Silian_context = []): bool
     {
         return $this->logDataChange(
-            $category,
-            $action,
-            $adminId,
+            $Silian_category,
+            $Silian_action,
+            $Silian_adminId,
             'admin',
-            $context['table'] ?? null,
-            $context['record_id'] ?? null,
-            $context['old_data'] ?? null,
-            $context['new_data'] ?? null,
-            $context
+            $Silian_context['table'] ?? null,
+            $Silian_context['record_id'] ?? null,
+            $Silian_context['old_data'] ?? null,
+            $Silian_context['new_data'] ?? null,
+            $Silian_context
         );
     }
 
@@ -273,231 +273,231 @@ class AuditLogService
     /**
      * Legacy alias used in older tests: logUserAction($userId, $action, $context)
      */
-    public function logUserAction(?int $userId, string $action, array $context = [], ?string $ip = null): bool
+    public function logUserAction(?int $Silian_userId, string $Silian_action, array $Silian_context = [], ?string $Silian_ip = null): bool
     {
-        if ($ip && !isset($context['ip_address'])) { $context['ip_address'] = $ip; }
+        if ($Silian_ip && !isset($Silian_context['ip_address'])) { $Silian_context['ip_address'] = $Silian_ip; }
         // Reuse high-level logDataChange path
-        $ok = $this->logDataChange(
+        $Silian_ok = $this->logDataChange(
             'user_action',
-            $action,
-            $userId,
+            $Silian_action,
+            $Silian_userId,
             'user',
-            $context['table'] ?? null,
-            $context['record_id'] ?? null,
-            $context['old_data'] ?? null,
-            $context['new_data'] ?? null,
-            $context
+            $Silian_context['table'] ?? null,
+            $Silian_context['record_id'] ?? null,
+            $Silian_context['old_data'] ?? null,
+            $Silian_context['new_data'] ?? null,
+            $Silian_context
         );
-        if ($ok) {
-            $this->logger->info('audit_log_written', [ 'action' => $action, 'category' => 'user_action', 'user_id' => $userId ]);
+        if ($Silian_ok) {
+            $this->logger->info('audit_log_written', [ 'action' => $Silian_action, 'category' => 'user_action', 'user_id' => $Silian_userId ]);
         }
-        return $ok;
+        return $Silian_ok;
     }
 
     /**
      * Legacy method expected in tests to fetch user logs.
      */
-    public function getUserLogs(int $userId, int $limit = 50): array
+    public function getUserLogs(int $Silian_userId, int $Silian_limit = 50): array
     {
         try {
-            $stmt = $this->db->prepare('SELECT * FROM audit_logs WHERE user_id = :uid OR user_uuid = :user_uuid ORDER BY created_at DESC LIMIT :lim');
-            $stmt->bindValue(':uid', $userId, \PDO::PARAM_INT);
-            $stmt->bindValue(':user_uuid', $this->lookupUserUuidById($userId) ?? '', \PDO::PARAM_STR);
-            $stmt->bindValue(':lim', $limit, \PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
-        } catch (\Throwable $e) {
-            $this->logger->warning('getUserLogs failed', ['error' => $e->getMessage()]);
+            $Silian_stmt = $this->db->prepare('SELECT * FROM audit_logs WHERE user_id = :uid OR user_uuid = :user_uuid ORDER BY created_at DESC LIMIT :lim');
+            $Silian_stmt->bindValue(':uid', $Silian_userId, \PDO::PARAM_INT);
+            $Silian_stmt->bindValue(':user_uuid', $this->lookupUserUuidById($Silian_userId) ?? '', \PDO::PARAM_STR);
+            $Silian_stmt->bindValue(':lim', $Silian_limit, \PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            return $Silian_stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable $Silian_e) {
+            $this->logger->warning('getUserLogs failed', ['error' => $Silian_e->getMessage()]);
             return [];
         }
     }
 
-    public function logSystemEvent(string $action, string $category, array $context = []): bool
+    public function logSystemEvent(string $Silian_action, string $Silian_category, array $Silian_context = []): bool
     {
         return $this->logDataChange(
-            $category,
-            $action,
+            $Silian_category,
+            $Silian_action,
             null,
             'system',
             null,
             null,
             null,
             null,
-            $context
+            $Silian_context
         );
     }
 
-    public function getAuditStats(array $filters = []): array
+    public function getAuditStats(array $Silian_filters = []): array
     {
         try {
-            $sql = "SELECT actor_type, operation_category, COUNT(*) as count, MAX(created_at) as last_activity FROM audit_logs WHERE 1=1";
-            $params = [];
-            if (isset($filters['date_from'])) { $sql .= " AND created_at >= ?"; $params[] = $filters['date_from']; }
-            if (isset($filters['date_to'])) { $sql .= self::SQL_AND_CREATED_AT_LTE; $params[] = $filters['date_to']; }
-            if (isset($filters['actor_type'])) { $sql .= self::SQL_AND_ACTOR_TYPE; $params[] = $filters['actor_type']; }
-            if (isset($filters['category'])) { $sql .= self::SQL_AND_OPERATION_CATEGORY; $params[] = $filters['category']; }
-            $sql .= " GROUP BY actor_type, operation_category ORDER BY count DESC";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to get audit stats', ['error' => $e->getMessage()]);
+            $Silian_sql = "SELECT actor_type, operation_category, COUNT(*) as count, MAX(created_at) as last_activity FROM audit_logs WHERE 1=1";
+            $Silian_params = [];
+            if (isset($Silian_filters['date_from'])) { $Silian_sql .= " AND created_at >= ?"; $Silian_params[] = $Silian_filters['date_from']; }
+            if (isset($Silian_filters['date_to'])) { $Silian_sql .= self::SQL_AND_CREATED_AT_LTE; $Silian_params[] = $Silian_filters['date_to']; }
+            if (isset($Silian_filters['actor_type'])) { $Silian_sql .= self::SQL_AND_ACTOR_TYPE; $Silian_params[] = $Silian_filters['actor_type']; }
+            if (isset($Silian_filters['category'])) { $Silian_sql .= self::SQL_AND_OPERATION_CATEGORY; $Silian_params[] = $Silian_filters['category']; }
+            $Silian_sql .= " GROUP BY actor_type, operation_category ORDER BY count DESC";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute($Silian_params);
+            return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Failed to get audit stats', ['error' => $Silian_e->getMessage()]);
             return [];
         }
     }
 
-    public function getAuditLogs(array $filters = [], int $limit = 100, int $offset = 0): array
+    public function getAuditLogs(array $Silian_filters = [], int $Silian_limit = 100, int $Silian_offset = 0): array
     {
         try {
-            $sql = "SELECT * FROM audit_logs WHERE 1=1";
-            $params = [];
-            if (isset($filters['user_id'])) { $sql .= " AND user_id = ?"; $params[] = $filters['user_id']; }
-            if (isset($filters['user_uuid'])) { $sql .= " AND user_uuid = ?"; $params[] = strtolower((string) $filters['user_uuid']); }
-            if (isset($filters['actor_type'])) { $sql .= self::SQL_AND_ACTOR_TYPE; $params[] = $filters['actor_type']; }
-            if (isset($filters['category'])) { $sql .= self::SQL_AND_OPERATION_CATEGORY; $params[] = $filters['category']; }
-            if (isset($filters['status'])) { $sql .= " AND status = ?"; $params[] = $filters['status']; }
-            if (isset($filters['date_from'])) { $sql .= " AND created_at >= ?"; $params[] = $filters['date_from']; }
-            if (isset($filters['date_to'])) { $sql .= self::SQL_AND_CREATED_AT_LTE; $params[] = $filters['date_to']; }
-            $sql .= " ORDER BY id DESC LIMIT ? OFFSET ?";
-            $params[] = $limit; $params[] = $offset;
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to get audit logs', ['error' => $e->getMessage()]);
+            $Silian_sql = "SELECT * FROM audit_logs WHERE 1=1";
+            $Silian_params = [];
+            if (isset($Silian_filters['user_id'])) { $Silian_sql .= " AND user_id = ?"; $Silian_params[] = $Silian_filters['user_id']; }
+            if (isset($Silian_filters['user_uuid'])) { $Silian_sql .= " AND user_uuid = ?"; $Silian_params[] = strtolower((string) $Silian_filters['user_uuid']); }
+            if (isset($Silian_filters['actor_type'])) { $Silian_sql .= self::SQL_AND_ACTOR_TYPE; $Silian_params[] = $Silian_filters['actor_type']; }
+            if (isset($Silian_filters['category'])) { $Silian_sql .= self::SQL_AND_OPERATION_CATEGORY; $Silian_params[] = $Silian_filters['category']; }
+            if (isset($Silian_filters['status'])) { $Silian_sql .= " AND status = ?"; $Silian_params[] = $Silian_filters['status']; }
+            if (isset($Silian_filters['date_from'])) { $Silian_sql .= " AND created_at >= ?"; $Silian_params[] = $Silian_filters['date_from']; }
+            if (isset($Silian_filters['date_to'])) { $Silian_sql .= self::SQL_AND_CREATED_AT_LTE; $Silian_params[] = $Silian_filters['date_to']; }
+            $Silian_sql .= " ORDER BY id DESC LIMIT ? OFFSET ?";
+            $Silian_params[] = $Silian_limit; $Silian_params[] = $Silian_offset;
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute($Silian_params);
+            return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Failed to get audit logs', ['error' => $Silian_e->getMessage()]);
             return [];
         }
     }
 
-    public function getAuditLogsCount(array $filters = []): int
+    public function getAuditLogsCount(array $Silian_filters = []): int
     {
         try {
-            $sql = "SELECT COUNT(*) FROM audit_logs WHERE 1=1";
-            $params = [];
-            if (isset($filters['user_id'])) { $sql .= " AND user_id = ?"; $params[] = $filters['user_id']; }
-            if (isset($filters['user_uuid'])) { $sql .= " AND user_uuid = ?"; $params[] = strtolower((string) $filters['user_uuid']); }
-            if (isset($filters['actor_type'])) { $sql .= self::SQL_AND_ACTOR_TYPE; $params[] = $filters['actor_type']; }
-            if (isset($filters['category'])) { $sql .= self::SQL_AND_OPERATION_CATEGORY; $params[] = $filters['category']; }
-            if (isset($filters['status'])) { $sql .= " AND status = ?"; $params[] = $filters['status']; }
-            if (isset($filters['date_from'])) { $sql .= " AND created_at >= ?"; $params[] = $filters['date_from']; }
-            if (isset($filters['date_to'])) { $sql .= self::SQL_AND_CREATED_AT_LTE; $params[] = $filters['date_to']; }
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-            return (int)$stmt->fetchColumn();
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to get audit logs count', ['error' => $e->getMessage()]);
+            $Silian_sql = "SELECT COUNT(*) FROM audit_logs WHERE 1=1";
+            $Silian_params = [];
+            if (isset($Silian_filters['user_id'])) { $Silian_sql .= " AND user_id = ?"; $Silian_params[] = $Silian_filters['user_id']; }
+            if (isset($Silian_filters['user_uuid'])) { $Silian_sql .= " AND user_uuid = ?"; $Silian_params[] = strtolower((string) $Silian_filters['user_uuid']); }
+            if (isset($Silian_filters['actor_type'])) { $Silian_sql .= self::SQL_AND_ACTOR_TYPE; $Silian_params[] = $Silian_filters['actor_type']; }
+            if (isset($Silian_filters['category'])) { $Silian_sql .= self::SQL_AND_OPERATION_CATEGORY; $Silian_params[] = $Silian_filters['category']; }
+            if (isset($Silian_filters['status'])) { $Silian_sql .= " AND status = ?"; $Silian_params[] = $Silian_filters['status']; }
+            if (isset($Silian_filters['date_from'])) { $Silian_sql .= " AND created_at >= ?"; $Silian_params[] = $Silian_filters['date_from']; }
+            if (isset($Silian_filters['date_to'])) { $Silian_sql .= self::SQL_AND_CREATED_AT_LTE; $Silian_params[] = $Silian_filters['date_to']; }
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute($Silian_params);
+            return (int)$Silian_stmt->fetchColumn();
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Failed to get audit logs count', ['error' => $Silian_e->getMessage()]);
             return 0;
         }
     }
 
-    public function cleanupOldLogs(int $days = 365): int
+    public function cleanupOldLogs(int $Silian_days = 365): int
     {
         try {
-            $cutoff = date('Y-m-d H:i:s', strtotime("-$days days"));
-            $stmt = $this->db->prepare("DELETE FROM audit_logs WHERE created_at < ?");
-            $stmt->execute([$cutoff]);
-            return $stmt->rowCount();
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to cleanup old audit logs', ['error' => $e->getMessage(), 'days' => $days]);
+            $Silian_cutoff = date('Y-m-d H:i:s', strtotime("-$Silian_days days"));
+            $Silian_stmt = $this->db->prepare("DELETE FROM audit_logs WHERE created_at < ?");
+            $Silian_stmt->execute([$Silian_cutoff]);
+            return $Silian_stmt->rowCount();
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Failed to cleanup old audit logs', ['error' => $Silian_e->getMessage(), 'days' => $Silian_days]);
             return 0;
         }
     }
 
-    private function sanitizeAuditData(array $data): array
+    private function sanitizeAuditData(array $Silian_data): array
     {
-        $sanitized = [];
-        foreach ($data as $key => $value) {
-            if (in_array(strtolower($key), $this->sensitiveFields, true)) {
-                $sanitized[$key] = '[REDACTED]';
+        $Silian_sanitized = [];
+        foreach ($Silian_data as $Silian_key => $Silian_value) {
+            if (in_array(strtolower($Silian_key), $this->sensitiveFields, true)) {
+                $Silian_sanitized[$Silian_key] = '[REDACTED]';
                 continue;
             }
-            if ($value === null) {
-                $sanitized[$key] = null;
+            if ($Silian_value === null) {
+                $Silian_sanitized[$Silian_key] = null;
                 continue;
             }
-            if (in_array($key, $this->nullableIntegerFields, true)) {
-                $sanitized[$key] = $this->normalizeNullableInteger($value);
+            if (in_array($Silian_key, $this->nullableIntegerFields, true)) {
+                $Silian_sanitized[$Silian_key] = $this->normalizeNullableInteger($Silian_value);
                 continue;
             }
-            if (is_array($value) || is_object($value)) {
+            if (is_array($Silian_value) || is_object($Silian_value)) {
                 try {
-                    $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-                    $sanitized[$key] = $this->truncateData($json);
-                } catch (JsonException $e) {
-                    $sanitized[$key] = '[JSON_ERROR]';
+                    $Silian_json = json_encode($Silian_value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+                    $Silian_sanitized[$Silian_key] = $this->truncateData($Silian_json);
+                } catch (JsonException $Silian_e) {
+                    $Silian_sanitized[$Silian_key] = '[JSON_ERROR]';
                 }
             } else {
-                $sanitized[$key] = $this->truncateData((string)$value);
+                $Silian_sanitized[$Silian_key] = $this->truncateData((string)$Silian_value);
             }
         }
-        return $sanitized;
+        return $Silian_sanitized;
     }
 
-    private function normalizeNullableInteger(mixed $value): ?int
+    private function normalizeNullableInteger(mixed $Silian_value): ?int
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
 
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '') {
+        if (is_string($Silian_value)) {
+            $Silian_trimmed = trim($Silian_value);
+            if ($Silian_trimmed === '') {
                 return null;
             }
-            if (ctype_digit($trimmed) || preg_match('/^-?\d+$/', $trimmed) === 1) {
-                return (int) $trimmed;
+            if (ctype_digit($Silian_trimmed) || preg_match('/^-?\d+$/', $Silian_trimmed) === 1) {
+                return (int) $Silian_trimmed;
             }
 
             return null;
         }
 
-        if (is_int($value)) {
-            return $value;
+        if (is_int($Silian_value)) {
+            return $Silian_value;
         }
 
-        if (is_float($value)) {
-            return (int) $value;
+        if (is_float($Silian_value)) {
+            return (int) $Silian_value;
         }
 
-        if (is_numeric($value)) {
-            return (int) $value;
+        if (is_numeric($Silian_value)) {
+            return (int) $Silian_value;
         }
 
         return null;
     }
 
-    private function sanitizeData(array $data): ?string
+    private function sanitizeData(array $Silian_data): ?string
     {
-        $sanitized = [];
-        foreach ($data as $key => $value) {
-            if (in_array(strtolower($key), $this->sensitiveFields, true)) {
-                $sanitized[$key] = '[REDACTED]';
+        $Silian_sanitized = [];
+        foreach ($Silian_data as $Silian_key => $Silian_value) {
+            if (in_array(strtolower($Silian_key), $this->sensitiveFields, true)) {
+                $Silian_sanitized[$Silian_key] = '[REDACTED]';
                 continue;
             }
-            if (is_array($value) || is_object($value)) {
+            if (is_array($Silian_value) || is_object($Silian_value)) {
                 try {
-                    $sanitized[$key] = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-                } catch (JsonException $e) {
-                    $sanitized[$key] = '[JSON_ERROR]';
+                    $Silian_sanitized[$Silian_key] = json_encode($Silian_value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+                } catch (JsonException $Silian_e) {
+                    $Silian_sanitized[$Silian_key] = '[JSON_ERROR]';
                 }
             } else {
-                $sanitized[$key] = $value;
+                $Silian_sanitized[$Silian_key] = $Silian_value;
             }
         }
         try {
-            $json = json_encode($sanitized, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-            return $this->truncateData($json);
-        } catch (JsonException $e) {
+            $Silian_json = json_encode($Silian_sanitized, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            return $this->truncateData($Silian_json);
+        } catch (JsonException $Silian_e) {
             return null;
         }
     }
 
-    private function truncateData(string $data): string
+    private function truncateData(string $Silian_data): string
     {
-        if (mb_strlen($data, 'UTF-8') > $this->maxDataLength) {
-            return mb_substr($data, 0, $this->maxDataLength, 'UTF-8') . '...[TRUNCATED]';
+        if (mb_strlen($Silian_data, 'UTF-8') > $this->maxDataLength) {
+            return mb_substr($Silian_data, 0, $this->maxDataLength, 'UTF-8') . '...[TRUNCATED]';
         }
-        return $data;
+        return $Silian_data;
     }
 
     private function getRequestData(): array
@@ -511,54 +511,54 @@ class AuditLogService
         ];
     }
 
-    private function determineChangeType(?array $oldData, ?array $newData): string
+    private function determineChangeType(?array $Silian_oldData, ?array $Silian_newData): string
     {
-        if ($oldData === null && $newData !== null) return 'create';
-        if ($oldData !== null && $newData === null) return 'delete';
-        if ($oldData !== null && $newData !== null) return 'update';
-        if ($oldData === null && $newData === null) return 'read';
+        if ($Silian_oldData === null && $Silian_newData !== null) return 'create';
+        if ($Silian_oldData !== null && $Silian_newData === null) return 'delete';
+        if ($Silian_oldData !== null && $Silian_newData !== null) return 'update';
+        if ($Silian_oldData === null && $Silian_newData === null) return 'read';
         return 'other';
     }
 
-    private function resolveUserUuid(array $data): ?string
+    private function resolveUserUuid(array $Silian_data): ?string
     {
-        $explicit = $data['user_uuid'] ?? $data['uuid'] ?? $data['userUuid'] ?? null;
-        if (is_string($explicit)) {
-            $trimmed = strtolower(trim($explicit));
-            if ($trimmed !== '') {
-                return $trimmed;
+        $Silian_explicit = $Silian_data['user_uuid'] ?? $Silian_data['uuid'] ?? $Silian_data['userUuid'] ?? null;
+        if (is_string($Silian_explicit)) {
+            $Silian_trimmed = strtolower(trim($Silian_explicit));
+            if ($Silian_trimmed !== '') {
+                return $Silian_trimmed;
             }
         }
 
-        $userId = $data['user_id'] ?? null;
-        if (is_int($userId) || (is_numeric($userId) && (string) (int) $userId === (string) $userId)) {
-            return $this->lookupUserUuidById((int) $userId);
+        $Silian_userId = $Silian_data['user_id'] ?? null;
+        if (is_int($Silian_userId) || (is_numeric($Silian_userId) && (string) (int) $Silian_userId === (string) $Silian_userId)) {
+            return $this->lookupUserUuidById((int) $Silian_userId);
         }
 
         return null;
     }
 
-    private function lookupUserUuidById(int $userId): ?string
+    private function lookupUserUuidById(int $Silian_userId): ?string
     {
-        if ($userId <= 0) {
+        if ($Silian_userId <= 0) {
             return null;
         }
 
-        if (array_key_exists($userId, $this->userUuidCache)) {
-            return $this->userUuidCache[$userId];
+        if (array_key_exists($Silian_userId, $this->userUuidCache)) {
+            return $this->userUuidCache[$Silian_userId];
         }
 
         try {
-            $stmt = $this->db->prepare('SELECT uuid FROM users WHERE id = :id LIMIT 1');
-            if (!$stmt) {
+            $Silian_stmt = $this->db->prepare('SELECT uuid FROM users WHERE id = :id LIMIT 1');
+            if (!$Silian_stmt) {
                 return null;
             }
-            $stmt->execute(['id' => $userId]);
-            $uuid = $stmt->fetchColumn();
-            $normalized = is_string($uuid) && trim($uuid) !== '' ? strtolower(trim($uuid)) : null;
-            $this->userUuidCache[$userId] = $normalized;
-            return $normalized;
-        } catch (\Throwable $e) {
+            $Silian_stmt->execute(['id' => $Silian_userId]);
+            $Silian_uuid = $Silian_stmt->fetchColumn();
+            $Silian_normalized = is_string($Silian_uuid) && trim($Silian_uuid) !== '' ? strtolower(trim($Silian_uuid)) : null;
+            $this->userUuidCache[$Silian_userId] = $Silian_normalized;
+            return $Silian_normalized;
+        } catch (\Throwable $Silian_e) {
             return null;
         }
     }
@@ -574,17 +574,17 @@ class AuditLogService
             return false;
         }
 
-        $raw = $_ENV['DISABLE_AUDIT_LOG_WRITES'] ?? $_SERVER['DISABLE_AUDIT_LOG_WRITES'] ?? null;
-        if (!is_string($raw) && !is_numeric($raw) && !is_bool($raw)) {
+        $Silian_raw = $_ENV['DISABLE_AUDIT_LOG_WRITES'] ?? $_SERVER['DISABLE_AUDIT_LOG_WRITES'] ?? null;
+        if (!is_string($Silian_raw) && !is_numeric($Silian_raw) && !is_bool($Silian_raw)) {
             return false;
         }
 
-        return filter_var($raw, FILTER_VALIDATE_BOOLEAN) === true;
+        return filter_var($Silian_raw, FILTER_VALIDATE_BOOLEAN) === true;
     }
 
     private function isProductionEnvironment(): bool
     {
-        $env = strtolower(trim((string) ($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? '')));
-        return $env === 'production';
+        $Silian_env = strtolower(trim((string) ($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? '')));
+        return $Silian_env === 'production';
     }
 }

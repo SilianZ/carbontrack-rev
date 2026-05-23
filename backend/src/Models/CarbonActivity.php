@@ -13,11 +13,11 @@ class CarbonActivity extends Model
     use SoftDeletes;
 
     protected $table = 'carbon_activities';
-    
+
     // Use UUID as primary key
     protected $keyType = 'string';
     public $incrementing = false;
-    
+
     protected $fillable = [
         'id',
         'name_zh',
@@ -51,10 +51,10 @@ class CarbonActivity extends Model
     protected static function boot()
     {
         parent::boot();
-        
-        static::creating(function ($model) {
-            if (empty($model->id)) {
-                $model->id = (string) Str::uuid();
+
+        static::creating(function ($Silian_model) {
+            if (empty($Silian_model->id)) {
+                $Silian_model->id = (string) Str::uuid();
             }
         });
     }
@@ -72,49 +72,49 @@ class CarbonActivity extends Model
     /**
      * Scope to get active activities only
      */
-    public function scopeActive($query)
+    public function scopeActive($Silian_query)
     {
-        return $query->where('is_active', true);
+        return $Silian_query->where('is_active', true);
     }
 
     /**
      * Scope to get activities by category
      */
-    public function scopeByCategory($query, string $category)
+    public function scopeByCategory($Silian_query, string $Silian_category)
     {
-        return $query->where('category', $category);
+        return $Silian_query->where('category', $Silian_category);
     }
 
     /**
      * Scope to order by sort order
      */
-    public function scopeOrdered($query)
+    public function scopeOrdered($Silian_query)
     {
-        return $query->orderBy('sort_order')->orderBy('name_zh');
+        return $Silian_query->orderBy('sort_order')->orderBy('name_zh');
     }
 
     /**
      * Calculate carbon savings for given input
      */
-    public function calculateCarbonSavings(float $dataInput): float
+    public function calculateCarbonSavings(float $Silian_dataInput): float
     {
-        return $dataInput * $this->carbon_factor;
+        return $Silian_dataInput * $this->carbon_factor;
     }
 
     /**
      * Get display name based on locale
      */
-    public function getDisplayName(string $locale = 'zh'): string
+    public function getDisplayName(string $Silian_locale = 'zh'): string
     {
-        return $locale === 'en' ? $this->name_en : $this->name_zh;
+        return $Silian_locale === 'en' ? $this->name_en : $this->name_zh;
     }
 
     /**
      * Get description based on locale
      */
-    public function getDescription(string $locale = 'zh'): ?string
+    public function getDescription(string $Silian_locale = 'zh'): ?string
     {
-        return $locale === 'en' ? $this->description_en : $this->description_zh;
+        return $Silian_locale === 'en' ? $this->description_en : $this->description_zh;
     }
 
     /**
@@ -176,35 +176,35 @@ class CarbonActivity extends Model
      * Backward-compatible finder used by controllers that still call a static findById with PDO.
      * Returns a plain associative array for compatibility with array-based controller logic.
      */
-    public static function findById(\PDO $db, string $id): ?array
+    public static function findById(\PDO $Silian_db, string $Silian_id): ?array
     {
-        $sql = "SELECT id, name_zh, name_en, category, carbon_factor, unit, icon FROM carbon_activities WHERE id = :id AND deleted_at IS NULL";
-        $stmt = $db->prepare($sql);
-        $stmt->execute(['id' => $id]);
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        return $row ?: null;
+        $Silian_sql = "SELECT id, name_zh, name_en, category, carbon_factor, unit, icon FROM carbon_activities WHERE id = :id AND deleted_at IS NULL";
+        $Silian_stmt = $Silian_db->prepare($Silian_sql);
+        $Silian_stmt->execute(['id' => $Silian_id]);
+        $Silian_row = $Silian_stmt->fetch(\PDO::FETCH_ASSOC);
+        return $Silian_row ?: null;
     }
 
     /**
      * Search activities by name
      */
-    public function scopeSearch($query, string $search)
+    public function scopeSearch($Silian_query, string $Silian_search)
     {
-        return $query->where(function ($q) use ($search) {
-            $q->where('name_zh', 'like', "%{$search}%")
-              ->orWhere('name_en', 'like', "%{$search}%")
-              ->orWhere('description_zh', 'like', "%{$search}%")
-              ->orWhere('description_en', 'like', "%{$search}%");
+        return $Silian_query->where(function ($Silian_q) use ($Silian_search) {
+            $Silian_q->where('name_zh', 'like', "%{$Silian_search}%")
+              ->orWhere('name_en', 'like', "%{$Silian_search}%")
+              ->orWhere('description_zh', 'like', "%{$Silian_search}%")
+              ->orWhere('description_en', 'like', "%{$Silian_search}%");
         });
     }
 
     /**
      * Get activity by old string name (for migration compatibility)
      */
-    public static function findByOldName(string $oldName): ?self
+    public static function findByOldName(string $Silian_oldName): ?self
     {
         // Map old string names to UUIDs for backward compatibility
-        $nameMapping = [
+        $Silian_nameMapping = [
             '购物时自带袋子 / Bring your own bag when shopping' => '550e8400-e29b-41d4-a716-446655440001',
             '早睡觉一小时 / Sleep an hour earlier' => '550e8400-e29b-41d4-a716-446655440002',
             '刷牙时关掉水龙头 / Turn off the tap while brushing teeth' => '550e8400-e29b-41d4-a716-446655440003',
@@ -249,17 +249,17 @@ class CarbonActivity extends Model
             '垃圾分类1次' => '550e8400-e29b-41d4-a716-446655440041'
         ];
 
-        $uuid = $nameMapping[$oldName] ?? null;
-        
-        if ($uuid) {
-            return static::find($uuid);
+        $Silian_uuid = $Silian_nameMapping[$Silian_oldName] ?? null;
+
+        if ($Silian_uuid) {
+            return static::find($Silian_uuid);
         }
 
         // Fallback: search by combined name
-        return static::where(function ($query) use ($oldName) {
-            $query->whereRaw("CONCAT(name_zh, ' / ', name_en) = ?", [$oldName])
-                  ->orWhere('name_zh', $oldName)
-                  ->orWhere('name_en', $oldName);
+        return static::where(function ($Silian_query) use ($Silian_oldName) {
+            $Silian_query->whereRaw("CONCAT(name_zh, ' / ', name_en) = ?", [$Silian_oldName])
+                  ->orWhere('name_zh', $Silian_oldName)
+                  ->orWhere('name_en', $Silian_oldName);
         })->first();
     }
 }

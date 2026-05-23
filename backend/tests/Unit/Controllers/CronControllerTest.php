@@ -21,85 +21,85 @@ class CronControllerTest extends TestCase
 
     public function testRunReturnsServiceUnavailableWhenCronKeyIsMissing(): void
     {
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
 
-        $controller = new CronController(
+        $Silian_controller = new CronController(
             $this->createMock(CronSchedulerService::class),
             $this->createMock(LoggerInterface::class),
             $this->createMock(ErrorLogService::class),
-            $audit
+            $Silian_audit
         );
 
-        $response = $controller->run(
+        $Silian_response = $Silian_controller->run(
             makeRequest('POST', '/api/v1/cron/run'),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(503, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertSame('CRON_UNAVAILABLE', $payload['code']);
-        $this->assertArrayHasKey('request_id', $payload);
-        $this->assertSame('no-store, no-cache, max-age=0, must-revalidate', $response->getHeaderLine('Cache-Control'));
+        $this->assertSame(503, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertSame('CRON_UNAVAILABLE', $Silian_payload['code']);
+        $this->assertArrayHasKey('request_id', $Silian_payload);
+        $this->assertSame('no-store, no-cache, max-age=0, must-revalidate', $Silian_response->getHeaderLine('Cache-Control'));
     }
 
     public function testRunReturnsForbiddenForInvalidKey(): void
     {
         $_ENV['CRON_RUN_KEY'] = 'expected-secret';
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
 
-        $controller = new CronController(
+        $Silian_controller = new CronController(
             $this->createMock(CronSchedulerService::class),
             $this->createMock(LoggerInterface::class),
             $this->createMock(ErrorLogService::class),
-            $audit
+            $Silian_audit
         );
 
-        $response = $controller->run(
+        $Silian_response = $Silian_controller->run(
             makeRequest('POST', '/api/v1/cron/run', ['key' => 'bad']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(403, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertArrayHasKey('request_id', $payload);
+        $this->assertSame(403, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertArrayHasKey('request_id', $Silian_payload);
     }
 
     public function testRunStillReturnsForbiddenWhenAuditLogFails(): void
     {
         $_ENV['CRON_RUN_KEY'] = 'expected-secret';
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())
             ->method('logSystemEvent')
             ->willThrowException(new \RuntimeException('audit down'));
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->once())->method('warning');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->once())->method('warning');
 
-        $controller = new CronController(
+        $Silian_controller = new CronController(
             $this->createMock(CronSchedulerService::class),
-            $logger,
+            $Silian_logger,
             $this->createMock(ErrorLogService::class),
-            $audit
+            $Silian_audit
         );
 
-        $response = $controller->run(
+        $Silian_response = $Silian_controller->run(
             makeRequest('POST', '/api/v1/cron/run', ['key' => 'bad']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(403, $response->getStatusCode());
+        $this->assertSame(403, $Silian_response->getStatusCode());
     }
 
     public function testRunReturnsSchedulerSummaryForValidKey(): void
     {
         $_ENV['CRON_RUN_KEY'] = 'expected-secret';
 
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('runDueTasks')
             ->with('cron_endpoint', $this->arrayHasKey('request_id'))
             ->willReturn([
@@ -110,30 +110,30 @@ class CronControllerTest extends TestCase
                 'skipped' => [],
             ]);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
 
-        $controller = new CronController(
-            $scheduler,
+        $Silian_controller = new CronController(
+            $Silian_scheduler,
             $this->createMock(LoggerInterface::class),
             $this->createMock(ErrorLogService::class),
-            $audit
+            $Silian_audit
         );
 
-        $response = $controller->run(
+        $Silian_response = $Silian_controller->run(
             makeRequest('POST', '/api/v1/cron/run', ['key' => 'expected-secret']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(200, $Silian_response->getStatusCode());
     }
 
     public function testRunReturnsFailureWhenDueTaskFails(): void
     {
         $_ENV['CRON_RUN_KEY'] = 'expected-secret';
 
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('runDueTasks')
             ->willReturn([
                 'triggered_at' => '2026-04-10 12:00:00',
@@ -143,32 +143,32 @@ class CronControllerTest extends TestCase
                 'skipped' => [],
             ]);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
 
-        $controller = new CronController(
-            $scheduler,
+        $Silian_controller = new CronController(
+            $Silian_scheduler,
             $this->createMock(LoggerInterface::class),
             $this->createMock(ErrorLogService::class),
-            $audit
+            $Silian_audit
         );
 
-        $response = $controller->run(
+        $Silian_response = $Silian_controller->run(
             makeRequest('POST', '/api/v1/cron/run', ['key' => 'expected-secret']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(503, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
+        $this->assertSame(503, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
     }
 
     public function testRunReturnsConflictWhenAllDueTasksAreSkipped(): void
     {
         $_ENV['CRON_RUN_KEY'] = 'expected-secret';
 
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('runDueTasks')
             ->willReturn([
                 'triggered_at' => '2026-04-10 12:00:00',
@@ -178,32 +178,32 @@ class CronControllerTest extends TestCase
                 'skipped' => [['task_key' => 'support_sla_sweep', 'status' => 'skipped']],
             ]);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('logSystemEvent')->willReturn(true);
 
-        $controller = new CronController(
-            $scheduler,
+        $Silian_controller = new CronController(
+            $Silian_scheduler,
             $this->createMock(LoggerInterface::class),
             $this->createMock(ErrorLogService::class),
-            $audit
+            $Silian_audit
         );
 
-        $response = $controller->run(
+        $Silian_response = $Silian_controller->run(
             makeRequest('POST', '/api/v1/cron/run', ['key' => 'expected-secret']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(409, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
+        $this->assertSame(409, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
     }
 
     public function testRunReturnsConflictWhenBatchIsPartiallySkipped(): void
     {
         $_ENV['CRON_RUN_KEY'] = 'expected-secret';
 
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('runDueTasks')
             ->willReturn([
                 'triggered_at' => '2026-04-10 12:00:00',
@@ -213,58 +213,58 @@ class CronControllerTest extends TestCase
                 'skipped' => [['task_key' => 'support_sla_sweep', 'status' => 'skipped']],
             ]);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())
             ->method('logSystemEvent')
             ->with(
                 'cron_run_endpoint_triggered',
                 'cron_scheduler',
-                $this->callback(static function (array $context): bool {
-                    return ($context['status'] ?? null) === 'failed';
+                $this->callback(static function (array $Silian_context): bool {
+                    return ($Silian_context['status'] ?? null) === 'failed';
                 })
             )
             ->willReturn(true);
 
-        $controller = new CronController(
-            $scheduler,
+        $Silian_controller = new CronController(
+            $Silian_scheduler,
             $this->createMock(LoggerInterface::class),
             $this->createMock(ErrorLogService::class),
-            $audit
+            $Silian_audit
         );
 
-        $response = $controller->run(
+        $Silian_response = $Silian_controller->run(
             makeRequest('POST', '/api/v1/cron/run', ['key' => 'expected-secret']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(409, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
+        $this->assertSame(409, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
     }
 
     public function testJsonFallsBackWhenPayloadCannotBeEncoded(): void
     {
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->once())->method('error');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->once())->method('error');
 
-        $controller = new CronController(
+        $Silian_controller = new CronController(
             $this->createMock(CronSchedulerService::class),
-            $logger,
+            $Silian_logger,
             $this->createMock(ErrorLogService::class),
             $this->createMock(AuditLogService::class)
         );
 
-        $method = new \ReflectionMethod($controller, 'json');
-        $method->setAccessible(true);
+        $Silian_method = new \ReflectionMethod($Silian_controller, 'json');
+        $Silian_method->setAccessible(true);
 
-        $request = makeRequest('POST', '/api/v1/cron/run');
-        $response = new \Slim\Psr7\Response();
-        $invalidPayload = ['message' => "\xB1\x31"];
+        $Silian_request = makeRequest('POST', '/api/v1/cron/run');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_invalidPayload = ['message' => "\xB1\x31"];
 
-        $result = $method->invoke($controller, $request, $response, $invalidPayload, 500);
-        $payload = json_decode((string) $result->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $Silian_result = $Silian_method->invoke($Silian_controller, $Silian_request, $Silian_response, $Silian_invalidPayload, 500);
+        $Silian_payload = json_decode((string) $Silian_result->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
-        $this->assertFalse($payload['success']);
-        $this->assertSame('INTERNAL_ERROR', $payload['code']);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('INTERNAL_ERROR', $Silian_payload['code']);
     }
 }

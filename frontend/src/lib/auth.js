@@ -1,68 +1,68 @@
-const DEV_AUTH_TRUTHY_VALUES = new Set(['1', 'true', 'yes', 'on']);
+const Silian_DEV_AUTH_TRUTHY_VALUES = new Set(['1', 'true', 'yes', 'on']);
 
-let apiPromise;
+let Silian_apiPromise;
 
-const getApi = async () => {
-  if (!apiPromise) {
-    apiPromise = import('./api').then((module) => module.default);
+const Silian_getApi = async () => {
+  if (!Silian_apiPromise) {
+    Silian_apiPromise = import('./api').then((Silian_module) => Silian_module.default);
   }
 
-  return apiPromise;
+  return Silian_apiPromise;
 };
 
-const isDevTruthy = (value) => DEV_AUTH_TRUTHY_VALUES.has(String(value || '').toLowerCase());
+const Silian_isDevTruthy = (Silian_value) => Silian_DEV_AUTH_TRUTHY_VALUES.has(String(Silian_value || '').toLowerCase());
 
-const decodeBase64Utf8 = (rawBase64) => {
-  const normalized = String(rawBase64 || '').trim().replaceAll('-', '+').replaceAll('_', '/');
-  const paddingLength = normalized.length % 4;
-  const padded = paddingLength ? normalized + '='.repeat(4 - paddingLength) : normalized;
-  const binary = atob(padded);
-  const bytes = Uint8Array.from(binary, (char) => char.codePointAt(0) ?? 0);
+const Silian_decodeBase64Utf8 = (Silian_rawBase64) => {
+  const Silian_normalized = String(Silian_rawBase64 || '').trim().replaceAll('-', '+').replaceAll('_', '/');
+  const Silian_paddingLength = Silian_normalized.length % 4;
+  const Silian_padded = Silian_paddingLength ? Silian_normalized + '='.repeat(4 - Silian_paddingLength) : Silian_normalized;
+  const Silian_binary = atob(Silian_padded);
+  const Silian_bytes = Uint8Array.from(Silian_binary, (Silian_char) => Silian_char.codePointAt(0) ?? 0);
 
   if (globalThis.TextDecoder) {
-    return new globalThis.TextDecoder('utf-8').decode(bytes);
+    return new globalThis.TextDecoder('utf-8').decode(Silian_bytes);
   }
 
-  return binary;
+  return Silian_binary;
 };
 
-const hasMinimalDevUserInfoFields = (userInfo) => (
-  userInfo
-  && typeof userInfo === 'object'
-  && !Array.isArray(userInfo)
-  && userInfo.id != null
+const Silian_hasMinimalDevUserInfoFields = (Silian_userInfo) => (
+  Silian_userInfo
+  && typeof Silian_userInfo === 'object'
+  && !Array.isArray(Silian_userInfo)
+  && Silian_userInfo.id != null
 );
 
-export const hasSupportPortalAccess = (user) => Boolean(
-  user?.is_admin
-  || user?.is_support
-  || user?.role === 'support'
-  || user?.role === 'admin'
+export const hasSupportPortalAccess = (Silian_user) => Boolean(
+  Silian_user?.is_admin
+  || Silian_user?.is_support
+  || Silian_user?.role === 'support'
+  || Silian_user?.role === 'admin'
 );
 
-const parseDevUserInfoFromEnv = () => {
-  const rawJson = String(import.meta.env?.VITE_DEV_AUTH_USER_INFO_JSON || '').trim();
-  if (rawJson) {
+const Silian_parseDevUserInfoFromEnv = () => {
+  const Silian_rawJson = String(import.meta.env?.VITE_DEV_AUTH_USER_INFO_JSON || '').trim();
+  if (Silian_rawJson) {
     try {
-      const parsed = JSON.parse(rawJson);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        return parsed;
+      const Silian_parsed = JSON.parse(Silian_rawJson);
+      if (Silian_parsed && typeof Silian_parsed === 'object' && !Array.isArray(Silian_parsed)) {
+        return Silian_parsed;
       }
-    } catch (error) {
-      console.warn('Failed to parse VITE_DEV_AUTH_USER_INFO_JSON:', error);
+    } catch (Silian_error) {
+      console.warn('Failed to parse VITE_DEV_AUTH_USER_INFO_JSON:', Silian_error);
     }
   }
 
-  const rawBase64 = String(import.meta.env?.VITE_DEV_AUTH_USER_INFO_BASE64 || '').trim();
-  if (rawBase64) {
+  const Silian_rawBase64 = String(import.meta.env?.VITE_DEV_AUTH_USER_INFO_BASE64 || '').trim();
+  if (Silian_rawBase64) {
     try {
-      const decodedJson = decodeBase64Utf8(rawBase64);
-      const parsed = JSON.parse(decodedJson);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        return parsed;
+      const Silian_decodedJson = Silian_decodeBase64Utf8(Silian_rawBase64);
+      const Silian_parsed = JSON.parse(Silian_decodedJson);
+      if (Silian_parsed && typeof Silian_parsed === 'object' && !Array.isArray(Silian_parsed)) {
+        return Silian_parsed;
       }
-    } catch (error) {
-      console.warn('Failed to parse VITE_DEV_AUTH_USER_INFO_BASE64:', error);
+    } catch (Silian_error) {
+      console.warn('Failed to parse VITE_DEV_AUTH_USER_INFO_BASE64:', Silian_error);
     }
   }
 
@@ -75,8 +75,8 @@ export const tokenManager = {
     return localStorage.getItem('auth_token');
   },
 
-  setToken(token) {
-    localStorage.setItem('auth_token', token);
+  setToken(Silian_token) {
+    localStorage.setItem('auth_token', Silian_token);
   },
 
   removeToken() {
@@ -84,12 +84,12 @@ export const tokenManager = {
   },
 
   isTokenValid() {
-    const token = this.getToken();
-    if (!token) return false;
+    const Silian_token = this.getToken();
+    if (!Silian_token) return false;
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp * 1000 > Date.now();
+      const Silian_payload = JSON.parse(atob(Silian_token.split('.')[1]));
+      return Silian_payload.exp * 1000 > Date.now();
     } catch {
       return false;
     }
@@ -99,41 +99,41 @@ export const tokenManager = {
 // 用户管理
 export const userManager = {
   getUser() {
-    const userStr = localStorage.getItem('user_info');
-    return userStr ? JSON.parse(userStr) : null;
+    const Silian_userStr = localStorage.getItem('user_info');
+    return Silian_userStr ? JSON.parse(Silian_userStr) : null;
   },
 
-  setUser(user) {
-    if (!user) {
+  setUser(Silian_user) {
+    if (!Silian_user) {
       this.removeUser();
       return;
     }
-    
-    const existing = this.getUser();
-    const existingId = existing?.id;
-    const nextUserId = user?.id;
-    const isSameUser = existingId != null && nextUserId != null && String(existingId) === String(nextUserId);
-    
+
+    const Silian_existing = this.getUser();
+    const Silian_existingId = Silian_existing?.id;
+    const Silian_nextUserId = Silian_user?.id;
+    const Silian_isSameUser = Silian_existingId != null && Silian_nextUserId != null && String(Silian_existingId) === String(Silian_nextUserId);
+
     // UUID should only come from the backend database/identity layer.
     // If the new data contains a UUID, use it.
     // If not, but it is the same user, preserve the existing one.
     // Never generate a fake UUID on the client side.
-    const uuid = user.uuid || (isSameUser ? existing.uuid : null);
+    const Silian_uuid = Silian_user.uuid || (Silian_isSameUser ? Silian_existing.uuid : null);
 
-    const mergedUser = isSameUser ? {
-      ...existing,
-      ...user
+    const Silian_mergedUser = Silian_isSameUser ? {
+      ...Silian_existing,
+      ...Silian_user
     } : {
-      ...user
+      ...Silian_user
     };
-    
-    if (uuid && uuid !== 'null') {
-      mergedUser.uuid = uuid;
+
+    if (Silian_uuid && Silian_uuid !== 'null') {
+      Silian_mergedUser.uuid = Silian_uuid;
     } else {
-      delete mergedUser.uuid;
+      delete Silian_mergedUser.uuid;
     }
-    
-    localStorage.setItem('user_info', JSON.stringify(mergedUser));
+
+    localStorage.setItem('user_info', JSON.stringify(Silian_mergedUser));
   },
 
   removeUser() {
@@ -141,8 +141,8 @@ export const userManager = {
   },
 
   isAdmin() {
-    const user = this.getUser();
-    return user?.is_admin || false;
+    const Silian_user = this.getUser();
+    return Silian_user?.is_admin || false;
   },
 
   isSupport() {
@@ -150,12 +150,12 @@ export const userManager = {
   }
 };
 
-export const getDefaultAuthenticatedRoute = (user = userManager.getUser()) => (
-  hasSupportPortalAccess(user) ? '/support/' : '/dashboard'
+export const getDefaultAuthenticatedRoute = (Silian_user = userManager.getUser()) => (
+  hasSupportPortalAccess(Silian_user) ? '/support/' : '/dashboard'
 );
 
 export const bootstrapDevAuthFromEnv = () => {
-  if (!import.meta.env.DEV || !isDevTruthy(import.meta.env?.VITE_ENABLE_DEV_AUTH_FROM_ENV)) {
+  if (!import.meta.env.DEV || !Silian_isDevTruthy(import.meta.env?.VITE_ENABLE_DEV_AUTH_FROM_ENV)) {
     return false;
   }
 
@@ -163,11 +163,11 @@ export const bootstrapDevAuthFromEnv = () => {
     return false;
   }
 
-  const envToken = String(import.meta.env?.VITE_DEV_AUTH_TOKEN || '').trim();
-  const envUserInfo = parseDevUserInfoFromEnv();
+  const Silian_envToken = String(import.meta.env?.VITE_DEV_AUTH_TOKEN || '').trim();
+  const Silian_envUserInfo = Silian_parseDevUserInfoFromEnv();
 
-  if (!envToken || !hasMinimalDevUserInfoFields(envUserInfo)) {
-    if (envToken || envUserInfo) {
+  if (!Silian_envToken || !Silian_hasMinimalDevUserInfoFields(Silian_envUserInfo)) {
+    if (Silian_envToken || Silian_envUserInfo) {
       console.warn(
         '[bootstrapDevAuthFromEnv] Invalid dev auth env payload; requires VITE_DEV_AUTH_TOKEN and user_info with at least "id". Injection skipped.'
       );
@@ -175,69 +175,69 @@ export const bootstrapDevAuthFromEnv = () => {
     return false;
   }
 
-  const forceSync = isDevTruthy(import.meta.env?.VITE_DEV_AUTH_FORCE_SYNC);
-  const existingToken = tokenManager.getToken();
-  const existingUser = userManager.getUser();
+  const Silian_forceSync = Silian_isDevTruthy(import.meta.env?.VITE_DEV_AUTH_FORCE_SYNC);
+  const Silian_existingToken = tokenManager.getToken();
+  const Silian_existingUser = userManager.getUser();
 
-  if (!forceSync && existingToken && existingUser) {
+  if (!Silian_forceSync && Silian_existingToken && Silian_existingUser) {
     return false;
   }
 
-  tokenManager.setToken(envToken);
-  userManager.setUser(envUserInfo);
+  tokenManager.setToken(Silian_envToken);
+  userManager.setUser(Silian_envUserInfo);
 
   return true;
 };
 
 // 认证API (注意：这些方法也在 api.js 中的 authAPI 对象中定义了，建议统一使用)
 export const authAPI = {
-  async login(credentials) {
-    const api = await getApi();
-    const response = await api.post('/auth/login', credentials);
-    
-    if (response.data.success) {
-      const { token, user } = response.data.data;
-      tokenManager.setToken(token);
-      userManager.setUser(user);
+  async login(Silian_credentials) {
+    const Silian_api = await Silian_getApi();
+    const Silian_response = await Silian_api.post('/auth/login', Silian_credentials);
+
+    if (Silian_response.data.success) {
+      const { token: Silian_token, user: Silian_user } = Silian_response.data.data;
+      tokenManager.setToken(Silian_token);
+      userManager.setUser(Silian_user);
     }
-    
-    return response.data;
+
+    return Silian_response.data;
   },
 
-  async loginWithPasskey(data) {
-    const api = await getApi();
-    const response = await api.post('/auth/passkey/login/verify', data);
-    
-    if (response.data.success) {
-      const { token, user } = response.data.data;
-      tokenManager.setToken(token);
-      userManager.setUser(user);
+  async loginWithPasskey(Silian_data) {
+    const Silian_api = await Silian_getApi();
+    const Silian_response = await Silian_api.post('/auth/passkey/login/verify', Silian_data);
+
+    if (Silian_response.data.success) {
+      const { token: Silian_token, user: Silian_user } = Silian_response.data.data;
+      tokenManager.setToken(Silian_token);
+      userManager.setUser(Silian_user);
     }
-    
-    return response.data;
+
+    return Silian_response.data;
   },
 
-  async register(userData) {
-    const api = await getApi();
-    const response = await api.post('/auth/register', userData);
-    
-    if (response.data.success && response.data.data) {
-      const { token, user } = response.data.data;
-      if (token) {
-        tokenManager.setToken(token);
+  async register(Silian_userData) {
+    const Silian_api = await Silian_getApi();
+    const Silian_response = await Silian_api.post('/auth/register', Silian_userData);
+
+    if (Silian_response.data.success && Silian_response.data.data) {
+      const { token: Silian_token, user: Silian_user } = Silian_response.data.data;
+      if (Silian_token) {
+        tokenManager.setToken(Silian_token);
       }
-      if (user) {
-        userManager.setUser(user);
+      if (Silian_user) {
+        userManager.setUser(Silian_user);
       }
     }
-    
-    return response.data;
+
+    return Silian_response.data;
   },
 
   async logout() {
     try {
-      const api = await getApi();
-      await api.post('/auth/logout');
+      const Silian_api = await Silian_getApi();
+      await Silian_api.post('/auth/logout');
     } catch (error) {
       console.warn('Logout API call failed:', error);
     } finally {
@@ -248,11 +248,11 @@ export const authAPI = {
 
   async getCurrentUser() {
     try {
-      const api = await getApi();
-      const response = await api.get('/users/me');
-      if (response.data.success) {
-        userManager.setUser(response.data.data);
-        return response.data.data;
+      const Silian_api = await Silian_getApi();
+      const Silian_response = await Silian_api.get('/users/me');
+      if (Silian_response.data.success) {
+        userManager.setUser(Silian_response.data.data);
+        return Silian_response.data.data;
       }
     } catch (error) {
       console.error('Get current user failed:', error);
@@ -261,104 +261,104 @@ export const authAPI = {
     return null;
   },
 
-  async forgotPassword(payload) {
-    const api = await getApi();
-    const body = typeof payload === 'string' ? { email: payload } : payload;
-    const response = await api.post('/auth/forgot-password', body);
-    return response.data;
+  async forgotPassword(Silian_payload) {
+    const Silian_api = await Silian_getApi();
+    const Silian_body = typeof Silian_payload === 'string' ? { email: Silian_payload } : Silian_payload;
+    const Silian_response = await Silian_api.post('/auth/forgot-password', Silian_body);
+    return Silian_response.data;
   },
 
-  async resetPassword(token, password, confirmPassword) {
-    const api = await getApi();
-    const response = await api.post('/auth/reset-password', {
-      token,
-      password,
-      confirm_password: confirmPassword
+  async resetPassword(Silian_token, Silian_password, Silian_confirmPassword) {
+    const Silian_api = await Silian_getApi();
+    const Silian_response = await Silian_api.post('/auth/reset-password', {
+      token: Silian_token,
+      password: Silian_password,
+      confirm_password: Silian_confirmPassword
     });
-    return response.data;
+    return Silian_response.data;
   },
 
-  async changePassword(currentPassword, newPassword, confirmPassword) {
-    const api = await getApi();
-    const response = await api.post('/auth/change-password', {
-      current_password: currentPassword,
-      new_password: newPassword,
-      confirm_password: confirmPassword
+  async changePassword(Silian_currentPassword, Silian_newPassword, Silian_confirmPassword) {
+    const Silian_api = await Silian_getApi();
+    const Silian_response = await Silian_api.post('/auth/change-password', {
+      current_password: Silian_currentPassword,
+      new_password: Silian_newPassword,
+      confirm_password: Silian_confirmPassword
     });
-    return response.data;
+    return Silian_response.data;
   },
 
-  async sendVerificationCode(payload) {
-    const api = await getApi();
-    const body = typeof payload === 'string' ? { email: payload } : payload;
-    const response = await api.post('/auth/send-verification-code', body);
-    return response.data;
+  async sendVerificationCode(Silian_payload) {
+    const Silian_api = await Silian_getApi();
+    const Silian_body = typeof Silian_payload === 'string' ? { email: Silian_payload } : Silian_payload;
+    const Silian_response = await Silian_api.post('/auth/send-verification-code', Silian_body);
+    return Silian_response.data;
   },
 
-  async verifyEmail(data) {
-    const api = await getApi();
-    const response = await api.post('/auth/verify-email', data);
-    if (response.data?.success && response.data?.data) {
-      const { token, user } = response.data.data;
-      if (token) {
-        tokenManager.setToken(token);
+  async verifyEmail(Silian_data) {
+    const Silian_api = await Silian_getApi();
+    const Silian_response = await Silian_api.post('/auth/verify-email', Silian_data);
+    if (Silian_response.data?.success && Silian_response.data?.data) {
+      const { token: Silian_token, user: Silian_user } = Silian_response.data.data;
+      if (Silian_token) {
+        tokenManager.setToken(Silian_token);
       }
-      if (user) {
-        userManager.setUser(user);
+      if (Silian_user) {
+        userManager.setUser(Silian_user);
       }
     }
-    return response.data;
+    return Silian_response.data;
   }
 };
 
 // 认证状态检查
 export const checkAuthStatus = () => {
-  const token = tokenManager.getToken();
-  const user = userManager.getUser();
-  
+  const Silian_token = tokenManager.getToken();
+  const Silian_user = userManager.getUser();
+
   // 需要 token 有效 且 本地有用户信息 才视为已登录
-  if (!token || !tokenManager.isTokenValid()) {
+  if (!Silian_token || !tokenManager.isTokenValid()) {
     tokenManager.removeToken();
     userManager.removeUser();
     return { isAuthenticated: false, user: null };
   }
-  if (!user) {
+  if (!Silian_user) {
     return { isAuthenticated: false, user: null };
   }
-  
-  return { isAuthenticated: true, user };
+
+  return { isAuthenticated: true, user: Silian_user };
 };
 
 // 登录重定向
-export const redirectToLogin = (returnUrl = null) => {
-  const url = returnUrl ? `/auth/login?return=${encodeURIComponent(returnUrl)}` : '/auth/login';
-  window.location.href = url;
+export const redirectToLogin = (Silian_returnUrl = null) => {
+  const Silian_url = Silian_returnUrl ? `/auth/login?return=${encodeURIComponent(Silian_returnUrl)}` : '/auth/login';
+  window.location.href = Silian_url;
 };
 
 // 获取返回URL
 export const getReturnUrl = () => {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('return') || getDefaultAuthenticatedRoute();
+  const Silian_params = new URLSearchParams(window.location.search);
+  return Silian_params.get('return') || getDefaultAuthenticatedRoute();
 };
 
 // 权限检查
-export const hasPermission = (permission) => {
-  const user = userManager.getUser();
-  if (!user) return false;
-  
+export const hasPermission = (Silian_permission) => {
+  const Silian_user = userManager.getUser();
+  if (!Silian_user) return false;
+
   // 管理员拥有所有权限
-  if (user.is_admin) return true;
-  
+  if (Silian_user.is_admin) return true;
+
   // 基础权限检查
-  const permissions = {
+  const Silian_permissions = {
     'view_own_data': true,
     'edit_own_profile': true,
     'submit_carbon_record': true,
     'exchange_products': true,
     'view_messages': true
   };
-  
-  return permissions[permission] || false;
+
+  return Silian_permissions[Silian_permission] || false;
 };
 
 export const isSupportUser = () => userManager.isSupport();
@@ -374,7 +374,7 @@ export const validationRules = {
       message: '用户名只能包含字母、数字和下划线'
     }
   },
-  
+
   email: {
     required: '邮箱不能为空',
     pattern: {
@@ -382,7 +382,7 @@ export const validationRules = {
       message: '请输入有效的邮箱地址'
     }
   },
-  
+
   password: {
     required: '密码不能为空',
     minLength: { value: 8, message: '密码至少8个字符' }
@@ -397,11 +397,11 @@ export const getValidationRules = () => {
     // 登录时用户名或邮箱字段
     usernameOrEmail: {
       required: '用户名或邮箱不能为空',
-      validate: (value) => {
-        if (!value) return '用户名或邮箱不能为空';
-        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-        const isUsername = /^[a-zA-Z0-9_]{3,20}$/.test(value);
-        if (!isEmail && !isUsername) return '请输入有效的用户名或邮箱';
+      validate: (Silian_value) => {
+        if (!Silian_value) return '用户名或邮箱不能为空';
+        const Silian_isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(Silian_value);
+        const Silian_isUsername = /^[a-zA-Z0-9_]{3,20}$/.test(Silian_value);
+        if (!Silian_isEmail && !Silian_isUsername) return '请输入有效的用户名或邮箱';
         return true;
       }
     }
@@ -409,36 +409,36 @@ export const getValidationRules = () => {
 };
 
 // 错误处理
-export const handleAuthError = (error) => {
-  if (error.response?.status === 401) {
+export const handleAuthError = (Silian_error) => {
+  if (Silian_error.response?.status === 401) {
     tokenManager.removeToken();
     userManager.removeUser();
     redirectToLogin(window.location.pathname);
     return;
   }
-  
-  const message = error.response?.data?.message || error.message || '操作失败';
-  throw new Error(message);
+
+  const Silian_message = Silian_error.response?.data?.message || Silian_error.message || '操作失败';
+  throw new Error(Silian_message);
 };
 
 // 自动刷新token
 export const setupTokenRefresh = () => {
-  const refreshInterval = 30 * 60 * 1000; // 30分钟
-  
+  const Silian_refreshInterval = 30 * 60 * 1000; // 30分钟
+
   setInterval(async () => {
-    const token = tokenManager.getToken();
-    if (!token || !tokenManager.isTokenValid()) {
+    const Silian_token = tokenManager.getToken();
+    if (!Silian_token || !tokenManager.isTokenValid()) {
       return;
     }
-    
+
     try {
       // 检查token是否即将过期（剩余时间少于10分钟）
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const remainingTime = payload.exp * 1000 - Date.now();
-      
-      if (remainingTime < 10 * 60 * 1000) {
-        const user = await authAPI.getCurrentUser();
-        if (!user) {
+      const Silian_payload = JSON.parse(atob(Silian_token.split('.')[1]));
+      const Silian_remainingTime = Silian_payload.exp * 1000 - Date.now();
+
+      if (Silian_remainingTime < 10 * 60 * 1000) {
+        const Silian_user = await authAPI.getCurrentUser();
+        if (!Silian_user) {
           authAPI.logout();
         }
       }
@@ -446,29 +446,29 @@ export const setupTokenRefresh = () => {
       console.error('Token refresh failed:', error);
       authAPI.logout();
     }
-  }, refreshInterval);
+  }, Silian_refreshInterval);
 };
 
 // 初始化认证
 export const initAuth = async () => {
-  const api = await getApi();
+  const Silian_api = await Silian_getApi();
 
-  api.interceptors.request.use((config) => {
-    const token = tokenManager.getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  Silian_api.interceptors.request.use((Silian_config) => {
+    const Silian_token = tokenManager.getToken();
+    if (Silian_token) {
+      Silian_config.headers.Authorization = `Bearer ${Silian_token}`;
     }
-    return config;
+    return Silian_config;
   });
 
-  api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (error.response?.status === 401) {
+  Silian_api.interceptors.response.use(
+    (Silian_response) => Silian_response,
+    (Silian_error) => {
+      if (Silian_error.response?.status === 401) {
         authAPI.logout();
         redirectToLogin();
       }
-      return Promise.reject(error);
+      return Promise.reject(Silian_error);
     }
   );
 

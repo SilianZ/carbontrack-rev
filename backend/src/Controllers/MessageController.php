@@ -30,441 +30,441 @@ class MessageController
     private UserProfileViewService $userProfileViewService;
 
     public function __construct(
-        PDO $db,
-        MessageService $messageService,
-        AuditLogService $auditLog,
-        AuthService $authService,
-        UserProfileViewService $userProfileViewService,
-        ?EmailService $emailService = null,
-        ?ErrorLogService $errorLogService = null
+        PDO $Silian_db,
+        MessageService $Silian_messageService,
+        AuditLogService $Silian_auditLog,
+        AuthService $Silian_authService,
+        UserProfileViewService $Silian_userProfileViewService,
+        ?EmailService $Silian_emailService = null,
+        ?ErrorLogService $Silian_errorLogService = null
     ) {
-        $this->db = $db;
-        $this->messageService = $messageService;
-        $this->auditLog = $auditLog;
-        $this->authService = $authService;
-        $this->userProfileViewService = $userProfileViewService;
-        $this->emailService = $emailService;
-        $this->errorLogService = $errorLogService;
+        $this->db = $Silian_db;
+        $this->messageService = $Silian_messageService;
+        $this->auditLog = $Silian_auditLog;
+        $this->authService = $Silian_authService;
+        $this->userProfileViewService = $Silian_userProfileViewService;
+        $this->emailService = $Silian_emailService;
+        $this->errorLogService = $Silian_errorLogService;
     }
 
     /**
      * 获取用户消息列表
      */
-    public function getUserMessages(Request $request, Response $response): Response
+    public function getUserMessages(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $params = $request->getQueryParams();
-            $page = max(1, intval($params['page'] ?? 1));
-            $limit = min(50, max(10, intval($params['limit'] ?? 20)));
-            $offset = ($page - 1) * $limit;
+            $Silian_params = $Silian_request->getQueryParams();
+            $Silian_page = max(1, intval($Silian_params['page'] ?? 1));
+            $Silian_limit = min(50, max(10, intval($Silian_params['limit'] ?? 20)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
 
             // 构建查询条件
-            $where = ['m.receiver_id = :user_id', 'm.deleted_at IS NULL'];
-            $bindings = ['user_id' => $user['id']];
+            $Silian_where = ['m.receiver_id = :user_id', 'm.deleted_at IS NULL'];
+            $Silian_bindings = ['user_id' => $Silian_user['id']];
 
             // 状态筛选：前端使用 `status=unread|read`
-            if (isset($params['status']) && $params['status'] !== '') {
-                if ($params['status'] === 'unread') {
-                    $where[] = 'm.is_read = 0';
-                } elseif ($params['status'] === 'read') {
-                    $where[] = 'm.is_read = 1';
+            if (isset($Silian_params['status']) && $Silian_params['status'] !== '') {
+                if ($Silian_params['status'] === 'unread') {
+                    $Silian_where[] = 'm.is_read = 0';
+                } elseif ($Silian_params['status'] === 'read') {
+                    $Silian_where[] = 'm.is_read = 1';
                 }
             }
 
             // 搜索：在 title 和 content 上模糊匹配
-            if (!empty($params['search'])) {
-                $where[] = '(m.title LIKE :search_title OR m.content LIKE :search_content)';
-                $searchPattern = '%' . trim((string)$params['search']) . '%';
-                $bindings['search_title'] = $searchPattern;
-                $bindings['search_content'] = $searchPattern;
+            if (!empty($Silian_params['search'])) {
+                $Silian_where[] = '(m.title LIKE :search_title OR m.content LIKE :search_content)';
+                $Silian_searchPattern = '%' . trim((string)$Silian_params['search']) . '%';
+                $Silian_bindings['search_title'] = $Silian_searchPattern;
+                $Silian_bindings['search_content'] = $Silian_searchPattern;
             }
 
-            $whereClause = implode(' AND ', $where);
+            $Silian_whereClause = implode(' AND ', $Silian_where);
 
             // 计算总数
-            $countSql = "SELECT COUNT(*) as total FROM messages m WHERE {$whereClause}";
-            $countStmt = $this->db->prepare($countSql);
-            $countStmt->execute($bindings);
-            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $Silian_countSql = "SELECT COUNT(*) as total FROM messages m WHERE {$Silian_whereClause}";
+            $Silian_countStmt = $this->db->prepare($Silian_countSql);
+            $Silian_countStmt->execute($Silian_bindings);
+            $Silian_total = $Silian_countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
             // 检查 messages 表是否包含 priority 列（兼容老数据库）
-            $hasPriority = false;
+            $Silian_hasPriority = false;
             try {
-                $colStmt = $this->db->query("SHOW COLUMNS FROM messages LIKE 'priority'");
-                if ($colStmt && $colStmt->fetch()) {
-                    $hasPriority = true;
+                $Silian_colStmt = $this->db->query("SHOW COLUMNS FROM messages LIKE 'priority'");
+                if ($Silian_colStmt && $Silian_colStmt->fetch()) {
+                    $Silian_hasPriority = true;
                 }
-            } catch (\Throwable $_) {
+            } catch (\Throwable $Silian__) {
                 // ignore - absence of column will be handled
-                $hasPriority = false;
+                $Silian_hasPriority = false;
             }
 
             // 构建 priority 排序表达式（数值越大优先级越高）
-            if ($hasPriority) {
-                $priorityExpr = "(CASE COALESCE(m.priority,'normal') WHEN 'urgent' THEN 3 WHEN 'high' THEN 2 WHEN 'normal' THEN 1 WHEN 'low' THEN 0 ELSE 1 END)";
+            if ($Silian_hasPriority) {
+                $Silian_priorityExpr = "(CASE COALESCE(m.priority,'normal') WHEN 'urgent' THEN 3 WHEN 'high' THEN 2 WHEN 'normal' THEN 1 WHEN 'low' THEN 0 ELSE 1 END)";
             } else {
                 // 不存在 priority 列时，使用 0 常量占位（对排序无影响）
-                $priorityExpr = "0";
+                $Silian_priorityExpr = "0";
             }
 
             // 处理排序参数，确保 priority 排序优先于用户指定排序
-            $sort = trim((string)($params['sort'] ?? 'created_at_desc'));
-            $userOrder = 'm.created_at DESC';
-            $priorityOrderDir = 'DESC';
+            $Silian_sort = trim((string)($Silian_params['sort'] ?? 'created_at_desc'));
+            $Silian_userOrder = 'm.created_at DESC';
+            $Silian_priorityOrderDir = 'DESC';
 
-            switch ($sort) {
+            switch ($Silian_sort) {
                 case 'created_at_asc':
-                    $userOrder = 'm.created_at ASC';
+                    $Silian_userOrder = 'm.created_at ASC';
                     break;
                 case 'created_at_desc':
-                    $userOrder = 'm.created_at DESC';
+                    $Silian_userOrder = 'm.created_at DESC';
                     break;
                 case 'priority_asc':
                     // 用户请求优先级从低到高：priority 升序
-                    $priorityOrderDir = 'ASC';
+                    $Silian_priorityOrderDir = 'ASC';
                     // 仍然在同一优先级内按时间倒序
-                    $userOrder = 'm.created_at DESC';
+                    $Silian_userOrder = 'm.created_at DESC';
                     break;
                 case 'priority_desc':
-                    $priorityOrderDir = 'DESC';
-                    $userOrder = 'm.created_at DESC';
+                    $Silian_priorityOrderDir = 'DESC';
+                    $Silian_userOrder = 'm.created_at DESC';
                     break;
                 default:
                     // fallback
-                    $userOrder = 'm.created_at DESC';
+                    $Silian_userOrder = 'm.created_at DESC';
             }
 
             // 最终 ORDER BY：未读优先 -> priority 优先 -> 用户排序 -> 最后按 id 保持稳定
-            $orderParts = [];
-            $orderParts[] = 'm.is_read ASC';
-            if ($hasPriority) {
-                $orderParts[] = $priorityExpr . ' ' . $priorityOrderDir;
+            $Silian_orderParts = [];
+            $Silian_orderParts[] = 'm.is_read ASC';
+            if ($Silian_hasPriority) {
+                $Silian_orderParts[] = $Silian_priorityExpr . ' ' . $Silian_priorityOrderDir;
             }
-            $orderParts[] = $userOrder;
-            $orderParts[] = 'm.id DESC';
-            $orderClause = implode(', ', $orderParts);
+            $Silian_orderParts[] = $Silian_userOrder;
+            $Silian_orderParts[] = 'm.id DESC';
+            $Silian_orderClause = implode(', ', $Silian_orderParts);
 
             // 获取消息列表
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     m.*
                 FROM messages m
-                WHERE {$whereClause}
-                ORDER BY {$orderClause}
+                WHERE {$Silian_whereClause}
+                ORDER BY {$Silian_orderClause}
                 LIMIT :limit OFFSET :offset
             ";
 
-            $stmt = $this->db->prepare($sql);
-            foreach ($bindings as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_bindings as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
+            $Silian_stmt->bindValue('limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->bindValue('offset', $Silian_offset, PDO::PARAM_INT);
+            $Silian_stmt->execute();
 
-            $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_messages = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Cast is_read to boolean
-            foreach ($messages as &$msg) {
-                $msg['is_read'] = (bool)($msg['is_read'] ?? false);
+            foreach ($Silian_messages as &$Silian_msg) {
+                $Silian_msg['is_read'] = (bool)($Silian_msg['is_read'] ?? false);
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $messages,
+                'data' => $Silian_messages,
                 'pagination' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'total' => intval($total),
-                    'pages' => ceil($total / $limit)
+                    'page' => $Silian_page,
+                    'limit' => $Silian_limit,
+                    'total' => intval($Silian_total),
+                    'pages' => ceil($Silian_total / $Silian_limit)
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 获取消息详情
      */
-    public function getMessageDetail(Request $request, Response $response, array $args): Response
+    public function getMessageDetail(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $messageId = $args['id'];
+            $Silian_messageId = $Silian_args['id'];
 
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     m.*
                 FROM messages m
                 WHERE m.id = :message_id AND m.receiver_id = :user_id AND m.deleted_at IS NULL
             ";
 
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([
-                'message_id' => $messageId,
-                'user_id' => $user['id']
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute([
+                'message_id' => $Silian_messageId,
+                'user_id' => $Silian_user['id']
             ]);
 
-            $message = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$message) {
-                return $this->json($response, ['error' => 'Message not found'], 404);
+            $Silian_message = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$Silian_message) {
+                return $this->json($Silian_response, ['error' => 'Message not found'], 404);
             }
 
             // 如果消息未读，标记为已读
-            if (!($message['is_read'] ?? false)) {
-                $this->markMessageAsRead($messageId);
-                $message['is_read'] = true;
+            if (!($Silian_message['is_read'] ?? false)) {
+                $this->markMessageAsRead($Silian_messageId);
+                $Silian_message['is_read'] = true;
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $message
+                'data' => $Silian_message
             ]);
 
-        } catch (\Exception $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 标记消息为已读
      */
-    public function markAsRead(Request $request, Response $response, array $args): Response
+    public function markAsRead(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $messageId = $args['id'];
+            $Silian_messageId = $Silian_args['id'];
 
             // 验证消息属于当前用户
-            $sql = "SELECT id FROM messages WHERE id = :id AND receiver_id = :user_id AND deleted_at IS NULL";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $messageId, 'user_id' => $user['id']]);
-            
-            if (!$stmt->fetch()) {
-                return $this->json($response, ['error' => 'Message not found'], 404);
+            $Silian_sql = "SELECT id FROM messages WHERE id = :id AND receiver_id = :user_id AND deleted_at IS NULL";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute(['id' => $Silian_messageId, 'user_id' => $Silian_user['id']]);
+
+            if (!$Silian_stmt->fetch()) {
+                return $this->json($Silian_response, ['error' => 'Message not found'], 404);
             }
 
             // 标记为已读
-            $this->markMessageAsRead($messageId);
+            $this->markMessageAsRead($Silian_messageId);
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'message' => 'Message marked as read'
             ]);
 
-        } catch (\Exception $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 批量标记消息为已读
      */
-    public function markAllAsRead(Request $request, Response $response): Response
+    public function markAllAsRead(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $data = $request->getParsedBody();
-            $messageIds = $data['message_ids'] ?? [];
+            $Silian_data = $Silian_request->getParsedBody();
+            $Silian_messageIds = $Silian_data['message_ids'] ?? [];
 
-            if (empty($messageIds)) {
+            if (empty($Silian_messageIds)) {
                 // 标记所有未读消息为已读
-                $sql = "
-                    UPDATE messages 
-                    SET is_read = 1, updated_at = NOW() 
+                $Silian_sql = "
+                    UPDATE messages
+                    SET is_read = 1, updated_at = NOW()
                     WHERE receiver_id = :user_id AND is_read = 0 AND deleted_at IS NULL
                 ";
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute(['user_id' => $user['id']]);
-                $affectedRows = $stmt->rowCount();
+                $Silian_stmt = $this->db->prepare($Silian_sql);
+                $Silian_stmt->execute(['user_id' => $Silian_user['id']]);
+                $Silian_affectedRows = $Silian_stmt->rowCount();
             } else {
                 // 标记指定消息为已读
-                $placeholders = str_repeat('?,', count($messageIds) - 1) . '?';
-                $sql = "
-                    UPDATE messages 
-                    SET is_read = 1, updated_at = NOW() 
-                    WHERE receiver_id = ? AND id IN ({$placeholders}) AND is_read = 0 AND deleted_at IS NULL
+                $Silian_placeholders = str_repeat('?,', count($Silian_messageIds) - 1) . '?';
+                $Silian_sql = "
+                    UPDATE messages
+                    SET is_read = 1, updated_at = NOW()
+                    WHERE receiver_id = ? AND id IN ({$Silian_placeholders}) AND is_read = 0 AND deleted_at IS NULL
                 ";
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute(array_merge([$user['id']], $messageIds));
-                $affectedRows = $stmt->rowCount();
+                $Silian_stmt = $this->db->prepare($Silian_sql);
+                $Silian_stmt->execute(array_merge([$Silian_user['id']], $Silian_messageIds));
+                $Silian_affectedRows = $Silian_stmt->rowCount();
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'affected_rows' => $affectedRows,
+                'affected_rows' => $Silian_affectedRows,
                 'message' => 'Messages marked as read'
             ]);
 
-        } catch (\Exception $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 删除消息
      */
-    public function deleteMessage(Request $request, Response $response, array $args): Response
+    public function deleteMessage(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $messageId = $args['id'];
+            $Silian_messageId = $Silian_args['id'];
 
             // 验证消息属于当前用户
-            $sql = "SELECT id FROM messages WHERE id = :id AND receiver_id = :user_id AND deleted_at IS NULL";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $messageId, 'user_id' => $user['id']]);
-            
-            if (!$stmt->fetch()) {
-                return $this->json($response, ['error' => 'Message not found'], 404);
+            $Silian_sql = "SELECT id FROM messages WHERE id = :id AND receiver_id = :user_id AND deleted_at IS NULL";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute(['id' => $Silian_messageId, 'user_id' => $Silian_user['id']]);
+
+            if (!$Silian_stmt->fetch()) {
+                return $this->json($Silian_response, ['error' => 'Message not found'], 404);
             }
 
             // 软删除消息
-            $sql = "UPDATE messages SET deleted_at = NOW() WHERE id = :id";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $messageId]);
+            $Silian_sql = "UPDATE messages SET deleted_at = NOW() WHERE id = :id";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute(['id' => $Silian_messageId]);
 
             // 记录审计日志
             $this->auditLog->log([
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'actor_type' => 'user',
                 'action' => 'message_deleted',
                 'operation_category' => 'message',
                 'affected_table' => 'messages',
-                'affected_id' => $messageId,
-                'data' => ['message_id' => $messageId],
+                'affected_id' => $Silian_messageId,
+                'data' => ['message_id' => $Silian_messageId],
             ]);
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'message' => 'Message deleted successfully'
             ]);
 
-        } catch (\Exception $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 批量删除消息
      */
-    public function deleteMessages(Request $request, Response $response): Response
+    public function deleteMessages(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $data = $request->getParsedBody();
-            $messageIds = $data['message_ids'] ?? [];
+            $Silian_data = $Silian_request->getParsedBody();
+            $Silian_messageIds = $Silian_data['message_ids'] ?? [];
 
-            if (empty($messageIds)) {
-                return $this->json($response, ['error' => 'No message IDs provided'], 400);
+            if (empty($Silian_messageIds)) {
+                return $this->json($Silian_response, ['error' => 'No message IDs provided'], 400);
             }
 
             // 验证所有消息都属于当前用户
-            $placeholders = str_repeat('?,', count($messageIds) - 1) . '?';
-            $sql = "
-                SELECT COUNT(*) as count 
-                FROM messages 
-                WHERE receiver_id = ? AND id IN ({$placeholders}) AND deleted_at IS NULL
+            $Silian_placeholders = str_repeat('?,', count($Silian_messageIds) - 1) . '?';
+            $Silian_sql = "
+                SELECT COUNT(*) as count
+                FROM messages
+                WHERE receiver_id = ? AND id IN ({$Silian_placeholders}) AND deleted_at IS NULL
             ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(array_merge([$user['id']], $messageIds));
-            $validCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute(array_merge([$Silian_user['id']], $Silian_messageIds));
+            $Silian_validCount = $Silian_stmt->fetch(PDO::FETCH_ASSOC)['count'];
 
-            if ($validCount != count($messageIds)) {
-                return $this->json($response, ['error' => 'Some messages not found or not owned by user'], 400);
+            if ($Silian_validCount != count($Silian_messageIds)) {
+                return $this->json($Silian_response, ['error' => 'Some messages not found or not owned by user'], 400);
             }
 
             // 批量软删除
-            $sql = "
-                UPDATE messages 
-                SET deleted_at = NOW() 
-                WHERE receiver_id = ? AND id IN ({$placeholders}) AND deleted_at IS NULL
+            $Silian_sql = "
+                UPDATE messages
+                SET deleted_at = NOW()
+                WHERE receiver_id = ? AND id IN ({$Silian_placeholders}) AND deleted_at IS NULL
             ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(array_merge([$user['id']], $messageIds));
-            $affectedRows = $stmt->rowCount();
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute(array_merge([$Silian_user['id']], $Silian_messageIds));
+            $Silian_affectedRows = $Silian_stmt->rowCount();
 
             // 记录审计日志
             $this->auditLog->log([
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'actor_type' => 'user',
                 'action' => 'messages_batch_deleted',
                 'operation_category' => 'message',
                 'affected_table' => 'messages',
                 'affected_id' => null,
-                'data' => ['message_ids' => $messageIds, 'count' => $affectedRows],
+                'data' => ['message_ids' => $Silian_messageIds, 'count' => $Silian_affectedRows],
             ]);
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'affected_rows' => $affectedRows,
+                'affected_rows' => $Silian_affectedRows,
                 'message' => 'Messages deleted successfully'
             ]);
 
-        } catch (\Exception $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 获取未读消息数量
      */
-    public function getUnreadCount(Request $request, Response $response): Response
+    public function getUnreadCount(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     COUNT(*) as total_unread
-                FROM messages 
+                FROM messages
                 WHERE receiver_id = :user_id AND is_read = 0 AND deleted_at IS NULL
             ";
 
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['user_id' => $user['id']]);
-            $counts = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute(['user_id' => $Silian_user['id']]);
+            $Silian_counts = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'total_unread' => intval($counts['total_unread']),
+                    'total_unread' => intval($Silian_counts['total_unread']),
                     'urgent_unread' => 0,
                     'high_unread' => 0,
                     'system_unread' => 0,
@@ -472,379 +472,379 @@ class MessageController
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 管理员发送系统消息
      */
-    public function sendSystemMessage(Request $request, Response $response): Response
+    public function sendSystemMessage(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => 'Admin access required'], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => 'Admin access required'], 403);
             }
 
-            $data = $request->getParsedBody();
-            if (!is_array($data)) {
-                return $this->json($response, ['error' => 'Invalid payload'], 400);
+            $Silian_data = $Silian_request->getParsedBody();
+            if (!is_array($Silian_data)) {
+                return $this->json($Silian_response, ['error' => 'Invalid payload'], 400);
             }
 
-            $title = trim((string)($data['title'] ?? ''));
-            if ($title === '') {
-                return $this->json($response, ['error' => 'Missing required field: title'], 400);
+            $Silian_title = trim((string)($Silian_data['title'] ?? ''));
+            if ($Silian_title === '') {
+                return $this->json($Silian_response, ['error' => 'Missing required field: title'], 400);
             }
-            if (mb_strlen($title, 'UTF-8') > 255) {
-                return $this->json($response, ['error' => 'Title must be 255 characters or less'], 422);
-            }
-
-            $content = trim((string)($data['content'] ?? ''));
-            if ($content === '') {
-                return $this->json($response, ['error' => 'Missing required field: content'], 400);
+            if (mb_strlen($Silian_title, 'UTF-8') > 255) {
+                return $this->json($Silian_response, ['error' => 'Title must be 255 characters or less'], 422);
             }
 
-            $contentFormat = $this->normalizeBroadcastContentFormat($data['content_format'] ?? self::BROADCAST_CONTENT_FORMAT_TEXT);
-            if ($contentFormat === null) {
-                return $this->json($response, ['error' => 'Invalid content_format value'], 422);
+            $Silian_content = trim((string)($Silian_data['content'] ?? ''));
+            if ($Silian_content === '') {
+                return $this->json($Silian_response, ['error' => 'Missing required field: content'], 400);
             }
 
-            $renderProfile = $this->normalizeBroadcastRenderProfile($data['render_profile'] ?? null, $contentFormat);
-            if ($contentFormat === self::BROADCAST_CONTENT_FORMAT_HTML && $renderProfile === null) {
-                return $this->json($response, ['error' => 'Invalid render_profile value'], 422);
-            }
-            $renderVersion = $this->resolveBroadcastRenderVersion($contentFormat, $renderProfile);
-            $sourceKind = self::BROADCAST_SOURCE_KIND_ADMIN;
-
-            $content = $this->normalizeBroadcastContent($content, $contentFormat);
-            if ($content === '') {
-                return $this->json($response, ['error' => 'Content cannot be empty after sanitization'], 422);
+            $Silian_contentFormat = $this->normalizeBroadcastContentFormat($Silian_data['content_format'] ?? self::BROADCAST_CONTENT_FORMAT_TEXT);
+            if ($Silian_contentFormat === null) {
+                return $this->json($Silian_response, ['error' => 'Invalid content_format value'], 422);
             }
 
-            $priorityRaw = $data['priority'] ?? Message::PRIORITY_NORMAL;
-            $priority = strtolower(trim((string)$priorityRaw));
-            if ($priority === '') {
-                $priority = Message::PRIORITY_NORMAL;
+            $Silian_renderProfile = $this->normalizeBroadcastRenderProfile($Silian_data['render_profile'] ?? null, $Silian_contentFormat);
+            if ($Silian_contentFormat === self::BROADCAST_CONTENT_FORMAT_HTML && $Silian_renderProfile === null) {
+                return $this->json($Silian_response, ['error' => 'Invalid render_profile value'], 422);
             }
-            $validPriorities = Message::getValidPriorities();
-            if (!in_array($priority, $validPriorities, true)) {
-                return $this->json($response, ['error' => 'Invalid priority value'], 422);
+            $Silian_renderVersion = $this->resolveBroadcastRenderVersion($Silian_contentFormat, $Silian_renderProfile);
+            $Silian_sourceKind = self::BROADCAST_SOURCE_KIND_ADMIN;
+
+            $Silian_content = $this->normalizeBroadcastContent($Silian_content, $Silian_contentFormat);
+            if ($Silian_content === '') {
+                return $this->json($Silian_response, ['error' => 'Content cannot be empty after sanitization'], 422);
             }
 
-            $targetUsersRaw = $data['target_users'] ?? null;
-            $filterGroupsRaw = $data['target_filters'] ?? null;
+            $Silian_priorityRaw = $Silian_data['priority'] ?? Message::PRIORITY_NORMAL;
+            $Silian_priority = strtolower(trim((string)$Silian_priorityRaw));
+            if ($Silian_priority === '') {
+                $Silian_priority = Message::PRIORITY_NORMAL;
+            }
+            $Silian_validPriorities = Message::getValidPriorities();
+            if (!in_array($Silian_priority, $Silian_validPriorities, true)) {
+                return $this->json($Silian_response, ['error' => 'Invalid priority value'], 422);
+            }
 
-            $targetUserRecords = [];
-            $targetUserIds = [];
-            $invalidTargetIds = [];
-            $errorLogIds = [];
-            $loggedErrorMessages = [];
+            $Silian_targetUsersRaw = $Silian_data['target_users'] ?? null;
+            $Silian_filterGroupsRaw = $Silian_data['target_filters'] ?? null;
 
-            if ($targetUsersRaw !== null) {
-                if (!is_array($targetUsersRaw)) {
-                    return $this->json($response, ['error' => 'target_users must be an array of positive integers'], 400);
+            $Silian_targetUserRecords = [];
+            $Silian_targetUserIds = [];
+            $Silian_invalidTargetIds = [];
+            $Silian_errorLogIds = [];
+            $Silian_loggedErrorMessages = [];
+
+            if ($Silian_targetUsersRaw !== null) {
+                if (!is_array($Silian_targetUsersRaw)) {
+                    return $this->json($Silian_response, ['error' => 'target_users must be an array of positive integers'], 400);
                 }
-                $resolved = $this->resolveExplicitRecipients($targetUsersRaw);
-                if ($resolved['error']) {
-                    return $this->json($response, ['error' => $resolved['error']], $resolved['status']);
+                $Silian_resolved = $this->resolveExplicitRecipients($Silian_targetUsersRaw);
+                if ($Silian_resolved['error']) {
+                    return $this->json($Silian_response, ['error' => $Silian_resolved['error']], $Silian_resolved['status']);
                 }
-                $targetUserIds = $resolved['user_ids'];
-                $targetUserRecords = $resolved['records'];
-                $invalidTargetIds = $resolved['invalid_ids'];
+                $Silian_targetUserIds = $Silian_resolved['user_ids'];
+                $Silian_targetUserRecords = $Silian_resolved['records'];
+                $Silian_invalidTargetIds = $Silian_resolved['invalid_ids'];
             }
 
-            if ($filterGroupsRaw !== null) {
-                if (!is_array($filterGroupsRaw)) {
-                    return $this->json($response, ['error' => 'target_filters must be an array'], 400);
+            if ($Silian_filterGroupsRaw !== null) {
+                if (!is_array($Silian_filterGroupsRaw)) {
+                    return $this->json($Silian_response, ['error' => 'target_filters must be an array'], 400);
                 }
-                $filterResult = $this->resolveFilteredRecipients($filterGroupsRaw);
-                $targetUserIds = array_values(array_unique(array_merge($targetUserIds, $filterResult['user_ids'])));
-                foreach ($filterResult['records'] as $id => $record) {
-                    if (!isset($targetUserRecords[$id])) {
-                        $targetUserRecords[$id] = $record;
+                $Silian_filterResult = $this->resolveFilteredRecipients($Silian_filterGroupsRaw);
+                $Silian_targetUserIds = array_values(array_unique(array_merge($Silian_targetUserIds, $Silian_filterResult['user_ids'])));
+                foreach ($Silian_filterResult['records'] as $Silian_id => $Silian_record) {
+                    if (!isset($Silian_targetUserRecords[$Silian_id])) {
+                        $Silian_targetUserRecords[$Silian_id] = $Silian_record;
                     }
                 }
             }
 
-            $scope = 'all';
-            if ($targetUsersRaw !== null || $filterGroupsRaw !== null) {
-                $scope = 'custom';
+            $Silian_scope = 'all';
+            if ($Silian_targetUsersRaw !== null || $Silian_filterGroupsRaw !== null) {
+                $Silian_scope = 'custom';
             }
 
-            if ($scope === 'all' && empty($targetUserIds)) {
-                $allResult = $this->resolveAllRecipients();
-                $targetUserIds = $allResult['user_ids'];
-                $targetUserRecords = $allResult['records'];
+            if ($Silian_scope === 'all' && empty($Silian_targetUserIds)) {
+                $Silian_allResult = $this->resolveAllRecipients();
+                $Silian_targetUserIds = $Silian_allResult['user_ids'];
+                $Silian_targetUserRecords = $Silian_allResult['records'];
             }
 
-            if (empty($targetUserIds)) {
-                return $this->json($response, ['error' => 'No target users found for broadcast'], 404);
+            if (empty($Silian_targetUserIds)) {
+                return $this->json($Silian_response, ['error' => 'No target users found for broadcast'], 404);
             }
 
-            $sentCount = 0;
-            $failedUserIds = [];
-            $createdMessageIds = [];
-            foreach ($targetUserIds as $targetUserId) {
+            $Silian_sentCount = 0;
+            $Silian_failedUserIds = [];
+            $Silian_createdMessageIds = [];
+            foreach ($Silian_targetUserIds as $Silian_targetUserId) {
                 try {
-                    $message = $this->messageService->sendSystemMessage(
-                        (int)$targetUserId,
-                        $title,
-                        $content,
+                    $Silian_message = $this->messageService->sendSystemMessage(
+                        (int)$Silian_targetUserId,
+                        $Silian_title,
+                        $Silian_content,
                         Message::TYPE_SYSTEM,
-                        $priority,
+                        $Silian_priority,
                         null,
                         null,
                         false
                     );
-                    $sentCount++;
-                    if ($message && isset($message->id)) {
-                        $createdMessageIds[(int)$targetUserId] = (int)$message->id;
+                    $Silian_sentCount++;
+                    if ($Silian_message && isset($Silian_message->id)) {
+                        $Silian_createdMessageIds[(int)$Silian_targetUserId] = (int)$Silian_message->id;
                     }
-                } catch (\Throwable $e) {
-                    $failedUserIds[] = (int)$targetUserId;
+                } catch (\Throwable $Silian_e) {
+                    $Silian_failedUserIds[] = (int)$Silian_targetUserId;
                     if ($this->errorLogService) {
                         try {
-                            $this->errorLogService->logException($e, $request);
-                        } catch (\Throwable $ignore) {}
+                            $this->errorLogService->logException($Silian_e, $Silian_request);
+                        } catch (\Throwable $Silian_ignore) {}
                     }
                 }
             }
 
-            $missingEmailUserIds = [];
-            $emailRecipients = [];
-            foreach ($targetUserIds as $recipientId) {
-                $record = $targetUserRecords[$recipientId] ?? null;
-                if ($record === null) {
+            $Silian_missingEmailUserIds = [];
+            $Silian_emailRecipients = [];
+            foreach ($Silian_targetUserIds as $Silian_recipientId) {
+                $Silian_record = $Silian_targetUserRecords[$Silian_recipientId] ?? null;
+                if ($Silian_record === null) {
                     continue;
                 }
-                $email = trim((string)($record['email'] ?? ''));
-                if ($email === '') {
-                    $missingEmailUserIds[] = (int)$recipientId;
+                $Silian_email = trim((string)($Silian_record['email'] ?? ''));
+                if ($Silian_email === '') {
+                    $Silian_missingEmailUserIds[] = (int)$Silian_recipientId;
                     continue;
                 }
-                $displayName = $record['username'] ?? null;
-                if ($displayName === null || $displayName === '') {
-                    $displayName = $email;
+                $Silian_displayName = $Silian_record['username'] ?? null;
+                if ($Silian_displayName === null || $Silian_displayName === '') {
+                    $Silian_displayName = $Silian_email;
                 }
-                $emailRecipients[] = [
-                    'user_id' => (int)$recipientId,
-                    'email' => $email,
-                    'name' => $displayName,
+                $Silian_emailRecipients[] = [
+                    'user_id' => (int)$Silian_recipientId,
+                    'email' => $Silian_email,
+                    'name' => $Silian_displayName,
                 ];
             }
 
-            $allMessageIds = array_values(array_filter($createdMessageIds));
-            $messageIdCount = count($allMessageIds);
-            $messageIdSample = $messageIdCount > 200 ? array_slice($allMessageIds, 0, 200) : $allMessageIds;
-            $messageMapSample = $messageIdCount > 200 ? array_slice($createdMessageIds, 0, 200, true) : $createdMessageIds;
-            $contentHash = hash('sha256', $title . '||' . $content);
+            $Silian_allMessageIds = array_values(array_filter($Silian_createdMessageIds));
+            $Silian_messageIdCount = count($Silian_allMessageIds);
+            $Silian_messageIdSample = $Silian_messageIdCount > 200 ? array_slice($Silian_allMessageIds, 0, 200) : $Silian_allMessageIds;
+            $Silian_messageMapSample = $Silian_messageIdCount > 200 ? array_slice($Silian_createdMessageIds, 0, 200, true) : $Silian_createdMessageIds;
+            $Silian_contentHash = hash('sha256', $Silian_title . '||' . $Silian_content);
 
-            $emailDelivery = [
+            $Silian_emailDelivery = [
                 'triggered' => false,
-                'attempted_recipients' => count($emailRecipients),
+                'attempted_recipients' => count($Silian_emailRecipients),
                 'successful_chunks' => 0,
                 'failed_chunks' => 0,
                 'failed_recipient_ids' => [],
-                'missing_email_user_ids' => $missingEmailUserIds,
-                'status' => count($emailRecipients) > 0 ? 'queued' : 'skipped',
+                'missing_email_user_ids' => $Silian_missingEmailUserIds,
+                'status' => count($Silian_emailRecipients) > 0 ? 'queued' : 'skipped',
                 'errors' => [],
                 'completed_at' => null,
             ];
-            if ($this->shouldSendPriorityEmail($priority) && !empty($emailRecipients)) {
-                $queueResult = $this->messageService->queueBroadcastEmail(
-                    $emailRecipients,
-                    $title,
-                    $content,
-                    $priority,
+            if ($this->shouldSendPriorityEmail($Silian_priority) && !empty($Silian_emailRecipients)) {
+                $Silian_queueResult = $this->messageService->queueBroadcastEmail(
+                    $Silian_emailRecipients,
+                    $Silian_title,
+                    $Silian_content,
+                    $Silian_priority,
                     [
-                        'scope' => $scope,
-                        'message_ids' => $messageIdSample,
-                        'content_format' => $contentFormat,
-                        'render_profile' => $renderProfile,
-                        'render_version' => $renderVersion,
-                        'source_kind' => $sourceKind,
+                        'scope' => $Silian_scope,
+                        'message_ids' => $Silian_messageIdSample,
+                        'content_format' => $Silian_contentFormat,
+                        'render_profile' => $Silian_renderProfile,
+                        'render_version' => $Silian_renderVersion,
+                        'source_kind' => $Silian_sourceKind,
                     ]
                 );
-                if (!empty($queueResult['queued'])) {
-                    $emailDelivery['triggered'] = true;
-                    $emailDelivery['status'] = 'queued';
-                } elseif (!empty($queueResult['error'])) {
-                    $normalizedError = trim((string) $queueResult['error']);
-                    if ($normalizedError !== '') {
-                        $emailDelivery['errors'][] = $normalizedError;
-                        $loggedErrorMessages[$normalizedError] = true;
+                if (!empty($Silian_queueResult['queued'])) {
+                    $Silian_emailDelivery['triggered'] = true;
+                    $Silian_emailDelivery['status'] = 'queued';
+                } elseif (!empty($Silian_queueResult['error'])) {
+                    $Silian_normalizedError = trim((string) $Silian_queueResult['error']);
+                    if ($Silian_normalizedError !== '') {
+                        $Silian_emailDelivery['errors'][] = $Silian_normalizedError;
+                        $Silian_loggedErrorMessages[$Silian_normalizedError] = true;
                     }
-                    $emailDelivery['status'] = 'failed';
-                    $errorId = $this->logBroadcastError($request, 'broadcast_email_queue_failed', [
-                        'scope' => $scope,
-                        'message' => $normalizedError,
-                        'priority' => $priority,
+                    $Silian_emailDelivery['status'] = 'failed';
+                    $Silian_errorId = $this->logBroadcastError($Silian_request, 'broadcast_email_queue_failed', [
+                        'scope' => $Silian_scope,
+                        'message' => $Silian_normalizedError,
+                        'priority' => $Silian_priority,
                     ]);
-                    if ($errorId) {
-                        $errorLogIds[] = $errorId;
+                    if ($Silian_errorId) {
+                        $Silian_errorLogIds[] = $Silian_errorId;
                     }
                 } else {
-                    $emailDelivery['status'] = 'skipped';
+                    $Silian_emailDelivery['status'] = 'skipped';
                 }
             }
 
-            if (!empty($emailDelivery['errors'])) {
-                foreach ($emailDelivery['errors'] as $deliveryError) {
-                    $normalized = trim((string) $deliveryError);
-                    if ($normalized === '' || isset($loggedErrorMessages[$normalized])) {
+            if (!empty($Silian_emailDelivery['errors'])) {
+                foreach ($Silian_emailDelivery['errors'] as $Silian_deliveryError) {
+                    $Silian_normalized = trim((string) $Silian_deliveryError);
+                    if ($Silian_normalized === '' || isset($Silian_loggedErrorMessages[$Silian_normalized])) {
                         continue;
                     }
-                    $errorId = $this->logBroadcastError($request, $normalized, [
-                        'scope' => $scope,
-                        'priority' => $priority,
+                    $Silian_errorId = $this->logBroadcastError($Silian_request, $Silian_normalized, [
+                        'scope' => $Silian_scope,
+                        'priority' => $Silian_priority,
                     ]);
-                    if ($errorId) {
-                        $errorLogIds[] = $errorId;
+                    if ($Silian_errorId) {
+                        $Silian_errorLogIds[] = $Silian_errorId;
                     }
-                    $loggedErrorMessages[$normalized] = true;
+                    $Silian_loggedErrorMessages[$Silian_normalized] = true;
                 }
             }
 
-            $emailDeliveryForLog = $this->trimEmailDeliveryForLog($emailDelivery);
+            $Silian_emailDeliveryForLog = $this->trimEmailDeliveryForLog($Silian_emailDelivery);
 
-$auditPayload = [
+$Silian_auditPayload = [
                 'action' => 'system_message_broadcast',
                 'operation_category' => 'admin_message',
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'actor_type' => 'admin',
                 'affected_table' => 'messages',
                 'change_type' => 'broadcast',
                 'data' => [
-                    'title' => $title,
-                    'content' => $content,
-                    'content_format' => $contentFormat,
-                    'render_profile' => $renderProfile,
-                    'render_version' => $renderVersion,
-                    'source_kind' => $sourceKind,
-                    'priority' => $priority,
-                    'scope' => $scope,
-                    'target_count' => count($targetUserIds),
-                    'sent_count' => $sentCount,
-                    'invalid_user_ids' => $invalidTargetIds,
-                    'failed_user_ids' => $failedUserIds,
-                    'message_ids' => $messageIdSample,
-                    'message_id_count' => $messageIdCount,
-                    'message_id_map' => $messageMapSample,
-                    'content_hash' => $contentHash,
-                    'email_delivery' => $emailDeliveryForLog,
+                    'title' => $Silian_title,
+                    'content' => $Silian_content,
+                    'content_format' => $Silian_contentFormat,
+                    'render_profile' => $Silian_renderProfile,
+                    'render_version' => $Silian_renderVersion,
+                    'source_kind' => $Silian_sourceKind,
+                    'priority' => $Silian_priority,
+                    'scope' => $Silian_scope,
+                    'target_count' => count($Silian_targetUserIds),
+                    'sent_count' => $Silian_sentCount,
+                    'invalid_user_ids' => $Silian_invalidTargetIds,
+                    'failed_user_ids' => $Silian_failedUserIds,
+                    'message_ids' => $Silian_messageIdSample,
+                    'message_id_count' => $Silian_messageIdCount,
+                    'message_id_map' => $Silian_messageMapSample,
+                    'content_hash' => $Silian_contentHash,
+                    'email_delivery' => $Silian_emailDeliveryForLog,
                 ],
             ];
 
-            $this->auditLog->log($auditPayload);
-            $auditLogId = method_exists($this->auditLog, 'getLastInsertId') ? $this->auditLog->getLastInsertId() : null;
-            $requestId = $request->getAttribute('request_id') ?? $request->getHeaderLine('X-Request-ID') ?? ($request->getServerParams()['HTTP_X_REQUEST_ID'] ?? null);
-            if (is_string($requestId)) {
-                $requestId = trim($requestId);
-                if ($requestId === '') {
-                    $requestId = null;
+            $this->auditLog->log($Silian_auditPayload);
+            $Silian_auditLogId = method_exists($this->auditLog, 'getLastInsertId') ? $this->auditLog->getLastInsertId() : null;
+            $Silian_requestId = $Silian_request->getAttribute('request_id') ?? $Silian_request->getHeaderLine('X-Request-ID') ?? ($Silian_request->getServerParams()['HTTP_X_REQUEST_ID'] ?? null);
+            if (is_string($Silian_requestId)) {
+                $Silian_requestId = trim($Silian_requestId);
+                if ($Silian_requestId === '') {
+                    $Silian_requestId = null;
                 }
             } else {
-                $requestId = null;
+                $Silian_requestId = null;
             }
-            $systemLogId = $this->lookupSystemLogId($requestId);
+            $Silian_systemLogId = $this->lookupSystemLogId($Silian_requestId);
 
-            $cleanErrorLogIds = [];
-            foreach ($errorLogIds as $candidateId) {
-                $candidateId = (int) $candidateId;
-                if ($candidateId > 0) {
-                    $cleanErrorLogIds[$candidateId] = $candidateId;
+            $Silian_cleanErrorLogIds = [];
+            foreach ($Silian_errorLogIds as $Silian_candidateId) {
+                $Silian_candidateId = (int) $Silian_candidateId;
+                if ($Silian_candidateId > 0) {
+                    $Silian_cleanErrorLogIds[$Silian_candidateId] = $Silian_candidateId;
                 }
             }
-            $cleanErrorLogIds = array_values($cleanErrorLogIds);
+            $Silian_cleanErrorLogIds = array_values($Silian_cleanErrorLogIds);
 
-            $filtersSnapshot = ['scope' => $scope];
-            if ($filterGroupsRaw !== null) {
-                $filtersSnapshot['target_filters'] = $filterGroupsRaw;
+            $Silian_filtersSnapshot = ['scope' => $Silian_scope];
+            if ($Silian_filterGroupsRaw !== null) {
+                $Silian_filtersSnapshot['target_filters'] = $Silian_filterGroupsRaw;
             }
-            if ($targetUsersRaw !== null) {
-                $filtersSnapshot['explicit_targets'] = $targetUsersRaw;
+            if ($Silian_targetUsersRaw !== null) {
+                $Silian_filtersSnapshot['explicit_targets'] = $Silian_targetUsersRaw;
             }
-            if (empty($filtersSnapshot['target_filters']) && empty($filtersSnapshot['explicit_targets'])) {
-                $filtersSnapshot = ['scope' => $scope];
+            if (empty($Silian_filtersSnapshot['target_filters']) && empty($Silian_filtersSnapshot['explicit_targets'])) {
+                $Silian_filtersSnapshot = ['scope' => $Silian_scope];
             }
-            if ($filtersSnapshot === ['scope' => $scope]) {
-                $filtersSnapshot = null;
+            if ($Silian_filtersSnapshot === ['scope' => $Silian_scope]) {
+                $Silian_filtersSnapshot = null;
             }
 
-            $metaSnapshot = [];
-            $metaSnapshot['content_format'] = $contentFormat;
-            $metaSnapshot['render_profile'] = $renderProfile;
-            $metaSnapshot['render_version'] = $renderVersion;
-            $metaSnapshot['source_kind'] = $sourceKind;
+            $Silian_metaSnapshot = [];
+            $Silian_metaSnapshot['content_format'] = $Silian_contentFormat;
+            $Silian_metaSnapshot['render_profile'] = $Silian_renderProfile;
+            $Silian_metaSnapshot['render_version'] = $Silian_renderVersion;
+            $Silian_metaSnapshot['source_kind'] = $Silian_sourceKind;
 
-            if (!empty($targetUserRecords)) {
-                $metaSnapshot['target_records_sample'] = array_slice(array_values($targetUserRecords), 0, 50);
+            if (!empty($Silian_targetUserRecords)) {
+                $Silian_metaSnapshot['target_records_sample'] = array_slice(array_values($Silian_targetUserRecords), 0, 50);
             }
-            if (!empty($loggedErrorMessages)) {
-                $metaSnapshot['error_messages_logged'] = array_keys($loggedErrorMessages);
+            if (!empty($Silian_loggedErrorMessages)) {
+                $Silian_metaSnapshot['error_messages_logged'] = array_keys($Silian_loggedErrorMessages);
             }
 
             try {
-                $insert = $this->db->prepare('INSERT INTO message_broadcasts (request_id, audit_log_id, system_log_id, error_log_ids, title, content, priority, scope, target_count, sent_count, invalid_user_ids, failed_user_ids, message_ids_snapshot, message_map_snapshot, message_id_count, content_hash, email_delivery_snapshot, filters_snapshot, meta, created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
-                if ($insert) {
-                    $insert->execute([
-                        $requestId,
-                        $auditLogId,
-                        $systemLogId,
-                        $this->encodeJson($cleanErrorLogIds),
-                        $title,
-                        $content,
-                        $priority,
-                        $scope,
-                        count($targetUserIds),
-                        $sentCount,
-                        $this->encodeJson($invalidTargetIds),
-                        $this->encodeJson($failedUserIds),
-                        $this->encodeJson($messageIdSample),
-                        $this->encodeJson($messageMapSample),
-                        $messageIdCount,
-                        $contentHash,
-                        $this->encodeJson($emailDeliveryForLog),
-                        $this->encodeJson($filtersSnapshot),
-                        $this->encodeJson(!empty($metaSnapshot) ? $metaSnapshot : null),
-                        $user['id'] ?? null,
+                $Silian_insert = $this->db->prepare('INSERT INTO message_broadcasts (request_id, audit_log_id, system_log_id, error_log_ids, title, content, priority, scope, target_count, sent_count, invalid_user_ids, failed_user_ids, message_ids_snapshot, message_map_snapshot, message_id_count, content_hash, email_delivery_snapshot, filters_snapshot, meta, created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+                if ($Silian_insert) {
+                    $Silian_insert->execute([
+                        $Silian_requestId,
+                        $Silian_auditLogId,
+                        $Silian_systemLogId,
+                        $this->encodeJson($Silian_cleanErrorLogIds),
+                        $Silian_title,
+                        $Silian_content,
+                        $Silian_priority,
+                        $Silian_scope,
+                        count($Silian_targetUserIds),
+                        $Silian_sentCount,
+                        $this->encodeJson($Silian_invalidTargetIds),
+                        $this->encodeJson($Silian_failedUserIds),
+                        $this->encodeJson($Silian_messageIdSample),
+                        $this->encodeJson($Silian_messageMapSample),
+                        $Silian_messageIdCount,
+                        $Silian_contentHash,
+                        $this->encodeJson($Silian_emailDeliveryForLog),
+                        $this->encodeJson($Silian_filtersSnapshot),
+                        $this->encodeJson(!empty($Silian_metaSnapshot) ? $Silian_metaSnapshot : null),
+                        $Silian_user['id'] ?? null,
                     ]);
                 }
-            } catch (\Throwable $persistError) {
-                $this->logBroadcastError($request, 'broadcast_record_persist_failed', [
-                    'message' => $persistError->getMessage(),
+            } catch (\Throwable $Silian_persistError) {
+                $this->logBroadcastError($Silian_request, 'broadcast_record_persist_failed', [
+                    'message' => $Silian_persistError->getMessage(),
                 ]);
             }
 
-                        return $this->json($response, [
+                        return $this->json($Silian_response, [
                 'success' => true,
-                'sent_count' => $sentCount,
-                'total_targets' => count($targetUserIds),
-                'failed_user_ids' => $failedUserIds,
-                'invalid_user_ids' => $invalidTargetIds,
-                'scope' => $scope,
+                'sent_count' => $Silian_sentCount,
+                'total_targets' => count($Silian_targetUserIds),
+                'failed_user_ids' => $Silian_failedUserIds,
+                'invalid_user_ids' => $Silian_invalidTargetIds,
+                'scope' => $Silian_scope,
                 'message' => 'System message sent successfully',
-                'priority' => $priority,
-                'content_format' => $contentFormat,
-                'render_profile' => $renderProfile,
-                'render_version' => $renderVersion,
-                'source_kind' => $sourceKind,
-                'message_ids' => $messageIdSample,
-                'message_id_count' => $messageIdCount,
-                'email_delivery' => $emailDelivery,
-                'error_log_ids' => $cleanErrorLogIds,
-                'request_id' => $requestId,
+                'priority' => $Silian_priority,
+                'content_format' => $Silian_contentFormat,
+                'render_profile' => $Silian_renderProfile,
+                'render_version' => $Silian_renderVersion,
+                'source_kind' => $Silian_sourceKind,
+                'message_ids' => $Silian_messageIdSample,
+                'message_id_count' => $Silian_messageIdCount,
+                'email_delivery' => $Silian_emailDelivery,
+                'error_log_ids' => $Silian_cleanErrorLogIds,
+                'request_id' => $Silian_requestId,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             try {
                 if ($this->errorLogService) {
-                    $this->errorLogService->logException($e, $request);
+                    $this->errorLogService->logException($Silian_e, $Silian_request);
                 }
-            } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+            } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
@@ -852,22 +852,22 @@ $auditPayload = [
     /**
      * 获取消息类型统计
      */
-    public function getMessageStats(Request $request, Response $response): Response
+    public function getMessageStats(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $overview = ['total' => 0, 'unread' => 0, 'read' => 0];
-            $byType = [];
-            $raw = [];
+            $Silian_overview = ['total' => 0, 'unread' => 0, 'read' => 0];
+            $Silian_byType = [];
+            $Silian_raw = [];
 
             // Try rich aggregation first (works with tests' PDO mock); fallback to simple counts
             try {
-                $aggSql = "
-                    SELECT 
+                $Silian_aggSql = "
+                    SELECT
                         COALESCE(type,'unknown') AS type,
                         COALESCE(priority,'normal') AS priority,
                         COUNT(*) AS count,
@@ -876,570 +876,570 @@ $auditPayload = [
                     WHERE receiver_id = :user_id AND deleted_at IS NULL
                     GROUP BY COALESCE(type,'unknown'), COALESCE(priority,'normal')
                 ";
-                $aggStmt = $this->db->prepare($aggSql);
-                $aggStmt->execute(['user_id' => $user['id']]);
-                $raw = $aggStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                $Silian_aggStmt = $this->db->prepare($Silian_aggSql);
+                $Silian_aggStmt->execute(['user_id' => $Silian_user['id']]);
+                $Silian_raw = $Silian_aggStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-                $total = 0; $unread = 0;
-                foreach ($raw as $row) {
-                    $t = $row['type'];
-                    $p = $row['priority'];
-                    $c = (int)$row['count'];
-                    $u = (int)$row['unread_count'];
-                    if (!isset($byType[$t])) {
-                        $byType[$t] = ['total' => 0, 'unread' => 0, 'by_priority' => []];
+                $Silian_total = 0; $Silian_unread = 0;
+                foreach ($Silian_raw as $Silian_row) {
+                    $Silian_t = $Silian_row['type'];
+                    $Silian_p = $Silian_row['priority'];
+                    $Silian_c = (int)$Silian_row['count'];
+                    $Silian_u = (int)$Silian_row['unread_count'];
+                    if (!isset($Silian_byType[$Silian_t])) {
+                        $Silian_byType[$Silian_t] = ['total' => 0, 'unread' => 0, 'by_priority' => []];
                     }
-                    $byType[$t]['total'] += $c;
-                    $byType[$t]['unread'] += $u;
-                    $byType[$t]['by_priority'][$p] = [
-                        'total' => $c,
-                        'unread' => $u
+                    $Silian_byType[$Silian_t]['total'] += $Silian_c;
+                    $Silian_byType[$Silian_t]['unread'] += $Silian_u;
+                    $Silian_byType[$Silian_t]['by_priority'][$Silian_p] = [
+                        'total' => $Silian_c,
+                        'unread' => $Silian_u
                     ];
-                    $total += $c; $unread += $u;
+                    $Silian_total += $Silian_c; $Silian_unread += $Silian_u;
                 }
-                $overview = [
-                    'total' => $total,
-                    'unread' => $unread,
-                    'read' => max(0, $total - $unread)
+                $Silian_overview = [
+                    'total' => $Silian_total,
+                    'unread' => $Silian_unread,
+                    'read' => max(0, $Silian_total - $Silian_unread)
                 ];
-            } catch (\Throwable $ignored) {
+            } catch (\Throwable $Silian_ignored) {
                 // Fallback simple counts
-                $simple = $this->db->prepare("SELECT COUNT(*) as total, COUNT(CASE WHEN is_read = 0 THEN 1 END) as unread FROM messages WHERE receiver_id = :user_id AND deleted_at IS NULL");
-                $simple->execute(['user_id' => $user['id']]);
-                $row = $simple->fetch(PDO::FETCH_ASSOC) ?: ['total' => 0, 'unread' => 0];
-                $overview = [
-                    'total' => (int)$row['total'],
-                    'unread' => (int)$row['unread'],
-                    'read' => max(0, (int)$row['total'] - (int)$row['unread'])
+                $Silian_simple = $this->db->prepare("SELECT COUNT(*) as total, COUNT(CASE WHEN is_read = 0 THEN 1 END) as unread FROM messages WHERE receiver_id = :user_id AND deleted_at IS NULL");
+                $Silian_simple->execute(['user_id' => $Silian_user['id']]);
+                $Silian_row = $Silian_simple->fetch(PDO::FETCH_ASSOC) ?: ['total' => 0, 'unread' => 0];
+                $Silian_overview = [
+                    'total' => (int)$Silian_row['total'],
+                    'unread' => (int)$Silian_row['unread'],
+                    'read' => max(0, (int)$Silian_row['total'] - (int)$Silian_row['unread'])
                 ];
-                $byType = [];
-                $raw = [];
+                $Silian_byType = [];
+                $Silian_raw = [];
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'overview' => $overview,
-                    'by_type' => $byType,
-                    'raw_stats' => $raw
+                    'overview' => $Silian_overview,
+                    'by_type' => $Silian_byType,
+                    'raw_stats' => $Silian_raw
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 获取广播历史（管理员）
      */
-        public function getBroadcastHistory(Request $request, Response $response): Response
+        public function getBroadcastHistory(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => 'Admin access required'], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => 'Admin access required'], 403);
             }
 
-            $params = $request->getQueryParams();
-            $page = max(1, (int)($params['page'] ?? 1));
-            $limit = min(50, max(5, (int)($params['limit'] ?? 10)));
-            $offset = ($page - 1) * $limit;
+            $Silian_params = $Silian_request->getQueryParams();
+            $Silian_page = max(1, (int)($Silian_params['page'] ?? 1));
+            $Silian_limit = min(50, max(5, (int)($Silian_params['limit'] ?? 10)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
 
-            $total = 0;
+            $Silian_total = 0;
             try {
-                $countStmt = $this->db->query('SELECT COUNT(*) FROM message_broadcasts');
-                if ($countStmt !== false) {
-                    $total = (int) $countStmt->fetchColumn();
+                $Silian_countStmt = $this->db->query('SELECT COUNT(*) FROM message_broadcasts');
+                if ($Silian_countStmt !== false) {
+                    $Silian_total = (int) $Silian_countStmt->fetchColumn();
                 }
-            } catch (\Throwable $countError) {
-                $total = 0;
+            } catch (\Throwable $Silian_countError) {
+                $Silian_total = 0;
             }
 
-            $rows = [];
+            $Silian_rows = [];
             try {
-                $listStmt = $this->db->prepare('SELECT * FROM message_broadcasts ORDER BY id DESC LIMIT :limit OFFSET :offset');
-                if ($listStmt) {
-                    $listStmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-                    $listStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-                    $listStmt->execute();
-                    $rows = $listStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                $Silian_listStmt = $this->db->prepare('SELECT * FROM message_broadcasts ORDER BY id DESC LIMIT :limit OFFSET :offset');
+                if ($Silian_listStmt) {
+                    $Silian_listStmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+                    $Silian_listStmt->bindValue(':offset', $Silian_offset, PDO::PARAM_INT);
+                    $Silian_listStmt->execute();
+                    $Silian_rows = $Silian_listStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
                 }
-            } catch (\Throwable $listError) {
-                $rows = [];
+            } catch (\Throwable $Silian_listError) {
+                $Silian_rows = [];
             }
 
-            $actorIds = [];
-            foreach ($rows as $row) {
-                if (isset($row['created_by']) && $row['created_by'] !== null) {
-                    $actorIds[] = (int) $row['created_by'];
+            $Silian_actorIds = [];
+            foreach ($Silian_rows as $Silian_row) {
+                if (isset($Silian_row['created_by']) && $Silian_row['created_by'] !== null) {
+                    $Silian_actorIds[] = (int) $Silian_row['created_by'];
                 }
             }
-            $actorMap = !empty($actorIds) ? $this->loadUsernames($actorIds) : [];
+            $Silian_actorMap = !empty($Silian_actorIds) ? $this->loadUsernames($Silian_actorIds) : [];
 
-            $items = [];
-            foreach ($rows as $row) {
-                $broadcastId = (int)($row['id'] ?? 0);
-                $createdBy = isset($row['created_by']) ? (int)$row['created_by'] : null;
-                $title = (string)($row['title'] ?? '');
-                $content = (string)($row['content'] ?? '');
-                $priority = (string)($row['priority'] ?? Message::PRIORITY_NORMAL);
-                if (!in_array($priority, Message::getValidPriorities(), true)) {
-                    $priority = Message::PRIORITY_NORMAL;
+            $Silian_items = [];
+            foreach ($Silian_rows as $Silian_row) {
+                $Silian_broadcastId = (int)($Silian_row['id'] ?? 0);
+                $Silian_createdBy = isset($Silian_row['created_by']) ? (int)$Silian_row['created_by'] : null;
+                $Silian_title = (string)($Silian_row['title'] ?? '');
+                $Silian_content = (string)($Silian_row['content'] ?? '');
+                $Silian_priority = (string)($Silian_row['priority'] ?? Message::PRIORITY_NORMAL);
+                if (!in_array($Silian_priority, Message::getValidPriorities(), true)) {
+                    $Silian_priority = Message::PRIORITY_NORMAL;
                 }
-                $scope = (string)($row['scope'] ?? 'all');
-                $targetCount = (int)($row['target_count'] ?? 0);
-                $sentCount = (int)($row['sent_count'] ?? 0);
-                $invalidIds = $this->decodeIdList($row['invalid_user_ids'] ?? []);
-                $failedIds = $this->decodeIdList($row['failed_user_ids'] ?? []);
-                $messageIds = $this->decodeIdList($row['message_ids_snapshot'] ?? []);
-                $messageIdCount = isset($row['message_id_count']) ? (int)$row['message_id_count'] : (count($messageIds) ?: null);
-                $messageIdMap = $this->decodeJsonObject($row['message_map_snapshot'] ?? null);
-                $emailDelivery = $this->normalizeEmailDeliveryMeta($this->decodeJsonValue($row['email_delivery_snapshot'] ?? null));
-                $meta = $this->decodeJsonObject($row['meta'] ?? null);
-                $contentFormat = $this->normalizeBroadcastContentFormat($meta['content_format'] ?? self::BROADCAST_CONTENT_FORMAT_TEXT)
+                $Silian_scope = (string)($Silian_row['scope'] ?? 'all');
+                $Silian_targetCount = (int)($Silian_row['target_count'] ?? 0);
+                $Silian_sentCount = (int)($Silian_row['sent_count'] ?? 0);
+                $Silian_invalidIds = $this->decodeIdList($Silian_row['invalid_user_ids'] ?? []);
+                $Silian_failedIds = $this->decodeIdList($Silian_row['failed_user_ids'] ?? []);
+                $Silian_messageIds = $this->decodeIdList($Silian_row['message_ids_snapshot'] ?? []);
+                $Silian_messageIdCount = isset($Silian_row['message_id_count']) ? (int)$Silian_row['message_id_count'] : (count($Silian_messageIds) ?: null);
+                $Silian_messageIdMap = $this->decodeJsonObject($Silian_row['message_map_snapshot'] ?? null);
+                $Silian_emailDelivery = $this->normalizeEmailDeliveryMeta($this->decodeJsonValue($Silian_row['email_delivery_snapshot'] ?? null));
+                $Silian_meta = $this->decodeJsonObject($Silian_row['meta'] ?? null);
+                $Silian_contentFormat = $this->normalizeBroadcastContentFormat($Silian_meta['content_format'] ?? self::BROADCAST_CONTENT_FORMAT_TEXT)
                     ?? self::BROADCAST_CONTENT_FORMAT_TEXT;
-                $renderProfile = $this->normalizeBroadcastRenderProfile($meta['render_profile'] ?? null, $contentFormat);
-                $renderVersion = $this->normalizeBroadcastRenderVersion($meta['render_version'] ?? null, $contentFormat, $renderProfile);
-                $sourceKind = $this->normalizeBroadcastSourceKind($meta['source_kind'] ?? null);
-                $errorIds = $this->decodeIdList($row['error_log_ids'] ?? []);
-                $requestId = isset($row['request_id']) ? trim((string)$row['request_id']) : null;
-                if ($requestId === '') {
-                    $requestId = null;
+                $Silian_renderProfile = $this->normalizeBroadcastRenderProfile($Silian_meta['render_profile'] ?? null, $Silian_contentFormat);
+                $Silian_renderVersion = $this->normalizeBroadcastRenderVersion($Silian_meta['render_version'] ?? null, $Silian_contentFormat, $Silian_renderProfile);
+                $Silian_sourceKind = $this->normalizeBroadcastSourceKind($Silian_meta['source_kind'] ?? null);
+                $Silian_errorIds = $this->decodeIdList($Silian_row['error_log_ids'] ?? []);
+                $Silian_requestId = isset($Silian_row['request_id']) ? trim((string)$Silian_row['request_id']) : null;
+                if ($Silian_requestId === '') {
+                    $Silian_requestId = null;
                 }
-                $createdAtRaw = $row['created_at'] ?? date('Y-m-d H:i:s');
-                $startTime = is_string($createdAtRaw) ? $createdAtRaw : date('Y-m-d H:i:s');
-                if ($createdAtRaw instanceof \DateTimeInterface) {
-                    $startTime = $createdAtRaw->format('Y-m-d H:i:s');
+                $Silian_createdAtRaw = $Silian_row['created_at'] ?? date('Y-m-d H:i:s');
+                $Silian_startTime = is_string($Silian_createdAtRaw) ? $Silian_createdAtRaw : date('Y-m-d H:i:s');
+                if ($Silian_createdAtRaw instanceof \DateTimeInterface) {
+                    $Silian_startTime = $Silian_createdAtRaw->format('Y-m-d H:i:s');
                 }
-                $endTime = date('Y-m-d H:i:s', strtotime($startTime . ' +60 minutes'));
-                $recipients = $this->loadBroadcastRecipients($title, $startTime, $endTime, $messageIds, $row['content_hash'] ?? null, true);
+                $Silian_endTime = date('Y-m-d H:i:s', strtotime($Silian_startTime . ' +60 minutes'));
+                $Silian_recipients = $this->loadBroadcastRecipients($Silian_title, $Silian_startTime, $Silian_endTime, $Silian_messageIds, $Silian_row['content_hash'] ?? null, true);
 
-                $readUsers = [];
-                $unreadUsers = [];
-                foreach ($recipients as $recipient) {
-                    $recipientUuid = isset($recipient['uuid']) ? strtolower(trim((string)$recipient['uuid'])) : null;
-                    if ($recipientUuid === '') {
-                        $recipientUuid = null;
+                $Silian_readUsers = [];
+                $Silian_unreadUsers = [];
+                foreach ($Silian_recipients as $Silian_recipient) {
+                    $Silian_recipientUuid = isset($Silian_recipient['uuid']) ? strtolower(trim((string)$Silian_recipient['uuid'])) : null;
+                    if ($Silian_recipientUuid === '') {
+                        $Silian_recipientUuid = null;
                     }
-                    $entry = [
-                        'user_id' => $recipientUuid,
-                        'uuid' => $recipientUuid,
-                        'legacy_user_id' => isset($recipient['receiver_id']) ? (int)$recipient['receiver_id'] : null,
-                        'username' => $recipient['username'] ?? null,
-                        'email' => $recipient['email'] ?? null,
-                        'status' => $recipient['status'] ?? null,
-                        'is_admin' => isset($recipient['is_admin']) ? (bool)$recipient['is_admin'] : null,
-                        'message_id' => isset($recipient['id']) ? (int)$recipient['id'] : null,
-                        'read' => (bool)($recipient['is_read'] ?? false),
+                    $Silian_entry = [
+                        'user_id' => $Silian_recipientUuid,
+                        'uuid' => $Silian_recipientUuid,
+                        'legacy_user_id' => isset($Silian_recipient['receiver_id']) ? (int)$Silian_recipient['receiver_id'] : null,
+                        'username' => $Silian_recipient['username'] ?? null,
+                        'email' => $Silian_recipient['email'] ?? null,
+                        'status' => $Silian_recipient['status'] ?? null,
+                        'is_admin' => isset($Silian_recipient['is_admin']) ? (bool)$Silian_recipient['is_admin'] : null,
+                        'message_id' => isset($Silian_recipient['id']) ? (int)$Silian_recipient['id'] : null,
+                        'read' => (bool)($Silian_recipient['is_read'] ?? false),
                     ];
-                    if ($entry['read']) {
-                        $readUsers[] = $entry;
+                    if ($Silian_entry['read']) {
+                        $Silian_readUsers[] = $Silian_entry;
                     } else {
-                        $unreadUsers[] = $entry;
+                        $Silian_unreadUsers[] = $Silian_entry;
                     }
                 }
 
-                $items[] = [
-                    'id' => $broadcastId,
-                    'actor_user_id' => $createdBy,
-                    'actor_username' => ($createdBy !== null && isset($actorMap[$createdBy])) ? $actorMap[$createdBy] : null,
-                    'title' => $title,
-                    'content' => $content,
-                    'content_format' => $contentFormat,
-                    'render_profile' => $renderProfile,
-                    'render_version' => $renderVersion,
-                    'source_kind' => $sourceKind,
-                    'priority' => $priority,
-                    'scope' => $scope,
-                    'target_count' => $targetCount,
-                    'sent_count' => $sentCount,
-                    'read_count' => count($readUsers),
-                    'unread_count' => count($unreadUsers),
-                    'invalid_user_ids' => $invalidIds,
-                    'failed_user_ids' => $failedIds,
-                    'read_users' => $readUsers,
-                    'unread_users' => $unreadUsers,
-                    'created_at' => $startTime,
-                    'message_id_count' => $messageIdCount ?? count($recipients),
-                    'message_ids' => $messageIds,
-                    'message_id_map' => $messageIdMap,
-                    'email_delivery' => $emailDelivery,
-                    'request_id' => $requestId,
-                    'audit_log_id' => isset($row['audit_log_id']) ? (int)$row['audit_log_id'] : null,
-                    'system_log_id' => isset($row['system_log_id']) ? (int)$row['system_log_id'] : null,
-                    'error_log_ids' => $errorIds,
+                $Silian_items[] = [
+                    'id' => $Silian_broadcastId,
+                    'actor_user_id' => $Silian_createdBy,
+                    'actor_username' => ($Silian_createdBy !== null && isset($Silian_actorMap[$Silian_createdBy])) ? $Silian_actorMap[$Silian_createdBy] : null,
+                    'title' => $Silian_title,
+                    'content' => $Silian_content,
+                    'content_format' => $Silian_contentFormat,
+                    'render_profile' => $Silian_renderProfile,
+                    'render_version' => $Silian_renderVersion,
+                    'source_kind' => $Silian_sourceKind,
+                    'priority' => $Silian_priority,
+                    'scope' => $Silian_scope,
+                    'target_count' => $Silian_targetCount,
+                    'sent_count' => $Silian_sentCount,
+                    'read_count' => count($Silian_readUsers),
+                    'unread_count' => count($Silian_unreadUsers),
+                    'invalid_user_ids' => $Silian_invalidIds,
+                    'failed_user_ids' => $Silian_failedIds,
+                    'read_users' => $Silian_readUsers,
+                    'unread_users' => $Silian_unreadUsers,
+                    'created_at' => $Silian_startTime,
+                    'message_id_count' => $Silian_messageIdCount ?? count($Silian_recipients),
+                    'message_ids' => $Silian_messageIds,
+                    'message_id_map' => $Silian_messageIdMap,
+                    'email_delivery' => $Silian_emailDelivery,
+                    'request_id' => $Silian_requestId,
+                    'audit_log_id' => isset($Silian_row['audit_log_id']) ? (int)$Silian_row['audit_log_id'] : null,
+                    'system_log_id' => isset($Silian_row['system_log_id']) ? (int)$Silian_row['system_log_id'] : null,
+                    'error_log_ids' => $Silian_errorIds,
                 ];
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $items,
+                'data' => $Silian_items,
                 'pagination' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'total' => $total,
-                    'pages' => (int) max(1, ceil($total / max(1, $limit))),
+                    'page' => $Silian_page,
+                    'limit' => $Silian_limit,
+                    'total' => $Silian_total,
+                    'pages' => (int) max(1, ceil($Silian_total / max(1, $Silian_limit))),
                 ],
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             try {
                 if ($this->errorLogService) {
-                    $this->errorLogService->logException($e, $request);
+                    $this->errorLogService->logException($Silian_e, $Silian_request);
                 }
-            } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+            } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 刷新广播邮件队列并尝试发送（仅限管理员）。
      */
-    public function flushBroadcastEmailQueue(Request $request, Response $response): Response
+    public function flushBroadcastEmailQueue(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => 'Admin access required'], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => 'Admin access required'], 403);
             }
 
-            $query = $request->getQueryParams();
-            $body = $request->getParsedBody();
-            $params = [];
-            if (is_array($query)) {
-                $params = array_merge($params, $query);
+            $Silian_query = $Silian_request->getQueryParams();
+            $Silian_body = $Silian_request->getParsedBody();
+            $Silian_params = [];
+            if (is_array($Silian_query)) {
+                $Silian_params = array_merge($Silian_params, $Silian_query);
             }
-            if (is_array($body)) {
-                $params = array_merge($params, $body);
+            if (is_array($Silian_body)) {
+                $Silian_params = array_merge($Silian_params, $Silian_body);
             }
 
-            $limit = isset($params['limit']) ? (int)$params['limit'] : 10;
-            $limit = max(1, min(50, $limit));
+            $Silian_limit = isset($Silian_params['limit']) ? (int)$Silian_params['limit'] : 10;
+            $Silian_limit = max(1, min(50, $Silian_limit));
 
-            $forceSend = false;
-            if (isset($params['force'])) {
-                $rawForce = $params['force'];
-                if (is_bool($rawForce)) {
-                    $forceSend = $rawForce;
-                } elseif (is_numeric($rawForce)) {
-                    $forceSend = ((int)$rawForce) !== 0;
-                } elseif (is_string($rawForce)) {
-                    $normalized = strtolower(trim($rawForce));
-                    $forceSend = in_array($normalized, ['1', 'true', 'yes', 'on'], true);
+            $Silian_forceSend = false;
+            if (isset($Silian_params['force'])) {
+                $Silian_rawForce = $Silian_params['force'];
+                if (is_bool($Silian_rawForce)) {
+                    $Silian_forceSend = $Silian_rawForce;
+                } elseif (is_numeric($Silian_rawForce)) {
+                    $Silian_forceSend = ((int)$Silian_rawForce) !== 0;
+                } elseif (is_string($Silian_rawForce)) {
+                    $Silian_normalized = strtolower(trim($Silian_rawForce));
+                    $Silian_forceSend = in_array($Silian_normalized, ['1', 'true', 'yes', 'on'], true);
                 }
             }
 
-            if ($forceSend && $this->emailService === null) {
-                return $this->json($response, [
+            if ($Silian_forceSend && $this->emailService === null) {
+                return $this->json($Silian_response, [
                     'error' => 'Email service unavailable, cannot force send queued broadcasts',
                 ], 503);
             }
 
-            $fetchLimit = max($limit * 3, $limit);
-            $stmt = $this->db->prepare('SELECT * FROM message_broadcasts ORDER BY created_at ASC LIMIT :limit');
-            if (!$stmt) {
-                return $this->json($response, ['error' => 'Failed to inspect broadcast queue'], 500);
+            $Silian_fetchLimit = max($Silian_limit * 3, $Silian_limit);
+            $Silian_stmt = $this->db->prepare('SELECT * FROM message_broadcasts ORDER BY created_at ASC LIMIT :limit');
+            if (!$Silian_stmt) {
+                return $this->json($Silian_response, ['error' => 'Failed to inspect broadcast queue'], 500);
             }
-            $stmt->bindValue(':limit', $fetchLimit, PDO::PARAM_INT);
-            $stmt->execute();
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_stmt->bindValue(':limit', $Silian_fetchLimit, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            $processed = [];
-            $skipped = [];
-            $now = date('Y-m-d H:i:s');
+            $Silian_processed = [];
+            $Silian_skipped = [];
+            $Silian_now = date('Y-m-d H:i:s');
 
-            foreach ($rows as $row) {
-                if (count($processed) >= $limit) {
+            foreach ($Silian_rows as $Silian_row) {
+                if (count($Silian_processed) >= $Silian_limit) {
                     break;
                 }
 
-                $broadcastId = isset($row['id']) ? (int)$row['id'] : 0;
-                if ($broadcastId <= 0) {
+                $Silian_broadcastId = isset($Silian_row['id']) ? (int)$Silian_row['id'] : 0;
+                if ($Silian_broadcastId <= 0) {
                     continue;
                 }
 
-                $delivery = $this->normalizeEmailDeliveryMeta($row['email_delivery_snapshot'] ?? null);
-                if (!in_array($delivery['status'], ['queued', 'partial'], true)) {
-                    $skipped[] = $broadcastId;
+                $Silian_delivery = $this->normalizeEmailDeliveryMeta($Silian_row['email_delivery_snapshot'] ?? null);
+                if (!in_array($Silian_delivery['status'], ['queued', 'partial'], true)) {
+                    $Silian_skipped[] = $Silian_broadcastId;
                     continue;
                 }
 
-                if ($delivery['completed_at'] !== null && !$forceSend) {
-                    $skipped[] = $broadcastId;
+                if ($Silian_delivery['completed_at'] !== null && !$Silian_forceSend) {
+                    $Silian_skipped[] = $Silian_broadcastId;
                     continue;
                 }
 
-                $createdAtRaw = $row['created_at'] ?? $now;
-                if ($createdAtRaw instanceof \DateTimeInterface) {
-                    $startTime = $createdAtRaw->format('Y-m-d H:i:s');
+                $Silian_createdAtRaw = $Silian_row['created_at'] ?? $Silian_now;
+                if ($Silian_createdAtRaw instanceof \DateTimeInterface) {
+                    $Silian_startTime = $Silian_createdAtRaw->format('Y-m-d H:i:s');
                 } else {
-                    $startTime = is_string($createdAtRaw) && $createdAtRaw !== '' ? $createdAtRaw : $now;
+                    $Silian_startTime = is_string($Silian_createdAtRaw) && $Silian_createdAtRaw !== '' ? $Silian_createdAtRaw : $Silian_now;
                 }
-                $endTime = date('Y-m-d H:i:s', strtotime($startTime . ' +90 minutes'));
+                $Silian_endTime = date('Y-m-d H:i:s', strtotime($Silian_startTime . ' +90 minutes'));
 
-                $messageIds = $this->decodeIdList($row['message_ids_snapshot'] ?? []);
-                $contentHash = isset($row['content_hash']) && is_string($row['content_hash']) ? $row['content_hash'] : null;
-                $recipients = $this->loadBroadcastRecipients(
-                    (string)($row['title'] ?? ''),
-                    $startTime,
-                    $endTime,
-                    $messageIds,
-                    $contentHash,
+                $Silian_messageIds = $this->decodeIdList($Silian_row['message_ids_snapshot'] ?? []);
+                $Silian_contentHash = isset($Silian_row['content_hash']) && is_string($Silian_row['content_hash']) ? $Silian_row['content_hash'] : null;
+                $Silian_recipients = $this->loadBroadcastRecipients(
+                    (string)($Silian_row['title'] ?? ''),
+                    $Silian_startTime,
+                    $Silian_endTime,
+                    $Silian_messageIds,
+                    $Silian_contentHash,
                     false
                 );
 
-                $deliverable = [];
-                $missingEmailUserIds = [];
-                foreach ($recipients as $recipient) {
-                    $receiverId = isset($recipient['receiver_id']) ? (int)$recipient['receiver_id'] : 0;
-                    if ($receiverId <= 0) {
+                $Silian_deliverable = [];
+                $Silian_missingEmailUserIds = [];
+                foreach ($Silian_recipients as $Silian_recipient) {
+                    $Silian_receiverId = isset($Silian_recipient['receiver_id']) ? (int)$Silian_recipient['receiver_id'] : 0;
+                    if ($Silian_receiverId <= 0) {
                         continue;
                     }
-                    if (isset($deliverable[$receiverId]) || in_array($receiverId, $missingEmailUserIds, true)) {
+                    if (isset($Silian_deliverable[$Silian_receiverId]) || in_array($Silian_receiverId, $Silian_missingEmailUserIds, true)) {
                         continue;
                     }
-                    $email = trim((string)($recipient['email'] ?? ''));
-                    if ($email === '') {
-                        $missingEmailUserIds[] = $receiverId;
+                    $Silian_email = trim((string)($Silian_recipient['email'] ?? ''));
+                    if ($Silian_email === '') {
+                        $Silian_missingEmailUserIds[] = $Silian_receiverId;
                         continue;
                     }
-                    $name = (string)($recipient['username'] ?? '');
-                    if ($name === '') {
-                        $name = $email;
+                    $Silian_name = (string)($Silian_recipient['username'] ?? '');
+                    if ($Silian_name === '') {
+                        $Silian_name = $Silian_email;
                     }
-                    $deliverable[$receiverId] = [
-                        'email' => $email,
-                        'name' => $name,
+                    $Silian_deliverable[$Silian_receiverId] = [
+                        'email' => $Silian_email,
+                        'name' => $Silian_name,
                     ];
                 }
 
-                $deliverableList = array_values($deliverable);
-                $attempted = count($deliverableList);
-                $meta = $this->decodeJsonObject($row['meta'] ?? null);
-                $contentFormat = $this->normalizeBroadcastContentFormat($meta['content_format'] ?? self::BROADCAST_CONTENT_FORMAT_TEXT)
+                $Silian_deliverableList = array_values($Silian_deliverable);
+                $Silian_attempted = count($Silian_deliverableList);
+                $Silian_meta = $this->decodeJsonObject($Silian_row['meta'] ?? null);
+                $Silian_contentFormat = $this->normalizeBroadcastContentFormat($Silian_meta['content_format'] ?? self::BROADCAST_CONTENT_FORMAT_TEXT)
                     ?? self::BROADCAST_CONTENT_FORMAT_TEXT;
-                $renderProfile = $this->normalizeBroadcastRenderProfile($meta['render_profile'] ?? null, $contentFormat);
-                $renderVersion = $this->normalizeBroadcastRenderVersion($meta['render_version'] ?? null, $contentFormat, $renderProfile);
-                $sourceKind = $this->normalizeBroadcastSourceKind($meta['source_kind'] ?? null);
+                $Silian_renderProfile = $this->normalizeBroadcastRenderProfile($Silian_meta['render_profile'] ?? null, $Silian_contentFormat);
+                $Silian_renderVersion = $this->normalizeBroadcastRenderVersion($Silian_meta['render_version'] ?? null, $Silian_contentFormat, $Silian_renderProfile);
+                $Silian_sourceKind = $this->normalizeBroadcastSourceKind($Silian_meta['source_kind'] ?? null);
 
-                $status = $delivery['status'];
-                $errors = $delivery['errors'];
-                $failedChunks = $delivery['failed_chunks'];
-                $successfulChunks = $delivery['successful_chunks'];
-                $failedRecipientIds = $delivery['failed_recipient_ids'];
+                $Silian_status = $Silian_delivery['status'];
+                $Silian_errors = $Silian_delivery['errors'];
+                $Silian_failedChunks = $Silian_delivery['failed_chunks'];
+                $Silian_successfulChunks = $Silian_delivery['successful_chunks'];
+                $Silian_failedRecipientIds = $Silian_delivery['failed_recipient_ids'];
 
-                $sendResult = true;
-                if ($forceSend && $attempted > 0 && $this->emailService) {
-                    $payload = [];
-                    foreach ($deliverableList as $entry) {
-                        $payload[] = [
-                            'email' => $entry['email'],
-                            'name' => $entry['name'],
+                $Silian_sendResult = true;
+                if ($Silian_forceSend && $Silian_attempted > 0 && $this->emailService) {
+                    $Silian_payload = [];
+                    foreach ($Silian_deliverableList as $Silian_entry) {
+                        $Silian_payload[] = [
+                            'email' => $Silian_entry['email'],
+                            'name' => $Silian_entry['name'],
                         ];
                     }
 
-                    $sendResult = $this->emailService->sendAnnouncementBroadcast(
-                        $payload,
-                        (string)($row['title'] ?? ''),
-                        (string)($row['content'] ?? ''),
-                        (string)($row['priority'] ?? Message::PRIORITY_NORMAL),
-                        $contentFormat,
-                        $renderProfile,
-                        $renderVersion,
-                        $sourceKind
+                    $Silian_sendResult = $this->emailService->sendAnnouncementBroadcast(
+                        $Silian_payload,
+                        (string)($Silian_row['title'] ?? ''),
+                        (string)($Silian_row['content'] ?? ''),
+                        (string)($Silian_row['priority'] ?? Message::PRIORITY_NORMAL),
+                        $Silian_contentFormat,
+                        $Silian_renderProfile,
+                        $Silian_renderVersion,
+                        $Silian_sourceKind
                     );
 
-                    if ($sendResult) {
-                        $status = empty($missingEmailUserIds) ? 'sent' : 'partial';
-                        $successfulChunks = max(1, $successfulChunks);
-                        $failedChunks = 0;
-                        $failedRecipientIds = [];
+                    if ($Silian_sendResult) {
+                        $Silian_status = empty($Silian_missingEmailUserIds) ? 'sent' : 'partial';
+                        $Silian_successfulChunks = max(1, $Silian_successfulChunks);
+                        $Silian_failedChunks = 0;
+                        $Silian_failedRecipientIds = [];
                     } else {
-                        $status = 'failed';
-                        $failedChunks = max(1, $failedChunks);
-                        $successfulChunks = max(0, $successfulChunks);
-                        $failedRecipientIds = array_keys($deliverable);
-                        $errorMessage = $this->emailService->getLastError() ?? 'Broadcast email dispatch failed';
-                        if ($errorMessage !== '' && !in_array($errorMessage, $errors, true)) {
-                            $errors[] = $errorMessage;
+                        $Silian_status = 'failed';
+                        $Silian_failedChunks = max(1, $Silian_failedChunks);
+                        $Silian_successfulChunks = max(0, $Silian_successfulChunks);
+                        $Silian_failedRecipientIds = array_keys($Silian_deliverable);
+                        $Silian_errorMessage = $this->emailService->getLastError() ?? 'Broadcast email dispatch failed';
+                        if ($Silian_errorMessage !== '' && !in_array($Silian_errorMessage, $Silian_errors, true)) {
+                            $Silian_errors[] = $Silian_errorMessage;
                         }
                     }
                 } else {
-                    if ($attempted > 0) {
-                        $status = empty($missingEmailUserIds) ? 'sent' : 'partial';
-                        $successfulChunks = max(1, $successfulChunks);
-                        $failedChunks = 0;
-                        $failedRecipientIds = [];
+                    if ($Silian_attempted > 0) {
+                        $Silian_status = empty($Silian_missingEmailUserIds) ? 'sent' : 'partial';
+                        $Silian_successfulChunks = max(1, $Silian_successfulChunks);
+                        $Silian_failedChunks = 0;
+                        $Silian_failedRecipientIds = [];
                     } else {
-                        $status = 'skipped';
+                        $Silian_status = 'skipped';
                     }
                 }
 
-                $updatedDelivery = [
+                $Silian_updatedDelivery = [
                     'triggered' => true,
-                    'attempted_recipients' => $attempted,
-                    'successful_chunks' => $successfulChunks,
-                    'failed_chunks' => $failedChunks,
-                    'failed_recipient_ids' => array_values(array_unique($failedRecipientIds)),
+                    'attempted_recipients' => $Silian_attempted,
+                    'successful_chunks' => $Silian_successfulChunks,
+                    'failed_chunks' => $Silian_failedChunks,
+                    'failed_recipient_ids' => array_values(array_unique($Silian_failedRecipientIds)),
                     'missing_email_user_ids' => array_values(array_unique(array_merge(
-                        $delivery['missing_email_user_ids'] ?? [],
-                        $missingEmailUserIds
+                        $Silian_delivery['missing_email_user_ids'] ?? [],
+                        $Silian_missingEmailUserIds
                     ))),
-                    'status' => $status,
-                    'errors' => array_values(array_unique($errors)),
-                    'completed_at' => $now,
+                    'status' => $Silian_status,
+                    'errors' => array_values(array_unique($Silian_errors)),
+                    'completed_at' => $Silian_now,
                 ];
 
-                $update = $this->db->prepare('UPDATE message_broadcasts SET email_delivery_snapshot = :snapshot, updated_at = NOW() WHERE id = :id');
-                if ($update) {
-                    $update->execute([
-                        ':snapshot' => $this->encodeJson($updatedDelivery),
-                        ':id' => $broadcastId,
+                $Silian_update = $this->db->prepare('UPDATE message_broadcasts SET email_delivery_snapshot = :snapshot, updated_at = NOW() WHERE id = :id');
+                if ($Silian_update) {
+                    $Silian_update->execute([
+                        ':snapshot' => $this->encodeJson($Silian_updatedDelivery),
+                        ':id' => $Silian_broadcastId,
                     ]);
                 }
 
-                $processed[] = [
-                    'id' => $broadcastId,
-                    'status' => $status,
-                    'attempted' => $attempted,
-                    'force' => $forceSend,
-                    'missing_email_user_ids' => $missingEmailUserIds,
-                    'errors' => $updatedDelivery['errors'],
+                $Silian_processed[] = [
+                    'id' => $Silian_broadcastId,
+                    'status' => $Silian_status,
+                    'attempted' => $Silian_attempted,
+                    'force' => $Silian_forceSend,
+                    'missing_email_user_ids' => $Silian_missingEmailUserIds,
+                    'errors' => $Silian_updatedDelivery['errors'],
                 ];
             }
 
-            if (!empty($processed)) {
-                $auditPayload = [
+            if (!empty($Silian_processed)) {
+                $Silian_auditPayload = [
                     'action' => 'broadcast_email_flush',
                     'operation_category' => 'admin_message',
-                    'user_id' => $user['id'],
+                    'user_id' => $Silian_user['id'],
                     'actor_type' => 'admin',
                     'change_type' => 'update',
                     'data' => [
-                        'requested_limit' => $limit,
-                        'force_send' => $forceSend,
-                        'processed_ids' => array_column($processed, 'id'),
-                        'skipped_ids' => $skipped,
+                        'requested_limit' => $Silian_limit,
+                        'force_send' => $Silian_forceSend,
+                        'processed_ids' => array_column($Silian_processed, 'id'),
+                        'skipped_ids' => $Silian_skipped,
                     ],
                 ];
-                $this->auditLog->log($auditPayload);
+                $this->auditLog->log($Silian_auditPayload);
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'processed' => $processed,
-                'skipped' => $skipped,
-                'count' => count($processed),
+                'processed' => $Silian_processed,
+                'skipped' => $Silian_skipped,
+                'count' => count($Silian_processed),
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             try {
                 if ($this->errorLogService) {
-                    $this->errorLogService->logException($e, $request, ['context' => 'flushBroadcastEmailQueue']);
+                    $this->errorLogService->logException($Silian_e, $Silian_request, ['context' => 'flushBroadcastEmailQueue']);
                 }
-            } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+            } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
-    private function logBroadcastError(Request $request, string $message, array $context = []): ?int
+    private function logBroadcastError(Request $Silian_request, string $Silian_message, array $Silian_context = []): ?int
     {
         if (!$this->errorLogService) {
             return null;
         }
         try {
-            $payload = array_merge([
+            $Silian_payload = array_merge([
                 'controller' => 'MessageController',
                 'action' => 'sendSystemMessage',
-            ], $context);
-            return $this->errorLogService->logError('broadcast_error', $message, $request, $payload);
-        } catch (\Throwable $e) {
+            ], $Silian_context);
+            return $this->errorLogService->logError('broadcast_error', $Silian_message, $Silian_request, $Silian_payload);
+        } catch (\Throwable $Silian_e) {
             return null;
         }
     }
 
-    private function lookupSystemLogId(?string $requestId): ?int
+    private function lookupSystemLogId(?string $Silian_requestId): ?int
     {
-        if ($requestId === null || $requestId === '') {
+        if ($Silian_requestId === null || $Silian_requestId === '') {
             return null;
         }
         try {
-            $stmt = $this->db->prepare('SELECT id FROM system_logs WHERE request_id = :request_id ORDER BY id DESC LIMIT 1');
-            if ($stmt && $stmt->execute(['request_id' => $requestId])) {
-                $value = $stmt->fetchColumn();
-                if ($value !== false) {
-                    $id = (int) $value;
-                    return $id > 0 ? $id : null;
+            $Silian_stmt = $this->db->prepare('SELECT id FROM system_logs WHERE request_id = :request_id ORDER BY id DESC LIMIT 1');
+            if ($Silian_stmt && $Silian_stmt->execute(['request_id' => $Silian_requestId])) {
+                $Silian_value = $Silian_stmt->fetchColumn();
+                if ($Silian_value !== false) {
+                    $Silian_id = (int) $Silian_value;
+                    return $Silian_id > 0 ? $Silian_id : null;
                 }
             }
-        } catch (\Throwable $ignored) {
+        } catch (\Throwable $Silian_ignored) {
         }
         return null;
     }
 
-    private function encodeJson($value): ?string
+    private function encodeJson($Silian_value): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
         try {
-            $encoded = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            return $encoded === false ? null : $encoded;
-        } catch (\Throwable $e) {
+            $Silian_encoded = json_encode($Silian_value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            return $Silian_encoded === false ? null : $Silian_encoded;
+        } catch (\Throwable $Silian_e) {
             return null;
         }
     }
 
-    private function decodeJsonValue($value)
+    private function decodeJsonValue($Silian_value)
     {
-        if (is_array($value)) {
-            return $value;
+        if (is_array($Silian_value)) {
+            return $Silian_value;
         }
-        if (is_string($value) && $value !== '') {
-            $decoded = json_decode($value, true);
+        if (is_string($Silian_value) && $Silian_value !== '') {
+            $Silian_decoded = json_decode($Silian_value, true);
             if (json_last_error() === JSON_ERROR_NONE) {
-                return $decoded;
+                return $Silian_decoded;
             }
         }
         return [];
     }
 
-    private function decodeJsonObject($value): array
+    private function decodeJsonObject($Silian_value): array
     {
-        $decoded = $this->decodeJsonValue($value);
-        return is_array($decoded) ? $decoded : [];
+        $Silian_decoded = $this->decodeJsonValue($Silian_value);
+        return is_array($Silian_decoded) ? $Silian_decoded : [];
     }
 
-    private function decodeAuditData(?string $raw): array
+    private function decodeAuditData(?string $Silian_raw): array
     {
-        if ($raw === null || $raw === '') {
+        if ($Silian_raw === null || $Silian_raw === '') {
             return [];
         }
-        $decoded = json_decode($raw, true);
-        return is_array($decoded) ? $decoded : [];
+        $Silian_decoded = json_decode($Silian_raw, true);
+        return is_array($Silian_decoded) ? $Silian_decoded : [];
     }
 
-    private function decodeIdList($value): array
+    private function decodeIdList($Silian_value): array
     {
-        if (is_array($value)) {
-            return array_values(array_map('intval', $value));
+        if (is_array($Silian_value)) {
+            return array_values(array_map('intval', $Silian_value));
         }
-        if (is_string($value) && $value !== '') {
-            $decoded = json_decode($value, true);
-            if (is_array($decoded)) {
-                return array_values(array_map('intval', $decoded));
+        if (is_string($Silian_value) && $Silian_value !== '') {
+            $Silian_decoded = json_decode($Silian_value, true);
+            if (is_array($Silian_decoded)) {
+                return array_values(array_map('intval', $Silian_decoded));
             }
-            $parts = preg_split('/[\s,]+/', $value);
-            if ($parts) {
-                $clean = [];
-                foreach ($parts as $part) {
-                    $num = (int)$part;
-                    if ($num > 0) {
-                        $clean[] = $num;
+            $Silian_parts = preg_split('/[\s,]+/', $Silian_value);
+            if ($Silian_parts) {
+                $Silian_clean = [];
+                foreach ($Silian_parts as $Silian_part) {
+                    $Silian_num = (int)$Silian_part;
+                    if ($Silian_num > 0) {
+                        $Silian_clean[] = $Silian_num;
                     }
                 }
-                if ($clean) {
-                    return $clean;
+                if ($Silian_clean) {
+                    return $Silian_clean;
                 }
             }
         }
@@ -1447,77 +1447,77 @@ $auditPayload = [
     }
 
     private function loadBroadcastRecipients(
-        string $title,
-        string $start,
-        string $end,
-        array $messageIds = [],
-        ?string $contentHash = null,
-        bool $includeUserContext = true
+        string $Silian_title,
+        string $Silian_start,
+        string $Silian_end,
+        array $Silian_messageIds = [],
+        ?string $Silian_contentHash = null,
+        bool $Silian_includeUserContext = true
     ): array
     {
         try {
-            $userColumns = $includeUserContext
+            $Silian_userColumns = $Silian_includeUserContext
                 ? 'u.uuid, u.username, u.email, u.status, u.is_admin'
                 : 'u.username, u.email';
-            $ids = array_values(array_filter(array_map('intval', $messageIds), static fn(int $value): bool => $value > 0));
-            if (!empty($ids)) {
-                $placeholders = implode(',', array_fill(0, count($ids), '?'));
-                $sql = 'SELECT m.id, m.receiver_id, m.is_read, ' . $userColumns . ' FROM messages m LEFT JOIN users u ON u.id = m.receiver_id WHERE m.deleted_at IS NULL AND m.id IN (' . $placeholders . ')';
-                $stmt = $this->db->prepare($sql);
-                if (!$stmt) {
+            $Silian_ids = array_values(array_filter(array_map('intval', $Silian_messageIds), static fn(int $Silian_value): bool => $Silian_value > 0));
+            if (!empty($Silian_ids)) {
+                $Silian_placeholders = implode(',', array_fill(0, count($Silian_ids), '?'));
+                $Silian_sql = 'SELECT m.id, m.receiver_id, m.is_read, ' . $Silian_userColumns . ' FROM messages m LEFT JOIN users u ON u.id = m.receiver_id WHERE m.deleted_at IS NULL AND m.id IN (' . $Silian_placeholders . ')';
+                $Silian_stmt = $this->db->prepare($Silian_sql);
+                if (!$Silian_stmt) {
                     return [];
                 }
-                foreach ($ids as $index => $id) {
-                    $stmt->bindValue($index + 1, $id, PDO::PARAM_INT);
+                foreach ($Silian_ids as $Silian_index => $Silian_id) {
+                    $Silian_stmt->bindValue($Silian_index + 1, $Silian_id, PDO::PARAM_INT);
                 }
-                $stmt->execute();
-                return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                $Silian_stmt->execute();
+                return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
             }
 
-            $sql = 'SELECT m.id, m.receiver_id, m.is_read, ' . $userColumns . ' FROM messages m LEFT JOIN users u ON u.id = m.receiver_id WHERE m.deleted_at IS NULL AND m.title = :title AND m.created_at >= :start AND m.created_at <= :end';
-            $stmt = $this->db->prepare($sql);
-            if (!$stmt) {
+            $Silian_sql = 'SELECT m.id, m.receiver_id, m.is_read, ' . $Silian_userColumns . ' FROM messages m LEFT JOIN users u ON u.id = m.receiver_id WHERE m.deleted_at IS NULL AND m.title = :title AND m.created_at >= :start AND m.created_at <= :end';
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            if (!$Silian_stmt) {
                 return [];
             }
-            $stmt->bindValue(':title', $title);
-            $stmt->bindValue(':start', $start);
-            $stmt->bindValue(':end', $end);
-            $stmt->execute();
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_stmt->bindValue(':title', $Silian_title);
+            $Silian_stmt->bindValue(':start', $Silian_start);
+            $Silian_stmt->bindValue(':end', $Silian_end);
+            $Silian_stmt->execute();
+            $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            if ($contentHash !== null && $contentHash !== '' && !empty($rows)) {
-                $filtered = [];
-                $contentStmt = $this->db->prepare('SELECT content FROM messages WHERE id = :id');
-                foreach ($rows as $row) {
-                    $messageId = isset($row['id']) ? (int)$row['id'] : 0;
-                    if ($messageId <= 0) {
+            if ($Silian_contentHash !== null && $Silian_contentHash !== '' && !empty($Silian_rows)) {
+                $Silian_filtered = [];
+                $Silian_contentStmt = $this->db->prepare('SELECT content FROM messages WHERE id = :id');
+                foreach ($Silian_rows as $Silian_row) {
+                    $Silian_messageId = isset($Silian_row['id']) ? (int)$Silian_row['id'] : 0;
+                    if ($Silian_messageId <= 0) {
                         continue;
                     }
                     try {
-                        if (!$contentStmt) {
-                            $filtered = $rows;
+                        if (!$Silian_contentStmt) {
+                            $Silian_filtered = $Silian_rows;
                             break;
                         }
-                        $contentStmt->bindValue(':id', $messageId, PDO::PARAM_INT);
-                        $contentStmt->execute();
-                        $contentRow = $contentStmt->fetch(PDO::FETCH_ASSOC);
-                        $contentStmt->closeCursor();
-                        $contentValue = is_array($contentRow) ? (string)($contentRow['content'] ?? '') : '';
-                        if (hash('sha256', $title . '||' . $contentValue) === $contentHash) {
-                            $filtered[] = $row;
+                        $Silian_contentStmt->bindValue(':id', $Silian_messageId, PDO::PARAM_INT);
+                        $Silian_contentStmt->execute();
+                        $Silian_contentRow = $Silian_contentStmt->fetch(PDO::FETCH_ASSOC);
+                        $Silian_contentStmt->closeCursor();
+                        $Silian_contentValue = is_array($Silian_contentRow) ? (string)($Silian_contentRow['content'] ?? '') : '';
+                        if (hash('sha256', $Silian_title . '||' . $Silian_contentValue) === $Silian_contentHash) {
+                            $Silian_filtered[] = $Silian_row;
                         }
-                    } catch (\Throwable $e) {
-                        $filtered = $rows;
+                    } catch (\Throwable $Silian_e) {
+                        $Silian_filtered = $Silian_rows;
                         break;
                     }
                 }
-                if (!empty($filtered)) {
-                    return $filtered;
+                if (!empty($Silian_filtered)) {
+                    return $Silian_filtered;
                 }
             }
 
-            return $rows;
-        } catch (\Throwable $e) {
+            return $Silian_rows;
+        } catch (\Throwable $Silian_e) {
             return [];
         }
     }
@@ -1525,64 +1525,64 @@ $auditPayload = [
     /**
      * 搜索广播收件人（管理员）
      */
-    public function searchBroadcastRecipients(Request $request, Response $response): Response
+    public function searchBroadcastRecipients(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => 'Admin access required'], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => 'Admin access required'], 403);
             }
 
-            $params = $request->getQueryParams();
-            $page = max(1, (int)($params['page'] ?? 1));
-            $limit = min(200, max(1, (int)($params['limit'] ?? 50)));
-            $offset = ($page - 1) * $limit;
+            $Silian_params = $Silian_request->getQueryParams();
+            $Silian_page = max(1, (int)($Silian_params['page'] ?? 1));
+            $Silian_limit = min(200, max(1, (int)($Silian_params['limit'] ?? 50)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
 
-            $criteria = $params;
-            if (isset($params['ids'])) {
-                $criteria['include_ids'] = $this->sanitizeIdList(is_array($params['ids']) ? $params['ids'] : explode(',', (string)$params['ids']));
+            $Silian_criteria = $Silian_params;
+            if (isset($Silian_params['ids'])) {
+                $Silian_criteria['include_ids'] = $this->sanitizeIdList(is_array($Silian_params['ids']) ? $Silian_params['ids'] : explode(',', (string)$Silian_params['ids']));
             }
-            if (isset($params['exclude_ids'])) {
-                $criteria['exclude_ids'] = $this->sanitizeIdList(is_array($params['exclude_ids']) ? $params['exclude_ids'] : explode(',', (string)$params['exclude_ids']));
-            }
-
-            $rows = $this->performUserSearch($criteria, $limit + 1, $offset);
-            $hasMore = count($rows) > $limit;
-            if ($hasMore) {
-                $rows = array_slice($rows, 0, $limit);
+            if (isset($Silian_params['exclude_ids'])) {
+                $Silian_criteria['exclude_ids'] = $this->sanitizeIdList(is_array($Silian_params['exclude_ids']) ? $Silian_params['exclude_ids'] : explode(',', (string)$Silian_params['exclude_ids']));
             }
 
-            $data = [];
-            foreach ($rows as $row) {
-                $normalized = $this->normalizeUserRow($row);
-                if ($normalized['id'] === null) {
+            $Silian_rows = $this->performUserSearch($Silian_criteria, $Silian_limit + 1, $Silian_offset);
+            $Silian_hasMore = count($Silian_rows) > $Silian_limit;
+            if ($Silian_hasMore) {
+                $Silian_rows = array_slice($Silian_rows, 0, $Silian_limit);
+            }
+
+            $Silian_data = [];
+            foreach ($Silian_rows as $Silian_row) {
+                $Silian_normalized = $this->normalizeUserRow($Silian_row);
+                if ($Silian_normalized['id'] === null) {
                     continue;
                 }
-                $data[] = $normalized;
+                $Silian_data[] = $Silian_normalized;
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $data,
+                'data' => $Silian_data,
                 'pagination' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'has_more' => $hasMore,
+                    'page' => $Silian_page,
+                    'limit' => $Silian_limit,
+                    'has_more' => $Silian_hasMore,
                 ],
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             try {
                 if ($this->errorLogService) {
-                    $this->errorLogService->logException($e, $request);
+                    $this->errorLogService->logException($Silian_e, $Silian_request);
                 }
-            } catch (\Throwable $ignore) {}
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+            } catch (\Throwable $Silian_ignore) {}
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
-    private function resolveExplicitRecipients(array $ids): array
+    private function resolveExplicitRecipients(array $Silian_ids): array
     {
-        $result = [
+        $Silian_result = [
             'error' => null,
             'status' => 200,
             'user_ids' => [],
@@ -1590,149 +1590,149 @@ $auditPayload = [
             'invalid_ids' => [],
         ];
 
-        $sanitized = [];
-        foreach ($ids as $value) {
-            if (is_int($value) || (is_numeric($value) && (string)(int)$value === (string)$value)) {
-                $intVal = (int)$value;
-                if ($intVal > 0) {
-                    $sanitized[$intVal] = $intVal;
+        $Silian_sanitized = [];
+        foreach ($Silian_ids as $Silian_value) {
+            if (is_int($Silian_value) || (is_numeric($Silian_value) && (string)(int)$Silian_value === (string)$Silian_value)) {
+                $Silian_intVal = (int)$Silian_value;
+                if ($Silian_intVal > 0) {
+                    $Silian_sanitized[$Silian_intVal] = $Silian_intVal;
                 }
             }
         }
 
-        if (empty($sanitized)) {
-            $result['error'] = 'target_users must contain at least one valid id';
-            $result['status'] = 400;
-            return $result;
+        if (empty($Silian_sanitized)) {
+            $Silian_result['error'] = 'target_users must contain at least one valid id';
+            $Silian_result['status'] = 400;
+            return $Silian_result;
         }
 
-        $placeholders = implode(',', array_fill(0, count($sanitized), '?'));
-        $sql = 'SELECT u.id, u.username, u.email, u.school_id, u.region_code, u.is_admin, u.status, s.name AS school_name FROM users u LEFT JOIN schools s ON s.id = u.school_id WHERE u.deleted_at IS NULL AND u.id IN (' . $placeholders . ')';
+        $Silian_placeholders = implode(',', array_fill(0, count($Silian_sanitized), '?'));
+        $Silian_sql = 'SELECT u.id, u.username, u.email, u.school_id, u.region_code, u.is_admin, u.status, s.name AS school_name FROM users u LEFT JOIN schools s ON s.id = u.school_id WHERE u.deleted_at IS NULL AND u.id IN (' . $Silian_placeholders . ')';
 
         try {
-            $stmt = $this->db->prepare($sql);
-            if (!$stmt) {
-                $result['error'] = 'Failed to resolve target users';
-                $result['status'] = 500;
-                return $result;
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            if (!$Silian_stmt) {
+                $Silian_result['error'] = 'Failed to resolve target users';
+                $Silian_result['status'] = 500;
+                return $Silian_result;
             }
 
-            $stmt->execute(array_values($sanitized));
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_stmt->execute(array_values($Silian_sanitized));
+            $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            $collectedIds = [];
-            foreach ($rows as $row) {
-                if (is_array($row)) {
-                    $id = isset($row['id']) ? (int)$row['id'] : 0;
-                    if ($id <= 0) {
+            $Silian_collectedIds = [];
+            foreach ($Silian_rows as $Silian_row) {
+                if (is_array($Silian_row)) {
+                    $Silian_id = isset($Silian_row['id']) ? (int)$Silian_row['id'] : 0;
+                    if ($Silian_id <= 0) {
                         continue;
                     }
-                    $collectedIds[$id] = $id;
-                    $result['records'][$id] = $this->normalizeUserRow($row);
-                } elseif (is_scalar($row)) {
-                    $id = (int)$row;
-                    if ($id <= 0) {
+                    $Silian_collectedIds[$Silian_id] = $Silian_id;
+                    $Silian_result['records'][$Silian_id] = $this->normalizeUserRow($Silian_row);
+                } elseif (is_scalar($Silian_row)) {
+                    $Silian_id = (int)$Silian_row;
+                    if ($Silian_id <= 0) {
                         continue;
                     }
-                    $collectedIds[$id] = $id;
-                    if (!isset($result['records'][$id])) {
-                        $result['records'][$id] = $this->normalizeUserRow(['id' => $id]);
+                    $Silian_collectedIds[$Silian_id] = $Silian_id;
+                    if (!isset($Silian_result['records'][$Silian_id])) {
+                        $Silian_result['records'][$Silian_id] = $this->normalizeUserRow(['id' => $Silian_id]);
                     }
                 }
             }
 
-            $result['user_ids'] = array_values($collectedIds);
-            $result['invalid_ids'] = array_values(array_diff($sanitized, $result['user_ids']));
-        } catch (\Throwable $e) {
-            $result['error'] = 'Failed to resolve target users';
-            $result['status'] = 500;
+            $Silian_result['user_ids'] = array_values($Silian_collectedIds);
+            $Silian_result['invalid_ids'] = array_values(array_diff($Silian_sanitized, $Silian_result['user_ids']));
+        } catch (\Throwable $Silian_e) {
+            $Silian_result['error'] = 'Failed to resolve target users';
+            $Silian_result['status'] = 500;
         }
 
-        return $result;
+        return $Silian_result;
     }
 
-    private function resolveFilteredRecipients(array $filterGroups): array
+    private function resolveFilteredRecipients(array $Silian_filterGroups): array
     {
-        $aggregated = [
+        $Silian_aggregated = [
             'user_ids' => [],
             'records' => [],
         ];
 
-        foreach ($filterGroups as $filterGroup) {
-            if (!is_array($filterGroup)) {
+        foreach ($Silian_filterGroups as $Silian_filterGroup) {
+            if (!is_array($Silian_filterGroup)) {
                 continue;
             }
-            $limit = (int)($filterGroup['limit'] ?? 250);
-            $limit = max(10, min(500, $limit));
-            $offset = max(0, (int)($filterGroup['offset'] ?? 0));
+            $Silian_limit = (int)($Silian_filterGroup['limit'] ?? 250);
+            $Silian_limit = max(10, min(500, $Silian_limit));
+            $Silian_offset = max(0, (int)($Silian_filterGroup['offset'] ?? 0));
 
-            $searchResult = $this->performUserSearch($filterGroup, $limit, $offset);
-            foreach ($searchResult as $row) {
-                $id = isset($row['id']) ? (int)$row['id'] : 0;
-                if ($id <= 0) {
+            $Silian_searchResult = $this->performUserSearch($Silian_filterGroup, $Silian_limit, $Silian_offset);
+            foreach ($Silian_searchResult as $Silian_row) {
+                $Silian_id = isset($Silian_row['id']) ? (int)$Silian_row['id'] : 0;
+                if ($Silian_id <= 0) {
                     continue;
                 }
-                $aggregated['user_ids'][$id] = $id;
-                $aggregated['records'][$id] = $this->normalizeUserRow($row);
+                $Silian_aggregated['user_ids'][$Silian_id] = $Silian_id;
+                $Silian_aggregated['records'][$Silian_id] = $this->normalizeUserRow($Silian_row);
             }
         }
 
-        $aggregated['user_ids'] = array_values($aggregated['user_ids']);
+        $Silian_aggregated['user_ids'] = array_values($Silian_aggregated['user_ids']);
 
-        return $aggregated;
+        return $Silian_aggregated;
     }
 
     private function resolveAllRecipients(): array
     {
-        $result = [
+        $Silian_result = [
             'user_ids' => [],
             'records' => [],
         ];
 
         try {
-            $sql = 'SELECT u.id, u.username, u.email, u.school_id, u.region_code, u.is_admin, u.status, s.name AS school_name FROM users u LEFT JOIN schools s ON s.id = u.school_id WHERE u.deleted_at IS NULL';
-            $stmt = $this->db->query($sql);
-            if (!$stmt) {
-                return $result;
+            $Silian_sql = 'SELECT u.id, u.username, u.email, u.school_id, u.region_code, u.is_admin, u.status, s.name AS school_name FROM users u LEFT JOIN schools s ON s.id = u.school_id WHERE u.deleted_at IS NULL';
+            $Silian_stmt = $this->db->query($Silian_sql);
+            if (!$Silian_stmt) {
+                return $Silian_result;
             }
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-            foreach ($rows as $row) {
-                $id = isset($row['id']) ? (int)$row['id'] : 0;
-                if ($id <= 0) {
+            $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            foreach ($Silian_rows as $Silian_row) {
+                $Silian_id = isset($Silian_row['id']) ? (int)$Silian_row['id'] : 0;
+                if ($Silian_id <= 0) {
                     continue;
                 }
-                $result['user_ids'][] = $id;
-                $result['records'][$id] = $this->normalizeUserRow($row);
+                $Silian_result['user_ids'][] = $Silian_id;
+                $Silian_result['records'][$Silian_id] = $this->normalizeUserRow($Silian_row);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             // Swallow exception and return what we have
         }
 
-        return $result;
+        return $Silian_result;
     }
 
-    private function performUserSearch(array $criteria, int $limit, int $offset = 0): array
+    private function performUserSearch(array $Silian_criteria, int $Silian_limit, int $Silian_offset = 0): array
     {
-        $where = ['u.deleted_at IS NULL'];
-        $params = [];
+        $Silian_where = ['u.deleted_at IS NULL'];
+        $Silian_params = [];
 
-        $search = trim((string)($criteria['search'] ?? $criteria['q'] ?? ''));
-        $fieldsRaw = $criteria['fields'] ?? null;
-        $fields = [];
-        if (is_string($fieldsRaw)) {
-            $fields = array_filter(array_map('trim', explode(',', $fieldsRaw)));
-        } elseif (is_array($fieldsRaw)) {
-            foreach ($fieldsRaw as $candidate) {
-                if (is_string($candidate) && $candidate !== '') {
-                    $fields[] = trim($candidate);
+        $Silian_search = trim((string)($Silian_criteria['search'] ?? $Silian_criteria['q'] ?? ''));
+        $Silian_fieldsRaw = $Silian_criteria['fields'] ?? null;
+        $Silian_fields = [];
+        if (is_string($Silian_fieldsRaw)) {
+            $Silian_fields = array_filter(array_map('trim', explode(',', $Silian_fieldsRaw)));
+        } elseif (is_array($Silian_fieldsRaw)) {
+            foreach ($Silian_fieldsRaw as $Silian_candidate) {
+                if (is_string($Silian_candidate) && $Silian_candidate !== '') {
+                    $Silian_fields[] = trim($Silian_candidate);
                 }
             }
         }
-        if (empty($fields)) {
-            $fields = ['username', 'email', 'uuid', 'school', 'location', 'school_name'];
+        if (empty($Silian_fields)) {
+            $Silian_fields = ['username', 'email', 'uuid', 'school', 'location', 'school_name'];
         }
 
-        $fieldMap = [
+        $Silian_fieldMap = [
             'username' => 'u.username',
             'email' => 'u.email',
             'uuid' => 'u.uuid',
@@ -1743,166 +1743,166 @@ $auditPayload = [
             'role' => 'u.role',
         ];
 
-        if ($search !== '') {
-            $searchParts = [];
-            $searchPattern = '%' . $search . '%';
-            $searchIndex = 0;
-            foreach ($fields as $field) {
-                $placeholder = 'search_' . $searchIndex++;
-                if ($field === 'id') {
-                    $searchParts[] = 'CAST(u.id AS CHAR) LIKE :' . $placeholder;
-                    $params[$placeholder] = $searchPattern;
+        if ($Silian_search !== '') {
+            $Silian_searchParts = [];
+            $Silian_searchPattern = '%' . $Silian_search . '%';
+            $Silian_searchIndex = 0;
+            foreach ($Silian_fields as $Silian_field) {
+                $Silian_placeholder = 'search_' . $Silian_searchIndex++;
+                if ($Silian_field === 'id') {
+                    $Silian_searchParts[] = 'CAST(u.id AS CHAR) LIKE :' . $Silian_placeholder;
+                    $Silian_params[$Silian_placeholder] = $Silian_searchPattern;
                     continue;
                 }
-                if ($field === 'school') {
-                    $searchParts[] = 's.name LIKE :' . $placeholder;
-                    $params[$placeholder] = $searchPattern;
+                if ($Silian_field === 'school') {
+                    $Silian_searchParts[] = 's.name LIKE :' . $Silian_placeholder;
+                    $Silian_params[$Silian_placeholder] = $Silian_searchPattern;
                     continue;
                 }
-                if ($field === 'location') {
-                    $searchParts[] = 'u.region_code LIKE :' . $placeholder;
-                    $params[$placeholder] = $searchPattern;
+                if ($Silian_field === 'location') {
+                    $Silian_searchParts[] = 'u.region_code LIKE :' . $Silian_placeholder;
+                    $Silian_params[$Silian_placeholder] = $Silian_searchPattern;
                     continue;
                 }
-                if (!isset($fieldMap[$field])) {
+                if (!isset($Silian_fieldMap[$Silian_field])) {
                     continue;
                 }
-                $searchParts[] = $fieldMap[$field] . ' LIKE :' . $placeholder;
-                $params[$placeholder] = $searchPattern;
+                $Silian_searchParts[] = $Silian_fieldMap[$Silian_field] . ' LIKE :' . $Silian_placeholder;
+                $Silian_params[$Silian_placeholder] = $Silian_searchPattern;
             }
-            if (!empty($searchParts)) {
-                $where[] = '(' . implode(' OR ', $searchParts) . ')';
-            }
-        }
-
-        if (!empty($criteria['school_id'])) {
-            $where[] = 'u.school_id = :school_id';
-            $params['school_id'] = (int)$criteria['school_id'];
-        }
-
-        if (!empty($criteria['school'])) {
-            $where[] = 's.name LIKE :school_exact';
-            $params['school_exact'] = '%' . trim((string)$criteria['school']) . '%';
-        }
-
-        if (!empty($criteria['email_suffix'])) {
-            $suffix = ltrim(trim((string)$criteria['email_suffix']), '@');
-            $where[] = 'u.email LIKE :email_suffix';
-            $params['email_suffix'] = '%@' . $suffix;
-        } elseif (!empty($criteria['email_domain'])) {
-            $suffix = ltrim(trim((string)$criteria['email_domain']), '@');
-            $where[] = 'u.email LIKE :email_suffix';
-            $params['email_suffix'] = '%@' . $suffix;
-        }
-
-        if (array_key_exists('status', $criteria) && $criteria['status'] !== null && $criteria['status'] !== '') {
-            $where[] = 'u.status = :status';
-            $params['status'] = trim((string)$criteria['status']);
-        }
-
-        if (array_key_exists('is_admin', $criteria)) {
-            $value = $criteria['is_admin'];
-            if ($value === '1' || $value === 1 || $value === true || $value === 'true') {
-                $where[] = 'u.is_admin = 1';
-            } elseif ($value === '0' || $value === 0 || $value === false || $value === 'false') {
-                $where[] = 'u.is_admin = 0';
+            if (!empty($Silian_searchParts)) {
+                $Silian_where[] = '(' . implode(' OR ', $Silian_searchParts) . ')';
             }
         }
 
-        if (!empty($criteria['include_ids']) && is_array($criteria['include_ids'])) {
-            $clean = $this->sanitizeIdList($criteria['include_ids']);
-            if (!empty($clean)) {
-                $placeholders = [];
-                foreach (array_values($clean) as $index => $id) {
-                    $placeholder = 'include_id_' . $index;
-                    $placeholders[] = ':' . $placeholder;
-                    $params[$placeholder] = $id;
+        if (!empty($Silian_criteria['school_id'])) {
+            $Silian_where[] = 'u.school_id = :school_id';
+            $Silian_params['school_id'] = (int)$Silian_criteria['school_id'];
+        }
+
+        if (!empty($Silian_criteria['school'])) {
+            $Silian_where[] = 's.name LIKE :school_exact';
+            $Silian_params['school_exact'] = '%' . trim((string)$Silian_criteria['school']) . '%';
+        }
+
+        if (!empty($Silian_criteria['email_suffix'])) {
+            $Silian_suffix = ltrim(trim((string)$Silian_criteria['email_suffix']), '@');
+            $Silian_where[] = 'u.email LIKE :email_suffix';
+            $Silian_params['email_suffix'] = '%@' . $Silian_suffix;
+        } elseif (!empty($Silian_criteria['email_domain'])) {
+            $Silian_suffix = ltrim(trim((string)$Silian_criteria['email_domain']), '@');
+            $Silian_where[] = 'u.email LIKE :email_suffix';
+            $Silian_params['email_suffix'] = '%@' . $Silian_suffix;
+        }
+
+        if (array_key_exists('status', $Silian_criteria) && $Silian_criteria['status'] !== null && $Silian_criteria['status'] !== '') {
+            $Silian_where[] = 'u.status = :status';
+            $Silian_params['status'] = trim((string)$Silian_criteria['status']);
+        }
+
+        if (array_key_exists('is_admin', $Silian_criteria)) {
+            $Silian_value = $Silian_criteria['is_admin'];
+            if ($Silian_value === '1' || $Silian_value === 1 || $Silian_value === true || $Silian_value === 'true') {
+                $Silian_where[] = 'u.is_admin = 1';
+            } elseif ($Silian_value === '0' || $Silian_value === 0 || $Silian_value === false || $Silian_value === 'false') {
+                $Silian_where[] = 'u.is_admin = 0';
+            }
+        }
+
+        if (!empty($Silian_criteria['include_ids']) && is_array($Silian_criteria['include_ids'])) {
+            $Silian_clean = $this->sanitizeIdList($Silian_criteria['include_ids']);
+            if (!empty($Silian_clean)) {
+                $Silian_placeholders = [];
+                foreach (array_values($Silian_clean) as $Silian_index => $Silian_id) {
+                    $Silian_placeholder = 'include_id_' . $Silian_index;
+                    $Silian_placeholders[] = ':' . $Silian_placeholder;
+                    $Silian_params[$Silian_placeholder] = $Silian_id;
                 }
-                $where[] = 'u.id IN (' . implode(',', $placeholders) . ')';
+                $Silian_where[] = 'u.id IN (' . implode(',', $Silian_placeholders) . ')';
             }
         }
 
-        if (!empty($criteria['exclude_ids']) && is_array($criteria['exclude_ids'])) {
-            $clean = $this->sanitizeIdList($criteria['exclude_ids']);
-            if (!empty($clean)) {
-                $placeholders = [];
-                foreach (array_values($clean) as $index => $id) {
-                    $placeholder = 'exclude_id_' . $index;
-                    $placeholders[] = ':' . $placeholder;
-                    $params[$placeholder] = $id;
+        if (!empty($Silian_criteria['exclude_ids']) && is_array($Silian_criteria['exclude_ids'])) {
+            $Silian_clean = $this->sanitizeIdList($Silian_criteria['exclude_ids']);
+            if (!empty($Silian_clean)) {
+                $Silian_placeholders = [];
+                foreach (array_values($Silian_clean) as $Silian_index => $Silian_id) {
+                    $Silian_placeholder = 'exclude_id_' . $Silian_index;
+                    $Silian_placeholders[] = ':' . $Silian_placeholder;
+                    $Silian_params[$Silian_placeholder] = $Silian_id;
                 }
-                $where[] = 'u.id NOT IN (' . implode(',', $placeholders) . ')';
+                $Silian_where[] = 'u.id NOT IN (' . implode(',', $Silian_placeholders) . ')';
             }
         }
 
-        $conditions = implode(' AND ', $where);
+        $Silian_conditions = implode(' AND ', $Silian_where);
 
-        $sql = 'SELECT u.id, u.uuid, u.username, u.email, u.school_id, u.region_code, u.is_admin, u.status, s.name AS school_name '
+        $Silian_sql = 'SELECT u.id, u.uuid, u.username, u.email, u.school_id, u.region_code, u.is_admin, u.status, s.name AS school_name '
             . 'FROM users u '
             . 'LEFT JOIN schools s ON s.id = u.school_id '
-            . 'WHERE ' . $conditions . ' '
+            . 'WHERE ' . $Silian_conditions . ' '
             . 'ORDER BY u.id DESC '
             . 'LIMIT :limit OFFSET :offset';
 
         try {
-            $stmt = $this->db->prepare($sql);
-            if (!$stmt) {
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            if (!$Silian_stmt) {
                 return [];
             }
 
-            foreach ($params as $key => $value) {
-                $type = PDO::PARAM_STR;
-                if ($key === 'school_id' || str_starts_with($key, 'include_id_') || str_starts_with($key, 'exclude_id_')) {
-                    $type = PDO::PARAM_INT;
-                    $value = (int)$value;
+            foreach ($Silian_params as $Silian_key => $Silian_value) {
+                $Silian_type = PDO::PARAM_STR;
+                if ($Silian_key === 'school_id' || str_starts_with($Silian_key, 'include_id_') || str_starts_with($Silian_key, 'exclude_id_')) {
+                    $Silian_type = PDO::PARAM_INT;
+                    $Silian_value = (int)$Silian_value;
                 }
-                $stmt->bindValue(':' . $key, $value, $type);
+                $Silian_stmt->bindValue(':' . $Silian_key, $Silian_value, $Silian_type);
             }
 
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (\Throwable $e) {
+            $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->bindValue(':offset', $Silian_offset, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            return $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable $Silian_e) {
             return [];
         }
     }
 
-    private function sanitizeIdList(array $values): array
+    private function sanitizeIdList(array $Silian_values): array
     {
-        $clean = [];
-        foreach ($values as $value) {
-            if (is_int($value) || (is_numeric($value) && (string)(int)$value === (string)$value)) {
-                $intVal = (int)$value;
-                if ($intVal > 0) {
-                    $clean[$intVal] = $intVal;
+        $Silian_clean = [];
+        foreach ($Silian_values as $Silian_value) {
+            if (is_int($Silian_value) || (is_numeric($Silian_value) && (string)(int)$Silian_value === (string)$Silian_value)) {
+                $Silian_intVal = (int)$Silian_value;
+                if ($Silian_intVal > 0) {
+                    $Silian_clean[$Silian_intVal] = $Silian_intVal;
                 }
             }
         }
-        return array_values($clean);
+        return array_values($Silian_clean);
     }
 
-    private function normalizeUserRow(array $row): array
+    private function normalizeUserRow(array $Silian_row): array
     {
-        $profileFields = $this->userProfileViewService->buildProfileFields($row);
-        $legacyDisplayFields = $this->userProfileViewService->buildLegacyDisplayFields($row, $profileFields);
+        $Silian_profileFields = $this->userProfileViewService->buildProfileFields($Silian_row);
+        $Silian_legacyDisplayFields = $this->userProfileViewService->buildLegacyDisplayFields($Silian_row, $Silian_profileFields);
 
         return [
-            'id' => isset($row['id']) ? (int)$row['id'] : null,
-            'uuid' => $row['uuid'] ?? null,
-            'username' => $row['username'] ?? null,
-            'email' => $row['email'] ?? null,
-            'school' => $legacyDisplayFields['school'],
-            'school_id' => $profileFields['school_id'],
-            'location' => $legacyDisplayFields['location'],
-            'is_admin' => isset($row['is_admin']) ? (bool)$row['is_admin'] : null,
-            'status' => $row['status'] ?? null,
+            'id' => isset($Silian_row['id']) ? (int)$Silian_row['id'] : null,
+            'uuid' => $Silian_row['uuid'] ?? null,
+            'username' => $Silian_row['username'] ?? null,
+            'email' => $Silian_row['email'] ?? null,
+            'school' => $Silian_legacyDisplayFields['school'],
+            'school_id' => $Silian_profileFields['school_id'],
+            'location' => $Silian_legacyDisplayFields['location'],
+            'is_admin' => isset($Silian_row['is_admin']) ? (bool)$Silian_row['is_admin'] : null,
+            'status' => $Silian_row['status'] ?? null,
         ];
     }
 
-    private function normalizeEmailDeliveryMeta($value): array
+    private function normalizeEmailDeliveryMeta($Silian_value): array
     {
-        $defaults = [
+        $Silian_defaults = [
             'triggered' => false,
             'attempted_recipients' => 0,
             'successful_chunks' => 0,
@@ -1914,112 +1914,112 @@ $auditPayload = [
             'completed_at' => null,
         ];
 
-        if (is_string($value) && $value !== '') {
-            $decoded = json_decode($value, true);
-            if (is_array($decoded)) {
-                $value = $decoded;
+        if (is_string($Silian_value) && $Silian_value !== '') {
+            $Silian_decoded = json_decode($Silian_value, true);
+            if (is_array($Silian_decoded)) {
+                $Silian_value = $Silian_decoded;
             }
         }
 
-        if (!is_array($value)) {
-            return $defaults;
+        if (!is_array($Silian_value)) {
+            return $Silian_defaults;
         }
 
-        $result = $defaults;
-        $result['triggered'] = (bool)($value['triggered'] ?? false);
-        $result['attempted_recipients'] = (int)($value['attempted_recipients'] ?? 0);
-        $result['successful_chunks'] = (int)($value['successful_chunks'] ?? 0);
-        $result['failed_chunks'] = (int)($value['failed_chunks'] ?? 0);
-        $result['failed_recipient_ids'] = $this->decodeIdList($value['failed_recipient_ids'] ?? []);
-        $result['missing_email_user_ids'] = $this->decodeIdList($value['missing_email_user_ids'] ?? []);
-        $status = (string)($value['status'] ?? '');
-        $result['status'] = $status !== '' ? $status : 'skipped';
+        $Silian_result = $Silian_defaults;
+        $Silian_result['triggered'] = (bool)($Silian_value['triggered'] ?? false);
+        $Silian_result['attempted_recipients'] = (int)($Silian_value['attempted_recipients'] ?? 0);
+        $Silian_result['successful_chunks'] = (int)($Silian_value['successful_chunks'] ?? 0);
+        $Silian_result['failed_chunks'] = (int)($Silian_value['failed_chunks'] ?? 0);
+        $Silian_result['failed_recipient_ids'] = $this->decodeIdList($Silian_value['failed_recipient_ids'] ?? []);
+        $Silian_result['missing_email_user_ids'] = $this->decodeIdList($Silian_value['missing_email_user_ids'] ?? []);
+        $Silian_status = (string)($Silian_value['status'] ?? '');
+        $Silian_result['status'] = $Silian_status !== '' ? $Silian_status : 'skipped';
 
-        $errors = $value['errors'] ?? [];
-        if (is_string($errors)) {
-            $decodedErrors = json_decode($errors, true);
-            if (is_array($decodedErrors)) {
-                $errors = $decodedErrors;
+        $Silian_errors = $Silian_value['errors'] ?? [];
+        if (is_string($Silian_errors)) {
+            $Silian_decodedErrors = json_decode($Silian_errors, true);
+            if (is_array($Silian_decodedErrors)) {
+                $Silian_errors = $Silian_decodedErrors;
             } else {
-                $errors = array_filter(array_map('trim', preg_split('/[\r\n]+/', $errors) ?: []));
+                $Silian_errors = array_filter(array_map('trim', preg_split('/[\r\n]+/', $Silian_errors) ?: []));
             }
         }
-        if (!is_array($errors)) {
-            $errors = [];
+        if (!is_array($Silian_errors)) {
+            $Silian_errors = [];
         }
-        $normalizedErrors = [];
-        foreach ($errors as $error) {
-            if (!is_scalar($error)) {
+        $Silian_normalizedErrors = [];
+        foreach ($Silian_errors as $Silian_error) {
+            if (!is_scalar($Silian_error)) {
                 continue;
             }
-            $trimmed = trim((string)$error);
-            if ($trimmed === '' || in_array($trimmed, $normalizedErrors, true)) {
+            $Silian_trimmed = trim((string)$Silian_error);
+            if ($Silian_trimmed === '' || in_array($Silian_trimmed, $Silian_normalizedErrors, true)) {
                 continue;
             }
-            $normalizedErrors[] = $trimmed;
+            $Silian_normalizedErrors[] = $Silian_trimmed;
         }
-        $result['errors'] = $normalizedErrors;
-        $completedAt = $value['completed_at'] ?? null;
-        if ($completedAt instanceof \DateTimeInterface) {
-            $completedAt = $completedAt->format('Y-m-d H:i:s');
-        } elseif (!is_string($completedAt) || $completedAt === '') {
-            $completedAt = null;
+        $Silian_result['errors'] = $Silian_normalizedErrors;
+        $Silian_completedAt = $Silian_value['completed_at'] ?? null;
+        if ($Silian_completedAt instanceof \DateTimeInterface) {
+            $Silian_completedAt = $Silian_completedAt->format('Y-m-d H:i:s');
+        } elseif (!is_string($Silian_completedAt) || $Silian_completedAt === '') {
+            $Silian_completedAt = null;
         }
-        $result['completed_at'] = $completedAt;
+        $Silian_result['completed_at'] = $Silian_completedAt;
 
-        return $result;
+        return $Silian_result;
     }
 
-    private function trimEmailDeliveryForLog(array $delivery): array
+    private function trimEmailDeliveryForLog(array $Silian_delivery): array
     {
-        $result = $delivery;
-        $limit = 100;
-        foreach (['failed_recipient_ids', 'missing_email_user_ids', 'errors'] as $key) {
-            if (!isset($result[$key]) || !is_array($result[$key])) {
+        $Silian_result = $Silian_delivery;
+        $Silian_limit = 100;
+        foreach (['failed_recipient_ids', 'missing_email_user_ids', 'errors'] as $Silian_key) {
+            if (!isset($Silian_result[$Silian_key]) || !is_array($Silian_result[$Silian_key])) {
                 continue;
             }
-            if (count($result[$key]) > $limit) {
-                $result[$key] = array_slice($result[$key], 0, $limit);
-                $result[$key . '_truncated'] = true;
+            if (count($Silian_result[$Silian_key]) > $Silian_limit) {
+                $Silian_result[$Silian_key] = array_slice($Silian_result[$Silian_key], 0, $Silian_limit);
+                $Silian_result[$Silian_key . '_truncated'] = true;
             }
         }
-        return $result;
+        return $Silian_result;
     }
 
-    private function normalizeBroadcastContentFormat($value): ?string
+    private function normalizeBroadcastContentFormat($Silian_value): ?string
     {
-        $normalized = strtolower(trim((string) $value));
-        if ($normalized === '' || $normalized === self::BROADCAST_CONTENT_FORMAT_TEXT) {
+        $Silian_normalized = strtolower(trim((string) $Silian_value));
+        if ($Silian_normalized === '' || $Silian_normalized === self::BROADCAST_CONTENT_FORMAT_TEXT) {
             return self::BROADCAST_CONTENT_FORMAT_TEXT;
         }
-        if ($normalized === self::BROADCAST_CONTENT_FORMAT_HTML) {
+        if ($Silian_normalized === self::BROADCAST_CONTENT_FORMAT_HTML) {
             return self::BROADCAST_CONTENT_FORMAT_HTML;
         }
 
         return null;
     }
 
-    private function normalizeBroadcastRenderProfile($value, string $contentFormat): ?string
+    private function normalizeBroadcastRenderProfile($Silian_value, string $Silian_contentFormat): ?string
     {
-        if ($contentFormat !== self::BROADCAST_CONTENT_FORMAT_HTML) {
+        if ($Silian_contentFormat !== self::BROADCAST_CONTENT_FORMAT_HTML) {
             return null;
         }
 
-        $normalized = trim((string) $value);
-        if ($normalized === '') {
+        $Silian_normalized = trim((string) $Silian_value);
+        if ($Silian_normalized === '') {
             return self::BROADCAST_RENDER_PROFILE_HTML;
         }
 
-        return $normalized === self::BROADCAST_RENDER_PROFILE_HTML
+        return $Silian_normalized === self::BROADCAST_RENDER_PROFILE_HTML
             ? self::BROADCAST_RENDER_PROFILE_HTML
             : null;
     }
 
-    private function resolveBroadcastRenderVersion(string $contentFormat, ?string $renderProfile): ?int
+    private function resolveBroadcastRenderVersion(string $Silian_contentFormat, ?string $Silian_renderProfile): ?int
     {
         if (
-            $contentFormat === self::BROADCAST_CONTENT_FORMAT_HTML
-            && $renderProfile === self::BROADCAST_RENDER_PROFILE_HTML
+            $Silian_contentFormat === self::BROADCAST_CONTENT_FORMAT_HTML
+            && $Silian_renderProfile === self::BROADCAST_RENDER_PROFILE_HTML
         ) {
             return self::BROADCAST_RENDER_VERSION_HTML;
         }
@@ -2027,290 +2027,290 @@ $auditPayload = [
         return null;
     }
 
-    private function normalizeBroadcastRenderVersion($value, string $contentFormat, ?string $renderProfile): ?int
+    private function normalizeBroadcastRenderVersion($Silian_value, string $Silian_contentFormat, ?string $Silian_renderProfile): ?int
     {
-        $resolved = $this->resolveBroadcastRenderVersion($contentFormat, $renderProfile);
-        if ($resolved === null) {
+        $Silian_resolved = $this->resolveBroadcastRenderVersion($Silian_contentFormat, $Silian_renderProfile);
+        if ($Silian_resolved === null) {
             return null;
         }
 
-        return $resolved;
+        return $Silian_resolved;
     }
 
-    private function normalizeBroadcastSourceKind($value): string
+    private function normalizeBroadcastSourceKind($Silian_value): string
     {
-        $normalized = trim((string) $value);
-        return $normalized !== '' ? $normalized : self::BROADCAST_SOURCE_KIND_ADMIN;
+        $Silian_normalized = trim((string) $Silian_value);
+        return $Silian_normalized !== '' ? $Silian_normalized : self::BROADCAST_SOURCE_KIND_ADMIN;
     }
 
-    private function normalizeBroadcastContent(string $content, string $contentFormat): string
+    private function normalizeBroadcastContent(string $Silian_content, string $Silian_contentFormat): string
     {
-        $normalized = trim($content);
-        if ($normalized === '') {
+        $Silian_normalized = trim($Silian_content);
+        if ($Silian_normalized === '') {
             return '';
         }
 
-        if ($contentFormat !== self::BROADCAST_CONTENT_FORMAT_HTML) {
-            return $normalized;
+        if ($Silian_contentFormat !== self::BROADCAST_CONTENT_FORMAT_HTML) {
+            return $Silian_normalized;
         }
 
-        return $this->sanitizeBroadcastAnnouncementHtml($normalized);
+        return $this->sanitizeBroadcastAnnouncementHtml($Silian_normalized);
     }
 
-    private function sanitizeBroadcastAnnouncementHtml(string $html): string
+    private function sanitizeBroadcastAnnouncementHtml(string $Silian_html): string
     {
-        $normalized = trim($html);
-        if ($normalized === '') {
+        $Silian_normalized = trim($Silian_html);
+        if ($Silian_normalized === '') {
             return '';
         }
 
         if (!class_exists(\DOMDocument::class)) {
-            return trim(strip_tags($normalized));
+            return trim(strip_tags($Silian_normalized));
         }
 
-        $wrapperId = '__broadcast_root__';
-        $document = new \DOMDocument('1.0', 'UTF-8');
-        $previous = libxml_use_internal_errors(true);
+        $Silian_wrapperId = '__broadcast_root__';
+        $Silian_document = new \DOMDocument('1.0', 'UTF-8');
+        $Silian_previous = libxml_use_internal_errors(true);
         try {
-            $loaded = $document->loadHTML(
-                '<?xml encoding="utf-8" ?><div id="' . $wrapperId . '">' . $normalized . '</div>',
+            $Silian_loaded = $Silian_document->loadHTML(
+                '<?xml encoding="utf-8" ?><div id="' . $Silian_wrapperId . '">' . $Silian_normalized . '</div>',
                 LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
             );
 
-            if ($loaded === false) {
-                return trim(strip_tags($normalized));
+            if ($Silian_loaded === false) {
+                return trim(strip_tags($Silian_normalized));
             }
 
-            $root = $document->getElementById($wrapperId);
-            if (!$root instanceof \DOMElement) {
-                return trim(strip_tags($normalized));
+            $Silian_root = $Silian_document->getElementById($Silian_wrapperId);
+            if (!$Silian_root instanceof \DOMElement) {
+                return trim(strip_tags($Silian_normalized));
             }
 
-            $this->sanitizeBroadcastAnnouncementNode($root, $document);
+            $this->sanitizeBroadcastAnnouncementNode($Silian_root, $Silian_document);
 
-            $output = '';
-            foreach ($root->childNodes as $child) {
-                $output .= $document->saveHTML($child);
+            $Silian_output = '';
+            foreach ($Silian_root->childNodes as $Silian_child) {
+                $Silian_output .= $Silian_document->saveHTML($Silian_child);
             }
 
-            return trim($output);
-        } catch (\Throwable $e) {
-            return trim(strip_tags($normalized));
+            return trim($Silian_output);
+        } catch (\Throwable $Silian_e) {
+            return trim(strip_tags($Silian_normalized));
         } finally {
             libxml_clear_errors();
-            libxml_use_internal_errors($previous);
+            libxml_use_internal_errors($Silian_previous);
         }
     }
 
-    private function sanitizeBroadcastAnnouncementNode(\DOMNode $node, \DOMDocument $document): void
+    private function sanitizeBroadcastAnnouncementNode(\DOMNode $Silian_node, \DOMDocument $Silian_document): void
     {
-        if ($node->nodeType === XML_COMMENT_NODE) {
-            if ($node->parentNode) {
-                $node->parentNode->removeChild($node);
+        if ($Silian_node->nodeType === XML_COMMENT_NODE) {
+            if ($Silian_node->parentNode) {
+                $Silian_node->parentNode->removeChild($Silian_node);
             }
             return;
         }
 
-        if ($node->nodeType === XML_ELEMENT_NODE) {
-            $tagName = strtolower($node->nodeName);
-            $blockedTags = ['form', 'iframe', 'img', 'input', 'meta', 'object', 'script', 'style', 'textarea', 'video'];
-            $allowedTags = ['a', 'abbr', 'b', 'blockquote', 'br', 'caption', 'code', 'col', 'colgroup', 'div', 'em', 'h1', 'h2', 'h3', 'h4', 'hr', 'i', 'li', 'ol', 'p', 'pre', 'strong', 'table', 'tbody', 'td', 'th', 'thead', 'tr', 'u', 'ul'];
+        if ($Silian_node->nodeType === XML_ELEMENT_NODE) {
+            $Silian_tagName = strtolower($Silian_node->nodeName);
+            $Silian_blockedTags = ['form', 'iframe', 'img', 'input', 'meta', 'object', 'script', 'style', 'textarea', 'video'];
+            $Silian_allowedTags = ['a', 'abbr', 'b', 'blockquote', 'br', 'caption', 'code', 'col', 'colgroup', 'div', 'em', 'h1', 'h2', 'h3', 'h4', 'hr', 'i', 'li', 'ol', 'p', 'pre', 'strong', 'table', 'tbody', 'td', 'th', 'thead', 'tr', 'u', 'ul'];
 
-            if (in_array($tagName, $blockedTags, true)) {
-                if ($node->parentNode) {
-                    $node->parentNode->removeChild($node);
+            if (in_array($Silian_tagName, $Silian_blockedTags, true)) {
+                if ($Silian_node->parentNode) {
+                    $Silian_node->parentNode->removeChild($Silian_node);
                 }
                 return;
             }
 
-            if (!in_array($tagName, $allowedTags, true)) {
-                $children = [];
-                $child = $node->firstChild;
-                while ($child !== null) {
-                    $children[] = $child;
-                    $child = $child->nextSibling;
+            if (!in_array($Silian_tagName, $Silian_allowedTags, true)) {
+                $Silian_children = [];
+                $Silian_child = $Silian_node->firstChild;
+                while ($Silian_child !== null) {
+                    $Silian_children[] = $Silian_child;
+                    $Silian_child = $Silian_child->nextSibling;
                 }
 
-                $this->unwrapBroadcastAnnouncementNode($node);
+                $this->unwrapBroadcastAnnouncementNode($Silian_node);
 
-                foreach ($children as $childNode) {
-                    if ($childNode->parentNode !== null) {
-                        $this->sanitizeBroadcastAnnouncementNode($childNode, $document);
+                foreach ($Silian_children as $Silian_childNode) {
+                    if ($Silian_childNode->parentNode !== null) {
+                        $this->sanitizeBroadcastAnnouncementNode($Silian_childNode, $Silian_document);
                     }
                 }
                 return;
             }
 
-            $this->sanitizeBroadcastAnnouncementAttributes($node);
+            $this->sanitizeBroadcastAnnouncementAttributes($Silian_node);
         }
 
-        $child = $node->firstChild;
-        while ($child !== null) {
-            $next = $child->nextSibling;
-            $this->sanitizeBroadcastAnnouncementNode($child, $document);
-            $child = $next;
+        $Silian_child = $Silian_node->firstChild;
+        while ($Silian_child !== null) {
+            $Silian_next = $Silian_child->nextSibling;
+            $this->sanitizeBroadcastAnnouncementNode($Silian_child, $Silian_document);
+            $Silian_child = $Silian_next;
         }
     }
 
-    private function unwrapBroadcastAnnouncementNode(\DOMNode $node): void
+    private function unwrapBroadcastAnnouncementNode(\DOMNode $Silian_node): void
     {
-        $parent = $node->parentNode;
-        if ($parent === null) {
+        $Silian_parent = $Silian_node->parentNode;
+        if ($Silian_parent === null) {
             return;
         }
 
-        while ($node->firstChild !== null) {
-            $parent->insertBefore($node->firstChild, $node);
+        while ($Silian_node->firstChild !== null) {
+            $Silian_parent->insertBefore($Silian_node->firstChild, $Silian_node);
         }
 
-        $parent->removeChild($node);
+        $Silian_parent->removeChild($Silian_node);
     }
 
-    private function sanitizeBroadcastAnnouncementAttributes(\DOMNode $node): void
+    private function sanitizeBroadcastAnnouncementAttributes(\DOMNode $Silian_node): void
     {
-        if (!$node instanceof \DOMElement || !$node->hasAttributes()) {
+        if (!$Silian_node instanceof \DOMElement || !$Silian_node->hasAttributes()) {
             return;
         }
 
-        $tagName = strtolower($node->tagName);
-        $allowedAttributes = ['title'];
-        if ($tagName === 'a') {
-            $allowedAttributes = ['href', 'rel', 'target', 'title'];
-        } elseif ($tagName === 'td' || $tagName === 'th') {
-            $allowedAttributes = ['colspan', 'rowspan', 'align', 'title'];
-            if ($tagName === 'th') {
-                $allowedAttributes[] = 'scope';
+        $Silian_tagName = strtolower($Silian_node->tagName);
+        $Silian_allowedAttributes = ['title'];
+        if ($Silian_tagName === 'a') {
+            $Silian_allowedAttributes = ['href', 'rel', 'target', 'title'];
+        } elseif ($Silian_tagName === 'td' || $Silian_tagName === 'th') {
+            $Silian_allowedAttributes = ['colspan', 'rowspan', 'align', 'title'];
+            if ($Silian_tagName === 'th') {
+                $Silian_allowedAttributes[] = 'scope';
             }
         }
 
-        $attributes = [];
-        foreach ($node->attributes as $attribute) {
-            if ($attribute instanceof \DOMAttr) {
-                $attributes[] = $attribute->name;
-            } elseif ($attribute instanceof \DOMNode) {
-                $attributes[] = $attribute->nodeName;
+        $Silian_attributes = [];
+        foreach ($Silian_node->attributes as $Silian_attribute) {
+            if ($Silian_attribute instanceof \DOMAttr) {
+                $Silian_attributes[] = $Silian_attribute->name;
+            } elseif ($Silian_attribute instanceof \DOMNode) {
+                $Silian_attributes[] = $Silian_attribute->nodeName;
             }
         }
 
-        foreach ($attributes as $attributeName) {
-            if (!in_array(strtolower($attributeName), $allowedAttributes, true)) {
-                $node->removeAttribute($attributeName);
+        foreach ($Silian_attributes as $Silian_attributeName) {
+            if (!in_array(strtolower($Silian_attributeName), $Silian_allowedAttributes, true)) {
+                $Silian_node->removeAttribute($Silian_attributeName);
             }
         }
 
-        if ($tagName === 'a') {
-            $href = trim((string) $node->getAttribute('href'));
-            if ($href === '' || !preg_match('/^(?:(?:https?|mailto|tel):|#|\/)/i', $href)) {
-                $node->removeAttribute('href');
-                $node->removeAttribute('rel');
-                $node->removeAttribute('target');
+        if ($Silian_tagName === 'a') {
+            $Silian_href = trim((string) $Silian_node->getAttribute('href'));
+            if ($Silian_href === '' || !preg_match('/^(?:(?:https?|mailto|tel):|#|\/)/i', $Silian_href)) {
+                $Silian_node->removeAttribute('href');
+                $Silian_node->removeAttribute('rel');
+                $Silian_node->removeAttribute('target');
             } else {
-                $node->setAttribute('rel', 'noopener noreferrer');
-                $node->setAttribute('target', '_blank');
+                $Silian_node->setAttribute('rel', 'noopener noreferrer');
+                $Silian_node->setAttribute('target', '_blank');
             }
         }
 
-        foreach (['colspan', 'rowspan'] as $spanAttribute) {
-            if (!$node->hasAttribute($spanAttribute)) {
+        foreach (['colspan', 'rowspan'] as $Silian_spanAttribute) {
+            if (!$Silian_node->hasAttribute($Silian_spanAttribute)) {
                 continue;
             }
-            $raw = trim((string) $node->getAttribute($spanAttribute));
-            $numeric = ctype_digit($raw) ? (int) $raw : 0;
-            if ($numeric < 1 || $numeric > 12) {
-                $node->removeAttribute($spanAttribute);
+            $Silian_raw = trim((string) $Silian_node->getAttribute($Silian_spanAttribute));
+            $Silian_numeric = ctype_digit($Silian_raw) ? (int) $Silian_raw : 0;
+            if ($Silian_numeric < 1 || $Silian_numeric > 12) {
+                $Silian_node->removeAttribute($Silian_spanAttribute);
             } else {
-                $node->setAttribute($spanAttribute, (string) $numeric);
+                $Silian_node->setAttribute($Silian_spanAttribute, (string) $Silian_numeric);
             }
         }
 
-        if ($node->hasAttribute('align')) {
-            $align = strtolower(trim((string) $node->getAttribute('align')));
-            if (!in_array($align, ['left', 'center', 'right'], true)) {
-                $node->removeAttribute('align');
+        if ($Silian_node->hasAttribute('align')) {
+            $Silian_align = strtolower(trim((string) $Silian_node->getAttribute('align')));
+            if (!in_array($Silian_align, ['left', 'center', 'right'], true)) {
+                $Silian_node->removeAttribute('align');
             } else {
-                $node->setAttribute('align', $align);
+                $Silian_node->setAttribute('align', $Silian_align);
             }
         }
 
-        if ($node->hasAttribute('scope')) {
-            $scope = strtolower(trim((string) $node->getAttribute('scope')));
-            if (!in_array($scope, ['col', 'row', 'colgroup', 'rowgroup'], true)) {
-                $node->removeAttribute('scope');
+        if ($Silian_node->hasAttribute('scope')) {
+            $Silian_scope = strtolower(trim((string) $Silian_node->getAttribute('scope')));
+            if (!in_array($Silian_scope, ['col', 'row', 'colgroup', 'rowgroup'], true)) {
+                $Silian_node->removeAttribute('scope');
             } else {
-                $node->setAttribute('scope', $scope);
+                $Silian_node->setAttribute('scope', $Silian_scope);
             }
         }
     }
 
-    private function normalizeMessageIdMap($value): array
+    private function normalizeMessageIdMap($Silian_value): array
     {
-        $result = [];
-        if (is_array($value)) {
-            foreach ($value as $userId => $messageId) {
-                $intUserId = is_numeric($userId) ? (int)$userId : null;
-                $intMessageId = is_numeric($messageId) ? (int)$messageId : null;
-                if ($intUserId !== null && $intUserId > 0 && $intMessageId !== null && $intMessageId > 0) {
-                    $result[$intUserId] = $intMessageId;
+        $Silian_result = [];
+        if (is_array($Silian_value)) {
+            foreach ($Silian_value as $Silian_userId => $Silian_messageId) {
+                $Silian_intUserId = is_numeric($Silian_userId) ? (int)$Silian_userId : null;
+                $Silian_intMessageId = is_numeric($Silian_messageId) ? (int)$Silian_messageId : null;
+                if ($Silian_intUserId !== null && $Silian_intUserId > 0 && $Silian_intMessageId !== null && $Silian_intMessageId > 0) {
+                    $Silian_result[$Silian_intUserId] = $Silian_intMessageId;
                 }
             }
-        } elseif (is_string($value) && $value !== '') {
-            $decoded = json_decode($value, true);
-            if (is_array($decoded)) {
-                return $this->normalizeMessageIdMap($decoded);
+        } elseif (is_string($Silian_value) && $Silian_value !== '') {
+            $Silian_decoded = json_decode($Silian_value, true);
+            if (is_array($Silian_decoded)) {
+                return $this->normalizeMessageIdMap($Silian_decoded);
             }
         }
-        return $result;
+        return $Silian_result;
     }
 
-    private function shouldSendPriorityEmail(string $priority): bool
+    private function shouldSendPriorityEmail(string $Silian_priority): bool
     {
-        return in_array($priority, [Message::PRIORITY_HIGH, Message::PRIORITY_URGENT], true);
+        return in_array($Silian_priority, [Message::PRIORITY_HIGH, Message::PRIORITY_URGENT], true);
     }
 
-    private function loadUsernames(array $ids): array
+    private function loadUsernames(array $Silian_ids): array
     {
-        $cleanIds = [];
-        foreach ($ids as $id) {
-            $intId = (int)$id;
-            if ($intId > 0) {
-                $cleanIds[$intId] = $intId;
+        $Silian_cleanIds = [];
+        foreach ($Silian_ids as $Silian_id) {
+            $Silian_intId = (int)$Silian_id;
+            if ($Silian_intId > 0) {
+                $Silian_cleanIds[$Silian_intId] = $Silian_intId;
             }
         }
-        if (empty($cleanIds)) {
+        if (empty($Silian_cleanIds)) {
             return [];
         }
 
         try {
-            $placeholders = implode(',', array_fill(0, count($cleanIds), '?'));
-            $sql = 'SELECT id, username, email FROM users WHERE id IN (' . $placeholders . ')';
-            $stmt = $this->db->prepare($sql);
-            if (!$stmt) {
+            $Silian_placeholders = implode(',', array_fill(0, count($Silian_cleanIds), '?'));
+            $Silian_sql = 'SELECT id, username, email FROM users WHERE id IN (' . $Silian_placeholders . ')';
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            if (!$Silian_stmt) {
                 return [];
             }
-            $index = 1;
-            foreach ($cleanIds as $userId) {
-                $stmt->bindValue($index, $userId, PDO::PARAM_INT);
-                $index++;
+            $Silian_index = 1;
+            foreach ($Silian_cleanIds as $Silian_userId) {
+                $Silian_stmt->bindValue($Silian_index, $Silian_userId, PDO::PARAM_INT);
+                $Silian_index++;
             }
-            $stmt->execute();
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_stmt->execute();
+            $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            $result = [];
-            foreach ($rows as $row) {
-                $uid = isset($row['id']) ? (int)$row['id'] : null;
-                if ($uid === null) {
+            $Silian_result = [];
+            foreach ($Silian_rows as $Silian_row) {
+                $Silian_uid = isset($Silian_row['id']) ? (int)$Silian_row['id'] : null;
+                if ($Silian_uid === null) {
                     continue;
                 }
-                $username = null;
-                if (!empty($row['username'])) {
-                    $username = (string)$row['username'];
-                } elseif (!empty($row['email'])) {
-                    $username = (string)$row['email'];
+                $Silian_username = null;
+                if (!empty($Silian_row['username'])) {
+                    $Silian_username = (string)$Silian_row['username'];
+                } elseif (!empty($Silian_row['email'])) {
+                    $Silian_username = (string)$Silian_row['email'];
                 }
-                $result[$uid] = $username;
+                $Silian_result[$Silian_uid] = $Silian_username;
             }
-            return $result;
-        } catch (\Throwable $e) {
+            return $Silian_result;
+        } catch (\Throwable $Silian_e) {
             return [];
         }
     }
@@ -2318,16 +2318,16 @@ $auditPayload = [
     /**
      * 标记消息为已读的私有方法
      */
-    private function markMessageAsRead(string $messageId): void
+    private function markMessageAsRead(string $Silian_messageId): void
     {
-        $sql = "UPDATE messages SET is_read = 1, updated_at = NOW() WHERE id = :id AND is_read = 0";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['id' => $messageId]);
+        $Silian_sql = "UPDATE messages SET is_read = 1, updated_at = NOW() WHERE id = :id AND is_read = 0";
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute(['id' => $Silian_messageId]);
     }
-    private function json(Response $response, array $data, int $status = 200): Response
+    private function json(Response $Silian_response, array $Silian_data, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($data));
-        return $response->withStatus($status)->withHeader('Content-Type', 'application/json');
+        $Silian_response->getBody()->write(json_encode($Silian_data));
+        return $Silian_response->withStatus($Silian_status)->withHeader('Content-Type', 'application/json');
     }
 }
 

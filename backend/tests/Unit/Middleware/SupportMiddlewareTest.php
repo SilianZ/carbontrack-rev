@@ -14,109 +14,109 @@ class SupportMiddlewareTest extends TestCase
 {
     public function testRejectsWhenUnauthenticated(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(null);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(null);
 
-        $middleware = new SupportMiddleware($auth, $this->createMock(LoggerInterface::class));
-        $response = $middleware->process(
+        $Silian_middleware = new SupportMiddleware($Silian_auth, $this->createMock(LoggerInterface::class));
+        $Silian_response = $Silian_middleware->process(
             makeRequest('GET', '/api/v1/support/tickets')->withAttribute('request_id', 'req-support-auth'),
             $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class)
         );
 
-        $this->assertSame(401, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame('Authentication required', $payload['message']);
-        $this->assertSame('Authentication required', $payload['error']);
-        $this->assertSame('AUTH_REQUIRED', $payload['code']);
-        $this->assertSame('req-support-auth', $payload['request_id']);
+        $this->assertSame(401, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('Authentication required', $Silian_payload['message']);
+        $this->assertSame('Authentication required', $Silian_payload['error']);
+        $this->assertSame('AUTH_REQUIRED', $Silian_payload['code']);
+        $this->assertSame('req-support-auth', $Silian_payload['request_id']);
     }
 
     public function testRejectsRegularUsers(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 8, 'role' => 'user', 'is_admin' => false]);
-        $auth->method('isSupportUser')->willReturn(false);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 8, 'role' => 'user', 'is_admin' => false]);
+        $Silian_auth->method('isSupportUser')->willReturn(false);
 
-        $middleware = new SupportMiddleware($auth, $this->createMock(LoggerInterface::class));
-        $response = $middleware->process(
+        $Silian_middleware = new SupportMiddleware($Silian_auth, $this->createMock(LoggerInterface::class));
+        $Silian_response = $Silian_middleware->process(
             makeRequest('GET', '/api/v1/support/tickets'),
             $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class)
         );
 
-        $this->assertSame(403, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame('Support access required', $payload['message']);
-        $this->assertSame('Support access required', $payload['error']);
-        $this->assertSame('SUPPORT_REQUIRED', $payload['code']);
+        $this->assertSame(403, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('Support access required', $Silian_payload['message']);
+        $this->assertSame('Support access required', $Silian_payload['error']);
+        $this->assertSame('SUPPORT_REQUIRED', $Silian_payload['code']);
     }
 
     public function testAllowsSupportUsers(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 3, 'role' => 'support', 'is_admin' => false, 'is_support' => true]);
-        $auth->method('isSupportUser')->willReturn(true);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 3, 'role' => 'support', 'is_admin' => false, 'is_support' => true]);
+        $Silian_auth->method('isSupportUser')->willReturn(true);
 
-        $middleware = new SupportMiddleware($auth, $this->createMock(LoggerInterface::class));
-        $handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
-            public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface
+        $Silian_middleware = new SupportMiddleware($Silian_auth, $this->createMock(LoggerInterface::class));
+        $Silian_handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
+            public function handle(\Psr\Http\Message\ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface
             {
-                TestCase::assertSame(3, $request->getAttribute('user')['id'] ?? null);
-                $response = new \Slim\Psr7\Response();
-                $response->getBody()->write('ok');
-                return $response;
+                TestCase::assertSame(3, $Silian_request->getAttribute('user')['id'] ?? null);
+                $Silian_response = new \Slim\Psr7\Response();
+                $Silian_response->getBody()->write('ok');
+                return $Silian_response;
             }
         };
 
-        $response = $middleware->process(makeRequest('GET', '/api/v1/support/tickets'), $handler);
+        $Silian_response = $Silian_middleware->process(makeRequest('GET', '/api/v1/support/tickets'), $Silian_handler);
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(200, $Silian_response->getStatusCode());
     }
 
     public function testLogsStructuredFallbackWhenErrorLogServiceFails(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willThrowException(new \RuntimeException('auth exploded'));
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willThrowException(new \RuntimeException('auth exploded'));
 
-        $errorLogService = $this->createMock(ErrorLogService::class);
-        $errorLogService->expects($this->once())
+        $Silian_errorLogService = $this->createMock(ErrorLogService::class);
+        $Silian_errorLogService->expects($this->once())
             ->method('logException')
             ->willThrowException(new \RuntimeException('logger exploded'));
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->once())
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->once())
             ->method('error')
             ->with(
                 'ErrorLogService logging failed for support middleware',
-                $this->callback(static function (array $context): bool {
-                    return ($context['request_id'] ?? null) === 'req-support-1'
-                        && ($context['path'] ?? null) === '/api/v1/support/tickets'
-                        && ($context['method'] ?? null) === 'GET'
-                        && ($context['exception_type'] ?? null) === \RuntimeException::class
-                        && ($context['logging_exception_type'] ?? null) === \RuntimeException::class
-                        && ($context['logging_error_message'] ?? null) === 'logger exploded';
+                $this->callback(static function (array $Silian_context): bool {
+                    return ($Silian_context['request_id'] ?? null) === 'req-support-1'
+                        && ($Silian_context['path'] ?? null) === '/api/v1/support/tickets'
+                        && ($Silian_context['method'] ?? null) === 'GET'
+                        && ($Silian_context['exception_type'] ?? null) === \RuntimeException::class
+                        && ($Silian_context['logging_exception_type'] ?? null) === \RuntimeException::class
+                        && ($Silian_context['logging_error_message'] ?? null) === 'logger exploded';
                 })
             );
-        $logger->expects($this->once())
+        $Silian_logger->expects($this->once())
             ->method('warning')
             ->with(
                 'SupportMiddleware error: auth exploded',
-                $this->callback(static function (array $context): bool {
-                    return ($context['request_id'] ?? null) === 'req-support-1'
-                        && ($context['path'] ?? null) === '/api/v1/support/tickets'
-                        && ($context['method'] ?? null) === 'GET'
-                        && ($context['exception_type'] ?? null) === \RuntimeException::class
-                        && ($context['exception_message'] ?? null) === 'auth exploded';
+                $this->callback(static function (array $Silian_context): bool {
+                    return ($Silian_context['request_id'] ?? null) === 'req-support-1'
+                        && ($Silian_context['path'] ?? null) === '/api/v1/support/tickets'
+                        && ($Silian_context['method'] ?? null) === 'GET'
+                        && ($Silian_context['exception_type'] ?? null) === \RuntimeException::class
+                        && ($Silian_context['exception_message'] ?? null) === 'auth exploded';
                 })
             );
 
-        $middleware = new SupportMiddleware($auth, $logger, $errorLogService);
-        $response = $middleware->process(
+        $Silian_middleware = new SupportMiddleware($Silian_auth, $Silian_logger, $Silian_errorLogService);
+        $Silian_response = $Silian_middleware->process(
             makeRequest('GET', '/api/v1/support/tickets')->withAttribute('request_id', 'req-support-1'),
             $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class)
         );
 
-        $this->assertSame(500, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame('INTERNAL_ERROR', $payload['code']);
+        $this->assertSame(500, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('INTERNAL_ERROR', $Silian_payload['code']);
     }
 }

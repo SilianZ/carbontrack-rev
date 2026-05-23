@@ -33,10 +33,10 @@ class QuotaServiceTest extends TestCase
 
     public static function tearDownAfterClass(): void
     {
-        $schema = self::$capsule->schema();
-        $schema->dropIfExists('user_usage_stats');
-        $schema->dropIfExists('users');
-        $schema->dropIfExists('user_groups');
+        $Silian_schema = self::$capsule->schema();
+        $Silian_schema->dropIfExists('user_usage_stats');
+        $Silian_schema->dropIfExists('users');
+        $Silian_schema->dropIfExists('user_groups');
     }
 
     protected function setUp(): void
@@ -49,142 +49,142 @@ class QuotaServiceTest extends TestCase
 
     public function testDailyQuotaHandlesCarbonDates(): void
     {
-        $user = $this->makeUserWithGroup(['daily_limit' => 2]);
+        $Silian_user = $this->makeUserWithGroup(['daily_limit' => 2]);
 
         UserUsageStats::create([
-            'user_id' => $user->id,
+            'user_id' => $Silian_user->id,
             'resource_key' => 'llm_daily',
             'counter' => 1,
             'last_updated_at' => Carbon::now()->subDay(),
             'reset_at' => Carbon::now()->subDay(),
         ]);
 
-        $this->assertEquals(['daily_limit' => 2], $user->group->getQuotaConfig('llm'));
+        $this->assertEquals(['daily_limit' => 2], $Silian_user->group->getQuotaConfig('llm'));
 
-        $service = new QuotaService();
+        $Silian_service = new QuotaService();
 
-        $this->assertTrue($service->checkAndConsume($user, 'llm', 1));
+        $this->assertTrue($Silian_service->checkAndConsume($Silian_user, 'llm', 1));
 
-        $stats = UserUsageStats::where('user_id', $user->id)
+        $Silian_stats = UserUsageStats::where('user_id', $Silian_user->id)
             ->where('resource_key', 'llm_daily')
             ->firstOrFail();
 
-        $this->assertSame(1, (int) $stats->counter, 'Counter should reset then consume cost.');
-        $this->assertTrue($stats->reset_at->greaterThan(Carbon::now()), 'Reset time should be in the future.');
+        $this->assertSame(1, (int) $Silian_stats->counter, 'Counter should reset then consume cost.');
+        $this->assertTrue($Silian_stats->reset_at->greaterThan(Carbon::now()), 'Reset time should be in the future.');
     }
 
     public function testTokenBucketHandlesCarbonDates(): void
     {
-        $user = $this->makeUserWithGroup(['rate_limit' => 2.0]);
+        $Silian_user = $this->makeUserWithGroup(['rate_limit' => 2.0]);
 
         UserUsageStats::create([
-            'user_id' => $user->id,
+            'user_id' => $Silian_user->id,
             'resource_key' => 'llm_bucket',
             'counter' => 1.0,
             'last_updated_at' => Carbon::now()->subSeconds(30),
         ]);
 
-        $this->assertEquals(['rate_limit' => 2.0], $user->group->getQuotaConfig('llm'));
+        $this->assertEquals(['rate_limit' => 2.0], $Silian_user->group->getQuotaConfig('llm'));
 
-        $service = new QuotaService();
+        $Silian_service = new QuotaService();
 
-        $this->assertTrue($service->checkAndConsume($user, 'llm', 1));
+        $this->assertTrue($Silian_service->checkAndConsume($Silian_user, 'llm', 1));
 
-        $stats = UserUsageStats::where('user_id', $user->id)
+        $Silian_stats = UserUsageStats::where('user_id', $Silian_user->id)
             ->where('resource_key', 'llm_bucket')
             ->firstOrFail();
 
-        $this->assertGreaterThanOrEqual(0.0, (float) $stats->counter);
-        $this->assertNotNull($stats->last_updated_at);
+        $this->assertGreaterThanOrEqual(0.0, (float) $Silian_stats->counter);
+        $this->assertNotNull($Silian_stats->last_updated_at);
     }
 
     public function testDailyQuotaInitializesWhenMissing(): void
     {
-        $user = $this->makeUserWithGroup(['daily_limit' => 1]);
+        $Silian_user = $this->makeUserWithGroup(['daily_limit' => 1]);
 
-        $service = new QuotaService();
+        $Silian_service = new QuotaService();
 
         // No existing stats row
-        $this->assertNull(UserUsageStats::where('user_id', $user->id)->where('resource_key', 'llm_daily')->first());
+        $this->assertNull(UserUsageStats::where('user_id', $Silian_user->id)->where('resource_key', 'llm_daily')->first());
 
-        $this->assertTrue($service->checkAndConsume($user, 'llm', 1));
+        $this->assertTrue($Silian_service->checkAndConsume($Silian_user, 'llm', 1));
 
-        $stats = UserUsageStats::where('user_id', $user->id)
+        $Silian_stats = UserUsageStats::where('user_id', $Silian_user->id)
             ->where('resource_key', 'llm_daily')
             ->firstOrFail();
 
-        $this->assertSame(1, (int) $stats->counter);
-        $this->assertTrue($stats->reset_at->greaterThan(Carbon::now()));
+        $this->assertSame(1, (int) $Silian_stats->counter);
+        $this->assertTrue($Silian_stats->reset_at->greaterThan(Carbon::now()));
     }
 
     private static function migrate(): void
     {
-        $schema = self::$capsule->schema();
+        $Silian_schema = self::$capsule->schema();
 
-        $schema->create('user_groups', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->string('name');
-            $table->string('code')->unique();
-            $table->longText('config')->nullable();
-            $table->boolean('is_default')->default(false);
-            $table->text('notes')->nullable();
-            $table->timestamps();
+        $Silian_schema->create('user_groups', function (Blueprint $Silian_table): void {
+            $Silian_table->increments('id');
+            $Silian_table->string('name');
+            $Silian_table->string('code')->unique();
+            $Silian_table->longText('config')->nullable();
+            $Silian_table->boolean('is_default')->default(false);
+            $Silian_table->text('notes')->nullable();
+            $Silian_table->timestamps();
         });
 
-        $schema->create('users', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->string('username')->nullable();
-            $table->string('email')->nullable();
-            $table->string('password')->nullable();
-            $table->string('role')->default('user');
-            $table->string('status')->default('active');
-            $table->decimal('points', 10, 2)->default(0);
-            $table->boolean('is_admin')->default(false);
-            $table->integer('group_id')->nullable();
-            $table->longText('quota_override')->nullable();
-            $table->text('admin_notes')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+        $Silian_schema->create('users', function (Blueprint $Silian_table): void {
+            $Silian_table->increments('id');
+            $Silian_table->string('username')->nullable();
+            $Silian_table->string('email')->nullable();
+            $Silian_table->string('password')->nullable();
+            $Silian_table->string('role')->default('user');
+            $Silian_table->string('status')->default('active');
+            $Silian_table->decimal('points', 10, 2)->default(0);
+            $Silian_table->boolean('is_admin')->default(false);
+            $Silian_table->integer('group_id')->nullable();
+            $Silian_table->longText('quota_override')->nullable();
+            $Silian_table->text('admin_notes')->nullable();
+            $Silian_table->timestamps();
+            $Silian_table->softDeletes();
         });
 
-        $schema->create('user_usage_stats', function (Blueprint $table): void {
-            $table->integer('user_id');
-            $table->string('resource_key', 50);
-            $table->decimal('counter', 10, 4)->default(0);
-            $table->dateTime('last_updated_at')->nullable();
-            $table->dateTime('reset_at')->nullable();
-            $table->primary(['user_id', 'resource_key']);
+        $Silian_schema->create('user_usage_stats', function (Blueprint $Silian_table): void {
+            $Silian_table->integer('user_id');
+            $Silian_table->string('resource_key', 50);
+            $Silian_table->decimal('counter', 10, 4)->default(0);
+            $Silian_table->dateTime('last_updated_at')->nullable();
+            $Silian_table->dateTime('reset_at')->nullable();
+            $Silian_table->primary(['user_id', 'resource_key']);
         });
     }
 
-    private function makeUserWithGroup(array $quotaConfig): User
+    private function makeUserWithGroup(array $Silian_quotaConfig): User
     {
-        $now = Carbon::now()->format('Y-m-d H:i:s');
-        $groupId = self::$capsule->table('user_groups')->insertGetId([
+        $Silian_now = Carbon::now()->format('Y-m-d H:i:s');
+        $Silian_groupId = self::$capsule->table('user_groups')->insertGetId([
             'name' => 'Test Group',
             'code' => 'code-' . uniqid(),
-            'config' => json_encode(['llm' => $quotaConfig]),
+            'config' => json_encode(['llm' => $Silian_quotaConfig]),
             'is_default' => false,
             'notes' => null,
-            'created_at' => $now,
-            'updated_at' => $now,
+            'created_at' => $Silian_now,
+            'updated_at' => $Silian_now,
         ]);
 
-        $userId = self::$capsule->table('users')->insertGetId([
+        $Silian_userId = self::$capsule->table('users')->insertGetId([
             'username' => 'user-' . uniqid(),
             'email' => 'test@example.com',
             'password' => 'secret',
             'role' => 'user',
             'status' => 'active',
-            'group_id' => $groupId,
+            'group_id' => $Silian_groupId,
             'quota_override' => json_encode([]),
             'points' => 0,
             'is_admin' => false,
             'admin_notes' => null,
-            'created_at' => $now,
-            'updated_at' => $now,
+            'created_at' => $Silian_now,
+            'updated_at' => $Silian_now,
         ]);
 
-        return User::with('group')->findOrFail($userId);
+        return User::with('group')->findOrFail($Silian_userId);
     }
 }

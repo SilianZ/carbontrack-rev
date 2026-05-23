@@ -1,20 +1,20 @@
-const ANNOUNCEMENT_TITLE_PATTERN = /(公告|系统|\b(?:announcement|system|broadcast|boardcast)\b)/i;
+const Silian_ANNOUNCEMENT_TITLE_PATTERN = /(公告|系统|\b(?:announcement|system|broadcast|boardcast)\b)/i;
 
-export function isAnnouncementMessage(message) {
-  if (!message) {
+export function isAnnouncementMessage(Silian_message) {
+  if (!Silian_message) {
     return false;
   }
 
-  if (message.type === 'system') {
+  if (Silian_message.type === 'system') {
     return true;
   }
 
-  if (message.sender_id !== null) {
+  if (Silian_message.sender_id !== null) {
     return false;
   }
 
-  const title = typeof message.title === 'string' ? message.title : '';
-  return ANNOUNCEMENT_TITLE_PATTERN.test(title.toLowerCase());
+  const Silian_title = typeof Silian_message.title === 'string' ? Silian_message.title : '';
+  return Silian_ANNOUNCEMENT_TITLE_PATTERN.test(Silian_title.toLowerCase());
 }
 
-export { ANNOUNCEMENT_TITLE_PATTERN };
+export { Silian_ANNOUNCEMENT_TITLE_PATTERN as ANNOUNCEMENT_TITLE_PATTERN };

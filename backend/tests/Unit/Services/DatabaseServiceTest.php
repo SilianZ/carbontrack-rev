@@ -12,57 +12,57 @@ class DatabaseServiceTest extends TestCase
 {
     public function testBasicHelpersAndIsConnected(): void
     {
-    $pdo = $this->createMock(\PDO::class);
-    $stmt = $this->createMock(\PDOStatement::class);
-    $pdo->method('query')->with('SELECT 1')->willReturn($stmt);
+    $Silian_pdo = $this->createMock(\PDO::class);
+    $Silian_stmt = $this->createMock(\PDOStatement::class);
+    $Silian_pdo->method('query')->with('SELECT 1')->willReturn($Silian_stmt);
 
-        $connection = $this->getMockBuilder(\Illuminate\Database\Connection::class)
+        $Silian_connection = $this->getMockBuilder(\Illuminate\Database\Connection::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getPdo','getTablePrefix','getDatabaseName','select','beginTransaction','commit','rollback'])
             ->getMock();
 
-        $connection->method('getPdo')->willReturn($pdo);
-        $connection->method('getTablePrefix')->willReturn('ct_');
-        $connection->method('getDatabaseName')->willReturn('testdb');
-        $connection->method('select')->willReturn([["ok" => 1]]);
+        $Silian_connection->method('getPdo')->willReturn($Silian_pdo);
+        $Silian_connection->method('getTablePrefix')->willReturn('ct_');
+        $Silian_connection->method('getDatabaseName')->willReturn('testdb');
+        $Silian_connection->method('select')->willReturn([["ok" => 1]]);
 
-        $capsule = $this->getMockBuilder(Capsule::class)
+        $Silian_capsule = $this->getMockBuilder(Capsule::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getConnection'])
             ->getMock();
-        $capsule->method('getConnection')->willReturn($connection);
+        $Silian_capsule->method('getConnection')->willReturn($Silian_connection);
 
-        $db = new DatabaseService($capsule);
-        $this->assertSame($capsule, $db->getCapsule());
-        $this->assertTrue($db->isConnected());
-        $this->assertEquals('ct_', $db->getTablePrefix());
-        $this->assertEquals('testdb', $db->getDatabaseName());
-        $this->assertIsArray($db->raw('SELECT 1'));
+        $Silian_db = new DatabaseService($Silian_capsule);
+        $this->assertSame($Silian_capsule, $Silian_db->getCapsule());
+        $this->assertTrue($Silian_db->isConnected());
+        $this->assertEquals('ct_', $Silian_db->getTablePrefix());
+        $this->assertEquals('testdb', $Silian_db->getDatabaseName());
+        $this->assertIsArray($Silian_db->raw('SELECT 1'));
 
         // transaction calls should not throw with mocked methods
-        $db->beginTransaction();
-        $db->commit();
-        $db->rollback();
+        $Silian_db->beginTransaction();
+        $Silian_db->commit();
+        $Silian_db->rollback();
     }
 
     public function testIsConnectedFalseOnException(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $pdo->method('query')->willThrowException(new \Exception('fail'));
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_pdo->method('query')->willThrowException(new \Exception('fail'));
 
-        $connection = $this->getMockBuilder(\Illuminate\Database\Connection::class)
+        $Silian_connection = $this->getMockBuilder(\Illuminate\Database\Connection::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getPdo'])
             ->getMock();
-        $connection->method('getPdo')->willReturn($pdo);
+        $Silian_connection->method('getPdo')->willReturn($Silian_pdo);
 
-        $capsule = $this->getMockBuilder(Capsule::class)
+        $Silian_capsule = $this->getMockBuilder(Capsule::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getConnection'])
             ->getMock();
-        $capsule->method('getConnection')->willReturn($connection);
+        $Silian_capsule->method('getConnection')->willReturn($Silian_connection);
 
-        $db = new DatabaseService($capsule);
-        $this->assertFalse($db->isConnected());
+        $Silian_db = new DatabaseService($Silian_capsule);
+        $this->assertFalse($Silian_db->isConnected());
     }
 }

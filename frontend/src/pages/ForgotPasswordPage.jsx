@@ -1,8 +1,8 @@
-import React from 'react';
-import { ForgotPasswordForm } from '../components/auth/ForgotPasswordForm';
+import Silian_React from 'react';
+import { ForgotPasswordForm as Silian_ForgotPasswordForm } from '../components/auth/ForgotPasswordForm';
 
 export default function ForgotPasswordPage() {
-  return <ForgotPasswordForm />;
+  return <Silian_ForgotPasswordForm />;
 }
 
 

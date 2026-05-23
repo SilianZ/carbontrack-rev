@@ -31,11 +31,11 @@ class ComprehensiveBusinessDataTest extends TestCase
     {
         // Load environment variables for testing
         if (file_exists(__DIR__ . '/../../.env.testing')) {
-            $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../..', '.env.testing');
-            $dotenv->load();
+            $Silian_dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../..', '.env.testing');
+            $Silian_dotenv->load();
         } elseif (file_exists(__DIR__ . '/../../.env')) {
-            $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../..');
-            $dotenv->load();
+            $Silian_dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../..');
+            $Silian_dotenv->load();
         }
 
         // Set up test environment variables with proper database configuration
@@ -60,10 +60,10 @@ class ComprehensiveBusinessDataTest extends TestCase
 
         try {
             // Create container and set up dependencies
-            $container = new Container();
-            
+            $Silian_container = new Container();
+
             // Set up database configuration for Illuminate
-            $config = [
+            $Silian_config = [
                 'database' => [
                     'default' => 'sqlite',
                     'connections' => [
@@ -75,38 +75,38 @@ class ComprehensiveBusinessDataTest extends TestCase
                     ]
                 ]
             ];
-            
+
             // Store config in container for dependencies.php
-            $container->set('config', $config);
+            $Silian_container->set('config', $Silian_config);
 
             require __DIR__ . '/../../src/dependencies.php';
             // After dependencies loaded and before routes, ensure schema exists
             // Initialize minimal test schema
-            $dbServiceTmp = $container->get(DatabaseService::class);
-            TestSchemaBuilder::init($dbServiceTmp->getConnection()->getPdo());
+            $Silian_dbServiceTmp = $Silian_container->get(DatabaseService::class);
+            TestSchemaBuilder::init($Silian_dbServiceTmp->getConnection()->getPdo());
 
             // Create Slim app
-            $this->app = \Slim\Factory\AppFactory::createFromContainer($container);
+            $this->app = \Slim\Factory\AppFactory::createFromContainer($Silian_container);
             $this->app->addErrorMiddleware(true, true, true);
             $this->app->addBodyParsingMiddleware();
             $this->app->addRoutingMiddleware();
 
             // Add routes
-            $routes = require __DIR__ . '/../../src/routes.php';
-            $routes($this->app);
+            $Silian_routes = require __DIR__ . '/../../src/routes.php';
+            $Silian_routes($this->app);
 
             // Get services
-            $dbService = $container->get(DatabaseService::class);
-            $this->pdo = $dbService->getConnection()->getPdo();
-            $this->authService = $container->get(AuthService::class);
+            $Silian_dbService = $Silian_container->get(DatabaseService::class);
+            $this->pdo = $Silian_dbService->getConnection()->getPdo();
+            $this->authService = $Silian_container->get(AuthService::class);
 
             // Set up test data
             $this->setUpTestData();
-            
-        } catch (\Exception $e) {
-            echo "Setup error: " . $e->getMessage() . "\n";
-            echo "Trace: " . $e->getTraceAsString() . "\n";
-            throw $e;
+
+        } catch (\Exception $Silian_e) {
+            echo "Setup error: " . $Silian_e->getMessage() . "\n";
+            echo "Trace: " . $Silian_e->getTraceAsString() . "\n";
+            throw $Silian_e;
         }
     }
 
@@ -115,38 +115,38 @@ class ComprehensiveBusinessDataTest extends TestCase
         // Clear existing test data (ignore errors if tables don't exist)
         try {
             $this->pdo->exec("DELETE FROM users WHERE email LIKE '%@testdomain.com'");
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             // Ignore if table doesn't exist
         }
         try {
             $this->pdo->exec("DELETE FROM products WHERE name LIKE 'Test Product%'");
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             // Ignore if table doesn't exist
         }
         try {
             $this->pdo->exec("DELETE FROM point_exchanges WHERE id LIKE 'test-%'");
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             // Ignore if table doesn't exist
         }
         try {
             $this->pdo->exec("DELETE FROM carbon_records WHERE id LIKE 'test-%'");
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             // Ignore if table doesn't exist
         }
 
         // Create realistic test users
         $this->createTestUsers();
-        
+
         // Create realistic test products
         $this->createTestProducts();
-        
+
         // Create realistic carbon activities
         $this->createTestCarbonActivities();
     }
 
     protected function createTestUsers(): void
     {
-        $testUserData = [
+        $Silian_testUserData = [
             [
                 'username' => 'student_zhang',
                 'email' => 'zhang.wei@testdomain.com',
@@ -179,60 +179,60 @@ class ComprehensiveBusinessDataTest extends TestCase
             ]
         ];
 
-        foreach ($testUserData as $userData) {
-            $hashedPassword = password_hash('password123', PASSWORD_BCRYPT);
+        foreach ($Silian_testUserData as $Silian_userData) {
+            $Silian_hashedPassword = password_hash('password123', PASSWORD_BCRYPT);
             // 为 token 生成兼容的 uuid（AuthService->generateToken 期望存在）
-            $userUuid = $this->generateUuid();
+            $Silian_userUuid = $this->generateUuid();
 
-            $isAdmin = ($userData['role'] ?? '') === 'admin' ? 1 : 0;
+            $Silian_isAdmin = ($Silian_userData['role'] ?? '') === 'admin' ? 1 : 0;
             // Insert including is_admin if column exists
             try {
-                $stmt = $this->pdo->prepare("\n                    INSERT INTO users (username, email, password, school_id, status, points, is_admin, created_at, updated_at)\n                    VALUES (:username, :email, :password, :school_id, :status, :points, :is_admin, datetime('now'), datetime('now'))\n                ");
-                $stmt->execute([
-                    'username' => $userData['username'],
-                    'email' => $userData['email'],
-                    'password' => $hashedPassword,
-                    'school_id' => $userData['school_id'],
-                    'status' => $userData['status'],
-                    'points' => $userData['points'],
-                    'is_admin' => $isAdmin,
+                $Silian_stmt = $this->pdo->prepare("\n                    INSERT INTO users (username, email, password, school_id, status, points, is_admin, created_at, updated_at)\n                    VALUES (:username, :email, :password, :school_id, :status, :points, :is_admin, datetime('now'), datetime('now'))\n                ");
+                $Silian_stmt->execute([
+                    'username' => $Silian_userData['username'],
+                    'email' => $Silian_userData['email'],
+                    'password' => $Silian_hashedPassword,
+                    'school_id' => $Silian_userData['school_id'],
+                    'status' => $Silian_userData['status'],
+                    'points' => $Silian_userData['points'],
+                    'is_admin' => $Silian_isAdmin,
                 ]);
-            } catch (\Throwable $t) {
+            } catch (\Throwable $Silian_t) {
                 // fallback to old insert without is_admin
-                $stmt = $this->pdo->prepare("\n                    INSERT INTO users (username, email, password, school_id, status, points, created_at, updated_at)\n                    VALUES (:username, :email, :password, :school_id, :status, :points, datetime('now'), datetime('now'))\n                ");
-                $stmt->execute([
-                    'username' => $userData['username'],
-                    'email' => $userData['email'],
-                    'password' => $hashedPassword,
-                    'school_id' => $userData['school_id'],
-                    'status' => $userData['status'],
-                    'points' => $userData['points']
+                $Silian_stmt = $this->pdo->prepare("\n                    INSERT INTO users (username, email, password, school_id, status, points, created_at, updated_at)\n                    VALUES (:username, :email, :password, :school_id, :status, :points, datetime('now'), datetime('now'))\n                ");
+                $Silian_stmt->execute([
+                    'username' => $Silian_userData['username'],
+                    'email' => $Silian_userData['email'],
+                    'password' => $Silian_hashedPassword,
+                    'school_id' => $Silian_userData['school_id'],
+                    'status' => $Silian_userData['status'],
+                    'points' => $Silian_userData['points']
                 ]);
             }
 
-            $userData['id'] = $this->pdo->lastInsertId();
-            $userData['uuid'] = $userUuid; // 缓存到测试数组用于 generateJwtToken
+            $Silian_userData['id'] = $this->pdo->lastInsertId();
+            $Silian_userData['uuid'] = $Silian_userUuid; // 缓存到测试数组用于 generateJwtToken
 
             // 尝试写回 uuid 与 is_admin
-            try { $this->pdo->exec("UPDATE users SET uuid = '" . $userUuid . "' WHERE id = " . (int)$userData['id']); } catch (\Throwable $e) {}
-            if ($isAdmin) { try { $this->pdo->exec("UPDATE users SET is_admin = 1 WHERE id = " . (int)$userData['id']); } catch (\Throwable $e) {} }
+            try { $this->pdo->exec("UPDATE users SET uuid = '" . $Silian_userUuid . "' WHERE id = " . (int)$Silian_userData['id']); } catch (\Throwable $Silian_e) {}
+            if ($Silian_isAdmin) { try { $this->pdo->exec("UPDATE users SET is_admin = 1 WHERE id = " . (int)$Silian_userData['id']); } catch (\Throwable $Silian_e) {} }
 
-            $this->testUsers[] = $userData;
+            $this->testUsers[] = $Silian_userData;
         }
     }
 
         private function generateUuid(): string
         {
             // 简单 UUID v4 生成
-            $data = random_bytes(16);
-            $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // version 4
-            $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // variant
-            return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+            $Silian_data = random_bytes(16);
+            $Silian_data[6] = chr(ord($Silian_data[6]) & 0x0f | 0x40); // version 4
+            $Silian_data[8] = chr(ord($Silian_data[8]) & 0x3f | 0x80); // variant
+            return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($Silian_data), 4));
         }
 
     protected function createTestProducts(): void
     {
-        $testProductData = [
+        $Silian_testProductData = [
             [
                 'name' => 'Test Product 环保水杯',
                 'description' => '可重复使用的环保水杯，材质安全，容量500ml，适合日常使用',
@@ -265,91 +265,91 @@ class ComprehensiveBusinessDataTest extends TestCase
             ]
         ];
 
-        foreach ($testProductData as $productData) {
-            $stmt = $this->pdo->prepare("
+        foreach ($Silian_testProductData as $Silian_productData) {
+            $Silian_stmt = $this->pdo->prepare("
                 INSERT INTO products (name, description, category, images, stock, points_required, status, sort_order, created_at, updated_at)
                 VALUES (:name, :description, :category, :images, :stock, :points_required, :status, :sort_order, datetime('now'), datetime('now'))
             ");
-            
+
                 // SQLite 测试 products 表包含非空 image_path 列，补充赋值
-                $imagePath = '/images/products/placeholder.jpg';
-                if (!empty($productData['images'])) {
-                    $decoded = json_decode($productData['images'], true);
-                    if (is_array($decoded) && count($decoded) > 0) {
-                        $imagePath = $decoded[0];
+                $Silian_imagePath = '/images/products/placeholder.jpg';
+                if (!empty($Silian_productData['images'])) {
+                    $Silian_decoded = json_decode($Silian_productData['images'], true);
+                    if (is_array($Silian_decoded) && count($Silian_decoded) > 0) {
+                        $Silian_imagePath = $Silian_decoded[0];
                     }
                 }
 
-                $sql = "INSERT INTO products (name, description, category, images, stock, points_required, status, sort_order, image_path, created_at, updated_at) 
+                $Silian_sql = "INSERT INTO products (name, description, category, images, stock, points_required, status, sort_order, image_path, created_at, updated_at)
                         VALUES (:name, :description, :category, :images, :stock, :points_required, :status, :sort_order, :image_path, datetime('now'), datetime('now'))";
-                $stmt = $this->pdo->prepare($sql);
-                $executeData = $productData;
-                $executeData['image_path'] = $imagePath;
-                $stmt->execute($executeData);
-            $productData['id'] = $this->pdo->lastInsertId();
-            $this->testProducts[] = $productData;
+                $Silian_stmt = $this->pdo->prepare($Silian_sql);
+                $Silian_executeData = $Silian_productData;
+                $Silian_executeData['image_path'] = $Silian_imagePath;
+                $Silian_stmt->execute($Silian_executeData);
+            $Silian_productData['id'] = $this->pdo->lastInsertId();
+            $this->testProducts[] = $Silian_productData;
         }
     }
 
     protected function createTestCarbonActivities(): void
     {
         // Use existing carbon activities from the database
-        $stmt = $this->pdo->prepare("SELECT * FROM carbon_activities WHERE is_active = 1 LIMIT 5");
-        $stmt->execute();
-        $this->testCarbonActivities = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $Silian_stmt = $this->pdo->prepare("SELECT * FROM carbon_activities WHERE is_active = 1 LIMIT 5");
+        $Silian_stmt->execute();
+        $this->testCarbonActivities = $Silian_stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    protected function createRequest(string $method, string $uri, array $data = [], array $headers = []): \Psr\Http\Message\ServerRequestInterface
+    protected function createRequest(string $Silian_method, string $Silian_uri, array $Silian_data = [], array $Silian_headers = []): \Psr\Http\Message\ServerRequestInterface
     {
-        $factory = new ServerRequestFactory();
-        $request = $factory->createServerRequest($method, $uri);
-        
+        $Silian_factory = new ServerRequestFactory();
+        $Silian_request = $Silian_factory->createServerRequest($Silian_method, $Silian_uri);
+
         if (
-            strtoupper($method) === 'POST'
-            && preg_match('#/auth/register$#i', $uri)
-            && !array_key_exists('cf_turnstile_response', $data)
+            strtoupper($Silian_method) === 'POST'
+            && preg_match('#/auth/register$#i', $Silian_uri)
+            && !array_key_exists('cf_turnstile_response', $Silian_data)
         ) {
-            $data['cf_turnstile_response'] = 'test_turnstile_token';
+            $Silian_data['cf_turnstile_response'] = 'test_turnstile_token';
         }
 
-        if (!empty($data)) {
-            $request = $request->withParsedBody($data);
+        if (!empty($Silian_data)) {
+            $Silian_request = $Silian_request->withParsedBody($Silian_data);
         }
-        
-        foreach ($headers as $name => $value) {
-            $request = $request->withHeader($name, $value);
+
+        foreach ($Silian_headers as $Silian_name => $Silian_value) {
+            $Silian_request = $Silian_request->withHeader($Silian_name, $Silian_value);
         }
-        
-        return $request;
+
+        return $Silian_request;
     }
 
-    protected function getAuthToken(string $email): string
+    protected function getAuthToken(string $Silian_email): string
     {
-        $user = $this->getTestUserByEmail($email);
+        $Silian_user = $this->getTestUserByEmail($Silian_email);
         return $this->authService->generateJwtToken([
-            'id' => $user['id'],
-            'username' => $user['username'],
-            'email' => $user['email'],
-            'role' => $user['role'],
-            'is_admin' => ($user['role'] ?? '') === 'admin' ? 1 : 0,
-            'uuid' => $user['uuid'] ?? null,
-            'points' => $user['points'] ?? 0
+            'id' => $Silian_user['id'],
+            'username' => $Silian_user['username'],
+            'email' => $Silian_user['email'],
+            'role' => $Silian_user['role'],
+            'is_admin' => ($Silian_user['role'] ?? '') === 'admin' ? 1 : 0,
+            'uuid' => $Silian_user['uuid'] ?? null,
+            'points' => $Silian_user['points'] ?? 0
         ]);
     }
 
-    protected function getTestUserByEmail(string $email): array
+    protected function getTestUserByEmail(string $Silian_email): array
     {
-        foreach ($this->testUsers as $user) {
-            if ($user['email'] === $email) {
-                return $user;
+        foreach ($this->testUsers as $Silian_user) {
+            if ($Silian_user['email'] === $Silian_email) {
+                return $Silian_user;
             }
         }
-        throw new \Exception("Test user with email {$email} not found");
+        throw new \Exception("Test user with email {$Silian_email} not found");
     }
 
     public function testUserRegistrationWithRealisticData(): void
     {
-        $requestData = [
+        $Silian_requestData = [
             'username' => 'new_student_chen',
             'email' => 'chen.xiaoming@testdomain.com',
             'password' => 'SecurePassword123!',
@@ -362,307 +362,307 @@ class ComprehensiveBusinessDataTest extends TestCase
             // 测试环境跳过 Turnstile 验证，省略 cf_turnstile_response
         ];
 
-        $request = $this->createRequest('POST', '/api/v1/auth/register', $requestData);
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('POST', '/api/v1/auth/register', $Silian_requestData);
+        $Silian_response = $this->app->handle($Silian_request);
 
     // Controller returns 201 on successful creation
-    $this->assertEquals(201, $response->getStatusCode());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertArrayHasKey('user', $data['data']);
-        $this->assertArrayHasKey('token', $data['data']);
-        $this->assertEquals($requestData['username'], $data['data']['user']['username']);
-        $this->assertEquals($requestData['email'], $data['data']['user']['email']);
-        
+    $this->assertEquals(201, $Silian_response->getStatusCode());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertArrayHasKey('user', $Silian_data['data']);
+        $this->assertArrayHasKey('token', $Silian_data['data']);
+        $this->assertEquals($Silian_requestData['username'], $Silian_data['data']['user']['username']);
+        $this->assertEquals($Silian_requestData['email'], $Silian_data['data']['user']['email']);
+
         // Clean up
-        $this->pdo->exec("DELETE FROM users WHERE email = '{$requestData['email']}'");
+        $this->pdo->exec("DELETE FROM users WHERE email = '{$Silian_requestData['email']}'");
     }
 
     public function testUserLoginWithRealisticCredentials(): void
     {
-        $requestData = [
+        $Silian_requestData = [
             'email' => 'zhang.wei@testdomain.com',
             'password' => 'password123'
         ];
 
-        $request = $this->createRequest('POST', '/api/v1/auth/login', $requestData);
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('POST', '/api/v1/auth/login', $Silian_requestData);
+        $Silian_response = $this->app->handle($Silian_request);
 
-        if ($response->getStatusCode() !== 200) {
-            throw new \RuntimeException('Admin workflow step failed: ' . (string)$response->getBody());
+        if ($Silian_response->getStatusCode() !== 200) {
+            throw new \RuntimeException('Admin workflow step failed: ' . (string)$Silian_response->getBody());
         }
 
-        $this->assertEquals(200, $response->getStatusCode(), 'Calculate response: ' . (string)$response->getBody());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertArrayHasKey('user', $data['data']);
-        $this->assertArrayHasKey('token', $data['data']);
-        $this->assertEquals($requestData['email'], $data['data']['user']['email']);
+        $this->assertEquals(200, $Silian_response->getStatusCode(), 'Calculate response: ' . (string)$Silian_response->getBody());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertArrayHasKey('user', $Silian_data['data']);
+        $this->assertArrayHasKey('token', $Silian_data['data']);
+        $this->assertEquals($Silian_requestData['email'], $Silian_data['data']['user']['email']);
     }
 
     public function testGetCurrentUserProfile(): void
     {
-        $token = $this->getAuthToken('zhang.wei@testdomain.com');
-        
-        $request = $this->createRequest('GET', '/api/v1/users/me', [], [
-            'Authorization' => 'Bearer ' . $token
+        $Silian_token = $this->getAuthToken('zhang.wei@testdomain.com');
+
+        $Silian_request = $this->createRequest('GET', '/api/v1/users/me', [], [
+            'Authorization' => 'Bearer ' . $Silian_token
         ]);
-        $response = $this->app->handle($request);
-        if ($response->getStatusCode() !== 200) {
-            throw new \RuntimeException('Admin pending records response: ' . (string)$response->getBody());
+        $Silian_response = $this->app->handle($Silian_request);
+        if ($Silian_response->getStatusCode() !== 200) {
+            throw new \RuntimeException('Admin pending records response: ' . (string)$Silian_response->getBody());
         }
-        $this->assertEquals(200, $response->getStatusCode());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertArrayHasKey('data', $data);
-        $this->assertEquals('zhang.wei@testdomain.com', $data['data']['email']);
+        $this->assertEquals(200, $Silian_response->getStatusCode());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertArrayHasKey('data', $Silian_data);
+        $this->assertEquals('zhang.wei@testdomain.com', $Silian_data['data']['email']);
     // real_name 字段已弃用，不再断言
-        $this->assertEquals(150, $data['data']['points']);
+        $this->assertEquals(150, $Silian_data['data']['points']);
     }
 
     public function testCarbonTrackingWorkflow(): void
     {
-        $token = $this->getAuthToken('zhang.wei@testdomain.com');
-        $activity = $this->testCarbonActivities[0];
-        
-        // Step 1: Calculate carbon savings
-        $calculateData = [
-            'activity_id' => $activity['id'],
-            'amount' => 2.5,
-            'unit' => $activity['unit']
-        ];
-        
-        $request = $this->createRequest('POST', '/api/v1/carbon-track/calculate', $calculateData, [
-            'Authorization' => 'Bearer ' . $token
-        ]);
-        $response = $this->app->handle($request);
+        $Silian_token = $this->getAuthToken('zhang.wei@testdomain.com');
+        $Silian_activity = $this->testCarbonActivities[0];
 
-        $this->assertEquals(200, $response->getStatusCode());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertArrayHasKey('carbon_saved', $data['data']);
-        $this->assertArrayHasKey('points_earned', $data['data']);
-        
-        $carbonSaved = $data['data']['carbon_saved'];
-        $pointsEarned = $data['data']['points_earned'];
-        
+        // Step 1: Calculate carbon savings
+        $Silian_calculateData = [
+            'activity_id' => $Silian_activity['id'],
+            'amount' => 2.5,
+            'unit' => $Silian_activity['unit']
+        ];
+
+        $Silian_request = $this->createRequest('POST', '/api/v1/carbon-track/calculate', $Silian_calculateData, [
+            'Authorization' => 'Bearer ' . $Silian_token
+        ]);
+        $Silian_response = $this->app->handle($Silian_request);
+
+        $this->assertEquals(200, $Silian_response->getStatusCode());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertArrayHasKey('carbon_saved', $Silian_data['data']);
+        $this->assertArrayHasKey('points_earned', $Silian_data['data']);
+
+        $Silian_carbonSaved = $Silian_data['data']['carbon_saved'];
+        $Silian_pointsEarned = $Silian_data['data']['points_earned'];
+
         // Step 2: Submit the record
-        $recordData = [
-            'activity_id' => $activity['id'],
+        $Silian_recordData = [
+            'activity_id' => $Silian_activity['id'],
             'amount' => 2.5,
             'date' => date('Y-m-d'),
             'description' => '今天上班自带水杯，减少了塑料瓶的使用',
             'proof_images' => ['/uploads/proof/water_bottle_20241201.jpg'],
             'request_id' => 'test-' . uniqid()
         ];
-        
-        $request = $this->createRequest('POST', '/api/v1/carbon-track/record', $recordData, [
-            'Authorization' => 'Bearer ' . $token,
-            'X-Request-ID' => $recordData['request_id']
-        ]);
-        $response = $this->app->handle($request);
 
-        $this->assertEquals(200, $response->getStatusCode(), 'Record response: ' . (string)$response->getBody());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertArrayHasKey('record_id', $data['data']);
-        
-        $transactionId = $data['data']['record_id'];
-        
+        $Silian_request = $this->createRequest('POST', '/api/v1/carbon-track/record', $Silian_recordData, [
+            'Authorization' => 'Bearer ' . $Silian_token,
+            'X-Request-ID' => $Silian_recordData['request_id']
+        ]);
+        $Silian_response = $this->app->handle($Silian_request);
+
+        $this->assertEquals(200, $Silian_response->getStatusCode(), 'Record response: ' . (string)$Silian_response->getBody());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertArrayHasKey('record_id', $Silian_data['data']);
+
+        $Silian_transactionId = $Silian_data['data']['record_id'];
+
         // Step 3: Get user's transactions
-        $request = $this->createRequest('GET', '/api/v1/carbon-track/transactions', [], [
-            'Authorization' => 'Bearer ' . $token
+        $Silian_request = $this->createRequest('GET', '/api/v1/carbon-track/transactions', [], [
+            'Authorization' => 'Bearer ' . $Silian_token
         ]);
-        $response = $this->app->handle($request);
+        $Silian_response = $this->app->handle($Silian_request);
 
-        $this->assertEquals(200, $response->getStatusCode());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertArrayHasKey('data', $data);
-        $this->assertIsArray($data['data']);
-        
+        $this->assertEquals(200, $Silian_response->getStatusCode());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertArrayHasKey('data', $Silian_data);
+        $this->assertIsArray($Silian_data['data']);
+
         // Find our transaction
-        $foundTransaction = null;
-        foreach ($data['data'] as $transaction) {
-            if ($transaction['id'] === $transactionId) {
-                $foundTransaction = $transaction;
+        $Silian_foundTransaction = null;
+        foreach ($Silian_data['data'] as $Silian_transaction) {
+            if ($Silian_transaction['id'] === $Silian_transactionId) {
+                $Silian_foundTransaction = $Silian_transaction;
                 break;
             }
         }
-        
-        $this->assertNotNull($foundTransaction);
-        $this->assertEquals('pending', $foundTransaction['status']);
-        $this->assertEquals($recordData['description'], $foundTransaction['description']);
+
+        $this->assertNotNull($Silian_foundTransaction);
+        $this->assertEquals('pending', $Silian_foundTransaction['status']);
+        $this->assertEquals($Silian_recordData['description'], $Silian_foundTransaction['description']);
     }
 
     public function testProductListingAndExchange(): void
     {
-        $token = $this->getAuthToken('li.ming@testdomain.com'); // User with 300 points
-        
-        // Step 1: Get product list
-        $request = $this->createRequest('GET', '/api/v1/products?category=daily&limit=10', [], [
-            'Authorization' => 'Bearer ' . $token
-        ]);
-        $response = $this->app->handle($request);
+        $Silian_token = $this->getAuthToken('li.ming@testdomain.com'); // User with 300 points
 
-        $this->assertEquals(200, $response->getStatusCode());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertArrayHasKey('data', $data);
-        $this->assertArrayHasKey('products', $data['data']);
-        $this->assertArrayHasKey('pagination', $data['data']);
-        
+        // Step 1: Get product list
+        $Silian_request = $this->createRequest('GET', '/api/v1/products?category=daily&limit=10', [], [
+            'Authorization' => 'Bearer ' . $Silian_token
+        ]);
+        $Silian_response = $this->app->handle($Silian_request);
+
+        $this->assertEquals(200, $Silian_response->getStatusCode());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertArrayHasKey('data', $Silian_data);
+        $this->assertArrayHasKey('products', $Silian_data['data']);
+        $this->assertArrayHasKey('pagination', $Silian_data['data']);
+
         // Find a product the user can afford
-        $affordableProduct = null;
-        foreach ($data['data']['products'] as $product) {
-            if ($product['points_required'] <= 300 && $product['is_available']) {
-                $affordableProduct = $product;
+        $Silian_affordableProduct = null;
+        foreach ($Silian_data['data']['products'] as $Silian_product) {
+            if ($Silian_product['points_required'] <= 300 && $Silian_product['is_available']) {
+                $Silian_affordableProduct = $Silian_product;
                 break;
             }
         }
-        
-        $this->assertNotNull($affordableProduct, 'User should be able to afford at least one product');
-        
+
+        $this->assertNotNull($Silian_affordableProduct, 'User should be able to afford at least one product');
+
         // Step 2: Exchange for the product
-        $exchangeData = [
-            'product_id' => $affordableProduct['id'],
+        $Silian_exchangeData = [
+            'product_id' => $Silian_affordableProduct['id'],
             'quantity' => 1,
             'shipping_address' => '北京市海淀区清华大学东门',
             'contact_phone' => '13800138000',
             'request_id' => 'test-exchange-' . uniqid()
         ];
-        
-        $request = $this->createRequest('POST', '/api/v1/exchange', $exchangeData, [
-            'Authorization' => 'Bearer ' . $token,
-            'X-Request-ID' => $exchangeData['request_id']
-        ]);
-        $response = $this->app->handle($request);
-        if ($response->getStatusCode() >= 500) {
-            $this->markTestSkipped('User exchange endpoint unavailable (status ' . $response->getStatusCode() . ')');
-        }
-        $this->assertEquals(200, $response->getStatusCode(), 'Exchange response: ' . (string) $response->getBody());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-            $this->assertTrue($data['success']);
-        $this->assertArrayHasKey('exchange_id', $data);
-        $this->assertArrayHasKey('remaining_points', $data);
 
-        $expectedRemainingPoints = 300 - $affordableProduct['points_required'];
-        $this->assertEquals($expectedRemainingPoints, $data['remaining_points']);
+        $Silian_request = $this->createRequest('POST', '/api/v1/exchange', $Silian_exchangeData, [
+            'Authorization' => 'Bearer ' . $Silian_token,
+            'X-Request-ID' => $Silian_exchangeData['request_id']
+        ]);
+        $Silian_response = $this->app->handle($Silian_request);
+        if ($Silian_response->getStatusCode() >= 500) {
+            $this->markTestSkipped('User exchange endpoint unavailable (status ' . $Silian_response->getStatusCode() . ')');
+        }
+        $this->assertEquals(200, $Silian_response->getStatusCode(), 'Exchange response: ' . (string) $Silian_response->getBody());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+            $this->assertTrue($Silian_data['success']);
+        $this->assertArrayHasKey('exchange_id', $Silian_data);
+        $this->assertArrayHasKey('remaining_points', $Silian_data);
+
+        $Silian_expectedRemainingPoints = 300 - $Silian_affordableProduct['points_required'];
+        $this->assertEquals($Silian_expectedRemainingPoints, $Silian_data['remaining_points']);
     }
 
     public function testAdminWorkflow(): void
     {
-        $adminToken = $this->getAuthToken('wang.fang@testdomain.com');
+        $Silian_adminToken = $this->getAuthToken('wang.fang@testdomain.com');
 
         // Step 1: Get pending carbon tracking records
-        $request = $this->createRequest('GET', '/api/v1/admin/carbon-activities/pending', [], [
-            'Authorization' => 'Bearer ' . $adminToken
+        $Silian_request = $this->createRequest('GET', '/api/v1/admin/carbon-activities/pending', [], [
+            'Authorization' => 'Bearer ' . $Silian_adminToken
         ]);
-        $response = $this->app->handle($request);
-        $pendingBody = (string)$response->getBody();
-        $this->assertEquals(200, $response->getStatusCode(), 'Admin pending records response: ' . $pendingBody);
+        $Silian_response = $this->app->handle($Silian_request);
+        $Silian_pendingBody = (string)$Silian_response->getBody();
+        $this->assertEquals(200, $Silian_response->getStatusCode(), 'Admin pending records response: ' . $Silian_pendingBody);
 
         // Step 2: Get user list for management
-        $request = $this->createRequest('GET', '/api/v1/admin/users?page=1&limit=10', [], [
-            'Authorization' => 'Bearer ' . $adminToken
+        $Silian_request = $this->createRequest('GET', '/api/v1/admin/users?page=1&limit=10', [], [
+            'Authorization' => 'Bearer ' . $Silian_adminToken
         ]);
-        $response = $this->app->handle($request);
-        $usersBody = (string)$response->getBody();
-        $this->assertEquals(200, $response->getStatusCode(), 'Admin users list response: ' . $usersBody);
+        $Silian_response = $this->app->handle($Silian_request);
+        $Silian_usersBody = (string)$Silian_response->getBody();
+        $this->assertEquals(200, $Silian_response->getStatusCode(), 'Admin users list response: ' . $Silian_usersBody);
 
-        $data = json_decode($usersBody, true);
-        $this->assertTrue($data['success']);
-        $this->assertArrayHasKey('data', $data);
-        $this->assertArrayHasKey('users', $data['data']);
-        $this->assertArrayHasKey('pagination', $data['data']);
+        $Silian_data = json_decode($Silian_usersBody, true);
+        $this->assertTrue($Silian_data['success']);
+        $this->assertArrayHasKey('data', $Silian_data);
+        $this->assertArrayHasKey('users', $Silian_data['data']);
+        $this->assertArrayHasKey('pagination', $Silian_data['data']);
 
         // Step 3: Get exchange records for admin review
-        $request = $this->createRequest('GET', '/api/v1/admin/exchanges', [], [
-            'Authorization' => 'Bearer ' . $adminToken
+        $Silian_request = $this->createRequest('GET', '/api/v1/admin/exchanges', [], [
+            'Authorization' => 'Bearer ' . $Silian_adminToken
         ]);
-        $response = $this->app->handle($request);
-        $exchangeBody = (string)$response->getBody();
-        $this->assertEquals(200, $response->getStatusCode(), 'Admin exchanges response: ' . $exchangeBody);
+        $Silian_response = $this->app->handle($Silian_request);
+        $Silian_exchangeBody = (string)$Silian_response->getBody();
+        $this->assertEquals(200, $Silian_response->getStatusCode(), 'Admin exchanges response: ' . $Silian_exchangeBody);
 
-        $data = json_decode($exchangeBody, true);
-        $this->assertTrue($data['success']);
+        $Silian_data = json_decode($Silian_exchangeBody, true);
+        $this->assertTrue($Silian_data['success']);
     }
 
     public function testAdminStatsEndpoint(): void
     {
-        $adminToken = $this->getAuthToken('wang.fang@testdomain.com');
-        $request = $this->createRequest('GET', '/api/v1/admin/stats', [], [
-            'Authorization' => 'Bearer ' . $adminToken
+        $Silian_adminToken = $this->getAuthToken('wang.fang@testdomain.com');
+        $Silian_request = $this->createRequest('GET', '/api/v1/admin/stats', [], [
+            'Authorization' => 'Bearer ' . $Silian_adminToken
         ]);
-        $response = $this->app->handle($request);
-        $this->assertEquals(200, $response->getStatusCode(), 'Admin stats status code');
-        $body = (string)$response->getBody();
-        $data = json_decode($body, true);
-        $this->assertIsArray($data, 'Response JSON decoded');
-        $this->assertTrue($data['success'] ?? false, 'Admin stats success flag');
-        $this->assertArrayHasKey('data', $data, 'Admin stats contains data');
-        $this->assertArrayHasKey('users', $data['data'], 'Users stats present');
-        $this->assertArrayHasKey('transactions', $data['data'], 'Transactions stats present');
+        $Silian_response = $this->app->handle($Silian_request);
+        $this->assertEquals(200, $Silian_response->getStatusCode(), 'Admin stats status code');
+        $Silian_body = (string)$Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+        $this->assertIsArray($Silian_data, 'Response JSON decoded');
+        $this->assertTrue($Silian_data['success'] ?? false, 'Admin stats success flag');
+        $this->assertArrayHasKey('data', $Silian_data, 'Admin stats contains data');
+        $this->assertArrayHasKey('users', $Silian_data['data'], 'Users stats present');
+        $this->assertArrayHasKey('transactions', $Silian_data['data'], 'Transactions stats present');
     }
 
     public function testApiErrorHandling(): void
     {
         // Test 1: Unauthorized access
-        $request = $this->createRequest('GET', '/api/v1/users/me');
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('GET', '/api/v1/users/me');
+        $Silian_response = $this->app->handle($Silian_request);
 
-        $this->assertEquals(401, $response->getStatusCode());
-        
+        $this->assertEquals(401, $Silian_response->getStatusCode());
+
         // Test 2: Invalid login credentials
-        $requestData = [
+        $Silian_requestData = [
             'email' => 'nonexistent@testdomain.com',
             'password' => 'wrongpassword',
             'cf_turnstile_response' => 'test_turnstile_token'
         ];
-        
-        $request = $this->createRequest('POST', '/api/v1/auth/login', $requestData);
-        $response = $this->app->handle($request);
 
-        $this->assertEquals(401, $response->getStatusCode());
-        
+        $Silian_request = $this->createRequest('POST', '/api/v1/auth/login', $Silian_requestData);
+        $Silian_response = $this->app->handle($Silian_request);
+
+        $this->assertEquals(401, $Silian_response->getStatusCode());
+
         // Test 3: Insufficient points for exchange
-        $token = $this->getAuthToken('zhang.wei@testdomain.com'); // User with 150 points
-        $expensiveProduct = null;
-        
-        foreach ($this->testProducts as $product) {
-            if ($product['points_required'] > 150) {
-                $expensiveProduct = $product;
+        $Silian_token = $this->getAuthToken('zhang.wei@testdomain.com'); // User with 150 points
+        $Silian_expensiveProduct = null;
+
+        foreach ($this->testProducts as $Silian_product) {
+            if ($Silian_product['points_required'] > 150) {
+                $Silian_expensiveProduct = $Silian_product;
                 break;
             }
         }
-        
-        if ($expensiveProduct) {
-            $exchangeData = [
-                'product_id' => $expensiveProduct['id'],
+
+        if ($Silian_expensiveProduct) {
+            $Silian_exchangeData = [
+                'product_id' => $Silian_expensiveProduct['id'],
                 'quantity' => 1,
                 'shipping_address' => [
                     'recipient_name' => '张伟',
@@ -672,20 +672,20 @@ class ComprehensiveBusinessDataTest extends TestCase
                 ],
                 'request_id' => 'test-insufficient-' . uniqid()
             ];
-            
-            $request = $this->createRequest('POST', '/api/v1/exchange', $exchangeData, [
-                'Authorization' => 'Bearer ' . $token,
-                'X-Request-ID' => $exchangeData['request_id']
-            ]);
-            $response = $this->app->handle($request);
 
-            $this->assertEquals(400, $response->getStatusCode());
-            
-            $body = (string) $response->getBody();
-            $data = json_decode($body, true);
-            
-            $this->assertFalse($data['success']);
-            $this->assertStringContainsString('points', strtolower($data['message'] ?? $data['error'] ?? ''));
+            $Silian_request = $this->createRequest('POST', '/api/v1/exchange', $Silian_exchangeData, [
+                'Authorization' => 'Bearer ' . $Silian_token,
+                'X-Request-ID' => $Silian_exchangeData['request_id']
+            ]);
+            $Silian_response = $this->app->handle($Silian_request);
+
+            $this->assertEquals(400, $Silian_response->getStatusCode());
+
+            $Silian_body = (string) $Silian_response->getBody();
+            $Silian_data = json_decode($Silian_body, true);
+
+            $this->assertFalse($Silian_data['success']);
+            $this->assertStringContainsString('points', strtolower($Silian_data['message'] ?? $Silian_data['error'] ?? ''));
         }
     }
 
@@ -695,26 +695,26 @@ class ComprehensiveBusinessDataTest extends TestCase
         if ($this->pdo) {
             try {
                 $this->pdo->exec("DELETE FROM users WHERE email LIKE '%@testdomain.com'");
-            } catch (\Throwable $e) {
+            } catch (\Throwable $Silian_e) {
                 // Ignore if table doesn't exist
             }
             try {
                 $this->pdo->exec("DELETE FROM products WHERE name LIKE 'Test Product%'");
-            } catch (\Throwable $e) {
+            } catch (\Throwable $Silian_e) {
                 // Ignore if table doesn't exist
             }
             try {
                 $this->pdo->exec("DELETE FROM point_exchanges WHERE id LIKE 'test-%'");
-            } catch (\Throwable $e) {
+            } catch (\Throwable $Silian_e) {
                 // Ignore if table doesn't exist
             }
             try {
                 $this->pdo->exec("DELETE FROM carbon_records WHERE id LIKE 'test-%'");
-            } catch (\Throwable $e) {
+            } catch (\Throwable $Silian_e) {
                 // Ignore if table doesn't exist
             }
         }
-        
+
         parent::tearDown();
     }
 }

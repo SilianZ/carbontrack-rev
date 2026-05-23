@@ -31,14 +31,14 @@ class AdminAnnouncementAiService
     public function __construct(
         private ?LlmClientInterface $client,
         private LoggerInterface $logger,
-        array $config = [],
+        array $Silian_config = [],
         private ?LlmLogService $llmLogService = null,
         private ?AuditLogService $auditLogService = null,
         private ?ErrorLogService $errorLogService = null
     ) {
-        $this->model = (string) ($config['model'] ?? 'google/gemini-2.5-flash-lite');
-        $this->temperature = isset($config['temperature']) ? (float) $config['temperature'] : 0.2;
-        $this->maxTokens = isset($config['max_tokens']) ? (int) $config['max_tokens'] : 1800;
+        $this->model = (string) ($Silian_config['model'] ?? 'google/gemini-2.5-flash-lite');
+        $this->temperature = isset($Silian_config['temperature']) ? (float) $Silian_config['temperature'] : 0.2;
+        $this->maxTokens = isset($Silian_config['max_tokens']) ? (int) $Silian_config['max_tokens'] : 1800;
         $this->enabled = $client !== null;
     }
 
@@ -47,12 +47,12 @@ class AdminAnnouncementAiService
         return $this->enabled;
     }
 
-    public static function normalizeAction(mixed $value): string
+    public static function normalizeAction(mixed $Silian_value): string
     {
-        $normalized = is_string($value) ? strtolower(trim($value)) : '';
+        $Silian_normalized = is_string($Silian_value) ? strtolower(trim($Silian_value)) : '';
 
-        return in_array($normalized, self::SUPPORTED_ACTIONS, true)
-            ? $normalized
+        return in_array($Silian_normalized, self::SUPPORTED_ACTIONS, true)
+            ? $Silian_normalized
             : self::ACTION_GENERATE;
     }
 
@@ -61,99 +61,99 @@ class AdminAnnouncementAiService
      * @param array<string,mixed> $logContext
      * @return array<string,mixed>
      */
-    public function generateDraft(array $input, array $logContext = []): array
+    public function generateDraft(array $Silian_input, array $Silian_logContext = []): array
     {
         if (!$this->enabled) {
             throw new AdminAnnouncementAiException('AI service is disabled');
         }
 
-        $normalized = $this->normalizeInput($input);
-        $messages = $this->buildMessages($normalized);
-        $promptTranscript = $this->buildPromptTranscript($messages);
+        $Silian_normalized = $this->normalizeInput($Silian_input);
+        $Silian_messages = $this->buildMessages($Silian_normalized);
+        $Silian_promptTranscript = $this->buildPromptTranscript($Silian_messages);
 
-        $payload = [
+        $Silian_payload = [
             'model' => $this->model,
             'temperature' => $this->temperature,
             'max_tokens' => $this->maxTokens,
-            'messages' => $messages,
+            'messages' => $Silian_messages,
             'response_format' => ['type' => 'json_object'],
         ];
 
-        $startedAt = microtime(true);
+        $Silian_startedAt = microtime(true);
 
         try {
-            $rawResponse = $this->client->createChatCompletion($payload);
-            $this->logLlmCall($promptTranscript, $rawResponse, $logContext, $normalized, $startedAt);
-        } catch (\Throwable $e) {
+            $Silian_rawResponse = $this->client->createChatCompletion($Silian_payload);
+            $this->logLlmCall($Silian_promptTranscript, $Silian_rawResponse, $Silian_logContext, $Silian_normalized, $Silian_startedAt);
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Admin announcement AI call failed', [
-                'exception' => $e::class,
-                'message' => $e->getMessage(),
+                'exception' => $Silian_e::class,
+                'message' => $Silian_e->getMessage(),
             ]);
-            $this->logLlmFailure($promptTranscript, $logContext, $normalized, $startedAt, $e);
-            $this->logAudit('admin_announcement_ai_service_failed', $logContext, [
+            $this->logLlmFailure($Silian_promptTranscript, $Silian_logContext, $Silian_normalized, $Silian_startedAt, $Silian_e);
+            $this->logAudit('admin_announcement_ai_service_failed', $Silian_logContext, [
                 'status' => 'failed',
                 'request_data' => [
-                    'action' => $normalized['action'],
-                    'priority' => $normalized['priority'],
-                    'content_format' => $normalized['content_format'],
-                    'error' => $e->getMessage(),
+                    'action' => $Silian_normalized['action'],
+                    'priority' => $Silian_normalized['priority'],
+                    'content_format' => $Silian_normalized['content_format'],
+                    'error' => $Silian_e->getMessage(),
                 ],
             ]);
-            $this->logError($e, $logContext, $normalized);
-            throw new AdminAnnouncementAiUnavailableException('LLM_UNAVAILABLE', 0, $e);
+            $this->logError($Silian_e, $Silian_logContext, $Silian_normalized);
+            throw new AdminAnnouncementAiUnavailableException('LLM_UNAVAILABLE', 0, $Silian_e);
         }
 
-        $result = $this->processResponse($rawResponse, $normalized);
-        $this->logAudit('admin_announcement_ai_service_succeeded', $logContext, [
+        $Silian_result = $this->processResponse($Silian_rawResponse, $Silian_normalized);
+        $this->logAudit('admin_announcement_ai_service_succeeded', $Silian_logContext, [
             'request_data' => [
-                'action' => $normalized['action'],
-                'priority' => $normalized['priority'],
-                'content_format' => $normalized['content_format'],
-                'model' => $rawResponse['model'] ?? $this->model,
-                'success' => $result['success'] ?? false,
+                'action' => $Silian_normalized['action'],
+                'priority' => $Silian_normalized['priority'],
+                'content_format' => $Silian_normalized['content_format'],
+                'model' => $Silian_rawResponse['model'] ?? $this->model,
+                'success' => $Silian_result['success'] ?? false,
             ],
         ]);
 
-        return $result;
+        return $Silian_result;
     }
 
     /**
      * @param array<string,mixed> $input
      * @return array<string,mixed>
      */
-    private function normalizeInput(array $input): array
+    private function normalizeInput(array $Silian_input): array
     {
         return [
-            'action' => self::normalizeAction($input['action'] ?? null),
-            'title' => trim((string) ($input['title'] ?? '')),
-            'content' => trim((string) ($input['content'] ?? '')),
-            'instruction' => trim((string) ($input['instruction'] ?? '')),
-            'priority' => $this->normalizePriority($input['priority'] ?? null),
-            'content_format' => $this->normalizeContentFormat($input['content_format'] ?? null),
+            'action' => self::normalizeAction($Silian_input['action'] ?? null),
+            'title' => trim((string) ($Silian_input['title'] ?? '')),
+            'content' => trim((string) ($Silian_input['content'] ?? '')),
+            'instruction' => trim((string) ($Silian_input['instruction'] ?? '')),
+            'priority' => $this->normalizePriority($Silian_input['priority'] ?? null),
+            'content_format' => $this->normalizeContentFormat($Silian_input['content_format'] ?? null),
         ];
     }
 
-    private function normalizePriority(mixed $value): string
+    private function normalizePriority(mixed $Silian_value): string
     {
-        $normalized = is_string($value) ? strtolower(trim($value)) : 'normal';
-        return in_array($normalized, ['low', 'normal', 'high', 'urgent'], true) ? $normalized : 'normal';
+        $Silian_normalized = is_string($Silian_value) ? strtolower(trim($Silian_value)) : 'normal';
+        return in_array($Silian_normalized, ['low', 'normal', 'high', 'urgent'], true) ? $Silian_normalized : 'normal';
     }
 
-    private function normalizeContentFormat(mixed $value): string
+    private function normalizeContentFormat(mixed $Silian_value): string
     {
-        $normalized = is_string($value) ? strtolower(trim($value)) : 'html';
-        return in_array($normalized, ['text', 'html'], true) ? $normalized : 'html';
+        $Silian_normalized = is_string($Silian_value) ? strtolower(trim($Silian_value)) : 'html';
+        return in_array($Silian_normalized, ['text', 'html'], true) ? $Silian_normalized : 'html';
     }
 
     /**
      * @param array<string,mixed> $input
      * @return array<int,array<string,string>>
      */
-    private function buildMessages(array $input): array
+    private function buildMessages(array $Silian_input): array
     {
         return [
             ['role' => 'system', 'content' => $this->buildSystemPrompt()],
-            ['role' => 'user', 'content' => $this->buildUserPrompt($input)],
+            ['role' => 'user', 'content' => $this->buildUserPrompt($Silian_input)],
         ];
     }
 
@@ -188,10 +188,10 @@ class AdminAnnouncementAiService
     /**
      * @param array<string,mixed> $input
      */
-    private function buildUserPrompt(array $input): string
+    private function buildUserPrompt(array $Silian_input): string
     {
-        $lines = array_merge(
-            $this->buildIntentInstructions((string) $input['action'], ((string) $input['content']) !== ''),
+        $Silian_lines = array_merge(
+            $this->buildIntentInstructions((string) $Silian_input['action'], ((string) $Silian_input['content']) !== ''),
             [
                 '',
                 'Project constraints:',
@@ -200,32 +200,32 @@ class AdminAnnouncementAiService
                 '- Match urgency to the provided priority without exaggeration.',
                 '',
                 'Context:',
-                'Title: ' . (((string) $input['title']) !== '' ? (string) $input['title'] : '(untitled announcement)'),
-                'Priority: ' . (string) $input['priority'],
-                'Current editor content format: ' . (string) $input['content_format'],
+                'Title: ' . (((string) $Silian_input['title']) !== '' ? (string) $Silian_input['title'] : '(untitled announcement)'),
+                'Priority: ' . (string) $Silian_input['priority'],
+                'Current editor content format: ' . (string) $Silian_input['content_format'],
                 'Current draft / notes:',
-                ((string) $input['content']) !== '' ? (string) $input['content'] : '(no existing content yet)',
+                ((string) $Silian_input['content']) !== '' ? (string) $Silian_input['content'] : '(no existing content yet)',
             ]
         );
 
-        if (((string) $input['instruction']) !== '') {
-            $lines[] = '';
-            $lines[] = 'Additional admin request:';
-            $lines[] = (string) $input['instruction'];
+        if (((string) $Silian_input['instruction']) !== '') {
+            $Silian_lines[] = '';
+            $Silian_lines[] = 'Additional admin request:';
+            $Silian_lines[] = (string) $Silian_input['instruction'];
         }
 
-        $lines[] = '';
-        $lines[] = 'Return only the JSON object.';
+        $Silian_lines[] = '';
+        $Silian_lines[] = 'Return only the JSON object.';
 
-        return implode("\n", $lines);
+        return implode("\n", $Silian_lines);
     }
 
     /**
      * @return array<int,string>
      */
-    private function buildIntentInstructions(string $action, bool $hasContent): array
+    private function buildIntentInstructions(string $Silian_action, bool $Silian_hasContent): array
     {
-        return match ($action) {
+        return match ($Silian_action) {
             self::ACTION_REWRITE => [
                 'Task: polish and rewrite the existing announcement draft.',
                 '- Preserve all confirmed facts.',
@@ -241,7 +241,7 @@ class AdminAnnouncementAiService
                 '- Organize the material into clear semantic sections.',
                 '- Preserve meaning and avoid adding new facts.',
             ],
-            default => $hasContent
+            default => $Silian_hasContent
                 ? [
                     'Task: generate a refined announcement HTML draft from the provided title, notes, and constraints.',
                     '- Use the supplied draft or notes as the content source of truth.',
@@ -257,16 +257,16 @@ class AdminAnnouncementAiService
     /**
      * @param array<int,array<string,string>> $messages
      */
-    private function buildPromptTranscript(array $messages): string
+    private function buildPromptTranscript(array $Silian_messages): string
     {
-        $chunks = [];
-        foreach ($messages as $message) {
-            $role = strtoupper((string) ($message['role'] ?? 'message'));
-            $content = (string) ($message['content'] ?? '');
-            $chunks[] = "=== {$role} ===\n{$content}";
+        $Silian_chunks = [];
+        foreach ($Silian_messages as $Silian_message) {
+            $Silian_role = strtoupper((string) ($Silian_message['role'] ?? 'message'));
+            $Silian_content = (string) ($Silian_message['content'] ?? '');
+            $Silian_chunks[] = "=== {$Silian_role} ===\n{$Silian_content}";
         }
 
-        return implode("\n\n", $chunks);
+        return implode("\n\n", $Silian_chunks);
     }
 
     /**
@@ -274,47 +274,47 @@ class AdminAnnouncementAiService
      * @param array<string,mixed> $input
      * @return array<string,mixed>
      */
-    private function processResponse(array $rawResponse, array $input): array
+    private function processResponse(array $Silian_rawResponse, array $Silian_input): array
     {
-        $messageContent = $this->extractMessageContent($rawResponse);
-        $decoded = $this->decodeJsonContent($messageContent);
+        $Silian_messageContent = $this->extractMessageContent($Silian_rawResponse);
+        $Silian_decoded = $this->decodeJsonContent($Silian_messageContent);
 
-        if (!is_array($decoded)) {
-            if ($this->looksLikeHtml($messageContent)) {
-                $decoded = [
-                    'title' => (string) ($input['title'] ?: 'Announcement'),
-                    'content' => trim($messageContent),
+        if (!is_array($Silian_decoded)) {
+            if ($this->looksLikeHtml($Silian_messageContent)) {
+                $Silian_decoded = [
+                    'title' => (string) ($Silian_input['title'] ?: 'Announcement'),
+                    'content' => trim($Silian_messageContent),
                 ];
             } else {
                 return [
                     'success' => false,
                     'error' => 'Failed to parse AI response',
-                    'raw_content' => $messageContent,
+                    'raw_content' => $Silian_messageContent,
                     'metadata' => [
-                        'model' => $rawResponse['model'] ?? $this->model,
-                        'usage' => $rawResponse['usage'] ?? null,
-                        'finish_reason' => $rawResponse['choices'][0]['finish_reason'] ?? null,
+                        'model' => $Silian_rawResponse['model'] ?? $this->model,
+                        'usage' => $Silian_rawResponse['usage'] ?? null,
+                        'finish_reason' => $Silian_rawResponse['choices'][0]['finish_reason'] ?? null,
                     ],
                 ];
             }
         }
 
-        $title = trim((string) ($decoded['title'] ?? $input['title'] ?? ''));
-        $content = trim((string) ($decoded['content'] ?? $decoded['html'] ?? ''));
+        $Silian_title = trim((string) ($Silian_decoded['title'] ?? $Silian_input['title'] ?? ''));
+        $Silian_content = trim((string) ($Silian_decoded['content'] ?? $Silian_decoded['html'] ?? ''));
 
-        if ($title === '') {
-            $title = (string) ($input['title'] ?: 'Announcement');
+        if ($Silian_title === '') {
+            $Silian_title = (string) ($Silian_input['title'] ?: 'Announcement');
         }
 
-        if ($content === '') {
+        if ($Silian_content === '') {
             return [
                 'success' => false,
                 'error' => 'AI response did not include announcement content',
-                'raw_content' => $messageContent,
+                'raw_content' => $Silian_messageContent,
                 'metadata' => [
-                    'model' => $rawResponse['model'] ?? $this->model,
-                    'usage' => $rawResponse['usage'] ?? null,
-                    'finish_reason' => $rawResponse['choices'][0]['finish_reason'] ?? null,
+                    'model' => $Silian_rawResponse['model'] ?? $this->model,
+                    'usage' => $Silian_rawResponse['usage'] ?? null,
+                    'finish_reason' => $Silian_rawResponse['choices'][0]['finish_reason'] ?? null,
                 ],
             ];
         }
@@ -322,15 +322,15 @@ class AdminAnnouncementAiService
         return [
             'success' => true,
             'result' => [
-                'title' => $title,
-                'content' => $content,
+                'title' => $Silian_title,
+                'content' => $Silian_content,
                 'content_format' => 'html',
-                'action' => (string) $input['action'],
+                'action' => (string) $Silian_input['action'],
             ],
             'metadata' => [
-                'model' => $rawResponse['model'] ?? $this->model,
-                'usage' => $rawResponse['usage'] ?? null,
-                'finish_reason' => $rawResponse['choices'][0]['finish_reason'] ?? null,
+                'model' => $Silian_rawResponse['model'] ?? $this->model,
+                'usage' => $Silian_rawResponse['usage'] ?? null,
+                'finish_reason' => $Silian_rawResponse['choices'][0]['finish_reason'] ?? null,
             ],
         ];
     }
@@ -338,43 +338,43 @@ class AdminAnnouncementAiService
     /**
      * @param array<string,mixed> $rawResponse
      */
-    private function extractMessageContent(array $rawResponse): string
+    private function extractMessageContent(array $Silian_rawResponse): string
     {
-        $choice = $rawResponse['choices'][0] ?? [];
-        $content = $choice['message']['content'] ?? '';
-        return is_string($content) ? trim($content) : '';
+        $Silian_choice = $Silian_rawResponse['choices'][0] ?? [];
+        $Silian_content = $Silian_choice['message']['content'] ?? '';
+        return is_string($Silian_content) ? trim($Silian_content) : '';
     }
 
     /**
      * @return array<string,mixed>|null
      */
-    private function decodeJsonContent(string $content): ?array
+    private function decodeJsonContent(string $Silian_content): ?array
     {
-        if ($content === '') {
+        if ($Silian_content === '') {
             return null;
         }
 
-        $cleaned = preg_replace('/^```(?:json)?\s*/i', '', $content);
-        if (!is_string($cleaned)) {
-            $cleaned = $content;
+        $Silian_cleaned = preg_replace('/^```(?:json)?\s*/i', '', $Silian_content);
+        if (!is_string($Silian_cleaned)) {
+            $Silian_cleaned = $Silian_content;
         }
 
-        $cleaned = preg_replace('/\s*```$/', '', $cleaned);
-        if (!is_string($cleaned)) {
-            $cleaned = $content;
+        $Silian_cleaned = preg_replace('/\s*```$/', '', $Silian_cleaned);
+        if (!is_string($Silian_cleaned)) {
+            $Silian_cleaned = $Silian_content;
         }
 
-        $decoded = json_decode(trim($cleaned), true);
-        if (!is_array($decoded) && preg_match('/\{.*\}/s', $cleaned, $matches) === 1) {
-            $decoded = json_decode($matches[0], true);
+        $Silian_decoded = json_decode(trim($Silian_cleaned), true);
+        if (!is_array($Silian_decoded) && preg_match('/\{.*\}/s', $Silian_cleaned, $Silian_matches) === 1) {
+            $Silian_decoded = json_decode($Silian_matches[0], true);
         }
 
-        return is_array($decoded) ? $decoded : null;
+        return is_array($Silian_decoded) ? $Silian_decoded : null;
     }
 
-    private function looksLikeHtml(string $content): bool
+    private function looksLikeHtml(string $Silian_content): bool
     {
-        return $content !== '' && preg_match('/<\/?[a-z][^>]*>/i', $content) === 1;
+        return $Silian_content !== '' && preg_match('/<\/?[a-z][^>]*>/i', $Silian_content) === 1;
     }
 
     /**
@@ -382,29 +382,29 @@ class AdminAnnouncementAiService
      * @param array<string,mixed> $logContext
      * @param array<string,mixed> $context
      */
-    private function logLlmCall(string $prompt, array $rawResponse, array $logContext, array $context, float $startedAt): void
+    private function logLlmCall(string $Silian_prompt, array $Silian_rawResponse, array $Silian_logContext, array $Silian_context, float $Silian_startedAt): void
     {
         if (!$this->llmLogService) {
             return;
         }
 
-        $durationMs = (microtime(true) - $startedAt) * 1000.0;
-        $responseId = $rawResponse['id'] ?? ($rawResponse['metadata']['request_id'] ?? null);
+        $Silian_durationMs = (microtime(true) - $Silian_startedAt) * 1000.0;
+        $Silian_responseId = $Silian_rawResponse['id'] ?? ($Silian_rawResponse['metadata']['request_id'] ?? null);
 
         $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'admin',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'source' => $logContext['source'] ?? null,
-            'model' => $rawResponse['model'] ?? $this->model,
-            'prompt' => $prompt,
-            'response_raw' => $rawResponse,
-            'response_id' => $responseId,
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'admin',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'source' => $Silian_logContext['source'] ?? null,
+            'model' => $Silian_rawResponse['model'] ?? $this->model,
+            'prompt' => $Silian_prompt,
+            'response_raw' => $Silian_rawResponse,
+            'response_id' => $Silian_responseId,
             'status' => 'success',
             'error_message' => null,
-            'usage' => $rawResponse['usage'] ?? null,
-            'latency_ms' => round($durationMs, 2),
-            'context' => $context,
+            'usage' => $Silian_rawResponse['usage'] ?? null,
+            'latency_ms' => round($Silian_durationMs, 2),
+            'context' => $Silian_context,
         ]);
     }
 
@@ -412,71 +412,71 @@ class AdminAnnouncementAiService
      * @param array<string,mixed> $logContext
      * @param array<string,mixed> $context
      */
-    private function logLlmFailure(string $prompt, array $logContext, array $context, float $startedAt, \Throwable $error): void
+    private function logLlmFailure(string $Silian_prompt, array $Silian_logContext, array $Silian_context, float $Silian_startedAt, \Throwable $Silian_error): void
     {
         if (!$this->llmLogService) {
             return;
         }
 
-        $durationMs = (microtime(true) - $startedAt) * 1000.0;
+        $Silian_durationMs = (microtime(true) - $Silian_startedAt) * 1000.0;
 
         $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'admin',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'source' => $logContext['source'] ?? null,
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'admin',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'source' => $Silian_logContext['source'] ?? null,
             'model' => $this->model,
-            'prompt' => $prompt,
+            'prompt' => $Silian_prompt,
             'response_raw' => null,
             'response_id' => null,
             'status' => 'failed',
-            'error_message' => $error->getMessage(),
+            'error_message' => $Silian_error->getMessage(),
             'usage' => null,
-            'latency_ms' => round($durationMs, 2),
-            'context' => $context,
+            'latency_ms' => round($Silian_durationMs, 2),
+            'context' => $Silian_context,
         ]);
     }
 
-    private function logAudit(string $action, array $logContext, array $context = []): void
+    private function logAudit(string $Silian_action, array $Silian_logContext, array $Silian_context = []): void
     {
         if (!$this->auditLogService) {
             return;
         }
 
         try {
-            $actorId = isset($logContext['actor_id']) && is_numeric((string) $logContext['actor_id'])
-                ? (int) $logContext['actor_id']
+            $Silian_actorId = isset($Silian_logContext['actor_id']) && is_numeric((string) $Silian_logContext['actor_id'])
+                ? (int) $Silian_logContext['actor_id']
                 : null;
-            $this->auditLogService->logAdminOperation($action, $actorId, 'admin_announcement_ai_service', array_merge([
-                'request_id' => $logContext['request_id'] ?? null,
-                'endpoint' => $logContext['source'] ?? '/admin/ai/announcement-drafts',
+            $this->auditLogService->logAdminOperation($Silian_action, $Silian_actorId, 'admin_announcement_ai_service', array_merge([
+                'request_id' => $Silian_logContext['request_id'] ?? null,
+                'endpoint' => $Silian_logContext['source'] ?? '/admin/ai/announcement-drafts',
                 'request_method' => 'POST',
                 'status' => 'success',
-            ], $context));
-        } catch (\Throwable $ignore) {
+            ], $Silian_context));
+        } catch (\Throwable $Silian_ignore) {
             // 审计日志失败不阻断主流程
         }
     }
 
-    private function logError(\Throwable $exception, array $logContext, array $context = []): void
+    private function logError(\Throwable $Silian_exception, array $Silian_logContext, array $Silian_context = []): void
     {
         if (!$this->errorLogService) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext(
-                $logContext['source'] ?? '/admin/ai/announcement-drafts',
+            $Silian_request = SyntheticRequestFactory::fromContext(
+                $Silian_logContext['source'] ?? '/admin/ai/announcement-drafts',
                 'POST',
-                $logContext['request_id'] ?? null,
+                $Silian_logContext['request_id'] ?? null,
                 [],
-                $context
+                $Silian_context
             );
-            $this->errorLogService->logException($exception, $request, [
-                'request_id' => $logContext['request_id'] ?? null,
-                'actor_type' => $logContext['actor_type'] ?? 'admin',
+            $this->errorLogService->logException($Silian_exception, $Silian_request, [
+                'request_id' => $Silian_logContext['request_id'] ?? null,
+                'actor_type' => $Silian_logContext['actor_type'] ?? 'admin',
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // swallow secondary logging failure
         }
     }

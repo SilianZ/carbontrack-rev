@@ -18,72 +18,72 @@ class IdempotencyMiddlewareTest extends TestCase
     public function testMissingRequestIdReturns400(): void
     {
         // DatabaseService not used directly in current implementation; pass a dummy stub
-        $db = $this->getMockBuilder(DatabaseService::class)->disableOriginalConstructor()->getMock();
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $mw = new IdempotencyMiddleware($db, $logger);
+        $Silian_db = $this->getMockBuilder(DatabaseService::class)->disableOriginalConstructor()->getMock();
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mw = new IdempotencyMiddleware($Silian_db, $Silian_logger);
 
-        $request = makeRequest('POST', '/api/v1/auth/register');
-        $handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(400, $resp->getStatusCode());
+        $Silian_request = makeRequest('POST', '/api/v1/auth/register');
+        $Silian_handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(400, $Silian_resp->getStatusCode());
     }
 
     public function testPassthroughWhenNotSensitive(): void
     {
-        $db = $this->getMockBuilder(DatabaseService::class)->disableOriginalConstructor()->getMock();
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $mw = new IdempotencyMiddleware($db, $logger);
+        $Silian_db = $this->getMockBuilder(DatabaseService::class)->disableOriginalConstructor()->getMock();
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mw = new IdempotencyMiddleware($Silian_db, $Silian_logger);
 
-        $request = makeRequest('POST', '/api/v1/others');
-        $handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
-            public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
-                $resp = new \Slim\Psr7\Response();
-                $resp->getBody()->write('{"ok":true}');
-                return $resp->withHeader('Content-Type','application/json');
+        $Silian_request = makeRequest('POST', '/api/v1/others');
+        $Silian_handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
+            public function handle(\Psr\Http\Message\ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface {
+                $Silian_resp = new \Slim\Psr7\Response();
+                $Silian_resp->getBody()->write('{"ok":true}');
+                return $Silian_resp->withHeader('Content-Type','application/json');
             }
         };
 
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(200, $resp->getStatusCode());
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
     }
 
     public function testInvalidRequestIdFormatReturns400(): void
     {
-        $db = $this->getMockBuilder(DatabaseService::class)->disableOriginalConstructor()->getMock();
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $mw = new IdempotencyMiddleware($db, $logger);
+        $Silian_db = $this->getMockBuilder(DatabaseService::class)->disableOriginalConstructor()->getMock();
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mw = new IdempotencyMiddleware($Silian_db, $Silian_logger);
 
-        $request = makeRequest('POST', '/api/v1/exchange', null, null, [
+        $Silian_request = makeRequest('POST', '/api/v1/exchange', null, null, [
             'X-Request-ID' => ['not-a-uuid']
         ]);
-        $handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(400, $resp->getStatusCode());
+        $Silian_handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(400, $Silian_resp->getStatusCode());
     }
 
     public function testSensitiveWithValidUuidPassesThroughAndStoresSafely(): void
     {
-        $db = $this->getMockBuilder(DatabaseService::class)->disableOriginalConstructor()->getMock();
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $mw = new IdempotencyMiddleware($db, $logger);
+        $Silian_db = $this->getMockBuilder(DatabaseService::class)->disableOriginalConstructor()->getMock();
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_mw = new IdempotencyMiddleware($Silian_db, $Silian_logger);
 
-        $uuid = '123e4567-e89b-12d3-a456-426614174000';
-        $request = makeRequest('POST', '/api/v1/exchange', ['a' => 1], null, [
-            'X-Request-ID' => [$uuid],
+        $Silian_uuid = '123e4567-e89b-12d3-a456-426614174000';
+        $Silian_request = makeRequest('POST', '/api/v1/exchange', ['a' => 1], null, [
+            'X-Request-ID' => [$Silian_uuid],
             'User-Agent' => ['PHPUnit']
         ]);
 
-        $handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
-            public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
-                $resp = new \Slim\Psr7\Response(201);
-                $resp->getBody()->write('{"success":true}');
-                return $resp->withHeader('Content-Type','application/json');
+        $Silian_handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
+            public function handle(\Psr\Http\Message\ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface {
+                $Silian_resp = new \Slim\Psr7\Response(201);
+                $Silian_resp->getBody()->write('{"success":true}');
+                return $Silian_resp->withHeader('Content-Type','application/json');
             }
         };
 
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(201, $resp->getStatusCode());
-        $this->assertEquals('application/json', $resp->getHeaderLine('Content-Type'));
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(201, $Silian_resp->getStatusCode());
+        $this->assertEquals('application/json', $Silian_resp->getHeaderLine('Content-Type'));
         // When storage fails, middleware swallows error and still returns handler response
         // We can't assert DB writes here without wiring Eloquent; this verifies happy path passthrough.
     }

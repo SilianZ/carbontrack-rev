@@ -24,41 +24,41 @@ class AdminLlmUsageController
     /**
      * GET /api/v1/admin/llm-usage
      */
-    public function summary(Request $request, Response $response): Response
+    public function summary(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $admin = $this->authService->getCurrentUser($request);
-            if (!$admin || !$this->authService->isAdminUser($admin)) {
-                return $this->json($response, ['error' => 'Access denied'], 403);
+            $Silian_admin = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_admin || !$this->authService->isAdminUser($Silian_admin)) {
+                return $this->json($Silian_response, ['error' => 'Access denied'], 403);
             }
 
-            $q = $request->getQueryParams();
-            $page = max(1, (int) ($q['page'] ?? 1));
-            $limit = min(200, max(10, (int) ($q['limit'] ?? 20)));
-            $offset = ($page - 1) * $limit;
-            $search = isset($q['q']) ? trim((string) $q['q']) : '';
-            $sort = isset($q['sort']) ? (string) $q['sort'] : 'llm_used_desc';
+            $Silian_q = $Silian_request->getQueryParams();
+            $Silian_page = max(1, (int) ($Silian_q['page'] ?? 1));
+            $Silian_limit = min(200, max(10, (int) ($Silian_q['limit'] ?? 20)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
+            $Silian_search = isset($Silian_q['q']) ? trim((string) $Silian_q['q']) : '';
+            $Silian_sort = isset($Silian_q['sort']) ? (string) $Silian_q['sort'] : 'llm_used_desc';
 
-            $where = ['u.deleted_at IS NULL'];
-            $params = [];
-            if ($search !== '') {
-                $where[] = '(u.username LIKE :search_username OR u.email LIKE :search_email)';
-                $searchPattern = '%' . $search . '%';
-                $params['search_username'] = $searchPattern;
-                $params['search_email'] = $searchPattern;
+            $Silian_where = ['u.deleted_at IS NULL'];
+            $Silian_params = [];
+            if ($Silian_search !== '') {
+                $Silian_where[] = '(u.username LIKE :search_username OR u.email LIKE :search_email)';
+                $Silian_searchPattern = '%' . $Silian_search . '%';
+                $Silian_params['search_username'] = $Silian_searchPattern;
+                $Silian_params['search_email'] = $Silian_searchPattern;
             }
-            $whereClause = implode(' AND ', $where);
+            $Silian_whereClause = implode(' AND ', $Silian_where);
 
-            $sortMap = [
+            $Silian_sortMap = [
                 'llm_used_desc' => 'COALESCE(usage_stats.counter, 0) DESC',
                 'llm_used_asc' => 'COALESCE(usage_stats.counter, 0) ASC',
                 'last_used_desc' => 'usage_stats.last_updated_at DESC',
                 'username_asc' => 'u.username ASC',
                 'username_desc' => 'u.username DESC',
             ];
-            $orderBy = $sortMap[$sort] ?? $sortMap['llm_used_desc'];
+            $Silian_orderBy = $Silian_sortMap[$Silian_sort] ?? $Silian_sortMap['llm_used_desc'];
 
-            $sql = "SELECT
+            $Silian_sql = "SELECT
                         u.id,
                         u.username,
                         u.email,
@@ -75,232 +75,232 @@ class AdminLlmUsageController
                     LEFT JOIN user_usage_stats usage_stats
                         ON usage_stats.user_id = u.id
                         AND usage_stats.resource_key = 'llm_daily'
-                    WHERE {$whereClause}
-                    ORDER BY {$orderBy}
+                    WHERE {$Silian_whereClause}
+                    ORDER BY {$Silian_orderBy}
                     LIMIT :limit OFFSET :offset";
 
-            $stmt = $this->db->prepare($sql);
-            foreach ($params as $key => $value) {
-                $stmt->bindValue(':' . $key, $value);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_params as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue(':' . $Silian_key, $Silian_value);
             }
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->bindValue(':offset', $Silian_offset, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            $users = [];
-            foreach ($rows as $row) {
-                $groupConfig = $this->decodeJson($row['group_config'] ?? null);
-                $userOverride = $this->decodeJson($row['quota_override'] ?? null);
-                $effective = array_merge(
-                    $groupConfig['llm'] ?? [],
-                    $userOverride['llm'] ?? []
+            $Silian_users = [];
+            foreach ($Silian_rows as $Silian_row) {
+                $Silian_groupConfig = $this->decodeJson($Silian_row['group_config'] ?? null);
+                $Silian_userOverride = $this->decodeJson($Silian_row['quota_override'] ?? null);
+                $Silian_effective = array_merge(
+                    $Silian_groupConfig['llm'] ?? [],
+                    $Silian_userOverride['llm'] ?? []
                 );
 
-                $dailyLimit = isset($effective['daily_limit']) ? (int) $effective['daily_limit'] : null;
-                $rateLimit = isset($effective['rate_limit']) ? (int) $effective['rate_limit'] : null;
-                $dailyUsed = isset($row['llm_daily_used']) ? (int) $row['llm_daily_used'] : 0;
-                $dailyRemaining = $dailyLimit !== null ? max($dailyLimit - $dailyUsed, 0) : null;
+                $Silian_dailyLimit = isset($Silian_effective['daily_limit']) ? (int) $Silian_effective['daily_limit'] : null;
+                $Silian_rateLimit = isset($Silian_effective['rate_limit']) ? (int) $Silian_effective['rate_limit'] : null;
+                $Silian_dailyUsed = isset($Silian_row['llm_daily_used']) ? (int) $Silian_row['llm_daily_used'] : 0;
+                $Silian_dailyRemaining = $Silian_dailyLimit !== null ? max($Silian_dailyLimit - $Silian_dailyUsed, 0) : null;
 
-                $users[] = [
-                    'id' => (int) $row['id'],
-                    'username' => $row['username'],
-                    'email' => $row['email'],
-                    'is_admin' => (bool) $row['is_admin'],
-                    'group_id' => $row['group_id'] !== null ? (int) $row['group_id'] : null,
-                    'group_name' => $row['group_name'],
-                    'daily_used' => $dailyUsed,
-                    'daily_limit' => $dailyLimit,
-                    'daily_remaining' => $dailyRemaining,
-                    'rate_limit' => $rateLimit,
-                    'reset_at' => $row['llm_reset_at'],
-                    'last_used_at' => $row['llm_last_used_at'],
+                $Silian_users[] = [
+                    'id' => (int) $Silian_row['id'],
+                    'username' => $Silian_row['username'],
+                    'email' => $Silian_row['email'],
+                    'is_admin' => (bool) $Silian_row['is_admin'],
+                    'group_id' => $Silian_row['group_id'] !== null ? (int) $Silian_row['group_id'] : null,
+                    'group_name' => $Silian_row['group_name'],
+                    'daily_used' => $Silian_dailyUsed,
+                    'daily_limit' => $Silian_dailyLimit,
+                    'daily_remaining' => $Silian_dailyRemaining,
+                    'rate_limit' => $Silian_rateLimit,
+                    'reset_at' => $Silian_row['llm_reset_at'],
+                    'last_used_at' => $Silian_row['llm_last_used_at'],
                 ];
             }
 
-            $countSql = "SELECT COUNT(*) FROM users u WHERE {$whereClause}";
-            $countStmt = $this->db->prepare($countSql);
-            foreach ($params as $key => $value) {
-                $countStmt->bindValue(':' . $key, $value);
+            $Silian_countSql = "SELECT COUNT(*) FROM users u WHERE {$Silian_whereClause}";
+            $Silian_countStmt = $this->db->prepare($Silian_countSql);
+            foreach ($Silian_params as $Silian_key => $Silian_value) {
+                $Silian_countStmt->bindValue(':' . $Silian_key, $Silian_value);
             }
-            $countStmt->execute();
-            $total = (int) $countStmt->fetchColumn();
+            $Silian_countStmt->execute();
+            $Silian_total = (int) $Silian_countStmt->fetchColumn();
 
-            $summary = $this->fetchSummary();
+            $Silian_summary = $this->fetchSummary();
 
-            $this->logAudit('admin_llm_usage_summary_viewed', $admin, $request, [
+            $this->logAudit('admin_llm_usage_summary_viewed', $Silian_admin, $Silian_request, [
                 'data' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'search' => $search !== '',
-                    'sort' => $sort,
+                    'page' => $Silian_page,
+                    'limit' => $Silian_limit,
+                    'search' => $Silian_search !== '',
+                    'sort' => $Silian_sort,
                 ],
             ]);
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'summary' => $summary,
-                    'users' => $users,
+                    'summary' => $Silian_summary,
+                    'users' => $Silian_users,
                     'pagination' => [
-                        'current_page' => $page,
-                        'per_page' => $limit,
-                        'total_items' => $total,
-                        'total_pages' => $total > 0 ? (int) ceil($total / $limit) : 0,
+                        'current_page' => $Silian_page,
+                        'per_page' => $Silian_limit,
+                        'total_items' => $Silian_total,
+                        'total_pages' => $Silian_total > 0 ? (int) ceil($Silian_total / $Silian_limit) : 0,
                     ],
                 ],
             ]);
-        } catch (\Throwable $e) {
-            try { $this->errorLogService?->logException($e, $request); } catch (\Throwable $ignore) { /* ignore */ }
-            $this->logAudit('admin_llm_usage_summary_failed', $admin ?? null, $request, [
-                'data' => ['error' => $e->getMessage()],
+        } catch (\Throwable $Silian_e) {
+            try { $this->errorLogService?->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) { /* ignore */ }
+            $this->logAudit('admin_llm_usage_summary_failed', $Silian_admin ?? null, $Silian_request, [
+                'data' => ['error' => $Silian_e->getMessage()],
             ], 'failed');
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * GET /api/v1/admin/llm-usage/analytics
      */
-    public function analytics(Request $request, Response $response): Response
+    public function analytics(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $admin = $this->authService->getCurrentUser($request);
-            if (!$admin || !$this->authService->isAdminUser($admin)) {
-                return $this->json($response, ['error' => 'Access denied'], 403);
+            $Silian_admin = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_admin || !$this->authService->isAdminUser($Silian_admin)) {
+                return $this->json($Silian_response, ['error' => 'Access denied'], 403);
             }
 
-            $q = $request->getQueryParams();
-            $days = max(7, min(90, (int)($q['days'] ?? 30)));
-            $recentLimit = max(5, min(30, (int)($q['recent_limit'] ?? 8)));
+            $Silian_q = $Silian_request->getQueryParams();
+            $Silian_days = max(7, min(90, (int)($Silian_q['days'] ?? 30)));
+            $Silian_recentLimit = max(5, min(30, (int)($Silian_q['recent_limit'] ?? 8)));
 
-            $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-            $start = $now->modify('-' . max(0, $days - 1) . ' days')->setTime(0, 0, 0);
-            $since = $start->format('Y-m-d H:i:s');
+            $Silian_now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+            $Silian_start = $Silian_now->modify('-' . max(0, $Silian_days - 1) . ' days')->setTime(0, 0, 0);
+            $Silian_since = $Silian_start->format('Y-m-d H:i:s');
 
-            $summary = $this->fetchSummary();
-            $trends = $this->fetchDailyTrends($since, $start, $now);
-            $distributions = [
-                'models' => $this->fetchDistribution('model', 'model', $since, 8),
-                'sources' => $this->fetchDistribution('source', 'source', $since, 8),
-                'actors' => $this->fetchActorDistribution($since),
-                'status' => $this->fetchDistribution('status', 'status', $since, 4),
+            $Silian_summary = $this->fetchSummary();
+            $Silian_trends = $this->fetchDailyTrends($Silian_since, $Silian_start, $Silian_now);
+            $Silian_distributions = [
+                'models' => $this->fetchDistribution('model', 'model', $Silian_since, 8),
+                'sources' => $this->fetchDistribution('source', 'source', $Silian_since, 8),
+                'actors' => $this->fetchActorDistribution($Silian_since),
+                'status' => $this->fetchDistribution('status', 'status', $Silian_since, 4),
             ];
-            $rangeStats = $this->fetchRangeStats($since);
-            $insights = $this->buildInsights($trends, $distributions, $rangeStats);
-            $recent = $this->fetchRecentConversations($recentLimit);
+            $Silian_rangeStats = $this->fetchRangeStats($Silian_since);
+            $Silian_insights = $this->buildInsights($Silian_trends, $Silian_distributions, $Silian_rangeStats);
+            $Silian_recent = $this->fetchRecentConversations($Silian_recentLimit);
 
-            $this->logAudit('admin_llm_usage_analytics_viewed', $admin, $request, [
+            $this->logAudit('admin_llm_usage_analytics_viewed', $Silian_admin, $Silian_request, [
                 'data' => [
-                    'days' => $days,
-                    'recent_limit' => $recentLimit,
+                    'days' => $Silian_days,
+                    'recent_limit' => $Silian_recentLimit,
                 ],
             ]);
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'summary' => $summary,
-                    'range_days' => $days,
-                    'trends' => $trends,
-                    'distributions' => $distributions,
-                    'insights' => $insights,
-                    'recent_conversations' => $recent,
+                    'summary' => $Silian_summary,
+                    'range_days' => $Silian_days,
+                    'trends' => $Silian_trends,
+                    'distributions' => $Silian_distributions,
+                    'insights' => $Silian_insights,
+                    'recent_conversations' => $Silian_recent,
                 ],
             ]);
-        } catch (\Throwable $e) {
-            try { $this->errorLogService?->logException($e, $request); } catch (\Throwable $ignore) { /* ignore */ }
-            $this->logAudit('admin_llm_usage_analytics_failed', $admin ?? null, $request, [
-                'data' => ['error' => $e->getMessage()],
+        } catch (\Throwable $Silian_e) {
+            try { $this->errorLogService?->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) { /* ignore */ }
+            $this->logAudit('admin_llm_usage_analytics_failed', $Silian_admin ?? null, $Silian_request, [
+                'data' => ['error' => $Silian_e->getMessage()],
             ], 'failed');
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * GET /api/v1/admin/llm-usage/logs/{id}
      */
-    public function logDetail(Request $request, Response $response, array $args): Response
+    public function logDetail(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $admin = $this->authService->getCurrentUser($request);
-            if (!$admin || !$this->authService->isAdminUser($admin)) {
-                return $this->json($response, ['error' => 'Access denied'], 403);
+            $Silian_admin = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_admin || !$this->authService->isAdminUser($Silian_admin)) {
+                return $this->json($Silian_response, ['error' => 'Access denied'], 403);
             }
 
-            $id = isset($args['id']) ? (int) $args['id'] : 0;
-            if ($id <= 0) {
-                return $this->json($response, ['error' => 'Invalid id'], 400);
+            $Silian_id = isset($Silian_args['id']) ? (int) $Silian_args['id'] : 0;
+            if ($Silian_id <= 0) {
+                return $this->json($Silian_response, ['error' => 'Invalid id'], 400);
             }
 
-            $stmt = $this->db->prepare('SELECT * FROM llm_logs WHERE id = :id');
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-            $log = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_stmt = $this->db->prepare('SELECT * FROM llm_logs WHERE id = :id');
+            $Silian_stmt->bindValue(':id', $Silian_id, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            $Silian_log = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$log) {
-                return $this->json($response, ['error' => 'Not found'], 404);
+            if (!$Silian_log) {
+                return $this->json($Silian_response, ['error' => 'Not found'], 404);
             }
 
-            $log['usage'] = $this->decodeJson($log['usage_json'] ?? null);
-            unset($log['usage_json']);
-            $log['context'] = $this->decodeJson($log['context_json'] ?? null);
-            unset($log['context_json']);
-            $log['response_raw'] = $this->decodeMaybeJson($log['response_raw'] ?? null);
-            $log['prompt'] = $this->decodeMaybeJson($log['prompt'] ?? null);
+            $Silian_log['usage'] = $this->decodeJson($Silian_log['usage_json'] ?? null);
+            unset($Silian_log['usage_json']);
+            $Silian_log['context'] = $this->decodeJson($Silian_log['context_json'] ?? null);
+            unset($Silian_log['context_json']);
+            $Silian_log['response_raw'] = $this->decodeMaybeJson($Silian_log['response_raw'] ?? null);
+            $Silian_log['prompt'] = $this->decodeMaybeJson($Silian_log['prompt'] ?? null);
 
-            $this->logAudit('admin_llm_usage_log_viewed', $admin, $request, [
-                'record_id' => $id,
-                'data' => ['request_id' => $log['request_id'] ?? null],
+            $this->logAudit('admin_llm_usage_log_viewed', $Silian_admin, $Silian_request, [
+                'record_id' => $Silian_id,
+                'data' => ['request_id' => $Silian_log['request_id'] ?? null],
             ]);
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $log,
+                'data' => $Silian_log,
             ]);
-        } catch (\Throwable $e) {
-            try { $this->errorLogService?->logException($e, $request); } catch (\Throwable $ignore) { /* ignore */ }
-            $this->logAudit('admin_llm_usage_log_view_failed', $admin ?? null, $request, [
-                'data' => ['error' => $e->getMessage()],
+        } catch (\Throwable $Silian_e) {
+            try { $this->errorLogService?->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) { /* ignore */ }
+            $this->logAudit('admin_llm_usage_log_view_failed', $Silian_admin ?? null, $Silian_request, [
+                'data' => ['error' => $Silian_e->getMessage()],
             ], 'failed');
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * @param array<string,mixed> $payload
      */
-    private function json(Response $response, array $payload, int $status = 200): Response
+    private function json(Response $Silian_response, array $Silian_payload, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($payload, JSON_UNESCAPED_UNICODE));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus($status);
+        $Silian_response->getBody()->write(json_encode($Silian_payload, JSON_UNESCAPED_UNICODE));
+        return $Silian_response->withHeader('Content-Type', 'application/json')->withStatus($Silian_status);
     }
 
-    private function logAudit(string $action, ?array $admin, Request $request, array $context = [], string $status = 'success'): void
+    private function logAudit(string $Silian_action, ?array $Silian_admin, Request $Silian_request, array $Silian_context = [], string $Silian_status = 'success'): void
     {
         try {
-            $adminId = isset($admin['id']) && is_numeric((string)$admin['id']) ? (int)$admin['id'] : null;
-            $this->auditLogService->logAdminOperation($action, $adminId, 'admin_llm_usage', array_merge([
-                'record_id' => $context['record_id'] ?? null,
-                'request_id' => $request->getAttribute('request_id'),
-                'request_method' => $request->getMethod(),
-                'endpoint' => (string)$request->getUri()->getPath(),
-                'status' => $status,
-                'request_data' => $context['data'] ?? null,
-            ], $context));
-        } catch (\Throwable $ignore) {
+            $Silian_adminId = isset($Silian_admin['id']) && is_numeric((string)$Silian_admin['id']) ? (int)$Silian_admin['id'] : null;
+            $this->auditLogService->logAdminOperation($Silian_action, $Silian_adminId, 'admin_llm_usage', array_merge([
+                'record_id' => $Silian_context['record_id'] ?? null,
+                'request_id' => $Silian_request->getAttribute('request_id'),
+                'request_method' => $Silian_request->getMethod(),
+                'endpoint' => (string)$Silian_request->getUri()->getPath(),
+                'status' => $Silian_status,
+                'request_data' => $Silian_context['data'] ?? null,
+            ], $Silian_context));
+        } catch (\Throwable $Silian_ignore) {
             // 审计日志失败不阻断主流程
         }
     }
 
     private function fetchSummary(): array
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-        $since1d = $now->modify('-1 day')->format('Y-m-d H:i:s');
-        $since7d = $now->modify('-7 days')->format('Y-m-d H:i:s');
-        $since30d = $now->modify('-30 days')->format('Y-m-d H:i:s');
+        $Silian_now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $Silian_since1d = $Silian_now->modify('-1 day')->format('Y-m-d H:i:s');
+        $Silian_since7d = $Silian_now->modify('-7 days')->format('Y-m-d H:i:s');
+        $Silian_since30d = $Silian_now->modify('-30 days')->format('Y-m-d H:i:s');
 
-        $sql = "SELECT
+        $Silian_sql = "SELECT
                     COUNT(*) AS total_calls,
                     SUM(CASE WHEN created_at >= :since1d THEN 1 ELSE 0 END) AS calls_24h,
                     SUM(CASE WHEN created_at >= :since7d THEN 1 ELSE 0 END) AS calls_7d,
@@ -312,36 +312,36 @@ class AdminLlmUsageController
                     MAX(created_at) AS last_call_at
                 FROM llm_logs";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':since1d', $since1d);
-        $stmt->bindValue(':since7d', $since7d);
-        $stmt->bindValue(':since30d_calls', $since30d);
-        $stmt->bindValue(':since30d_admin', $since30d);
-        $stmt->bindValue(':since30d_user', $since30d);
-        $stmt->bindValue(':since30d_tokens', $since30d);
-        $stmt->bindValue(':since30d_failed', $since30d);
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->bindValue(':since1d', $Silian_since1d);
+        $Silian_stmt->bindValue(':since7d', $Silian_since7d);
+        $Silian_stmt->bindValue(':since30d_calls', $Silian_since30d);
+        $Silian_stmt->bindValue(':since30d_admin', $Silian_since30d);
+        $Silian_stmt->bindValue(':since30d_user', $Silian_since30d);
+        $Silian_stmt->bindValue(':since30d_tokens', $Silian_since30d);
+        $Silian_stmt->bindValue(':since30d_failed', $Silian_since30d);
+        $Silian_stmt->execute();
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
         return [
-            'total_calls' => (int) ($row['total_calls'] ?? 0),
-            'calls_24h' => (int) ($row['calls_24h'] ?? 0),
-            'calls_7d' => (int) ($row['calls_7d'] ?? 0),
-            'calls_30d' => (int) ($row['calls_30d'] ?? 0),
-            'admin_calls_30d' => (int) ($row['admin_calls_30d'] ?? 0),
-            'user_calls_30d' => (int) ($row['user_calls_30d'] ?? 0),
-            'tokens_30d' => (int) ($row['tokens_30d'] ?? 0),
-            'failed_calls_30d' => (int) ($row['failed_calls_30d'] ?? 0),
-            'last_call_at' => $row['last_call_at'] ?? null,
+            'total_calls' => (int) ($Silian_row['total_calls'] ?? 0),
+            'calls_24h' => (int) ($Silian_row['calls_24h'] ?? 0),
+            'calls_7d' => (int) ($Silian_row['calls_7d'] ?? 0),
+            'calls_30d' => (int) ($Silian_row['calls_30d'] ?? 0),
+            'admin_calls_30d' => (int) ($Silian_row['admin_calls_30d'] ?? 0),
+            'user_calls_30d' => (int) ($Silian_row['user_calls_30d'] ?? 0),
+            'tokens_30d' => (int) ($Silian_row['tokens_30d'] ?? 0),
+            'failed_calls_30d' => (int) ($Silian_row['failed_calls_30d'] ?? 0),
+            'last_call_at' => $Silian_row['last_call_at'] ?? null,
         ];
     }
 
     /**
      * @return array<int, array<string, mixed>>
      */
-    private function fetchDailyTrends(string $since, \DateTimeImmutable $start, \DateTimeImmutable $end): array
+    private function fetchDailyTrends(string $Silian_since, \DateTimeImmutable $Silian_start, \DateTimeImmutable $Silian_end): array
     {
-        $sql = "SELECT
+        $Silian_sql = "SELECT
                     DATE(created_at) AS log_date,
                     COUNT(*) AS calls,
                     SUM(COALESCE(total_tokens, 0)) AS tokens,
@@ -353,94 +353,94 @@ class AdminLlmUsageController
                 GROUP BY DATE(created_at)
                 ORDER BY log_date ASC";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':since', $since);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->bindValue(':since', $Silian_since);
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $indexed = [];
-        foreach ($rows as $row) {
-            $date = $row['log_date'] ?? null;
-            if (!$date) {
+        $Silian_indexed = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_date = $Silian_row['log_date'] ?? null;
+            if (!$Silian_date) {
                 continue;
             }
-            $indexed[$date] = [
-                'date' => $date,
-                'calls' => (int) ($row['calls'] ?? 0),
-                'tokens' => (int) ($row['tokens'] ?? 0),
-                'success_calls' => (int) ($row['success_calls'] ?? 0),
-                'failed_calls' => (int) ($row['failed_calls'] ?? 0),
-                'avg_latency_ms' => $row['avg_latency_ms'] !== null ? (float) $row['avg_latency_ms'] : null,
+            $Silian_indexed[$Silian_date] = [
+                'date' => $Silian_date,
+                'calls' => (int) ($Silian_row['calls'] ?? 0),
+                'tokens' => (int) ($Silian_row['tokens'] ?? 0),
+                'success_calls' => (int) ($Silian_row['success_calls'] ?? 0),
+                'failed_calls' => (int) ($Silian_row['failed_calls'] ?? 0),
+                'avg_latency_ms' => $Silian_row['avg_latency_ms'] !== null ? (float) $Silian_row['avg_latency_ms'] : null,
             ];
         }
 
-        $cursor = $start->setTime(0, 0, 0);
-        $endDate = $end->setTime(0, 0, 0);
-        $points = [];
-        while ($cursor <= $endDate) {
-            $dateKey = $cursor->format('Y-m-d');
-            $points[] = $indexed[$dateKey] ?? [
-                'date' => $dateKey,
+        $Silian_cursor = $Silian_start->setTime(0, 0, 0);
+        $Silian_endDate = $Silian_end->setTime(0, 0, 0);
+        $Silian_points = [];
+        while ($Silian_cursor <= $Silian_endDate) {
+            $Silian_dateKey = $Silian_cursor->format('Y-m-d');
+            $Silian_points[] = $Silian_indexed[$Silian_dateKey] ?? [
+                'date' => $Silian_dateKey,
                 'calls' => 0,
                 'tokens' => 0,
                 'success_calls' => 0,
                 'failed_calls' => 0,
                 'avg_latency_ms' => null,
             ];
-            $cursor = $cursor->modify('+1 day');
+            $Silian_cursor = $Silian_cursor->modify('+1 day');
         }
 
-        return $points;
+        return $Silian_points;
     }
 
     /**
      * @return array<int, array<string, mixed>>
      */
-    private function fetchDistribution(string $column, string $alias, string $since, int $limit): array
+    private function fetchDistribution(string $Silian_column, string $Silian_alias, string $Silian_since, int $Silian_limit): array
     {
-        $sql = "SELECT {$column} AS label,
+        $Silian_sql = "SELECT {$Silian_column} AS label,
                     COUNT(*) AS calls,
                     SUM(COALESCE(total_tokens, 0)) AS tokens
                 FROM llm_logs
                 WHERE created_at >= :since
-                  AND {$column} IS NOT NULL
-                  AND {$column} <> ''
-                GROUP BY {$column}
+                  AND {$Silian_column} IS NOT NULL
+                  AND {$Silian_column} <> ''
+                GROUP BY {$Silian_column}
                 ORDER BY calls DESC
                 LIMIT :limit";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':since', $since);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->bindValue(':since', $Silian_since);
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $items = [];
-        foreach ($rows as $row) {
-            $items[] = [
-                $alias => $row['label'],
-                'calls' => (int) ($row['calls'] ?? 0),
-                'tokens' => (int) ($row['tokens'] ?? 0),
+        $Silian_items = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_items[] = [
+                $Silian_alias => $Silian_row['label'],
+                'calls' => (int) ($Silian_row['calls'] ?? 0),
+                'tokens' => (int) ($Silian_row['tokens'] ?? 0),
             ];
         }
 
-        return $items;
+        return $Silian_items;
     }
 
     /**
      * @return array<int, array<string, mixed>>
      */
-    private function fetchActorDistribution(string $since): array
+    private function fetchActorDistribution(string $Silian_since): array
     {
-        return $this->fetchDistribution('actor_type', 'actor_type', $since, 4);
+        return $this->fetchDistribution('actor_type', 'actor_type', $Silian_since, 4);
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function fetchRangeStats(string $since): array
+    private function fetchRangeStats(string $Silian_since): array
     {
-        $sql = "SELECT
+        $Silian_sql = "SELECT
                     COUNT(*) AS total_calls,
                     SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed_calls,
                     SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) AS success_calls,
@@ -450,43 +450,43 @@ class AdminLlmUsageController
                 FROM llm_logs
                 WHERE created_at >= :since";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':since', $since);
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->bindValue(':since', $Silian_since);
+        $Silian_stmt->execute();
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $p95Latency = $this->computeLatencyPercentile($since, 0.95, 2000);
+        $Silian_p95Latency = $this->computeLatencyPercentile($Silian_since, 0.95, 2000);
 
         return [
-            'total_calls' => (int) ($row['total_calls'] ?? 0),
-            'failed_calls' => (int) ($row['failed_calls'] ?? 0),
-            'success_calls' => (int) ($row['success_calls'] ?? 0),
-            'avg_latency_ms' => $row['avg_latency_ms'] !== null ? (float) $row['avg_latency_ms'] : null,
-            'p95_latency_ms' => $p95Latency,
-            'avg_tokens_per_call' => $row['avg_tokens_per_call'] !== null ? (float) $row['avg_tokens_per_call'] : null,
-            'total_tokens' => (int) ($row['total_tokens'] ?? 0),
+            'total_calls' => (int) ($Silian_row['total_calls'] ?? 0),
+            'failed_calls' => (int) ($Silian_row['failed_calls'] ?? 0),
+            'success_calls' => (int) ($Silian_row['success_calls'] ?? 0),
+            'avg_latency_ms' => $Silian_row['avg_latency_ms'] !== null ? (float) $Silian_row['avg_latency_ms'] : null,
+            'p95_latency_ms' => $Silian_p95Latency,
+            'avg_tokens_per_call' => $Silian_row['avg_tokens_per_call'] !== null ? (float) $Silian_row['avg_tokens_per_call'] : null,
+            'total_tokens' => (int) ($Silian_row['total_tokens'] ?? 0),
         ];
     }
 
-    private function computeLatencyPercentile(string $since, float $percentile, int $limit): ?float
+    private function computeLatencyPercentile(string $Silian_since, float $Silian_percentile, int $Silian_limit): ?float
     {
-        $stmt = $this->db->prepare("SELECT latency_ms FROM llm_logs WHERE created_at >= :since AND latency_ms IS NOT NULL ORDER BY latency_ms ASC LIMIT :limit");
-        $stmt->bindValue(':since', $since);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        if (!$rows) {
+        $Silian_stmt = $this->db->prepare("SELECT latency_ms FROM llm_logs WHERE created_at >= :since AND latency_ms IS NOT NULL ORDER BY latency_ms ASC LIMIT :limit");
+        $Silian_stmt->bindValue(':since', $Silian_since);
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        if (!$Silian_rows) {
             return null;
         }
 
-        $values = array_map(static fn ($row) => (float) $row['latency_ms'], $rows);
-        sort($values, SORT_NUMERIC);
-        $count = count($values);
-        if ($count === 0) {
+        $Silian_values = array_map(static fn ($Silian_row) => (float) $Silian_row['latency_ms'], $Silian_rows);
+        sort($Silian_values, SORT_NUMERIC);
+        $Silian_count = count($Silian_values);
+        if ($Silian_count === 0) {
             return null;
         }
-        $index = (int) floor(($count - 1) * $percentile);
-        return isset($values[$index]) ? (float) $values[$index] : null;
+        $Silian_index = (int) floor(($Silian_count - 1) * $Silian_percentile);
+        return isset($Silian_values[$Silian_index]) ? (float) $Silian_values[$Silian_index] : null;
     }
 
     /**
@@ -495,50 +495,50 @@ class AdminLlmUsageController
      * @param array<string, mixed> $rangeStats
      * @return array<string, mixed>
      */
-    private function buildInsights(array $trends, array $distributions, array $rangeStats): array
+    private function buildInsights(array $Silian_trends, array $Silian_distributions, array $Silian_rangeStats): array
     {
-        [$recentCalls, $prevCalls, $callsDelta, $callsDeltaRate] = $this->computeDelta($trends, 7, 'calls');
-        [$recentTokens, $prevTokens, $tokensDelta, $tokensDeltaRate] = $this->computeDelta($trends, 7, 'tokens');
+        [$Silian_recentCalls, $Silian_prevCalls, $Silian_callsDelta, $Silian_callsDeltaRate] = $this->computeDelta($Silian_trends, 7, 'calls');
+        [$Silian_recentTokens, $Silian_prevTokens, $Silian_tokensDelta, $Silian_tokensDeltaRate] = $this->computeDelta($Silian_trends, 7, 'tokens');
 
-        $totalCalls = (int) ($rangeStats['total_calls'] ?? 0);
-        $failedCalls = (int) ($rangeStats['failed_calls'] ?? 0);
-        $successRate = $totalCalls > 0 ? ($totalCalls - $failedCalls) / $totalCalls : null;
+        $Silian_totalCalls = (int) ($Silian_rangeStats['total_calls'] ?? 0);
+        $Silian_failedCalls = (int) ($Silian_rangeStats['failed_calls'] ?? 0);
+        $Silian_successRate = $Silian_totalCalls > 0 ? ($Silian_totalCalls - $Silian_failedCalls) / $Silian_totalCalls : null;
 
-        $topModel = $distributions['models'][0]['model'] ?? null;
-        $topSource = $distributions['sources'][0]['source'] ?? null;
+        $Silian_topModel = $Silian_distributions['models'][0]['model'] ?? null;
+        $Silian_topSource = $Silian_distributions['sources'][0]['source'] ?? null;
 
-        $actorTotals = array_reduce($distributions['actors'] ?? [], fn ($carry, $item) => $carry + (int) ($item['calls'] ?? 0), 0);
-        $adminCalls = 0;
-        $userCalls = 0;
-        foreach ($distributions['actors'] ?? [] as $item) {
-            if (($item['actor_type'] ?? null) === 'admin') {
-                $adminCalls += (int) ($item['calls'] ?? 0);
-            } elseif (($item['actor_type'] ?? null) === 'user') {
-                $userCalls += (int) ($item['calls'] ?? 0);
+        $Silian_actorTotals = array_reduce($Silian_distributions['actors'] ?? [], fn ($Silian_carry, $Silian_item) => $Silian_carry + (int) ($Silian_item['calls'] ?? 0), 0);
+        $Silian_adminCalls = 0;
+        $Silian_userCalls = 0;
+        foreach ($Silian_distributions['actors'] ?? [] as $Silian_item) {
+            if (($Silian_item['actor_type'] ?? null) === 'admin') {
+                $Silian_adminCalls += (int) ($Silian_item['calls'] ?? 0);
+            } elseif (($Silian_item['actor_type'] ?? null) === 'user') {
+                $Silian_userCalls += (int) ($Silian_item['calls'] ?? 0);
             }
         }
-        $adminShare = $actorTotals > 0 ? $adminCalls / $actorTotals : null;
-        $userShare = $actorTotals > 0 ? $userCalls / $actorTotals : null;
+        $Silian_adminShare = $Silian_actorTotals > 0 ? $Silian_adminCalls / $Silian_actorTotals : null;
+        $Silian_userShare = $Silian_actorTotals > 0 ? $Silian_userCalls / $Silian_actorTotals : null;
 
         return [
-            'success_rate' => $successRate,
-            'avg_latency_ms' => $rangeStats['avg_latency_ms'] ?? null,
-            'p95_latency_ms' => $rangeStats['p95_latency_ms'] ?? null,
-            'avg_tokens_per_call' => $rangeStats['avg_tokens_per_call'] ?? null,
-            'total_calls' => $totalCalls,
-            'total_tokens' => $rangeStats['total_tokens'] ?? 0,
-            'calls_last_7d' => $recentCalls,
-            'calls_prev_7d' => $prevCalls,
-            'calls_delta' => $callsDelta,
-            'calls_delta_rate' => $callsDeltaRate,
-            'tokens_last_7d' => $recentTokens,
-            'tokens_prev_7d' => $prevTokens,
-            'tokens_delta' => $tokensDelta,
-            'tokens_delta_rate' => $tokensDeltaRate,
-            'top_model' => $topModel,
-            'top_source' => $topSource,
-            'admin_share' => $adminShare,
-            'user_share' => $userShare,
+            'success_rate' => $Silian_successRate,
+            'avg_latency_ms' => $Silian_rangeStats['avg_latency_ms'] ?? null,
+            'p95_latency_ms' => $Silian_rangeStats['p95_latency_ms'] ?? null,
+            'avg_tokens_per_call' => $Silian_rangeStats['avg_tokens_per_call'] ?? null,
+            'total_calls' => $Silian_totalCalls,
+            'total_tokens' => $Silian_rangeStats['total_tokens'] ?? 0,
+            'calls_last_7d' => $Silian_recentCalls,
+            'calls_prev_7d' => $Silian_prevCalls,
+            'calls_delta' => $Silian_callsDelta,
+            'calls_delta_rate' => $Silian_callsDeltaRate,
+            'tokens_last_7d' => $Silian_recentTokens,
+            'tokens_prev_7d' => $Silian_prevTokens,
+            'tokens_delta' => $Silian_tokensDelta,
+            'tokens_delta_rate' => $Silian_tokensDeltaRate,
+            'top_model' => $Silian_topModel,
+            'top_source' => $Silian_topSource,
+            'admin_share' => $Silian_adminShare,
+            'user_share' => $Silian_userShare,
         ];
     }
 
@@ -546,23 +546,23 @@ class AdminLlmUsageController
      * @param array<int, array<string, mixed>> $trends
      * @return array{int,int,int,?float}
      */
-    private function computeDelta(array $trends, int $window, string $key): array
+    private function computeDelta(array $Silian_trends, int $Silian_window, string $Silian_key): array
     {
-        $recentSlice = array_slice($trends, -$window);
-        $prevSlice = array_slice($trends, -$window * 2, $window);
-        $recent = array_sum(array_map(static fn ($item) => (int) ($item[$key] ?? 0), $recentSlice));
-        $previous = array_sum(array_map(static fn ($item) => (int) ($item[$key] ?? 0), $prevSlice));
-        $delta = $recent - $previous;
-        $deltaRate = $previous > 0 ? $delta / $previous : null;
-        return [$recent, $previous, $delta, $deltaRate];
+        $Silian_recentSlice = array_slice($Silian_trends, -$Silian_window);
+        $Silian_prevSlice = array_slice($Silian_trends, -$Silian_window * 2, $Silian_window);
+        $Silian_recent = array_sum(array_map(static fn ($Silian_item) => (int) ($Silian_item[$Silian_key] ?? 0), $Silian_recentSlice));
+        $Silian_previous = array_sum(array_map(static fn ($Silian_item) => (int) ($Silian_item[$Silian_key] ?? 0), $Silian_prevSlice));
+        $Silian_delta = $Silian_recent - $Silian_previous;
+        $Silian_deltaRate = $Silian_previous > 0 ? $Silian_delta / $Silian_previous : null;
+        return [$Silian_recent, $Silian_previous, $Silian_delta, $Silian_deltaRate];
     }
 
     /**
      * @return array<int, array<string, mixed>>
      */
-    private function fetchRecentConversations(int $limit): array
+    private function fetchRecentConversations(int $Silian_limit): array
     {
-        $sql = "SELECT
+        $Silian_sql = "SELECT
                     l.id,
                     l.request_id,
                     l.actor_type,
@@ -584,204 +584,204 @@ class AdminLlmUsageController
                 ORDER BY l.id DESC
                 LIMIT :limit";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $requestIds = [];
-        foreach ($rows as $row) {
-            $requestId = isset($row['request_id']) ? trim((string) $row['request_id']) : '';
-            if ($requestId !== '') {
-                $requestIds[$requestId] = true;
+        $Silian_requestIds = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_requestId = isset($Silian_row['request_id']) ? trim((string) $Silian_row['request_id']) : '';
+            if ($Silian_requestId !== '') {
+                $Silian_requestIds[$Silian_requestId] = true;
             }
         }
 
-        $requestIdList = array_keys($requestIds);
-        $systemCounts = $this->fetchRequestIdCounts('system_logs', $requestIdList);
-        $auditCounts = $this->fetchRequestIdCounts('audit_logs', $requestIdList);
-        $errorCounts = $this->fetchRequestIdCounts('error_logs', $requestIdList);
-        $latestSystemLogs = $this->fetchLatestSystemLogsByRequestId($requestIdList);
+        $Silian_requestIdList = array_keys($Silian_requestIds);
+        $Silian_systemCounts = $this->fetchRequestIdCounts('system_logs', $Silian_requestIdList);
+        $Silian_auditCounts = $this->fetchRequestIdCounts('audit_logs', $Silian_requestIdList);
+        $Silian_errorCounts = $this->fetchRequestIdCounts('error_logs', $Silian_requestIdList);
+        $Silian_latestSystemLogs = $this->fetchLatestSystemLogsByRequestId($Silian_requestIdList);
 
-        $result = [];
-        foreach ($rows as $row) {
-            $requestId = isset($row['request_id']) ? trim((string) $row['request_id']) : '';
-            $requestId = $requestId !== '' ? $requestId : null;
-            $latestSystemLog = $requestId !== null ? ($latestSystemLogs[$requestId] ?? null) : null;
+        $Silian_result = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_requestId = isset($Silian_row['request_id']) ? trim((string) $Silian_row['request_id']) : '';
+            $Silian_requestId = $Silian_requestId !== '' ? $Silian_requestId : null;
+            $Silian_latestSystemLog = $Silian_requestId !== null ? ($Silian_latestSystemLogs[$Silian_requestId] ?? null) : null;
 
-            $result[] = [
-                'id' => (int) $row['id'],
-                'created_at' => $row['created_at'] ?? null,
-                'actor_type' => $row['actor_type'],
-                'actor_id' => $row['actor_id'] !== null ? (int) $row['actor_id'] : null,
-                'actor_name' => $row['actor_name'] ?? null,
-                'actor_email' => $row['actor_email'] ?? null,
-                'source' => $row['source'] ?? null,
-                'model' => $row['model'] ?? null,
-                'status' => $row['status'] ?? null,
-                'request_id' => $requestId,
-                'response_id' => $row['response_id'] ?? null,
-                'total_tokens' => $row['total_tokens'] !== null ? (int) $row['total_tokens'] : null,
-                'latency_ms' => $row['latency_ms'] !== null ? (float) $row['latency_ms'] : null,
-                'prompt_preview' => $this->buildPreview($row['prompt'] ?? null, 200),
-                'response_preview' => $this->buildPreview($row['response_raw'] ?? null, 240),
-                'context' => $this->decodeJson($row['context_json'] ?? null),
-                'system_path' => $latestSystemLog['path'] ?? null,
-                'system_status_code' => isset($latestSystemLog['status_code']) ? (int) $latestSystemLog['status_code'] : null,
+            $Silian_result[] = [
+                'id' => (int) $Silian_row['id'],
+                'created_at' => $Silian_row['created_at'] ?? null,
+                'actor_type' => $Silian_row['actor_type'],
+                'actor_id' => $Silian_row['actor_id'] !== null ? (int) $Silian_row['actor_id'] : null,
+                'actor_name' => $Silian_row['actor_name'] ?? null,
+                'actor_email' => $Silian_row['actor_email'] ?? null,
+                'source' => $Silian_row['source'] ?? null,
+                'model' => $Silian_row['model'] ?? null,
+                'status' => $Silian_row['status'] ?? null,
+                'request_id' => $Silian_requestId,
+                'response_id' => $Silian_row['response_id'] ?? null,
+                'total_tokens' => $Silian_row['total_tokens'] !== null ? (int) $Silian_row['total_tokens'] : null,
+                'latency_ms' => $Silian_row['latency_ms'] !== null ? (float) $Silian_row['latency_ms'] : null,
+                'prompt_preview' => $this->buildPreview($Silian_row['prompt'] ?? null, 200),
+                'response_preview' => $this->buildPreview($Silian_row['response_raw'] ?? null, 240),
+                'context' => $this->decodeJson($Silian_row['context_json'] ?? null),
+                'system_path' => $Silian_latestSystemLog['path'] ?? null,
+                'system_status_code' => isset($Silian_latestSystemLog['status_code']) ? (int) $Silian_latestSystemLog['status_code'] : null,
                 'related' => [
-                    'system' => $requestId !== null ? (int) ($systemCounts[$requestId] ?? 0) : 0,
-                    'audit' => $requestId !== null ? (int) ($auditCounts[$requestId] ?? 0) : 0,
-                    'error' => $requestId !== null ? (int) ($errorCounts[$requestId] ?? 0) : 0,
+                    'system' => $Silian_requestId !== null ? (int) ($Silian_systemCounts[$Silian_requestId] ?? 0) : 0,
+                    'audit' => $Silian_requestId !== null ? (int) ($Silian_auditCounts[$Silian_requestId] ?? 0) : 0,
+                    'error' => $Silian_requestId !== null ? (int) ($Silian_errorCounts[$Silian_requestId] ?? 0) : 0,
                 ],
             ];
         }
 
-        return $result;
+        return $Silian_result;
     }
 
     /**
      * @param array<int, string> $requestIds
      * @return array<string, int>
      */
-    private function fetchRequestIdCounts(string $table, array $requestIds): array
+    private function fetchRequestIdCounts(string $Silian_table, array $Silian_requestIds): array
     {
-        $tableName = match ($table) {
+        $Silian_tableName = match ($Silian_table) {
             'system_logs' => 'system_logs',
             'audit_logs' => 'audit_logs',
             'error_logs' => 'error_logs',
             default => throw new \InvalidArgumentException('Unsupported request-id aggregate table.'),
         };
 
-        if ($requestIds === []) {
+        if ($Silian_requestIds === []) {
             return [];
         }
 
-        $placeholders = $this->buildPositionalPlaceholders(count($requestIds));
-        $stmt = $this->db->prepare("SELECT request_id, COUNT(*) AS total
-            FROM {$tableName}
-            WHERE request_id IN ({$placeholders})
+        $Silian_placeholders = $this->buildPositionalPlaceholders(count($Silian_requestIds));
+        $Silian_stmt = $this->db->prepare("SELECT request_id, COUNT(*) AS total
+            FROM {$Silian_tableName}
+            WHERE request_id IN ({$Silian_placeholders})
             GROUP BY request_id");
 
-        foreach ($requestIds as $index => $requestId) {
-            $stmt->bindValue($index + 1, $requestId);
+        foreach ($Silian_requestIds as $Silian_index => $Silian_requestId) {
+            $Silian_stmt->bindValue($Silian_index + 1, $Silian_requestId);
         }
 
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $counts = [];
-        foreach ($rows as $row) {
-            $requestId = isset($row['request_id']) ? trim((string) $row['request_id']) : '';
-            if ($requestId === '') {
+        $Silian_counts = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_requestId = isset($Silian_row['request_id']) ? trim((string) $Silian_row['request_id']) : '';
+            if ($Silian_requestId === '') {
                 continue;
             }
-            $counts[$requestId] = (int) ($row['total'] ?? 0);
+            $Silian_counts[$Silian_requestId] = (int) ($Silian_row['total'] ?? 0);
         }
 
-        return $counts;
+        return $Silian_counts;
     }
 
     /**
      * @param array<int, string> $requestIds
      * @return array<string, array{path:?string,status_code:?int}>
      */
-    private function fetchLatestSystemLogsByRequestId(array $requestIds): array
+    private function fetchLatestSystemLogsByRequestId(array $Silian_requestIds): array
     {
-        if ($requestIds === []) {
+        if ($Silian_requestIds === []) {
             return [];
         }
 
-        $placeholders = $this->buildPositionalPlaceholders(count($requestIds));
-        $sql = "SELECT s.request_id, s.path, s.status_code
+        $Silian_placeholders = $this->buildPositionalPlaceholders(count($Silian_requestIds));
+        $Silian_sql = "SELECT s.request_id, s.path, s.status_code
                 FROM system_logs s
                 INNER JOIN (
                     SELECT request_id, MAX(id) AS latest_id
                     FROM system_logs
-                    WHERE request_id IN ({$placeholders})
+                    WHERE request_id IN ({$Silian_placeholders})
                     GROUP BY request_id
                 ) latest ON latest.latest_id = s.id";
 
-        $stmt = $this->db->prepare($sql);
-        foreach ($requestIds as $index => $requestId) {
-            $stmt->bindValue($index + 1, $requestId);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_requestIds as $Silian_index => $Silian_requestId) {
+            $Silian_stmt->bindValue($Silian_index + 1, $Silian_requestId);
         }
 
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt->execute();
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $items = [];
-        foreach ($rows as $row) {
-            $requestId = isset($row['request_id']) ? trim((string) $row['request_id']) : '';
-            if ($requestId === '') {
+        $Silian_items = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_requestId = isset($Silian_row['request_id']) ? trim((string) $Silian_row['request_id']) : '';
+            if ($Silian_requestId === '') {
                 continue;
             }
 
-            $items[$requestId] = [
-                'path' => $row['path'] ?? null,
-                'status_code' => $row['status_code'] !== null ? (int) $row['status_code'] : null,
+            $Silian_items[$Silian_requestId] = [
+                'path' => $Silian_row['path'] ?? null,
+                'status_code' => $Silian_row['status_code'] !== null ? (int) $Silian_row['status_code'] : null,
             ];
         }
 
-        return $items;
+        return $Silian_items;
     }
 
-    private function buildPositionalPlaceholders(int $count): string
+    private function buildPositionalPlaceholders(int $Silian_count): string
     {
-        if ($count <= 0) {
+        if ($Silian_count <= 0) {
             throw new \InvalidArgumentException('Placeholder count must be positive.');
         }
 
-        return implode(', ', array_fill(0, $count, '?'));
+        return implode(', ', array_fill(0, $Silian_count, '?'));
     }
 
-    private function buildPreview($value, int $maxLength): ?string
+    private function buildPreview($Silian_value, int $Silian_maxLength): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
-        if (is_array($value) || is_object($value)) {
-            $value = $this->encodeJson($value);
+        if (is_array($Silian_value) || is_object($Silian_value)) {
+            $Silian_value = $this->encodeJson($Silian_value);
         }
-        if (!is_string($value)) {
-            $value = (string) $value;
+        if (!is_string($Silian_value)) {
+            $Silian_value = (string) $Silian_value;
         }
-        $value = trim($value);
-        if ($value === '') {
+        $Silian_value = trim($Silian_value);
+        if ($Silian_value === '') {
             return null;
         }
-        if (mb_strlen($value, 'UTF-8') > $maxLength) {
-            return mb_substr($value, 0, $maxLength, 'UTF-8') . '...';
+        if (mb_strlen($Silian_value, 'UTF-8') > $Silian_maxLength) {
+            return mb_substr($Silian_value, 0, $Silian_maxLength, 'UTF-8') . '...';
         }
-        return $value;
+        return $Silian_value;
     }
 
-    private function encodeJson($value): ?string
+    private function encodeJson($Silian_value): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
-        if (is_string($value)) {
-            return $value;
+        if (is_string($Silian_value)) {
+            return $Silian_value;
         }
-        $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        return $json === false ? null : $json;
+        $Silian_json = json_encode($Silian_value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return $Silian_json === false ? null : $Silian_json;
     }
 
-    private function decodeJson($raw): array
+    private function decodeJson($Silian_raw): array
     {
-        if (!is_string($raw) || $raw === '') {
+        if (!is_string($Silian_raw) || $Silian_raw === '') {
             return [];
         }
-        $decoded = json_decode($raw, true);
-        return is_array($decoded) ? $decoded : [];
+        $Silian_decoded = json_decode($Silian_raw, true);
+        return is_array($Silian_decoded) ? $Silian_decoded : [];
     }
 
-    private function decodeMaybeJson($value)
+    private function decodeMaybeJson($Silian_value)
     {
-        if (!is_string($value) || $value === '') {
-            return $value;
+        if (!is_string($Silian_value) || $Silian_value === '') {
+            return $Silian_value;
         }
-        $decoded = json_decode($value, true);
-        return json_last_error() === JSON_ERROR_NONE ? $decoded : $value;
+        $Silian_decoded = json_decode($Silian_value, true);
+        return json_last_error() === JSON_ERROR_NONE ? $Silian_decoded : $Silian_value;
     }
 }

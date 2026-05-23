@@ -67,36 +67,36 @@ class UserGroupService
     {
         return UserGroup::orderBy('id', 'asc')
             ->get()
-            ->map(fn (UserGroup $group) => $this->formatGroup($group))
+            ->map(fn (UserGroup $Silian_group) => $this->formatGroup($Silian_group))
             ->values()
             ->all();
     }
 
-    public function getGroupById(int $id)
+    public function getGroupById(int $Silian_id)
     {
-        $group = UserGroup::find($id);
-        return $group ? $this->formatGroup($group) : null;
+        $Silian_group = UserGroup::find($Silian_id);
+        return $Silian_group ? $this->formatGroup($Silian_group) : null;
     }
 
-    public function createGroup(array $data)
+    public function createGroup(array $Silian_data)
     {
-        $payload = $this->preparePayload($data, null);
-        $group = UserGroup::create($payload);
-        return $this->formatGroup($group);
+        $Silian_payload = $this->preparePayload($Silian_data, null);
+        $Silian_group = UserGroup::create($Silian_payload);
+        return $this->formatGroup($Silian_group);
     }
 
-    public function updateGroup(int $id, array $data)
+    public function updateGroup(int $Silian_id, array $Silian_data)
     {
-        $group = UserGroup::findOrFail($id);
-        $payload = $this->preparePayload($data, $group->config);
-        $group->update($payload);
-        return $this->formatGroup($group->fresh());
+        $Silian_group = UserGroup::findOrFail($Silian_id);
+        $Silian_payload = $this->preparePayload($Silian_data, $Silian_group->config);
+        $Silian_group->update($Silian_payload);
+        return $this->formatGroup($Silian_group->fresh());
     }
 
-    public function deleteGroup(int $id)
+    public function deleteGroup(int $Silian_id)
     {
-        $group = UserGroup::findOrFail($id);
-        $group->delete();
+        $Silian_group = UserGroup::findOrFail($Silian_id);
+        $Silian_group->delete();
     }
 
     public function getQuotaDefinitions(): array
@@ -111,82 +111,82 @@ class UserGroupService
 
     public function getSupportRoutingDefaults(): array
     {
-        $defaults = [];
-        foreach (self::SUPPORT_ROUTING_FIELDS as $field) {
-            $defaults[$field['key']] = $field['default'] ?? null;
+        $Silian_defaults = [];
+        foreach (self::SUPPORT_ROUTING_FIELDS as $Silian_field) {
+            $Silian_defaults[$Silian_field['key']] = $Silian_field['default'] ?? null;
         }
-        return $defaults;
+        return $Silian_defaults;
     }
 
-    private function formatGroup(UserGroup $group): array
+    private function formatGroup(UserGroup $Silian_group): array
     {
-        $data = $group->toArray();
-        $config = $this->quotaConfigService->decodeJsonToArray($data['config'] ?? null);
-        $normalized = $config === null ? null : $this->quotaConfigService->normalizeQuotaConfig($config);
-        $data['config'] = $normalized;
-        $fullConfig = is_array($normalized) ? $normalized : [];
-        $quotaConfig = $fullConfig;
-        unset($quotaConfig['support_routing']);
-        $data['quota_flat'] = $this->quotaConfigService->flattenQuotas($quotaConfig);
-        $data['support_routing'] = $this->normalizeSupportRouting($fullConfig['support_routing'] ?? null);
-        return $data;
+        $Silian_data = $Silian_group->toArray();
+        $Silian_config = $this->quotaConfigService->decodeJsonToArray($Silian_data['config'] ?? null);
+        $Silian_normalized = $Silian_config === null ? null : $this->quotaConfigService->normalizeQuotaConfig($Silian_config);
+        $Silian_data['config'] = $Silian_normalized;
+        $Silian_fullConfig = is_array($Silian_normalized) ? $Silian_normalized : [];
+        $Silian_quotaConfig = $Silian_fullConfig;
+        unset($Silian_quotaConfig['support_routing']);
+        $Silian_data['quota_flat'] = $this->quotaConfigService->flattenQuotas($Silian_quotaConfig);
+        $Silian_data['support_routing'] = $this->normalizeSupportRouting($Silian_fullConfig['support_routing'] ?? null);
+        return $Silian_data;
     }
 
-    private function preparePayload(array $data, $currentConfig): array
+    private function preparePayload(array $Silian_data, $Silian_currentConfig): array
     {
-        $payload = $data;
-        unset($payload['quota_flat']);
-        unset($payload['support_routing']);
+        $Silian_payload = $Silian_data;
+        unset($Silian_payload['quota_flat']);
+        unset($Silian_payload['support_routing']);
 
-        if (array_key_exists('is_default', $payload)) {
-            $payload['is_default'] = $this->normalizeBooleanValue($payload['is_default']);
+        if (array_key_exists('is_default', $Silian_payload)) {
+            $Silian_payload['is_default'] = $this->normalizeBooleanValue($Silian_payload['is_default']);
         }
 
-        $config = $this->quotaConfigService->decodeJsonToArray($data['config'] ?? null);
-        $current = $this->quotaConfigService->decodeJsonToArray($currentConfig);
+        $Silian_config = $this->quotaConfigService->decodeJsonToArray($Silian_data['config'] ?? null);
+        $Silian_current = $this->quotaConfigService->decodeJsonToArray($Silian_currentConfig);
 
-        if (isset($data['quota_flat']) && is_array($data['quota_flat'])) {
-            $base = $config ?? $current ?? [];
-            $config = $this->quotaConfigService->unflattenQuotas($data['quota_flat'], $base);
+        if (isset($Silian_data['quota_flat']) && is_array($Silian_data['quota_flat'])) {
+            $Silian_base = $Silian_config ?? $Silian_current ?? [];
+            $Silian_config = $this->quotaConfigService->unflattenQuotas($Silian_data['quota_flat'], $Silian_base);
         }
 
-        if (array_key_exists('support_routing', $data)) {
-            $base = $config ?? $current ?? [];
-            $base['support_routing'] = $this->normalizeSupportRouting($data['support_routing']);
-            $config = $base;
+        if (array_key_exists('support_routing', $Silian_data)) {
+            $Silian_base = $Silian_config ?? $Silian_current ?? [];
+            $Silian_base['support_routing'] = $this->normalizeSupportRouting($Silian_data['support_routing']);
+            $Silian_config = $Silian_base;
         }
 
-        if ($config !== null) {
-            $payload['config'] = $this->quotaConfigService->normalizeQuotaConfig($config);
+        if ($Silian_config !== null) {
+            $Silian_payload['config'] = $this->quotaConfigService->normalizeQuotaConfig($Silian_config);
         }
 
-        return $payload;
+        return $Silian_payload;
     }
 
-    private function normalizeBooleanValue(mixed $value, bool $default = false): bool
+    private function normalizeBooleanValue(mixed $Silian_value, bool $Silian_default = false): bool
     {
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '' || strtolower($trimmed) === 'indeterminate') {
-                return $default;
+        if (is_string($Silian_value)) {
+            $Silian_trimmed = trim($Silian_value);
+            if ($Silian_trimmed === '' || strtolower($Silian_trimmed) === 'indeterminate') {
+                return $Silian_default;
             }
         }
 
-        return InputValueNormalizer::boolean($value, 'is_default', $default);
+        return InputValueNormalizer::boolean($Silian_value, 'is_default', $Silian_default);
     }
 
-    private function normalizeSupportRouting(mixed $value): array
+    private function normalizeSupportRouting(mixed $Silian_value): array
     {
-        $routing = is_array($value) ? $value : [];
-        $defaults = $this->getSupportRoutingDefaults();
+        $Silian_routing = is_array($Silian_value) ? $Silian_value : [];
+        $Silian_defaults = $this->getSupportRoutingDefaults();
 
         return [
-            'first_response_minutes' => $this->normalizeSupportRoutingInteger($routing, 'first_response_minutes', (int) ($defaults['first_response_minutes'] ?? 240), 1),
-            'resolution_minutes' => $this->normalizeSupportRoutingInteger($routing, 'resolution_minutes', (int) ($defaults['resolution_minutes'] ?? 1440), 1),
-            'routing_weight' => $this->normalizeSupportRoutingFloat($routing, 'routing_weight', (float) ($defaults['routing_weight'] ?? 1.0), 0.1),
-            'min_agent_level' => $this->normalizeSupportRoutingInteger($routing, 'min_agent_level', (int) ($defaults['min_agent_level'] ?? 1), 1, 5),
-            'overdue_boost' => $this->normalizeSupportRoutingFloat($routing, 'overdue_boost', (float) ($defaults['overdue_boost'] ?? 1.0), 0.0),
-            'tier_label' => $this->normalizeSupportRoutingLabel($routing['tier_label'] ?? ($defaults['tier_label'] ?? 'standard')),
+            'first_response_minutes' => $this->normalizeSupportRoutingInteger($Silian_routing, 'first_response_minutes', (int) ($Silian_defaults['first_response_minutes'] ?? 240), 1),
+            'resolution_minutes' => $this->normalizeSupportRoutingInteger($Silian_routing, 'resolution_minutes', (int) ($Silian_defaults['resolution_minutes'] ?? 1440), 1),
+            'routing_weight' => $this->normalizeSupportRoutingFloat($Silian_routing, 'routing_weight', (float) ($Silian_defaults['routing_weight'] ?? 1.0), 0.1),
+            'min_agent_level' => $this->normalizeSupportRoutingInteger($Silian_routing, 'min_agent_level', (int) ($Silian_defaults['min_agent_level'] ?? 1), 1, 5),
+            'overdue_boost' => $this->normalizeSupportRoutingFloat($Silian_routing, 'overdue_boost', (float) ($Silian_defaults['overdue_boost'] ?? 1.0), 0.0),
+            'tier_label' => $this->normalizeSupportRoutingLabel($Silian_routing['tier_label'] ?? ($Silian_defaults['tier_label'] ?? 'standard')),
         ];
     }
 
@@ -194,74 +194,74 @@ class UserGroupService
      * @param array<string,mixed> $routing
      */
     private function normalizeSupportRoutingInteger(
-        array $routing,
-        string $field,
-        int $default,
-        int $min,
-        ?int $max = null
+        array $Silian_routing,
+        string $Silian_field,
+        int $Silian_default,
+        int $Silian_min,
+        ?int $Silian_max = null
     ): int {
-        if (!array_key_exists($field, $routing) || $routing[$field] === null || $routing[$field] === '') {
-            return $default;
+        if (!array_key_exists($Silian_field, $Silian_routing) || $Silian_routing[$Silian_field] === null || $Silian_routing[$Silian_field] === '') {
+            return $Silian_default;
         }
 
         try {
-            $normalized = InputValueNormalizer::integer($routing[$field], $field, $default);
+            $Silian_normalized = InputValueNormalizer::integer($Silian_routing[$Silian_field], $Silian_field, $Silian_default);
         } catch (\InvalidArgumentException) {
-            return $default;
+            return $Silian_default;
         }
 
-        if ($normalized < $min) {
-            $normalized = $min;
+        if ($Silian_normalized < $Silian_min) {
+            $Silian_normalized = $Silian_min;
         }
 
-        if ($max !== null && $normalized > $max) {
-            $normalized = $max;
+        if ($Silian_max !== null && $Silian_normalized > $Silian_max) {
+            $Silian_normalized = $Silian_max;
         }
 
-        return $normalized;
+        return $Silian_normalized;
     }
 
     /**
      * @param array<string,mixed> $routing
      */
     private function normalizeSupportRoutingFloat(
-        array $routing,
-        string $field,
-        float $default,
-        float $min,
-        ?float $max = null
+        array $Silian_routing,
+        string $Silian_field,
+        float $Silian_default,
+        float $Silian_min,
+        ?float $Silian_max = null
     ): float {
-        if (!array_key_exists($field, $routing) || $routing[$field] === null || $routing[$field] === '') {
-            return $default;
+        if (!array_key_exists($Silian_field, $Silian_routing) || $Silian_routing[$Silian_field] === null || $Silian_routing[$Silian_field] === '') {
+            return $Silian_default;
         }
 
-        $value = $routing[$field];
-        if (is_int($value) || is_float($value)) {
-            $normalized = (float) $value;
-        } elseif (is_string($value) && is_numeric(trim($value))) {
-            $normalized = (float) trim($value);
+        $Silian_value = $Silian_routing[$Silian_field];
+        if (is_int($Silian_value) || is_float($Silian_value)) {
+            $Silian_normalized = (float) $Silian_value;
+        } elseif (is_string($Silian_value) && is_numeric(trim($Silian_value))) {
+            $Silian_normalized = (float) trim($Silian_value);
         } else {
-            return $default;
+            return $Silian_default;
         }
 
-        if ($normalized < $min) {
-            $normalized = $min;
+        if ($Silian_normalized < $Silian_min) {
+            $Silian_normalized = $Silian_min;
         }
 
-        if ($max !== null && $normalized > $max) {
-            $normalized = $max;
+        if ($Silian_max !== null && $Silian_normalized > $Silian_max) {
+            $Silian_normalized = $Silian_max;
         }
 
-        return $normalized;
+        return $Silian_normalized;
     }
 
-    private function normalizeSupportRoutingLabel(mixed $value): string
+    private function normalizeSupportRoutingLabel(mixed $Silian_value): string
     {
-        if (!is_string($value)) {
+        if (!is_string($Silian_value)) {
             return 'standard';
         }
 
-        $normalized = trim($value);
-        return $normalized !== '' ? $normalized : 'standard';
+        $Silian_normalized = trim($Silian_value);
+        return $Silian_normalized !== '' ? $Silian_normalized : 'standard';
     }
 }

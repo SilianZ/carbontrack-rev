@@ -21,72 +21,72 @@ class LlmLogService
     private int $maxErrorLength = 4000;
     private int $maxContextLength = 8000;
 
-    public function __construct(PDO $db, Logger $logger)
+    public function __construct(PDO $Silian_db, Logger $Silian_logger)
     {
-        $this->db = $db;
-        $this->logger = $logger;
+        $this->db = $Silian_db;
+        $this->logger = $Silian_logger;
     }
 
     /**
      * @param array<string,mixed> $data
      */
-    public function log(array $data): ?int
+    public function log(array $Silian_data): ?int
     {
         try {
-            $requestId = $this->trimString($data['request_id'] ?? null, 64);
-            $actorType = $this->trimString($data['actor_type'] ?? null, 20) ?? 'user';
-            $actorId = isset($data['actor_id']) ? (int) $data['actor_id'] : null;
-            $conversationId = $this->trimString($data['conversation_id'] ?? null, 64);
-            $turnNo = isset($data['turn_no']) && is_numeric($data['turn_no']) ? (int) $data['turn_no'] : null;
-            $source = $this->trimString($data['source'] ?? null, 120);
-            $model = $this->trimString($data['model'] ?? null, 120);
-            $prompt = $this->normalizeText($data['prompt'] ?? null, $this->maxPromptLength);
-            $responseRaw = $this->normalizeText($data['response_raw'] ?? null, $this->maxResponseLength);
-            $responseId = $this->trimString($data['response_id'] ?? null, 64);
-            $status = $this->trimString($data['status'] ?? null, 20);
-            $errorMessage = $this->normalizeText($data['error_message'] ?? null, $this->maxErrorLength);
+            $Silian_requestId = $this->trimString($Silian_data['request_id'] ?? null, 64);
+            $Silian_actorType = $this->trimString($Silian_data['actor_type'] ?? null, 20) ?? 'user';
+            $Silian_actorId = isset($Silian_data['actor_id']) ? (int) $Silian_data['actor_id'] : null;
+            $Silian_conversationId = $this->trimString($Silian_data['conversation_id'] ?? null, 64);
+            $Silian_turnNo = isset($Silian_data['turn_no']) && is_numeric($Silian_data['turn_no']) ? (int) $Silian_data['turn_no'] : null;
+            $Silian_source = $this->trimString($Silian_data['source'] ?? null, 120);
+            $Silian_model = $this->trimString($Silian_data['model'] ?? null, 120);
+            $Silian_prompt = $this->normalizeText($Silian_data['prompt'] ?? null, $this->maxPromptLength);
+            $Silian_responseRaw = $this->normalizeText($Silian_data['response_raw'] ?? null, $this->maxResponseLength);
+            $Silian_responseId = $this->trimString($Silian_data['response_id'] ?? null, 64);
+            $Silian_status = $this->trimString($Silian_data['status'] ?? null, 20);
+            $Silian_errorMessage = $this->normalizeText($Silian_data['error_message'] ?? null, $this->maxErrorLength);
 
-            $usage = $data['usage'] ?? null;
-            $usageJson = $this->encodeJson($usage);
-            $usageTokens = $this->extractUsageTokens($usage);
-            $contextJson = $this->normalizeText($data['context'] ?? ($data['context_json'] ?? null), $this->maxContextLength);
+            $Silian_usage = $Silian_data['usage'] ?? null;
+            $Silian_usageJson = $this->encodeJson($Silian_usage);
+            $Silian_usageTokens = $this->extractUsageTokens($Silian_usage);
+            $Silian_contextJson = $this->normalizeText($Silian_data['context'] ?? ($Silian_data['context_json'] ?? null), $this->maxContextLength);
 
-            $latencyMs = isset($data['latency_ms']) ? (float) $data['latency_ms'] : null;
+            $Silian_latencyMs = isset($Silian_data['latency_ms']) ? (float) $Silian_data['latency_ms'] : null;
 
-            $stmt = $this->db->prepare("INSERT INTO llm_logs (
+            $Silian_stmt = $this->db->prepare("INSERT INTO llm_logs (
                 request_id, actor_type, actor_id, conversation_id, turn_no, source, model, prompt, response_raw, response_id,
                 status, error_message, prompt_tokens, completion_tokens, total_tokens, latency_ms, usage_json, context_json
             ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-            $stmt->execute([
-                $requestId,
-                $actorType,
-                $actorId,
-                $conversationId,
-                $turnNo,
-                $source,
-                $model,
-                $prompt,
-                $responseRaw,
-                $responseId,
-                $status,
-                $errorMessage,
-                $usageTokens['prompt_tokens'],
-                $usageTokens['completion_tokens'],
-                $usageTokens['total_tokens'],
-                $latencyMs,
-                $usageJson,
-                $contextJson,
+            $Silian_stmt->execute([
+                $Silian_requestId,
+                $Silian_actorType,
+                $Silian_actorId,
+                $Silian_conversationId,
+                $Silian_turnNo,
+                $Silian_source,
+                $Silian_model,
+                $Silian_prompt,
+                $Silian_responseRaw,
+                $Silian_responseId,
+                $Silian_status,
+                $Silian_errorMessage,
+                $Silian_usageTokens['prompt_tokens'],
+                $Silian_usageTokens['completion_tokens'],
+                $Silian_usageTokens['total_tokens'],
+                $Silian_latencyMs,
+                $Silian_usageJson,
+                $Silian_contextJson,
             ]);
 
-            $id = (int) $this->db->lastInsertId();
-            return $id > 0 ? $id : null;
-        } catch (\Throwable $e) {
+            $Silian_id = (int) $this->db->lastInsertId();
+            return $Silian_id > 0 ? $Silian_id : null;
+        } catch (\Throwable $Silian_e) {
             try {
                 $this->logger->warning('LLM log insert failed', [
-                    'error' => $e->getMessage(),
+                    'error' => $Silian_e->getMessage(),
                 ]);
-            } catch (\Throwable $ignore) {
+            } catch (\Throwable $Silian_ignore) {
                 // swallow secondary logging failure
             }
         }
@@ -94,60 +94,60 @@ class LlmLogService
         return null;
     }
 
-    private function trimString($value, int $maxLength): ?string
+    private function trimString($Silian_value, int $Silian_maxLength): ?string
     {
-        if (!is_string($value)) {
+        if (!is_string($Silian_value)) {
             return null;
         }
-        $value = trim($value);
-        if ($value === '') {
+        $Silian_value = trim($Silian_value);
+        if ($Silian_value === '') {
             return null;
         }
-        if (mb_strlen($value, 'UTF-8') > $maxLength) {
-            return mb_substr($value, 0, $maxLength, 'UTF-8');
+        if (mb_strlen($Silian_value, 'UTF-8') > $Silian_maxLength) {
+            return mb_substr($Silian_value, 0, $Silian_maxLength, 'UTF-8');
         }
-        return $value;
+        return $Silian_value;
     }
 
-    private function normalizeText($value, int $maxLength): ?string
+    private function normalizeText($Silian_value, int $Silian_maxLength): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
-        if (is_array($value) || is_object($value)) {
-            $value = $this->encodeJson($value);
+        if (is_array($Silian_value) || is_object($Silian_value)) {
+            $Silian_value = $this->encodeJson($Silian_value);
         }
-        if (!is_string($value)) {
-            $value = (string) $value;
+        if (!is_string($Silian_value)) {
+            $Silian_value = (string) $Silian_value;
         }
-        if ($value === '') {
+        if ($Silian_value === '') {
             return null;
         }
-        if (mb_strlen($value, 'UTF-8') > $maxLength) {
-            return mb_substr($value, 0, $maxLength, 'UTF-8') . '...[TRUNCATED]';
+        if (mb_strlen($Silian_value, 'UTF-8') > $Silian_maxLength) {
+            return mb_substr($Silian_value, 0, $Silian_maxLength, 'UTF-8') . '...[TRUNCATED]';
         }
-        return $value;
+        return $Silian_value;
     }
 
-    private function encodeJson($value): ?string
+    private function encodeJson($Silian_value): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
-        if (is_string($value)) {
-            return $value;
+        if (is_string($Silian_value)) {
+            return $Silian_value;
         }
-        $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        return $json === false ? null : $json;
+        $Silian_json = json_encode($Silian_value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return $Silian_json === false ? null : $Silian_json;
     }
 
     /**
      * @param mixed $usage
      * @return array{prompt_tokens:int|null,completion_tokens:int|null,total_tokens:int|null}
      */
-    private function extractUsageTokens($usage): array
+    private function extractUsageTokens($Silian_usage): array
     {
-        if (!is_array($usage)) {
+        if (!is_array($Silian_usage)) {
             return [
                 'prompt_tokens' => null,
                 'completion_tokens' => null,
@@ -155,28 +155,28 @@ class LlmLogService
             ];
         }
 
-        $promptTokens = $this->toInt($usage['prompt_tokens'] ?? ($usage['input_tokens'] ?? ($usage['promptTokens'] ?? null)));
-        $completionTokens = $this->toInt($usage['completion_tokens'] ?? ($usage['output_tokens'] ?? ($usage['completionTokens'] ?? null)));
-        $totalTokens = $this->toInt($usage['total_tokens'] ?? ($usage['totalTokens'] ?? null));
+        $Silian_promptTokens = $this->toInt($Silian_usage['prompt_tokens'] ?? ($Silian_usage['input_tokens'] ?? ($Silian_usage['promptTokens'] ?? null)));
+        $Silian_completionTokens = $this->toInt($Silian_usage['completion_tokens'] ?? ($Silian_usage['output_tokens'] ?? ($Silian_usage['completionTokens'] ?? null)));
+        $Silian_totalTokens = $this->toInt($Silian_usage['total_tokens'] ?? ($Silian_usage['totalTokens'] ?? null));
 
-        if ($totalTokens === null && ($promptTokens !== null || $completionTokens !== null)) {
-            $totalTokens = (int) ($promptTokens ?? 0) + (int) ($completionTokens ?? 0);
+        if ($Silian_totalTokens === null && ($Silian_promptTokens !== null || $Silian_completionTokens !== null)) {
+            $Silian_totalTokens = (int) ($Silian_promptTokens ?? 0) + (int) ($Silian_completionTokens ?? 0);
         }
 
         return [
-            'prompt_tokens' => $promptTokens,
-            'completion_tokens' => $completionTokens,
-            'total_tokens' => $totalTokens,
+            'prompt_tokens' => $Silian_promptTokens,
+            'completion_tokens' => $Silian_completionTokens,
+            'total_tokens' => $Silian_totalTokens,
         ];
     }
 
-    private function toInt($value): ?int
+    private function toInt($Silian_value): ?int
     {
-        if ($value === null || $value === '') {
+        if ($Silian_value === null || $Silian_value === '') {
             return null;
         }
-        if (is_numeric($value)) {
-            return (int) $value;
+        if (is_numeric($Silian_value)) {
+            return (int) $Silian_value;
         }
         return null;
     }

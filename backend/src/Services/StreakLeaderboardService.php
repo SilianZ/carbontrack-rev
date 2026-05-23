@@ -28,71 +28,71 @@ class StreakLeaderboardService
     private UserProfileViewService $userProfileViewService;
 
     public function __construct(
-        PDO $db,
-        RegionService $regionService,
-        ?Logger $logger = null,
-        ?string $cacheDir = null,
-        ?int $ttlSeconds = null,
-        ?AuditLogService $auditLogService = null,
-        ?ErrorLogService $errorLogService = null,
-        ?UserProfileViewService $userProfileViewService = null
+        PDO $Silian_db,
+        RegionService $Silian_regionService,
+        ?Logger $Silian_logger = null,
+        ?string $Silian_cacheDir = null,
+        ?int $Silian_ttlSeconds = null,
+        ?AuditLogService $Silian_auditLogService = null,
+        ?ErrorLogService $Silian_errorLogService = null,
+        ?UserProfileViewService $Silian_userProfileViewService = null
     )
     {
-        $this->db = $db;
-        $this->regionService = $regionService;
-        $this->logger = $logger;
-        $this->auditLogService = $auditLogService;
-        $this->errorLogService = $errorLogService;
-        $this->userProfileViewService = $userProfileViewService ?? new UserProfileViewService($regionService);
-        $baseDir = $cacheDir ?? (dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'cache');
-        if (!is_dir($baseDir)) {
-            @mkdir($baseDir, 0755, true);
+        $this->db = $Silian_db;
+        $this->regionService = $Silian_regionService;
+        $this->logger = $Silian_logger;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->errorLogService = $Silian_errorLogService;
+        $this->userProfileViewService = $Silian_userProfileViewService ?? new UserProfileViewService($Silian_regionService);
+        $Silian_baseDir = $Silian_cacheDir ?? (dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'cache');
+        if (!is_dir($Silian_baseDir)) {
+            @mkdir($Silian_baseDir, 0755, true);
         }
-        $this->cacheFile = rtrim($baseDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'streak_leaderboards.json';
-        $this->ttlSeconds = $this->validateTtl($ttlSeconds ?? (int) ($_ENV['STREAK_LEADERBOARD_CACHE_TTL'] ?? self::DEFAULT_TTL));
+        $this->cacheFile = rtrim($Silian_baseDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'streak_leaderboards.json';
+        $this->ttlSeconds = $this->validateTtl($Silian_ttlSeconds ?? (int) ($_ENV['STREAK_LEADERBOARD_CACHE_TTL'] ?? self::DEFAULT_TTL));
 
-        $tzName = $_ENV['APP_TIMEZONE'] ?? date_default_timezone_get();
-        if (!$tzName) {
-            $tzName = 'UTC';
+        $Silian_tzName = $_ENV['APP_TIMEZONE'] ?? date_default_timezone_get();
+        if (!$Silian_tzName) {
+            $Silian_tzName = 'UTC';
         }
-        $this->timezone = new DateTimeZone($tzName);
+        $this->timezone = new DateTimeZone($Silian_tzName);
     }
 
-    public function getSnapshot(bool $forceRefresh = false): array
+    public function getSnapshot(bool $Silian_forceRefresh = false): array
     {
-        if (!$forceRefresh) {
-            $cached = $this->readCache();
-            if ($cached !== null) {
+        if (!$Silian_forceRefresh) {
+            $Silian_cached = $this->readCache();
+            if ($Silian_cached !== null) {
                 $this->logAudit('streak_leaderboard_cache_hit', [
                     'cache_file' => $this->cacheFile,
                 ]);
-                return $cached;
+                return $Silian_cached;
             }
         }
 
         return $this->rebuildCache('auto');
     }
 
-    public function rebuildCache(?string $reason = null): array
+    public function rebuildCache(?string $Silian_reason = null): array
     {
         try {
-            $data = $this->generateSnapshot();
-            $this->writeCache($data, $reason);
+            $Silian_data = $this->generateSnapshot();
+            $this->writeCache($Silian_data, $Silian_reason);
             $this->logAudit('streak_leaderboard_cache_rebuilt', [
-                'reason' => $reason,
-                'global_entries' => count($data['global'] ?? []),
+                'reason' => $Silian_reason,
+                'global_entries' => count($Silian_data['global'] ?? []),
             ]);
-            return $data;
-        } catch (\Throwable $e) {
+            return $Silian_data;
+        } catch (\Throwable $Silian_e) {
             $this->logAudit('streak_leaderboard_cache_rebuild_failed', [
-                'reason' => $reason,
+                'reason' => $Silian_reason,
             ], 'failed');
-            $this->logError($e, '/internal/streak-leaderboard/rebuild', 'Failed to rebuild streak leaderboard cache', [
-                'reason' => $reason,
+            $this->logError($Silian_e, '/internal/streak-leaderboard/rebuild', 'Failed to rebuild streak leaderboard cache', [
+                'reason' => $Silian_reason,
             ]);
             $this->log('error', 'Failed to rebuild streak leaderboard cache', [
-                'error' => $e->getMessage(),
-                'reason' => $reason,
+                'error' => $Silian_e->getMessage(),
+                'reason' => $Silian_reason,
             ]);
             return $this->readCache() ?? [
                 'generated_at' => null,
@@ -111,7 +111,7 @@ class StreakLeaderboardService
 
     private function generateSnapshot(): array
     {
-        $sql = "SELECT uc.user_id, uc.checkin_date,
+        $Silian_sql = "SELECT uc.user_id, uc.checkin_date,
                     u.username, u.region_code, u.school_id, u.avatar_id,
                     s.name AS school_name, a.file_path AS avatar_path
                 FROM user_checkins uc
@@ -120,45 +120,45 @@ class StreakLeaderboardService
                 LEFT JOIN avatars a ON u.avatar_id = a.id
                 ORDER BY uc.user_id ASC, uc.checkin_date ASC";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute();
 
-        $today = new DateTimeImmutable('now', $this->timezone);
-        $todayStr = $today->format('Y-m-d');
-        $yesterdayStr = $today->modify('-1 day')->format('Y-m-d');
+        $Silian_today = new DateTimeImmutable('now', $this->timezone);
+        $Silian_todayStr = $Silian_today->format('Y-m-d');
+        $Silian_yesterdayStr = $Silian_today->modify('-1 day')->format('Y-m-d');
 
-        $entries = [];
-        $currentUserId = null;
-        $current = null;
+        $Silian_entries = [];
+        $Silian_currentUserId = null;
+        $Silian_current = null;
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $userId = isset($row['user_id']) ? (int) $row['user_id'] : 0;
-            if ($userId <= 0) {
+        while ($Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC)) {
+            $Silian_userId = isset($Silian_row['user_id']) ? (int) $Silian_row['user_id'] : 0;
+            if ($Silian_userId <= 0) {
                 continue;
             }
-            $checkinDate = $row['checkin_date'] ?? null;
-            if (!$checkinDate) {
+            $Silian_checkinDate = $Silian_row['checkin_date'] ?? null;
+            if (!$Silian_checkinDate) {
                 continue;
             }
 
-            if ($currentUserId === null || $currentUserId !== $userId) {
-                if ($currentUserId !== null && $current) {
-                    $entry = $this->buildStreakEntry($current, $todayStr, $yesterdayStr);
-                    if ($entry) {
-                        $entries[] = $entry;
+            if ($Silian_currentUserId === null || $Silian_currentUserId !== $Silian_userId) {
+                if ($Silian_currentUserId !== null && $Silian_current) {
+                    $Silian_entry = $this->buildStreakEntry($Silian_current, $Silian_todayStr, $Silian_yesterdayStr);
+                    if ($Silian_entry) {
+                        $Silian_entries[] = $Silian_entry;
                     }
                 }
 
-                $currentUserId = $userId;
-                $profileFields = $this->userProfileViewService->buildProfileFields($row);
-                $current = [
-                    'id' => $userId,
-                    'username' => $row['username'] ?? null,
-                    'region_code' => $profileFields['region_code'] ?? null,
-                    'school_id' => $profileFields['school_id'] ?? null,
-                    'school_name' => $profileFields['school_name'] ?? null,
-                    'avatar_id' => isset($row['avatar_id']) ? (int) $row['avatar_id'] : null,
-                    'avatar_path' => $row['avatar_path'] ?? null,
+                $Silian_currentUserId = $Silian_userId;
+                $Silian_profileFields = $this->userProfileViewService->buildProfileFields($Silian_row);
+                $Silian_current = [
+                    'id' => $Silian_userId,
+                    'username' => $Silian_row['username'] ?? null,
+                    'region_code' => $Silian_profileFields['region_code'] ?? null,
+                    'school_id' => $Silian_profileFields['school_id'] ?? null,
+                    'school_name' => $Silian_profileFields['school_name'] ?? null,
+                    'avatar_id' => isset($Silian_row['avatar_id']) ? (int) $Silian_row['avatar_id'] : null,
+                    'avatar_path' => $Silian_row['avatar_path'] ?? null,
                     'last_date' => null,
                     'current_run' => 0,
                     'longest' => 0,
@@ -166,200 +166,200 @@ class StreakLeaderboardService
                 ];
             }
 
-            if (!$current) {
+            if (!$Silian_current) {
                 continue;
             }
 
-            if ($current['last_date'] === null) {
-                $current['current_run'] = 1;
-                $current['longest'] = 1;
-                $current['last_date'] = $checkinDate;
-                $current['total'] = 1;
+            if ($Silian_current['last_date'] === null) {
+                $Silian_current['current_run'] = 1;
+                $Silian_current['longest'] = 1;
+                $Silian_current['last_date'] = $Silian_checkinDate;
+                $Silian_current['total'] = 1;
                 continue;
             }
 
-            $diff = $this->diffDays($current['last_date'], $checkinDate);
-            if ($diff === 0) {
+            $Silian_diff = $this->diffDays($Silian_current['last_date'], $Silian_checkinDate);
+            if ($Silian_diff === 0) {
                 continue;
             }
 
-            if ($diff === 1) {
-                $current['current_run']++;
+            if ($Silian_diff === 1) {
+                $Silian_current['current_run']++;
             } else {
-                $current['current_run'] = 1;
+                $Silian_current['current_run'] = 1;
             }
 
-            if ($current['current_run'] > $current['longest']) {
-                $current['longest'] = $current['current_run'];
+            if ($Silian_current['current_run'] > $Silian_current['longest']) {
+                $Silian_current['longest'] = $Silian_current['current_run'];
             }
 
-            $current['last_date'] = $checkinDate;
-            $current['total']++;
+            $Silian_current['last_date'] = $Silian_checkinDate;
+            $Silian_current['total']++;
         }
 
-        if ($currentUserId !== null && $current) {
-            $entry = $this->buildStreakEntry($current, $todayStr, $yesterdayStr);
-            if ($entry) {
-                $entries[] = $entry;
+        if ($Silian_currentUserId !== null && $Silian_current) {
+            $Silian_entry = $this->buildStreakEntry($Silian_current, $Silian_todayStr, $Silian_yesterdayStr);
+            if ($Silian_entry) {
+                $Silian_entries[] = $Silian_entry;
             }
         }
 
-        $globalSorted = $this->sortEntries($entries);
-        $global = $this->limitEntries($globalSorted, self::GLOBAL_LIMIT);
-        $globalRanks = $this->buildRanks($globalSorted);
+        $Silian_globalSorted = $this->sortEntries($Silian_entries);
+        $Silian_global = $this->limitEntries($Silian_globalSorted, self::GLOBAL_LIMIT);
+        $Silian_globalRanks = $this->buildRanks($Silian_globalSorted);
 
-        $regions = [];
-        $regionRanks = [];
-        foreach ($entries as $entry) {
-            $regionCode = $entry['region_code'] ?? null;
-            if (!$regionCode) {
+        $Silian_regions = [];
+        $Silian_regionRanks = [];
+        foreach ($Silian_entries as $Silian_entry) {
+            $Silian_regionCode = $Silian_entry['region_code'] ?? null;
+            if (!$Silian_regionCode) {
                 continue;
             }
-            if (!isset($regions[$regionCode])) {
-                $context = $this->userProfileViewService->buildRegionFields(['region_code' => $regionCode]);
-                $regions[$regionCode] = [
-                    'region_code' => $context['region_code'] ?? $regionCode,
-                    'country_code' => $context['country_code'] ?? null,
-                    'state_code' => $context['state_code'] ?? null,
-                    'region_label' => $context['region_label'] ?? null,
+            if (!isset($Silian_regions[$Silian_regionCode])) {
+                $Silian_context = $this->userProfileViewService->buildRegionFields(['region_code' => $Silian_regionCode]);
+                $Silian_regions[$Silian_regionCode] = [
+                    'region_code' => $Silian_context['region_code'] ?? $Silian_regionCode,
+                    'country_code' => $Silian_context['country_code'] ?? null,
+                    'state_code' => $Silian_context['state_code'] ?? null,
+                    'region_label' => $Silian_context['region_label'] ?? null,
                     'entries' => [],
                 ];
             }
-            $regions[$regionCode]['entries'][] = $entry;
+            $Silian_regions[$Silian_regionCode]['entries'][] = $Silian_entry;
         }
 
-        foreach ($regions as $regionCode => $bucket) {
-            $sorted = $this->sortEntries($bucket['entries']);
-            $regions[$regionCode]['entries'] = $this->limitEntries($sorted, self::REGION_LIMIT);
-            $regionRanks[$regionCode] = $this->buildRanks($sorted);
+        foreach ($Silian_regions as $Silian_regionCode => $Silian_bucket) {
+            $Silian_sorted = $this->sortEntries($Silian_bucket['entries']);
+            $Silian_regions[$Silian_regionCode]['entries'] = $this->limitEntries($Silian_sorted, self::REGION_LIMIT);
+            $Silian_regionRanks[$Silian_regionCode] = $this->buildRanks($Silian_sorted);
         }
 
-        $schools = [];
-        $schoolRanks = [];
-        foreach ($entries as $entry) {
-            $schoolId = isset($entry['school_id']) ? (int) $entry['school_id'] : 0;
-            if ($schoolId <= 0) {
+        $Silian_schools = [];
+        $Silian_schoolRanks = [];
+        foreach ($Silian_entries as $Silian_entry) {
+            $Silian_schoolId = isset($Silian_entry['school_id']) ? (int) $Silian_entry['school_id'] : 0;
+            if ($Silian_schoolId <= 0) {
                 continue;
             }
-            if (!isset($schools[$schoolId])) {
-                $schools[$schoolId] = [
-                    'school_id' => $schoolId,
-                    'school_name' => $entry['school_name'] ?? null,
+            if (!isset($Silian_schools[$Silian_schoolId])) {
+                $Silian_schools[$Silian_schoolId] = [
+                    'school_id' => $Silian_schoolId,
+                    'school_name' => $Silian_entry['school_name'] ?? null,
                     'entries' => [],
                 ];
             }
-            $schools[$schoolId]['entries'][] = $entry;
+            $Silian_schools[$Silian_schoolId]['entries'][] = $Silian_entry;
         }
 
-        foreach ($schools as $schoolId => $bucket) {
-            $sorted = $this->sortEntries($bucket['entries']);
-            $schools[$schoolId]['entries'] = $this->limitEntries($sorted, self::SCHOOL_LIMIT);
-            $schoolRanks[$schoolId] = $this->buildRanks($sorted);
+        foreach ($Silian_schools as $Silian_schoolId => $Silian_bucket) {
+            $Silian_sorted = $this->sortEntries($Silian_bucket['entries']);
+            $Silian_schools[$Silian_schoolId]['entries'] = $this->limitEntries($Silian_sorted, self::SCHOOL_LIMIT);
+            $Silian_schoolRanks[$Silian_schoolId] = $this->buildRanks($Silian_sorted);
         }
 
-        $generatedAt = (new DateTimeImmutable('now', $this->timezone))->format(DATE_ATOM);
-        $expiresAt = (new DateTimeImmutable('now', $this->timezone))
+        $Silian_generatedAt = (new DateTimeImmutable('now', $this->timezone))->format(DATE_ATOM);
+        $Silian_expiresAt = (new DateTimeImmutable('now', $this->timezone))
             ->modify(sprintf('+%d seconds', $this->ttlSeconds))
             ->format(DATE_ATOM);
 
         return [
-            'generated_at' => $generatedAt,
-            'expires_at' => $expiresAt,
+            'generated_at' => $Silian_generatedAt,
+            'expires_at' => $Silian_expiresAt,
             'ttl' => $this->ttlSeconds,
-            'global' => $global,
-            'regions' => $regions,
-            'schools' => $schools,
+            'global' => $Silian_global,
+            'regions' => $Silian_regions,
+            'schools' => $Silian_schools,
             'ranks' => [
-                'global' => $globalRanks,
-                'regions' => $regionRanks,
-                'schools' => $schoolRanks,
+                'global' => $Silian_globalRanks,
+                'regions' => $Silian_regionRanks,
+                'schools' => $Silian_schoolRanks,
             ],
         ];
     }
 
-    private function buildStreakEntry(array $accumulator, string $todayStr, string $yesterdayStr): ?array
+    private function buildStreakEntry(array $Silian_accumulator, string $Silian_todayStr, string $Silian_yesterdayStr): ?array
     {
-        $lastDate = $accumulator['last_date'] ?? null;
-        if (!$lastDate) {
+        $Silian_lastDate = $Silian_accumulator['last_date'] ?? null;
+        if (!$Silian_lastDate) {
             return null;
         }
 
-        $currentStreak = 0;
-        if ($lastDate === $todayStr || $lastDate === $yesterdayStr) {
-            $currentStreak = (int) ($accumulator['current_run'] ?? 0);
+        $Silian_currentStreak = 0;
+        if ($Silian_lastDate === $Silian_todayStr || $Silian_lastDate === $Silian_yesterdayStr) {
+            $Silian_currentStreak = (int) ($Silian_accumulator['current_run'] ?? 0);
         }
 
-        $longest = (int) ($accumulator['longest'] ?? 0);
-        if ($longest <= 0) {
-            $longest = (int) ($accumulator['current_run'] ?? 0);
+        $Silian_longest = (int) ($Silian_accumulator['longest'] ?? 0);
+        if ($Silian_longest <= 0) {
+            $Silian_longest = (int) ($Silian_accumulator['current_run'] ?? 0);
         }
 
         return [
-            'id' => $accumulator['id'] ?? null,
-            'username' => $accumulator['username'] ?? null,
-            'region_code' => $accumulator['region_code'] ?? null,
-            'school_id' => $accumulator['school_id'] ?? null,
-            'school_name' => $accumulator['school_name'] ?? null,
-            'avatar_id' => $accumulator['avatar_id'] ?? null,
-            'avatar_path' => $accumulator['avatar_path'] ?? null,
-            'current_streak' => $currentStreak,
-            'longest_streak' => $longest,
-            'total_checkins' => (int) ($accumulator['total'] ?? 0),
-            'last_checkin_date' => $lastDate,
+            'id' => $Silian_accumulator['id'] ?? null,
+            'username' => $Silian_accumulator['username'] ?? null,
+            'region_code' => $Silian_accumulator['region_code'] ?? null,
+            'school_id' => $Silian_accumulator['school_id'] ?? null,
+            'school_name' => $Silian_accumulator['school_name'] ?? null,
+            'avatar_id' => $Silian_accumulator['avatar_id'] ?? null,
+            'avatar_path' => $Silian_accumulator['avatar_path'] ?? null,
+            'current_streak' => $Silian_currentStreak,
+            'longest_streak' => $Silian_longest,
+            'total_checkins' => (int) ($Silian_accumulator['total'] ?? 0),
+            'last_checkin_date' => $Silian_lastDate,
         ];
     }
 
-    private function diffDays(string $from, string $to): int
+    private function diffDays(string $Silian_from, string $Silian_to): int
     {
-        $fromDate = new DateTimeImmutable($from, $this->timezone);
-        $toDate = new DateTimeImmutable($to, $this->timezone);
-        return (int) $fromDate->diff($toDate)->format('%r%a');
+        $Silian_fromDate = new DateTimeImmutable($Silian_from, $this->timezone);
+        $Silian_toDate = new DateTimeImmutable($Silian_to, $this->timezone);
+        return (int) $Silian_fromDate->diff($Silian_toDate)->format('%r%a');
     }
 
-    private function sortEntries(array $entries): array
+    private function sortEntries(array $Silian_entries): array
     {
-        usort($entries, function (array $a, array $b): int {
-            $cmp = ($b['current_streak'] ?? 0) <=> ($a['current_streak'] ?? 0);
-            if ($cmp !== 0) {
-                return $cmp;
+        usort($Silian_entries, function (array $Silian_a, array $Silian_b): int {
+            $Silian_cmp = ($Silian_b['current_streak'] ?? 0) <=> ($Silian_a['current_streak'] ?? 0);
+            if ($Silian_cmp !== 0) {
+                return $Silian_cmp;
             }
-            $cmp = ($b['longest_streak'] ?? 0) <=> ($a['longest_streak'] ?? 0);
-            if ($cmp !== 0) {
-                return $cmp;
+            $Silian_cmp = ($Silian_b['longest_streak'] ?? 0) <=> ($Silian_a['longest_streak'] ?? 0);
+            if ($Silian_cmp !== 0) {
+                return $Silian_cmp;
             }
-            $cmp = ($b['total_checkins'] ?? 0) <=> ($a['total_checkins'] ?? 0);
-            if ($cmp !== 0) {
-                return $cmp;
+            $Silian_cmp = ($Silian_b['total_checkins'] ?? 0) <=> ($Silian_a['total_checkins'] ?? 0);
+            if ($Silian_cmp !== 0) {
+                return $Silian_cmp;
             }
-            $cmp = strcmp((string) ($b['last_checkin_date'] ?? ''), (string) ($a['last_checkin_date'] ?? ''));
-            if ($cmp !== 0) {
-                return $cmp;
+            $Silian_cmp = strcmp((string) ($Silian_b['last_checkin_date'] ?? ''), (string) ($Silian_a['last_checkin_date'] ?? ''));
+            if ($Silian_cmp !== 0) {
+                return $Silian_cmp;
             }
-            return ($a['id'] ?? 0) <=> ($b['id'] ?? 0);
+            return ($Silian_a['id'] ?? 0) <=> ($Silian_b['id'] ?? 0);
         });
-        return $entries;
+        return $Silian_entries;
     }
 
-    private function limitEntries(array $entries, int $limit): array
+    private function limitEntries(array $Silian_entries, int $Silian_limit): array
     {
-        $limited = array_slice($entries, 0, $limit);
-        foreach ($limited as $index => &$entry) {
-            $entry['rank'] = $index + 1;
+        $Silian_limited = array_slice($Silian_entries, 0, $Silian_limit);
+        foreach ($Silian_limited as $Silian_index => &$Silian_entry) {
+            $Silian_entry['rank'] = $Silian_index + 1;
         }
-        unset($entry);
-        return $limited;
+        unset($Silian_entry);
+        return $Silian_limited;
     }
 
-    private function buildRanks(array $sortedEntries): array
+    private function buildRanks(array $Silian_sortedEntries): array
     {
-        $ranks = [];
-        foreach ($sortedEntries as $index => $entry) {
-            $userId = isset($entry['id']) ? (int) $entry['id'] : null;
-            if ($userId !== null && $userId > 0) {
-                $ranks[$userId] = $index + 1;
+        $Silian_ranks = [];
+        foreach ($Silian_sortedEntries as $Silian_index => $Silian_entry) {
+            $Silian_userId = isset($Silian_entry['id']) ? (int) $Silian_entry['id'] : null;
+            if ($Silian_userId !== null && $Silian_userId > 0) {
+                $Silian_ranks[$Silian_userId] = $Silian_index + 1;
             }
         }
-        return $ranks;
+        return $Silian_ranks;
     }
 
     private function readCache(): ?array
@@ -368,63 +368,63 @@ class StreakLeaderboardService
             return null;
         }
 
-        $modified = @filemtime($this->cacheFile);
-        if ($modified === false || (time() - $modified) > $this->ttlSeconds) {
+        $Silian_modified = @filemtime($this->cacheFile);
+        if ($Silian_modified === false || (time() - $Silian_modified) > $this->ttlSeconds) {
             return null;
         }
 
-        $contents = @file_get_contents($this->cacheFile);
-        if ($contents === false) {
+        $Silian_contents = @file_get_contents($this->cacheFile);
+        if ($Silian_contents === false) {
             return null;
         }
 
-        $decoded = json_decode($contents, true);
-        if (!is_array($decoded)) {
+        $Silian_decoded = json_decode($Silian_contents, true);
+        if (!is_array($Silian_decoded)) {
             return null;
         }
 
-        return $decoded;
+        return $Silian_decoded;
     }
 
-    private function writeCache(array $data, ?string $reason = null): void
+    private function writeCache(array $Silian_data, ?string $Silian_reason = null): void
     {
         if (!is_dir(dirname($this->cacheFile))) {
             @mkdir(dirname($this->cacheFile), 0755, true);
         }
-        $payload = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        if ($payload === false) {
+        $Silian_payload = json_encode($Silian_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($Silian_payload === false) {
             return;
         }
-        @file_put_contents($this->cacheFile, $payload, LOCK_EX);
+        @file_put_contents($this->cacheFile, $Silian_payload, LOCK_EX);
         $this->logAudit('streak_leaderboard_cache_written', [
-            'reason' => $reason,
-            'entries_global' => count($data['global'] ?? []),
+            'reason' => $Silian_reason,
+            'entries_global' => count($Silian_data['global'] ?? []),
             'cache_file' => $this->cacheFile,
         ]);
         $this->log('info', 'Streak leaderboard cache written', [
-            'reason' => $reason,
-            'entries_global' => count($data['global'] ?? []),
+            'reason' => $Silian_reason,
+            'entries_global' => count($Silian_data['global'] ?? []),
         ]);
     }
 
-    private function validateTtl(int $value): int
+    private function validateTtl(int $Silian_value): int
     {
-        return max(60, min($value, 3600));
+        return max(60, min($Silian_value, 3600));
     }
 
-    private function log(string $level, string $message, array $context = []): void
+    private function log(string $Silian_level, string $Silian_message, array $Silian_context = []): void
     {
         if (!$this->logger) {
             return;
         }
         try {
-            $this->logger->log($level, $message, $context);
-        } catch (\Throwable $ignore) {
+            $this->logger->log($Silian_level, $Silian_message, $Silian_context);
+        } catch (\Throwable $Silian_ignore) {
             // swallow logger failures
         }
     }
 
-    private function logAudit(string $action, array $context = [], string $status = 'success'): void
+    private function logAudit(string $Silian_action, array $Silian_context = [], string $Silian_status = 'success'): void
     {
         if (!$this->auditLogService) {
             return;
@@ -432,27 +432,27 @@ class StreakLeaderboardService
 
         try {
             $this->auditLogService->log([
-                'action' => $action,
+                'action' => $Silian_action,
                 'operation_category' => 'leaderboard',
                 'actor_type' => 'system',
-                'status' => $status,
-                'data' => $context,
+                'status' => $Silian_status,
+                'data' => $Silian_context,
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // ignore audit failures for streak leaderboard
         }
     }
 
-    private function logError(\Throwable $e, string $path, string $message, array $context = []): void
+    private function logError(\Throwable $Silian_e, string $Silian_path, string $Silian_message, array $Silian_context = []): void
     {
         if (!$this->errorLogService) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext($path, 'POST', null, [], $context);
-            $this->errorLogService->logException($e, $request, ['context_message' => $message] + $context);
-        } catch (\Throwable $ignore) {
+            $Silian_request = SyntheticRequestFactory::fromContext($Silian_path, 'POST', null, [], $Silian_context);
+            $this->errorLogService->logException($Silian_e, $Silian_request, ['context_message' => $Silian_message] + $Silian_context);
+        } catch (\Throwable $Silian_ignore) {
             // ignore error log failures for streak leaderboard
         }
     }

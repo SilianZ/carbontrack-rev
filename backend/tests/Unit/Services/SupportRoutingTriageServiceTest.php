@@ -13,12 +13,12 @@ class SupportRoutingTriageServiceTest extends TestCase
 {
     public function testFallsBackWhenAiIsDisabled(): void
     {
-        $service = new SupportRoutingTriageService(
+        $Silian_service = new SupportRoutingTriageService(
             null,
             $this->createMock(LoggerInterface::class)
         );
 
-        $result = $service->triage([
+        $Silian_result = $Silian_service->triage([
             'id' => 11,
             'priority' => 'high',
         ], [
@@ -26,16 +26,16 @@ class SupportRoutingTriageServiceTest extends TestCase
             'group_routing' => ['min_agent_level' => 2],
         ]);
 
-        $this->assertFalse($result['used_ai']);
-        $this->assertSame('ai_disabled', $result['fallback_reason']);
-        $this->assertSame('high', $result['triage']['severity']);
-        $this->assertSame(3, $result['triage']['required_agent_level']);
+        $this->assertFalse($Silian_result['used_ai']);
+        $this->assertSame('ai_disabled', $Silian_result['fallback_reason']);
+        $this->assertSame('high', $Silian_result['triage']['severity']);
+        $this->assertSame(3, $Silian_result['triage']['required_agent_level']);
     }
 
     public function testParsesJsonResponseFromLlm(): void
     {
-        $client = $this->createMock(LlmClientInterface::class);
-        $client->expects($this->once())
+        $Silian_client = $this->createMock(LlmClientInterface::class);
+        $Silian_client->expects($this->once())
             ->method('createChatCompletion')
             ->willReturn([
                 'model' => 'test-model',
@@ -54,12 +54,12 @@ class SupportRoutingTriageServiceTest extends TestCase
                 ]],
             ]);
 
-        $service = new SupportRoutingTriageService(
-            $client,
+        $Silian_service = new SupportRoutingTriageService(
+            $Silian_client,
             $this->createMock(LoggerInterface::class)
         );
 
-        $result = $service->triage([
+        $Silian_result = $Silian_service->triage([
             'id' => 22,
             'subject' => 'VIP complaint',
             'priority' => 'urgent',
@@ -69,10 +69,10 @@ class SupportRoutingTriageServiceTest extends TestCase
             'message_body' => 'I want this escalated now',
         ]);
 
-        $this->assertTrue($result['used_ai']);
-        $this->assertNull($result['fallback_reason']);
-        $this->assertSame('critical', $result['triage']['severity']);
-        $this->assertSame(5, $result['triage']['required_agent_level']);
-        $this->assertSame(['billing', 'vip'], $result['triage']['suggested_skills']);
+        $this->assertTrue($Silian_result['used_ai']);
+        $this->assertNull($Silian_result['fallback_reason']);
+        $this->assertSame('critical', $Silian_result['triage']['severity']);
+        $this->assertSame(5, $Silian_result['triage']['required_agent_level']);
+        $this->assertSame(['billing', 'vip'], $Silian_result['triage']['suggested_skills']);
     }
 }

@@ -1,60 +1,60 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { ChevronRight, MoreHorizontal } from "lucide-react"
+import * as Silian_React from "react"
+import { Slot as Silian_Slot } from "@radix-ui/react-slot"
+import { ChevronRight as Silian_ChevronRight, MoreHorizontal as Silian_MoreHorizontal } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { cn as Silian_cn } from "@/lib/utils"
 
-function Breadcrumb({
-  ...props
+function Silian_Breadcrumb({
+  ...Silian_props
 }) {
-  return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
+  return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...Silian_props} />;
 }
 
-function BreadcrumbList({
-  className,
-  ...props
+function Silian_BreadcrumbList({
+  className: Silian_className,
+  ...Silian_props
 }) {
   return (
     <ol
       data-slot="breadcrumb-list"
-      className={cn(
+      className={Silian_cn(
         "text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5",
-        className
+        Silian_className
       )}
-      {...props} />
+      {...Silian_props} />
   );
 }
 
-function BreadcrumbItem({
-  className,
-  ...props
+function Silian_BreadcrumbItem({
+  className: Silian_className,
+  ...Silian_props
 }) {
   return (
     <li
       data-slot="breadcrumb-item"
-      className={cn("inline-flex items-center gap-1.5", className)}
-      {...props} />
+      className={Silian_cn("inline-flex items-center gap-1.5", Silian_className)}
+      {...Silian_props} />
   );
 }
 
-function BreadcrumbLink({
-  asChild,
-  className,
-  ...props
+function Silian_BreadcrumbLink({
+  asChild: Silian_asChild,
+  className: Silian_className,
+  ...Silian_props
 }) {
-  const Comp = asChild ? Slot : "a"
+  const Silian_Comp = Silian_asChild ? Silian_Slot : "a"
 
   return (
-    <Comp
+    <Silian_Comp
       data-slot="breadcrumb-link"
-      className={cn("hover:text-foreground transition-colors", className)}
-      {...props} />
+      className={Silian_cn("hover:text-foreground transition-colors", Silian_className)}
+      {...Silian_props} />
   );
 }
 
-function BreadcrumbPage({
-  className,
-  ...props
+function Silian_BreadcrumbPage({
+  className: Silian_className,
+  ...Silian_props
 }) {
   return (
     <span
@@ -62,51 +62,51 @@ function BreadcrumbPage({
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn("text-foreground font-normal", className)}
-      {...props} />
+      className={Silian_cn("text-foreground font-normal", Silian_className)}
+      {...Silian_props} />
   );
 }
 
-function BreadcrumbSeparator({
-  children,
-  className,
-  ...props
+function Silian_BreadcrumbSeparator({
+  children: Silian_children,
+  className: Silian_className,
+  ...Silian_props
 }) {
   return (
     <li
       data-slot="breadcrumb-separator"
       role="presentation"
       aria-hidden="true"
-      className={cn("[&>svg]:size-3.5", className)}
-      {...props}>
-      {children ?? <ChevronRight />}
+      className={Silian_cn("[&>svg]:size-3.5", Silian_className)}
+      {...Silian_props}>
+      {Silian_children ?? <Silian_ChevronRight />}
     </li>
   );
 }
 
-function BreadcrumbEllipsis({
-  className,
-  ...props
+function Silian_BreadcrumbEllipsis({
+  className: Silian_className,
+  ...Silian_props
 }) {
   return (
     <span
       data-slot="breadcrumb-ellipsis"
       role="presentation"
       aria-hidden="true"
-      className={cn("flex size-9 items-center justify-center", className)}
-      {...props}>
-      <MoreHorizontal className="size-4" />
+      className={Silian_cn("flex size-9 items-center justify-center", Silian_className)}
+      {...Silian_props}>
+      <Silian_MoreHorizontal className="size-4" />
       <span className="sr-only">More</span>
     </span>
   );
 }
 
 export {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbEllipsis,
+  Silian_Breadcrumb as Breadcrumb,
+  Silian_BreadcrumbList as BreadcrumbList,
+  Silian_BreadcrumbItem as BreadcrumbItem,
+  Silian_BreadcrumbLink as BreadcrumbLink,
+  Silian_BreadcrumbPage as BreadcrumbPage,
+  Silian_BreadcrumbSeparator as BreadcrumbSeparator,
+  Silian_BreadcrumbEllipsis as BreadcrumbEllipsis,
 }

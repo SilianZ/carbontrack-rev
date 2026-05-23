@@ -75,27 +75,27 @@ class ErrorLogServiceTest extends TestCase
 
     public function testLogExceptionUsesRequestAttributeRequestId(): void
     {
-        $service = new ErrorLogService($this->pdo, new Logger('test'));
-        $request = makeRequest('GET', '/test')
+        $Silian_service = new ErrorLogService($this->pdo, new Logger('test'));
+        $Silian_request = makeRequest('GET', '/test')
             ->withAttribute('request_id', '550e8400-e29b-41d4-a716-446655440001');
 
-        $service->logException(new \RuntimeException('boom'), $request);
+        $Silian_service->logException(new \RuntimeException('boom'), $Silian_request);
 
-        $row = $this->pdo->query('SELECT request_id FROM error_logs')->fetch(PDO::FETCH_ASSOC);
-        $this->assertIsArray($row);
-        $this->assertSame('550e8400-e29b-41d4-a716-446655440001', $row['request_id']);
+        $Silian_row = $this->pdo->query('SELECT request_id FROM error_logs')->fetch(PDO::FETCH_ASSOC);
+        $this->assertIsArray($Silian_row);
+        $this->assertSame('550e8400-e29b-41d4-a716-446655440001', $Silian_row['request_id']);
     }
 
     public function testLogExceptionFallsBackToExtraRequestId(): void
     {
-        $service = new ErrorLogService($this->pdo, new Logger('test'));
-        $request = makeRequest('POST', '/test');
+        $Silian_service = new ErrorLogService($this->pdo, new Logger('test'));
+        $Silian_request = makeRequest('POST', '/test');
 
-        $service->logException(new \RuntimeException('boom'), $request, ['request_id' => 'extra-request-id']);
+        $Silian_service->logException(new \RuntimeException('boom'), $Silian_request, ['request_id' => 'extra-request-id']);
 
-        $row = $this->pdo->query('SELECT request_id FROM error_logs')->fetch(PDO::FETCH_ASSOC);
-        $this->assertIsArray($row);
-        $this->assertSame('extra-request-id', $row['request_id']);
+        $Silian_row = $this->pdo->query('SELECT request_id FROM error_logs')->fetch(PDO::FETCH_ASSOC);
+        $this->assertIsArray($Silian_row);
+        $this->assertSame('extra-request-id', $Silian_row['request_id']);
     }
 
     public function testLogExceptionReturnsNullWhenWritesDisabled(): void
@@ -103,14 +103,14 @@ class ErrorLogServiceTest extends TestCase
         $_ENV['DISABLE_ERROR_LOG_WRITES'] = '1';
         $_SERVER['DISABLE_ERROR_LOG_WRITES'] = '1';
 
-        $service = new ErrorLogService($this->pdo, new Logger('test'));
-        $request = makeRequest('GET', '/test');
+        $Silian_service = new ErrorLogService($this->pdo, new Logger('test'));
+        $Silian_request = makeRequest('GET', '/test');
 
-        $result = $service->logException(new \RuntimeException('boom'), $request);
+        $Silian_result = $Silian_service->logException(new \RuntimeException('boom'), $Silian_request);
 
-        $this->assertNull($result);
-        $count = (int) $this->pdo->query('SELECT COUNT(*) FROM error_logs')->fetchColumn();
-        $this->assertSame(0, $count);
+        $this->assertNull($Silian_result);
+        $Silian_count = (int) $this->pdo->query('SELECT COUNT(*) FROM error_logs')->fetchColumn();
+        $this->assertSame(0, $Silian_count);
     }
 
     public function testProductionEnvironmentIgnoresDisableFlag(): void
@@ -120,13 +120,13 @@ class ErrorLogServiceTest extends TestCase
         $_ENV['DISABLE_ERROR_LOG_WRITES'] = '1';
         $_SERVER['DISABLE_ERROR_LOG_WRITES'] = '1';
 
-        $service = new ErrorLogService($this->pdo, new Logger('test'));
-        $request = makeRequest('GET', '/test');
+        $Silian_service = new ErrorLogService($this->pdo, new Logger('test'));
+        $Silian_request = makeRequest('GET', '/test');
 
-        $result = $service->logException(new \RuntimeException('boom'), $request);
+        $Silian_result = $Silian_service->logException(new \RuntimeException('boom'), $Silian_request);
 
-        $this->assertSame(1, $result);
-        $count = (int) $this->pdo->query('SELECT COUNT(*) FROM error_logs')->fetchColumn();
-        $this->assertSame(1, $count);
+        $this->assertSame(1, $Silian_result);
+        $Silian_count = (int) $this->pdo->query('SELECT COUNT(*) FROM error_logs')->fetchColumn();
+        $this->assertSame(1, $Silian_count);
     }
 }

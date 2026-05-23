@@ -1,37 +1,37 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { adminAPI } from '@/lib/api';
-import { useTranslation } from '@/hooks/useTranslation';
-import { toast } from 'react-hot-toast';
-import { format } from 'date-fns';
+import Silian_React, { useCallback as Silian_useCallback, useEffect as Silian_useEffect, useMemo as Silian_useMemo, useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { useSearchParams as Silian_useSearchParams } from 'react-router-dom';
+import { Card as Silian_Card, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle, CardContent as Silian_CardContent } from '@/components/ui/Card';
+import { Button as Silian_Button } from '@/components/ui/Button';
+import { Input as Silian_Input } from '@/components/ui/Input';
+import { Textarea as Silian_Textarea } from '@/components/ui/textarea';
+import { Switch as Silian_Switch } from '@/components/ui/switch';
+import { Badge as Silian_Badge } from '@/components/ui/badge';
+import { ToggleGroup as Silian_ToggleGroup, ToggleGroupItem as Silian_ToggleGroupItem } from '@/components/ui/toggle-group';
+import { adminAPI as Silian_adminAPI } from '@/lib/api';
+import { useTranslation as Silian_useTranslation } from '@/hooks/useTranslation';
+import { toast as Silian_toast } from 'react-hot-toast';
+import { format as Silian_format } from 'date-fns';
 import {
-  Loader2,
-  RefreshCw,
-  Edit,
-  Sparkles,
-  Trash2,
-  Award,
-  Upload,
-  BarChart3,
-  ShieldCheck,
-  Users,
-  Eye,
+  Loader2 as Silian_Loader2,
+  RefreshCw as Silian_RefreshCw,
+  Edit as Silian_Edit,
+  Sparkles as Silian_Sparkles,
+  Trash2 as Silian_Trash2,
+  Award as Silian_Award,
+  Upload as Silian_Upload,
+  BarChart3 as Silian_BarChart3,
+  ShieldCheck as Silian_ShieldCheck,
+  Users as Silian_Users,
+  Eye as Silian_Eye,
 } from 'lucide-react';
-import { uploadViaPresign } from '@/lib/r2Upload';
-import { resolveR2ImageSource } from '@/lib/r2Image';
-import R2Image from '@/components/common/R2Image';
-import BadgeBulkAwardDialog from './badges/BadgeBulkAwardDialog';
-import BadgeRuleBuilder from './badges/BadgeRuleBuilder';
-import BadgeRecipientsDialog from './badges/BadgeRecipientsDialog';
+import { uploadViaPresign as Silian_uploadViaPresign } from '@/lib/r2Upload';
+import { resolveR2ImageSource as Silian_resolveR2ImageSource } from '@/lib/r2Image';
+import Silian_R2Image from '@/components/common/R2Image';
+import Silian_BadgeBulkAwardDialog from './badges/BadgeBulkAwardDialog';
+import Silian_BadgeRuleBuilder from './badges/BadgeRuleBuilder';
+import Silian_BadgeRecipientsDialog from './badges/BadgeRecipientsDialog';
 
-const DEFAULT_FORM = {
+const Silian_DEFAULT_FORM = {
   id: null,
   name_zh: '',
   name_en: '',
@@ -51,7 +51,7 @@ const DEFAULT_FORM = {
   message_body_en: '',
 };
 
-const DEFAULT_BADGE_STATS = {
+const Silian_DEFAULT_BADGE_STATS = {
   total_records: 0,
   unique_users: 0,
   awarded_records: 0,
@@ -61,352 +61,352 @@ const DEFAULT_BADGE_STATS = {
 };
 
 
-const DEFAULT_CRITERIA = { all: true, rules: [] };
+const Silian_DEFAULT_CRITERIA = { all: true, rules: [] };
 
-const normalizeCriteria = (raw) => {
-  if (!raw) {
-    return DEFAULT_CRITERIA;
+const Silian_normalizeCriteria = (Silian_raw) => {
+  if (!Silian_raw) {
+    return Silian_DEFAULT_CRITERIA;
   }
-  let data = raw;
-  if (typeof raw === 'string') {
+  let Silian_data = Silian_raw;
+  if (typeof Silian_raw === 'string') {
     try {
-      data = JSON.parse(raw);
+      Silian_data = JSON.parse(Silian_raw);
     } catch {
       return null;
     }
   }
-  if (Array.isArray(data)) {
-    return { all: true, rules: data };
+  if (Array.isArray(Silian_data)) {
+    return { all: true, rules: Silian_data };
   }
-  if (typeof data === 'object') {
-    const rules = Array.isArray(data.rules) ? data.rules : Array.isArray(data.conditions) ? data.conditions : [];
-    const flag = data.all ?? data.all_required ?? data.requireAll ?? true;
-    return { all: Boolean(flag), rules: rules.map((rule) => ({ ...rule })) };
+  if (typeof Silian_data === 'object') {
+    const Silian_rules = Array.isArray(Silian_data.rules) ? Silian_data.rules : Array.isArray(Silian_data.conditions) ? Silian_data.conditions : [];
+    const Silian_flag = Silian_data.all ?? Silian_data.all_required ?? Silian_data.requireAll ?? true;
+    return { all: Boolean(Silian_flag), rules: Silian_rules.map((Silian_rule) => ({ ...Silian_rule })) };
   }
   return null;
 };
 
-const resolveBadgeImage = (badge = {}) => resolveR2ImageSource({
-  urlCandidates: [badge.icon_url, badge.icon_presigned_url],
-  pathCandidates: [badge.icon_path, badge.icon_thumbnail_path],
+const Silian_resolveBadgeImage = (Silian_badge = {}) => Silian_resolveR2ImageSource({
+  urlCandidates: [Silian_badge.icon_url, Silian_badge.icon_presigned_url],
+  pathCandidates: [Silian_badge.icon_path, Silian_badge.icon_thumbnail_path],
 });
 
 export default function BadgeManagement() {
-  const { t } = useTranslation(['admin', 'common']);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [badges, setBadges] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [triggering, setTriggering] = useState(false);
-  const [uploadingIcon, setUploadingIcon] = useState(false);
-  const [formValues, setFormValues] = useState(DEFAULT_FORM);
-  const [criteriaMode, setCriteriaMode] = useState('builder');
-  const [ruleBuilderValue, setRuleBuilderValue] = useState(DEFAULT_CRITERIA);
-  const [bulkDialog, setBulkDialog] = useState({ open: false, badgeIds: [], mode: 'award', presetUsers: [] });
-  const [recipientDialog, setRecipientDialog] = useState({ open: false, badge: null });
-  const iconInputRef = useRef(null);
+  const { t: Silian_t } = Silian_useTranslation(['admin', 'common']);
+  const [Silian_searchParams, Silian_setSearchParams] = Silian_useSearchParams();
+  const [Silian_badges, Silian_setBadges] = Silian_useState([]);
+  const [Silian_loading, Silian_setLoading] = Silian_useState(true);
+  const [Silian_saving, Silian_setSaving] = Silian_useState(false);
+  const [Silian_triggering, Silian_setTriggering] = Silian_useState(false);
+  const [Silian_uploadingIcon, Silian_setUploadingIcon] = Silian_useState(false);
+  const [Silian_formValues, Silian_setFormValues] = Silian_useState(Silian_DEFAULT_FORM);
+  const [Silian_criteriaMode, Silian_setCriteriaMode] = Silian_useState('builder');
+  const [Silian_ruleBuilderValue, Silian_setRuleBuilderValue] = Silian_useState(Silian_DEFAULT_CRITERIA);
+  const [Silian_bulkDialog, Silian_setBulkDialog] = Silian_useState({ open: false, badgeIds: [], mode: 'award', presetUsers: [] });
+  const [Silian_recipientDialog, Silian_setRecipientDialog] = Silian_useState({ open: false, badge: null });
+  const Silian_iconInputRef = Silian_useRef(null);
 
-  const fetchBadges = useCallback(async () => {
+  const Silian_fetchBadges = Silian_useCallback(async () => {
     try {
-      setLoading(true);
-      const response = await adminAPI.getBadges();
-      if (response.data?.success) {
-        setBadges(response.data.data || []);
+      Silian_setLoading(true);
+      const Silian_response = await Silian_adminAPI.getBadges();
+      if (Silian_response.data?.success) {
+        Silian_setBadges(Silian_response.data.data || []);
       }
     } catch {
-      toast.error(t('admin.badges.loadFailed'));
+      Silian_toast.error(Silian_t('admin.badges.loadFailed'));
     } finally {
-      setLoading(false);
+      Silian_setLoading(false);
     }
-  }, [t]);
+  }, [Silian_t]);
 
-  useEffect(() => {
-    fetchBadges();
-  }, [fetchBadges]);
+  Silian_useEffect(() => {
+    Silian_fetchBadges();
+  }, [Silian_fetchBadges]);
 
-  useEffect(() => {
-    if (searchParams.get('create') === '1') {
-      resetForm();
-      setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete('create');
-        return next;
+  Silian_useEffect(() => {
+    if (Silian_searchParams.get('create') === '1') {
+      Silian_resetForm();
+      Silian_setSearchParams((Silian_prev) => {
+        const Silian_next = new URLSearchParams(Silian_prev);
+        Silian_next.delete('create');
+        return Silian_next;
       }, { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  }, [Silian_searchParams, Silian_setSearchParams]);
 
-  const resetForm = () => {
-    setFormValues(DEFAULT_FORM);
-    setRuleBuilderValue(DEFAULT_CRITERIA);
-    setCriteriaMode('builder');
-    if (iconInputRef.current) {
-      iconInputRef.current.value = '';
+  const Silian_resetForm = () => {
+    Silian_setFormValues(Silian_DEFAULT_FORM);
+    Silian_setRuleBuilderValue(Silian_DEFAULT_CRITERIA);
+    Silian_setCriteriaMode('builder');
+    if (Silian_iconInputRef.current) {
+      Silian_iconInputRef.current.value = '';
     }
   };
 
-  const handleEdit = (badge) => {
-    const normalizedCriteria = normalizeCriteria(badge?.auto_grant_criteria);
-    setFormValues({
-      ...DEFAULT_FORM,
-      ...badge,
-      auto_grant_criteria: normalizedCriteria
-        ? JSON.stringify(normalizedCriteria, null, 2)
-        : badge.auto_grant_criteria
-          ? JSON.stringify(badge.auto_grant_criteria, null, 2)
+  const Silian_handleEdit = (Silian_badge) => {
+    const Silian_normalizedCriteria = Silian_normalizeCriteria(Silian_badge?.auto_grant_criteria);
+    Silian_setFormValues({
+      ...Silian_DEFAULT_FORM,
+      ...Silian_badge,
+      auto_grant_criteria: Silian_normalizedCriteria
+        ? JSON.stringify(Silian_normalizedCriteria, null, 2)
+        : Silian_badge.auto_grant_criteria
+          ? JSON.stringify(Silian_badge.auto_grant_criteria, null, 2)
           : '',
     });
-    if (normalizedCriteria) {
-      setRuleBuilderValue(normalizedCriteria);
-      setCriteriaMode('builder');
-    } else if (badge.auto_grant_criteria) {
-      setCriteriaMode('json');
+    if (Silian_normalizedCriteria) {
+      Silian_setRuleBuilderValue(Silian_normalizedCriteria);
+      Silian_setCriteriaMode('builder');
+    } else if (Silian_badge.auto_grant_criteria) {
+      Silian_setCriteriaMode('json');
     } else {
-      setRuleBuilderValue(DEFAULT_CRITERIA);
-      setCriteriaMode('builder');
+      Silian_setRuleBuilderValue(Silian_DEFAULT_CRITERIA);
+      Silian_setCriteriaMode('builder');
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
+  const Silian_handleInputChange = (Silian_e) => {
+    const { name: Silian_name, value: Silian_value } = Silian_e.target;
+    Silian_setFormValues((Silian_prev) => ({ ...Silian_prev, [Silian_name]: Silian_value }));
   };
 
-  const handleToggle = (field) => (checked) => {
-    setFormValues((prev) => ({ ...prev, [field]: checked }));
+  const Silian_handleToggle = (Silian_field) => (Silian_checked) => {
+    Silian_setFormValues((Silian_prev) => ({ ...Silian_prev, [Silian_field]: Silian_checked }));
   };
 
-  const handleCriteriaModeChange = (next) => {
-    if (!next) return;
-    if (next === 'builder') {
-      const parsed = normalizeCriteria(formValues.auto_grant_criteria);
-      if (parsed) {
-        setRuleBuilderValue(parsed);
-        setFormValues((prev) => ({ ...prev, auto_grant_criteria: JSON.stringify(parsed, null, 2) }));
-        setCriteriaMode('builder');
+  const Silian_handleCriteriaModeChange = (Silian_next) => {
+    if (!Silian_next) return;
+    if (Silian_next === 'builder') {
+      const Silian_parsed = Silian_normalizeCriteria(Silian_formValues.auto_grant_criteria);
+      if (Silian_parsed) {
+        Silian_setRuleBuilderValue(Silian_parsed);
+        Silian_setFormValues((Silian_prev) => ({ ...Silian_prev, auto_grant_criteria: JSON.stringify(Silian_parsed, null, 2) }));
+        Silian_setCriteriaMode('builder');
       } else {
-        toast.error(t('admin.badges.ruleBuilder.parseFailed'));
+        Silian_toast.error(Silian_t('admin.badges.ruleBuilder.parseFailed'));
       }
     } else {
-      setCriteriaMode(next);
+      Silian_setCriteriaMode(Silian_next);
     }
   };
 
-  const handleRuleBuilderChange = (nextValue) => {
-    setRuleBuilderValue(nextValue);
-    setFormValues((prev) => ({ ...prev, auto_grant_criteria: JSON.stringify(nextValue, null, 2) }));
+  const Silian_handleRuleBuilderChange = (Silian_nextValue) => {
+    Silian_setRuleBuilderValue(Silian_nextValue);
+    Silian_setFormValues((Silian_prev) => ({ ...Silian_prev, auto_grant_criteria: JSON.stringify(Silian_nextValue, null, 2) }));
   };
 
-  const handleIconFileChange = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('admin.badges.fileTooLarge'));
-      event.target.value = '';
+  const Silian_handleIconFileChange = async (Silian_event) => {
+    const Silian_file = Silian_event.target.files?.[0];
+    if (!Silian_file) return;
+    if (Silian_file.size > 5 * 1024 * 1024) {
+      Silian_toast.error(Silian_t('admin.badges.fileTooLarge'));
+      Silian_event.target.value = '';
       return;
     }
-    setUploadingIcon(true);
+    Silian_setUploadingIcon(true);
     try {
-      const result = await uploadViaPresign(file, {
+      const Silian_result = await Silian_uploadViaPresign(Silian_file, {
         directory: 'badges',
         entityType: 'badge',
-        entityId: formValues.id || undefined,
+        entityId: Silian_formValues.id || undefined,
       });
-      const info = result?.data || result;
-      setFormValues((prev) => ({
-        ...prev,
-        icon_path: info.file_path || prev.icon_path,
-        icon_thumbnail_path: info.thumbnail_path || prev.icon_thumbnail_path,
-        icon_url: info.url || info.public_url || prev.icon_url,
-        icon_presigned_url: info.presigned_url || prev.icon_presigned_url,
+      const Silian_info = Silian_result?.data || Silian_result;
+      Silian_setFormValues((Silian_prev) => ({
+        ...Silian_prev,
+        icon_path: Silian_info.file_path || Silian_prev.icon_path,
+        icon_thumbnail_path: Silian_info.thumbnail_path || Silian_prev.icon_thumbnail_path,
+        icon_url: Silian_info.url || Silian_info.public_url || Silian_prev.icon_url,
+        icon_presigned_url: Silian_info.presigned_url || Silian_prev.icon_presigned_url,
       }));
-      toast.success(t('admin.badges.uploadSuccess'));
-    } catch (err) {
-      toast.error(err?.message || t('admin.badges.uploadFailed'));
+      Silian_toast.success(Silian_t('admin.badges.uploadSuccess'));
+    } catch (Silian_err) {
+      Silian_toast.error(Silian_err?.message || Silian_t('admin.badges.uploadFailed'));
     } finally {
-      setUploadingIcon(false);
-      if (event.target) {
-        event.target.value = '';
+      Silian_setUploadingIcon(false);
+      if (Silian_event.target) {
+        Silian_event.target.value = '';
       }
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const payload = {
-      name_zh: formValues.name_zh,
-      name_en: formValues.name_en,
-      description_zh: formValues.description_zh,
-      description_en: formValues.description_en,
-      icon_path: formValues.icon_path,
-      icon_thumbnail_path: formValues.icon_thumbnail_path,
-      sort_order: Number(formValues.sort_order) || 0,
-      is_active: Boolean(formValues.is_active),
-      auto_grant_enabled: Boolean(formValues.auto_grant_enabled),
-      message_title_zh: formValues.message_title_zh,
-      message_title_en: formValues.message_title_en,
-      message_body_zh: formValues.message_body_zh,
-      message_body_en: formValues.message_body_en,
+  const Silian_handleSubmit = async (Silian_e) => {
+    Silian_e.preventDefault();
+    const Silian_payload = {
+      name_zh: Silian_formValues.name_zh,
+      name_en: Silian_formValues.name_en,
+      description_zh: Silian_formValues.description_zh,
+      description_en: Silian_formValues.description_en,
+      icon_path: Silian_formValues.icon_path,
+      icon_thumbnail_path: Silian_formValues.icon_thumbnail_path,
+      sort_order: Number(Silian_formValues.sort_order) || 0,
+      is_active: Boolean(Silian_formValues.is_active),
+      auto_grant_enabled: Boolean(Silian_formValues.auto_grant_enabled),
+      message_title_zh: Silian_formValues.message_title_zh,
+      message_title_en: Silian_formValues.message_title_en,
+      message_body_zh: Silian_formValues.message_body_zh,
+      message_body_en: Silian_formValues.message_body_en,
     };
 
-    if (payload.auto_grant_enabled) {
-      if (criteriaMode === 'builder') {
-        payload.auto_grant_criteria = ruleBuilderValue;
-      } else if (formValues.auto_grant_criteria) {
+    if (Silian_payload.auto_grant_enabled) {
+      if (Silian_criteriaMode === 'builder') {
+        Silian_payload.auto_grant_criteria = Silian_ruleBuilderValue;
+      } else if (Silian_formValues.auto_grant_criteria) {
         try {
-          payload.auto_grant_criteria = JSON.parse(formValues.auto_grant_criteria);
+          Silian_payload.auto_grant_criteria = JSON.parse(Silian_formValues.auto_grant_criteria);
         } catch {
-          toast.error(t('admin.badges.criteriaParseFailed'));
+          Silian_toast.error(Silian_t('admin.badges.criteriaParseFailed'));
           return;
         }
       } else {
-        payload.auto_grant_criteria = null;
+        Silian_payload.auto_grant_criteria = null;
       }
     } else {
-      payload.auto_grant_criteria = null;
+      Silian_payload.auto_grant_criteria = null;
     }
 
     try {
-      setSaving(true);
-      if (formValues.id) {
-        await adminAPI.updateBadge(formValues.id, payload);
-        toast.success(t('admin.badges.updateSuccess'));
+      Silian_setSaving(true);
+      if (Silian_formValues.id) {
+        await Silian_adminAPI.updateBadge(Silian_formValues.id, Silian_payload);
+        Silian_toast.success(Silian_t('admin.badges.updateSuccess'));
       } else {
-        await adminAPI.createBadge(payload);
-        toast.success(t('admin.badges.createSuccess'));
+        await Silian_adminAPI.createBadge(Silian_payload);
+        Silian_toast.success(Silian_t('admin.badges.createSuccess'));
       }
-      resetForm();
-      fetchBadges();
-    } catch (err) {
-      toast.error(err.response?.data?.message || t('admin.badges.saveFailed'));
+      Silian_resetForm();
+      Silian_fetchBadges();
+    } catch (Silian_err) {
+      Silian_toast.error(Silian_err.response?.data?.message || Silian_t('admin.badges.saveFailed'));
     } finally {
-      setSaving(false);
+      Silian_setSaving(false);
     }
   };
 
-  const handleBulkDialogComplete = ({ failed }) => {
-    if (!failed) {
-      setBulkDialog((prev) => ({ ...prev, open: false }));
+  const Silian_handleBulkDialogComplete = ({ failed: Silian_failed }) => {
+    if (!Silian_failed) {
+      Silian_setBulkDialog((Silian_prev) => ({ ...Silian_prev, open: false }));
     }
-    fetchBadges();
+    Silian_fetchBadges();
   };
 
-  const handleAward = (badge) => {
-    setBulkDialog({ open: true, badgeIds: badge ? [badge.id] : [], mode: 'award', presetUsers: [] });
+  const Silian_handleAward = (Silian_badge) => {
+    Silian_setBulkDialog({ open: true, badgeIds: Silian_badge ? [Silian_badge.id] : [], mode: 'award', presetUsers: [] });
   };
 
-  const handleRevoke = (badge) => {
-    setBulkDialog({ open: true, badgeIds: badge ? [badge.id] : [], mode: 'revoke', presetUsers: [] });
+  const Silian_handleRevoke = (Silian_badge) => {
+    Silian_setBulkDialog({ open: true, badgeIds: Silian_badge ? [Silian_badge.id] : [], mode: 'revoke', presetUsers: [] });
   };
 
-  const handleViewRecipients = (badge) => {
-    if (!badge) {
+  const Silian_handleViewRecipients = (Silian_badge) => {
+    if (!Silian_badge) {
       return;
     }
-    setRecipientDialog({ open: true, badge });
+    Silian_setRecipientDialog({ open: true, badge: Silian_badge });
   };
 
-  const handleRecipientDialogChange = (open) => {
-    setRecipientDialog((prev) => ({ open, badge: open ? prev.badge : null }));
+  const Silian_handleRecipientDialogChange = (Silian_open) => {
+    Silian_setRecipientDialog((Silian_prev) => ({ open: Silian_open, badge: Silian_open ? Silian_prev.badge : null }));
   };
 
-  const handleTriggerAuto = async () => {
+  const Silian_handleTriggerAuto = async () => {
     try {
-      setTriggering(true);
-      const response = await adminAPI.triggerBadgeAuto();
-      const summary = response.data?.data;
-      const awarded = summary && typeof summary.awarded !== 'undefined' ? summary.awarded : 0;
-      const users = summary && typeof summary.users !== 'undefined' ? summary.users : 0;
-      const extra = summary ? ' (' + awarded + ' / ' + users + ')' : '';
-      toast.success(t('admin.badges.autoTriggered') + extra);
-    } catch (err) {
-      toast.error(err.response?.data?.message || t('admin.badges.autoTriggerFailed'));
+      Silian_setTriggering(true);
+      const Silian_response = await Silian_adminAPI.triggerBadgeAuto();
+      const Silian_summary = Silian_response.data?.data;
+      const Silian_awarded = Silian_summary && typeof Silian_summary.awarded !== 'undefined' ? Silian_summary.awarded : 0;
+      const Silian_users = Silian_summary && typeof Silian_summary.users !== 'undefined' ? Silian_summary.users : 0;
+      const Silian_extra = Silian_summary ? ' (' + Silian_awarded + ' / ' + Silian_users + ')' : '';
+      Silian_toast.success(Silian_t('admin.badges.autoTriggered') + Silian_extra);
+    } catch (Silian_err) {
+      Silian_toast.error(Silian_err.response?.data?.message || Silian_t('admin.badges.autoTriggerFailed'));
     } finally {
-      setTriggering(false);
-      fetchBadges();
+      Silian_setTriggering(false);
+      Silian_fetchBadges();
     }
   };
 
-  const formattedBadges = useMemo(() => badges || [], [badges]);
-  const activeBadges = useMemo(() => formattedBadges.filter((badge) => badge.is_active), [formattedBadges]);
-  const autoBadges = useMemo(() => formattedBadges.filter((badge) => badge.auto_grant_enabled), [formattedBadges]);
-  const previewImage = resolveBadgeImage(formValues);
+  const Silian_formattedBadges = Silian_useMemo(() => Silian_badges || [], [Silian_badges]);
+  const Silian_activeBadges = Silian_useMemo(() => Silian_formattedBadges.filter((Silian_badge) => Silian_badge.is_active), [Silian_formattedBadges]);
+  const Silian_autoBadges = Silian_useMemo(() => Silian_formattedBadges.filter((Silian_badge) => Silian_badge.auto_grant_enabled), [Silian_formattedBadges]);
+  const Silian_previewImage = Silian_resolveBadgeImage(Silian_formValues);
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('admin.badges.metrics.total')}</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formattedBadges.length}</div>
+        <Silian_Card>
+          <Silian_CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Silian_CardTitle className="text-sm font-medium">{Silian_t('admin.badges.metrics.total')}</Silian_CardTitle>
+            <Silian_Award className="h-4 w-4 text-muted-foreground" />
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            <div className="text-2xl font-bold">{Silian_formattedBadges.length}</div>
             <p className="text-xs text-muted-foreground">
-              {t('admin.badges.metrics.totalHint')}
+              {Silian_t('admin.badges.metrics.totalHint')}
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('admin.badges.metrics.active')}</CardTitle>
-            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeBadges.length}</div>
+          </Silian_CardContent>
+        </Silian_Card>
+        <Silian_Card>
+          <Silian_CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Silian_CardTitle className="text-sm font-medium">{Silian_t('admin.badges.metrics.active')}</Silian_CardTitle>
+            <Silian_ShieldCheck className="h-4 w-4 text-muted-foreground" />
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            <div className="text-2xl font-bold">{Silian_activeBadges.length}</div>
             <p className="text-xs text-muted-foreground">
-              {t('admin.badges.metrics.activeHint')}
+              {Silian_t('admin.badges.metrics.activeHint')}
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('admin.badges.metrics.auto')}</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{autoBadges.length}</div>
+          </Silian_CardContent>
+        </Silian_Card>
+        <Silian_Card>
+          <Silian_CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Silian_CardTitle className="text-sm font-medium">{Silian_t('admin.badges.metrics.auto')}</Silian_CardTitle>
+            <Silian_BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            <div className="text-2xl font-bold">{Silian_autoBadges.length}</div>
             <p className="text-xs text-muted-foreground">
-              {t('admin.badges.metrics.autoHint')}
+              {Silian_t('admin.badges.metrics.autoHint')}
             </p>
-          </CardContent>
-        </Card>
+          </Silian_CardContent>
+        </Silian_Card>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <Silian_Card>
+        <Silian_CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0 space-y-1">
-            <CardTitle>{t('admin.badges.listTitle')}</CardTitle>
+            <Silian_CardTitle>{Silian_t('admin.badges.listTitle')}</Silian_CardTitle>
             <p className="text-sm text-muted-foreground">
-              {t('admin.badges.listHint')}
+              {Silian_t('admin.badges.listHint')}
             </p>
           </div>
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-            <Button className="w-full sm:w-auto" variant="outline" onClick={fetchBadges} disabled={loading}>
-              <RefreshCw className={'h-4 w-4 mr-2 ' + (loading ? 'animate-spin' : '')} />
-              {t('common.refresh')}
-            </Button>
-            <Button className="w-full sm:w-auto" variant="outline" onClick={handleTriggerAuto} disabled={triggering}>
-              {triggering ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <Silian_Button className="w-full sm:w-auto" variant="outline" onClick={Silian_fetchBadges} disabled={Silian_loading}>
+              <Silian_RefreshCw className={'h-4 w-4 mr-2 ' + (Silian_loading ? 'animate-spin' : '')} />
+              {Silian_t('common.refresh')}
+            </Silian_Button>
+            <Silian_Button className="w-full sm:w-auto" variant="outline" onClick={Silian_handleTriggerAuto} disabled={Silian_triggering}>
+              {Silian_triggering ? (
+                <Silian_Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Silian_Sparkles className="h-4 w-4 mr-2" />
               )}
-              {t('admin.badges.triggerAuto')}
-            </Button>
-            <Button className="w-full sm:w-auto" variant="outline" onClick={() => handleAward(null)}>
-              <Users className="h-4 w-4 mr-2" />
-              {t('admin.badges.bulkAward')}
-            </Button>
-            <Button className="w-full sm:w-auto" onClick={resetForm} variant="secondary">
-              {t('admin.badges.newBadge')}
-            </Button>
+              {Silian_t('admin.badges.triggerAuto')}
+            </Silian_Button>
+            <Silian_Button className="w-full sm:w-auto" variant="outline" onClick={() => Silian_handleAward(null)}>
+              <Silian_Users className="h-4 w-4 mr-2" />
+              {Silian_t('admin.badges.bulkAward')}
+            </Silian_Button>
+            <Silian_Button className="w-full sm:w-auto" onClick={Silian_resetForm} variant="secondary">
+              {Silian_t('admin.badges.newBadge')}
+            </Silian_Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
+        </Silian_CardHeader>
+        <Silian_CardContent>
+          {Silian_loading ? (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              {t('common.loading')}
+              <Silian_Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              {Silian_t('common.loading')}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -414,127 +414,127 @@ export default function BadgeManagement() {
                 <thead className="bg-muted/50">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.badges.table.icon')}
+                      {Silian_t('admin.badges.table.icon')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.badges.table.name')}
+                      {Silian_t('admin.badges.table.name')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.badges.table.status')}
+                      {Silian_t('admin.badges.table.status')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.badges.table.stats')}
+                      {Silian_t('admin.badges.table.stats')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.badges.table.auto')}
+                      {Silian_t('admin.badges.table.auto')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.badges.table.sort')}
+                      {Silian_t('admin.badges.table.sort')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.badges.table.updated')}
+                      {Silian_t('admin.badges.table.updated')}
                     </th>
                     <th className="px-4 py-3 text-right font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('common.actions')}
+                      {Silian_t('common.actions')}
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border bg-card">
-                  {formattedBadges.map((badge) => {
-                    const ruleCount = Array.isArray(badge.auto_grant_criteria?.rules)
-                      ? badge.auto_grant_criteria.rules.length
-                      : Array.isArray(badge.auto_grant_criteria)
-                        ? badge.auto_grant_criteria.length
+                  {Silian_formattedBadges.map((Silian_badge) => {
+                    const Silian_ruleCount = Array.isArray(Silian_badge.auto_grant_criteria?.rules)
+                      ? Silian_badge.auto_grant_criteria.rules.length
+                      : Array.isArray(Silian_badge.auto_grant_criteria)
+                        ? Silian_badge.auto_grant_criteria.length
                         : 0;
-                    const stats = badge.stats || DEFAULT_BADGE_STATS;
-                    const badgeImage = resolveBadgeImage(badge);
+                    const Silian_stats = Silian_badge.stats || Silian_DEFAULT_BADGE_STATS;
+                    const Silian_badgeImage = Silian_resolveBadgeImage(Silian_badge);
                     return (
-                      <tr key={badge.id} className="transition-colors hover:bg-muted/40">
+                      <tr key={Silian_badge.id} className="transition-colors hover:bg-muted/40">
                         <td className="px-4 py-3">
                           <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border bg-muted">
-                            {badgeImage.src || badgeImage.filePath ? (
-                              <R2Image
-                                src={badgeImage.src || undefined}
-                                filePath={badgeImage.filePath || undefined}
-                                alt={badge.name_zh || badge.name_en}
+                            {Silian_badgeImage.src || Silian_badgeImage.filePath ? (
+                              <Silian_R2Image
+                                src={Silian_badgeImage.src || undefined}
+                                filePath={Silian_badgeImage.filePath || undefined}
+                                alt={Silian_badge.name_zh || Silian_badge.name_en}
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <Award className="h-5 w-5 text-muted-foreground" />
+                              <Silian_Award className="h-5 w-5 text-muted-foreground" />
                             )}
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="font-medium text-foreground">{badge.name_zh || badge.name_en}</div>
-                          <div className="text-xs text-muted-foreground">{badge.name_en}</div>
+                          <div className="font-medium text-foreground">{Silian_badge.name_zh || Silian_badge.name_en}</div>
+                          <div className="text-xs text-muted-foreground">{Silian_badge.name_en}</div>
                         </td>
                         <td className="px-4 py-3">
-                          <Badge variant={badge.is_active ? 'success' : 'secondary'}>
-                            {badge.is_active
-                              ? t('admin.badges.active')
-                              : t('admin.badges.inactive')}
-                          </Badge>
+                          <Silian_Badge variant={Silian_badge.is_active ? 'success' : 'secondary'}>
+                            {Silian_badge.is_active
+                              ? Silian_t('admin.badges.active')
+                              : Silian_t('admin.badges.inactive')}
+                          </Silian_Badge>
                         </td>
                         <td className="px-4 py-3 text-sm text-foreground/80">
                           <div className="flex flex-col gap-1">
-                            <span>{t('admin.badges.stats.summary',  { awarded: stats.awarded_records || 0, total: stats.total_records || 0 })}</span>
+                            <span>{Silian_t('admin.badges.stats.summary',  { awarded: Silian_stats.awarded_records || 0, total: Silian_stats.total_records || 0 })}</span>
                             <span className="text-xs text-muted-foreground">
-                              {t('admin.badges.stats.awardedUsers',  { count: stats.awarded_users || 0 })}
+                              {Silian_t('admin.badges.stats.awardedUsers',  { count: Silian_stats.awarded_users || 0 })}
                             </span>
-                            {stats.last_awarded_at ? (
+                            {Silian_stats.last_awarded_at ? (
                               <span className="text-[10px] text-muted-foreground">
-                                {t('admin.badges.stats.lastAwarded',  { time: format(new Date(stats.last_awarded_at), 'yyyy-MM-dd HH:mm') })}
+                                {Silian_t('admin.badges.stats.lastAwarded',  { time: Silian_format(new Date(Silian_stats.last_awarded_at), 'yyyy-MM-dd HH:mm') })}
                               </span>
                             ) : null}
                           </div>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex flex-col gap-1">
-                            <Badge variant={badge.auto_grant_enabled ? 'outline' : 'secondary'}>
-                              {badge.auto_grant_enabled
-                                ? t('admin.badges.autoEnabled')
-                                : t('admin.badges.autoDisabled')}
-                            </Badge>
-                            {badge.auto_grant_enabled && ruleCount > 0 && (
+                            <Silian_Badge variant={Silian_badge.auto_grant_enabled ? 'outline' : 'secondary'}>
+                              {Silian_badge.auto_grant_enabled
+                                ? Silian_t('admin.badges.autoEnabled')
+                                : Silian_t('admin.badges.autoDisabled')}
+                            </Silian_Badge>
+                            {Silian_badge.auto_grant_enabled && Silian_ruleCount > 0 && (
                               <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                                {t('admin.badges.ruleBuilder.ruleCount',  { count: ruleCount })}
+                                {Silian_t('admin.badges.ruleBuilder.ruleCount',  { count: Silian_ruleCount })}
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-foreground/80">{badge.sort_order}</td>
+                        <td className="px-4 py-3 text-sm text-foreground/80">{Silian_badge.sort_order}</td>
                         <td className="px-4 py-3 text-xs text-muted-foreground">
-                          {badge.updated_at
-                            ? format(new Date(badge.updated_at), 'yyyy-MM-dd HH:mm')
+                          {Silian_badge.updated_at
+                            ? Silian_format(new Date(Silian_badge.updated_at), 'yyyy-MM-dd HH:mm')
                             : '--'}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex flex-wrap justify-end gap-2">
-                            <Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => handleEdit(badge)}>
-                              <Edit className="h-4 w-4 mr-1" />
-                              {t('common.edit')}
-                            </Button>
-                            <Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => handleViewRecipients(badge)}>
-                              <Eye className="h-4 w-4 mr-1" />
-                              {t('admin.badges.viewRecipients')}
-                            </Button>
-                            <Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => handleAward(badge)}>
-                              <Sparkles className="h-4 w-4 mr-1" />
-                              {t('admin.badges.award')}
-                            </Button>
-                            <Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => handleRevoke(badge)}>
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              {t('admin.badges.revoke')}
-                            </Button>
+                            <Silian_Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => Silian_handleEdit(Silian_badge)}>
+                              <Silian_Edit className="h-4 w-4 mr-1" />
+                              {Silian_t('common.edit')}
+                            </Silian_Button>
+                            <Silian_Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => Silian_handleViewRecipients(Silian_badge)}>
+                              <Silian_Eye className="h-4 w-4 mr-1" />
+                              {Silian_t('admin.badges.viewRecipients')}
+                            </Silian_Button>
+                            <Silian_Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => Silian_handleAward(Silian_badge)}>
+                              <Silian_Sparkles className="h-4 w-4 mr-1" />
+                              {Silian_t('admin.badges.award')}
+                            </Silian_Button>
+                            <Silian_Button className="w-full sm:w-auto" variant="ghost" size="sm" onClick={() => Silian_handleRevoke(Silian_badge)}>
+                              <Silian_Trash2 className="h-4 w-4 mr-1" />
+                              {Silian_t('admin.badges.revoke')}
+                            </Silian_Button>
                           </div>
                         </td>
                       </tr>
                     );
                   })}
-                  {formattedBadges.length === 0 && !loading && (
+                  {Silian_formattedBadges.length === 0 && !Silian_loading && (
                     <tr>
                       <td colSpan={8} className="px-4 py-6 text-center text-sm text-muted-foreground">
-                        {t('admin.badges.empty')}
+                        {Silian_t('admin.badges.empty')}
                       </td>
                     </tr>
                   )}
@@ -542,87 +542,87 @@ export default function BadgeManagement() {
               </table>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </Silian_CardContent>
+      </Silian_Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {formValues.id
-              ? t('admin.badges.editTitle')
-              : t('admin.badges.createTitle')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
+      <Silian_Card>
+        <Silian_CardHeader>
+          <Silian_CardTitle>
+            {Silian_formValues.id
+              ? Silian_t('admin.badges.editTitle')
+              : Silian_t('admin.badges.createTitle')}
+          </Silian_CardTitle>
+        </Silian_CardHeader>
+        <Silian_CardContent>
+          <form onSubmit={Silian_handleSubmit} className="grid grid-cols-1 gap-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    {t('admin.badges.fields.nameZh')}
+                    {Silian_t('admin.badges.fields.nameZh')}
                   </label>
-                  <Input
+                  <Silian_Input
                     name="name_zh"
-                    value={formValues.name_zh}
-                    onChange={handleInputChange}
+                    value={Silian_formValues.name_zh}
+                    onChange={Silian_handleInputChange}
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    {t('admin.badges.fields.nameEn')}
+                    {Silian_t('admin.badges.fields.nameEn')}
                   </label>
-                  <Input
+                  <Silian_Input
                     name="name_en"
-                    value={formValues.name_en}
-                    onChange={handleInputChange}
+                    value={Silian_formValues.name_en}
+                    onChange={Silian_handleInputChange}
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    {t('admin.badges.fields.descZh')}
+                    {Silian_t('admin.badges.fields.descZh')}
                   </label>
-                  <Textarea
+                  <Silian_Textarea
                     name="description_zh"
-                    value={formValues.description_zh}
-                    onChange={handleInputChange}
+                    value={Silian_formValues.description_zh}
+                    onChange={Silian_handleInputChange}
                     rows={3}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    {t('admin.badges.fields.descEn')}
+                    {Silian_t('admin.badges.fields.descEn')}
                   </label>
-                  <Textarea
+                  <Silian_Textarea
                     name="description_en"
-                    value={formValues.description_en}
-                    onChange={handleInputChange}
+                    value={Silian_formValues.description_en}
+                    onChange={Silian_handleInputChange}
                     rows={3}
                   />
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">
-                      {t('admin.badges.fields.sort')}
+                      {Silian_t('admin.badges.fields.sort')}
                     </label>
-                    <Input
+                    <Silian_Input
                       type="number"
                       name="sort_order"
-                      value={formValues.sort_order}
-                      onChange={handleInputChange}
+                      value={Silian_formValues.sort_order}
+                      onChange={Silian_handleInputChange}
                     />
                   </div>
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        {t('admin.badges.fields.isActive')}
+                        {Silian_t('admin.badges.fields.isActive')}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {t('admin.badges.fields.isActiveHint')}
+                        {Silian_t('admin.badges.fields.isActiveHint')}
                       </p>
                     </div>
-                    <Switch checked={formValues.is_active} onCheckedChange={handleToggle('is_active')} />
+                    <Silian_Switch checked={Silian_formValues.is_active} onCheckedChange={Silian_handleToggle('is_active')} />
                   </div>
                 </div>
               </div>
@@ -630,45 +630,45 @@ export default function BadgeManagement() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    {t('admin.badges.fields.icon')}
+                    {Silian_t('admin.badges.fields.icon')}
                   </label>
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-lg border bg-muted overflow-hidden flex items-center justify-center">
-                      {previewImage.src || previewImage.filePath ? (
-                        <R2Image
-                          src={previewImage.src || undefined}
-                          filePath={previewImage.filePath || undefined}
-                          alt={formValues.name_zh || formValues.name_en}
+                      {Silian_previewImage.src || Silian_previewImage.filePath ? (
+                        <Silian_R2Image
+                          src={Silian_previewImage.src || undefined}
+                          filePath={Silian_previewImage.filePath || undefined}
+                          alt={Silian_formValues.name_zh || Silian_formValues.name_en}
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <Award className="h-8 w-8 text-muted-foreground" />
+                        <Silian_Award className="h-8 w-8 text-muted-foreground" />
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Button
+                      <Silian_Button
                         type="button"
                         variant="outline"
-                        disabled={uploadingIcon}
-                        onClick={() => iconInputRef.current?.click()}
+                        disabled={Silian_uploadingIcon}
+                        onClick={() => Silian_iconInputRef.current?.click()}
                         className="flex items-center gap-2"
                       >
-                        {uploadingIcon ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                        {Silian_uploadingIcon ? (
+                          <Silian_Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <Upload className="h-4 w-4" />
+                          <Silian_Upload className="h-4 w-4" />
                         )}
-                        {t('admin.badges.fields.uploadIcon')}
-                      </Button>
+                        {Silian_t('admin.badges.fields.uploadIcon')}
+                      </Silian_Button>
                       <input
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        ref={iconInputRef}
-                        onChange={handleIconFileChange}
+                        ref={Silian_iconInputRef}
+                        onChange={Silian_handleIconFileChange}
                       />
                       <p className="text-xs text-muted-foreground">
-                        {t('admin.badges.fields.iconHint')}
+                        {Silian_t('admin.badges.fields.iconHint')}
                       </p>
                     </div>
                   </div>
@@ -678,40 +678,40 @@ export default function BadgeManagement() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        {t('admin.badges.fields.autoGrantTitle')}
+                        {Silian_t('admin.badges.fields.autoGrantTitle')}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {t('admin.badges.fields.autoGrantHint')}
+                        {Silian_t('admin.badges.fields.autoGrantHint')}
                       </p>
                     </div>
-                    <Switch checked={formValues.auto_grant_enabled} onCheckedChange={handleToggle('auto_grant_enabled')} />
+                    <Silian_Switch checked={Silian_formValues.auto_grant_enabled} onCheckedChange={Silian_handleToggle('auto_grant_enabled')} />
                   </div>
 
-                  {formValues.auto_grant_enabled && (
+                  {Silian_formValues.auto_grant_enabled && (
                     <div className="space-y-4">
-                      <ToggleGroup
+                      <Silian_ToggleGroup
                         type="single"
-                        value={criteriaMode}
-                        onValueChange={handleCriteriaModeChange}
+                        value={Silian_criteriaMode}
+                        onValueChange={Silian_handleCriteriaModeChange}
                         variant="outline"
                       >
-                        <ToggleGroupItem value="builder">
-                          {t('admin.badges.ruleBuilder.toggle.visual')}
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="json">
-                          {t('admin.badges.ruleBuilder.toggle.json')}
-                        </ToggleGroupItem>
-                      </ToggleGroup>
+                        <Silian_ToggleGroupItem value="builder">
+                          {Silian_t('admin.badges.ruleBuilder.toggle.visual')}
+                        </Silian_ToggleGroupItem>
+                        <Silian_ToggleGroupItem value="json">
+                          {Silian_t('admin.badges.ruleBuilder.toggle.json')}
+                        </Silian_ToggleGroupItem>
+                      </Silian_ToggleGroup>
 
-                      {criteriaMode === 'builder' ? (
-                        <BadgeRuleBuilder value={ruleBuilderValue} onChange={handleRuleBuilderChange} />
+                      {Silian_criteriaMode === 'builder' ? (
+                        <Silian_BadgeRuleBuilder value={Silian_ruleBuilderValue} onChange={Silian_handleRuleBuilderChange} />
                       ) : (
-                        <Textarea
+                        <Silian_Textarea
                           className="font-mono"
                           rows={12}
-                          value={formValues.auto_grant_criteria}
-                          onChange={(e) => setFormValues((prev) => ({ ...prev, auto_grant_criteria: e.target.value }))}
-                          placeholder={JSON.stringify(DEFAULT_CRITERIA, null, 2)}
+                          value={Silian_formValues.auto_grant_criteria}
+                          onChange={(Silian_e) => Silian_setFormValues((Silian_prev) => ({ ...Silian_prev, auto_grant_criteria: Silian_e.target.value }))}
+                          placeholder={JSON.stringify(Silian_DEFAULT_CRITERIA, null, 2)}
                         />
                       )}
                     </div>
@@ -720,43 +720,43 @@ export default function BadgeManagement() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    {t('admin.badges.fields.messageTitleZh')}
+                    {Silian_t('admin.badges.fields.messageTitleZh')}
                   </label>
-                  <Input
+                  <Silian_Input
                     name="message_title_zh"
-                    value={formValues.message_title_zh}
-                    onChange={handleInputChange}
+                    value={Silian_formValues.message_title_zh}
+                    onChange={Silian_handleInputChange}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    {t('admin.badges.fields.messageTitleEn')}
+                    {Silian_t('admin.badges.fields.messageTitleEn')}
                   </label>
-                  <Input
+                  <Silian_Input
                     name="message_title_en"
-                    value={formValues.message_title_en}
-                    onChange={handleInputChange}
+                    value={Silian_formValues.message_title_en}
+                    onChange={Silian_handleInputChange}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    {t('admin.badges.fields.messageBodyZh')}
+                    {Silian_t('admin.badges.fields.messageBodyZh')}
                   </label>
-                  <Textarea
+                  <Silian_Textarea
                     name="message_body_zh"
-                    value={formValues.message_body_zh}
-                    onChange={handleInputChange}
+                    value={Silian_formValues.message_body_zh}
+                    onChange={Silian_handleInputChange}
                     rows={3}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    {t('admin.badges.fields.messageBodyEn')}
+                    {Silian_t('admin.badges.fields.messageBodyEn')}
                   </label>
-                  <Textarea
+                  <Silian_Textarea
                     name="message_body_en"
-                    value={formValues.message_body_en}
-                    onChange={handleInputChange}
+                    value={Silian_formValues.message_body_en}
+                    onChange={Silian_handleInputChange}
                     rows={3}
                   />
                 </div>
@@ -764,37 +764,37 @@ export default function BadgeManagement() {
             </div>
 
             <div className="flex flex-wrap items-center justify-end gap-3">
-              <Button className="w-full sm:w-auto" type="button" variant="ghost" onClick={resetForm}>
-                {t('common.reset')}
-              </Button>
-              <Button className="w-full sm:w-auto" type="submit" disabled={saving}>
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {formValues.id ? t('common.saveChanges') : t('common.create')}
-              </Button>
+              <Silian_Button className="w-full sm:w-auto" type="button" variant="ghost" onClick={Silian_resetForm}>
+                {Silian_t('common.reset')}
+              </Silian_Button>
+              <Silian_Button className="w-full sm:w-auto" type="submit" disabled={Silian_saving}>
+                {Silian_saving && <Silian_Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {Silian_formValues.id ? Silian_t('common.saveChanges') : Silian_t('common.create')}
+              </Silian_Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </Silian_CardContent>
+      </Silian_Card>
 
-      <BadgeBulkAwardDialog
-        open={bulkDialog.open}
-        onOpenChange={(open) => {
-          if (!open) {
-            setBulkDialog({ open: false, badgeIds: [], mode: 'award', presetUsers: [] });
+      <Silian_BadgeBulkAwardDialog
+        open={Silian_bulkDialog.open}
+        onOpenChange={(Silian_open) => {
+          if (!Silian_open) {
+            Silian_setBulkDialog({ open: false, badgeIds: [], mode: 'award', presetUsers: [] });
           } else {
-            setBulkDialog((prev) => ({ ...prev, open: true }));
+            Silian_setBulkDialog((Silian_prev) => ({ ...Silian_prev, open: true }));
           }
         }}
-        badges={formattedBadges}
-        defaultSelectedBadgeIds={bulkDialog.badgeIds}
-        presetUsers={bulkDialog.presetUsers}
-        onCompleted={handleBulkDialogComplete}
-        mode={bulkDialog.mode}
+        badges={Silian_formattedBadges}
+        defaultSelectedBadgeIds={Silian_bulkDialog.badgeIds}
+        presetUsers={Silian_bulkDialog.presetUsers}
+        onCompleted={Silian_handleBulkDialogComplete}
+        mode={Silian_bulkDialog.mode}
       />
-      <BadgeRecipientsDialog
-        open={recipientDialog.open}
-        onOpenChange={handleRecipientDialogChange}
-        badge={recipientDialog.badge}
+      <Silian_BadgeRecipientsDialog
+        open={Silian_recipientDialog.open}
+        onOpenChange={Silian_handleRecipientDialogChange}
+        badge={Silian_recipientDialog.badge}
       />
     </div>
   );

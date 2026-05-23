@@ -10,59 +10,59 @@ use Monolog\Logger;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$jobFile = $argv[1] ?? null;
-if ($jobFile === null || !is_file($jobFile)) {
+$Silian_jobFile = $argv[1] ?? null;
+if ($Silian_jobFile === null || !is_file($Silian_jobFile)) {
     fwrite(STDERR, "Missing email job payload file.\n");
     exit(1);
 }
 
-$rawPayload = file_get_contents($jobFile);
-@unlink($jobFile);
-if ($rawPayload === false) {
+$Silian_rawPayload = file_get_contents($Silian_jobFile);
+@unlink($Silian_jobFile);
+if ($Silian_rawPayload === false) {
     fwrite(STDERR, "Unable to read email job payload.\n");
     exit(1);
 }
 
-$jobData = json_decode($rawPayload, true);
-if (!is_array($jobData)) {
+$Silian_jobData = json_decode($Silian_rawPayload, true);
+if (!is_array($Silian_jobData)) {
     fwrite(STDERR, "Invalid email job payload.\n");
     exit(1);
 }
 
 try {
-    $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
-    if (method_exists($dotenv, 'safeLoad')) {
-        $dotenv->safeLoad();
+    $Silian_dotenv = Dotenv::createImmutable(__DIR__ . '/..');
+    if (method_exists($Silian_dotenv, 'safeLoad')) {
+        $Silian_dotenv->safeLoad();
     } else {
-        $dotenv->load();
+        $Silian_dotenv->load();
     }
-} catch (Throwable $e) {
+} catch (Throwable $Silian_e) {
     // Ignore failures to load environment; defaults will be used.
 }
 
-$container = new Container();
-$dependencies = require __DIR__ . '/../src/dependencies.php';
-$dependencies($container);
+$Silian_container = new Container();
+$Silian_dependencies = require __DIR__ . '/../src/dependencies.php';
+$Silian_dependencies($Silian_container);
 
 /** @var EmailService $emailService */
-$emailService = $container->get(EmailService::class);
+$Silian_emailService = $Silian_container->get(EmailService::class);
 /** @var Logger $logger */
-$logger = $container->get(Logger::class);
+$Silian_logger = $Silian_container->get(Logger::class);
 
-$jobs = $jobData['jobs'] ?? null;
-if (is_array($jobs)) {
-    foreach ($jobs as $job) {
-        $jobType = (string) ($job['job_type'] ?? '');
-        $payload = is_array($job['payload'] ?? null) ? $job['payload'] : [];
-        EmailJobRunner::run($emailService, $logger, $jobType, $payload);
+$Silian_jobs = $Silian_jobData['jobs'] ?? null;
+if (is_array($Silian_jobs)) {
+    foreach ($Silian_jobs as $Silian_job) {
+        $Silian_jobType = (string) ($Silian_job['job_type'] ?? '');
+        $Silian_payload = is_array($Silian_job['payload'] ?? null) ? $Silian_job['payload'] : [];
+        EmailJobRunner::run($Silian_emailService, $Silian_logger, $Silian_jobType, $Silian_payload);
     }
     exit(0);
 }
 
-$jobType = (string) ($jobData['job_type'] ?? '');
-$payload = is_array($jobData['payload'] ?? null) ? $jobData['payload'] : [];
+$Silian_jobType = (string) ($Silian_jobData['job_type'] ?? '');
+$Silian_payload = is_array($Silian_jobData['payload'] ?? null) ? $Silian_jobData['payload'] : [];
 
-EmailJobRunner::run($emailService, $logger, $jobType, $payload);
+EmailJobRunner::run($Silian_emailService, $Silian_logger, $Silian_jobType, $Silian_payload);
 
 exit(0);
 

@@ -1,30 +1,30 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
+import Silian_React, { useCallback as Silian_useCallback, useEffect as Silian_useEffect, useMemo as Silian_useMemo, useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { Card as Silian_Card, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle, CardContent as Silian_CardContent } from '@/components/ui/Card';
+import { Button as Silian_Button } from '@/components/ui/Button';
+import { Input as Silian_Input } from '@/components/ui/Input';
+import { Textarea as Silian_Textarea } from '@/components/ui/textarea';
+import { Switch as Silian_Switch } from '@/components/ui/switch';
+import { Badge as Silian_Badge } from '@/components/ui/badge';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog as Silian_AlertDialog,
+  AlertDialogAction as Silian_AlertDialogAction,
+  AlertDialogCancel as Silian_AlertDialogCancel,
+  AlertDialogContent as Silian_AlertDialogContent,
+  AlertDialogDescription as Silian_AlertDialogDescription,
+  AlertDialogFooter as Silian_AlertDialogFooter,
+  AlertDialogHeader as Silian_AlertDialogHeader,
+  AlertDialogTitle as Silian_AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { adminAPI } from '@/lib/api';
-import { useTranslation } from '@/hooks/useTranslation';
-import { toast } from 'react-hot-toast';
-import { format } from 'date-fns';
-import { Loader2, RefreshCw, Edit, Trash2, RotateCcw, Star, Image as ImageIcon, Upload } from 'lucide-react';
-import { uploadViaPresign } from '@/lib/r2Upload';
-import { resolveR2ImageSource } from '@/lib/r2Image';
-import R2Image from '@/components/common/R2Image';
+import { adminAPI as Silian_adminAPI } from '@/lib/api';
+import { useTranslation as Silian_useTranslation } from '@/hooks/useTranslation';
+import { toast as Silian_toast } from 'react-hot-toast';
+import { format as Silian_format } from 'date-fns';
+import { Loader2 as Silian_Loader2, RefreshCw as Silian_RefreshCw, Edit as Silian_Edit, Trash2 as Silian_Trash2, RotateCcw as Silian_RotateCcw, Star as Silian_Star, Image as Silian_ImageIcon, Upload as Silian_Upload } from 'lucide-react';
+import { uploadViaPresign as Silian_uploadViaPresign } from '@/lib/r2Upload';
+import { resolveR2ImageSource as Silian_resolveR2ImageSource } from '@/lib/r2Image';
+import Silian_R2Image from '@/components/common/R2Image';
 
-const DEFAULT_FORM = {
+const Silian_DEFAULT_FORM = {
   id: null,
   name: '',
   description: '',
@@ -36,268 +36,268 @@ const DEFAULT_FORM = {
   is_active: true,
   is_default: false,
 };
-const sanitizeCategory = (category) => {
-  const raw = typeof category === 'string' ? category : '';
-  const trimmed = raw.trim();
-  if (!trimmed) {
+const Silian_sanitizeCategory = (Silian_category) => {
+  const Silian_raw = typeof Silian_category === 'string' ? Silian_category : '';
+  const Silian_trimmed = Silian_raw.trim();
+  if (!Silian_trimmed) {
     return 'default';
   }
-  const normalized = trimmed
+  const Silian_normalized = Silian_trimmed
     .replace(/[^A-Za-z0-9_-]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^[-_]+|[-_]+$/g, '')
     .toLowerCase();
-  return normalized || 'default';
+  return Silian_normalized || 'default';
 };
 
-const normalizeAvatar = (avatar = {}) => {
-  if (!avatar || typeof avatar !== 'object') {
-    return { ...DEFAULT_FORM };
+const Silian_normalizeAvatar = (Silian_avatar = {}) => {
+  if (!Silian_avatar || typeof Silian_avatar !== 'object') {
+    return { ...Silian_DEFAULT_FORM };
   }
-  const rawFilePath = typeof avatar.file_path === 'string' && avatar.file_path ? avatar.file_path : '';
-  const sanitizedIconPath = typeof avatar.icon_path === 'string' ? avatar.icon_path.replace(/^[/]+/, '') : '';
-  const normalizedPath = rawFilePath || (sanitizedIconPath ? `/${sanitizedIconPath}` : '');
-  const iconUrl = avatar.icon_url || avatar.url || avatar.image_url || '';
-  const normalizedCategory = sanitizeCategory(avatar.category);
+  const Silian_rawFilePath = typeof Silian_avatar.file_path === 'string' && Silian_avatar.file_path ? Silian_avatar.file_path : '';
+  const Silian_sanitizedIconPath = typeof Silian_avatar.icon_path === 'string' ? Silian_avatar.icon_path.replace(/^[/]+/, '') : '';
+  const Silian_normalizedPath = Silian_rawFilePath || (Silian_sanitizedIconPath ? `/${Silian_sanitizedIconPath}` : '');
+  const Silian_iconUrl = Silian_avatar.icon_url || Silian_avatar.url || Silian_avatar.image_url || '';
+  const Silian_normalizedCategory = Silian_sanitizeCategory(Silian_avatar.category);
   return {
-    ...avatar,
-    category: normalizedCategory,
-    file_path: normalizedPath,
-    icon_path: sanitizedIconPath || normalizedPath.replace(/^[/]+/, ''),
-    icon_url: iconUrl,
-    icon_presigned_url: avatar.icon_presigned_url || '',
-    image_url: avatar.image_url || iconUrl || '',
-    url: avatar.url || iconUrl || '',
+    ...Silian_avatar,
+    category: Silian_normalizedCategory,
+    file_path: Silian_normalizedPath,
+    icon_path: Silian_sanitizedIconPath || Silian_normalizedPath.replace(/^[/]+/, ''),
+    icon_url: Silian_iconUrl,
+    icon_presigned_url: Silian_avatar.icon_presigned_url || '',
+    image_url: Silian_avatar.image_url || Silian_iconUrl || '',
+    url: Silian_avatar.url || Silian_iconUrl || '',
   };
 };
 
-const resolveAvatarImage = (avatar = {}) => resolveR2ImageSource({
-  urlCandidates: [avatar.icon_url, avatar.icon_presigned_url],
-  pathCandidates: [avatar.file_path],
+const Silian_resolveAvatarImage = (Silian_avatar = {}) => Silian_resolveR2ImageSource({
+  urlCandidates: [Silian_avatar.icon_url, Silian_avatar.icon_presigned_url],
+  pathCandidates: [Silian_avatar.file_path],
 });
 
 
 export function AvatarManagement() {
-  const { t } = useTranslation(['admin', 'common']);
-  const [avatars, setAvatars] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [formValues, setFormValues] = useState(DEFAULT_FORM);
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, avatar: null });
-  const [isDeleting, setIsDeleting] = useState(false);
-  const avatarInputRef = useRef(null);
+  const { t: Silian_t } = Silian_useTranslation(['admin', 'common']);
+  const [Silian_avatars, Silian_setAvatars] = Silian_useState([]);
+  const [Silian_loading, Silian_setLoading] = Silian_useState(true);
+  const [Silian_saving, Silian_setSaving] = Silian_useState(false);
+  const [Silian_uploadingAvatar, Silian_setUploadingAvatar] = Silian_useState(false);
+  const [Silian_formValues, Silian_setFormValues] = Silian_useState(Silian_DEFAULT_FORM);
+  const [Silian_deleteDialog, Silian_setDeleteDialog] = Silian_useState({ open: false, avatar: null });
+  const [Silian_isDeleting, Silian_setIsDeleting] = Silian_useState(false);
+  const Silian_avatarInputRef = Silian_useRef(null);
 
-  const fetchAvatars = useCallback(async () => {
+  const Silian_fetchAvatars = Silian_useCallback(async () => {
     try {
-      setLoading(true);
-      const response = await adminAPI.getAvatars({ include_inactive: true });
-      if (response.data?.success) {
-        const items = (response.data.data || []).map((item) => normalizeAvatar(item));
-        setAvatars(items);
+      Silian_setLoading(true);
+      const Silian_response = await Silian_adminAPI.getAvatars({ include_inactive: true });
+      if (Silian_response.data?.success) {
+        const Silian_items = (Silian_response.data.data || []).map((Silian_item) => Silian_normalizeAvatar(Silian_item));
+        Silian_setAvatars(Silian_items);
       }
-    } catch (error) {
-      console.error('Avatar list fetch failed:', error);
-      toast.error(t('admin.avatars.loadFailed'));
+    } catch (Silian_error) {
+      console.error('Avatar list fetch failed:', Silian_error);
+      Silian_toast.error(Silian_t('admin.avatars.loadFailed'));
     } finally {
-      setLoading(false);
+      Silian_setLoading(false);
     }
-  }, [t]);
+  }, [Silian_t]);
 
-  useEffect(() => {
-    fetchAvatars();
-  }, [fetchAvatars]);
+  Silian_useEffect(() => {
+    Silian_fetchAvatars();
+  }, [Silian_fetchAvatars]);
 
-  const resetForm = () => {
-    setFormValues({ ...DEFAULT_FORM });
+  const Silian_resetForm = () => {
+    Silian_setFormValues({ ...Silian_DEFAULT_FORM });
   };
 
-  const handleEdit = (avatar) => {
-    const normalized = normalizeAvatar(avatar);
-    setFormValues({
-      id: normalized.id,
-      name: normalized.name || '',
-      description: normalized.description || '',
-      category: sanitizeCategory(normalized.category),
-      file_path: normalized.file_path || '',
-      icon_url: normalized.icon_url || normalized.image_url || '',
-      icon_presigned_url: normalized.icon_presigned_url || '',
-      sort_order: normalized.sort_order || 0,
-      is_active: normalized.is_active === undefined ? true : !!normalized.is_active,
-      is_default: !!normalized.is_default,
+  const Silian_handleEdit = (Silian_avatar) => {
+    const Silian_normalized = Silian_normalizeAvatar(Silian_avatar);
+    Silian_setFormValues({
+      id: Silian_normalized.id,
+      name: Silian_normalized.name || '',
+      description: Silian_normalized.description || '',
+      category: Silian_sanitizeCategory(Silian_normalized.category),
+      file_path: Silian_normalized.file_path || '',
+      icon_url: Silian_normalized.icon_url || Silian_normalized.image_url || '',
+      icon_presigned_url: Silian_normalized.icon_presigned_url || '',
+      sort_order: Silian_normalized.sort_order || 0,
+      is_active: Silian_normalized.is_active === undefined ? true : !!Silian_normalized.is_active,
+      is_default: !!Silian_normalized.is_default,
     });
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prev) => ({
-      ...prev,
-      [name]: name === 'category' ? sanitizeCategory(value) : value,
+  const Silian_handleInputChange = (Silian_e) => {
+    const { name: Silian_name, value: Silian_value } = Silian_e.target;
+    Silian_setFormValues((Silian_prev) => ({
+      ...Silian_prev,
+      [Silian_name]: Silian_name === 'category' ? Silian_sanitizeCategory(Silian_value) : Silian_value,
     }));
   };
 
-  const handleToggle = (field) => (checked) => {
-    setFormValues((prev) => ({ ...prev, [field]: checked }));
+  const Silian_handleToggle = (Silian_field) => (Silian_checked) => {
+    Silian_setFormValues((Silian_prev) => ({ ...Silian_prev, [Silian_field]: Silian_checked }));
   };
 
-  const handleAvatarFileChange = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('admin.avatars.fileTooLarge'));
-      event.target.value = '';
+  const Silian_handleAvatarFileChange = async (Silian_event) => {
+    const Silian_file = Silian_event.target.files?.[0];
+    if (!Silian_file) return;
+    if (Silian_file.size > 5 * 1024 * 1024) {
+      Silian_toast.error(Silian_t('admin.avatars.fileTooLarge'));
+      Silian_event.target.value = '';
       return;
     }
-    setUploadingAvatar(true);
-    const category = sanitizeCategory(formValues.category);
+    Silian_setUploadingAvatar(true);
+    const Silian_category = Silian_sanitizeCategory(Silian_formValues.category);
     try {
-      const result = await uploadViaPresign(file, {
-        directory: `avatars/${category}`,
+      const Silian_result = await Silian_uploadViaPresign(Silian_file, {
+        directory: `avatars/${Silian_category}`,
         entityType: 'avatar',
-        entityId: formValues.id || undefined,
+        entityId: Silian_formValues.id || undefined,
       });
-      const info = result?.data || result;
-      setFormValues((prev) => ({
-        ...prev,
-        file_path: info.file_path || prev.file_path,
-        icon_url: info.url || info.public_url || prev.icon_url,
-        icon_presigned_url: info.presigned_url || prev.icon_presigned_url,
+      const Silian_info = Silian_result?.data || Silian_result;
+      Silian_setFormValues((Silian_prev) => ({
+        ...Silian_prev,
+        file_path: Silian_info.file_path || Silian_prev.file_path,
+        icon_url: Silian_info.url || Silian_info.public_url || Silian_prev.icon_url,
+        icon_presigned_url: Silian_info.presigned_url || Silian_prev.icon_presigned_url,
       }));
-      toast.success(t('admin.avatars.uploadSuccess'));
-    } catch (error) {
-      toast.error(error?.message || t('admin.avatars.uploadFailed'));
+      Silian_toast.success(Silian_t('admin.avatars.uploadSuccess'));
+    } catch (Silian_error) {
+      Silian_toast.error(Silian_error?.message || Silian_t('admin.avatars.uploadFailed'));
     } finally {
-      setUploadingAvatar(false);
-      if (event.target) {
-        event.target.value = '';
+      Silian_setUploadingAvatar(false);
+      if (Silian_event.target) {
+        Silian_event.target.value = '';
       }
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formValues.file_path) {
-      toast.error(t('admin.avatars.fileRequired'));
+  const Silian_handleSubmit = async (Silian_e) => {
+    Silian_e.preventDefault();
+    if (!Silian_formValues.file_path) {
+      Silian_toast.error(Silian_t('admin.avatars.fileRequired'));
       return;
     }
 
-    const payload = {
-      name: formValues.name,
-      description: formValues.description,
-      category: sanitizeCategory(formValues.category),
-      file_path: formValues.file_path,
-      sort_order: Number(formValues.sort_order) || 0,
-      is_active: !!formValues.is_active,
-      is_default: !!formValues.is_default,
+    const Silian_payload = {
+      name: Silian_formValues.name,
+      description: Silian_formValues.description,
+      category: Silian_sanitizeCategory(Silian_formValues.category),
+      file_path: Silian_formValues.file_path,
+      sort_order: Number(Silian_formValues.sort_order) || 0,
+      is_active: !!Silian_formValues.is_active,
+      is_default: !!Silian_formValues.is_default,
     };
 
     try {
-      setSaving(true);
-      if (formValues.id) {
-        await adminAPI.updateAvatar(formValues.id, payload);
-        toast.success(t('admin.avatars.updateSuccess'));
+      Silian_setSaving(true);
+      if (Silian_formValues.id) {
+        await Silian_adminAPI.updateAvatar(Silian_formValues.id, Silian_payload);
+        Silian_toast.success(Silian_t('admin.avatars.updateSuccess'));
       } else {
-        await adminAPI.createAvatar(payload);
-        toast.success(t('admin.avatars.createSuccess'));
+        await Silian_adminAPI.createAvatar(Silian_payload);
+        Silian_toast.success(Silian_t('admin.avatars.createSuccess'));
       }
-      resetForm();
-      fetchAvatars();
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.saveFailed'));
+      Silian_resetForm();
+      Silian_fetchAvatars();
+    } catch (Silian_error) {
+      Silian_toast.error(Silian_error.response?.data?.message || Silian_t('admin.avatars.saveFailed'));
     } finally {
-      setSaving(false);
+      Silian_setSaving(false);
     }
   };
 
-  const toggleActive = async (avatar) => {
-    const nextActive = !avatar.is_active;
+  const Silian_toggleActive = async (Silian_avatar) => {
+    const Silian_nextActive = !Silian_avatar.is_active;
     try {
-      await adminAPI.updateAvatar(avatar.id, { is_active: nextActive });
-      toast.success(nextActive
-        ? t('admin.avatars.enabled')
-        : t('admin.avatars.disabled'));
-      setAvatars((prev) => prev.map((item) => (item.id === avatar.id ? { ...item, is_active: nextActive } : item)));
-      setFormValues((prev) => {
-        if (prev.id !== avatar.id) {
-          return prev;
+      await Silian_adminAPI.updateAvatar(Silian_avatar.id, { is_active: Silian_nextActive });
+      Silian_toast.success(Silian_nextActive
+        ? Silian_t('admin.avatars.enabled')
+        : Silian_t('admin.avatars.disabled'));
+      Silian_setAvatars((Silian_prev) => Silian_prev.map((Silian_item) => (Silian_item.id === Silian_avatar.id ? { ...Silian_item, is_active: Silian_nextActive } : Silian_item)));
+      Silian_setFormValues((Silian_prev) => {
+        if (Silian_prev.id !== Silian_avatar.id) {
+          return Silian_prev;
         }
-        return { ...prev, is_active: nextActive };
+        return { ...Silian_prev, is_active: Silian_nextActive };
       });
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.toggleFailed'));
+    } catch (Silian_error) {
+      Silian_toast.error(Silian_error.response?.data?.message || Silian_t('admin.avatars.toggleFailed'));
     }
   };
 
 
-  const setDefault = async (avatarId) => {
+  const Silian_setDefault = async (Silian_avatarId) => {
     try {
-      await adminAPI.setDefaultAvatar(avatarId);
-      toast.success(t('admin.avatars.setDefaultSuccess'));
-      fetchAvatars();
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.setDefaultFailed'));
+      await Silian_adminAPI.setDefaultAvatar(Silian_avatarId);
+      Silian_toast.success(Silian_t('admin.avatars.setDefaultSuccess'));
+      Silian_fetchAvatars();
+    } catch (Silian_error) {
+      Silian_toast.error(Silian_error.response?.data?.message || Silian_t('admin.avatars.setDefaultFailed'));
     }
   };
 
-  const closeDeleteDialog = () => {
-    setDeleteDialog({ open: false, avatar: null });
-    setIsDeleting(false);
+  const Silian_closeDeleteDialog = () => {
+    Silian_setDeleteDialog({ open: false, avatar: null });
+    Silian_setIsDeleting(false);
   };
 
-  const requestDeleteAvatar = (avatar) => {
-    setDeleteDialog({ open: true, avatar });
+  const Silian_requestDeleteAvatar = (Silian_avatar) => {
+    Silian_setDeleteDialog({ open: true, avatar: Silian_avatar });
   };
 
-  const handleDeleteAvatar = async () => {
-    if (!deleteDialog.avatar) {
+  const Silian_handleDeleteAvatar = async () => {
+    if (!Silian_deleteDialog.avatar) {
       return;
     }
     try {
-      setIsDeleting(true);
-      await adminAPI.deleteAvatar(deleteDialog.avatar.id);
-      toast.success(t('admin.avatars.deleteSuccess'));
-      closeDeleteDialog();
-      fetchAvatars();
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.deleteFailed'));
+      Silian_setIsDeleting(true);
+      await Silian_adminAPI.deleteAvatar(Silian_deleteDialog.avatar.id);
+      Silian_toast.success(Silian_t('admin.avatars.deleteSuccess'));
+      Silian_closeDeleteDialog();
+      Silian_fetchAvatars();
+    } catch (Silian_error) {
+      Silian_toast.error(Silian_error.response?.data?.message || Silian_t('admin.avatars.deleteFailed'));
     } finally {
-      setIsDeleting(false);
+      Silian_setIsDeleting(false);
     }
   };
 
-  const restoreAvatar = async (avatarId) => {
+  const Silian_restoreAvatar = async (Silian_avatarId) => {
     try {
-      await adminAPI.restoreAvatar(avatarId);
-      toast.success(t('admin.avatars.restoreSuccess'));
-      fetchAvatars();
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.avatars.restoreFailed'));
+      await Silian_adminAPI.restoreAvatar(Silian_avatarId);
+      Silian_toast.success(Silian_t('admin.avatars.restoreSuccess'));
+      Silian_fetchAvatars();
+    } catch (Silian_error) {
+      Silian_toast.error(Silian_error.response?.data?.message || Silian_t('admin.avatars.restoreFailed'));
     }
   };
 
-  const formattedAvatars = useMemo(() => avatars || [], [avatars]);
-  const previewImage = resolveAvatarImage(formValues);
+  const Silian_formattedAvatars = Silian_useMemo(() => Silian_avatars || [], [Silian_avatars]);
+  const Silian_previewImage = Silian_resolveAvatarImage(Silian_formValues);
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>{t('admin.avatars.listTitle')}</CardTitle>
+      <Silian_Card>
+        <Silian_CardHeader className="flex items-center justify-between">
+          <Silian_CardTitle>{Silian_t('admin.avatars.listTitle')}</Silian_CardTitle>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={fetchAvatars} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              {t('common.refresh')}
-            </Button>
-            <Button variant="secondary" onClick={resetForm}>
-              {t('admin.avatars.newAvatar')}
-            </Button>
+            <Silian_Button variant="outline" onClick={Silian_fetchAvatars} disabled={Silian_loading}>
+              <Silian_RefreshCw className={`h-4 w-4 mr-2 ${Silian_loading ? 'animate-spin' : ''}`} />
+              {Silian_t('common.refresh')}
+            </Silian_Button>
+            <Silian_Button variant="secondary" onClick={Silian_resetForm}>
+              {Silian_t('admin.avatars.newAvatar')}
+            </Silian_Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
+        </Silian_CardHeader>
+        <Silian_CardContent>
+          {Silian_loading ? (
             <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              {t('common.loading')}
+              <Silian_Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              {Silian_t('common.loading')}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -305,101 +305,101 @@ export function AvatarManagement() {
                 <thead className="bg-muted/50">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.avatars.table.icon')}
+                      {Silian_t('admin.avatars.table.icon')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.avatars.table.name')}
+                      {Silian_t('admin.avatars.table.name')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.avatars.table.category')}
+                      {Silian_t('admin.avatars.table.category')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.avatars.table.status')}
+                      {Silian_t('admin.avatars.table.status')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.avatars.table.sort')}
+                      {Silian_t('admin.avatars.table.sort')}
                     </th>
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('admin.avatars.table.updated')}
+                      {Silian_t('admin.avatars.table.updated')}
                     </th>
                     <th className="px-4 py-3 text-right font-medium uppercase tracking-wider text-muted-foreground">
-                      {t('common.actions')}
+                      {Silian_t('common.actions')}
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border bg-card">
-                  {formattedAvatars.map((avatar) => {
-                    const avatarImage = resolveAvatarImage(avatar);
+                  {Silian_formattedAvatars.map((Silian_avatar) => {
+                    const Silian_avatarImage = Silian_resolveAvatarImage(Silian_avatar);
                     return (
-                      <tr key={avatar.id} className="transition-colors hover:bg-muted/40">
+                      <tr key={Silian_avatar.id} className="transition-colors hover:bg-muted/40">
                       <td className="px-4 py-3">
                         <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border bg-muted">
-                          {avatarImage.src || avatarImage.filePath ? (
-                            <R2Image
-                              src={avatarImage.src || undefined}
-                              filePath={avatarImage.filePath || undefined}
-                              alt={avatar.name}
+                          {Silian_avatarImage.src || Silian_avatarImage.filePath ? (
+                            <Silian_R2Image
+                              src={Silian_avatarImage.src || undefined}
+                              filePath={Silian_avatarImage.filePath || undefined}
+                              alt={Silian_avatar.name}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                            <Silian_ImageIcon className="h-5 w-5 text-muted-foreground" />
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">{avatar.name}</div>
-                        <div className="max-w-[180px] truncate text-xs text-muted-foreground">{avatar.description}</div>
+                        <div className="font-medium text-foreground">{Silian_avatar.name}</div>
+                        <div className="max-w-[180px] truncate text-xs text-muted-foreground">{Silian_avatar.description}</div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-foreground/80">{avatar.category || 'default'}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80">{Silian_avatar.category || 'default'}</td>
                       <td className="px-4 py-3 space-x-2">
-                        <Badge variant={avatar.is_active ? 'success' : 'secondary'}>
-                          {avatar.is_active
-                            ? t('admin.avatars.active')
-                            : t('admin.avatars.inactive')}
-                        </Badge>
-                        {avatar.is_default && (
-                          <Badge variant="outline">{t('admin.avatars.default')}</Badge>
+                        <Silian_Badge variant={Silian_avatar.is_active ? 'success' : 'secondary'}>
+                          {Silian_avatar.is_active
+                            ? Silian_t('admin.avatars.active')
+                            : Silian_t('admin.avatars.inactive')}
+                        </Silian_Badge>
+                        {Silian_avatar.is_default && (
+                          <Silian_Badge variant="outline">{Silian_t('admin.avatars.default')}</Silian_Badge>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-foreground/80">{avatar.sort_order}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80">{Silian_avatar.sort_order}</td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {avatar.updated_at
-                          ? format(new Date(avatar.updated_at), 'yyyy-MM-dd HH:mm')
+                        {Silian_avatar.updated_at
+                          ? Silian_format(new Date(Silian_avatar.updated_at), 'yyyy-MM-dd HH:mm')
                           : '--'}
                       </td>
                       <td className="px-4 py-3 text-right space-x-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(avatar)}>
-                          <Edit className="h-4 w-4 mr-1" />
-                          {t('common.edit')}
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => toggleActive(avatar)}>
-                          {avatar.is_active
-                            ? t('admin.avatars.disable')
-                            : t('admin.avatars.enable')}
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setDefault(avatar.id)} disabled={avatar.is_default}>
-                          <Star className="h-4 w-4 mr-1" />
-                          {t('admin.avatars.setDefault')}
-                        </Button>
-                        {avatar.deleted_at ? (
-                          <Button variant="ghost" size="sm" onClick={() => restoreAvatar(avatar.id)}>
-                            <RotateCcw className="h-4 w-4 mr-1" />
-                            {t('admin.avatars.restore')}
-                          </Button>
+                        <Silian_Button variant="ghost" size="sm" onClick={() => Silian_handleEdit(Silian_avatar)}>
+                          <Silian_Edit className="h-4 w-4 mr-1" />
+                          {Silian_t('common.edit')}
+                        </Silian_Button>
+                        <Silian_Button variant="ghost" size="sm" onClick={() => Silian_toggleActive(Silian_avatar)}>
+                          {Silian_avatar.is_active
+                            ? Silian_t('admin.avatars.disable')
+                            : Silian_t('admin.avatars.enable')}
+                        </Silian_Button>
+                        <Silian_Button variant="ghost" size="sm" onClick={() => Silian_setDefault(Silian_avatar.id)} disabled={Silian_avatar.is_default}>
+                          <Silian_Star className="h-4 w-4 mr-1" />
+                          {Silian_t('admin.avatars.setDefault')}
+                        </Silian_Button>
+                        {Silian_avatar.deleted_at ? (
+                          <Silian_Button variant="ghost" size="sm" onClick={() => Silian_restoreAvatar(Silian_avatar.id)}>
+                            <Silian_RotateCcw className="h-4 w-4 mr-1" />
+                            {Silian_t('admin.avatars.restore')}
+                          </Silian_Button>
                         ) : (
-                          <Button variant="ghost" size="sm" onClick={() => requestDeleteAvatar(avatar)}>
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            {t('admin.avatars.delete')}
-                          </Button>
+                          <Silian_Button variant="ghost" size="sm" onClick={() => Silian_requestDeleteAvatar(Silian_avatar)}>
+                            <Silian_Trash2 className="h-4 w-4 mr-1" />
+                            {Silian_t('admin.avatars.delete')}
+                          </Silian_Button>
                         )}
                       </td>
                       </tr>
                     );
                   })}
-                  {formattedAvatars.length === 0 && !loading && (
+                  {Silian_formattedAvatars.length === 0 && !Silian_loading && (
                     <tr>
                       <td colSpan={7} className="px-4 py-6 text-center text-sm text-muted-foreground">
-                        {t('admin.avatars.empty')} 
+                        {Silian_t('admin.avatars.empty')}
                       </td>
                     </tr>
                   )}
@@ -407,87 +407,87 @@ export function AvatarManagement() {
               </table>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </Silian_CardContent>
+      </Silian_Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {formValues.id
-              ? t('admin.avatars.editTitle')
-              : t('admin.avatars.createTitle')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Silian_Card>
+        <Silian_CardHeader>
+          <Silian_CardTitle>
+            {Silian_formValues.id
+              ? Silian_t('admin.avatars.editTitle')
+              : Silian_t('admin.avatars.createTitle')}
+          </Silian_CardTitle>
+        </Silian_CardHeader>
+        <Silian_CardContent>
+          <form onSubmit={Silian_handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {t('admin.avatars.fields.name')}
+                  {Silian_t('admin.avatars.fields.name')}
                 </label>
-                <Input
+                <Silian_Input
                   name="name"
-                  value={formValues.name}
-                  onChange={handleInputChange}
+                  value={Silian_formValues.name}
+                  onChange={Silian_handleInputChange}
                   required
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {t('admin.avatars.fields.description')}
+                  {Silian_t('admin.avatars.fields.description')}
                 </label>
-                <Textarea
+                <Silian_Textarea
                   name="description"
-                  value={formValues.description}
-                  onChange={handleInputChange}
+                  value={Silian_formValues.description}
+                  onChange={Silian_handleInputChange}
                   rows={4}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {t('admin.avatars.fields.category')}
+                  {Silian_t('admin.avatars.fields.category')}
                 </label>
-                <Input
+                <Silian_Input
                   name="category"
-                  value={formValues.category}
-                  onChange={handleInputChange}
+                  value={Silian_formValues.category}
+                  onChange={Silian_handleInputChange}
                   placeholder="default"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {t('admin.avatars.fields.icon')}
+                  {Silian_t('admin.avatars.fields.icon')}
                 </label>
                 <input
-                  ref={avatarInputRef}
+                  ref={Silian_avatarInputRef}
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={handleAvatarFileChange}
+                  onChange={Silian_handleAvatarFileChange}
                 />
-                <Button
+                <Silian_Button
                   type="button"
                   variant="outline"
-                  onClick={() => avatarInputRef.current?.click()}
-                  disabled={uploadingAvatar}
+                  onClick={() => Silian_avatarInputRef.current?.click()}
+                  disabled={Silian_uploadingAvatar}
                   className="flex items-center gap-2"
                 >
-                  {uploadingAvatar ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  {Silian_uploadingAvatar ? (
+                    <Silian_Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Upload className="h-4 w-4" />
+                    <Silian_Upload className="h-4 w-4" />
                   )}
-                  {t('admin.avatars.selectFile')}
-                </Button>
+                  {Silian_t('admin.avatars.selectFile')}
+                </Silian_Button>
                 <p className="text-xs text-muted-foreground">
-                  {t('admin.avatars.uploadHint')}
+                  {Silian_t('admin.avatars.uploadHint')}
                 </p>
-                {(formValues.icon_presigned_url || formValues.icon_url || formValues.file_path) && (
+                {(Silian_formValues.icon_presigned_url || Silian_formValues.icon_url || Silian_formValues.file_path) && (
                   <div className="mt-2 w-20 h-20 rounded-full overflow-hidden border">
-                    <R2Image
-                      src={previewImage.src || undefined}
-                      filePath={previewImage.filePath || undefined}
-                      alt={formValues.name}
+                    <Silian_R2Image
+                      src={Silian_previewImage.src || undefined}
+                      filePath={Silian_previewImage.filePath || undefined}
+                      alt={Silian_formValues.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -498,77 +498,77 @@ export function AvatarManagement() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {t('admin.avatars.fields.sortOrder')}
+                  {Silian_t('admin.avatars.fields.sortOrder')}
                 </label>
-                <Input
+                <Silian_Input
                   type="number"
                   name="sort_order"
-                  value={formValues.sort_order}
-                  onChange={handleInputChange}
+                  value={Silian_formValues.sort_order}
+                  onChange={Silian_handleInputChange}
                 />
               </div>
               <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2">
-                <span className="text-sm text-foreground">{t('admin.avatars.fields.active')}</span>
-                <Switch
-                  checked={formValues.is_active}
-                  onCheckedChange={handleToggle('is_active')}
-                  aria-label={t('admin.avatars.fields.active')}
+                <span className="text-sm text-foreground">{Silian_t('admin.avatars.fields.active')}</span>
+                <Silian_Switch
+                  checked={Silian_formValues.is_active}
+                  onCheckedChange={Silian_handleToggle('is_active')}
+                  aria-label={Silian_t('admin.avatars.fields.active')}
                 />
               </div>
               <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2">
-                <span className="text-sm text-foreground">{t('admin.avatars.fields.default')}</span>
-                <Switch
-                  checked={formValues.is_default}
-                  onCheckedChange={handleToggle('is_default')}
-                  aria-label={t('admin.avatars.fields.default')}
+                <span className="text-sm text-foreground">{Silian_t('admin.avatars.fields.default')}</span>
+                <Silian_Switch
+                  checked={Silian_formValues.is_default}
+                  onCheckedChange={Silian_handleToggle('is_default')}
+                  aria-label={Silian_t('admin.avatars.fields.default')}
                 />
               </div>
 
               <div className="flex items-center gap-2">
-                <Button type="submit" disabled={saving}>
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Silian_Button type="submit" disabled={Silian_saving}>
+                  {Silian_saving ? (
+                    <Silian_Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
-                    <ImageIcon className="h-4 w-4 mr-2" />
+                    <Silian_ImageIcon className="h-4 w-4 mr-2" />
                   )}
-                  {formValues.id
-                    ? t('admin.avatars.updateAction')
-                    : t('admin.avatars.createAction')}
-                </Button>
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  {t('common.cancel')}
-                </Button>
+                  {Silian_formValues.id
+                    ? Silian_t('admin.avatars.updateAction')
+                    : Silian_t('admin.avatars.createAction')}
+                </Silian_Button>
+                <Silian_Button type="button" variant="outline" onClick={Silian_resetForm}>
+                  {Silian_t('common.cancel')}
+                </Silian_Button>
               </div>
             </div>
           </form>
-        </CardContent>
-      </Card>
-      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => (!open ? closeDeleteDialog() : null)}>
-        <AlertDialogContent className="sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('admin.avatars.deleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('admin.avatars.deleteConfirm')}
-              {deleteDialog.avatar?.name ? ` (${deleteDialog.avatar.name})` : ''}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDeleteDialog}>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteAvatar}
+        </Silian_CardContent>
+      </Silian_Card>
+      <Silian_AlertDialog open={Silian_deleteDialog.open} onOpenChange={(Silian_open) => (!Silian_open ? Silian_closeDeleteDialog() : null)}>
+        <Silian_AlertDialogContent className="sm:max-w-md">
+          <Silian_AlertDialogHeader>
+            <Silian_AlertDialogTitle>{Silian_t('admin.avatars.deleteTitle')}</Silian_AlertDialogTitle>
+            <Silian_AlertDialogDescription>
+              {Silian_t('admin.avatars.deleteConfirm')}
+              {Silian_deleteDialog.avatar?.name ? ` (${Silian_deleteDialog.avatar.name})` : ''}
+            </Silian_AlertDialogDescription>
+          </Silian_AlertDialogHeader>
+          <Silian_AlertDialogFooter>
+            <Silian_AlertDialogCancel onClick={Silian_closeDeleteDialog}>{Silian_t('common.cancel')}</Silian_AlertDialogCancel>
+            <Silian_AlertDialogAction
+              onClick={Silian_handleDeleteAvatar}
               className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-600"
-              disabled={isDeleting}
+              disabled={Silian_isDeleting}
             >
-              {isDeleting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {Silian_isDeleting ? (
+                <Silian_Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Silian_Trash2 className="mr-2 h-4 w-4" />
               )}
-              {t('common.confirm')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              {Silian_t('common.confirm')}
+            </Silian_AlertDialogAction>
+          </Silian_AlertDialogFooter>
+        </Silian_AlertDialogContent>
+      </Silian_AlertDialog>
 
     </div>
   );

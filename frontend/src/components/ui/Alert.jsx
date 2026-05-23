@@ -1,7 +1,7 @@
-import React from 'react';
-import { cn } from '../../lib/utils';
+import Silian_React from 'react';
+import { cn as Silian_cn } from '../../lib/utils';
 
-const alertVariants = {
+const Silian_alertVariants = {
   default: "bg-background text-foreground",
   destructive: "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
   success: "border-green-500/50 text-green-700 dark:border-green-500 [&>svg]:text-green-700",
@@ -9,37 +9,37 @@ const alertVariants = {
   info: "border-blue-500/50 text-blue-700 dark:border-blue-500 [&>svg]:text-blue-700"
 };
 
-const Alert = React.forwardRef(({ className, variant = "default", ...props }, ref) => (
+const Silian_Alert = Silian_React.forwardRef(({ className: Silian_className, variant: Silian_variant = "default", ...Silian_props }, Silian_ref) => (
   <div
-    ref={ref}
+    ref={Silian_ref}
     role="alert"
-    className={cn(
+    className={Silian_cn(
       "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
-      alertVariants[variant],
-      className
+      Silian_alertVariants[Silian_variant],
+      Silian_className
     )}
-    {...props}
+    {...Silian_props}
   />
 ));
-Alert.displayName = "Alert";
+Silian_Alert.displayName = "Alert";
 
-const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
+const Silian_AlertTitle = Silian_React.forwardRef(({ className: Silian_className, ...Silian_props }, Silian_ref) => (
   <h5
-    ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
-    {...props}
+    ref={Silian_ref}
+    className={Silian_cn("mb-1 font-medium leading-none tracking-tight", Silian_className)}
+    {...Silian_props}
   />
 ));
-AlertTitle.displayName = "AlertTitle";
+Silian_AlertTitle.displayName = "AlertTitle";
 
-const AlertDescription = React.forwardRef(({ className, ...props }, ref) => (
+const Silian_AlertDescription = Silian_React.forwardRef(({ className: Silian_className, ...Silian_props }, Silian_ref) => (
   <div
-    ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
-    {...props}
+    ref={Silian_ref}
+    className={Silian_cn("text-sm [&_p]:leading-relaxed", Silian_className)}
+    {...Silian_props}
   />
 ));
-AlertDescription.displayName = "AlertDescription";
+Silian_AlertDescription.displayName = "AlertDescription";
 
-export { Alert, AlertTitle, AlertDescription };
+export { Silian_Alert as Alert, Silian_AlertTitle as AlertTitle, Silian_AlertDescription as AlertDescription };
 

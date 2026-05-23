@@ -31,416 +31,416 @@ class ProductController
     private ?bool $pointExchangeHasAreaCode = null;
 
     public function __construct(
-        PDO $db,
-        MessageService $messageService,
-        AuditLogService $auditLog,
-        AuthService $authService,
-        ErrorLogService $errorLogService = null,
-        CloudflareR2Service $r2Service = null
+        PDO $Silian_db,
+        MessageService $Silian_messageService,
+        AuditLogService $Silian_auditLog,
+        AuthService $Silian_authService,
+        ErrorLogService $Silian_errorLogService = null,
+        CloudflareR2Service $Silian_r2Service = null
     ) {
-        $this->db = $db;
-        $this->messageService = $messageService;
-        $this->auditLog = $auditLog;
-        $this->authService = $authService;
-        $this->errorLogService = $errorLogService;
-        $this->r2Service = $r2Service;
+        $this->db = $Silian_db;
+        $this->messageService = $Silian_messageService;
+        $this->auditLog = $Silian_auditLog;
+        $this->authService = $Silian_authService;
+        $this->errorLogService = $Silian_errorLogService;
+        $this->r2Service = $Silian_r2Service;
     }
 
     /**
      * 获取商品列表
      */
-    public function getProducts(Request $request, Response $response): Response
+    public function getProducts(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $params = $request->getQueryParams();
+            $Silian_params = $Silian_request->getQueryParams();
             // 管理端调用该方法时，会经过 AdminMiddleware，这里再做一次判定用于放宽筛选条件
-            $currentUser = null;
-            try { $currentUser = $this->authService->getCurrentUser($request); } catch (\Throwable $ignore) {}
-            $isAdminCall = $currentUser && $this->authService->isAdminUser($currentUser);
-            $page = max(1, intval($params['page'] ?? 1));
-            $limit = min(50, max(10, intval($params['limit'] ?? 20)));
-            $offset = ($page - 1) * $limit;
+            $Silian_currentUser = null;
+            try { $Silian_currentUser = $this->authService->getCurrentUser($Silian_request); } catch (\Throwable $Silian_ignore) {}
+            $Silian_isAdminCall = $Silian_currentUser && $this->authService->isAdminUser($Silian_currentUser);
+            $Silian_page = max(1, intval($Silian_params['page'] ?? 1));
+            $Silian_limit = min(50, max(10, intval($Silian_params['limit'] ?? 20)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
 
             // 构建查询条件
-            $where = ['p.deleted_at IS NULL'];
-            $bindings = [];
+            $Silian_where = ['p.deleted_at IS NULL'];
+            $Silian_bindings = [];
 
-            $tagSlugs = [];
-            if (isset($params['tag'])) {
-                if (is_array($params['tag'])) {
-                    $tagSlugs = array_merge($tagSlugs, $params['tag']);
+            $Silian_tagSlugs = [];
+            if (isset($Silian_params['tag'])) {
+                if (is_array($Silian_params['tag'])) {
+                    $Silian_tagSlugs = array_merge($Silian_tagSlugs, $Silian_params['tag']);
                 } else {
-                    $tagSlugs[] = (string)$params['tag'];
+                    $Silian_tagSlugs[] = (string)$Silian_params['tag'];
                 }
             }
-            if (isset($params['tags'])) {
-                if (is_array($params['tags'])) {
-                    $tagSlugs = array_merge($tagSlugs, $params['tags']);
+            if (isset($Silian_params['tags'])) {
+                if (is_array($Silian_params['tags'])) {
+                    $Silian_tagSlugs = array_merge($Silian_tagSlugs, $Silian_params['tags']);
                 } else {
-                    $tagSlugs = array_merge($tagSlugs, explode(',', (string)$params['tags']));
+                    $Silian_tagSlugs = array_merge($Silian_tagSlugs, explode(',', (string)$Silian_params['tags']));
                 }
             }
-            $tagSlugs = array_values(array_unique(array_filter(array_map('trim', $tagSlugs), static function ($slug) {
-                return $slug !== '';
+            $Silian_tagSlugs = array_values(array_unique(array_filter(array_map('trim', $Silian_tagSlugs), static function ($Silian_slug) {
+                return $Silian_slug !== '';
             })));
 
             // 前台商品列表默认仅展示 active；管理员列表可查看所有或按 status 过滤
-            if (!$isAdminCall) {
-                $where[] = 'p.status = "active"';
-            } else if (!empty($params['status'])) {
-                $where[] = 'p.status = :status';
-                $bindings['status'] = $params['status'];
+            if (!$Silian_isAdminCall) {
+                $Silian_where[] = 'p.status = "active"';
+            } else if (!empty($Silian_params['status'])) {
+                $Silian_where[] = 'p.status = :status';
+                $Silian_bindings['status'] = $Silian_params['status'];
             }
 
-            if (!empty($params['category'])) {
-                $rawCategory = trim((string)$params['category']);
-                if ($rawCategory !== '') {
-                    $categorySlug = $this->normalizeSlug($rawCategory);
-                    $categoryNames = [];
-                    if ($categorySlug !== '') {
-                        $resolvedCategories = $this->fetchCategoriesBySlugs([$categorySlug]);
-                        if (isset($resolvedCategories[$categorySlug])) {
-                            $categoryNames[] = $resolvedCategories[$categorySlug]['name'];
+            if (!empty($Silian_params['category'])) {
+                $Silian_rawCategory = trim((string)$Silian_params['category']);
+                if ($Silian_rawCategory !== '') {
+                    $Silian_categorySlug = $this->normalizeSlug($Silian_rawCategory);
+                    $Silian_categoryNames = [];
+                    if ($Silian_categorySlug !== '') {
+                        $Silian_resolvedCategories = $this->fetchCategoriesBySlugs([$Silian_categorySlug]);
+                        if (isset($Silian_resolvedCategories[$Silian_categorySlug])) {
+                            $Silian_categoryNames[] = $Silian_resolvedCategories[$Silian_categorySlug]['name'];
                         }
                     }
-                    $categoryNames[] = $rawCategory;
+                    $Silian_categoryNames[] = $Silian_rawCategory;
 
-                    $where[] = '(
+                    $Silian_where[] = '(
                         p.category_slug = :filter_category_slug
                         OR p.category = :filter_category_name
                         OR p.category = :filter_category_raw
                     )';
-                    $bindings['filter_category_slug'] = $categorySlug ?: $this->slugifyCategoryName($rawCategory);
-                    $bindings['filter_category_name'] = $categoryNames[0];
-                    $bindings['filter_category_raw'] = $rawCategory;
+                    $Silian_bindings['filter_category_slug'] = $Silian_categorySlug ?: $this->slugifyCategoryName($Silian_rawCategory);
+                    $Silian_bindings['filter_category_name'] = $Silian_categoryNames[0];
+                    $Silian_bindings['filter_category_raw'] = $Silian_rawCategory;
                 }
             }
 
-            if (!empty($params['search'])) {
-                $where[] = '(p.name LIKE :search_name OR p.description LIKE :search_description)';
-                $searchPattern = '%' . $params['search'] . '%';
-                $bindings['search_name'] = $searchPattern;
-                $bindings['search_description'] = $searchPattern;
+            if (!empty($Silian_params['search'])) {
+                $Silian_where[] = '(p.name LIKE :search_name OR p.description LIKE :search_description)';
+                $Silian_searchPattern = '%' . $Silian_params['search'] . '%';
+                $Silian_bindings['search_name'] = $Silian_searchPattern;
+                $Silian_bindings['search_description'] = $Silian_searchPattern;
             }
 
-            if (isset($params['min_points'])) {
-                $where[] = 'p.points_required >= :min_points';
-                $bindings['min_points'] = intval($params['min_points']);
+            if (isset($Silian_params['min_points'])) {
+                $Silian_where[] = 'p.points_required >= :min_points';
+                $Silian_bindings['min_points'] = intval($Silian_params['min_points']);
             }
 
-            if (isset($params['max_points'])) {
-                $where[] = 'p.points_required <= :max_points';
-                $bindings['max_points'] = intval($params['max_points']);
+            if (isset($Silian_params['max_points'])) {
+                $Silian_where[] = 'p.points_required <= :max_points';
+                $Silian_bindings['max_points'] = intval($Silian_params['max_points']);
             }
 
-            if (!empty($tagSlugs)) {
-                $tagPlaceholders = [];
-                foreach ($tagSlugs as $index => $slug) {
-                    $paramKey = 'tag_slug_' . $index;
-                    $tagPlaceholders[] = ':' . $paramKey;
-                    $bindings[$paramKey] = $slug;
+            if (!empty($Silian_tagSlugs)) {
+                $Silian_tagPlaceholders = [];
+                foreach ($Silian_tagSlugs as $Silian_index => $Silian_slug) {
+                    $Silian_paramKey = 'tag_slug_' . $Silian_index;
+                    $Silian_tagPlaceholders[] = ':' . $Silian_paramKey;
+                    $Silian_bindings[$Silian_paramKey] = $Silian_slug;
                 }
-                $where[] = 'EXISTS (
+                $Silian_where[] = 'EXISTS (
                     SELECT 1
                     FROM product_tag_map ptm
                     INNER JOIN product_tags pt ON ptm.tag_id = pt.id
                     WHERE ptm.product_id = p.id
-                    AND pt.slug IN (' . implode(', ', $tagPlaceholders) . ')
+                    AND pt.slug IN (' . implode(', ', $Silian_tagPlaceholders) . ')
                 )';
             }
 
-            $whereClause = implode(' AND ', $where);
+            $Silian_whereClause = implode(' AND ', $Silian_where);
 
             // 获取总数
-            $countSql = "SELECT COUNT(*) as total FROM products p WHERE {$whereClause}";
-            $countStmt = $this->db->prepare($countSql);
-            $countStmt->execute($bindings);
-            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $Silian_countSql = "SELECT COUNT(*) as total FROM products p WHERE {$Silian_whereClause}";
+            $Silian_countStmt = $this->db->prepare($Silian_countSql);
+            $Silian_countStmt->execute($Silian_bindings);
+            $Silian_total = $Silian_countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-            $orderByClause = $this->buildProductOrderByClause($params['sort'] ?? null);
+            $Silian_orderByClause = $this->buildProductOrderByClause($Silian_params['sort'] ?? null);
 
             // 获取商品列表
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     p.*,
                     COALESCE(e.total_exchanged, 0) as total_exchanged
                 FROM products p
                 LEFT JOIN (
                     SELECT product_id, COUNT(*) as total_exchanged
-                    FROM point_exchanges 
+                    FROM point_exchanges
                     WHERE status = 'completed'
                     GROUP BY product_id
                 ) e ON p.id = e.product_id
-                WHERE {$whereClause}
-                ORDER BY {$orderByClause}
+                WHERE {$Silian_whereClause}
+                ORDER BY {$Silian_orderByClause}
                 LIMIT :limit OFFSET :offset
             ";
 
-            $stmt = $this->db->prepare($sql);
-            foreach ($bindings as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_bindings as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
+            $Silian_stmt->bindValue('limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->bindValue('offset', $Silian_offset, PDO::PARAM_INT);
+            $Silian_stmt->execute();
 
-            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_products = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $productIds = array_map(static function ($item) {
-                return isset($item['id']) ? (int)$item['id'] : null;
-            }, $products);
-            $productIds = array_values(array_filter($productIds, static fn($v) => $v !== null));
-            $tagsMap = $productIds ? $this->loadTagsForProducts($productIds) : [];
+            $Silian_productIds = array_map(static function ($Silian_item) {
+                return isset($Silian_item['id']) ? (int)$Silian_item['id'] : null;
+            }, $Silian_products);
+            $Silian_productIds = array_values(array_filter($Silian_productIds, static fn($Silian_v) => $Silian_v !== null));
+            $Silian_tagsMap = $Silian_productIds ? $this->loadTagsForProducts($Silian_productIds) : [];
 
-            foreach ($products as &$product) {
-                $product = $this->prepareProductPayload($product, $isAdminCall, $request);
-                $product['tags'] = $tagsMap[$product['id']] ?? [];
+            foreach ($Silian_products as &$Silian_product) {
+                $Silian_product = $this->prepareProductPayload($Silian_product, $Silian_isAdminCall, $Silian_request);
+                $Silian_product['tags'] = $Silian_tagsMap[$Silian_product['id']] ?? [];
             }
-            unset($product);
+            unset($Silian_product);
 
-            $pages = (int)ceil($total / $limit);
-            return $this->json($response, [
+            $Silian_pages = (int)ceil($Silian_total / $Silian_limit);
+            return $this->json($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'products' => $products,
+                    'products' => $Silian_products,
                     'pagination' => [
-                        'page' => $page,
-                        'limit' => $limit,
-                        'total' => intval($total),
-                        'pages' => $pages,
+                        'page' => $Silian_page,
+                        'limit' => $Silian_limit,
+                        'total' => intval($Silian_total),
+                        'pages' => $Silian_pages,
                         // 别名，方便前端统一解析
-                        'current_page' => $page,
-                        'per_page' => $limit,
-                        'total_items' => intval($total),
-                        'total_pages' => $pages
+                        'current_page' => $Silian_page,
+                        'per_page' => $Silian_limit,
+                        'total_items' => intval($Silian_total),
+                        'total_pages' => $Silian_pages
                     ]
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::getProducts error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::getProducts error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 获取商品详情
      */
-    public function getProductDetail(Request $request, Response $response, array $args): Response
+    public function getProductDetail(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $currentUser = null;
-            try { $currentUser = $this->authService->getCurrentUser($request); } catch (\Throwable $ignore) {}
-            $isAdminCall = $currentUser && $this->authService->isAdminUser($currentUser);
+            $Silian_currentUser = null;
+            try { $Silian_currentUser = $this->authService->getCurrentUser($Silian_request); } catch (\Throwable $Silian_ignore) {}
+            $Silian_isAdminCall = $Silian_currentUser && $this->authService->isAdminUser($Silian_currentUser);
 
-            $productId = $args['id'];
+            $Silian_productId = $Silian_args['id'];
 
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     p.*,
                     COALESCE(e.total_exchanged, 0) as total_exchanged
                 FROM products p
                 LEFT JOIN (
                     SELECT product_id, COUNT(*) as total_exchanged
-                    FROM point_exchanges 
+                    FROM point_exchanges
                     WHERE status = 'completed'
                     GROUP BY product_id
                 ) e ON p.id = e.product_id
                 WHERE p.id = :product_id AND p.deleted_at IS NULL
             ";
 
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['product_id' => $productId]);
-            $product = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute(['product_id' => $Silian_productId]);
+            $Silian_product = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$product) {
-                return $this->json($response, ['error' => 'Product not found'], 404);
+            if (!$Silian_product) {
+                return $this->json($Silian_response, ['error' => 'Product not found'], 404);
             }
 
-            $product = $this->prepareProductPayload($product, $isAdminCall, $request);
+            $Silian_product = $this->prepareProductPayload($Silian_product, $Silian_isAdminCall, $Silian_request);
 
-            $tagMap = $this->loadTagsForProducts([(int)$product['id']]);
-            $product['tags'] = $tagMap[$product['id']] ?? [];
+            $Silian_tagMap = $this->loadTagsForProducts([(int)$Silian_product['id']]);
+            $Silian_product['tags'] = $Silian_tagMap[$Silian_product['id']] ?? [];
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $product
+                'data' => $Silian_product
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::getProductDetail error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::getProductDetail error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 兑换商品
      */
-    public function exchangeProduct(Request $request, Response $response): Response
+    public function exchangeProduct(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $data = $request->getParsedBody();
-            if (!is_array($data)) { $data = []; }
+            $Silian_data = $Silian_request->getParsedBody();
+            if (!is_array($Silian_data)) { $Silian_data = []; }
 
             // 字段同义词兼容：shipping_address -> delivery_address, address -> delivery_address
             // phone|mobile|contact -> contact_phone, remark|comments -> notes
-            $synonyms = [
+            $Silian_synonyms = [
                 'delivery_address' => ['shipping_address', 'address', 'ship_address'],
                 'contact_phone' => ['phone', 'mobile', 'tel', 'contact'],
                 'notes' => ['remark', 'remarks', 'comment', 'comments', 'note']
             ];
-            foreach ($synonyms as $primary => $alts) {
-                if (!array_key_exists($primary, $data) || $data[$primary] === '' || $data[$primary] === null) {
-                    foreach ($alts as $alt) {
-                        if (array_key_exists($alt, $data) && $data[$alt] !== '' && $data[$alt] !== null) {
-                            $data[$primary] = $data[$alt];
+            foreach ($Silian_synonyms as $Silian_primary => $Silian_alts) {
+                if (!array_key_exists($Silian_primary, $Silian_data) || $Silian_data[$Silian_primary] === '' || $Silian_data[$Silian_primary] === null) {
+                    foreach ($Silian_alts as $Silian_alt) {
+                        if (array_key_exists($Silian_alt, $Silian_data) && $Silian_data[$Silian_alt] !== '' && $Silian_data[$Silian_alt] !== null) {
+                            $Silian_data[$Silian_primary] = $Silian_data[$Silian_alt];
                             break;
                         }
                     }
                 }
             }
 
-            if (!isset($data['product_id'])) {
-                return $this->json($response, ['error' => 'Product ID is required'], 400);
+            if (!isset($Silian_data['product_id'])) {
+                return $this->json($Silian_response, ['error' => 'Product ID is required'], 400);
             }
 
-            $productId = $data['product_id'];
-            $quantity = max(1, intval($data['quantity'] ?? 1));
+            $Silian_productId = $Silian_data['product_id'];
+            $Silian_quantity = max(1, intval($Silian_data['quantity'] ?? 1));
 
             // 开始事务
             $this->db->beginTransaction();
 
             try {
                 // 获取商品信息并锁定
-                $sql = "SELECT * FROM products WHERE id = :id AND deleted_at IS NULL";
+                $Silian_sql = "SELECT * FROM products WHERE id = :id AND deleted_at IS NULL";
                 try {
-                    $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
-                } catch (\Throwable $driverError) {
-                    $driver = null;
+                    $Silian_driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+                } catch (\Throwable $Silian_driverError) {
+                    $Silian_driver = null;
                 }
-                if ($driver !== 'sqlite') {
-                    $sql .= ' FOR UPDATE';
+                if ($Silian_driver !== 'sqlite') {
+                    $Silian_sql .= ' FOR UPDATE';
                 }
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute(['id' => $productId]);
-                $product = $stmt->fetch(PDO::FETCH_ASSOC);
+                $Silian_stmt = $this->db->prepare($Silian_sql);
+                $Silian_stmt->execute(['id' => $Silian_productId]);
+                $Silian_product = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-                if (!$product) {
+                if (!$Silian_product) {
                     throw new \Exception('Product not found');
                 }
 
-                if ($product['status'] !== 'active') {
+                if ($Silian_product['status'] !== 'active') {
                     throw new \Exception('Product is not available');
                 }
 
                 // 检查库存
-                if ($product['stock'] !== -1 && $product['stock'] < $quantity) {
+                if ($Silian_product['stock'] !== -1 && $Silian_product['stock'] < $Silian_quantity) {
                     throw new \Exception('Insufficient stock');
                 }
 
-                $totalPoints = $product['points_required'] * $quantity;
+                $Silian_totalPoints = $Silian_product['points_required'] * $Silian_quantity;
 
                 // 检查用户积分
-                if ($user['points'] < $totalPoints) {
+                if ($Silian_user['points'] < $Silian_totalPoints) {
                     throw new \Exception('Insufficient points');
                 }
 
                 // 扣除用户积分
-                $sql = "UPDATE users SET points = points - :points WHERE id = :user_id";
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute(['points' => $totalPoints, 'user_id' => $user['id']]);
+                $Silian_sql = "UPDATE users SET points = points - :points WHERE id = :user_id";
+                $Silian_stmt = $this->db->prepare($Silian_sql);
+                $Silian_stmt->execute(['points' => $Silian_totalPoints, 'user_id' => $Silian_user['id']]);
 
                 // 更新商品库存
-                if ($product['stock'] !== -1) {
-                    $sql = "UPDATE products SET stock = stock - :quantity WHERE id = :product_id";
-                    $stmt = $this->db->prepare($sql);
-                    $stmt->execute(['quantity' => $quantity, 'product_id' => $productId]);
+                if ($Silian_product['stock'] !== -1) {
+                    $Silian_sql = "UPDATE products SET stock = stock - :quantity WHERE id = :product_id";
+                    $Silian_stmt = $this->db->prepare($Silian_sql);
+                    $Silian_stmt->execute(['quantity' => $Silian_quantity, 'product_id' => $Silian_productId]);
                 }
 
                 // 创建兑换记录
-                $exchangeId = $this->createExchangeRecord([
-                    'user_id' => $user['id'],
-                    'product_id' => $productId,
-                    'quantity' => $quantity,
-                    'points_used' => $totalPoints,
-                    'product_name' => $product['name'],
-                    'product_price' => $product['points_required'],
-                    'delivery_address' => $data['delivery_address'] ?? null,
-                    'contact_area_code' => $data['contact_area_code'] ?? null,
-                    'contact_phone' => $data['contact_phone'] ?? null,
-                    'notes' => $data['notes'] ?? null
+                $Silian_exchangeId = $this->createExchangeRecord([
+                    'user_id' => $Silian_user['id'],
+                    'product_id' => $Silian_productId,
+                    'quantity' => $Silian_quantity,
+                    'points_used' => $Silian_totalPoints,
+                    'product_name' => $Silian_product['name'],
+                    'product_price' => $Silian_product['points_required'],
+                    'delivery_address' => $Silian_data['delivery_address'] ?? null,
+                    'contact_area_code' => $Silian_data['contact_area_code'] ?? null,
+                    'contact_phone' => $Silian_data['contact_phone'] ?? null,
+                    'notes' => $Silian_data['notes'] ?? null
                 ]);
 
                 // 记录积分交易
                 $this->recordPointTransaction(
-                    $user,
-                    -$totalPoints,
+                    $Silian_user,
+                    -$Silian_totalPoints,
                     'product_exchange',
-                    "兑换商品：{$product['name']} x{$quantity}",
+                    "兑换商品：{$Silian_product['name']} x{$Silian_quantity}",
                     'point_exchanges',
-                    $exchangeId
+                    $Silian_exchangeId
                 );
 
                 // 记录审计日志
                 $this->auditLog->log(
-                    $user['id'],
+                    $Silian_user['id'],
                     'product_exchanged',
                     'point_exchanges',
-                    $exchangeId,
+                    $Silian_exchangeId,
                     [
-                        'product_id' => $productId,
-                        'quantity' => $quantity,
-                        'points_used' => $totalPoints
+                        'product_id' => $Silian_productId,
+                        'quantity' => $Silian_quantity,
+                        'points_used' => $Silian_totalPoints
                     ]
                 );
 
                 // 发送站内信
                 $this->messageService->sendMessage(
-                    $user['id'],
+                    $Silian_user['id'],
                     'product_exchanged',
                     '商品兑换成功',
-                    "您已成功兑换 {$product['name']} x{$quantity}，消耗 {$totalPoints} 积分。我们将尽快为您安排发货。",
+                    "您已成功兑换 {$Silian_product['name']} x{$Silian_quantity}，消耗 {$Silian_totalPoints} 积分。我们将尽快为您安排发货。",
                     'normal'
                 );
                 $this->messageService->sendExchangeConfirmationEmailToUser(
-                    (int) $user['id'],
-                    (string) ($product['name'] ?? ''),
-                    $quantity,
-                    (float) $totalPoints,
-                    $user['email'] ?? null,
-                    $user['username'] ?? ($user['full_name'] ?? ($user['name'] ?? null))
+                    (int) $Silian_user['id'],
+                    (string) ($Silian_product['name'] ?? ''),
+                    $Silian_quantity,
+                    (float) $Silian_totalPoints,
+                    $Silian_user['email'] ?? null,
+                    $Silian_user['username'] ?? ($Silian_user['full_name'] ?? ($Silian_user['name'] ?? null))
                 );
 
 
                 // 通知管理员
-                $this->notifyAdminsNewExchange($exchangeId, $user, $product, $quantity);
+                $this->notifyAdminsNewExchange($Silian_exchangeId, $Silian_user, $Silian_product, $Silian_quantity);
 
                 $this->db->commit();
 
-                return $this->json($response, [
+                return $this->json($Silian_response, [
                     'success' => true,
-                    'exchange_id' => $exchangeId,
-                    'points_used' => $totalPoints,
-                    'remaining_points' => $user['points'] - $totalPoints,
+                    'exchange_id' => $Silian_exchangeId,
+                    'points_used' => $Silian_totalPoints,
+                    'remaining_points' => $Silian_user['points'] - $Silian_totalPoints,
                     'message' => 'Product exchanged successfully'
                 ]);
 
-            } catch (\Exception $e) {
+            } catch (\Exception $Silian_e) {
                 $this->db->rollBack();
-                throw $e;
+                throw $Silian_e;
             }
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::exchangeProduct error: ' . $e->getMessage());
-            return $this->json($response, [
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::exchangeProduct error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, [
                 'success' => false,
-                'message' => $e->getMessage(),
-                'error' => $e->getMessage(),
+                'message' => $Silian_e->getMessage(),
+                'error' => $Silian_e->getMessage(),
                 'code' => 'EXCHANGE_FAILED'
             ], 400);
         }
@@ -449,216 +449,216 @@ class ProductController
     /**
      * 获取当前用户兑换历史（路由别名，复用 getUserExchanges）
      */
-    public function getExchangeTransactions(Request $request, Response $response): Response
+    public function getExchangeTransactions(Request $Silian_request, Response $Silian_response): Response
     {
-        return $this->getUserExchanges($request, $response);
+        return $this->getUserExchanges($Silian_request, $Silian_response);
     }
 
     /**
      * 获取当前用户某条兑换详情
      */
-    public function getExchangeTransaction(Request $request, Response $response, array $args): Response
+    public function getExchangeTransaction(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
-            $exchangeId = $args['id'];
-            $userColumn = $this->pointExchangeUserColumn();
-            $sql = "SELECT * FROM point_exchanges WHERE id = :id AND {$userColumn} = :uid AND deleted_at IS NULL";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $exchangeId, 'uid' => $user['id']]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$row) {
-                return $this->json($response, ['error' => 'Exchange not found'], 404);
+            $Silian_exchangeId = $Silian_args['id'];
+            $Silian_userColumn = $this->pointExchangeUserColumn();
+            $Silian_sql = "SELECT * FROM point_exchanges WHERE id = :id AND {$Silian_userColumn} = :uid AND deleted_at IS NULL";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute(['id' => $Silian_exchangeId, 'uid' => $Silian_user['id']]);
+            $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$Silian_row) {
+                return $this->json($Silian_response, ['error' => 'Exchange not found'], 404);
             }
-            return $this->json($response, ['success' => true, 'data' => $row]);
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::getExchangeTransaction error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+            return $this->json($Silian_response, ['success' => true, 'data' => $Silian_row]);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::getExchangeTransaction error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 获取用户兑换历史
      */
-    public function getUserExchanges(Request $request, Response $response): Response
+    public function getUserExchanges(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $params = $request->getQueryParams();
-            $page = max(1, intval($params['page'] ?? 1));
-            $limit = min(50, max(10, intval($params['limit'] ?? 20)));
-            $offset = ($page - 1) * $limit;
+            $Silian_params = $Silian_request->getQueryParams();
+            $Silian_page = max(1, intval($Silian_params['page'] ?? 1));
+            $Silian_limit = min(50, max(10, intval($Silian_params['limit'] ?? 20)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
 
-            $where = [
+            $Silian_where = [
                 $this->pointExchangeUserColumn('e') . ' = :user_id',
                 'e.deleted_at IS NULL',
             ];
-            $bindings = [
-                'user_id' => (int) $user['id'],
+            $Silian_bindings = [
+                'user_id' => (int) $Silian_user['id'],
             ];
 
-            if (!empty($params['status'])) {
-                $where[] = 'e.status = :status';
-                $bindings['status'] = trim((string) $params['status']);
+            if (!empty($Silian_params['status'])) {
+                $Silian_where[] = 'e.status = :status';
+                $Silian_bindings['status'] = trim((string) $Silian_params['status']);
             }
 
-            $search = trim((string) ($params['search'] ?? ''));
-            if ($search !== '') {
-                [$searchClause, $searchBindings] = $this->buildNamedLikeClause([
+            $Silian_search = trim((string) ($Silian_params['search'] ?? ''));
+            if ($Silian_search !== '') {
+                [$Silian_searchClause, $Silian_searchBindings] = $this->buildNamedLikeClause([
                     'LOWER(e.id)',
                     'LOWER(COALESCE(e.product_name, \'\'))',
                     'LOWER(COALESCE(e.tracking_number, \'\'))',
                     'LOWER(COALESCE(e.notes, \'\'))',
-                ], $search, 'exchange_search');
-                $where[] = $searchClause;
-                $bindings = array_merge($bindings, $searchBindings);
+                ], $Silian_search, 'exchange_search');
+                $Silian_where[] = $Silian_searchClause;
+                $Silian_bindings = array_merge($Silian_bindings, $Silian_searchBindings);
             }
 
-            $dateFrom = trim((string) ($params['date_from'] ?? ''));
-            if ($dateFrom !== '') {
-                $where[] = 'e.created_at >= :date_from';
-                $bindings['date_from'] = $dateFrom . ' 00:00:00';
+            $Silian_dateFrom = trim((string) ($Silian_params['date_from'] ?? ''));
+            if ($Silian_dateFrom !== '') {
+                $Silian_where[] = 'e.created_at >= :date_from';
+                $Silian_bindings['date_from'] = $Silian_dateFrom . ' 00:00:00';
             }
 
-            $dateTo = trim((string) ($params['date_to'] ?? ''));
-            if ($dateTo !== '') {
-                $where[] = 'e.created_at <= :date_to';
-                $bindings['date_to'] = $dateTo . ' 23:59:59';
+            $Silian_dateTo = trim((string) ($Silian_params['date_to'] ?? ''));
+            if ($Silian_dateTo !== '') {
+                $Silian_where[] = 'e.created_at <= :date_to';
+                $Silian_bindings['date_to'] = $Silian_dateTo . ' 23:59:59';
             }
 
-            $whereClause = implode(' AND ', $where);
-            $orderByClause = $this->buildExchangeOrderByClause($params['sort'] ?? null, 'e');
+            $Silian_whereClause = implode(' AND ', $Silian_where);
+            $Silian_orderByClause = $this->buildExchangeOrderByClause($Silian_params['sort'] ?? null, 'e');
 
             // 获取总数
-            $countSql = "
+            $Silian_countSql = "
                 SELECT COUNT(*) as total
                 FROM point_exchanges e
-                WHERE {$whereClause}
+                WHERE {$Silian_whereClause}
             ";
-            $countStmt = $this->db->prepare($countSql);
-            $countStmt->execute($bindings);
-            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $Silian_countStmt = $this->db->prepare($Silian_countSql);
+            $Silian_countStmt->execute($Silian_bindings);
+            $Silian_total = $Silian_countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
             // 获取兑换记录
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     e.*,
                     p.name as current_product_name,
                     p.images as current_product_images
                 FROM point_exchanges e
                 LEFT JOIN products p ON e.product_id = p.id
-                WHERE {$whereClause}
-                ORDER BY {$orderByClause}
+                WHERE {$Silian_whereClause}
+                ORDER BY {$Silian_orderByClause}
                 LIMIT :limit OFFSET :offset
             ";
 
-            $stmt = $this->db->prepare($sql);
-            foreach ($bindings as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_bindings as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
+            $Silian_stmt->bindValue('limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->bindValue('offset', $Silian_offset, PDO::PARAM_INT);
+            $Silian_stmt->execute();
 
-            $exchanges = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_exchanges = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 处理图片字段
-            foreach ($exchanges as &$exchange) {
-                $exchange['current_product_images'] = $exchange['current_product_images'] 
-                    ? json_decode($exchange['current_product_images'], true) 
+            foreach ($Silian_exchanges as &$Silian_exchange) {
+                $Silian_exchange['current_product_images'] = $Silian_exchange['current_product_images']
+                    ? json_decode($Silian_exchange['current_product_images'], true)
                     : [];
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $exchanges,
+                'data' => $Silian_exchanges,
                 'pagination' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'total' => intval($total),
-                    'pages' => (int) ceil($total / $limit),
-                    'current_page' => $page,
-                    'per_page' => $limit,
-                    'total_items' => intval($total),
-                    'total_pages' => (int) ceil($total / $limit),
+                    'page' => $Silian_page,
+                    'limit' => $Silian_limit,
+                    'total' => intval($Silian_total),
+                    'pages' => (int) ceil($Silian_total / $Silian_limit),
+                    'current_page' => $Silian_page,
+                    'per_page' => $Silian_limit,
+                    'total_items' => intval($Silian_total),
+                    'total_pages' => (int) ceil($Silian_total / $Silian_limit),
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::getUserExchanges error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::getUserExchanges error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 管理员获取兑换记录
      */
-    public function getExchangeRecords(Request $request, Response $response): Response
+    public function getExchangeRecords(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
             }
 
-            $params = $request->getQueryParams();
-            $page = max(1, intval($params['page'] ?? 1));
-            $limit = min(50, max(10, intval($params['limit'] ?? 20)));
-            $offset = ($page - 1) * $limit;
+            $Silian_params = $Silian_request->getQueryParams();
+            $Silian_page = max(1, intval($Silian_params['page'] ?? 1));
+            $Silian_limit = min(50, max(10, intval($Silian_params['limit'] ?? 20)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
 
             // 构建查询条件
-            $where = ['e.deleted_at IS NULL'];
-            $bindings = [];
-            $userJoinSql = 'LEFT JOIN users u ON ' . $this->pointExchangeUserColumn('e') . ' = u.id';
+            $Silian_where = ['e.deleted_at IS NULL'];
+            $Silian_bindings = [];
+            $Silian_userJoinSql = 'LEFT JOIN users u ON ' . $this->pointExchangeUserColumn('e') . ' = u.id';
 
-            if (!empty($params['status'])) {
-                $where[] = 'e.status = :status';
-                $bindings['status'] = $params['status'];
+            if (!empty($Silian_params['status'])) {
+                $Silian_where[] = 'e.status = :status';
+                $Silian_bindings['status'] = $Silian_params['status'];
             }
 
-            if (!empty($params['user_id'])) {
-                $where[] = $this->pointExchangeUserColumn('e') . ' = :user_id';
-                $bindings['user_id'] = $params['user_id'];
+            if (!empty($Silian_params['user_id'])) {
+                $Silian_where[] = $this->pointExchangeUserColumn('e') . ' = :user_id';
+                $Silian_bindings['user_id'] = $Silian_params['user_id'];
             }
 
-            $search = trim((string) ($params['search'] ?? ''));
-            if ($search !== '') {
-                [$searchClause, $searchBindings] = $this->buildNamedLikeClause([
+            $Silian_search = trim((string) ($Silian_params['search'] ?? ''));
+            if ($Silian_search !== '') {
+                [$Silian_searchClause, $Silian_searchBindings] = $this->buildNamedLikeClause([
                     'LOWER(e.id)',
                     'LOWER(COALESCE(e.product_name, \'\'))',
                     'LOWER(COALESCE(e.tracking_number, \'\'))',
                     'LOWER(COALESCE(e.contact_phone, \'\'))',
                     'LOWER(COALESCE(u.username, \'\'))',
                     'LOWER(COALESCE(u.email, \'\'))',
-                ], $search, 'exchange_search');
-                $where[] = $searchClause;
-                $bindings = array_merge($bindings, $searchBindings);
+                ], $Silian_search, 'exchange_search');
+                $Silian_where[] = $Silian_searchClause;
+                $Silian_bindings = array_merge($Silian_bindings, $Silian_searchBindings);
             }
 
-            $whereClause = implode(' AND ', $where);
-            $orderByClause = $this->buildExchangeOrderByClause($params['sort'] ?? null, 'e');
+            $Silian_whereClause = implode(' AND ', $Silian_where);
+            $Silian_orderByClause = $this->buildExchangeOrderByClause($Silian_params['sort'] ?? null, 'e');
 
             // 获取总数
-            $countSql = "
+            $Silian_countSql = "
                 SELECT COUNT(*) as total
                 FROM point_exchanges e
-                {$userJoinSql}
-                WHERE {$whereClause}
+                {$Silian_userJoinSql}
+                WHERE {$Silian_whereClause}
             ";
-            $countStmt = $this->db->prepare($countSql);
-            $countStmt->execute($bindings);
-            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $Silian_countStmt = $this->db->prepare($Silian_countSql);
+            $Silian_countStmt->execute($Silian_bindings);
+            $Silian_total = $Silian_countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
             // 获取兑换记录
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     e.*,
                     u.username,
                     u.email,
@@ -666,96 +666,96 @@ class ProductController
                     p.image_path as current_product_image_path,
                     p.images as current_product_images
                 FROM point_exchanges e
-                {$userJoinSql}
+                {$Silian_userJoinSql}
                 LEFT JOIN products p ON e.product_id = p.id
-                WHERE {$whereClause}
-                ORDER BY {$orderByClause}
+                WHERE {$Silian_whereClause}
+                ORDER BY {$Silian_orderByClause}
                 LIMIT :limit OFFSET :offset
             ";
 
-            $stmt = $this->db->prepare($sql);
-            foreach ($bindings as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_bindings as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
+            $Silian_stmt->bindValue('limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->bindValue('offset', $Silian_offset, PDO::PARAM_INT);
+            $Silian_stmt->execute();
 
-            $exchanges = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_exchanges = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 映射前端期望字段
-            foreach ($exchanges as &$ex) {
+            foreach ($Silian_exchanges as &$Silian_ex) {
                 // 别名：用户与积分
-                $ex['user_username'] = $ex['username'] ?? null;
-                $ex['user_email'] = $ex['email'] ?? null;
-                if (!isset($ex['total_points']) && isset($ex['points_used'])) {
-                    $ex['total_points'] = (int)$ex['points_used'];
+                $Silian_ex['user_username'] = $Silian_ex['username'] ?? null;
+                $Silian_ex['user_email'] = $Silian_ex['email'] ?? null;
+                if (!isset($Silian_ex['total_points']) && isset($Silian_ex['points_used'])) {
+                    $Silian_ex['total_points'] = (int)$Silian_ex['points_used'];
                 }
-                if (!isset($ex['shipping_address']) && isset($ex['delivery_address'])) {
-                    $ex['shipping_address'] = $ex['delivery_address'];
+                if (!isset($Silian_ex['shipping_address']) && isset($Silian_ex['delivery_address'])) {
+                    $Silian_ex['shipping_address'] = $Silian_ex['delivery_address'];
                 }
-                if (!isset($ex['admin_notes']) && isset($ex['notes'])) {
-                    $ex['admin_notes'] = $ex['notes'];
+                if (!isset($Silian_ex['admin_notes']) && isset($Silian_ex['notes'])) {
+                    $Silian_ex['admin_notes'] = $Silian_ex['notes'];
                 }
 
                 // 产品图片URL
-                $imgUrl = null;
-                if (!empty($ex['current_product_images'])) {
-                    $imgs = json_decode($ex['current_product_images'], true);
-                    if (is_array($imgs) && count($imgs) > 0) {
-                        $first = $imgs[0];
-                        if (is_array($first)) {
-                            $imgUrl = $first['public_url'] ?? ($first['url'] ?? null);
-                        } elseif (is_string($first)) {
-                            $imgUrl = $first;
+                $Silian_imgUrl = null;
+                if (!empty($Silian_ex['current_product_images'])) {
+                    $Silian_imgs = json_decode($Silian_ex['current_product_images'], true);
+                    if (is_array($Silian_imgs) && count($Silian_imgs) > 0) {
+                        $Silian_first = $Silian_imgs[0];
+                        if (is_array($Silian_first)) {
+                            $Silian_imgUrl = $Silian_first['public_url'] ?? ($Silian_first['url'] ?? null);
+                        } elseif (is_string($Silian_first)) {
+                            $Silian_imgUrl = $Silian_first;
                         }
                     }
                 }
-                if (!$imgUrl && !empty($ex['current_product_image_path'])) {
-                    $imgUrl = $ex['current_product_image_path'];
+                if (!$Silian_imgUrl && !empty($Silian_ex['current_product_image_path'])) {
+                    $Silian_imgUrl = $Silian_ex['current_product_image_path'];
                 }
-                if (!isset($ex['product_image_url'])) {
-                    $ex['product_image_url'] = $imgUrl;
+                if (!isset($Silian_ex['product_image_url'])) {
+                    $Silian_ex['product_image_url'] = $Silian_imgUrl;
                 }
             }
 
-            $pages = (int)ceil($total / $limit);
-            return $this->json($response, [
+            $Silian_pages = (int)ceil($Silian_total / $Silian_limit);
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $exchanges,
+                'data' => $Silian_exchanges,
                 'pagination' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'total' => intval($total),
-                    'pages' => $pages,
+                    'page' => $Silian_page,
+                    'limit' => $Silian_limit,
+                    'total' => intval($Silian_total),
+                    'pages' => $Silian_pages,
                     // 别名
-                    'current_page' => $page,
-                    'per_page' => $limit,
-                    'total_items' => intval($total),
-                    'total_pages' => $pages
+                    'current_page' => $Silian_page,
+                    'per_page' => $Silian_limit,
+                    'total_items' => intval($Silian_total),
+                    'total_pages' => $Silian_pages
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::getExchangeRecords error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::getExchangeRecords error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 管理员获取单个兑换记录详情
      */
-    public function getExchangeRecordDetail(Request $request, Response $response, array $args): Response
+    public function getExchangeRecordDetail(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
             }
 
-            $exchangeId = $args['id'];
-            $sql = "
-                SELECT 
+            $Silian_exchangeId = $Silian_args['id'];
+            $Silian_sql = "
+                SELECT
                     e.*,
                     u.username,
                     u.email,
@@ -767,133 +767,133 @@ class ProductController
                 LEFT JOIN products p ON e.product_id = p.id
                 WHERE e.id = :id AND e.deleted_at IS NULL
             ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['id' => $exchangeId]);
-            $exchange = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute(['id' => $Silian_exchangeId]);
+            $Silian_exchange = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$exchange) {
-                return $this->json($response, ['error' => 'Exchange not found'], 404);
+            if (!$Silian_exchange) {
+                return $this->json($Silian_response, ['error' => 'Exchange not found'], 404);
             }
 
             // 映射别名
-            $exchange['user_username'] = $exchange['username'] ?? null;
-            $exchange['user_email'] = $exchange['email'] ?? null;
-            if (!isset($exchange['total_points']) && isset($exchange['points_used'])) {
-                $exchange['total_points'] = (int)$exchange['points_used'];
+            $Silian_exchange['user_username'] = $Silian_exchange['username'] ?? null;
+            $Silian_exchange['user_email'] = $Silian_exchange['email'] ?? null;
+            if (!isset($Silian_exchange['total_points']) && isset($Silian_exchange['points_used'])) {
+                $Silian_exchange['total_points'] = (int)$Silian_exchange['points_used'];
             }
-            if (!isset($exchange['shipping_address']) && isset($exchange['delivery_address'])) {
-                $exchange['shipping_address'] = $exchange['delivery_address'];
+            if (!isset($Silian_exchange['shipping_address']) && isset($Silian_exchange['delivery_address'])) {
+                $Silian_exchange['shipping_address'] = $Silian_exchange['delivery_address'];
             }
-            if (!isset($exchange['admin_notes']) && isset($exchange['notes'])) {
-                $exchange['admin_notes'] = $exchange['notes'];
+            if (!isset($Silian_exchange['admin_notes']) && isset($Silian_exchange['notes'])) {
+                $Silian_exchange['admin_notes'] = $Silian_exchange['notes'];
             }
             // 产品图片
-            $imgUrl = null;
-            if (!empty($exchange['current_product_images'])) {
-                $imgs = json_decode($exchange['current_product_images'], true);
-                if (is_array($imgs) && count($imgs) > 0) {
-                    $first = $imgs[0];
-                    if (is_array($first)) {
-                        $imgUrl = $first['public_url'] ?? ($first['url'] ?? null);
-                    } elseif (is_string($first)) {
-                        $imgUrl = $first;
+            $Silian_imgUrl = null;
+            if (!empty($Silian_exchange['current_product_images'])) {
+                $Silian_imgs = json_decode($Silian_exchange['current_product_images'], true);
+                if (is_array($Silian_imgs) && count($Silian_imgs) > 0) {
+                    $Silian_first = $Silian_imgs[0];
+                    if (is_array($Silian_first)) {
+                        $Silian_imgUrl = $Silian_first['public_url'] ?? ($Silian_first['url'] ?? null);
+                    } elseif (is_string($Silian_first)) {
+                        $Silian_imgUrl = $Silian_first;
                     }
                 }
             }
-            if (!$imgUrl && !empty($exchange['current_product_image_path'])) {
-                $imgUrl = $exchange['current_product_image_path'];
+            if (!$Silian_imgUrl && !empty($Silian_exchange['current_product_image_path'])) {
+                $Silian_imgUrl = $Silian_exchange['current_product_image_path'];
             }
-            $exchange['product_image_url'] = $exchange['product_image_url'] ?? $imgUrl;
+            $Silian_exchange['product_image_url'] = $Silian_exchange['product_image_url'] ?? $Silian_imgUrl;
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $exchange
+                'data' => $Silian_exchange
             ]);
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::getExchangeRecordDetail error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::getExchangeRecordDetail error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 管理员更新兑换状态
      */
-    public function updateExchangeStatus(Request $request, Response $response, array $args): Response
+    public function updateExchangeStatus(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
             }
 
-            $exchangeId = $args['id'];
-            $data = $request->getParsedBody();
+            $Silian_exchangeId = $Silian_args['id'];
+            $Silian_data = $Silian_request->getParsedBody();
 
-            if (!isset($data['status']) || !in_array($data['status'], ['processing', 'shipped', 'completed', 'cancelled', 'rejected'], true)) {
-                return $this->json($response, ['error' => 'Invalid status'], 400);
+            if (!isset($Silian_data['status']) || !in_array($Silian_data['status'], ['processing', 'shipped', 'completed', 'cancelled', 'rejected'], true)) {
+                return $this->json($Silian_response, ['error' => 'Invalid status'], 400);
             }
 
-            $status = $data['status'];
-            $notes = $data['notes'] ?? ($data['admin_notes'] ?? null);
-            $trackingNumber = $data['tracking_number'] ?? null;
+            $Silian_status = $Silian_data['status'];
+            $Silian_notes = $Silian_data['notes'] ?? ($Silian_data['admin_notes'] ?? null);
+            $Silian_trackingNumber = $Silian_data['tracking_number'] ?? null;
 
             // 更新兑换状态
-            $sql = "
-                UPDATE point_exchanges 
-                SET status = :status, 
+            $Silian_sql = "
+                UPDATE point_exchanges
+                SET status = :status,
                     notes = :notes,
                     tracking_number = :tracking_number,
                     updated_at = NOW()
                 WHERE id = :exchange_id
             ";
 
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([
-                'status' => $status,
-                'notes' => $notes,
-                'tracking_number' => $trackingNumber,
-                'exchange_id' => $exchangeId
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute([
+                'status' => $Silian_status,
+                'notes' => $Silian_notes,
+                'tracking_number' => $Silian_trackingNumber,
+                'exchange_id' => $Silian_exchangeId
             ]);
 
             // 获取兑换信息用于通知
-            $exchange = $this->getExchangeRecord($exchangeId);
-            if ($exchange) {
+            $Silian_exchange = $this->getExchangeRecord($Silian_exchangeId);
+            if ($Silian_exchange) {
                 // 发送状态更新通知
-                $this->sendStatusUpdateNotification($exchange, $status, $notes, $trackingNumber);
+                $this->sendStatusUpdateNotification($Silian_exchange, $Silian_status, $Silian_notes, $Silian_trackingNumber);
             }
 
             // 记录审计日志
             $this->auditLog->log(
-                $user['id'],
+                $Silian_user['id'],
                 'exchange_status_updated',
                 'point_exchanges',
-                $exchangeId,
-                ['status' => $status, 'notes' => $notes]
+                $Silian_exchangeId,
+                ['status' => $Silian_status, 'notes' => $Silian_notes]
             );
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'message' => 'Exchange status updated successfully'
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::updateExchangeStatus error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::updateExchangeStatus error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 获取商品分类
      */
-    public function getCategories(Request $request, Response $response): Response
+    public function getCategories(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $params = $request->getQueryParams();
-            $search = trim((string)($params['search'] ?? ''));
-            $limitParam = isset($params['limit']) ? (int)$params['limit'] : 50;
-            $limit = max(5, min(100, $limitParam));
+            $Silian_params = $Silian_request->getQueryParams();
+            $Silian_search = trim((string)($Silian_params['search'] ?? ''));
+            $Silian_limitParam = isset($Silian_params['limit']) ? (int)$Silian_params['limit'] : 50;
+            $Silian_limit = max(5, min(100, $Silian_limitParam));
 
-            $sql = "
+            $Silian_sql = "
                 SELECT
                     pc.id,
                     pc.name,
@@ -908,39 +908,39 @@ class ProductController
                 ) AS stats ON stats.category_slug = pc.slug
             ";
 
-            $bindings = [];
-            if ($search !== '') {
-                $sql .= ' WHERE pc.name LIKE :search_name OR pc.slug LIKE :search_slug';
-                $searchPattern = '%' . $search . '%';
-                $bindings['search_name'] = $searchPattern;
-                $bindings['search_slug'] = $searchPattern;
+            $Silian_bindings = [];
+            if ($Silian_search !== '') {
+                $Silian_sql .= ' WHERE pc.name LIKE :search_name OR pc.slug LIKE :search_slug';
+                $Silian_searchPattern = '%' . $Silian_search . '%';
+                $Silian_bindings['search_name'] = $Silian_searchPattern;
+                $Silian_bindings['search_slug'] = $Silian_searchPattern;
             }
 
-            $sql .= ' ORDER BY pc.name ASC LIMIT :limit';
+            $Silian_sql .= ' ORDER BY pc.name ASC LIMIT :limit';
 
-            $stmt = $this->db->prepare($sql);
-            foreach ($bindings as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_bindings as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            $categoryRows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_stmt->bindValue('limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            $Silian_categoryRows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            $map = [];
-            foreach ($categoryRows as $row) {
-                $name = $row['name'] ?? '';
-                $slug = $row['slug'] ?? '';
-                $key = strtolower($slug !== '' ? $slug : $name);
-                $map[$key] = [
-                    'id' => isset($row['id']) ? (int)$row['id'] : null,
-                    'name' => $name !== '' ? $name : ($slug ?: ''),
-                    'slug' => $slug,
-                    'product_count' => (int)($row['product_count'] ?? 0),
+            $Silian_map = [];
+            foreach ($Silian_categoryRows as $Silian_row) {
+                $Silian_name = $Silian_row['name'] ?? '';
+                $Silian_slug = $Silian_row['slug'] ?? '';
+                $Silian_key = strtolower($Silian_slug !== '' ? $Silian_slug : $Silian_name);
+                $Silian_map[$Silian_key] = [
+                    'id' => isset($Silian_row['id']) ? (int)$Silian_row['id'] : null,
+                    'name' => $Silian_name !== '' ? $Silian_name : ($Silian_slug ?: ''),
+                    'slug' => $Silian_slug,
+                    'product_count' => (int)($Silian_row['product_count'] ?? 0),
                 ];
             }
 
-            $fallbackLimit = $limit * 2;
-            $fallbackSql = "
+            $Silian_fallbackLimit = $Silian_limit * 2;
+            $Silian_fallbackSql = "
                 SELECT
                     COALESCE(NULLIF(category_slug, ''), NULL) AS slug,
                     category AS name,
@@ -954,71 +954,71 @@ class ProductController
                 LIMIT :fallback_limit
             ";
 
-            $fallbackStmt = $this->db->prepare($fallbackSql);
-            $fallbackStmt->bindValue('fallback_limit', $fallbackLimit, PDO::PARAM_INT);
-            $fallbackStmt->execute();
-            $fallbackRows = $fallbackStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_fallbackStmt = $this->db->prepare($Silian_fallbackSql);
+            $Silian_fallbackStmt->bindValue('fallback_limit', $Silian_fallbackLimit, PDO::PARAM_INT);
+            $Silian_fallbackStmt->execute();
+            $Silian_fallbackRows = $Silian_fallbackStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            $searchLower = strtolower($search);
-            foreach ($fallbackRows as $row) {
-                $name = isset($row['name']) ? trim((string)$row['name']) : '';
-                $slug = isset($row['slug']) ? (string)$row['slug'] : '';
-                $slug = $slug !== '' ? $this->normalizeSlug($slug) : '';
-                if ($slug === '' && $name !== '') {
-                    $slug = $this->slugifyCategoryName($name);
+            $Silian_searchLower = strtolower($Silian_search);
+            foreach ($Silian_fallbackRows as $Silian_row) {
+                $Silian_name = isset($Silian_row['name']) ? trim((string)$Silian_row['name']) : '';
+                $Silian_slug = isset($Silian_row['slug']) ? (string)$Silian_row['slug'] : '';
+                $Silian_slug = $Silian_slug !== '' ? $this->normalizeSlug($Silian_slug) : '';
+                if ($Silian_slug === '' && $Silian_name !== '') {
+                    $Silian_slug = $this->slugifyCategoryName($Silian_name);
                 }
-                if ($name === '' && $slug === '') {
+                if ($Silian_name === '' && $Silian_slug === '') {
                     continue;
                 }
-                $key = strtolower($slug !== '' ? $slug : $name);
+                $Silian_key = strtolower($Silian_slug !== '' ? $Silian_slug : $Silian_name);
 
-                if ($searchLower !== '') {
-                    $matchesSearch = (strpos(strtolower($name), $searchLower) !== false)
-                        || ($slug !== '' && strpos($slug, $searchLower) !== false);
-                    if (!$matchesSearch) {
+                if ($Silian_searchLower !== '') {
+                    $Silian_matchesSearch = (strpos(strtolower($Silian_name), $Silian_searchLower) !== false)
+                        || ($Silian_slug !== '' && strpos($Silian_slug, $Silian_searchLower) !== false);
+                    if (!$Silian_matchesSearch) {
                         continue;
                     }
                 }
 
-                $count = (int)($row['product_count'] ?? 0);
+                $Silian_count = (int)($Silian_row['product_count'] ?? 0);
 
-                if (isset($map[$key])) {
-                    $map[$key]['product_count'] += $count;
-                    if ($map[$key]['name'] === '' && $name !== '') {
-                        $map[$key]['name'] = $name;
+                if (isset($Silian_map[$Silian_key])) {
+                    $Silian_map[$Silian_key]['product_count'] += $Silian_count;
+                    if ($Silian_map[$Silian_key]['name'] === '' && $Silian_name !== '') {
+                        $Silian_map[$Silian_key]['name'] = $Silian_name;
                     }
-                    if ($map[$key]['slug'] === '' && $slug !== '') {
-                        $map[$key]['slug'] = $slug;
+                    if ($Silian_map[$Silian_key]['slug'] === '' && $Silian_slug !== '') {
+                        $Silian_map[$Silian_key]['slug'] = $Silian_slug;
                     }
                     continue;
                 }
 
-                $map[$key] = [
+                $Silian_map[$Silian_key] = [
                     'id' => null,
-                    'name' => $name !== '' ? $name : $slug,
-                    'slug' => $slug,
-                    'product_count' => $count,
+                    'name' => $Silian_name !== '' ? $Silian_name : $Silian_slug,
+                    'slug' => $Silian_slug,
+                    'product_count' => $Silian_count,
                 ];
             }
 
-            $categories = array_values($map);
-            usort($categories, static function ($a, $b) {
-                return strcmp($a['name'], $b['name']);
+            $Silian_categories = array_values($Silian_map);
+            usort($Silian_categories, static function ($Silian_a, $Silian_b) {
+                return strcmp($Silian_a['name'], $Silian_b['name']);
             });
-            if (count($categories) > $limit) {
-                $categories = array_slice($categories, 0, $limit);
+            if (count($Silian_categories) > $Silian_limit) {
+                $Silian_categories = array_slice($Silian_categories, 0, $Silian_limit);
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'categories' => $categories,
+                    'categories' => $Silian_categories,
                 ],
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::getCategories error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::getCategories error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
@@ -1026,40 +1026,40 @@ class ProductController
     /**
      * 管理员创建商品
      */
-    public function createProduct(Request $request, Response $response): Response
+    public function createProduct(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
             }
 
-            $data = $request->getParsedBody() ?: [];
+            $Silian_data = $Silian_request->getParsedBody() ?: [];
 
             // 输入校验
-            if (empty($data['name']) || !isset($data['points_required']) || !isset($data['stock'])) {
-                return $this->json($response, ['error' => 'Missing required fields: name, points_required, stock'], 400);
+            if (empty($Silian_data['name']) || !isset($Silian_data['points_required']) || !isset($Silian_data['stock'])) {
+                return $this->json($Silian_response, ['error' => 'Missing required fields: name, points_required, stock'], 400);
             }
-            $tagPayload = $data['tags'] ?? [];
-            $rawCategory = $data['category'] ?? null;
-            $categoryRecord = $this->resolveCategoryFromPayload($rawCategory);
-            $imagePath = $this->extractPrimaryImagePath($data);
-            $imagesPayload = isset($data['images']) ? (is_string($data['images']) ? $data['images'] : json_encode($data['images'])) : null;
-            $statusInput = $data['status'] ?? 'active';
-            $status = in_array($statusInput, ['active', 'inactive'], true) ? $statusInput : 'active';
+            $Silian_tagPayload = $Silian_data['tags'] ?? [];
+            $Silian_rawCategory = $Silian_data['category'] ?? null;
+            $Silian_categoryRecord = $this->resolveCategoryFromPayload($Silian_rawCategory);
+            $Silian_imagePath = $this->extractPrimaryImagePath($Silian_data);
+            $Silian_imagesPayload = isset($Silian_data['images']) ? (is_string($Silian_data['images']) ? $Silian_data['images'] : json_encode($Silian_data['images'])) : null;
+            $Silian_statusInput = $Silian_data['status'] ?? 'active';
+            $Silian_status = in_array($Silian_statusInput, ['active', 'inactive'], true) ? $Silian_statusInput : 'active';
 
-            $categoryName = $categoryRecord['name'] ?? (is_string($rawCategory) ? trim($rawCategory) : null);
-            if ($categoryName === '') {
-                $categoryName = null;
+            $Silian_categoryName = $Silian_categoryRecord['name'] ?? (is_string($Silian_rawCategory) ? trim($Silian_rawCategory) : null);
+            if ($Silian_categoryName === '') {
+                $Silian_categoryName = null;
             }
-            $categorySlug = $categoryRecord['slug'] ?? null;
-            if (!$categorySlug && $categoryName) {
-                $categorySlug = $this->slugifyCategoryName($categoryName);
+            $Silian_categorySlug = $Silian_categoryRecord['slug'] ?? null;
+            if (!$Silian_categorySlug && $Silian_categoryName) {
+                $Silian_categorySlug = $this->slugifyCategoryName($Silian_categoryName);
             }
 
             $this->db->beginTransaction();
             try {
-                $sql = "
+                $Silian_sql = "
                     INSERT INTO products (
                         name, category, category_slug, points_required, description, image_path, images,
                         stock, status, sort_order, created_at
@@ -1069,43 +1069,43 @@ class ProductController
                     )
                 ";
 
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute([
-                    'name' => $data['name'],
-                    'category' => $categoryName,
-                    'category_slug' => $categorySlug,
-                    'points_required' => (int)$data['points_required'],
-                    'description' => $data['description'] ?? '',
-                    'image_path' => $imagePath,
-                    'images' => $imagesPayload,
-                    'stock' => (int)$data['stock'],
-                    'status' => $status,
-                    'sort_order' => (int)($data['sort_order'] ?? 0),
+                $Silian_stmt = $this->db->prepare($Silian_sql);
+                $Silian_stmt->execute([
+                    'name' => $Silian_data['name'],
+                    'category' => $Silian_categoryName,
+                    'category_slug' => $Silian_categorySlug,
+                    'points_required' => (int)$Silian_data['points_required'],
+                    'description' => $Silian_data['description'] ?? '',
+                    'image_path' => $Silian_imagePath,
+                    'images' => $Silian_imagesPayload,
+                    'stock' => (int)$Silian_data['stock'],
+                    'status' => $Silian_status,
+                    'sort_order' => (int)($Silian_data['sort_order'] ?? 0),
                 ]);
 
-                $newId = (int)$this->db->lastInsertId();
+                $Silian_newId = (int)$this->db->lastInsertId();
 
-                $normalizedTags = $this->resolveTagsFromPayload($tagPayload);
-                $this->syncProductTags($newId, $normalizedTags);
+                $Silian_normalizedTags = $this->resolveTagsFromPayload($Silian_tagPayload);
+                $this->syncProductTags($Silian_newId, $Silian_normalizedTags);
 
                 $this->db->commit();
 
                 // 写入审计日志
-                $this->auditLog->log($user['id'], 'product_created', 'products', (string)$newId, [
-                    'name' => $data['name'],
-                    'category' => $categoryName,
-                    'category_slug' => $categorySlug,
-                    'tags' => array_map(static fn($tag) => $tag['name'], $normalizedTags),
+                $this->auditLog->log($Silian_user['id'], 'product_created', 'products', (string)$Silian_newId, [
+                    'name' => $Silian_data['name'],
+                    'category' => $Silian_categoryName,
+                    'category_slug' => $Silian_categorySlug,
+                    'tags' => array_map(static fn($Silian_tag) => $Silian_tag['name'], $Silian_normalizedTags),
                 ]);
 
-                return $this->json($response, ['success' => true, 'id' => $newId, 'message' => 'Product created successfully'], 201);
-            } catch (\Throwable $txError) {
-                try { $this->db->rollBack(); } catch (\Throwable $ignore) {}
-                throw $txError;
+                return $this->json($Silian_response, ['success' => true, 'id' => $Silian_newId, 'message' => 'Product created successfully'], 201);
+            } catch (\Throwable $Silian_txError) {
+                try { $this->db->rollBack(); } catch (\Throwable $Silian_ignore) {}
+                throw $Silian_txError;
             }
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::createProduct error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::createProduct error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
@@ -1113,104 +1113,104 @@ class ProductController
     /**
      * 管理员更新商品
      */
-    public function updateProduct(Request $request, Response $response, array $args): Response
+    public function updateProduct(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
             }
 
-            $id = (int)($args['id'] ?? 0);
-            if ($id <= 0) {
-                return $this->json($response, ['error' => 'Invalid product id'], 400);
+            $Silian_id = (int)($Silian_args['id'] ?? 0);
+            if ($Silian_id <= 0) {
+                return $this->json($Silian_response, ['error' => 'Invalid product id'], 400);
             }
 
-            $data = $request->getParsedBody() ?: [];
+            $Silian_data = $Silian_request->getParsedBody() ?: [];
 
-            $fields = [];
-            $params = ['id' => $id];
+            $Silian_fields = [];
+            $Silian_params = ['id' => $Silian_id];
 
-            $assign = function(string $column, $value) use (&$fields, &$params) {
-                $fields[] = "$column = :$column";
-                $params[$column] = $value;
+            $Silian_assign = function(string $Silian_column, $Silian_value) use (&$Silian_fields, &$Silian_params) {
+                $Silian_fields[] = "$Silian_column = :$Silian_column";
+                $Silian_params[$Silian_column] = $Silian_value;
             };
 
-            foreach (['name','description'] as $col) {
-                if (array_key_exists($col, $data)) { $assign($col, $data[$col]); }
+            foreach (['name','description'] as $Silian_col) {
+                if (array_key_exists($Silian_col, $Silian_data)) { $Silian_assign($Silian_col, $Silian_data[$Silian_col]); }
             }
 
-            $categoryName = null;
-            $categorySlug = null;
-            $hasCategoryPayload = array_key_exists('category', $data);
-            if ($hasCategoryPayload) {
-                $categoryRecord = $this->resolveCategoryFromPayload($data['category']);
-                $categoryName = $categoryRecord['name'] ?? (is_string($data['category']) ? trim((string)$data['category']) : null);
-                if ($categoryName === '') {
-                    $categoryName = null;
+            $Silian_categoryName = null;
+            $Silian_categorySlug = null;
+            $Silian_hasCategoryPayload = array_key_exists('category', $Silian_data);
+            if ($Silian_hasCategoryPayload) {
+                $Silian_categoryRecord = $this->resolveCategoryFromPayload($Silian_data['category']);
+                $Silian_categoryName = $Silian_categoryRecord['name'] ?? (is_string($Silian_data['category']) ? trim((string)$Silian_data['category']) : null);
+                if ($Silian_categoryName === '') {
+                    $Silian_categoryName = null;
                 }
-                $categorySlug = $categoryRecord['slug'] ?? null;
-                if (!$categorySlug && $categoryName) {
-                    $categorySlug = $this->slugifyCategoryName($categoryName);
+                $Silian_categorySlug = $Silian_categoryRecord['slug'] ?? null;
+                if (!$Silian_categorySlug && $Silian_categoryName) {
+                    $Silian_categorySlug = $this->slugifyCategoryName($Silian_categoryName);
                 }
-                $assign('category', $categoryName);
-                $assign('category_slug', $categorySlug);
+                $Silian_assign('category', $Silian_categoryName);
+                $Silian_assign('category_slug', $Silian_categorySlug);
             }
 
-            if (array_key_exists('points_required', $data)) { $assign('points_required', (int)$data['points_required']); }
-            if (array_key_exists('stock', $data)) { $assign('stock', (int)$data['stock']); }
-            if (array_key_exists('status', $data)) {
-                $status = in_array($data['status'], ['active','inactive'], true) ? $data['status'] : 'inactive';
-                $assign('status', $status);
+            if (array_key_exists('points_required', $Silian_data)) { $Silian_assign('points_required', (int)$Silian_data['points_required']); }
+            if (array_key_exists('stock', $Silian_data)) { $Silian_assign('stock', (int)$Silian_data['stock']); }
+            if (array_key_exists('status', $Silian_data)) {
+                $Silian_status = in_array($Silian_data['status'], ['active','inactive'], true) ? $Silian_data['status'] : 'inactive';
+                $Silian_assign('status', $Silian_status);
             }
-            if (array_key_exists('sort_order', $data)) { $assign('sort_order', (int)$data['sort_order']); }
-            $imagePath = null;
-            $hasImagePayload = array_key_exists('image_path', $data) || array_key_exists('image_url', $data) || array_key_exists('image', $data);
-            if ($hasImagePayload) {
-                $imagePath = $this->extractPrimaryImagePath($data);
-                $assign('image_path', $imagePath);
+            if (array_key_exists('sort_order', $Silian_data)) { $Silian_assign('sort_order', (int)$Silian_data['sort_order']); }
+            $Silian_imagePath = null;
+            $Silian_hasImagePayload = array_key_exists('image_path', $Silian_data) || array_key_exists('image_url', $Silian_data) || array_key_exists('image', $Silian_data);
+            if ($Silian_hasImagePayload) {
+                $Silian_imagePath = $this->extractPrimaryImagePath($Silian_data);
+                $Silian_assign('image_path', $Silian_imagePath);
             }
-            if (array_key_exists('images', $data)) {
-                $images = is_string($data['images']) ? $data['images'] : json_encode($data['images']);
-                $assign('images', $images);
-            }
-
-            $shouldUpdateTags = array_key_exists('tags', $data);
-            if (empty($fields) && !$shouldUpdateTags) {
-                return $this->json($response, ['error' => 'No fields to update'], 400);
+            if (array_key_exists('images', $Silian_data)) {
+                $Silian_images = is_string($Silian_data['images']) ? $Silian_data['images'] : json_encode($Silian_data['images']);
+                $Silian_assign('images', $Silian_images);
             }
 
-            $normalizedTags = $shouldUpdateTags ? $this->resolveTagsFromPayload($data['tags']) : [];
+            $Silian_shouldUpdateTags = array_key_exists('tags', $Silian_data);
+            if (empty($Silian_fields) && !$Silian_shouldUpdateTags) {
+                return $this->json($Silian_response, ['error' => 'No fields to update'], 400);
+            }
+
+            $Silian_normalizedTags = $Silian_shouldUpdateTags ? $this->resolveTagsFromPayload($Silian_data['tags']) : [];
 
             $this->db->beginTransaction();
             try {
-                if (!empty($fields)) {
-                    $sql = 'UPDATE products SET ' . implode(', ', $fields) . ', updated_at = NOW() WHERE id = :id AND deleted_at IS NULL';
-                    $stmt = $this->db->prepare($sql);
-                    $stmt->execute($params);
+                if (!empty($Silian_fields)) {
+                    $Silian_sql = 'UPDATE products SET ' . implode(', ', $Silian_fields) . ', updated_at = NOW() WHERE id = :id AND deleted_at IS NULL';
+                    $Silian_stmt = $this->db->prepare($Silian_sql);
+                    $Silian_stmt->execute($Silian_params);
                 }
 
-                if ($shouldUpdateTags) {
-                    $this->syncProductTags($id, $normalizedTags);
+                if ($Silian_shouldUpdateTags) {
+                    $this->syncProductTags($Silian_id, $Silian_normalizedTags);
                 }
 
                 $this->db->commit();
 
-                $this->auditLog->log($user['id'], 'product_updated', 'products', (string)$id, [
-                    'updated_fields' => array_keys($data),
-                    'category' => $hasCategoryPayload ? $categoryName : null,
-                    'category_slug' => $hasCategoryPayload ? $categorySlug : null,
-                    'tags' => $shouldUpdateTags ? array_map(static fn($tag) => $tag['name'], $normalizedTags) : null,
+                $this->auditLog->log($Silian_user['id'], 'product_updated', 'products', (string)$Silian_id, [
+                    'updated_fields' => array_keys($Silian_data),
+                    'category' => $Silian_hasCategoryPayload ? $Silian_categoryName : null,
+                    'category_slug' => $Silian_hasCategoryPayload ? $Silian_categorySlug : null,
+                    'tags' => $Silian_shouldUpdateTags ? array_map(static fn($Silian_tag) => $Silian_tag['name'], $Silian_normalizedTags) : null,
                 ]);
 
-                return $this->json($response, ['success' => true, 'message' => 'Product updated successfully']);
-            } catch (\Throwable $txError) {
-                try { $this->db->rollBack(); } catch (\Throwable $ignore) {}
-                throw $txError;
+                return $this->json($Silian_response, ['success' => true, 'message' => 'Product updated successfully']);
+            } catch (\Throwable $Silian_txError) {
+                try { $this->db->rollBack(); } catch (\Throwable $Silian_ignore) {}
+                throw $Silian_txError;
             }
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::updateProduct error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::updateProduct error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
@@ -1218,301 +1218,301 @@ class ProductController
     /**
      * 获取商品标签（用于自动补全）
      */
-    public function searchProductTags(Request $request, Response $response): Response
+    public function searchProductTags(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $params = $request->getQueryParams();
-            $search = trim((string)($params['search'] ?? ''));
-            $limit = min(50, max(5, (int)($params['limit'] ?? 20)));
+            $Silian_params = $Silian_request->getQueryParams();
+            $Silian_search = trim((string)($Silian_params['search'] ?? ''));
+            $Silian_limit = min(50, max(5, (int)($Silian_params['limit'] ?? 20)));
 
-            $sql = 'SELECT id, name, slug FROM product_tags';
-            $bindings = [];
-            if ($search !== '') {
-                $sql .= ' WHERE name LIKE :search_name OR slug LIKE :search_slug';
-                $searchPattern = '%' . $search . '%';
-                $bindings['search_name'] = $searchPattern;
-                $bindings['search_slug'] = $searchPattern;
+            $Silian_sql = 'SELECT id, name, slug FROM product_tags';
+            $Silian_bindings = [];
+            if ($Silian_search !== '') {
+                $Silian_sql .= ' WHERE name LIKE :search_name OR slug LIKE :search_slug';
+                $Silian_searchPattern = '%' . $Silian_search . '%';
+                $Silian_bindings['search_name'] = $Silian_searchPattern;
+                $Silian_bindings['search_slug'] = $Silian_searchPattern;
             }
-            $sql .= ' ORDER BY name ASC LIMIT :limit';
+            $Silian_sql .= ' ORDER BY name ASC LIMIT :limit';
 
-            $stmt = $this->db->prepare($sql);
-            foreach ($bindings as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_bindings as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_stmt->bindValue('limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'tags' => array_map(static function ($row) {
+                    'tags' => array_map(static function ($Silian_row) {
                         return [
-                            'id' => isset($row['id']) ? (int)$row['id'] : null,
-                            'name' => $row['name'] ?? '',
-                            'slug' => $row['slug'] ?? '',
+                            'id' => isset($Silian_row['id']) ? (int)$Silian_row['id'] : null,
+                            'name' => $Silian_row['name'] ?? '',
+                            'slug' => $Silian_row['slug'] ?? '',
                         ];
-                    }, $rows)
+                    }, $Silian_rows)
                 ]
                 ]
             );
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::searchProductTags error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::searchProductTags error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
-    private function prepareProductPayload(array $product, bool $withProtectedUrls = false, ?Request $request = null): array
+    private function prepareProductPayload(array $Silian_product, bool $Silian_withProtectedUrls = false, ?Request $Silian_request = null): array
     {
-        $product['images'] = $this->normalizeProductImagesList($product['images'] ?? null, $withProtectedUrls, $request);
+        $Silian_product['images'] = $this->normalizeProductImagesList($Silian_product['images'] ?? null, $Silian_withProtectedUrls, $Silian_request);
 
-        $imagePathRaw = $product['image_path'] ?? null;
-        $normalizedImagePath = null;
-        if (is_string($imagePathRaw) && $imagePathRaw !== '') {
-            $normalizedImagePath = ltrim(trim($imagePathRaw), '/');
-            $product['image_path'] = $normalizedImagePath;
+        $Silian_imagePathRaw = $Silian_product['image_path'] ?? null;
+        $Silian_normalizedImagePath = null;
+        if (is_string($Silian_imagePathRaw) && $Silian_imagePathRaw !== '') {
+            $Silian_normalizedImagePath = ltrim(trim($Silian_imagePathRaw), '/');
+            $Silian_product['image_path'] = $Silian_normalizedImagePath;
         }
 
-        $imageUrl = $product['image_url'] ?? null;
-        if ((!is_string($imageUrl) || $imageUrl === '') && $normalizedImagePath) {
-            $publicUrl = $this->buildPublicUrl($normalizedImagePath, $request);
-            if ($publicUrl) {
-                $imageUrl = $publicUrl;
+        $Silian_imageUrl = $Silian_product['image_url'] ?? null;
+        if ((!is_string($Silian_imageUrl) || $Silian_imageUrl === '') && $Silian_normalizedImagePath) {
+            $Silian_publicUrl = $this->buildPublicUrl($Silian_normalizedImagePath, $Silian_request);
+            if ($Silian_publicUrl) {
+                $Silian_imageUrl = $Silian_publicUrl;
             }
         }
 
-        $existingPresigned = $product['image_presigned_url'] ?? null;
-        $presignedUrl = $existingPresigned && is_string($existingPresigned) ? $existingPresigned : null;
-        if ($withProtectedUrls && $normalizedImagePath) {
-            $freshPresigned = $this->buildPresignedUrl($normalizedImagePath, 600, $request);
-            if ($freshPresigned) {
-                $presignedUrl = $freshPresigned;
+        $Silian_existingPresigned = $Silian_product['image_presigned_url'] ?? null;
+        $Silian_presignedUrl = $Silian_existingPresigned && is_string($Silian_existingPresigned) ? $Silian_existingPresigned : null;
+        if ($Silian_withProtectedUrls && $Silian_normalizedImagePath) {
+            $Silian_freshPresigned = $this->buildPresignedUrl($Silian_normalizedImagePath, 600, $Silian_request);
+            if ($Silian_freshPresigned) {
+                $Silian_presignedUrl = $Silian_freshPresigned;
             }
         }
 
-        if (!is_string($imageUrl) || $imageUrl === '') {
-            if (!empty($product['images'])) {
-                $firstImage = $product['images'][0];
-                if (is_array($firstImage)) {
-                    if (!empty($firstImage['url'])) {
-                        $imageUrl = $firstImage['url'];
-                    } elseif (!empty($firstImage['file_path'])) {
-                        $fallbackUrl = $this->buildPublicUrl($firstImage['file_path'], $request);
-                        if ($fallbackUrl) {
-                            $imageUrl = $fallbackUrl;
+        if (!is_string($Silian_imageUrl) || $Silian_imageUrl === '') {
+            if (!empty($Silian_product['images'])) {
+                $Silian_firstImage = $Silian_product['images'][0];
+                if (is_array($Silian_firstImage)) {
+                    if (!empty($Silian_firstImage['url'])) {
+                        $Silian_imageUrl = $Silian_firstImage['url'];
+                    } elseif (!empty($Silian_firstImage['file_path'])) {
+                        $Silian_fallbackUrl = $this->buildPublicUrl($Silian_firstImage['file_path'], $Silian_request);
+                        if ($Silian_fallbackUrl) {
+                            $Silian_imageUrl = $Silian_fallbackUrl;
                         }
                     }
-                    if ($withProtectedUrls && !$presignedUrl && !empty($firstImage['file_path'])) {
-                        $presignedUrl = $this->buildPresignedUrl($firstImage['file_path'], 600, $request);
+                    if ($Silian_withProtectedUrls && !$Silian_presignedUrl && !empty($Silian_firstImage['file_path'])) {
+                        $Silian_presignedUrl = $this->buildPresignedUrl($Silian_firstImage['file_path'], 600, $Silian_request);
                     }
-                } elseif (is_string($firstImage) && $firstImage !== '') {
-                    $imageUrl = $firstImage;
+                } elseif (is_string($Silian_firstImage) && $Silian_firstImage !== '') {
+                    $Silian_imageUrl = $Silian_firstImage;
                 }
             }
         } else {
-            if ($withProtectedUrls && !$presignedUrl && $normalizedImagePath) {
-                $presignedUrl = $this->buildPresignedUrl($normalizedImagePath, 600, $request);
+            if ($Silian_withProtectedUrls && !$Silian_presignedUrl && $Silian_normalizedImagePath) {
+                $Silian_presignedUrl = $this->buildPresignedUrl($Silian_normalizedImagePath, 600, $Silian_request);
             }
         }
 
-        if ($withProtectedUrls && !$presignedUrl && !empty($product['images'])) {
-            foreach ($product['images'] as $imageMeta) {
-                if (!empty($imageMeta['presigned_url'])) {
-                    $presignedUrl = $imageMeta['presigned_url'];
+        if ($Silian_withProtectedUrls && !$Silian_presignedUrl && !empty($Silian_product['images'])) {
+            foreach ($Silian_product['images'] as $Silian_imageMeta) {
+                if (!empty($Silian_imageMeta['presigned_url'])) {
+                    $Silian_presignedUrl = $Silian_imageMeta['presigned_url'];
                     break;
                 }
             }
         }
 
-        if (!is_string($imageUrl) || $imageUrl === '') {
-            if ($normalizedImagePath) {
-                $imageUrl = $normalizedImagePath;
+        if (!is_string($Silian_imageUrl) || $Silian_imageUrl === '') {
+            if ($Silian_normalizedImagePath) {
+                $Silian_imageUrl = $Silian_normalizedImagePath;
             }
         }
 
-        if (is_string($imageUrl) && $imageUrl !== '') {
-            $product['image_url'] = $imageUrl;
+        if (is_string($Silian_imageUrl) && $Silian_imageUrl !== '') {
+            $Silian_product['image_url'] = $Silian_imageUrl;
         }
 
-        if ($withProtectedUrls) {
-            $product['image_presigned_url'] = $presignedUrl ?: '';
+        if ($Silian_withProtectedUrls) {
+            $Silian_product['image_presigned_url'] = $Silian_presignedUrl ?: '';
         } else {
-            unset($product['image_presigned_url']);
+            unset($Silian_product['image_presigned_url']);
         }
 
-        if (isset($product['stock'])) {
-            $product['stock'] = (int)$product['stock'];
+        if (isset($Silian_product['stock'])) {
+            $Silian_product['stock'] = (int)$Silian_product['stock'];
         }
-        if (isset($product['points_required'])) {
-            $product['points_required'] = (int)$product['points_required'];
-        }
-
-        $stockValue = $product['stock'] ?? null;
-        $product['is_available'] = $stockValue === -1 || ($stockValue > 0);
-
-        if (!isset($product['price']) && isset($product['points_required'])) {
-            $product['price'] = (int)$product['points_required'];
+        if (isset($Silian_product['points_required'])) {
+            $Silian_product['points_required'] = (int)$Silian_product['points_required'];
         }
 
-        return $product;
+        $Silian_stockValue = $Silian_product['stock'] ?? null;
+        $Silian_product['is_available'] = $Silian_stockValue === -1 || ($Silian_stockValue > 0);
+
+        if (!isset($Silian_product['price']) && isset($Silian_product['points_required'])) {
+            $Silian_product['price'] = (int)$Silian_product['points_required'];
+        }
+
+        return $Silian_product;
     }
 
-    private function normalizeProductImagesList($rawImages, bool $withProtectedUrls = false, ?Request $request = null): array
+    private function normalizeProductImagesList($Silian_rawImages, bool $Silian_withProtectedUrls = false, ?Request $Silian_request = null): array
     {
-        if (empty($rawImages)) {
+        if (empty($Silian_rawImages)) {
             return [];
         }
 
-        if (is_string($rawImages)) {
-            $decoded = json_decode($rawImages, true);
+        if (is_string($Silian_rawImages)) {
+            $Silian_decoded = json_decode($Silian_rawImages, true);
             if (json_last_error() === JSON_ERROR_NONE) {
-                $rawImages = $decoded;
+                $Silian_rawImages = $Silian_decoded;
             } else {
-                $rawImages = [$rawImages];
+                $Silian_rawImages = [$Silian_rawImages];
             }
         }
 
-        if (!is_array($rawImages)) {
+        if (!is_array($Silian_rawImages)) {
             return [];
         }
 
-        $normalized = [];
-        foreach ($rawImages as $item) {
-            $image = $this->normalizeProductImageItem($item, $withProtectedUrls, $request);
-            if ($image !== null) {
-                $normalized[] = $image;
+        $Silian_normalized = [];
+        foreach ($Silian_rawImages as $Silian_item) {
+            $Silian_image = $this->normalizeProductImageItem($Silian_item, $Silian_withProtectedUrls, $Silian_request);
+            if ($Silian_image !== null) {
+                $Silian_normalized[] = $Silian_image;
             }
         }
 
-        return $normalized;
+        return $Silian_normalized;
     }
 
-    private function normalizeProductImageItem($item, bool $withProtectedUrls = false, ?Request $request = null): ?array
+    private function normalizeProductImageItem($Silian_item, bool $Silian_withProtectedUrls = false, ?Request $Silian_request = null): ?array
     {
-        if (is_string($item)) {
-            $item = ['file_path' => $item];
-        } elseif (!is_array($item)) {
+        if (is_string($Silian_item)) {
+            $Silian_item = ['file_path' => $Silian_item];
+        } elseif (!is_array($Silian_item)) {
             return null;
         }
 
-        $filePath = $item['file_path'] ?? ($item['path'] ?? null);
-        if (is_string($filePath) && $filePath !== '') {
-            $filePath = ltrim(trim($filePath), '/');
+        $Silian_filePath = $Silian_item['file_path'] ?? ($Silian_item['path'] ?? null);
+        if (is_string($Silian_filePath) && $Silian_filePath !== '') {
+            $Silian_filePath = ltrim(trim($Silian_filePath), '/');
         } else {
-            $filePath = null;
+            $Silian_filePath = null;
         }
 
-        $url = $item['url'] ?? ($item['public_url'] ?? null);
-        if ((!is_string($url) || $url === '') && $filePath) {
-            $url = $this->buildPublicUrl($filePath, $request) ?? $url;
+        $Silian_url = $Silian_item['url'] ?? ($Silian_item['public_url'] ?? null);
+        if ((!is_string($Silian_url) || $Silian_url === '') && $Silian_filePath) {
+            $Silian_url = $this->buildPublicUrl($Silian_filePath, $Silian_request) ?? $Silian_url;
         }
 
-        $existingPresigned = $item['presigned_url'] ?? null;
-        $presignedUrl = null;
-        if ($withProtectedUrls && $filePath) {
-            $freshPresigned = $this->buildPresignedUrl($filePath, 600, $request);
-            if ($freshPresigned) {
-                $presignedUrl = $freshPresigned;
-            } elseif (is_string($existingPresigned) && $existingPresigned !== '') {
-                $presignedUrl = $existingPresigned;
+        $Silian_existingPresigned = $Silian_item['presigned_url'] ?? null;
+        $Silian_presignedUrl = null;
+        if ($Silian_withProtectedUrls && $Silian_filePath) {
+            $Silian_freshPresigned = $this->buildPresignedUrl($Silian_filePath, 600, $Silian_request);
+            if ($Silian_freshPresigned) {
+                $Silian_presignedUrl = $Silian_freshPresigned;
+            } elseif (is_string($Silian_existingPresigned) && $Silian_existingPresigned !== '') {
+                $Silian_presignedUrl = $Silian_existingPresigned;
             }
-        } elseif ($withProtectedUrls && is_string($existingPresigned) && $existingPresigned !== '') {
-            $presignedUrl = $existingPresigned;
+        } elseif ($Silian_withProtectedUrls && is_string($Silian_existingPresigned) && $Silian_existingPresigned !== '') {
+            $Silian_presignedUrl = $Silian_existingPresigned;
         }
 
-        $normalized = [
-            'file_path' => $filePath,
-            'url' => $url,
+        $Silian_normalized = [
+            'file_path' => $Silian_filePath,
+            'url' => $Silian_url,
         ];
 
-        if ($withProtectedUrls) {
-            $normalized['presigned_url'] = $presignedUrl ?: null;
+        if ($Silian_withProtectedUrls) {
+            $Silian_normalized['presigned_url'] = $Silian_presignedUrl ?: null;
         }
-        if (isset($item['thumbnail_path'])) {
-            $normalized['thumbnail_path'] = $item['thumbnail_path'];
+        if (isset($Silian_item['thumbnail_path'])) {
+            $Silian_normalized['thumbnail_path'] = $Silian_item['thumbnail_path'];
         }
-        if (isset($item['original_name'])) {
-            $normalized['original_name'] = $item['original_name'];
+        if (isset($Silian_item['original_name'])) {
+            $Silian_normalized['original_name'] = $Silian_item['original_name'];
         }
-        if (isset($item['mime_type'])) {
-            $normalized['mime_type'] = $item['mime_type'];
+        if (isset($Silian_item['mime_type'])) {
+            $Silian_normalized['mime_type'] = $Silian_item['mime_type'];
         }
-        $size = $item['size'] ?? ($item['file_size'] ?? null);
-        if ($size !== null) {
-            $normalized['size'] = $size;
+        $Silian_size = $Silian_item['size'] ?? ($Silian_item['file_size'] ?? null);
+        if ($Silian_size !== null) {
+            $Silian_normalized['size'] = $Silian_size;
         }
-        if (isset($item['duplicate'])) {
-            $normalized['duplicate'] = $item['duplicate'];
+        if (isset($Silian_item['duplicate'])) {
+            $Silian_normalized['duplicate'] = $Silian_item['duplicate'];
         }
 
-        return $normalized;
+        return $Silian_normalized;
     }
 
-    private function logControllerException(\Throwable $exception, Request $request, string $contextMessage = ''): void
+    private function logControllerException(\Throwable $Silian_exception, Request $Silian_request, string $Silian_contextMessage = ''): void
     {
         if ($this->errorLogService) {
             try {
-                $extra = $contextMessage !== '' ? ['context_message' => $contextMessage] : [];
-                $this->errorLogService->logException($exception, $request, $extra);
+                $Silian_extra = $Silian_contextMessage !== '' ? ['context_message' => $Silian_contextMessage] : [];
+                $this->errorLogService->logException($Silian_exception, $Silian_request, $Silian_extra);
                 return;
-            } catch (\Throwable $loggingError) {
-                error_log(self::ERRLOG_PREFIX . $loggingError->getMessage());
+            } catch (\Throwable $Silian_loggingError) {
+                error_log(self::ERRLOG_PREFIX . $Silian_loggingError->getMessage());
             }
         }
-        $fallbackMessage = $contextMessage !== '' ? $contextMessage : $exception->getMessage();
-        error_log($fallbackMessage);
+        $Silian_fallbackMessage = $Silian_contextMessage !== '' ? $Silian_contextMessage : $Silian_exception->getMessage();
+        error_log($Silian_fallbackMessage);
     }
 
-    private function buildPresignedUrl(?string $filePath, int $ttlSeconds = 600, ?Request $request = null): ?string
+    private function buildPresignedUrl(?string $Silian_filePath, int $Silian_ttlSeconds = 600, ?Request $Silian_request = null): ?string
     {
-        if (!$filePath || !$this->r2Service) {
+        if (!$Silian_filePath || !$this->r2Service) {
             return null;
         }
         try {
-            return $this->r2Service->generatePresignedUrl($filePath, $ttlSeconds);
-        } catch (\Throwable $ignore) {
+            return $this->r2Service->generatePresignedUrl($Silian_filePath, $Silian_ttlSeconds);
+        } catch (\Throwable $Silian_ignore) {
             return null;
         }
     }
 
-    private function buildPublicUrl(?string $filePath, ?Request $request = null): ?string
+    private function buildPublicUrl(?string $Silian_filePath, ?Request $Silian_request = null): ?string
     {
-        if (!$filePath || !$this->r2Service) {
+        if (!$Silian_filePath || !$this->r2Service) {
             return null;
         }
         try {
-            return $this->r2Service->getPublicUrl($filePath);
-        } catch (\Throwable $ignore) {
+            return $this->r2Service->getPublicUrl($Silian_filePath);
+        } catch (\Throwable $Silian_ignore) {
             return null;
         }
     }
 
-    private function extractPrimaryImagePath(array $payload): ?string
+    private function extractPrimaryImagePath(array $Silian_payload): ?string
     {
-        $candidates = [];
-        if (array_key_exists('image_path', $payload)) {
-            $candidates[] = $payload['image_path'];
+        $Silian_candidates = [];
+        if (array_key_exists('image_path', $Silian_payload)) {
+            $Silian_candidates[] = $Silian_payload['image_path'];
         }
-        if (array_key_exists('image_url', $payload)) {
-            $candidates[] = $payload['image_url'];
+        if (array_key_exists('image_url', $Silian_payload)) {
+            $Silian_candidates[] = $Silian_payload['image_url'];
         }
-        if (array_key_exists('image', $payload)) {
-            $candidates[] = $payload['image'];
+        if (array_key_exists('image', $Silian_payload)) {
+            $Silian_candidates[] = $Silian_payload['image'];
         }
-        if (array_key_exists('main_image', $payload)) {
-            $candidates[] = $payload['main_image'];
+        if (array_key_exists('main_image', $Silian_payload)) {
+            $Silian_candidates[] = $Silian_payload['main_image'];
         }
 
-        foreach ($candidates as $candidate) {
-            if (is_array($candidate)) {
-                $filePath = $candidate['file_path'] ?? ($candidate['path'] ?? ($candidate['value'] ?? null));
-                if (is_string($filePath) && trim($filePath) !== '') {
-                    return trim($filePath);
+        foreach ($Silian_candidates as $Silian_candidate) {
+            if (is_array($Silian_candidate)) {
+                $Silian_filePath = $Silian_candidate['file_path'] ?? ($Silian_candidate['path'] ?? ($Silian_candidate['value'] ?? null));
+                if (is_string($Silian_filePath) && trim($Silian_filePath) !== '') {
+                    return trim($Silian_filePath);
                 }
-            } elseif (is_string($candidate)) {
-                $candidate = trim($candidate);
-                if ($candidate !== '') {
-                    return $candidate;
+            } elseif (is_string($Silian_candidate)) {
+                $Silian_candidate = trim($Silian_candidate);
+                if ($Silian_candidate !== '') {
+                    return $Silian_candidate;
                 }
             }
         }
@@ -1520,588 +1520,588 @@ class ProductController
         return null;
     }
 
-    private function resolveCategoryFromPayload($rawCategory): ?array
+    private function resolveCategoryFromPayload($Silian_rawCategory): ?array
     {
-        if ($rawCategory === null || $rawCategory === '') {
+        if ($Silian_rawCategory === null || $Silian_rawCategory === '') {
             return null;
         }
 
-        $candidate = $this->normalizeCategoryCandidate($rawCategory);
-        if (!$candidate) {
+        $Silian_candidate = $this->normalizeCategoryCandidate($Silian_rawCategory);
+        if (!$Silian_candidate) {
             return null;
         }
 
-        if ($candidate['id'] !== null) {
-            $byId = $this->fetchCategoriesByIds([$candidate['id']]);
-            if (isset($byId[$candidate['id']])) {
-                return $byId[$candidate['id']];
+        if ($Silian_candidate['id'] !== null) {
+            $Silian_byId = $this->fetchCategoriesByIds([$Silian_candidate['id']]);
+            if (isset($Silian_byId[$Silian_candidate['id']])) {
+                return $Silian_byId[$Silian_candidate['id']];
             }
         }
 
-        if ($candidate['slug'] !== '') {
-            $bySlug = $this->fetchCategoriesBySlugs([$candidate['slug']]);
-            if (isset($bySlug[$candidate['slug']])) {
-                return $bySlug[$candidate['slug']];
+        if ($Silian_candidate['slug'] !== '') {
+            $Silian_bySlug = $this->fetchCategoriesBySlugs([$Silian_candidate['slug']]);
+            if (isset($Silian_bySlug[$Silian_candidate['slug']])) {
+                return $Silian_bySlug[$Silian_candidate['slug']];
             }
         }
 
-        $name = $candidate['name'] !== '' ? $candidate['name'] : null;
-        if ($name === null && $candidate['slug'] !== '') {
-            $name = $candidate['slug'];
+        $Silian_name = $Silian_candidate['name'] !== '' ? $Silian_candidate['name'] : null;
+        if ($Silian_name === null && $Silian_candidate['slug'] !== '') {
+            $Silian_name = $Silian_candidate['slug'];
         }
-        if ($name === null) {
+        if ($Silian_name === null) {
             return null;
         }
 
-        $slug = $candidate['slug'] !== '' ? $candidate['slug'] : $this->slugifyCategoryName($name);
+        $Silian_slug = $Silian_candidate['slug'] !== '' ? $Silian_candidate['slug'] : $this->slugifyCategoryName($Silian_name);
 
-        return $this->createProductCategory($name, $slug);
+        return $this->createProductCategory($Silian_name, $Silian_slug);
     }
 
-    private function normalizeCategoryCandidate($category): ?array
+    private function normalizeCategoryCandidate($Silian_category): ?array
     {
-        if (is_string($category)) {
-            $name = trim($category);
-            if ($name === '') {
+        if (is_string($Silian_category)) {
+            $Silian_name = trim($Silian_category);
+            if ($Silian_name === '') {
                 return null;
             }
             return [
                 'id' => null,
-                'name' => $name,
-                'slug' => $this->slugifyCategoryName($name),
+                'name' => $Silian_name,
+                'slug' => $this->slugifyCategoryName($Silian_name),
             ];
         }
 
-        if (!is_array($category)) {
+        if (!is_array($Silian_category)) {
             return null;
         }
 
-        $id = null;
-        foreach (['id', 'category_id'] as $idKey) {
-            if (isset($category[$idKey]) && $category[$idKey] !== '') {
-                $id = (int)$category[$idKey];
+        $Silian_id = null;
+        foreach (['id', 'category_id'] as $Silian_idKey) {
+            if (isset($Silian_category[$Silian_idKey]) && $Silian_category[$Silian_idKey] !== '') {
+                $Silian_id = (int)$Silian_category[$Silian_idKey];
                 break;
             }
         }
 
-        $name = '';
-        foreach (['name', 'category', 'label', 'value'] as $nameKey) {
-            if (isset($category[$nameKey]) && is_string($category[$nameKey])) {
-                $candidate = trim($category[$nameKey]);
-                if ($candidate !== '') {
-                    $name = $candidate;
+        $Silian_name = '';
+        foreach (['name', 'category', 'label', 'value'] as $Silian_nameKey) {
+            if (isset($Silian_category[$Silian_nameKey]) && is_string($Silian_category[$Silian_nameKey])) {
+                $Silian_candidate = trim($Silian_category[$Silian_nameKey]);
+                if ($Silian_candidate !== '') {
+                    $Silian_name = $Silian_candidate;
                     break;
                 }
             }
         }
 
-        $slug = '';
-        foreach (['slug', 'category_slug', 'value'] as $slugKey) {
-            if (isset($category[$slugKey]) && is_string($category[$slugKey])) {
-                $candidate = $this->normalizeSlug($category[$slugKey]);
-                if ($candidate !== '') {
-                    $slug = $candidate;
+        $Silian_slug = '';
+        foreach (['slug', 'category_slug', 'value'] as $Silian_slugKey) {
+            if (isset($Silian_category[$Silian_slugKey]) && is_string($Silian_category[$Silian_slugKey])) {
+                $Silian_candidate = $this->normalizeSlug($Silian_category[$Silian_slugKey]);
+                if ($Silian_candidate !== '') {
+                    $Silian_slug = $Silian_candidate;
                     break;
                 }
             }
         }
 
-        if ($slug === '' && $name !== '') {
-            $slug = $this->slugifyCategoryName($name);
+        if ($Silian_slug === '' && $Silian_name !== '') {
+            $Silian_slug = $this->slugifyCategoryName($Silian_name);
         }
 
-        if ($id === null && $slug === '' && $name === '') {
+        if ($Silian_id === null && $Silian_slug === '' && $Silian_name === '') {
             return null;
         }
 
         return [
-            'id' => $id,
-            'name' => $name,
-            'slug' => $slug,
+            'id' => $Silian_id,
+            'name' => $Silian_name,
+            'slug' => $Silian_slug,
         ];
     }
 
-    private function fetchCategoriesByIds(array $ids): array
+    private function fetchCategoriesByIds(array $Silian_ids): array
     {
-        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static fn($id) => $id > 0)));
-        if (empty($ids)) {
+        $Silian_ids = array_values(array_unique(array_filter(array_map('intval', $Silian_ids), static fn($Silian_id) => $Silian_id > 0)));
+        if (empty($Silian_ids)) {
             return [];
         }
 
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $sql = 'SELECT id, name, slug FROM product_categories WHERE id IN (' . $placeholders . ')';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($ids);
+        $Silian_placeholders = implode(',', array_fill(0, count($Silian_ids), '?'));
+        $Silian_sql = 'SELECT id, name, slug FROM product_categories WHERE id IN (' . $Silian_placeholders . ')';
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_ids);
 
-        $result = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            if (!isset($row['id'])) {
+        $Silian_result = [];
+        while ($Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC)) {
+            if (!isset($Silian_row['id'])) {
                 continue;
             }
-            $identifier = (int)$row['id'];
-            $result[$identifier] = [
-                'id' => $identifier,
-                'name' => $row['name'] ?? '',
-                'slug' => $row['slug'] ?? '',
+            $Silian_identifier = (int)$Silian_row['id'];
+            $Silian_result[$Silian_identifier] = [
+                'id' => $Silian_identifier,
+                'name' => $Silian_row['name'] ?? '',
+                'slug' => $Silian_row['slug'] ?? '',
             ];
         }
 
-        return $result;
+        return $Silian_result;
     }
 
-    private function createProductCategory(string $name, string $slug): array
+    private function createProductCategory(string $Silian_name, string $Silian_slug): array
     {
-        $name = trim($name) !== '' ? trim($name) : $slug;
-        $normalizedSlug = $this->slugifyCategoryName($slug ?: $name);
-        $baseSlug = $normalizedSlug;
-        $attempts = 0;
+        $Silian_name = trim($Silian_name) !== '' ? trim($Silian_name) : $Silian_slug;
+        $Silian_normalizedSlug = $this->slugifyCategoryName($Silian_slug ?: $Silian_name);
+        $Silian_baseSlug = $Silian_normalizedSlug;
+        $Silian_attempts = 0;
 
-        while ($attempts < 5) {
+        while ($Silian_attempts < 5) {
             try {
-                $stmt = $this->db->prepare('INSERT INTO product_categories (name, slug, created_at) VALUES (:name, :slug, NOW())');
-                $stmt->execute([
-                    'name' => $name,
-                    'slug' => $normalizedSlug,
+                $Silian_stmt = $this->db->prepare('INSERT INTO product_categories (name, slug, created_at) VALUES (:name, :slug, NOW())');
+                $Silian_stmt->execute([
+                    'name' => $Silian_name,
+                    'slug' => $Silian_normalizedSlug,
                 ]);
-                $id = (int)$this->db->lastInsertId();
+                $Silian_id = (int)$this->db->lastInsertId();
 
                 return [
-                    'id' => $id,
-                    'name' => $name,
-                    'slug' => $normalizedSlug,
+                    'id' => $Silian_id,
+                    'name' => $Silian_name,
+                    'slug' => $Silian_normalizedSlug,
                 ];
-            } catch (PDOException $e) {
-                if ($e->getCode() !== '23000') {
-                    throw $e;
+            } catch (PDOException $Silian_e) {
+                if ($Silian_e->getCode() !== '23000') {
+                    throw $Silian_e;
                 }
 
-                $existing = $this->fetchCategoriesBySlugs([$normalizedSlug]);
-                if (isset($existing[$normalizedSlug])) {
-                    return $existing[$normalizedSlug];
+                $Silian_existing = $this->fetchCategoriesBySlugs([$Silian_normalizedSlug]);
+                if (isset($Silian_existing[$Silian_normalizedSlug])) {
+                    return $Silian_existing[$Silian_normalizedSlug];
                 }
 
-                ++$attempts;
-                $normalizedSlug = $baseSlug . '-' . $attempts;
+                ++$Silian_attempts;
+                $Silian_normalizedSlug = $Silian_baseSlug . '-' . $Silian_attempts;
             }
         }
 
-        $normalizedSlug = $baseSlug . '-' . substr(md5((string)microtime(true)), 0, 6);
-        $stmt = $this->db->prepare('INSERT INTO product_categories (name, slug, created_at) VALUES (:name, :slug, NOW())');
-        $stmt->execute([
-            'name' => $name,
-            'slug' => $normalizedSlug,
+        $Silian_normalizedSlug = $Silian_baseSlug . '-' . substr(md5((string)microtime(true)), 0, 6);
+        $Silian_stmt = $this->db->prepare('INSERT INTO product_categories (name, slug, created_at) VALUES (:name, :slug, NOW())');
+        $Silian_stmt->execute([
+            'name' => $Silian_name,
+            'slug' => $Silian_normalizedSlug,
         ]);
-        $id = (int)$this->db->lastInsertId();
+        $Silian_id = (int)$this->db->lastInsertId();
 
         return [
-            'id' => $id,
-            'name' => $name,
-            'slug' => $normalizedSlug,
+            'id' => $Silian_id,
+            'name' => $Silian_name,
+            'slug' => $Silian_normalizedSlug,
         ];
     }
 
-    private function resolveTagsFromPayload($rawTags): array
+    private function resolveTagsFromPayload($Silian_rawTags): array
     {
-        if (!is_array($rawTags)) {
+        if (!is_array($Silian_rawTags)) {
             return [];
         }
 
-        $normalized = [];
-        foreach ($rawTags as $tag) {
-            $candidate = $this->normalizeTagCandidate($tag);
-            if (!$candidate) {
+        $Silian_normalized = [];
+        foreach ($Silian_rawTags as $Silian_tag) {
+            $Silian_candidate = $this->normalizeTagCandidate($Silian_tag);
+            if (!$Silian_candidate) {
                 continue;
             }
-            $key = $candidate['id'] !== null
-                ? 'id-' . $candidate['id']
-                : 'slug-' . $candidate['slug'];
-            $normalized[$key] = $candidate;
+            $Silian_key = $Silian_candidate['id'] !== null
+                ? 'id-' . $Silian_candidate['id']
+                : 'slug-' . $Silian_candidate['slug'];
+            $Silian_normalized[$Silian_key] = $Silian_candidate;
         }
 
-        if (empty($normalized)) {
+        if (empty($Silian_normalized)) {
             return [];
         }
 
-        $byId = [];
-        $bySlug = [];
-        $idList = [];
-        $slugList = [];
-        foreach ($normalized as $candidate) {
-            if ($candidate['id'] !== null) {
-                $idList[$candidate['id']] = true;
+        $Silian_byId = [];
+        $Silian_bySlug = [];
+        $Silian_idList = [];
+        $Silian_slugList = [];
+        foreach ($Silian_normalized as $Silian_candidate) {
+            if ($Silian_candidate['id'] !== null) {
+                $Silian_idList[$Silian_candidate['id']] = true;
             }
-            $slugList[$candidate['slug']] = true;
+            $Silian_slugList[$Silian_candidate['slug']] = true;
         }
 
-        if (!empty($idList)) {
-            $byId = $this->fetchTagsByIds(array_keys($idList));
+        if (!empty($Silian_idList)) {
+            $Silian_byId = $this->fetchTagsByIds(array_keys($Silian_idList));
         }
-        if (!empty($slugList)) {
-            $bySlug = $this->fetchTagsBySlugs(array_keys($slugList));
+        if (!empty($Silian_slugList)) {
+            $Silian_bySlug = $this->fetchTagsBySlugs(array_keys($Silian_slugList));
         }
 
-        $resolved = [];
-        foreach (array_values($normalized) as $candidate) {
-            if ($candidate['id'] !== null && isset($byId[$candidate['id']])) {
-                $record = $byId[$candidate['id']];
-                $resolved[$record['id']] = $record;
+        $Silian_resolved = [];
+        foreach (array_values($Silian_normalized) as $Silian_candidate) {
+            if ($Silian_candidate['id'] !== null && isset($Silian_byId[$Silian_candidate['id']])) {
+                $Silian_record = $Silian_byId[$Silian_candidate['id']];
+                $Silian_resolved[$Silian_record['id']] = $Silian_record;
                 continue;
             }
 
-            if (isset($bySlug[$candidate['slug']])) {
-                $record = $bySlug[$candidate['slug']];
-                $resolved[$record['id']] = $record;
+            if (isset($Silian_bySlug[$Silian_candidate['slug']])) {
+                $Silian_record = $Silian_bySlug[$Silian_candidate['slug']];
+                $Silian_resolved[$Silian_record['id']] = $Silian_record;
                 continue;
             }
 
-            $record = $this->createProductTag($candidate['name'], $candidate['slug']);
-            $resolved[$record['id']] = $record;
-            $bySlug[$record['slug']] = $record;
+            $Silian_record = $this->createProductTag($Silian_candidate['name'], $Silian_candidate['slug']);
+            $Silian_resolved[$Silian_record['id']] = $Silian_record;
+            $Silian_bySlug[$Silian_record['slug']] = $Silian_record;
         }
 
-        return array_values($resolved);
+        return array_values($Silian_resolved);
     }
 
-    private function normalizeTagCandidate($tag): ?array
+    private function normalizeTagCandidate($Silian_tag): ?array
     {
-        if (is_string($tag)) {
-            $name = trim($tag);
-            if ($name === '') {
+        if (is_string($Silian_tag)) {
+            $Silian_name = trim($Silian_tag);
+            if ($Silian_name === '') {
                 return null;
             }
             return [
                 'id' => null,
-                'name' => $name,
-                'slug' => $this->slugifyTagName($name),
+                'name' => $Silian_name,
+                'slug' => $this->slugifyTagName($Silian_name),
             ];
         }
 
-        if (!is_array($tag)) {
+        if (!is_array($Silian_tag)) {
             return null;
         }
 
-        $id = null;
-        if (isset($tag['id']) && $tag['id'] !== '') {
-            $id = (int)$tag['id'];
+        $Silian_id = null;
+        if (isset($Silian_tag['id']) && $Silian_tag['id'] !== '') {
+            $Silian_id = (int)$Silian_tag['id'];
         }
 
-        $name = '';
-        if (isset($tag['name']) && is_string($tag['name'])) {
-            $name = trim($tag['name']);
-        } elseif (isset($tag['label']) && is_string($tag['label'])) {
-            $name = trim($tag['label']);
-        } elseif (isset($tag['value']) && is_string($tag['value'])) {
-            $name = trim($tag['value']);
+        $Silian_name = '';
+        if (isset($Silian_tag['name']) && is_string($Silian_tag['name'])) {
+            $Silian_name = trim($Silian_tag['name']);
+        } elseif (isset($Silian_tag['label']) && is_string($Silian_tag['label'])) {
+            $Silian_name = trim($Silian_tag['label']);
+        } elseif (isset($Silian_tag['value']) && is_string($Silian_tag['value'])) {
+            $Silian_name = trim($Silian_tag['value']);
         }
 
-        $slug = null;
-        if (isset($tag['slug']) && is_string($tag['slug'])) {
-            $slug = $this->normalizeSlug($tag['slug']);
+        $Silian_slug = null;
+        if (isset($Silian_tag['slug']) && is_string($Silian_tag['slug'])) {
+            $Silian_slug = $this->normalizeSlug($Silian_tag['slug']);
         }
 
-        if ($id !== null && $slug === null) {
-            $slug = $name !== '' ? $this->slugifyTagName($name) : 'tag-' . $id;
+        if ($Silian_id !== null && $Silian_slug === null) {
+            $Silian_slug = $Silian_name !== '' ? $this->slugifyTagName($Silian_name) : 'tag-' . $Silian_id;
         }
 
-        if ($slug === null && $name !== '') {
-            $slug = $this->slugifyTagName($name);
+        if ($Silian_slug === null && $Silian_name !== '') {
+            $Silian_slug = $this->slugifyTagName($Silian_name);
         }
 
-        if ($id === null && $name === '') {
+        if ($Silian_id === null && $Silian_name === '') {
             return null;
         }
 
-        if ($slug === null) {
-            $slug = $this->slugifyTagName($name ?: ('tag-' . md5(json_encode($tag))));
+        if ($Silian_slug === null) {
+            $Silian_slug = $this->slugifyTagName($Silian_name ?: ('tag-' . md5(json_encode($Silian_tag))));
         }
 
         return [
-            'id' => $id,
-            'name' => $name,
-            'slug' => $slug,
+            'id' => $Silian_id,
+            'name' => $Silian_name,
+            'slug' => $Silian_slug,
         ];
     }
 
-    private function syncProductTags(int $productId, array $tags): void
+    private function syncProductTags(int $Silian_productId, array $Silian_tags): void
     {
-        $desiredIds = array_map(static fn($tag) => (int)$tag['id'], $tags);
-        $desiredIds = array_values(array_unique(array_filter($desiredIds, static fn($id) => $id > 0)));
+        $Silian_desiredIds = array_map(static fn($Silian_tag) => (int)$Silian_tag['id'], $Silian_tags);
+        $Silian_desiredIds = array_values(array_unique(array_filter($Silian_desiredIds, static fn($Silian_id) => $Silian_id > 0)));
 
-        $stmt = $this->db->prepare('SELECT tag_id FROM product_tag_map WHERE product_id = :product_id');
-        $stmt->execute(['product_id' => $productId]);
-        $existingIds = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN) ?: []);
+        $Silian_stmt = $this->db->prepare('SELECT tag_id FROM product_tag_map WHERE product_id = :product_id');
+        $Silian_stmt->execute(['product_id' => $Silian_productId]);
+        $Silian_existingIds = array_map('intval', $Silian_stmt->fetchAll(PDO::FETCH_COLUMN) ?: []);
 
-        $toDelete = array_diff($existingIds, $desiredIds);
-        $toInsert = array_diff($desiredIds, $existingIds);
+        $Silian_toDelete = array_diff($Silian_existingIds, $Silian_desiredIds);
+        $Silian_toInsert = array_diff($Silian_desiredIds, $Silian_existingIds);
 
-        if (!empty($toDelete)) {
-            $placeholders = implode(',', array_fill(0, count($toDelete), '?'));
-            $sql = 'DELETE FROM product_tag_map WHERE product_id = ? AND tag_id IN (' . $placeholders . ')';
-            $delStmt = $this->db->prepare($sql);
-            $delStmt->execute(array_merge([$productId], array_values($toDelete)));
+        if (!empty($Silian_toDelete)) {
+            $Silian_placeholders = implode(',', array_fill(0, count($Silian_toDelete), '?'));
+            $Silian_sql = 'DELETE FROM product_tag_map WHERE product_id = ? AND tag_id IN (' . $Silian_placeholders . ')';
+            $Silian_delStmt = $this->db->prepare($Silian_sql);
+            $Silian_delStmt->execute(array_merge([$Silian_productId], array_values($Silian_toDelete)));
         }
 
-        if (!empty($toInsert)) {
-            $insertSql = 'INSERT INTO product_tag_map (product_id, tag_id, created_at) VALUES (:product_id, :tag_id, NOW())';
-            $insStmt = $this->db->prepare($insertSql);
-            foreach ($toInsert as $tagId) {
-                $insStmt->execute([
-                    'product_id' => $productId,
-                    'tag_id' => $tagId,
+        if (!empty($Silian_toInsert)) {
+            $Silian_insertSql = 'INSERT INTO product_tag_map (product_id, tag_id, created_at) VALUES (:product_id, :tag_id, NOW())';
+            $Silian_insStmt = $this->db->prepare($Silian_insertSql);
+            foreach ($Silian_toInsert as $Silian_tagId) {
+                $Silian_insStmt->execute([
+                    'product_id' => $Silian_productId,
+                    'tag_id' => $Silian_tagId,
                 ]);
             }
         }
     }
 
-    private function loadTagsForProducts(array $productIds): array
+    private function loadTagsForProducts(array $Silian_productIds): array
     {
-        $productIds = array_values(array_unique(array_filter($productIds, static fn($id) => $id > 0)));
-        if (empty($productIds)) {
+        $Silian_productIds = array_values(array_unique(array_filter($Silian_productIds, static fn($Silian_id) => $Silian_id > 0)));
+        if (empty($Silian_productIds)) {
             return [];
         }
 
-        $placeholders = implode(',', array_fill(0, count($productIds), '?'));
-        $sql = 'SELECT ptm.product_id, pt.id, pt.name, pt.slug
+        $Silian_placeholders = implode(',', array_fill(0, count($Silian_productIds), '?'));
+        $Silian_sql = 'SELECT ptm.product_id, pt.id, pt.name, pt.slug
                 FROM product_tag_map ptm
                 INNER JOIN product_tags pt ON pt.id = ptm.tag_id
-                WHERE ptm.product_id IN (' . $placeholders . ')
+                WHERE ptm.product_id IN (' . $Silian_placeholders . ')
                 ORDER BY pt.name ASC';
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($productIds);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_productIds);
 
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $map = [];
-        foreach ($rows as $row) {
-            $productId = isset($row['product_id']) ? (int)$row['product_id'] : null;
-            if ($productId === null) {
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_map = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_productId = isset($Silian_row['product_id']) ? (int)$Silian_row['product_id'] : null;
+            if ($Silian_productId === null) {
                 continue;
             }
-            $map[$productId] ??= [];
-            $map[$productId][] = [
-                'id' => isset($row['id']) ? (int)$row['id'] : null,
-                'name' => $row['name'] ?? '',
-                'slug' => $row['slug'] ?? '',
+            $Silian_map[$Silian_productId] ??= [];
+            $Silian_map[$Silian_productId][] = [
+                'id' => isset($Silian_row['id']) ? (int)$Silian_row['id'] : null,
+                'name' => $Silian_row['name'] ?? '',
+                'slug' => $Silian_row['slug'] ?? '',
             ];
         }
 
-        return $map;
+        return $Silian_map;
     }
 
-    private function fetchTagsByIds(array $ids): array
+    private function fetchTagsByIds(array $Silian_ids): array
     {
-        $ids = array_values(array_unique(array_filter($ids, static fn($id) => $id > 0)));
-        if (empty($ids)) {
+        $Silian_ids = array_values(array_unique(array_filter($Silian_ids, static fn($Silian_id) => $Silian_id > 0)));
+        if (empty($Silian_ids)) {
             return [];
         }
 
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $sql = 'SELECT id, name, slug FROM product_tags WHERE id IN (' . $placeholders . ')';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($ids);
+        $Silian_placeholders = implode(',', array_fill(0, count($Silian_ids), '?'));
+        $Silian_sql = 'SELECT id, name, slug FROM product_tags WHERE id IN (' . $Silian_placeholders . ')';
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_ids);
 
-        $result = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $id = isset($row['id']) ? (int)$row['id'] : null;
-            if ($id === null) {
+        $Silian_result = [];
+        while ($Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC)) {
+            $Silian_id = isset($Silian_row['id']) ? (int)$Silian_row['id'] : null;
+            if ($Silian_id === null) {
                 continue;
             }
-            $result[$id] = [
-                'id' => $id,
-                'name' => $row['name'] ?? '',
-                'slug' => $row['slug'] ?? '',
+            $Silian_result[$Silian_id] = [
+                'id' => $Silian_id,
+                'name' => $Silian_row['name'] ?? '',
+                'slug' => $Silian_row['slug'] ?? '',
             ];
         }
 
-        return $result;
+        return $Silian_result;
     }
 
-    private function fetchTagsBySlugs(array $slugs): array
+    private function fetchTagsBySlugs(array $Silian_slugs): array
     {
-        $slugs = array_values(array_unique(array_filter($slugs, static fn($slug) => is_string($slug) && $slug !== '')));
-        if (empty($slugs)) {
+        $Silian_slugs = array_values(array_unique(array_filter($Silian_slugs, static fn($Silian_slug) => is_string($Silian_slug) && $Silian_slug !== '')));
+        if (empty($Silian_slugs)) {
             return [];
         }
 
-        $placeholders = implode(',', array_fill(0, count($slugs), '?'));
-        $sql = 'SELECT id, name, slug FROM product_tags WHERE slug IN (' . $placeholders . ')';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($slugs);
+        $Silian_placeholders = implode(',', array_fill(0, count($Silian_slugs), '?'));
+        $Silian_sql = 'SELECT id, name, slug FROM product_tags WHERE slug IN (' . $Silian_placeholders . ')';
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_slugs);
 
-        $result = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            if (!isset($row['slug'])) {
+        $Silian_result = [];
+        while ($Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC)) {
+            if (!isset($Silian_row['slug'])) {
                 continue;
             }
-            $slug = $row['slug'];
-            $result[$slug] = [
-                'id' => isset($row['id']) ? (int)$row['id'] : null,
-                'name' => $row['name'] ?? '',
-                'slug' => $slug,
+            $Silian_slug = $Silian_row['slug'];
+            $Silian_result[$Silian_slug] = [
+                'id' => isset($Silian_row['id']) ? (int)$Silian_row['id'] : null,
+                'name' => $Silian_row['name'] ?? '',
+                'slug' => $Silian_slug,
             ];
         }
 
-        return $result;
+        return $Silian_result;
     }
 
-    private function fetchCategoriesBySlugs(array $slugs): array
+    private function fetchCategoriesBySlugs(array $Silian_slugs): array
     {
-        $slugs = array_values(array_unique(array_filter($slugs, static fn($slug) => is_string($slug) && $slug !== '')));
-        if (empty($slugs)) {
+        $Silian_slugs = array_values(array_unique(array_filter($Silian_slugs, static fn($Silian_slug) => is_string($Silian_slug) && $Silian_slug !== '')));
+        if (empty($Silian_slugs)) {
             return [];
         }
 
-        $placeholders = implode(',', array_fill(0, count($slugs), '?'));
-        $sql = 'SELECT id, name, slug FROM product_categories WHERE slug IN (' . $placeholders . ')';
+        $Silian_placeholders = implode(',', array_fill(0, count($Silian_slugs), '?'));
+        $Silian_sql = 'SELECT id, name, slug FROM product_categories WHERE slug IN (' . $Silian_placeholders . ')';
 
         try {
-            $stmt = $this->db->prepare($sql);
-            if (!$stmt) {
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            if (!$Silian_stmt) {
                 return [];
             }
 
-            $stmt->execute($slugs);
+            $Silian_stmt->execute($Silian_slugs);
 
-            $result = [];
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                if (!isset($row['slug'])) {
+            $Silian_result = [];
+            while ($Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC)) {
+                if (!isset($Silian_row['slug'])) {
                     continue;
                 }
-                $slug = $row['slug'];
-                $result[$slug] = [
-                    'id' => isset($row['id']) ? (int)$row['id'] : null,
-                    'name' => $row['name'] ?? '',
-                    'slug' => $slug,
+                $Silian_slug = $Silian_row['slug'];
+                $Silian_result[$Silian_slug] = [
+                    'id' => isset($Silian_row['id']) ? (int)$Silian_row['id'] : null,
+                    'name' => $Silian_row['name'] ?? '',
+                    'slug' => $Silian_slug,
                 ];
             }
 
-            return $result;
-        } catch (\Throwable $e) {
+            return $Silian_result;
+        } catch (\Throwable $Silian_e) {
             return [];
         }
     }
 
-    private function slugifyCategoryName(string $name): string
+    private function slugifyCategoryName(string $Silian_name): string
     {
-        $slug = $this->normalizeSlug($name);
-        if ($slug === '') {
-            $slug = 'category-' . substr(md5($name), 0, 8);
+        $Silian_slug = $this->normalizeSlug($Silian_name);
+        if ($Silian_slug === '') {
+            $Silian_slug = 'category-' . substr(md5($Silian_name), 0, 8);
         }
-        return $slug;
+        return $Silian_slug;
     }
-    private function createProductTag(string $name, string $slug): array
+    private function createProductTag(string $Silian_name, string $Silian_slug): array
     {
-        $name = trim($name) !== '' ? trim($name) : $slug;
-        $slug = $this->normalizeSlug($slug);
-        $baseSlug = $slug;
-        $attempts = 0;
+        $Silian_name = trim($Silian_name) !== '' ? trim($Silian_name) : $Silian_slug;
+        $Silian_slug = $this->normalizeSlug($Silian_slug);
+        $Silian_baseSlug = $Silian_slug;
+        $Silian_attempts = 0;
 
-        while ($attempts < 5) {
+        while ($Silian_attempts < 5) {
             try {
-                $stmt = $this->db->prepare('INSERT INTO product_tags (name, slug, created_at, updated_at) VALUES (:name, :slug, NOW(), NOW())');
-                $stmt->execute([
-                    'name' => $name,
-                    'slug' => $slug,
+                $Silian_stmt = $this->db->prepare('INSERT INTO product_tags (name, slug, created_at, updated_at) VALUES (:name, :slug, NOW(), NOW())');
+                $Silian_stmt->execute([
+                    'name' => $Silian_name,
+                    'slug' => $Silian_slug,
                 ]);
-                $id = (int)$this->db->lastInsertId();
+                $Silian_id = (int)$this->db->lastInsertId();
 
                 return [
-                    'id' => $id,
-                    'name' => $name,
-                    'slug' => $slug,
+                    'id' => $Silian_id,
+                    'name' => $Silian_name,
+                    'slug' => $Silian_slug,
                 ];
-            } catch (PDOException $e) {
-                if ($e->getCode() !== '23000') {
-                    throw $e;
+            } catch (PDOException $Silian_e) {
+                if ($Silian_e->getCode() !== '23000') {
+                    throw $Silian_e;
                 }
 
-                $existing = $this->fetchTagsBySlugs([$slug]);
-                if (isset($existing[$slug])) {
-                    return $existing[$slug];
+                $Silian_existing = $this->fetchTagsBySlugs([$Silian_slug]);
+                if (isset($Silian_existing[$Silian_slug])) {
+                    return $Silian_existing[$Silian_slug];
                 }
 
-                ++$attempts;
-                $slug = $baseSlug . '-' . $attempts;
+                ++$Silian_attempts;
+                $Silian_slug = $Silian_baseSlug . '-' . $Silian_attempts;
             }
         }
 
-        $slug = $baseSlug . '-' . substr(md5((string)microtime(true)), 0, 6);
-        $stmt = $this->db->prepare('INSERT INTO product_tags (name, slug, created_at, updated_at) VALUES (:name, :slug, NOW(), NOW())');
-        $stmt->execute([
-            'name' => $name,
-            'slug' => $slug,
+        $Silian_slug = $Silian_baseSlug . '-' . substr(md5((string)microtime(true)), 0, 6);
+        $Silian_stmt = $this->db->prepare('INSERT INTO product_tags (name, slug, created_at, updated_at) VALUES (:name, :slug, NOW(), NOW())');
+        $Silian_stmt->execute([
+            'name' => $Silian_name,
+            'slug' => $Silian_slug,
         ]);
-        $id = (int)$this->db->lastInsertId();
+        $Silian_id = (int)$this->db->lastInsertId();
 
         return [
-            'id' => $id,
-            'name' => $name,
-            'slug' => $slug,
+            'id' => $Silian_id,
+            'name' => $Silian_name,
+            'slug' => $Silian_slug,
         ];
     }
 
-    private function normalizeSlug(string $slug): string
+    private function normalizeSlug(string $Silian_slug): string
     {
-        $slug = trim($slug);
-        if ($slug === '') {
+        $Silian_slug = trim($Silian_slug);
+        if ($Silian_slug === '') {
             return '';
         }
-        $slug = preg_replace('/[^\p{L}\p{N}\-]+/u', '-', $slug);
-        $slug = strtolower(trim($slug, '-'));
-        return $slug;
+        $Silian_slug = preg_replace('/[^\p{L}\p{N}\-]+/u', '-', $Silian_slug);
+        $Silian_slug = strtolower(trim($Silian_slug, '-'));
+        return $Silian_slug;
     }
 
-    private function slugifyTagName(string $name): string
+    private function slugifyTagName(string $Silian_name): string
     {
-        $trimmed = trim($name);
-        $slug = function_exists('mb_strtolower') ? mb_strtolower($trimmed) : strtolower($trimmed);
-        $slug = preg_replace('/[^\p{L}\p{N}\-]+/u', '-', $slug);
-        $slug = trim($slug, '-');
-        if ($slug === '') {
-            $slug = 'tag-' . substr(md5($name), 0, 8);
+        $Silian_trimmed = trim($Silian_name);
+        $Silian_slug = function_exists('mb_strtolower') ? mb_strtolower($Silian_trimmed) : strtolower($Silian_trimmed);
+        $Silian_slug = preg_replace('/[^\p{L}\p{N}\-]+/u', '-', $Silian_slug);
+        $Silian_slug = trim($Silian_slug, '-');
+        if ($Silian_slug === '') {
+            $Silian_slug = 'tag-' . substr(md5($Silian_name), 0, 8);
         }
-        return $slug;
+        return $Silian_slug;
     }
 
     /**
      * 管理员删除商品（软删除）
      */
-    public function deleteProduct(Request $request, Response $response, array $args): Response
+    public function deleteProduct(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => self::ERR_ADMIN_REQUIRED], 403);
             }
 
-            $id = (int)($args['id'] ?? 0);
-            if ($id <= 0) {
-                return $this->json($response, ['error' => 'Invalid product id'], 400);
+            $Silian_id = (int)($Silian_args['id'] ?? 0);
+            if ($Silian_id <= 0) {
+                return $this->json($Silian_response, ['error' => 'Invalid product id'], 400);
             }
 
-            $stmt = $this->db->prepare('UPDATE products SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL');
-            $stmt->execute(['id' => $id]);
+            $Silian_stmt = $this->db->prepare('UPDATE products SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL');
+            $Silian_stmt->execute(['id' => $Silian_id]);
 
-            $this->auditLog->log($user['id'], 'product_deleted', 'products', (string)$id, []);
+            $this->auditLog->log($Silian_user['id'], 'product_deleted', 'products', (string)$Silian_id, []);
 
-            return $this->json($response, ['success' => true, 'message' => 'Product deleted successfully']);
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'ProductController::deleteProduct error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+            return $this->json($Silian_response, ['success' => true, 'message' => 'Product deleted successfully']);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'ProductController::deleteProduct error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 创建兑换记录
      */
-    private function createExchangeRecord(array $data): string
+    private function createExchangeRecord(array $Silian_data): string
     {
-        $userColumn = $this->resolvePointExchangeUserIdColumn();
-        $supportsAreaCode = $this->pointExchangeSupportsAreaCode();
+        $Silian_userColumn = $this->resolvePointExchangeUserIdColumn();
+        $Silian_supportsAreaCode = $this->pointExchangeSupportsAreaCode();
 
-        $columns = [
+        $Silian_columns = [
             'id',
-            $userColumn,
+            $Silian_userColumn,
             'product_id',
             'quantity',
             'points_used',
@@ -2110,7 +2110,7 @@ class ProductController
             'delivery_address',
         ];
 
-        $placeholders = [
+        $Silian_placeholders = [
             ':id',
             ':exchange_user_id',
             ':product_id',
@@ -2121,53 +2121,53 @@ class ProductController
             ':delivery_address',
         ];
 
-        if ($supportsAreaCode) {
-            $columns[] = 'contact_area_code';
-            $placeholders[] = ':contact_area_code';
+        if ($Silian_supportsAreaCode) {
+            $Silian_columns[] = 'contact_area_code';
+            $Silian_placeholders[] = ':contact_area_code';
         }
 
-        $columns = array_merge($columns, [
+        $Silian_columns = array_merge($Silian_columns, [
             'contact_phone',
             'notes',
             'status',
             'created_at',
         ]);
-        $placeholders = array_merge($placeholders, [
+        $Silian_placeholders = array_merge($Silian_placeholders, [
             ':contact_phone',
             ':notes',
             "'pending'",
             'NOW()',
         ]);
 
-        $sql = sprintf(
+        $Silian_sql = sprintf(
             'INSERT INTO point_exchanges (%s) VALUES (%s)',
-            implode(', ', $columns),
-            implode(', ', $placeholders)
+            implode(', ', $Silian_columns),
+            implode(', ', $Silian_placeholders)
         );
 
-        $exchangeId = $this->generateUuid();
-        $stmt = $this->db->prepare($sql);
+        $Silian_exchangeId = $this->generateUuid();
+        $Silian_stmt = $this->db->prepare($Silian_sql);
 
-        $params = [
-            'id' => $exchangeId,
-            'exchange_user_id' => $data['user_id'],
-            'product_id' => $data['product_id'],
-            'quantity' => $data['quantity'],
-            'points_used' => $data['points_used'],
-            'product_name' => $data['product_name'],
-            'product_price' => $data['product_price'],
-            'delivery_address' => $data['delivery_address'],
-            'contact_phone' => $data['contact_phone'],
-            'notes' => $data['notes'],
+        $Silian_params = [
+            'id' => $Silian_exchangeId,
+            'exchange_user_id' => $Silian_data['user_id'],
+            'product_id' => $Silian_data['product_id'],
+            'quantity' => $Silian_data['quantity'],
+            'points_used' => $Silian_data['points_used'],
+            'product_name' => $Silian_data['product_name'],
+            'product_price' => $Silian_data['product_price'],
+            'delivery_address' => $Silian_data['delivery_address'],
+            'contact_phone' => $Silian_data['contact_phone'],
+            'notes' => $Silian_data['notes'],
         ];
 
-        if ($supportsAreaCode) {
-            $params['contact_area_code'] = $data['contact_area_code'] ?? null;
+        if ($Silian_supportsAreaCode) {
+            $Silian_params['contact_area_code'] = $Silian_data['contact_area_code'] ?? null;
         }
 
-        $stmt->execute($params);
+        $Silian_stmt->execute($Silian_params);
 
-        return $exchangeId;
+        return $Silian_exchangeId;
     }
 
     private function pointExchangeSupportsAreaCode(): bool
@@ -2176,271 +2176,271 @@ class ProductController
             return $this->pointExchangeHasAreaCode;
         }
 
-        $hasColumn = false;
+        $Silian_hasColumn = false;
 
         try {
-            $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: null;
+            $Silian_driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: null;
 
-            if ($driver === 'sqlite') {
-                $stmt = $this->db->query("PRAGMA table_info(point_exchanges)");
-                if ($stmt) {
-                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                        if (isset($row['name']) && strcasecmp((string) $row['name'], 'contact_area_code') === 0) {
-                            $hasColumn = true;
+            if ($Silian_driver === 'sqlite') {
+                $Silian_stmt = $this->db->query("PRAGMA table_info(point_exchanges)");
+                if ($Silian_stmt) {
+                    while ($Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC)) {
+                        if (isset($Silian_row['name']) && strcasecmp((string) $Silian_row['name'], 'contact_area_code') === 0) {
+                            $Silian_hasColumn = true;
                             break;
                         }
                     }
                 }
-            } elseif ($driver === 'mysql') {
-                $stmt = $this->db->prepare('SHOW COLUMNS FROM point_exchanges LIKE ?');
-                if ($stmt && $stmt->execute(['contact_area_code'])) {
-                    $hasColumn = (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+            } elseif ($Silian_driver === 'mysql') {
+                $Silian_stmt = $this->db->prepare('SHOW COLUMNS FROM point_exchanges LIKE ?');
+                if ($Silian_stmt && $Silian_stmt->execute(['contact_area_code'])) {
+                    $Silian_hasColumn = (bool) $Silian_stmt->fetch(PDO::FETCH_ASSOC);
                 }
-            } elseif ($driver === 'pgsql') {
-                $stmt = $this->db->prepare('SELECT column_name FROM information_schema.columns WHERE table_name = ? AND column_name = ?');
-                if ($stmt && $stmt->execute(['point_exchanges', 'contact_area_code'])) {
-                    $hasColumn = (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+            } elseif ($Silian_driver === 'pgsql') {
+                $Silian_stmt = $this->db->prepare('SELECT column_name FROM information_schema.columns WHERE table_name = ? AND column_name = ?');
+                if ($Silian_stmt && $Silian_stmt->execute(['point_exchanges', 'contact_area_code'])) {
+                    $Silian_hasColumn = (bool) $Silian_stmt->fetch(PDO::FETCH_ASSOC);
                 }
             }
-        } catch (\Throwable $exception) {
-            $hasColumn = false;
+        } catch (\Throwable $Silian_exception) {
+            $Silian_hasColumn = false;
         }
 
-        $this->pointExchangeHasAreaCode = $hasColumn;
-        return $hasColumn;
+        $this->pointExchangeHasAreaCode = $Silian_hasColumn;
+        return $Silian_hasColumn;
     }
     /**
      * 记录积分交易
      */
-    private function recordPointTransaction(array $user, float $points, string $type, string $description, ?string $relatedTable = null, ?string $relatedId = null): void
+    private function recordPointTransaction(array $Silian_user, float $Silian_points, string $Silian_type, string $Silian_description, ?string $Silian_relatedTable = null, ?string $Silian_relatedId = null): void
     {
-        $userId = (int)($user['id'] ?? 0);
-        if ($userId <= 0) {
+        $Silian_userId = (int)($Silian_user['id'] ?? 0);
+        if ($Silian_userId <= 0) {
             throw new \InvalidArgumentException('Invalid user for points transaction');
         }
 
-        $username = $user['username'] ?? null;
-        $email = $user['email'] ?? null;
+        $Silian_username = $Silian_user['username'] ?? null;
+        $Silian_email = $Silian_user['email'] ?? null;
 
-        if (!$username || !$email) {
+        if (!$Silian_username || !$Silian_email) {
             try {
-                $stmt = $this->db->prepare('SELECT username, email FROM users WHERE id = :id');
-                $stmt->execute(['id' => $userId]);
-                $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-                $username = $username ?: ($row['username'] ?? null);
-                $email = $email ?: ($row['email'] ?? null);
-            } catch (\Throwable $ignore) {
+                $Silian_stmt = $this->db->prepare('SELECT username, email FROM users WHERE id = :id');
+                $Silian_stmt->execute(['id' => $Silian_userId]);
+                $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+                $Silian_username = $Silian_username ?: ($Silian_row['username'] ?? null);
+                $Silian_email = $Silian_email ?: ($Silian_row['email'] ?? null);
+            } catch (\Throwable $Silian_ignore) {
                 // 忽略补充信息失败，继续以已有数据写入
             }
         }
 
-        $email = $email ?? '';
-        $username = $username ?? '';
+        $Silian_email = $Silian_email ?? '';
+        $Silian_username = $Silian_username ?? '';
 
-        $columns = $this->getPointsTransactionColumns();
-        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
-        $normalizedType = $points < 0 ? 'spend' : 'earn';
-        $absolutePoints = abs($points);
-        $isLegacySchema = isset($columns['time']);
+        $Silian_columns = $this->getPointsTransactionColumns();
+        $Silian_now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $Silian_normalizedType = $Silian_points < 0 ? 'spend' : 'earn';
+        $Silian_absolutePoints = abs($Silian_points);
+        $Silian_isLegacySchema = isset($Silian_columns['time']);
 
-        if ($isLegacySchema) {
-            $columnMap = [];
-            $params = [];
+        if ($Silian_isLegacySchema) {
+            $Silian_columnMap = [];
+            $Silian_params = [];
 
-            $userColumn = $this->resolvePointsTransactionUserIdColumn();
-            $columnMap[$userColumn] = 'user_column_value';
-            $params['user_column_value'] = $userId;
+            $Silian_userColumn = $this->resolvePointsTransactionUserIdColumn();
+            $Silian_columnMap[$Silian_userColumn] = 'user_column_value';
+            $Silian_params['user_column_value'] = $Silian_userId;
 
-            if (isset($columns['username'])) {
-                $columnMap['username'] = 'username_value';
-                $params['username_value'] = $username;
+            if (isset($Silian_columns['username'])) {
+                $Silian_columnMap['username'] = 'username_value';
+                $Silian_params['username_value'] = $Silian_username;
             }
 
-            if (isset($columns['email'])) {
-                $columnMap['email'] = 'email_value';
-                $params['email_value'] = $email;
+            if (isset($Silian_columns['email'])) {
+                $Silian_columnMap['email'] = 'email_value';
+                $Silian_params['email_value'] = $Silian_email;
             }
 
-            $columnMap['points'] = 'points_value';
-            $params['points_value'] = $points;
+            $Silian_columnMap['points'] = 'points_value';
+            $Silian_params['points_value'] = $Silian_points;
 
-            if (isset($columns['raw'])) {
-                $columnMap['raw'] = 'raw_value';
-                $params['raw_value'] = $absolutePoints;
+            if (isset($Silian_columns['raw'])) {
+                $Silian_columnMap['raw'] = 'raw_value';
+                $Silian_params['raw_value'] = $Silian_absolutePoints;
             }
 
-            if (isset($columns['auth'])) {
-                $columnMap['auth'] = 'auth_value';
-                $params['auth_value'] = $type;
+            if (isset($Silian_columns['auth'])) {
+                $Silian_columnMap['auth'] = 'auth_value';
+                $Silian_params['auth_value'] = $Silian_type;
             }
 
-            $columnMap['type'] = 'type_value';
-            $params['type_value'] = $normalizedType;
+            $Silian_columnMap['type'] = 'type_value';
+            $Silian_params['type_value'] = $Silian_normalizedType;
 
-            if (isset($columns['notes'])) {
-                $columnMap['notes'] = 'notes_value';
-                $params['notes_value'] = $description;
+            if (isset($Silian_columns['notes'])) {
+                $Silian_columnMap['notes'] = 'notes_value';
+                $Silian_params['notes_value'] = $Silian_description;
             }
 
-            if (isset($columns['status'])) {
-                $columnMap['status'] = 'status_value';
-                $params['status_value'] = 'approved';
+            if (isset($Silian_columns['status'])) {
+                $Silian_columnMap['status'] = 'status_value';
+                $Silian_params['status_value'] = 'approved';
             }
 
-            if (isset($columns['time'])) {
-                $columnMap['time'] = 'time_value';
-                $params['time_value'] = $now;
+            if (isset($Silian_columns['time'])) {
+                $Silian_columnMap['time'] = 'time_value';
+                $Silian_params['time_value'] = $Silian_now;
             }
 
-            if (isset($columns['activity_id'])) {
-                $columnMap['activity_id'] = 'activity_id_value';
-                $params['activity_id_value'] = $relatedId;
+            if (isset($Silian_columns['activity_id'])) {
+                $Silian_columnMap['activity_id'] = 'activity_id_value';
+                $Silian_params['activity_id_value'] = $Silian_relatedId;
             }
 
-            if (isset($columns['approved_at'])) {
-                $columnMap['approved_at'] = 'approved_at_value';
-                $params['approved_at_value'] = $now;
+            if (isset($Silian_columns['approved_at'])) {
+                $Silian_columnMap['approved_at'] = 'approved_at_value';
+                $Silian_params['approved_at_value'] = $Silian_now;
             }
 
-            if (isset($columns['created_at'])) {
-                $columnMap['created_at'] = 'created_at_value';
-                $params['created_at_value'] = $now;
+            if (isset($Silian_columns['created_at'])) {
+                $Silian_columnMap['created_at'] = 'created_at_value';
+                $Silian_params['created_at_value'] = $Silian_now;
             }
 
-            if (isset($columns['updated_at'])) {
-                $columnMap['updated_at'] = 'updated_at_value';
-                $params['updated_at_value'] = $now;
+            if (isset($Silian_columns['updated_at'])) {
+                $Silian_columnMap['updated_at'] = 'updated_at_value';
+                $Silian_params['updated_at_value'] = $Silian_now;
             }
 
-            if (isset($columns['activity_date'])) {
-                $columnMap['activity_date'] = 'activity_date_value';
-                $params['activity_date_value'] = $now;
+            if (isset($Silian_columns['activity_date'])) {
+                $Silian_columnMap['activity_date'] = 'activity_date_value';
+                $Silian_params['activity_date_value'] = $Silian_now;
             }
 
-            $columnsSql = implode(', ', array_keys($columnMap));
-            $placeholdersSql = implode(', ', array_map(static fn(string $param) => ':' . $param, array_values($columnMap)));
-            $sql = sprintf('INSERT INTO points_transactions (%s) VALUES (%s)', $columnsSql, $placeholdersSql);
+            $Silian_columnsSql = implode(', ', array_keys($Silian_columnMap));
+            $Silian_placeholdersSql = implode(', ', array_map(static fn(string $Silian_param) => ':' . $Silian_param, array_values($Silian_columnMap)));
+            $Silian_sql = sprintf('INSERT INTO points_transactions (%s) VALUES (%s)', $Silian_columnsSql, $Silian_placeholdersSql);
 
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute($Silian_params);
 
             return;
         }
 
-        $columnMap = [];
-        $params = [];
+        $Silian_columnMap = [];
+        $Silian_params = [];
 
-        $columnMap['id'] = 'transaction_id';
-        $params['transaction_id'] = $this->generateUuid();
+        $Silian_columnMap['id'] = 'transaction_id';
+        $Silian_params['transaction_id'] = $this->generateUuid();
 
-        if (isset($columns['uid'])) {
-            $columnMap['uid'] = 'uid_value';
-            $params['uid_value'] = $userId;
+        if (isset($Silian_columns['uid'])) {
+            $Silian_columnMap['uid'] = 'uid_value';
+            $Silian_params['uid_value'] = $Silian_userId;
         }
 
-        if (isset($columns['user_id'])) {
-            $columnMap['user_id'] = 'user_id_value';
-            $params['user_id_value'] = $userId;
+        if (isset($Silian_columns['user_id'])) {
+            $Silian_columnMap['user_id'] = 'user_id_value';
+            $Silian_params['user_id_value'] = $Silian_userId;
         }
 
-        if (!isset($columns['uid']) && !isset($columns['user_id'])) {
-            $userColumn = $this->resolvePointsTransactionUserIdColumn();
-            $columnMap[$userColumn] = 'user_column_value';
-            $params['user_column_value'] = $userId;
+        if (!isset($Silian_columns['uid']) && !isset($Silian_columns['user_id'])) {
+            $Silian_userColumn = $this->resolvePointsTransactionUserIdColumn();
+            $Silian_columnMap[$Silian_userColumn] = 'user_column_value';
+            $Silian_params['user_column_value'] = $Silian_userId;
         }
 
-        $columnMap['points'] = 'points_value';
-        $params['points_value'] = $points;
+        $Silian_columnMap['points'] = 'points_value';
+        $Silian_params['points_value'] = $Silian_points;
 
-        if (isset($columns['raw'])) {
-            $columnMap['raw'] = 'raw_value';
-            $params['raw_value'] = $absolutePoints;
+        if (isset($Silian_columns['raw'])) {
+            $Silian_columnMap['raw'] = 'raw_value';
+            $Silian_params['raw_value'] = $Silian_absolutePoints;
         }
 
-        $columnMap['type'] = 'type_value';
-        $params['type_value'] = $normalizedType;
+        $Silian_columnMap['type'] = 'type_value';
+        $Silian_params['type_value'] = $Silian_normalizedType;
 
-        if (isset($columns['description'])) {
-            $columnMap['description'] = 'description_value';
-            $params['description_value'] = $description;
+        if (isset($Silian_columns['description'])) {
+            $Silian_columnMap['description'] = 'description_value';
+            $Silian_params['description_value'] = $Silian_description;
         }
 
-        if (isset($columns['notes'])) {
-            $columnMap['notes'] = 'notes_value';
-            $params['notes_value'] = $description;
+        if (isset($Silian_columns['notes'])) {
+            $Silian_columnMap['notes'] = 'notes_value';
+            $Silian_params['notes_value'] = $Silian_description;
         }
 
-        if (isset($columns['act'])) {
-            $columnMap['act'] = 'act_value';
-            $params['act_value'] = $description;
+        if (isset($Silian_columns['act'])) {
+            $Silian_columnMap['act'] = 'act_value';
+            $Silian_params['act_value'] = $Silian_description;
         }
 
-        if (isset($columns['status'])) {
-            $columnMap['status'] = 'status_value';
-            $params['status_value'] = 'approved';
+        if (isset($Silian_columns['status'])) {
+            $Silian_columnMap['status'] = 'status_value';
+            $Silian_params['status_value'] = 'approved';
         }
 
-        if (isset($columns['related_table'])) {
-            $columnMap['related_table'] = 'related_table_value';
-            $params['related_table_value'] = $relatedTable;
+        if (isset($Silian_columns['related_table'])) {
+            $Silian_columnMap['related_table'] = 'related_table_value';
+            $Silian_params['related_table_value'] = $Silian_relatedTable;
         }
 
-        if (isset($columns['related_id'])) {
-            $columnMap['related_id'] = 'related_id_value';
-            $params['related_id_value'] = $relatedId;
+        if (isset($Silian_columns['related_id'])) {
+            $Silian_columnMap['related_id'] = 'related_id_value';
+            $Silian_params['related_id_value'] = $Silian_relatedId;
         }
 
-        if (isset($columns['username'])) {
-            $columnMap['username'] = 'username_value';
-            $params['username_value'] = $username;
+        if (isset($Silian_columns['username'])) {
+            $Silian_columnMap['username'] = 'username_value';
+            $Silian_params['username_value'] = $Silian_username;
         }
 
-        if (isset($columns['email'])) {
-            $columnMap['email'] = 'email_value';
-            $params['email_value'] = $email;
+        if (isset($Silian_columns['email'])) {
+            $Silian_columnMap['email'] = 'email_value';
+            $Silian_params['email_value'] = $Silian_email;
         }
 
-        if (isset($columns['auth'])) {
-            $columnMap['auth'] = 'auth_value';
-            $params['auth_value'] = $type;
+        if (isset($Silian_columns['auth'])) {
+            $Silian_columnMap['auth'] = 'auth_value';
+            $Silian_params['auth_value'] = $Silian_type;
         }
 
-        if (isset($columns['approved_at'])) {
-            $columnMap['approved_at'] = 'approved_at_value';
-            $params['approved_at_value'] = $now;
+        if (isset($Silian_columns['approved_at'])) {
+            $Silian_columnMap['approved_at'] = 'approved_at_value';
+            $Silian_params['approved_at_value'] = $Silian_now;
         }
 
-        if (isset($columns['approved_by'])) {
-            $columnMap['approved_by'] = 'approved_by_value';
-            $params['approved_by_value'] = null;
+        if (isset($Silian_columns['approved_by'])) {
+            $Silian_columnMap['approved_by'] = 'approved_by_value';
+            $Silian_params['approved_by_value'] = null;
         }
 
-        if (isset($columns['created_at'])) {
-            $columnMap['created_at'] = 'created_at_value';
-            $params['created_at_value'] = $now;
+        if (isset($Silian_columns['created_at'])) {
+            $Silian_columnMap['created_at'] = 'created_at_value';
+            $Silian_params['created_at_value'] = $Silian_now;
         }
 
-        if (isset($columns['updated_at'])) {
-            $columnMap['updated_at'] = 'updated_at_value';
-            $params['updated_at_value'] = $now;
+        if (isset($Silian_columns['updated_at'])) {
+            $Silian_columnMap['updated_at'] = 'updated_at_value';
+            $Silian_params['updated_at_value'] = $Silian_now;
         }
 
-        if (isset($columns['activity_id'])) {
-            $columnMap['activity_id'] = 'activity_id_value';
-            $params['activity_id_value'] = $relatedId;
+        if (isset($Silian_columns['activity_id'])) {
+            $Silian_columnMap['activity_id'] = 'activity_id_value';
+            $Silian_params['activity_id_value'] = $Silian_relatedId;
         }
 
-        if (isset($columns['activity_date'])) {
-            $columnMap['activity_date'] = 'activity_date_value';
-            $params['activity_date_value'] = $now;
+        if (isset($Silian_columns['activity_date'])) {
+            $Silian_columnMap['activity_date'] = 'activity_date_value';
+            $Silian_params['activity_date_value'] = $Silian_now;
         }
 
-        $columnsSql = implode(', ', array_keys($columnMap));
-        $placeholdersSql = implode(', ', array_map(static fn(string $param) => ':' . $param, array_values($columnMap)));
-        $sql = sprintf('INSERT INTO points_transactions (%s) VALUES (%s)', $columnsSql, $placeholdersSql);
+        $Silian_columnsSql = implode(', ', array_keys($Silian_columnMap));
+        $Silian_placeholdersSql = implode(', ', array_map(static fn(string $Silian_param) => ':' . $Silian_param, array_values($Silian_columnMap)));
+        $Silian_sql = sprintf('INSERT INTO points_transactions (%s) VALUES (%s)', $Silian_columnsSql, $Silian_placeholdersSql);
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_params);
     }
 
     private function getPointsTransactionColumns(): array
@@ -2449,57 +2449,57 @@ class ProductController
             return $this->pointsTransactionColumns;
         }
 
-        $columns = [];
+        $Silian_columns = [];
 
         try {
-            $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql';
+            $Silian_driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql';
 
-            if ($driver === 'sqlite') {
-                $stmt = $this->db->query('PRAGMA table_info(points_transactions)');
-                if ($stmt) {
-                    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                        $name = $row['name'] ?? null;
-                        if ($name) {
-                            $columns[strtolower((string)$name)] = (string)$name;
+            if ($Silian_driver === 'sqlite') {
+                $Silian_stmt = $this->db->query('PRAGMA table_info(points_transactions)');
+                if ($Silian_stmt) {
+                    foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) as $Silian_row) {
+                        $Silian_name = $Silian_row['name'] ?? null;
+                        if ($Silian_name) {
+                            $Silian_columns[strtolower((string)$Silian_name)] = (string)$Silian_name;
                         }
                     }
                 }
-            } elseif ($driver === 'pgsql') {
-                $stmt = $this->db->prepare('SELECT column_name FROM information_schema.columns WHERE table_name = :table');
-                if ($stmt && $stmt->execute(['table' => 'points_transactions'])) {
-                    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                        $name = $row['column_name'] ?? null;
-                        if ($name) {
-                            $columns[strtolower((string)$name)] = (string)$name;
+            } elseif ($Silian_driver === 'pgsql') {
+                $Silian_stmt = $this->db->prepare('SELECT column_name FROM information_schema.columns WHERE table_name = :table');
+                if ($Silian_stmt && $Silian_stmt->execute(['table' => 'points_transactions'])) {
+                    foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) as $Silian_row) {
+                        $Silian_name = $Silian_row['column_name'] ?? null;
+                        if ($Silian_name) {
+                            $Silian_columns[strtolower((string)$Silian_name)] = (string)$Silian_name;
                         }
                     }
                 }
             } else {
-                $stmt = $this->db->query('SHOW COLUMNS FROM points_transactions');
-                if ($stmt) {
-                    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                        $field = $row['Field'] ?? $row['field'] ?? null;
-                        if ($field) {
-                            $columns[strtolower((string)$field)] = (string)$field;
+                $Silian_stmt = $this->db->query('SHOW COLUMNS FROM points_transactions');
+                if ($Silian_stmt) {
+                    foreach ($Silian_stmt->fetchAll(PDO::FETCH_ASSOC) as $Silian_row) {
+                        $Silian_field = $Silian_row['Field'] ?? $Silian_row['field'] ?? null;
+                        if ($Silian_field) {
+                            $Silian_columns[strtolower((string)$Silian_field)] = (string)$Silian_field;
                         }
                     }
                 }
             }
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // 读取表结构失败时按空集合处理，后续逻辑会走“现代”路径
         }
 
-        return $this->pointsTransactionColumns = $columns;
+        return $this->pointsTransactionColumns = $Silian_columns;
     }
 
-    private function pointExchangeUserColumn(?string $alias = null): string
+    private function pointExchangeUserColumn(?string $Silian_alias = null): string
     {
-        $column = $this->resolvePointExchangeUserIdColumn();
-        if ($alias !== null && $alias !== '') {
-            return $alias . '.' . $column;
+        $Silian_column = $this->resolvePointExchangeUserIdColumn();
+        if ($Silian_alias !== null && $Silian_alias !== '') {
+            return $Silian_alias . '.' . $Silian_column;
         }
 
-        return $column;
+        return $Silian_column;
     }
 
     private function resolvePointExchangeUserIdColumn(): string
@@ -2508,49 +2508,49 @@ class ProductController
             return $this->pointExchangeUserIdColumn;
         }
 
-        $detected = 'user_id';
+        $Silian_detected = 'user_id';
 
         try {
-            $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql';
+            $Silian_driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql';
 
-            if ($driver === 'mysql') {
-                $stmt = $this->db->query("SHOW COLUMNS FROM point_exchanges LIKE 'user_id'");
-                $hasUserId = $stmt && $stmt->fetch(PDO::FETCH_ASSOC);
-                if (!$hasUserId) {
-                    $stmtUid = $this->db->query("SHOW COLUMNS FROM point_exchanges LIKE 'uid'");
-                    if ($stmtUid && $stmtUid->fetch(PDO::FETCH_ASSOC)) {
-                        $detected = 'uid';
+            if ($Silian_driver === 'mysql') {
+                $Silian_stmt = $this->db->query("SHOW COLUMNS FROM point_exchanges LIKE 'user_id'");
+                $Silian_hasUserId = $Silian_stmt && $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$Silian_hasUserId) {
+                    $Silian_stmtUid = $this->db->query("SHOW COLUMNS FROM point_exchanges LIKE 'uid'");
+                    if ($Silian_stmtUid && $Silian_stmtUid->fetch(PDO::FETCH_ASSOC)) {
+                        $Silian_detected = 'uid';
                     }
                 }
-            } elseif ($driver === 'sqlite') {
-                $stmt = $this->db->query("PRAGMA table_info(point_exchanges)");
-                $columns = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
-                $names = array_map(static fn($col) => $col['name'] ?? '', $columns);
-                if (!in_array('user_id', $names, true) && in_array('uid', $names, true)) {
-                    $detected = 'uid';
+            } elseif ($Silian_driver === 'sqlite') {
+                $Silian_stmt = $this->db->query("PRAGMA table_info(point_exchanges)");
+                $Silian_columns = $Silian_stmt ? $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+                $Silian_names = array_map(static fn($Silian_col) => $Silian_col['name'] ?? '', $Silian_columns);
+                if (!in_array('user_id', $Silian_names, true) && in_array('uid', $Silian_names, true)) {
+                    $Silian_detected = 'uid';
                 }
             } else {
-                $stmt = $this->db->query("SELECT * FROM point_exchanges LIMIT 0");
-                if ($stmt) {
-                    $count = $stmt->columnCount();
-                    for ($i = 0; $i < $count; $i++) {
-                        $meta = $stmt->getColumnMeta($i);
-                        $name = $meta['name'] ?? '';
-                        if ($name === 'user_id') {
-                            $detected = 'user_id';
+                $Silian_stmt = $this->db->query("SELECT * FROM point_exchanges LIMIT 0");
+                if ($Silian_stmt) {
+                    $Silian_count = $Silian_stmt->columnCount();
+                    for ($Silian_i = 0; $Silian_i < $Silian_count; $Silian_i++) {
+                        $Silian_meta = $Silian_stmt->getColumnMeta($Silian_i);
+                        $Silian_name = $Silian_meta['name'] ?? '';
+                        if ($Silian_name === 'user_id') {
+                            $Silian_detected = 'user_id';
                             break;
                         }
-                        if ($name === 'uid') {
-                            $detected = 'uid';
+                        if ($Silian_name === 'uid') {
+                            $Silian_detected = 'uid';
                         }
                     }
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             // ignore and fall back to default detected value
         }
 
-        return $this->pointExchangeUserIdColumn = $detected;
+        return $this->pointExchangeUserIdColumn = $Silian_detected;
     }
 
     private function resolvePointsTransactionUserIdColumn(): string
@@ -2559,56 +2559,56 @@ class ProductController
             return $this->pointsTransactionUserIdColumn;
         }
 
-        $detected = 'user_id';
+        $Silian_detected = 'user_id';
 
         try {
-            $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql';
+            $Silian_driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql';
 
-            if ($driver === 'mysql') {
-                $stmt = $this->db->query("SHOW COLUMNS FROM points_transactions LIKE 'user_id'");
-                $hasUserId = $stmt && $stmt->fetch(PDO::FETCH_ASSOC);
-                if (!$hasUserId) {
-                    $stmtUid = $this->db->query("SHOW COLUMNS FROM points_transactions LIKE 'uid'");
-                    if ($stmtUid && $stmtUid->fetch(PDO::FETCH_ASSOC)) {
-                        $detected = 'uid';
+            if ($Silian_driver === 'mysql') {
+                $Silian_stmt = $this->db->query("SHOW COLUMNS FROM points_transactions LIKE 'user_id'");
+                $Silian_hasUserId = $Silian_stmt && $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$Silian_hasUserId) {
+                    $Silian_stmtUid = $this->db->query("SHOW COLUMNS FROM points_transactions LIKE 'uid'");
+                    if ($Silian_stmtUid && $Silian_stmtUid->fetch(PDO::FETCH_ASSOC)) {
+                        $Silian_detected = 'uid';
                     }
                 }
-            } elseif ($driver === 'sqlite') {
-                $stmt = $this->db->query("PRAGMA table_info(points_transactions)");
-                $columns = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
-                $names = array_map(static fn($col) => $col['name'] ?? '', $columns);
-                if (!in_array('user_id', $names, true) && in_array('uid', $names, true)) {
-                    $detected = 'uid';
+            } elseif ($Silian_driver === 'sqlite') {
+                $Silian_stmt = $this->db->query("PRAGMA table_info(points_transactions)");
+                $Silian_columns = $Silian_stmt ? $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+                $Silian_names = array_map(static fn($Silian_col) => $Silian_col['name'] ?? '', $Silian_columns);
+                if (!in_array('user_id', $Silian_names, true) && in_array('uid', $Silian_names, true)) {
+                    $Silian_detected = 'uid';
                 }
             } else {
-                $stmt = $this->db->query("SELECT * FROM points_transactions LIMIT 0");
-                if ($stmt) {
-                    $count = $stmt->columnCount();
-                    for ($i = 0; $i < $count; $i++) {
-                        $meta = $stmt->getColumnMeta($i);
-                        $name = $meta['name'] ?? '';
-                        if ($name === 'user_id') {
-                            $detected = 'user_id';
+                $Silian_stmt = $this->db->query("SELECT * FROM points_transactions LIMIT 0");
+                if ($Silian_stmt) {
+                    $Silian_count = $Silian_stmt->columnCount();
+                    for ($Silian_i = 0; $Silian_i < $Silian_count; $Silian_i++) {
+                        $Silian_meta = $Silian_stmt->getColumnMeta($Silian_i);
+                        $Silian_name = $Silian_meta['name'] ?? '';
+                        if ($Silian_name === 'user_id') {
+                            $Silian_detected = 'user_id';
                             break;
                         }
-                        if ($name === 'uid') {
-                            $detected = 'uid';
+                        if ($Silian_name === 'uid') {
+                            $Silian_detected = 'uid';
                         }
                     }
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             // ignore and fall back to detected value
         }
 
-        return $this->pointsTransactionUserIdColumn = $detected;
+        return $this->pointsTransactionUserIdColumn = $Silian_detected;
     }
 
-    private function buildProductOrderByClause($sort): string
+    private function buildProductOrderByClause($Silian_sort): string
     {
-        $normalizedSort = is_string($sort) ? trim($sort) : '';
+        $Silian_normalizedSort = is_string($Silian_sort) ? trim($Silian_sort) : '';
 
-        switch ($normalizedSort) {
+        switch ($Silian_normalizedSort) {
             case 'created_at':
             case 'created_at_desc':
                 return 'p.created_at DESC, p.id DESC';
@@ -2627,87 +2627,87 @@ class ProductController
         }
     }
 
-    private function buildExchangeOrderByClause($sort, string $alias = 'e'): string
+    private function buildExchangeOrderByClause($Silian_sort, string $Silian_alias = 'e'): string
     {
-        $normalizedSort = is_string($sort) ? trim($sort) : '';
-        $columnPrefix = $alias !== '' ? $alias . '.' : '';
+        $Silian_normalizedSort = is_string($Silian_sort) ? trim($Silian_sort) : '';
+        $Silian_columnPrefix = $Silian_alias !== '' ? $Silian_alias . '.' : '';
 
-        switch ($normalizedSort) {
+        switch ($Silian_normalizedSort) {
             case 'created_at_asc':
-                return $columnPrefix . 'created_at ASC, ' . $columnPrefix . 'id ASC';
+                return $Silian_columnPrefix . 'created_at ASC, ' . $Silian_columnPrefix . 'id ASC';
             case 'points_asc':
-                return $columnPrefix . 'points_used ASC, ' . $columnPrefix . 'created_at DESC';
+                return $Silian_columnPrefix . 'points_used ASC, ' . $Silian_columnPrefix . 'created_at DESC';
             case 'points_desc':
-                return $columnPrefix . 'points_used DESC, ' . $columnPrefix . 'created_at DESC';
+                return $Silian_columnPrefix . 'points_used DESC, ' . $Silian_columnPrefix . 'created_at DESC';
             case 'status_asc':
-                return $columnPrefix . 'status ASC, ' . $columnPrefix . 'created_at DESC';
+                return $Silian_columnPrefix . 'status ASC, ' . $Silian_columnPrefix . 'created_at DESC';
             case 'status_desc':
-                return $columnPrefix . 'status DESC, ' . $columnPrefix . 'created_at DESC';
+                return $Silian_columnPrefix . 'status DESC, ' . $Silian_columnPrefix . 'created_at DESC';
             case 'created_at_desc':
             case 'created_at':
             default:
-                return $columnPrefix . 'created_at DESC, ' . $columnPrefix . 'id DESC';
+                return $Silian_columnPrefix . 'created_at DESC, ' . $Silian_columnPrefix . 'id DESC';
         }
     }
 
-    private function buildNamedLikeClause(array $expressions, string $search, string $prefix = 'search'): array
+    private function buildNamedLikeClause(array $Silian_expressions, string $Silian_search, string $Silian_prefix = 'search'): array
     {
-        $term = '%' . strtolower($search) . '%';
-        $clauses = [];
-        $bindings = [];
+        $Silian_term = '%' . strtolower($Silian_search) . '%';
+        $Silian_clauses = [];
+        $Silian_bindings = [];
 
-        foreach (array_values($expressions) as $index => $expression) {
-            $param = $prefix . '_' . $index;
-            $clauses[] = $expression . ' LIKE :' . $param;
-            $bindings[$param] = $term;
+        foreach (array_values($Silian_expressions) as $Silian_index => $Silian_expression) {
+            $Silian_param = $Silian_prefix . '_' . $Silian_index;
+            $Silian_clauses[] = $Silian_expression . ' LIKE :' . $Silian_param;
+            $Silian_bindings[$Silian_param] = $Silian_term;
         }
 
-        return ['(' . implode("\n                    OR ", $clauses) . "\n                )", $bindings];
+        return ['(' . implode("\n                    OR ", $Silian_clauses) . "\n                )", $Silian_bindings];
     }
     /**
      * 获取兑换记录
      */
-    private function getExchangeRecord(string $exchangeId): ?array
+    private function getExchangeRecord(string $Silian_exchangeId): ?array
     {
-        $sql = "
+        $Silian_sql = "
             SELECT e.*, u.username, u.email
             FROM point_exchanges e
             LEFT JOIN users u ON " . $this->pointExchangeUserColumn('e') . " = u.id
             WHERE e.id = :id AND e.deleted_at IS NULL
         ";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['id' => $exchangeId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute(['id' => $Silian_exchangeId]);
+        return $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     /**
      * 通知管理员新兑换
      */
-    private function notifyAdminsNewExchange(string $exchangeId, array $user, array $product, int $quantity): void
+    private function notifyAdminsNewExchange(string $Silian_exchangeId, array $Silian_user, array $Silian_product, int $Silian_quantity): void
     {
         // 获取管理员
-        $sql = "SELECT id, email, username FROM users WHERE is_admin = 1 AND deleted_at IS NULL";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $Silian_sql = "SELECT id, email, username FROM users WHERE is_admin = 1 AND deleted_at IS NULL";
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute();
+        $Silian_admins = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if (empty($admins)) {
+        if (empty($Silian_admins)) {
             return;
         }
 
-        $recipients = array_map(static function (array $admin): array {
+        $Silian_recipients = array_map(static function (array $Silian_admin): array {
             return [
-                'id' => isset($admin['id']) ? (int) $admin['id'] : 0,
-                'email' => $admin['email'] ?? null,
-                'username' => $admin['username'] ?? null,
+                'id' => isset($Silian_admin['id']) ? (int) $Silian_admin['id'] : 0,
+                'email' => $Silian_admin['email'] ?? null,
+                'username' => $Silian_admin['username'] ?? null,
             ];
-        }, $admins);
+        }, $Silian_admins);
 
         $this->messageService->sendAdminNotificationBatch(
-            $recipients,
+            $Silian_recipients,
             'new_exchange_pending',
             '有新兑换待处理',
-            "用户 {$user['username']} 刚刚兑换了 {$product['name']} x{$quantity}，请尽快处理。",
+            "用户 {$Silian_user['username']} 刚刚兑换了 {$Silian_product['name']} x{$Silian_quantity}，请尽快处理。",
             'high'
         );
     }
@@ -2715,9 +2715,9 @@ class ProductController
     /**
      * 发送状态更新通知
      */
-    private function sendStatusUpdateNotification(array $exchange, string $status, ?string $notes, ?string $trackingNumber): void
+    private function sendStatusUpdateNotification(array $Silian_exchange, string $Silian_status, ?string $Silian_notes, ?string $Silian_trackingNumber): void
     {
-        $statusMessages = [
+        $Silian_statusMessages = [
             'processing' => '您的兑换订单正在处理中',
             'shipped' => '您的兑换商品已发货',
             'completed' => '您的兑换订单已完成',
@@ -2725,40 +2725,40 @@ class ProductController
             'rejected' => '您的兑换订单已被驳回',
         ];
 
-        $title = $statusMessages[$status] ?? '兑换状态更新';
-        $message = "您的兑换订单（{$exchange['product_name']} x{$exchange['quantity']}）状态已更新为：{$title}";
+        $Silian_title = $Silian_statusMessages[$Silian_status] ?? '兑换状态更新';
+        $Silian_message = "您的兑换订单（{$Silian_exchange['product_name']} x{$Silian_exchange['quantity']}）状态已更新为：{$Silian_title}";
 
-        if ($trackingNumber) {
-            $message .= "\n物流单号：{$trackingNumber}";
+        if ($Silian_trackingNumber) {
+            $Silian_message .= "\n物流单号：{$Silian_trackingNumber}";
         }
 
-        if ($notes) {
-            $message .= "\n备注：{$notes}";
+        if ($Silian_notes) {
+            $Silian_message .= "\n备注：{$Silian_notes}";
         }
 
-        $userColumn = $this->resolvePointExchangeUserIdColumn();
-        $userId = isset($exchange[$userColumn]) ? (int)$exchange[$userColumn] : 0;
+        $Silian_userColumn = $this->resolvePointExchangeUserIdColumn();
+        $Silian_userId = isset($Silian_exchange[$Silian_userColumn]) ? (int)$Silian_exchange[$Silian_userColumn] : 0;
 
-        if ($userId <= 0) {
+        if ($Silian_userId <= 0) {
             return;
         }
 
         $this->messageService->sendMessage(
-            $userId,
+            $Silian_userId,
             'exchange_status_updated',
-            $title,
-            $message,
+            $Silian_title,
+            $Silian_message,
             'normal'
         );
 
         $this->messageService->sendExchangeStatusUpdateEmailToUser(
-            $userId,
-            (string) ($exchange['product_name'] ?? ''),
-            $status,
-            $trackingNumber,
-            $notes,
-            $exchange['email'] ?? null,
-            $exchange['username'] ?? null
+            $Silian_userId,
+            (string) ($Silian_exchange['product_name'] ?? ''),
+            $Silian_status,
+            $Silian_trackingNumber,
+            $Silian_notes,
+            $Silian_exchange['email'] ?? null,
+            $Silian_exchange['username'] ?? null
         );
     }
 
@@ -2776,10 +2776,10 @@ class ProductController
             mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
         );
     }
-    private function json(Response $response, array $data, int $status = 200): Response
+    private function json(Response $Silian_response, array $Silian_data, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($data));
-        return $response->withStatus($status)->withHeader('Content-Type', 'application/json');
+        $Silian_response->getBody()->write(json_encode($Silian_data));
+        return $Silian_response->withStatus($Silian_status)->withHeader('Content-Type', 'application/json');
     }
 }
 

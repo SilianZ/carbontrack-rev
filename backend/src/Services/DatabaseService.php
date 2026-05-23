@@ -11,9 +11,9 @@ class DatabaseService
 {
     private Capsule $capsule;
 
-    public function __construct(Capsule $capsule)
+    public function __construct(Capsule $Silian_capsule)
     {
-        $this->capsule = $capsule;
+        $this->capsule = $Silian_capsule;
     }
 
     /**
@@ -48,7 +48,7 @@ class DatabaseService
         try {
             $this->capsule->getConnection()->getPdo()->query('SELECT 1');
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             return false;
         }
     }
@@ -80,9 +80,9 @@ class DatabaseService
     /**
      * Execute a raw SQL query
      */
-    public function raw(string $sql, array $bindings = []): mixed
+    public function raw(string $Silian_sql, array $Silian_bindings = []): mixed
     {
-        return $this->capsule->getConnection()->select($sql, $bindings);
+        return $this->capsule->getConnection()->select($Silian_sql, $Silian_bindings);
     }
 
     /**

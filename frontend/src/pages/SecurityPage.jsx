@@ -1,17 +1,17 @@
-import React from 'react';
-import { m as Motion, LazyMotion, domAnimation } from 'framer-motion';
-import PropTypes from 'prop-types';
-import { Trans } from 'react-i18next';
-import { Card, CardContent } from '../components/ui/Card';
-import { ShieldCheck, Lock, AlertCircle, Bug, Server } from 'lucide-react';
-import { useTranslation } from '../hooks/useTranslation';
+import Silian_React from 'react';
+import { m as Silian_Motion, LazyMotion as Silian_LazyMotion, domAnimation as Silian_domAnimation } from 'framer-motion';
+import Silian_PropTypes from 'prop-types';
+import { Trans as Silian_Trans } from 'react-i18next';
+import { Card as Silian_Card, CardContent as Silian_CardContent } from '../components/ui/Card';
+import { ShieldCheck as Silian_ShieldCheck, Lock as Silian_Lock, AlertCircle as Silian_AlertCircle, Bug as Silian_Bug, Server as Silian_Server } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../hooks/useTranslation';
 
-const toItemKey = (prefix, item) => `${prefix}-${String(item).trim()}`;
+const Silian_toItemKey = (Silian_prefix, Silian_item) => `${Silian_prefix}-${String(Silian_item).trim()}`;
 
-const toMailtoLink = (email) => `mailto:${String(email || '').trim()}`;
+const Silian_toMailtoLink = (Silian_email) => `mailto:${String(Silian_email || '').trim()}`;
 
-const Section = ({ title, icon: Icon, children }) => (
-    <Motion.div
+const Silian_Section = ({ title: Silian_title, icon: Silian_Icon, children: Silian_children }) => (
+    <Silian_Motion.div
         className="mb-8"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -19,106 +19,106 @@ const Section = ({ title, icon: Icon, children }) => (
         transition={{ duration: 0.5 }}
     >
         <h2 className="text-xl md:text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-            {Icon && <Icon className="h-6 w-6 text-green-600" />}
-            {title}
+            {Silian_Icon && <Silian_Icon className="h-6 w-6 text-green-600" />}
+            {Silian_title}
         </h2>
         <div className="text-muted-foreground leading-relaxed space-y-4">
-            {children}
+            {Silian_children}
         </div>
-    </Motion.div>
+    </Silian_Motion.div>
 );
 
-Section.propTypes = {
-    title: PropTypes.node.isRequired,
-    icon: PropTypes.elementType,
-    children: PropTypes.node,
+Silian_Section.propTypes = {
+    title: Silian_PropTypes.node.isRequired,
+    icon: Silian_PropTypes.elementType,
+    children: Silian_PropTypes.node,
 };
 
-const SecurityPage = () => {
-    const { t } = useTranslation(['app', 'legal']);
+const Silian_SecurityPage = () => {
+    const { t: Silian_t } = Silian_useTranslation(['app', 'legal']);
 
-    const infraItems = t('legal.security.sections.infrastructure.items', { returnObjects: true });
-    const appItems = t('legal.security.sections.app.items', { returnObjects: true });
-    const vulnItems = t('legal.security.sections.vuln.items', { returnObjects: true });
+    const Silian_infraItems = Silian_t('legal.security.sections.infrastructure.items', { returnObjects: true });
+    const Silian_appItems = Silian_t('legal.security.sections.app.items', { returnObjects: true });
+    const Silian_vulnItems = Silian_t('legal.security.sections.vuln.items', { returnObjects: true });
 
     return (
-        <LazyMotion features={domAnimation}>
+        <Silian_LazyMotion features={Silian_domAnimation}>
             <div className="min-h-screen bg-background text-foreground py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto">
-                    <Motion.div
+                    <Silian_Motion.div
                         className="text-center mb-12"
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <h1 className="text-4xl font-extrabold text-foreground mb-4">{t('legal.security.title')}</h1>
+                        <h1 className="text-4xl font-extrabold text-foreground mb-4">{Silian_t('legal.security.title')}</h1>
                         <p className="text-lg text-muted-foreground">
-                            {t('legal.security.subtitle')}
+                            {Silian_t('legal.security.subtitle')}
                         </p>
-                    </Motion.div>
-                    <Card className="border-border/60 bg-card/85 backdrop-blur shadow-xl">
-                        <CardContent className="p-8 md:p-12">
-                            <Section title={t('legal.security.sections.commitment.title')} icon={ShieldCheck}>
+                    </Silian_Motion.div>
+                    <Silian_Card className="border-border/60 bg-card/85 backdrop-blur shadow-xl">
+                        <Silian_CardContent className="p-8 md:p-12">
+                            <Silian_Section title={Silian_t('legal.security.sections.commitment.title')} icon={Silian_ShieldCheck}>
                                 <p>
-                                    {t('legal.security.sections.commitment.content')}
+                                    {Silian_t('legal.security.sections.commitment.content')}
                                 </p>
-                            </Section>
+                            </Silian_Section>
 
-                            <Section title={t('legal.security.sections.infrastructure.title')} icon={Server}>
+                            <Silian_Section title={Silian_t('legal.security.sections.infrastructure.title')} icon={Silian_Server}>
                                 <p>
-                                    {t('legal.security.sections.infrastructure.intro')}
+                                    {Silian_t('legal.security.sections.infrastructure.intro')}
                                 </p>
                                 <ul className="list-disc pl-5 mt-2 space-y-2">
-                                    {Array.isArray(infraItems) && infraItems.map((item, index) => (
-                                        <li key={toItemKey(`infra-${index}`, item)}>
-                                            <Trans defaults={item} components={{ strong: <strong /> }} />
+                                    {Array.isArray(Silian_infraItems) && Silian_infraItems.map((Silian_item, Silian_index) => (
+                                        <li key={Silian_toItemKey(`infra-${Silian_index}`, Silian_item)}>
+                                            <Silian_Trans defaults={Silian_item} components={{ strong: <strong /> }} />
                                         </li>
                                     ))}
                                 </ul>
-                            </Section>
+                            </Silian_Section>
 
-                            <Section title={t('legal.security.sections.app.title')} icon={Lock}>
+                            <Silian_Section title={Silian_t('legal.security.sections.app.title')} icon={Silian_Lock}>
                                 <ul className="list-disc pl-5 mt-2 space-y-2">
-                                    {Array.isArray(appItems) && appItems.map((item, index) => (
-                                        <li key={toItemKey(`app-${index}`, item)}>
-                                            <Trans defaults={item} components={{ strong: <strong /> }} />
+                                    {Array.isArray(Silian_appItems) && Silian_appItems.map((Silian_item, Silian_index) => (
+                                        <li key={Silian_toItemKey(`app-${Silian_index}`, Silian_item)}>
+                                            <Silian_Trans defaults={Silian_item} components={{ strong: <strong /> }} />
                                         </li>
                                     ))}
                                 </ul>
-                            </Section>
+                            </Silian_Section>
 
-                            <Section title={t('legal.security.sections.vuln.title')} icon={Bug}>
+                            <Silian_Section title={Silian_t('legal.security.sections.vuln.title')} icon={Silian_Bug}>
                                 <p>
-                                    {t('legal.security.sections.vuln.intro')}
+                                    {Silian_t('legal.security.sections.vuln.intro')}
                                 </p>
                                 <div className="mt-4 rounded-lg border border-blue-500/20 bg-blue-500/10 p-4">
-                                    <h3 className="font-bold text-blue-700 dark:text-blue-300 mb-2">{t('legal.security.sections.vuln.policyTitle')}</h3>
+                                    <h3 className="font-bold text-blue-700 dark:text-blue-300 mb-2">{Silian_t('legal.security.sections.vuln.policyTitle')}</h3>
                                     <p className="mb-2 text-sm text-blue-700 dark:text-blue-300">
-                                        <Trans
+                                        <Silian_Trans
                                             i18nKey="legal.security.sections.vuln.contact"
                                             values={{ email: import.meta.env.VITE_SECURITY_EMAIL }}
-                                            components={{ a: <a href={toMailtoLink(import.meta.env.VITE_SECURITY_EMAIL)} className="underline font-semibold" /> }}
+                                            components={{ a: <a href={Silian_toMailtoLink(import.meta.env.VITE_SECURITY_EMAIL)} className="underline font-semibold" /> }}
                                         />
                                     </p>
                                     <ul className="list-disc pl-5 text-sm text-blue-700 dark:text-blue-300">
-                                        {Array.isArray(vulnItems) && vulnItems.map((item, index) => (
-                                            <li key={toItemKey(`vuln-${index}`, item)}>{item}</li>
+                                        {Array.isArray(Silian_vulnItems) && Silian_vulnItems.map((Silian_item, Silian_index) => (
+                                            <li key={Silian_toItemKey(`vuln-${Silian_index}`, Silian_item)}>{Silian_item}</li>
                                         ))}
                                     </ul>
                                 </div>
-                            </Section>
+                            </Silian_Section>
 
-                            <Section title={t('legal.security.sections.breach.title')} icon={AlertCircle}>
+                            <Silian_Section title={Silian_t('legal.security.sections.breach.title')} icon={Silian_AlertCircle}>
                                 <p>
-                                    <Trans i18nKey="legal.security.sections.breach.content" components={{ strong: <strong /> }} />
+                                    <Silian_Trans i18nKey="legal.security.sections.breach.content" components={{ strong: <strong /> }} />
                                 </p>
-                            </Section>
-                        </CardContent>
-                    </Card>
+                            </Silian_Section>
+                        </Silian_CardContent>
+                    </Silian_Card>
                 </div>
             </div>
-        </LazyMotion>
+        </Silian_LazyMotion>
     );
 };
 
-export default SecurityPage;
+export default Silian_SecurityPage;

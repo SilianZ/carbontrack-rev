@@ -30,78 +30,78 @@ class AvatarController
     private ?MessageService $messageService;
 
     public function __construct(
-        Avatar $avatarModel,
-        AuthService $authService,
-        AuditLogService $auditLogService = null,
-        CloudflareR2Service $r2Service = null,
-        Logger $logger = null,
-        ErrorLogService $errorLogService = null,
-        MessageService $messageService = null
+        Avatar $Silian_avatarModel,
+        AuthService $Silian_authService,
+        AuditLogService $Silian_auditLogService = null,
+        CloudflareR2Service $Silian_r2Service = null,
+        Logger $Silian_logger = null,
+        ErrorLogService $Silian_errorLogService = null,
+        MessageService $Silian_messageService = null
     ) {
-        $this->avatarModel = $avatarModel;
-        $this->authService = $authService;
-        $this->auditLogService = $auditLogService;
-        $this->r2Service = $r2Service;
-        $this->logger = $logger;
-        $this->errorLogService = $errorLogService;
-        $this->messageService = $messageService;
+        $this->avatarModel = $Silian_avatarModel;
+        $this->authService = $Silian_authService;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->r2Service = $Silian_r2Service;
+        $this->logger = $Silian_logger;
+        $this->errorLogService = $Silian_errorLogService;
+        $this->messageService = $Silian_messageService;
     }
 
     /**
      * 获取所有可用头像（用户和管理员都可访问）
      */
-    public function getAvatars(Request $request, Response $response): Response
+    public function getAvatars(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $queryParams = $request->getQueryParams();
-            $category = $queryParams['category'] ?? null;
-            $includeInactive = !empty($queryParams['include_inactive'])
-                && filter_var($queryParams['include_inactive'], FILTER_VALIDATE_BOOLEAN);
+            $Silian_queryParams = $Silian_request->getQueryParams();
+            $Silian_category = $Silian_queryParams['category'] ?? null;
+            $Silian_includeInactive = !empty($Silian_queryParams['include_inactive'])
+                && filter_var($Silian_queryParams['include_inactive'], FILTER_VALIDATE_BOOLEAN);
 
             // 检查是否为管理员（容错：AuthService 可能在匿名请求时抛出异常）
-            $user = null;
-            $isAdmin = false;
+            $Silian_user = null;
+            $Silian_isAdmin = false;
             try {
-                $user = $this->authService->getCurrentUser($request);
-                $isAdmin = $user && !empty($user['is_admin']);
-            } catch (\Throwable $authEx) {
+                $Silian_user = $this->authService->getCurrentUser($Silian_request);
+                $Silian_isAdmin = $Silian_user && !empty($Silian_user['is_admin']);
+            } catch (\Throwable $Silian_authEx) {
                 // 记日志但不影响公开接口返回
                 if (isset($this->logger)) {
                     $this->logger->debug('Anonymous avatar listing (auth not resolved)', [
-                        'error' => $authEx->getMessage()
+                        'error' => $Silian_authEx->getMessage()
                     ]);
                 }
             }
 
-            if ($includeInactive && !$isAdmin) {
-                return $this->jsonResponse($response, [
+            if ($Silian_includeInactive && !$Silian_isAdmin) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required to view inactive avatars',
                     'code' => 'ADMIN_REQUIRED'
                 ], 403);
             }
 
-            $avatars = $this->avatarModel->getAvailableAvatars($category, $includeInactive && $isAdmin);
-            $avatars = array_map([$this, 'formatAvatar'], array_values($avatars));
+            $Silian_avatars = $this->avatarModel->getAvailableAvatars($Silian_category, $Silian_includeInactive && $Silian_isAdmin);
+            $Silian_avatars = array_map([$this, 'formatAvatar'], array_values($Silian_avatars));
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $avatars
+                'data' => $Silian_avatars
             ]);
 
-        } catch (\Exception $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
             if ($this->logger) {
                 $this->logger->error('Get avatars failed', [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'error' => $Silian_e->getMessage(),
+                    'trace' => $Silian_e->getTraceAsString()
                 ]);
             }
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get avatars',
-                'debug' => getenv('APP_ENV') === 'testing' ? ($e->getMessage()) : null
+                'debug' => getenv('APP_ENV') === 'testing' ? ($Silian_e->getMessage()) : null
             ], 500);
         }
     }
@@ -109,26 +109,26 @@ class AvatarController
     /**
      * 获取头像分类列表
      */
-    public function getAvatarCategories(Request $request, Response $response): Response
+    public function getAvatarCategories(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $categories = $this->avatarModel->getAvatarCategories();
+            $Silian_categories = $this->avatarModel->getAvatarCategories();
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $categories
+                'data' => $Silian_categories
             ]);
 
-        } catch (\Exception $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
             if ($this->logger) {
                 $this->logger->error('Get avatar categories failed', [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'error' => $Silian_e->getMessage(),
+                    'trace' => $Silian_e->getTraceAsString()
                 ]);
             }
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get avatar categories'
             ], 500);
@@ -138,45 +138,45 @@ class AvatarController
     /**
      * 获取单个头像详情（管理员）
      */
-    public function getAvatar(Request $request, Response $response, array $args): Response
+    public function getAvatar(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$user['is_admin']) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$Silian_user['is_admin']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required',
                     'code' => 'ADMIN_REQUIRED'
                 ], 403);
             }
 
-            $avatarId = (int)$args['id'];
-            $avatar = $this->avatarModel->getAvatarById($avatarId);
+            $Silian_avatarId = (int)$Silian_args['id'];
+            $Silian_avatar = $this->avatarModel->getAvatarById($Silian_avatarId);
 
-            if (!$avatar) {
-                return $this->jsonResponse($response, [
+            if (!$Silian_avatar) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Avatar not found',
                     'code' => 'AVATAR_NOT_FOUND'
                 ], 404);
             }
 
-            $avatar = $this->formatAvatar($avatar);
+            $Silian_avatar = $this->formatAvatar($Silian_avatar);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $avatar
+                'data' => $Silian_avatar
             ]);
 
-        } catch (\Exception $e) {
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
             $this->logger->error('Get avatar failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'avatar_id' => $args['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'avatar_id' => $Silian_args['id'] ?? null
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get avatar'
             ], 500);
@@ -186,43 +186,43 @@ class AvatarController
     /**
      * 创建新头像（管理员）
      */
-    public function createAvatar(Request $request, Response $response): Response
+    public function createAvatar(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$user['is_admin']) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$Silian_user['is_admin']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required',
                     'code' => 'ADMIN_REQUIRED'
                 ], 403);
             }
 
-            $data = $this->normalizeAvatarPayload($request->getParsedBody());
+            $Silian_data = $this->normalizeAvatarPayload($Silian_request->getParsedBody());
 
             // 验证必需字段
-            $requiredFields = ['name', 'file_path'];
-            foreach ($requiredFields as $field) {
-                if (empty($data[$field])) {
-                    return $this->jsonResponse($response, [
+            $Silian_requiredFields = ['name', 'file_path'];
+            foreach ($Silian_requiredFields as $Silian_field) {
+                if (empty($Silian_data[$Silian_field])) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
-                        'message' => "Missing required field: {$field}",
+                        'message' => "Missing required field: {$Silian_field}",
                         'code' => 'MISSING_FIELD'
                     ], 400);
                 }
             }
 
-            $this->assertDefaultAvatarStateIsValid($data);
+            $this->assertDefaultAvatarStateIsValid($Silian_data);
 
             // 验证文件路径是否存在（如果是R2路径）
-            if (strpos($data['file_path'], '/avatars/') === 0) {
-                $filePath = ltrim($data['file_path'], '/');
+            if (strpos($Silian_data['file_path'], '/avatars/') === 0) {
+                $Silian_filePath = ltrim($Silian_data['file_path'], '/');
                 if ($this->r2Service === null) {
-                    return $this->avatarStorageUnavailableResponse($response);
+                    return $this->avatarStorageUnavailableResponse($Silian_response);
                 }
 
-                if (!$this->r2Service->fileExists($filePath)) {
-                    return $this->jsonResponse($response, [
+                if (!$this->r2Service->fileExists($Silian_filePath)) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Avatar file does not exist',
                         'code' => 'FILE_NOT_FOUND'
@@ -231,61 +231,61 @@ class AvatarController
             }
 
             // 创建头像
-            $avatarData = [
-                'name' => $data['name'],
-                'description' => $data['description'] ?? null,
-                'file_path' => $data['file_path'],
-                'thumbnail_path' => $data['thumbnail_path'] ?? null,
-                'category' => $data['category'] ?? 'default',
-                'sort_order' => $data['sort_order'] ?? 0,
-                'is_active' => $data['is_active'] ?? 1,
-                'is_default' => $data['is_default'] ?? 0
+            $Silian_avatarData = [
+                'name' => $Silian_data['name'],
+                'description' => $Silian_data['description'] ?? null,
+                'file_path' => $Silian_data['file_path'],
+                'thumbnail_path' => $Silian_data['thumbnail_path'] ?? null,
+                'category' => $Silian_data['category'] ?? 'default',
+                'sort_order' => $Silian_data['sort_order'] ?? 0,
+                'is_active' => $Silian_data['is_active'] ?? 1,
+                'is_default' => $Silian_data['is_default'] ?? 0
             ];
 
-            $avatarId = $this->avatarModel->createAvatar($avatarData);
+            $Silian_avatarId = $this->avatarModel->createAvatar($Silian_avatarData);
 
             // 记录审计日志
             $this->auditLogService->log([
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'action' => 'avatar_created',
                 'entity_type' => 'avatar',
-                'entity_id' => $avatarId,
-                'new_value' => json_encode($avatarData),
+                'entity_id' => $Silian_avatarId,
+                'new_value' => json_encode($Silian_avatarData),
                 'notes' => 'Avatar created by admin'
             ]);
 
             $this->logger->info('Avatar created', [
-                'avatar_id' => $avatarId,
-                'admin_id' => $user['id'],
-                'avatar_name' => $data['name']
+                'avatar_id' => $Silian_avatarId,
+                'admin_id' => $Silian_user['id'],
+                'avatar_name' => $Silian_data['name']
             ]);
 
             // 获取创建的头像信息
-            $createdAvatar = $this->avatarModel->getAvatarById($avatarId);
+            $Silian_createdAvatar = $this->avatarModel->getAvatarById($Silian_avatarId);
 
-            $createdAvatar = $this->formatAvatar($createdAvatar);
+            $Silian_createdAvatar = $this->formatAvatar($Silian_createdAvatar);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Avatar created successfully',
-                'data' => $createdAvatar
+                'data' => $Silian_createdAvatar
             ], 201);
 
-        } catch (\InvalidArgumentException $e) {
-            return $this->jsonResponse($response, [
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => $e->getMessage(),
-                'code' => $this->avatarValidationErrorCode($e),
+                'message' => $Silian_e->getMessage(),
+                'code' => $this->avatarValidationErrorCode($Silian_e),
             ], 400);
-        } catch (\Exception $e) {
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
             $this->logger->error('Create avatar failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'admin_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'admin_id' => $Silian_user['id'] ?? null
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to create avatar'
             ], 500);
@@ -295,42 +295,42 @@ class AvatarController
     /**
      * 更新头像（管理员）
      */
-    public function updateAvatar(Request $request, Response $response, array $args): Response
+    public function updateAvatar(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$user['is_admin']) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$Silian_user['is_admin']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required',
                     'code' => 'ADMIN_REQUIRED'
                 ], 403);
             }
 
-            $avatarId = (int)$args['id'];
-            $data = $this->normalizeAvatarPayload($request->getParsedBody());
+            $Silian_avatarId = (int)$Silian_args['id'];
+            $Silian_data = $this->normalizeAvatarPayload($Silian_request->getParsedBody());
 
             // 检查头像是否存在
-            $existingAvatar = $this->avatarModel->getAvatarById($avatarId);
-            if (!$existingAvatar) {
-                return $this->jsonResponse($response, [
+            $Silian_existingAvatar = $this->avatarModel->getAvatarById($Silian_avatarId);
+            if (!$Silian_existingAvatar) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Avatar not found',
                     'code' => 'AVATAR_NOT_FOUND'
                 ], 404);
             }
 
-            $this->assertDefaultAvatarStateIsValid($data, $existingAvatar);
+            $this->assertDefaultAvatarStateIsValid($Silian_data, $Silian_existingAvatar);
 
             // 验证文件路径是否存在（如果提供了新的文件路径）
-            if (!empty($data['file_path']) && strpos($data['file_path'], '/avatars/') === 0) {
-                $filePath = ltrim($data['file_path'], '/');
+            if (!empty($Silian_data['file_path']) && strpos($Silian_data['file_path'], '/avatars/') === 0) {
+                $Silian_filePath = ltrim($Silian_data['file_path'], '/');
                 if ($this->r2Service === null) {
-                    return $this->avatarStorageUnavailableResponse($response);
+                    return $this->avatarStorageUnavailableResponse($Silian_response);
                 }
 
-                if (!$this->r2Service->fileExists($filePath)) {
-                    return $this->jsonResponse($response, [
+                if (!$this->r2Service->fileExists($Silian_filePath)) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Avatar file does not exist',
                         'code' => 'FILE_NOT_FOUND'
@@ -339,86 +339,86 @@ class AvatarController
             }
 
             // 准备更新数据
-            $updateData = [];
-            $allowedFields = [
-                'name', 'description', 'file_path', 'thumbnail_path', 
+            $Silian_updateData = [];
+            $Silian_allowedFields = [
+                'name', 'description', 'file_path', 'thumbnail_path',
                 'category', 'sort_order', 'is_active', 'is_default'
             ];
 
-            foreach ($allowedFields as $field) {
-                if (array_key_exists($field, $data)) {
-                    $updateData[$field] = $data[$field];
+            foreach ($Silian_allowedFields as $Silian_field) {
+                if (array_key_exists($Silian_field, $Silian_data)) {
+                    $Silian_updateData[$Silian_field] = $Silian_data[$Silian_field];
                 }
             }
 
-            if (empty($updateData)) {
-                return $this->jsonResponse($response, [
+            if (empty($Silian_updateData)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'No valid fields to update',
                     'code' => 'NO_UPDATE_DATA'
                 ], 400);
             }
 
-            $wasActive = $this->normalizeBooleanValue($existingAvatar['is_active'] ?? true);
-            $willBeActive = array_key_exists('is_active', $updateData)
-                ? (bool) $updateData['is_active']
-                : $wasActive;
-            $isDeactivation = $wasActive && !$willBeActive;
-            $fallbackAvatar = null;
-            $affectedUsers = [];
+            $Silian_wasActive = $this->normalizeBooleanValue($Silian_existingAvatar['is_active'] ?? true);
+            $Silian_willBeActive = array_key_exists('is_active', $Silian_updateData)
+                ? (bool) $Silian_updateData['is_active']
+                : $Silian_wasActive;
+            $Silian_isDeactivation = $Silian_wasActive && !$Silian_willBeActive;
+            $Silian_fallbackAvatar = null;
+            $Silian_affectedUsers = [];
 
-            if ($isDeactivation) {
+            if ($Silian_isDeactivation) {
                 try {
-                    $reassignment = $this->avatarModel->updateAvatarAndReassignUsers(
-                        $avatarId,
-                        $updateData,
+                    $Silian_reassignment = $this->avatarModel->updateAvatarAndReassignUsers(
+                        $Silian_avatarId,
+                        $Silian_updateData,
                         null
                     );
-                    $affectedUsers = $reassignment['users'] ?? [];
-                    $fallbackAvatar = $reassignment['fallback_avatar'] ?? null;
-                } catch (AvatarFallbackUnavailableException $e) {
-                    return $this->jsonResponse($response, [
+                    $Silian_affectedUsers = $Silian_reassignment['users'] ?? [];
+                    $Silian_fallbackAvatar = $Silian_reassignment['fallback_avatar'] ?? null;
+                } catch (AvatarFallbackUnavailableException $Silian_e) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
-                        'message' => $e->getMessage(),
+                        'message' => $Silian_e->getMessage(),
                         'code' => 'DEFAULT_AVATAR_REQUIRED'
                     ], 409);
                 }
             } else {
                 // 更新头像
-                $success = $this->avatarModel->updateAvatar($avatarId, $updateData);
+                $Silian_success = $this->avatarModel->updateAvatar($Silian_avatarId, $Silian_updateData);
 
-                if (!$success) {
-                    return $this->jsonResponse($response, [
+                if (!$Silian_success) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Failed to update avatar'
                     ], 500);
                 }
             }
 
-            $notificationSummary = null;
-            if ($isDeactivation && $fallbackAvatar !== null && $affectedUsers !== []) {
-                $notificationSummary = $this->notifyUsersAboutAvatarFallback(
-                    $affectedUsers,
-                    $existingAvatar,
-                    $fallbackAvatar,
-                    $request
+            $Silian_notificationSummary = null;
+            if ($Silian_isDeactivation && $Silian_fallbackAvatar !== null && $Silian_affectedUsers !== []) {
+                $Silian_notificationSummary = $this->notifyUsersAboutAvatarFallback(
+                    $Silian_affectedUsers,
+                    $Silian_existingAvatar,
+                    $Silian_fallbackAvatar,
+                    $Silian_request
                 );
 
                 if ($this->auditLogService !== null) {
                     $this->auditLogService->log([
-                        'user_id' => $user['id'],
+                        'user_id' => $Silian_user['id'],
                         'action' => 'avatar_users_reassigned_to_default',
                         'entity_type' => 'avatar',
-                        'entity_id' => $avatarId,
+                        'entity_id' => $Silian_avatarId,
                         'new_value' => json_encode([
-                            'fallback_avatar_id' => (int) $fallbackAvatar['id'],
-                            'fallback_avatar_name' => $fallbackAvatar['name'] ?? null,
+                            'fallback_avatar_id' => (int) $Silian_fallbackAvatar['id'],
+                            'fallback_avatar_name' => $Silian_fallbackAvatar['name'] ?? null,
                             'affected_user_ids' => array_map(
-                                static fn (array $entry): int => (int) ($entry['id'] ?? 0),
-                                $affectedUsers
+                                static fn (array $Silian_entry): int => (int) ($Silian_entry['id'] ?? 0),
+                                $Silian_affectedUsers
                             ),
-                            'notified_count' => $notificationSummary['notified_count'],
-                            'notification_failures' => $notificationSummary['failed_user_ids'],
+                            'notified_count' => $Silian_notificationSummary['notified_count'],
+                            'notification_failures' => $Silian_notificationSummary['failed_user_ids'],
                         ], JSON_UNESCAPED_UNICODE),
                         'notes' => 'Users were reassigned to the default avatar after avatar deactivation'
                     ]);
@@ -428,14 +428,14 @@ class AvatarController
             // 记录审计日志
             if ($this->auditLogService !== null) {
                 $this->auditLogService->log([
-                    'user_id' => $user['id'],
+                    'user_id' => $Silian_user['id'],
                     'action' => 'avatar_updated',
                     'entity_type' => 'avatar',
-                    'entity_id' => $avatarId,
-                    'old_value' => json_encode($existingAvatar),
-                    'new_value' => json_encode(array_merge($updateData, [
-                        'fallback_avatar_id' => $fallbackAvatar['id'] ?? null,
-                        'reassigned_user_count' => is_array($affectedUsers) ? count($affectedUsers) : 0,
+                    'entity_id' => $Silian_avatarId,
+                    'old_value' => json_encode($Silian_existingAvatar),
+                    'new_value' => json_encode(array_merge($Silian_updateData, [
+                        'fallback_avatar_id' => $Silian_fallbackAvatar['id'] ?? null,
+                        'reassigned_user_count' => is_array($Silian_affectedUsers) ? count($Silian_affectedUsers) : 0,
                     ]), JSON_UNESCAPED_UNICODE),
                     'notes' => 'Avatar updated by admin'
                 ]);
@@ -443,45 +443,45 @@ class AvatarController
 
             if ($this->logger !== null) {
                 $this->logger->info('Avatar updated', [
-                    'avatar_id' => $avatarId,
-                    'admin_id' => $user['id'],
-                    'updated_fields' => array_keys($updateData),
-                    'reassigned_user_count' => is_array($affectedUsers) ? count($affectedUsers) : 0,
-                    'notification_failures' => $notificationSummary['failed_user_ids'] ?? [],
+                    'avatar_id' => $Silian_avatarId,
+                    'admin_id' => $Silian_user['id'],
+                    'updated_fields' => array_keys($Silian_updateData),
+                    'reassigned_user_count' => is_array($Silian_affectedUsers) ? count($Silian_affectedUsers) : 0,
+                    'notification_failures' => $Silian_notificationSummary['failed_user_ids'] ?? [],
                 ]);
             }
 
             // 获取更新后的头像信息
-            $updatedAvatar = $this->avatarModel->getAvatarById($avatarId);
+            $Silian_updatedAvatar = $this->avatarModel->getAvatarById($Silian_avatarId);
 
-            $updatedAvatar = $this->formatAvatar($updatedAvatar);
+            $Silian_updatedAvatar = $this->formatAvatar($Silian_updatedAvatar);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Avatar updated successfully',
-                'data' => $updatedAvatar
+                'data' => $Silian_updatedAvatar
             ]);
 
-        } catch (\InvalidArgumentException $e) {
-            return $this->jsonResponse($response, [
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => $e->getMessage(),
-                'code' => $this->avatarValidationErrorCode($e),
+                'message' => $Silian_e->getMessage(),
+                'code' => $this->avatarValidationErrorCode($Silian_e),
             ], 400);
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             if ($this->errorLogService !== null) {
-                try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
+                try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
             }
             if ($this->logger !== null) {
                 $this->logger->error('Update avatar failed', [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                    'avatar_id' => $args['id'] ?? null,
-                    'admin_id' => $user['id'] ?? null
+                    'error' => $Silian_e->getMessage(),
+                    'trace' => $Silian_e->getTraceAsString(),
+                    'avatar_id' => $Silian_args['id'] ?? null,
+                    'admin_id' => $Silian_user['id'] ?? null
                 ]);
             }
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to update avatar'
             ], 500);
@@ -491,24 +491,24 @@ class AvatarController
     /**
      * 删除头像（管理员）
      */
-    public function deleteAvatar(Request $request, Response $response, array $args): Response
+    public function deleteAvatar(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$user['is_admin']) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$Silian_user['is_admin']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required',
                     'code' => 'ADMIN_REQUIRED'
                 ], 403);
             }
 
-            $avatarId = (int)$args['id'];
+            $Silian_avatarId = (int)$Silian_args['id'];
 
             // 检查头像是否存在
-            $avatar = $this->avatarModel->getAvatarById($avatarId);
-            if (!$avatar) {
-                return $this->jsonResponse($response, [
+            $Silian_avatar = $this->avatarModel->getAvatarById($Silian_avatarId);
+            if (!$Silian_avatar) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Avatar not found',
                     'code' => 'AVATAR_NOT_FOUND'
@@ -516,8 +516,8 @@ class AvatarController
             }
 
             // 检查是否为默认头像
-            if ($avatar['is_default']) {
-                return $this->jsonResponse($response, [
+            if ($Silian_avatar['is_default']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Cannot delete default avatar',
                     'code' => 'CANNOT_DELETE_DEFAULT'
@@ -525,10 +525,10 @@ class AvatarController
             }
 
             // 软删除头像
-            $success = $this->avatarModel->deleteAvatar($avatarId);
+            $Silian_success = $this->avatarModel->deleteAvatar($Silian_avatarId);
 
-            if (!$success) {
-                return $this->jsonResponse($response, [
+            if (!$Silian_success) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Failed to delete avatar'
                 ], 500);
@@ -536,35 +536,35 @@ class AvatarController
 
             // 记录审计日志
             $this->auditLogService->log([
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'action' => 'avatar_deleted',
                 'entity_type' => 'avatar',
-                'entity_id' => $avatarId,
-                'old_value' => json_encode($avatar),
+                'entity_id' => $Silian_avatarId,
+                'old_value' => json_encode($Silian_avatar),
                 'notes' => 'Avatar deleted by admin'
             ]);
 
             $this->logger->info('Avatar deleted', [
-                'avatar_id' => $avatarId,
-                'admin_id' => $user['id'],
-                'avatar_name' => $avatar['name']
+                'avatar_id' => $Silian_avatarId,
+                'admin_id' => $Silian_user['id'],
+                'avatar_name' => $Silian_avatar['name']
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Avatar deleted successfully'
             ]);
 
-        } catch (\Exception $e) {
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
             $this->logger->error('Delete avatar failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'avatar_id' => $args['id'] ?? null,
-                'admin_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'avatar_id' => $Silian_args['id'] ?? null,
+                'admin_id' => $Silian_user['id'] ?? null
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to delete avatar'
             ], 500);
@@ -574,25 +574,25 @@ class AvatarController
     /**
      * 恢复已删除的头像（管理员）
      */
-    public function restoreAvatar(Request $request, Response $response, array $args): Response
+    public function restoreAvatar(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$user['is_admin']) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$Silian_user['is_admin']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required',
                     'code' => 'ADMIN_REQUIRED'
                 ], 403);
             }
 
-            $avatarId = (int)$args['id'];
+            $Silian_avatarId = (int)$Silian_args['id'];
 
             // 恢复头像
-            $success = $this->avatarModel->restoreAvatar($avatarId);
+            $Silian_success = $this->avatarModel->restoreAvatar($Silian_avatarId);
 
-            if (!$success) {
-                return $this->jsonResponse($response, [
+            if (!$Silian_success) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Failed to restore avatar or avatar not found'
                 ], 500);
@@ -600,39 +600,39 @@ class AvatarController
 
             // 记录审计日志
             $this->auditLogService->log([
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'action' => 'avatar_restored',
                 'entity_type' => 'avatar',
-                'entity_id' => $avatarId,
+                'entity_id' => $Silian_avatarId,
                 'notes' => 'Avatar restored by admin'
             ]);
 
             $this->logger->info('Avatar restored', [
-                'avatar_id' => $avatarId,
-                'admin_id' => $user['id']
+                'avatar_id' => $Silian_avatarId,
+                'admin_id' => $Silian_user['id']
             ]);
 
             // 获取恢复后的头像信息
-            $restoredAvatar = $this->avatarModel->getAvatarById($avatarId);
+            $Silian_restoredAvatar = $this->avatarModel->getAvatarById($Silian_avatarId);
 
-            $restoredAvatar = $this->formatAvatar($restoredAvatar);
+            $Silian_restoredAvatar = $this->formatAvatar($Silian_restoredAvatar);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Avatar restored successfully',
-                'data' => $restoredAvatar
+                'data' => $Silian_restoredAvatar
             ]);
 
-        } catch (\Exception $e) {
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
             $this->logger->error('Restore avatar failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'avatar_id' => $args['id'] ?? null,
-                'admin_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'avatar_id' => $Silian_args['id'] ?? null,
+                'admin_id' => $Silian_user['id'] ?? null
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to restore avatar'
             ], 500);
@@ -642,23 +642,23 @@ class AvatarController
     /**
      * 设置默认头像（管理员）
      */
-    public function setDefaultAvatar(Request $request, Response $response, array $args): Response
+    public function setDefaultAvatar(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$user['is_admin']) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$Silian_user['is_admin']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required',
                     'code' => 'ADMIN_REQUIRED'
                 ], 403);
             }
 
-            $avatarId = (int)$args['id'];
+            $Silian_avatarId = (int)$Silian_args['id'];
 
             // 检查头像是否存在且可用
-            if (!$this->avatarModel->isAvatarAvailable($avatarId)) {
-                return $this->jsonResponse($response, [
+            if (!$this->avatarModel->isAvatarAvailable($Silian_avatarId)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Avatar not found or not available',
                     'code' => 'AVATAR_NOT_AVAILABLE'
@@ -666,10 +666,10 @@ class AvatarController
             }
 
             // 设置默认头像
-            $success = $this->avatarModel->setDefaultAvatar($avatarId);
+            $Silian_success = $this->avatarModel->setDefaultAvatar($Silian_avatarId);
 
-            if (!$success) {
-                return $this->jsonResponse($response, [
+            if (!$Silian_success) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Failed to set default avatar'
                 ], 500);
@@ -677,33 +677,33 @@ class AvatarController
 
             // 记录审计日志
             $this->auditLogService->log([
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'action' => 'default_avatar_changed',
                 'entity_type' => 'avatar',
-                'entity_id' => $avatarId,
+                'entity_id' => $Silian_avatarId,
                 'notes' => 'Default avatar changed by admin'
             ]);
 
             $this->logger->info('Default avatar changed', [
-                'avatar_id' => $avatarId,
-                'admin_id' => $user['id']
+                'avatar_id' => $Silian_avatarId,
+                'admin_id' => $Silian_user['id']
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Default avatar set successfully'
             ]);
 
-        } catch (\Exception $e) {
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
             $this->logger->error('Set default avatar failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'avatar_id' => $args['id'] ?? null,
-                'admin_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'avatar_id' => $Silian_args['id'] ?? null,
+                'admin_id' => $Silian_user['id'] ?? null
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to set default avatar'
             ], 500);
@@ -713,22 +713,22 @@ class AvatarController
     /**
      * 批量更新头像排序（管理员）
      */
-    public function updateSortOrders(Request $request, Response $response): Response
+    public function updateSortOrders(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$user['is_admin']) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$Silian_user['is_admin']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required',
                     'code' => 'ADMIN_REQUIRED'
                 ], 403);
             }
 
-            $data = $request->getParsedBody();
+            $Silian_data = $Silian_request->getParsedBody();
 
-            if (empty($data['sort_orders']) || !is_array($data['sort_orders'])) {
-                return $this->jsonResponse($response, [
+            if (empty($Silian_data['sort_orders']) || !is_array($Silian_data['sort_orders'])) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Invalid sort orders data',
                     'code' => 'INVALID_DATA'
@@ -736,23 +736,23 @@ class AvatarController
             }
 
             // 验证数据格式
-            $sortOrders = [];
-            foreach ($data['sort_orders'] as $item) {
-                if (!isset($item['id']) || !isset($item['sort_order'])) {
-                    return $this->jsonResponse($response, [
+            $Silian_sortOrders = [];
+            foreach ($Silian_data['sort_orders'] as $Silian_item) {
+                if (!isset($Silian_item['id']) || !isset($Silian_item['sort_order'])) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Invalid sort order item format',
                         'code' => 'INVALID_FORMAT'
                     ], 400);
                 }
-                $sortOrders[(int)$item['id']] = (int)$item['sort_order'];
+                $Silian_sortOrders[(int)$Silian_item['id']] = (int)$Silian_item['sort_order'];
             }
 
             // 更新排序
-            $success = $this->avatarModel->updateSortOrders($sortOrders);
+            $Silian_success = $this->avatarModel->updateSortOrders($Silian_sortOrders);
 
-            if (!$success) {
-                return $this->jsonResponse($response, [
+            if (!$Silian_success) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Failed to update sort orders'
                 ], 500);
@@ -760,32 +760,32 @@ class AvatarController
 
             // 记录审计日志
             $this->auditLogService->log([
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'action' => 'avatar_sort_orders_updated',
                 'entity_type' => 'avatar',
-                'new_value' => json_encode($sortOrders),
+                'new_value' => json_encode($Silian_sortOrders),
                 'notes' => 'Avatar sort orders updated by admin'
             ]);
 
             $this->logger->info('Avatar sort orders updated', [
-                'admin_id' => $user['id'],
-                'updated_count' => count($sortOrders)
+                'admin_id' => $Silian_user['id'],
+                'updated_count' => count($Silian_sortOrders)
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Sort orders updated successfully'
             ]);
 
-        } catch (\Exception $e) {
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
             $this->logger->error('Update sort orders failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'admin_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'admin_id' => $Silian_user['id'] ?? null
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to update sort orders'
             ], 500);
@@ -795,34 +795,34 @@ class AvatarController
     /**
      * 获取头像使用统计（管理员）
      */
-    public function getAvatarUsageStats(Request $request, Response $response): Response
+    public function getAvatarUsageStats(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$user['is_admin']) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$Silian_user['is_admin']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required',
                     'code' => 'ADMIN_REQUIRED'
                 ], 403);
             }
 
-            $stats = $this->avatarModel->getAvatarUsageStats();
+            $Silian_stats = $this->avatarModel->getAvatarUsageStats();
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $stats
+                'data' => $Silian_stats
             ]);
 
-        } catch (\Exception $e) {
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
             $this->logger->error('Get avatar usage stats failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'admin_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'admin_id' => $Silian_user['id'] ?? null
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get avatar usage stats'
             ], 500);
@@ -832,12 +832,12 @@ class AvatarController
     /**
      * 上传头像文件（管理员）
      */
-    public function uploadAvatarFile(Request $request, Response $response): Response
+    public function uploadAvatarFile(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$user['is_admin']) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$Silian_user['is_admin']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Admin access required',
                     'code' => 'ADMIN_REQUIRED'
@@ -845,69 +845,69 @@ class AvatarController
             }
 
             // 获取上传的文件
-            $uploadedFiles = $request->getUploadedFiles();
-            if (empty($uploadedFiles['avatar'])) {
-                return $this->jsonResponse($response, [
+            $Silian_uploadedFiles = $Silian_request->getUploadedFiles();
+            if (empty($Silian_uploadedFiles['avatar'])) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'No avatar file uploaded',
                     'code' => 'NO_FILE'
                 ], 400);
             }
 
-            $file = $uploadedFiles['avatar'];
-            
+            $Silian_file = $Silian_uploadedFiles['avatar'];
+
             // 获取请求参数
-            $body = $request->getParsedBody();
-            $category = $body['category'] ?? 'default';
+            $Silian_body = $Silian_request->getParsedBody();
+            $Silian_category = $Silian_body['category'] ?? 'default';
 
             // 上传文件到R2
-            $result = $this->r2Service->uploadFile(
-                $file,
-                "avatars/{$category}",
-                $user['id'],
+            $Silian_result = $this->r2Service->uploadFile(
+                $Silian_file,
+                "avatars/{$Silian_category}",
+                $Silian_user['id'],
                 'avatar',
                 null
             );
 
             // 记录审计日志
             $this->auditLogService->log([
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'action' => 'avatar_file_uploaded',
                 'entity_type' => 'file',
                 'new_value' => json_encode([
-                    'file_path' => $result['file_path'],
-                    'public_url' => $result['public_url'],
-                    'category' => $category
+                    'file_path' => $Silian_result['file_path'],
+                    'public_url' => $Silian_result['public_url'],
+                    'category' => $Silian_category
                 ]),
                 'notes' => 'Avatar file uploaded by admin'
             ]);
 
             $this->logger->info('Avatar file uploaded', [
-                'admin_id' => $user['id'],
-                'file_path' => $result['file_path'],
-                'category' => $category
+                'admin_id' => $Silian_user['id'],
+                'file_path' => $Silian_result['file_path'],
+                'category' => $Silian_category
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Avatar file uploaded successfully',
                 'data' => [
-                    'file_path' => '/' . $result['file_path'],
-                    'public_url' => $result['public_url'],
-                    'file_size' => $result['file_size'],
-                    'mime_type' => $result['mime_type']
+                    'file_path' => '/' . $Silian_result['file_path'],
+                    'public_url' => $Silian_result['public_url'],
+                    'file_size' => $Silian_result['file_size'],
+                    'mime_type' => $Silian_result['mime_type']
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
+        } catch (\Exception $Silian_e) {
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
             $this->logger->error('Upload avatar file failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'admin_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'admin_id' => $Silian_user['id'] ?? null
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to upload avatar file'
             ], 500);
@@ -917,126 +917,126 @@ class AvatarController
     /**
      * Enrich avatar payload with derived URLs for frontend consumption.
      */
-    private function formatAvatar(array $avatar): array
+    private function formatAvatar(array $Silian_avatar): array
     {
-        foreach (['id', 'sort_order'] as $field) {
-            if (array_key_exists($field, $avatar) && $avatar[$field] !== null) {
-                $avatar[$field] = (int) $avatar[$field];
+        foreach (['id', 'sort_order'] as $Silian_field) {
+            if (array_key_exists($Silian_field, $Silian_avatar) && $Silian_avatar[$Silian_field] !== null) {
+                $Silian_avatar[$Silian_field] = (int) $Silian_avatar[$Silian_field];
             }
         }
 
-        foreach (['is_active', 'is_default'] as $field) {
-            if (!array_key_exists($field, $avatar) || $avatar[$field] === null) {
+        foreach (['is_active', 'is_default'] as $Silian_field) {
+            if (!array_key_exists($Silian_field, $Silian_avatar) || $Silian_avatar[$Silian_field] === null) {
                 continue;
             }
 
-            $avatar[$field] = $this->normalizeBooleanValue($avatar[$field]);
+            $Silian_avatar[$Silian_field] = $this->normalizeBooleanValue($Silian_avatar[$Silian_field]);
         }
 
-        $filePath = $avatar['file_path'] ?? null;
-        if ($filePath) {
-            $normalizedPath = ltrim((string)$filePath, '/');
-            $avatar['icon_path'] = $normalizedPath;
+        $Silian_filePath = $Silian_avatar['file_path'] ?? null;
+        if ($Silian_filePath) {
+            $Silian_normalizedPath = ltrim((string)$Silian_filePath, '/');
+            $Silian_avatar['icon_path'] = $Silian_normalizedPath;
             if ($this->r2Service) {
                 try {
-                    $avatar['icon_url'] = $this->r2Service->getPublicUrl($normalizedPath);
-                } catch (\Throwable $e) {
+                    $Silian_avatar['icon_url'] = $this->r2Service->getPublicUrl($Silian_normalizedPath);
+                } catch (\Throwable $Silian_e) {
                     if ($this->logger) {
                         $this->logger->warning('Failed to build avatar icon public URL', [
-                            'error' => $e->getMessage(),
-                            'file_path' => $normalizedPath
+                            'error' => $Silian_e->getMessage(),
+                            'file_path' => $Silian_normalizedPath
                         ]);
                     }
                 }
                 try {
-                    $avatar['icon_presigned_url'] = $this->r2Service->generatePresignedUrl($normalizedPath, 600);
-                } catch (\Throwable $e) {
+                    $Silian_avatar['icon_presigned_url'] = $this->r2Service->generatePresignedUrl($Silian_normalizedPath, 600);
+                } catch (\Throwable $Silian_e) {
                     if ($this->logger) {
                         $this->logger->warning('Failed to build avatar icon presigned URL', [
-                            'error' => $e->getMessage(),
-                            'file_path' => $normalizedPath
+                            'error' => $Silian_e->getMessage(),
+                            'file_path' => $Silian_normalizedPath
                         ]);
                     }
                 }
             }
-            if (!isset($avatar['image_url']) || !$avatar['image_url']) {
-                $avatar['image_url'] = $avatar['icon_url'] ?? $filePath;
+            if (!isset($Silian_avatar['image_url']) || !$Silian_avatar['image_url']) {
+                $Silian_avatar['image_url'] = $Silian_avatar['icon_url'] ?? $Silian_filePath;
             }
-            if (!isset($avatar['url']) || !$avatar['url']) {
-                $avatar['url'] = $avatar['icon_url'] ?? ($avatar['image_url'] ?? $filePath);
+            if (!isset($Silian_avatar['url']) || !$Silian_avatar['url']) {
+                $Silian_avatar['url'] = $Silian_avatar['icon_url'] ?? ($Silian_avatar['image_url'] ?? $Silian_filePath);
             }
         }
 
-        $thumbnailPath = $avatar['thumbnail_path'] ?? null;
-        if ($thumbnailPath) {
-            $normalizedThumb = ltrim((string)$thumbnailPath, '/');
+        $Silian_thumbnailPath = $Silian_avatar['thumbnail_path'] ?? null;
+        if ($Silian_thumbnailPath) {
+            $Silian_normalizedThumb = ltrim((string)$Silian_thumbnailPath, '/');
             if ($this->r2Service) {
                 try {
-                    $avatar['thumbnail_url'] = $this->r2Service->getPublicUrl($normalizedThumb);
-                } catch (\Throwable $e) {
+                    $Silian_avatar['thumbnail_url'] = $this->r2Service->getPublicUrl($Silian_normalizedThumb);
+                } catch (\Throwable $Silian_e) {
                     if ($this->logger) {
                         $this->logger->warning('Failed to build avatar thumbnail URL', [
-                            'error' => $e->getMessage(),
-                            'file_path' => $normalizedThumb
+                            'error' => $Silian_e->getMessage(),
+                            'file_path' => $Silian_normalizedThumb
                         ]);
                     }
                 }
             }
         }
 
-        return $avatar;
+        return $Silian_avatar;
     }
 
     /**
      * 返回JSON响应
      */
-    private function jsonResponse(Response $response, array $data, int $status = 200): Response
+    private function jsonResponse(Response $Silian_response, array $Silian_data, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
-        return $response
+        $Silian_response->getBody()->write(json_encode($Silian_data, JSON_UNESCAPED_UNICODE));
+        return $Silian_response
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus($status);
+            ->withStatus($Silian_status);
     }
 
     /**
      * @param mixed $payload
      * @return array<string,mixed>
      */
-    private function normalizeAvatarPayload(mixed $payload): array
+    private function normalizeAvatarPayload(mixed $Silian_payload): array
     {
-        if (!is_array($payload)) {
+        if (!is_array($Silian_payload)) {
             throw new \InvalidArgumentException(self::ERR_INVALID_REQUEST_BODY);
         }
 
-        foreach (['is_active', 'is_default'] as $field) {
-            if (array_key_exists($field, $payload)) {
-                $payload[$field] = InputValueNormalizer::boolean($payload[$field], $field);
+        foreach (['is_active', 'is_default'] as $Silian_field) {
+            if (array_key_exists($Silian_field, $Silian_payload)) {
+                $Silian_payload[$Silian_field] = InputValueNormalizer::boolean($Silian_payload[$Silian_field], $Silian_field);
             }
         }
 
-        if (array_key_exists('sort_order', $payload)) {
-            $payload['sort_order'] = InputValueNormalizer::integer($payload['sort_order'], 'sort_order');
+        if (array_key_exists('sort_order', $Silian_payload)) {
+            $Silian_payload['sort_order'] = InputValueNormalizer::integer($Silian_payload['sort_order'], 'sort_order');
         }
 
-        return $payload;
+        return $Silian_payload;
     }
 
-    private function avatarValidationErrorCode(\InvalidArgumentException $exception): string
+    private function avatarValidationErrorCode(\InvalidArgumentException $Silian_exception): string
     {
-        if ($exception->getMessage() === self::ERR_INVALID_REQUEST_BODY) {
+        if ($Silian_exception->getMessage() === self::ERR_INVALID_REQUEST_BODY) {
             return 'INVALID_REQUEST_BODY';
         }
 
         return 'VALIDATION_ERROR';
     }
 
-    private function avatarStorageUnavailableResponse(Response $response): Response
+    private function avatarStorageUnavailableResponse(Response $Silian_response): Response
     {
         if ($this->logger !== null) {
             $this->logger->error('Avatar storage service is unavailable');
         }
 
-        return $this->jsonResponse($response, [
+        return $this->jsonResponse($Silian_response, [
             'success' => false,
             'message' => 'Avatar storage service is unavailable',
             'code' => 'AVATAR_STORAGE_UNAVAILABLE',
@@ -1049,27 +1049,27 @@ class AvatarController
      * @param array<string,mixed> $payload
      * @param array<string,mixed>|null $existingAvatar
      */
-    private function assertDefaultAvatarStateIsValid(array $payload, ?array $existingAvatar = null): void
+    private function assertDefaultAvatarStateIsValid(array $Silian_payload, ?array $Silian_existingAvatar = null): void
     {
-        $wasDefault = $this->normalizeBooleanValue($existingAvatar['is_default'] ?? false);
+        $Silian_wasDefault = $this->normalizeBooleanValue($Silian_existingAvatar['is_default'] ?? false);
 
-        $isDefault = array_key_exists('is_default', $payload)
-            ? (bool) $payload['is_default']
-            : $wasDefault;
+        $Silian_isDefault = array_key_exists('is_default', $Silian_payload)
+            ? (bool) $Silian_payload['is_default']
+            : $Silian_wasDefault;
 
-        $isActive = array_key_exists('is_active', $payload)
-            ? (bool) $payload['is_active']
-            : $this->normalizeBooleanValue($existingAvatar['is_active'] ?? true);
+        $Silian_isActive = array_key_exists('is_active', $Silian_payload)
+            ? (bool) $Silian_payload['is_active']
+            : $this->normalizeBooleanValue($Silian_existingAvatar['is_active'] ?? true);
 
-        if (($isDefault || $wasDefault) && !$isActive) {
+        if (($Silian_isDefault || $Silian_wasDefault) && !$Silian_isActive) {
             throw new \InvalidArgumentException('Default avatar must remain active');
         }
     }
 
-    private function normalizeBooleanValue(mixed $value): bool
+    private function normalizeBooleanValue(mixed $Silian_value): bool
     {
-        $normalized = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        return $normalized ?? ((int) $value === 1);
+        $Silian_normalized = filter_var($Silian_value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        return $Silian_normalized ?? ((int) $Silian_value === 1);
     }
 
     /**
@@ -1079,84 +1079,84 @@ class AvatarController
      * @return array{notified_count:int,failed_user_ids:array<int,int>}
      */
     private function notifyUsersAboutAvatarFallback(
-        array $affectedUsers,
-        array $avatar,
-        array $fallbackAvatar,
-        Request $request
+        array $Silian_affectedUsers,
+        array $Silian_avatar,
+        array $Silian_fallbackAvatar,
+        Request $Silian_request
     ): array {
         if ($this->messageService === null) {
             return [
                 'notified_count' => 0,
                 'failed_user_ids' => array_map(
-                    static fn (array $entry): int => (int) ($entry['id'] ?? 0),
-                    $affectedUsers
+                    static fn (array $Silian_entry): int => (int) ($Silian_entry['id'] ?? 0),
+                    $Silian_affectedUsers
                 ),
             ];
         }
 
-        $oldAvatarName = trim((string) ($avatar['name'] ?? ''));
-        $fallbackAvatarName = trim((string) ($fallbackAvatar['name'] ?? ''));
-        $oldAvatarLabel = $oldAvatarName !== '' ? $oldAvatarName : '已停用头像';
-        $fallbackAvatarLabel = $fallbackAvatarName !== '' ? $fallbackAvatarName : '默认头像';
+        $Silian_oldAvatarName = trim((string) ($Silian_avatar['name'] ?? ''));
+        $Silian_fallbackAvatarName = trim((string) ($Silian_fallbackAvatar['name'] ?? ''));
+        $Silian_oldAvatarLabel = $Silian_oldAvatarName !== '' ? $Silian_oldAvatarName : '已停用头像';
+        $Silian_fallbackAvatarLabel = $Silian_fallbackAvatarName !== '' ? $Silian_fallbackAvatarName : '默认头像';
 
-        $title = '您选择的头像已停用 / Selected avatar unavailable';
-        $content = sprintf(
+        $Silian_title = '您选择的头像已停用 / Selected avatar unavailable';
+        $Silian_content = sprintf(
             "您当前使用的头像“%s”已被停用，系统已自动为您切换为默认头像“%s”。\n\n如需调整，请前往个人资料重新选择头像。\n\nThe avatar \"%s\" you selected has been disabled. CarbonTrack has automatically switched your profile to the default avatar \"%s\". You can choose a different avatar anytime from your profile.",
-            $oldAvatarLabel,
-            $fallbackAvatarLabel,
-            $oldAvatarLabel,
-            $fallbackAvatarLabel
+            $Silian_oldAvatarLabel,
+            $Silian_fallbackAvatarLabel,
+            $Silian_oldAvatarLabel,
+            $Silian_fallbackAvatarLabel
         );
 
-        $notifiedCount = 0;
-        $failedUserIds = [];
+        $Silian_notifiedCount = 0;
+        $Silian_failedUserIds = [];
 
-        foreach ($affectedUsers as $recipient) {
-            $userId = (int) ($recipient['id'] ?? 0);
-            if ($userId <= 0) {
+        foreach ($Silian_affectedUsers as $Silian_recipient) {
+            $Silian_userId = (int) ($Silian_recipient['id'] ?? 0);
+            if ($Silian_userId <= 0) {
                 continue;
             }
 
             try {
                 $this->messageService->sendSystemMessage(
-                    $userId,
-                    $title,
-                    $content,
+                    $Silian_userId,
+                    $Silian_title,
+                    $Silian_content,
                     Message::TYPE_NOTIFICATION,
                     Message::PRIORITY_NORMAL,
                     'avatar',
-                    (int) ($avatar['id'] ?? 0),
+                    (int) ($Silian_avatar['id'] ?? 0),
                     true
                 );
-                $notifiedCount++;
-            } catch (\Throwable $e) {
-                $failedUserIds[] = $userId;
+                $Silian_notifiedCount++;
+            } catch (\Throwable $Silian_e) {
+                $Silian_failedUserIds[] = $Silian_userId;
                 if ($this->errorLogService !== null) {
                     try {
-                        $this->errorLogService->logException($e, $request, [
+                        $this->errorLogService->logException($Silian_e, $Silian_request, [
                             'action' => 'avatar_fallback_notification_failed',
-                            'avatar_id' => $avatar['id'] ?? null,
-                            'fallback_avatar_id' => $fallbackAvatar['id'] ?? null,
-                            'recipient_user_id' => $userId,
+                            'avatar_id' => $Silian_avatar['id'] ?? null,
+                            'fallback_avatar_id' => $Silian_fallbackAvatar['id'] ?? null,
+                            'recipient_user_id' => $Silian_userId,
                         ]);
-                    } catch (\Throwable $ignore) {
+                    } catch (\Throwable $Silian_ignore) {
                     }
                 }
 
                 if ($this->logger !== null) {
                     $this->logger->warning('Failed to notify user about avatar fallback', [
-                        'avatar_id' => $avatar['id'] ?? null,
-                        'fallback_avatar_id' => $fallbackAvatar['id'] ?? null,
-                        'recipient_user_id' => $userId,
-                        'error' => $e->getMessage(),
+                        'avatar_id' => $Silian_avatar['id'] ?? null,
+                        'fallback_avatar_id' => $Silian_fallbackAvatar['id'] ?? null,
+                        'recipient_user_id' => $Silian_userId,
+                        'error' => $Silian_e->getMessage(),
                     ]);
                 }
             }
         }
 
         return [
-            'notified_count' => $notifiedCount,
-            'failed_user_ids' => $failedUserIds,
+            'notified_count' => $Silian_notifiedCount,
+            'failed_user_ids' => $Silian_failedUserIds,
         ];
     }
 }

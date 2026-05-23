@@ -17,138 +17,138 @@ class SupportRoutingTriageService
     public function __construct(
         private ?LlmClientInterface $client,
         private LoggerInterface $logger,
-        array $config = [],
+        array $Silian_config = [],
         private ?LlmLogService $llmLogService = null,
         private ?AuditLogService $auditLogService = null,
         private ?ErrorLogService $errorLogService = null
     ) {
-        $this->model = (string) ($config['model'] ?? 'google/gemini-2.5-flash-lite');
-        $this->temperature = isset($config['temperature']) ? (float) $config['temperature'] : 0.1;
-        $this->maxTokens = isset($config['max_tokens']) ? (int) $config['max_tokens'] : 500;
+        $this->model = (string) ($Silian_config['model'] ?? 'google/gemini-2.5-flash-lite');
+        $this->temperature = isset($Silian_config['temperature']) ? (float) $Silian_config['temperature'] : 0.1;
+        $this->maxTokens = isset($Silian_config['max_tokens']) ? (int) $Silian_config['max_tokens'] : 500;
     }
 
-    public function triage(array $ticket, array $context = []): array
+    public function triage(array $Silian_ticket, array $Silian_context = []): array
     {
-        $fallback = $this->fallbackTriage($ticket, $context);
-        $aiEnabled = (bool) ($context['ai_enabled'] ?? false);
-        $logContext = is_array($context['log_context'] ?? null) ? $context['log_context'] : [];
+        $Silian_fallback = $this->fallbackTriage($Silian_ticket, $Silian_context);
+        $Silian_aiEnabled = (bool) ($Silian_context['ai_enabled'] ?? false);
+        $Silian_logContext = is_array($Silian_context['log_context'] ?? null) ? $Silian_context['log_context'] : [];
 
-        if (!$aiEnabled || $this->client === null) {
-            $reason = !$aiEnabled ? 'ai_disabled' : 'llm_unavailable';
-            $this->logAudit('support_ticket_triage_fallback', $logContext, [
-                'request_data' => ['reason' => $reason, 'ticket_id' => (int) ($ticket['id'] ?? 0)],
+        if (!$Silian_aiEnabled || $this->client === null) {
+            $Silian_reason = !$Silian_aiEnabled ? 'ai_disabled' : 'llm_unavailable';
+            $this->logAudit('support_ticket_triage_fallback', $Silian_logContext, [
+                'request_data' => ['reason' => $Silian_reason, 'ticket_id' => (int) ($Silian_ticket['id'] ?? 0)],
             ]);
 
             return [
                 'used_ai' => false,
-                'fallback_reason' => $reason,
-                'triage' => $fallback,
+                'fallback_reason' => $Silian_reason,
+                'triage' => $Silian_fallback,
             ];
         }
 
-        $body = trim((string) ($context['message_body'] ?? ''));
-        $groupRouting = is_array($context['group_routing'] ?? null) ? $context['group_routing'] : [];
-        $prompt = $this->buildPrompt($ticket, $body, $groupRouting);
-        $payload = [
+        $Silian_body = trim((string) ($Silian_context['message_body'] ?? ''));
+        $Silian_groupRouting = is_array($Silian_context['group_routing'] ?? null) ? $Silian_context['group_routing'] : [];
+        $Silian_prompt = $this->buildPrompt($Silian_ticket, $Silian_body, $Silian_groupRouting);
+        $Silian_payload = [
             'model' => $this->model,
             'temperature' => $this->temperature,
             'max_tokens' => $this->maxTokens,
             'messages' => [
-                ['role' => 'system', 'content' => $prompt['system']],
-                ['role' => 'user', 'content' => $prompt['user']],
+                ['role' => 'system', 'content' => $Silian_prompt['system']],
+                ['role' => 'user', 'content' => $Silian_prompt['user']],
             ],
             'response_format' => ['type' => 'json_object'],
         ];
 
-        $startedAt = microtime(true);
+        $Silian_startedAt = microtime(true);
 
         try {
-            $rawResponse = $this->client->createChatCompletion($payload);
-            $parsed = $this->parseResponse($rawResponse, $fallback);
-            $this->logLlmCall($prompt['user'], $rawResponse, $logContext, [
-                'ticket_id' => (int) ($ticket['id'] ?? 0),
+            $Silian_rawResponse = $this->client->createChatCompletion($Silian_payload);
+            $Silian_parsed = $this->parseResponse($Silian_rawResponse, $Silian_fallback);
+            $this->logLlmCall($Silian_prompt['user'], $Silian_rawResponse, $Silian_logContext, [
+                'ticket_id' => (int) ($Silian_ticket['id'] ?? 0),
                 'feature' => 'support_routing_triage',
-            ], $startedAt);
-            $this->logAudit('support_ticket_triage_completed', $logContext, [
+            ], $Silian_startedAt);
+            $this->logAudit('support_ticket_triage_completed', $Silian_logContext, [
                 'request_data' => [
-                    'ticket_id' => (int) ($ticket['id'] ?? 0),
-                    'model' => $rawResponse['model'] ?? $this->model,
-                    'severity' => $parsed['severity'],
+                    'ticket_id' => (int) ($Silian_ticket['id'] ?? 0),
+                    'model' => $Silian_rawResponse['model'] ?? $this->model,
+                    'severity' => $Silian_parsed['severity'],
                 ],
             ]);
 
             return [
                 'used_ai' => true,
                 'fallback_reason' => null,
-                'triage' => $parsed,
+                'triage' => $Silian_parsed,
             ];
-        } catch (\Throwable $exception) {
+        } catch (\Throwable $Silian_exception) {
             $this->logger->warning('Support triage AI call failed, using fallback', [
-                'ticket_id' => (int) ($ticket['id'] ?? 0),
-                'error' => $exception->getMessage(),
+                'ticket_id' => (int) ($Silian_ticket['id'] ?? 0),
+                'error' => $Silian_exception->getMessage(),
             ]);
-            $this->logLlmFailure($prompt['user'], $logContext, [
-                'ticket_id' => (int) ($ticket['id'] ?? 0),
+            $this->logLlmFailure($Silian_prompt['user'], $Silian_logContext, [
+                'ticket_id' => (int) ($Silian_ticket['id'] ?? 0),
                 'feature' => 'support_routing_triage',
-            ], $startedAt, $exception);
-            $this->logAudit('support_ticket_triage_fallback', $logContext, [
+            ], $Silian_startedAt, $Silian_exception);
+            $this->logAudit('support_ticket_triage_fallback', $Silian_logContext, [
                 'request_data' => [
-                    'ticket_id' => (int) ($ticket['id'] ?? 0),
+                    'ticket_id' => (int) ($Silian_ticket['id'] ?? 0),
                     'reason' => 'llm_error',
-                    'error' => $exception->getMessage(),
+                    'error' => $Silian_exception->getMessage(),
                 ],
                 'status' => 'failed',
             ]);
-            $this->logError($exception, $logContext, [
-                'ticket_id' => (int) ($ticket['id'] ?? 0),
+            $this->logError($Silian_exception, $Silian_logContext, [
+                'ticket_id' => (int) ($Silian_ticket['id'] ?? 0),
                 'feature' => 'support_routing_triage',
             ]);
 
             return [
                 'used_ai' => false,
                 'fallback_reason' => 'llm_error',
-                'triage' => $fallback,
+                'triage' => $Silian_fallback,
             ];
         }
     }
 
-    public function fallbackTriage(array $ticket, array $context = []): array
+    public function fallbackTriage(array $Silian_ticket, array $Silian_context = []): array
     {
-        $priority = strtolower((string) ($ticket['priority'] ?? 'normal'));
-        $prioritySeverity = [
+        $Silian_priority = strtolower((string) ($Silian_ticket['priority'] ?? 'normal'));
+        $Silian_prioritySeverity = [
             'low' => 'low',
             'normal' => 'medium',
             'high' => 'high',
             'urgent' => 'critical',
         ];
-        $priorityAgentLevel = [
+        $Silian_priorityAgentLevel = [
             'low' => 1,
             'normal' => 2,
             'high' => 3,
             'urgent' => 4,
         ];
 
-        $groupRouting = is_array($context['group_routing'] ?? null) ? $context['group_routing'] : [];
-        $requiredAgentLevel = max(
+        $Silian_groupRouting = is_array($Silian_context['group_routing'] ?? null) ? $Silian_context['group_routing'] : [];
+        $Silian_requiredAgentLevel = max(
             1,
-            (int) ($groupRouting['min_agent_level'] ?? 1),
-            (int) ($priorityAgentLevel[$priority] ?? 2)
+            (int) ($Silian_groupRouting['min_agent_level'] ?? 1),
+            (int) ($Silian_priorityAgentLevel[$Silian_priority] ?? 2)
         );
 
         return [
-            'severity' => $prioritySeverity[$priority] ?? 'medium',
-            'escalation_risk' => in_array($priority, ['high', 'urgent'], true) ? 'high' : 'medium',
-            'required_agent_level' => $requiredAgentLevel,
+            'severity' => $Silian_prioritySeverity[$Silian_priority] ?? 'medium',
+            'escalation_risk' => in_array($Silian_priority, ['high', 'urgent'], true) ? 'high' : 'medium',
+            'required_agent_level' => $Silian_requiredAgentLevel,
             'suggested_skills' => [],
             'language' => null,
             'confidence' => 0.35,
-            'summary' => sprintf('Fallback triage based on priority %s', $priority),
+            'summary' => sprintf('Fallback triage based on priority %s', $Silian_priority),
         ];
     }
 
-    private function buildPrompt(array $ticket, string $body, array $groupRouting): array
+    private function buildPrompt(array $Silian_ticket, string $Silian_body, array $Silian_groupRouting): array
     {
-        $system = <<<PROMPT
+        $Silian_system = <<<PROMPT
 You classify support tickets for routing. Return only a JSON object.
 Output schema:
 {
@@ -168,138 +168,138 @@ Rules:
 - Keep summary under 120 characters.
 PROMPT;
 
-        $user = sprintf(
+        $Silian_user = sprintf(
             "Ticket subject: %s\nCategory: %s\nPriority: %s\nUser group routing: %s\nFirst message:\n%s",
-            (string) ($ticket['subject'] ?? ''),
-            (string) ($ticket['category'] ?? ''),
-            (string) ($ticket['priority'] ?? ''),
-            json_encode($groupRouting, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            $body
+            (string) ($Silian_ticket['subject'] ?? ''),
+            (string) ($Silian_ticket['category'] ?? ''),
+            (string) ($Silian_ticket['priority'] ?? ''),
+            json_encode($Silian_groupRouting, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            $Silian_body
         );
 
-        return ['system' => $system, 'user' => $user];
+        return ['system' => $Silian_system, 'user' => $Silian_user];
     }
 
-    private function parseResponse(array $rawResponse, array $fallback): array
+    private function parseResponse(array $Silian_rawResponse, array $Silian_fallback): array
     {
-        $content = (string) (($rawResponse['choices'][0]['message']['content'] ?? '{}'));
-        if (str_contains($content, '```')) {
-            $content = (string) preg_replace('/^```json\s*|\s*```$/', '', trim($content));
+        $Silian_content = (string) (($Silian_rawResponse['choices'][0]['message']['content'] ?? '{}'));
+        if (str_contains($Silian_content, '```')) {
+            $Silian_content = (string) preg_replace('/^```json\s*|\s*```$/', '', trim($Silian_content));
         }
 
-        $decoded = json_decode($content, true);
-        if (!is_array($decoded) && preg_match('/\{.*\}/s', $content, $matches) === 1) {
-            $decoded = json_decode($matches[0], true);
+        $Silian_decoded = json_decode($Silian_content, true);
+        if (!is_array($Silian_decoded) && preg_match('/\{.*\}/s', $Silian_content, $Silian_matches) === 1) {
+            $Silian_decoded = json_decode($Silian_matches[0], true);
         }
-        if (!is_array($decoded)) {
-            return $fallback;
-        }
-
-        $severity = strtolower((string) ($decoded['severity'] ?? $fallback['severity']));
-        if (!in_array($severity, ['low', 'medium', 'high', 'critical'], true)) {
-            $severity = $fallback['severity'];
+        if (!is_array($Silian_decoded)) {
+            return $Silian_fallback;
         }
 
-        $risk = strtolower((string) ($decoded['escalation_risk'] ?? $fallback['escalation_risk']));
-        if (!in_array($risk, ['low', 'medium', 'high'], true)) {
-            $risk = $fallback['escalation_risk'];
+        $Silian_severity = strtolower((string) ($Silian_decoded['severity'] ?? $Silian_fallback['severity']));
+        if (!in_array($Silian_severity, ['low', 'medium', 'high', 'critical'], true)) {
+            $Silian_severity = $Silian_fallback['severity'];
         }
 
-        $level = max(1, min(5, (int) ($decoded['required_agent_level'] ?? $fallback['required_agent_level'])));
-        $skills = array_values(array_unique(array_filter(array_map(static function ($value): string {
-            return trim((string) $value);
-        }, is_array($decoded['suggested_skills'] ?? null) ? $decoded['suggested_skills'] : []), static fn (string $value): bool => $value !== '')));
+        $Silian_risk = strtolower((string) ($Silian_decoded['escalation_risk'] ?? $Silian_fallback['escalation_risk']));
+        if (!in_array($Silian_risk, ['low', 'medium', 'high'], true)) {
+            $Silian_risk = $Silian_fallback['escalation_risk'];
+        }
+
+        $Silian_level = max(1, min(5, (int) ($Silian_decoded['required_agent_level'] ?? $Silian_fallback['required_agent_level'])));
+        $Silian_skills = array_values(array_unique(array_filter(array_map(static function ($Silian_value): string {
+            return trim((string) $Silian_value);
+        }, is_array($Silian_decoded['suggested_skills'] ?? null) ? $Silian_decoded['suggested_skills'] : []), static fn (string $Silian_value): bool => $Silian_value !== '')));
 
         return [
-            'severity' => $severity,
-            'escalation_risk' => $risk,
-            'required_agent_level' => $level,
-            'suggested_skills' => $skills,
-            'language' => ($decoded['language'] ?? null) !== null ? trim((string) $decoded['language']) : null,
-            'confidence' => max(0.0, min(1.0, (float) ($decoded['confidence'] ?? $fallback['confidence']))),
-            'summary' => trim((string) ($decoded['summary'] ?? $fallback['summary'])),
+            'severity' => $Silian_severity,
+            'escalation_risk' => $Silian_risk,
+            'required_agent_level' => $Silian_level,
+            'suggested_skills' => $Silian_skills,
+            'language' => ($Silian_decoded['language'] ?? null) !== null ? trim((string) $Silian_decoded['language']) : null,
+            'confidence' => max(0.0, min(1.0, (float) ($Silian_decoded['confidence'] ?? $Silian_fallback['confidence']))),
+            'summary' => trim((string) ($Silian_decoded['summary'] ?? $Silian_fallback['summary'])),
         ];
     }
 
-    private function logLlmCall(string $prompt, array $rawResponse, array $logContext, array $context, float $startedAt): void
+    private function logLlmCall(string $Silian_prompt, array $Silian_rawResponse, array $Silian_logContext, array $Silian_context, float $Silian_startedAt): void
     {
         if ($this->llmLogService === null) {
             return;
         }
 
         $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'system',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'source' => $logContext['source'] ?? '/support/routing/triage',
-            'model' => $rawResponse['model'] ?? $this->model,
-            'prompt' => $prompt,
-            'response_raw' => $rawResponse,
-            'response_id' => $rawResponse['id'] ?? ($rawResponse['metadata']['request_id'] ?? null),
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'system',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'source' => $Silian_logContext['source'] ?? '/support/routing/triage',
+            'model' => $Silian_rawResponse['model'] ?? $this->model,
+            'prompt' => $Silian_prompt,
+            'response_raw' => $Silian_rawResponse,
+            'response_id' => $Silian_rawResponse['id'] ?? ($Silian_rawResponse['metadata']['request_id'] ?? null),
             'status' => 'success',
-            'usage' => $rawResponse['usage'] ?? null,
-            'latency_ms' => round((microtime(true) - $startedAt) * 1000.0, 2),
-            'context' => $context,
+            'usage' => $Silian_rawResponse['usage'] ?? null,
+            'latency_ms' => round((microtime(true) - $Silian_startedAt) * 1000.0, 2),
+            'context' => $Silian_context,
         ]);
     }
 
-    private function logLlmFailure(string $prompt, array $logContext, array $context, float $startedAt, \Throwable $error): void
+    private function logLlmFailure(string $Silian_prompt, array $Silian_logContext, array $Silian_context, float $Silian_startedAt, \Throwable $Silian_error): void
     {
         if ($this->llmLogService === null) {
             return;
         }
 
         $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'system',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'source' => $logContext['source'] ?? '/support/routing/triage',
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'system',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'source' => $Silian_logContext['source'] ?? '/support/routing/triage',
             'model' => $this->model,
-            'prompt' => $prompt,
+            'prompt' => $Silian_prompt,
             'response_raw' => null,
             'response_id' => null,
             'status' => 'failed',
-            'error_message' => $error->getMessage(),
+            'error_message' => $Silian_error->getMessage(),
             'usage' => null,
-            'latency_ms' => round((microtime(true) - $startedAt) * 1000.0, 2),
-            'context' => $context,
+            'latency_ms' => round((microtime(true) - $Silian_startedAt) * 1000.0, 2),
+            'context' => $Silian_context,
         ]);
     }
 
-    private function logAudit(string $action, array $logContext, array $context = []): void
+    private function logAudit(string $Silian_action, array $Silian_logContext, array $Silian_context = []): void
     {
         if ($this->auditLogService === null) {
             return;
         }
 
         try {
-            $this->auditLogService->logSystemEvent($action, 'support_routing_triage', array_merge([
+            $this->auditLogService->logSystemEvent($Silian_action, 'support_routing_triage', array_merge([
                 'request_method' => 'SYSTEM',
-                'endpoint' => $logContext['source'] ?? '/support/routing/triage',
-                'request_id' => $logContext['request_id'] ?? null,
-                'status' => $context['status'] ?? 'success',
-            ], $context));
+                'endpoint' => $Silian_logContext['source'] ?? '/support/routing/triage',
+                'request_id' => $Silian_logContext['request_id'] ?? null,
+                'status' => $Silian_context['status'] ?? 'success',
+            ], $Silian_context));
         } catch (\Throwable) {
             // ignore audit failure
         }
     }
 
-    private function logError(\Throwable $exception, array $logContext, array $context = []): void
+    private function logError(\Throwable $Silian_exception, array $Silian_logContext, array $Silian_context = []): void
     {
         if ($this->errorLogService === null) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext(
-                $logContext['source'] ?? '/support/routing/triage',
+            $Silian_request = SyntheticRequestFactory::fromContext(
+                $Silian_logContext['source'] ?? '/support/routing/triage',
                 'SYSTEM',
-                $logContext['request_id'] ?? null,
+                $Silian_logContext['request_id'] ?? null,
                 [],
-                $context,
+                $Silian_context,
                 ['PHP_SAPI' => PHP_SAPI]
             );
-            $this->errorLogService->logException($exception, $request, $context);
+            $this->errorLogService->logException($Silian_exception, $Silian_request, $Silian_context);
         } catch (\Throwable) {
             // ignore logging failure
         }

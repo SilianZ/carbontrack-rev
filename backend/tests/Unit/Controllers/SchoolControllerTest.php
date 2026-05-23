@@ -27,41 +27,41 @@ class SchoolControllerTest extends TestCase
 
     public function testSanitizeSchoolPayloadNormalizesEmptyStringNumericFields(): void
     {
-        $controller = new SchoolController(
+        $Silian_controller = new SchoolController(
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
             $this->createMock(\PDO::class)
         );
 
-        $method = new \ReflectionMethod($controller, 'sanitizeSchoolPayload');
-        $method->setAccessible(true);
+        $Silian_method = new \ReflectionMethod($Silian_controller, 'sanitizeSchoolPayload');
+        $Silian_method->setAccessible(true);
 
-        $payload = $method->invoke($controller, [
+        $Silian_payload = $Silian_method->invoke($Silian_controller, [
             'name' => 'Test School',
             'is_active' => '',
             'sort_order' => '',
         ]);
 
-        $this->assertSame('Test School', $payload['name']);
-        $this->assertFalse($payload['is_active']);
-        $this->assertSame(0, $payload['sort_order']);
+        $this->assertSame('Test School', $Silian_payload['name']);
+        $this->assertFalse($Silian_payload['is_active']);
+        $this->assertSame(0, $Silian_payload['sort_order']);
     }
 
     public function testSanitizeSchoolPayloadRejectsInvalidStringValues(): void
     {
-        $controller = new SchoolController(
+        $Silian_controller = new SchoolController(
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
             $this->createMock(\PDO::class)
         );
 
-        $method = new \ReflectionMethod($controller, 'sanitizeSchoolPayload');
-        $method->setAccessible(true);
+        $Silian_method = new \ReflectionMethod($Silian_controller, 'sanitizeSchoolPayload');
+        $Silian_method->setAccessible(true);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('sort_order must be an integer');
 
-        $method->invoke($controller, [
+        $Silian_method->invoke($Silian_controller, [
             'name' => 'Test School',
             'sort_order' => 'abc',
         ]);
@@ -69,83 +69,83 @@ class SchoolControllerTest extends TestCase
 
     public function testSanitizeSchoolPayloadRejectsNonObjectPayload(): void
     {
-        $controller = new SchoolController(
+        $Silian_controller = new SchoolController(
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
             $this->createMock(\PDO::class)
         );
 
-        $method = new \ReflectionMethod($controller, 'sanitizeSchoolPayload');
-        $method->setAccessible(true);
+        $Silian_method = new \ReflectionMethod($Silian_controller, 'sanitizeSchoolPayload');
+        $Silian_method->setAccessible(true);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Request body must be a JSON object');
 
-        $method->invoke($controller, null);
+        $Silian_method->invoke($Silian_controller, null);
     }
 
     public function testStoreRejectsNonObjectRequestBody(): void
     {
-        $controller = new SchoolController(
+        $Silian_controller = new SchoolController(
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
             $this->createMock(\PDO::class)
         );
 
-        $response = $controller->store(
+        $Silian_response = $Silian_controller->store(
             makeRequest('POST', '/api/v1/admin/schools', null),
             new \Slim\Psr7\Response(),
             []
         );
 
-        $this->assertSame(400, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('INVALID_REQUEST_BODY', $payload['code']);
+        $this->assertSame(400, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('INVALID_REQUEST_BODY', $Silian_payload['code']);
     }
 
     public function testShouldRetryWithoutSortOrderForLegacySchemaError(): void
     {
-        $controller = new SchoolController(
+        $Silian_controller = new SchoolController(
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
             $this->createMock(\PDO::class)
         );
 
-        $method = new \ReflectionMethod($controller, 'shouldRetryWithoutSortOrder');
-        $method->setAccessible(true);
+        $Silian_method = new \ReflectionMethod($Silian_controller, 'shouldRetryWithoutSortOrder');
+        $Silian_method->setAccessible(true);
 
-        $exception = new QueryException(
+        $Silian_exception = new QueryException(
             'insert into schools',
             [],
             new \PDOException("SQLSTATE[42S22]: Column not found: 1054 Unknown column 'sort_order' in 'field list'")
         );
 
-        $shouldRetry = $method->invoke($controller, ['sort_order' => 0], $exception);
+        $Silian_shouldRetry = $Silian_method->invoke($Silian_controller, ['sort_order' => 0], $Silian_exception);
 
-        $this->assertTrue($shouldRetry);
+        $this->assertTrue($Silian_shouldRetry);
     }
 
     public function testShouldNotRetryWithoutSortOrderForUnrelatedQueryError(): void
     {
-        $controller = new SchoolController(
+        $Silian_controller = new SchoolController(
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
             $this->createMock(\PDO::class)
         );
 
-        $method = new \ReflectionMethod($controller, 'shouldRetryWithoutSortOrder');
-        $method->setAccessible(true);
+        $Silian_method = new \ReflectionMethod($Silian_controller, 'shouldRetryWithoutSortOrder');
+        $Silian_method->setAccessible(true);
 
-        $exception = new QueryException(
+        $Silian_exception = new QueryException(
             'insert into schools',
             [],
             new \PDOException('SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry')
         );
 
-        $shouldRetry = $method->invoke($controller, ['sort_order' => 0], $exception);
+        $Silian_shouldRetry = $Silian_method->invoke($Silian_controller, ['sort_order' => 0], $Silian_exception);
 
-        $this->assertFalse($shouldRetry);
+        $this->assertFalse($Silian_shouldRetry);
     }
 }
 

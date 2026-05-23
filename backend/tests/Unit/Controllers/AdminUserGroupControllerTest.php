@@ -15,30 +15,30 @@ class AdminUserGroupControllerTest extends TestCase
 {
     public function testMetaReturnsQuotaDefinitions(): void
     {
-        $service = $this->createMock(UserGroupService::class);
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $errorLogService = $this->createMock(ErrorLogService::class);
+        $Silian_service = $this->createMock(UserGroupService::class);
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_errorLogService = $this->createMock(ErrorLogService::class);
 
-        $service->method('getQuotaDefinitions')->willReturn(['llm.daily_limit', 'llm.rate_limit']);
-        $service->method('getSupportRoutingFieldDefinitions')->willReturn([
+        $Silian_service->method('getQuotaDefinitions')->willReturn(['llm.daily_limit', 'llm.rate_limit']);
+        $Silian_service->method('getSupportRoutingFieldDefinitions')->willReturn([
             ['key' => 'first_response_minutes', 'type' => 'number'],
         ]);
-        $service->method('getSupportRoutingDefaults')->willReturn([
+        $Silian_service->method('getSupportRoutingDefaults')->willReturn([
             'first_response_minutes' => 240,
         ]);
-        $auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
+        $Silian_auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
 
-        $controller = new AdminUserGroupController($service, $auditLogService, $errorLogService);
-        $request = makeRequest('GET', '/admin/users/groups/meta')->withAttribute('user_id', 1);
-        $response = new Response();
+        $Silian_controller = new AdminUserGroupController($Silian_service, $Silian_auditLogService, $Silian_errorLogService);
+        $Silian_request = makeRequest('GET', '/admin/users/groups/meta')->withAttribute('user_id', 1);
+        $Silian_response = new Response();
 
-        $result = $controller->meta($request, $response);
+        $Silian_result = $Silian_controller->meta($Silian_request, $Silian_response);
 
-        $this->assertSame(200, $result->getStatusCode());
-        $payload = json_decode((string) $result->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertSame(['llm.daily_limit', 'llm.rate_limit'], $payload['data']['quota_definitions']);
-        $this->assertSame('first_response_minutes', $payload['data']['support_routing_fields'][0]['key']);
-        $this->assertSame(240, $payload['data']['support_routing_defaults']['first_response_minutes']);
+        $this->assertSame(200, $Silian_result->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_result->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertSame(['llm.daily_limit', 'llm.rate_limit'], $Silian_payload['data']['quota_definitions']);
+        $this->assertSame('first_response_minutes', $Silian_payload['data']['support_routing_fields'][0]['key']);
+        $this->assertSame(240, $Silian_payload['data']['support_routing_defaults']['first_response_minutes']);
     }
 }

@@ -59,19 +59,19 @@ HTML;
     private const DEFAULT_BUTTON_COLOR = '#0ea5e9';
 
     public function __construct(
-        array $config,
-        Logger $logger,
-        ?NotificationPreferenceService $preferenceService = null,
-        ?AuditLogService $auditLogService = null,
-        ?ErrorLogService $errorLogService = null
+        array $Silian_config,
+        Logger $Silian_logger,
+        ?NotificationPreferenceService $Silian_preferenceService = null,
+        ?AuditLogService $Silian_auditLogService = null,
+        ?ErrorLogService $Silian_errorLogService = null
     )
     {
-        $this->config = $config;
-        $this->logger = $logger;
-        $this->preferenceService = $preferenceService;
-        $this->auditLogService = $auditLogService;
-        $this->errorLogService = $errorLogService;
-        $this->forceSimulation = $this->normalizeForceSimulation($config['force_simulation'] ?? false);
+        $this->config = $Silian_config;
+        $this->logger = $Silian_logger;
+        $this->preferenceService = $Silian_preferenceService;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->errorLogService = $Silian_errorLogService;
+        $this->forceSimulation = $this->normalizeForceSimulation($Silian_config['force_simulation'] ?? false);
 
         // Initialize identity fields from environment first, then config, then sane defaults
         $this->fromAddress = (string) ($_ENV['MAIL_FROM_ADDRESS']
@@ -93,9 +93,9 @@ HTML;
         }
 
         // APP_NAME (or fallback to MAIL_FROM_NAME, then config, then 'CarbonTrack')
-        $appNameEnv = $_ENV['APP_NAME'] ?? ($_ENV['MAIL_FROM_NAME'] ?? null);
-        if (is_string($appNameEnv) && trim($appNameEnv) !== '') {
-            $this->appName = $appNameEnv;
+        $Silian_appNameEnv = $_ENV['APP_NAME'] ?? ($_ENV['MAIL_FROM_NAME'] ?? null);
+        if (is_string($Silian_appNameEnv) && trim($Silian_appNameEnv) !== '') {
+            $this->appName = $Silian_appNameEnv;
         } elseif (is_string($this->config['app_name'] ?? null) && trim((string) $this->config['app_name']) !== '') {
             $this->appName = (string) $this->config['app_name'];
         } else {
@@ -103,31 +103,31 @@ HTML;
         }
 
         // SUPPORT_EMAIL (or fallback to reply_to, then MAIL_FROM_ADDRESS, then default)
-        $support = $_ENV['SUPPORT_EMAIL']
+        $Silian_support = $_ENV['SUPPORT_EMAIL']
             ?? ($this->config['support_email'] ?? ($this->config['reply_to'] ?? null));
-        if (!is_string($support) || trim((string) $support) === '') {
-            $support = $_ENV['MAIL_FROM_ADDRESS'] ?? $this->fromAddress ?? 'support@example.com';
+        if (!is_string($Silian_support) || trim((string) $Silian_support) === '') {
+            $Silian_support = $_ENV['MAIL_FROM_ADDRESS'] ?? $this->fromAddress ?? 'support@example.com';
         }
-        $this->supportEmail = (string) $support;
+        $this->supportEmail = (string) $Silian_support;
 
         // FRONTEND_URL (prefer explicit env, then APP_URL, then config)
-        $frontend = $_ENV['FRONTEND_URL']
+        $Silian_frontend = $_ENV['FRONTEND_URL']
             ?? ($_ENV['APP_URL'] ?? ($this->config['frontend_url'] ?? null));
-        $this->frontendUrl = is_string($frontend) && trim((string) $frontend) !== '' ? (string) $frontend : null;
+        $this->frontendUrl = is_string($Silian_frontend) && trim((string) $Silian_frontend) !== '' ? (string) $Silian_frontend : null;
     }
 
-    private function normalizeForceSimulation($value): bool
+    private function normalizeForceSimulation($Silian_value): bool
     {
-        if (is_bool($value)) {
-            return $value;
+        if (is_bool($Silian_value)) {
+            return $Silian_value;
         }
 
-        if (is_string($value)) {
-            $value = strtolower(trim($value));
-            return in_array($value, ['1', 'true', 'yes', 'on'], true);
+        if (is_string($Silian_value)) {
+            $Silian_value = strtolower(trim($Silian_value));
+            return in_array($Silian_value, ['1', 'true', 'yes', 'on'], true);
         }
 
-        return (bool) $value;
+        return (bool) $Silian_value;
     }
 
     private function configureMailer(): void
@@ -137,13 +137,13 @@ HTML;
                 return;
             }
 
-            $debugLevel = (int) ($this->config['smtp_debug'] ?? 0);
-            $this->mailer->SMTPDebug = $debugLevel;
-            if ($debugLevel > 0) {
-                $this->mailer->Debugoutput = function ($str, $level): void {
+            $Silian_debugLevel = (int) ($this->config['smtp_debug'] ?? 0);
+            $this->mailer->SMTPDebug = $Silian_debugLevel;
+            if ($Silian_debugLevel > 0) {
+                $this->mailer->Debugoutput = function ($Silian_str, $Silian_level): void {
                     try {
-                        $this->logger->debug('SMTP debug output', ['level' => $level, 'message' => $str]);
-                    } catch (\Throwable $logError) {
+                        $this->logger->debug('SMTP debug output', ['level' => $Silian_level, 'message' => $Silian_str]);
+                    } catch (\Throwable $Silian_logError) {
                         // Swallow logging errors to avoid breaking mail flow
                     }
                 };
@@ -155,37 +155,37 @@ HTML;
             $this->mailer->Username = $this->config['username'] ?? '';
             $this->mailer->Password = $this->config['password'] ?? '';
 
-            $encryption = $this->config['encryption'] ?? 'tls';
-            if (in_array($encryption, ['ssl', 'tls'], true)) {
-                $constant = $encryption === 'ssl'
+            $Silian_encryption = $this->config['encryption'] ?? 'tls';
+            if (in_array($Silian_encryption, ['ssl', 'tls'], true)) {
+                $Silian_constant = $Silian_encryption === 'ssl'
                     ? 'PHPMailer\\PHPMailer\\PHPMailer::ENCRYPTION_SMTPS'
                     : 'PHPMailer\\PHPMailer\\PHPMailer::ENCRYPTION_STARTTLS';
 
-                $this->mailer->SMTPSecure = defined($constant) ? constant($constant) : $encryption;
+                $this->mailer->SMTPSecure = defined($Silian_constant) ? constant($Silian_constant) : $Silian_encryption;
             } else {
-                $this->mailer->SMTPSecure = $encryption;
+                $this->mailer->SMTPSecure = $Silian_encryption;
             }
 
             $this->mailer->Port = (int) ($this->config['port'] ?? 587);
 
             // Prioritize environment variables for identity fields
-            $fromAddress = $_ENV['MAIL_FROM_ADDRESS']
+            $Silian_fromAddress = $_ENV['MAIL_FROM_ADDRESS']
                 ?? ($this->config['from_address'] ?? ($this->config['from_email'] ?? 'noreply@example.com'));
-            $fromName = $_ENV['MAIL_FROM_NAME']
+            $Silian_fromName = $_ENV['MAIL_FROM_NAME']
                 ?? ($this->config['from_name'] ?? 'CarbonTrack');
-            $this->fromAddress = $fromAddress ?: 'noreply@example.com';
-            $this->fromName = $fromName ?: 'CarbonTrack';
+            $this->fromAddress = $Silian_fromAddress ?: 'noreply@example.com';
+            $this->fromName = $Silian_fromName ?: 'CarbonTrack';
 
             $this->mailer->setFrom($this->fromAddress, $this->fromName);
             $this->mailer->isHTML(true);
             $this->mailer->CharSet = 'UTF-8';
-        } catch (\Throwable $e) {
-            $this->logger->error("Mailer configuration error: {$e->getMessage()}");
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error("Mailer configuration error: {$Silian_e->getMessage()}");
             $this->logAudit('email_service_configuration_failed', [
                 'host' => $this->config['host'] ?? null,
                 'port' => $this->config['port'] ?? null,
             ], 'failed');
-            $this->logError($e, '/internal/email/configure', 'Mailer configuration error', [
+            $this->logError($Silian_e, '/internal/email/configure', 'Mailer configuration error', [
                 'host' => $this->config['host'] ?? null,
                 'port' => $this->config['port'] ?? null,
             ]);
@@ -193,55 +193,55 @@ HTML;
         }
     }
 
-    public function sendEmail(string $toEmail, string $toName, string $subject, string $bodyHtml, string $bodyText = ""): bool
+    public function sendEmail(string $Silian_toEmail, string $Silian_toName, string $Silian_subject, string $Silian_bodyHtml, string $Silian_bodyText = ""): bool
     {
         $this->lastError = null;
         try {
-            $mailer = $this->mailer;
+            $Silian_mailer = $this->mailer;
 
-            if (!$this->forceSimulation && $mailer instanceof PHPMailer) {
-                $mailer->clearAddresses();
-                if (method_exists($mailer, 'clearAttachments')) {
-                    $mailer->clearAttachments();
+            if (!$this->forceSimulation && $Silian_mailer instanceof PHPMailer) {
+                $Silian_mailer->clearAddresses();
+                if (method_exists($Silian_mailer, 'clearAttachments')) {
+                    $Silian_mailer->clearAttachments();
                 }
-                if (method_exists($mailer, 'clearBCCs')) {
-                    $mailer->clearBCCs();
+                if (method_exists($Silian_mailer, 'clearBCCs')) {
+                    $Silian_mailer->clearBCCs();
                 }
-                $mailer->addAddress($toEmail, $toName);
+                $Silian_mailer->addAddress($Silian_toEmail, $Silian_toName);
 
-                $mailer->Subject = $subject;
-                $mailer->Body = $bodyHtml;
-                $mailer->AltBody = $bodyText ?: strip_tags($bodyHtml);
+                $Silian_mailer->Subject = $Silian_subject;
+                $Silian_mailer->Body = $Silian_bodyHtml;
+                $Silian_mailer->AltBody = $Silian_bodyText ?: strip_tags($Silian_bodyHtml);
 
-                $mailer->send();
-                $this->logger->info('Email sent successfully', ['to' => $toEmail, 'subject' => $subject]);
+                $Silian_mailer->send();
+                $this->logger->info('Email sent successfully', ['to' => $Silian_toEmail, 'subject' => $Silian_subject]);
                 $this->logAudit('email_sent', [
-                    'to' => $toEmail,
-                    'subject' => $subject,
+                    'to' => $Silian_toEmail,
+                    'subject' => $Silian_subject,
                     'delivery_mode' => 'smtp',
                 ]);
                 return true;
             }
 
-            $reason = $this->forceSimulation ? 'force_simulation' : 'mailer_unavailable';
-            $this->logger->info('Simulated email send', ['to' => $toEmail, 'subject' => $subject, 'reason' => $reason]);
+            $Silian_reason = $this->forceSimulation ? 'force_simulation' : 'mailer_unavailable';
+            $this->logger->info('Simulated email send', ['to' => $Silian_toEmail, 'subject' => $Silian_subject, 'reason' => $Silian_reason]);
             $this->logAudit('email_simulated', [
-                'to' => $toEmail,
-                'subject' => $subject,
-                'reason' => $reason,
+                'to' => $Silian_toEmail,
+                'subject' => $Silian_subject,
+                'reason' => $Silian_reason,
             ]);
             return true;
-        } catch (\Throwable $e) {
-            $this->logger->error('Message could not be sent.', ['to' => $toEmail, 'subject' => $subject, 'error' => $e->getMessage()]);
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Message could not be sent.', ['to' => $Silian_toEmail, 'subject' => $Silian_subject, 'error' => $Silian_e->getMessage()]);
             $this->logAudit('email_send_failed', [
-                'to' => $toEmail,
-                'subject' => $subject,
+                'to' => $Silian_toEmail,
+                'subject' => $Silian_subject,
             ], 'failed');
-            $this->logError($e, '/internal/email/send', 'Email send failed', [
-                'to' => $toEmail,
-                'subject' => $subject,
+            $this->logError($Silian_e, '/internal/email/send', 'Email send failed', [
+                'to' => $Silian_toEmail,
+                'subject' => $Silian_subject,
             ]);
-            $this->lastError = $e->getMessage();
+            $this->lastError = $Silian_e->getMessage();
             return false;
         }
     }
@@ -250,143 +250,143 @@ HTML;
      * Send a broadcast email using BCC to protect recipient privacy
      * @param array<int, array{email:string, name: string|null}> $recipients
      */
-    public function sendBroadcastEmail(array $recipients, string $subject, string $bodyHtml, string $bodyText = "", ?string $category = null): bool
+    public function sendBroadcastEmail(array $Silian_recipients, string $Silian_subject, string $Silian_bodyHtml, string $Silian_bodyText = "", ?string $Silian_category = null): bool
     {
         $this->lastError = null;
-        $category = $category ?: NotificationPreferenceService::CATEGORY_ANNOUNCEMENT;
-        $cleaned = [];
-        foreach ($recipients as $recipient) {
-            $email = trim((string)($recipient['email'] ?? ''));
-            if ($email === '') {
+        $Silian_category = $Silian_category ?: NotificationPreferenceService::CATEGORY_ANNOUNCEMENT;
+        $Silian_cleaned = [];
+        foreach ($Silian_recipients as $Silian_recipient) {
+            $Silian_email = trim((string)($Silian_recipient['email'] ?? ''));
+            if ($Silian_email === '') {
                 continue;
             }
-            $name = $recipient['name'] ?? null;
-            if (!$this->shouldSendEmail($email, $category)) {
+            $Silian_name = $Silian_recipient['name'] ?? null;
+            if (!$this->shouldSendEmail($Silian_email, $Silian_category)) {
                 continue;
             }
-            $cleaned[] = ['email' => $email, 'name' => $name];
+            $Silian_cleaned[] = ['email' => $Silian_email, 'name' => $Silian_name];
         }
 
-        if (empty($cleaned)) {
+        if (empty($Silian_cleaned)) {
             $this->lastError = 'No deliverable email recipients provided';
             $this->logAudit('broadcast_email_skipped_no_recipients', [
-                'subject' => $subject,
-                'category' => $category,
-                'requested_recipient_count' => count($recipients),
+                'subject' => $Silian_subject,
+                'category' => $Silian_category,
+                'requested_recipient_count' => count($Silian_recipients),
             ], 'skipped');
             return false;
         }
 
         try {
-            $mailer = $this->mailer;
+            $Silian_mailer = $this->mailer;
 
-            if (!$this->forceSimulation && $mailer instanceof PHPMailer) {
-                if (method_exists($mailer, 'clearAddresses')) {
-                    $mailer->clearAddresses();
+            if (!$this->forceSimulation && $Silian_mailer instanceof PHPMailer) {
+                if (method_exists($Silian_mailer, 'clearAddresses')) {
+                    $Silian_mailer->clearAddresses();
                 }
-                if (method_exists($mailer, 'clearBCCs')) {
-                    $mailer->clearBCCs();
+                if (method_exists($Silian_mailer, 'clearBCCs')) {
+                    $Silian_mailer->clearBCCs();
                 }
-                if (method_exists($mailer, 'clearAttachments')) {
-                    $mailer->clearAttachments();
-                }
-
-                $mailer->addAddress($this->fromAddress, $this->fromName);
-                foreach ($cleaned as $recipient) {
-                    $mailer->addBCC($recipient['email'], (string)($recipient['name'] ?? ''));
+                if (method_exists($Silian_mailer, 'clearAttachments')) {
+                    $Silian_mailer->clearAttachments();
                 }
 
-                $mailer->Subject = $subject;
-                $mailer->Body = $bodyHtml;
-                $mailer->AltBody = $bodyText ?: strip_tags($bodyHtml);
+                $Silian_mailer->addAddress($this->fromAddress, $this->fromName);
+                foreach ($Silian_cleaned as $Silian_recipient) {
+                    $Silian_mailer->addBCC($Silian_recipient['email'], (string)($Silian_recipient['name'] ?? ''));
+                }
 
-                $mailer->send();
+                $Silian_mailer->Subject = $Silian_subject;
+                $Silian_mailer->Body = $Silian_bodyHtml;
+                $Silian_mailer->AltBody = $Silian_bodyText ?: strip_tags($Silian_bodyHtml);
+
+                $Silian_mailer->send();
                 $this->logger->info('Broadcast email sent successfully', [
-                    'recipient_count' => count($cleaned),
-                    'subject' => $subject,
-                    'category' => $category,
+                    'recipient_count' => count($Silian_cleaned),
+                    'subject' => $Silian_subject,
+                    'category' => $Silian_category,
                 ]);
                 $this->logAudit('broadcast_email_sent', [
-                    'recipient_count' => count($cleaned),
-                    'subject' => $subject,
-                    'category' => $category,
+                    'recipient_count' => count($Silian_cleaned),
+                    'subject' => $Silian_subject,
+                    'category' => $Silian_category,
                     'delivery_mode' => 'smtp',
                 ]);
                 return true;
             }
 
-            $reason = $this->forceSimulation ? 'force_simulation' : 'mailer_unavailable';
+            $Silian_reason = $this->forceSimulation ? 'force_simulation' : 'mailer_unavailable';
             $this->logger->info('Simulated broadcast email send', [
-                'recipient_count' => count($cleaned),
-                'subject' => $subject,
-                'reason' => $reason,
-                'category' => $category,
+                'recipient_count' => count($Silian_cleaned),
+                'subject' => $Silian_subject,
+                'reason' => $Silian_reason,
+                'category' => $Silian_category,
             ]);
             $this->logAudit('broadcast_email_simulated', [
-                'recipient_count' => count($cleaned),
-                'subject' => $subject,
-                'reason' => $reason,
-                'category' => $category,
+                'recipient_count' => count($Silian_cleaned),
+                'subject' => $Silian_subject,
+                'reason' => $Silian_reason,
+                'category' => $Silian_category,
             ]);
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Broadcast email could not be sent.', [
-                'subject' => $subject,
-                'error' => $e->getMessage()
+                'subject' => $Silian_subject,
+                'error' => $Silian_e->getMessage()
             ]);
             $this->logAudit('broadcast_email_failed', [
-                'subject' => $subject,
-                'category' => $category,
-                'requested_recipient_count' => count($recipients),
+                'subject' => $Silian_subject,
+                'category' => $Silian_category,
+                'requested_recipient_count' => count($Silian_recipients),
             ], 'failed');
-            $this->logError($e, '/internal/email/broadcast', 'Broadcast email send failed', [
-                'subject' => $subject,
-                'category' => $category,
-                'requested_recipient_count' => count($recipients),
+            $this->logError($Silian_e, '/internal/email/broadcast', 'Broadcast email send failed', [
+                'subject' => $Silian_subject,
+                'category' => $Silian_category,
+                'requested_recipient_count' => count($Silian_recipients),
             ]);
-            $this->lastError = $e->getMessage();
+            $this->lastError = $Silian_e->getMessage();
             return false;
         }
     }
 
     public function sendMessageNotification(
-        string $toEmail,
-        string $toName,
-        string $subject,
-        string $messageBody,
-        string $category,
-        string $priority = Message::PRIORITY_NORMAL
+        string $Silian_toEmail,
+        string $Silian_toName,
+        string $Silian_subject,
+        string $Silian_messageBody,
+        string $Silian_category,
+        string $Silian_priority = Message::PRIORITY_NORMAL
     ): bool {
-        if (!$this->shouldSendEmail($toEmail, $category)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, $Silian_category)) {
             return false;
         }
 
-        $buttons = [];
-        $messagesUrl = $this->buildFrontendUrl('messages');
-        if ($messagesUrl) {
-            $buttons[] = [
+        $Silian_buttons = [];
+        $Silian_messagesUrl = $this->buildFrontendUrl('messages');
+        if ($Silian_messagesUrl) {
+            $Silian_buttons[] = [
                 'text' => 'View in CarbonTrack',
-                'url' => $messagesUrl,
+                'url' => $Silian_messagesUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $priorityNotice = $this->buildPriorityNoticeText($priority);
+        $Silian_priorityNotice = $this->buildPriorityNoticeText($Silian_priority);
 
-        $contentHtml = '<p style="margin:0 0 16px 0;">' . sprintf('Hello %s,', $this->esc($toName)) . '</p>';
-        if ($priorityNotice !== '') {
-            $contentHtml .= '<p style="margin:0 0 16px 0;color:#dc2626;font-weight:600;">' . $this->esc($priorityNotice) . '</p>';
+        $Silian_contentHtml = '<p style="margin:0 0 16px 0;">' . sprintf('Hello %s,', $this->esc($Silian_toName)) . '</p>';
+        if ($Silian_priorityNotice !== '') {
+            $Silian_contentHtml .= '<p style="margin:0 0 16px 0;color:#dc2626;font-weight:600;">' . $this->esc($Silian_priorityNotice) . '</p>';
         }
-        $contentHtml .= '<p style="margin:0 0 12px 0;">You have a new notification in ' . $this->esc($this->appName) . '.</p>';
-        $contentHtml .= '<div style="margin:16px 0;padding:16px;background:#f8fafc;border-radius:12px;">'
-            . $this->renderMessageContentHtml($messageBody)
+        $Silian_contentHtml .= '<p style="margin:0 0 12px 0;">You have a new notification in ' . $this->esc($this->appName) . '.</p>';
+        $Silian_contentHtml .= '<div style="margin:16px 0;padding:16px;background:#f8fafc;border-radius:12px;">'
+            . $this->renderMessageContentHtml($Silian_messageBody)
             . '</div>';
-        $contentHtml .= '<p style="margin:12px 0 0 0;">You can review the full details in the app at any time.</p>';
+        $Silian_contentHtml .= '<p style="margin:12px 0 0 0;">You can review the full details in the app at any time.</p>';
 
-        $bodyHtml = $this->renderLayout($subject, $contentHtml, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout($Silian_subject, $Silian_contentHtml, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
     /**
@@ -405,106 +405,106 @@ HTML;
      * } $payload
      */
     public function sendSupportTicketNotification(
-        string $toEmail,
-        string $toName,
-        string $subject,
-        array $payload,
-        string $category,
-        string $priority = Message::PRIORITY_NORMAL
+        string $Silian_toEmail,
+        string $Silian_toName,
+        string $Silian_subject,
+        array $Silian_payload,
+        string $Silian_category,
+        string $Silian_priority = Message::PRIORITY_NORMAL
     ): bool {
-        if (!$this->shouldSendEmail($toEmail, $category)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, $Silian_category)) {
             return false;
         }
 
-        $buttons = [];
-        $buttonPath = trim((string) ($payload['button_path'] ?? ''));
-        $buttonUrl = $buttonPath !== '' ? $this->buildFrontendUrl($buttonPath) : null;
-        if ($buttonUrl) {
-            $buttons[] = [
-                'text' => (string) ($payload['button_label'] ?? 'Open ticket'),
-                'url' => $buttonUrl,
+        $Silian_buttons = [];
+        $Silian_buttonPath = trim((string) ($Silian_payload['button_path'] ?? ''));
+        $Silian_buttonUrl = $Silian_buttonPath !== '' ? $this->buildFrontendUrl($Silian_buttonPath) : null;
+        if ($Silian_buttonUrl) {
+            $Silian_buttons[] = [
+                'text' => (string) ($Silian_payload['button_label'] ?? 'Open ticket'),
+                'url' => $Silian_buttonUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $priorityNotice = $this->buildPriorityNoticeText($priority);
-        $contentHtml = '<p style="margin:0 0 16px 0;">' . sprintf('Hello %s,', $this->esc($toName)) . '</p>';
-        if ($priorityNotice !== '') {
-            $contentHtml .= '<p style="margin:0 0 16px 0;color:#dc2626;font-weight:600;">' . $this->esc($priorityNotice) . '</p>';
+        $Silian_priorityNotice = $this->buildPriorityNoticeText($Silian_priority);
+        $Silian_contentHtml = '<p style="margin:0 0 16px 0;">' . sprintf('Hello %s,', $this->esc($Silian_toName)) . '</p>';
+        if ($Silian_priorityNotice !== '') {
+            $Silian_contentHtml .= '<p style="margin:0 0 16px 0;color:#dc2626;font-weight:600;">' . $this->esc($Silian_priorityNotice) . '</p>';
         }
 
-        $contentHtml .= $this->renderSupportTicketNotificationContent($payload);
+        $Silian_contentHtml .= $this->renderSupportTicketNotificationContent($Silian_payload);
 
-        $bodyHtml = $this->renderLayout(
-            $subject,
-            $contentHtml,
-            $buttons,
-            isset($payload['footer_note']) ? (string) $payload['footer_note'] : null
+        $Silian_bodyHtml = $this->renderLayout(
+            $Silian_subject,
+            $Silian_contentHtml,
+            $Silian_buttons,
+            isset($Silian_payload['footer_note']) ? (string) $Silian_payload['footer_note'] : null
         );
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
     /**
      * @param array<int, array{email:string,name:string|null}> $recipients
      */
     public function sendAnnouncementBroadcast(
-        array $recipients,
-        string $title,
-        string $content,
-        string $priority = Message::PRIORITY_NORMAL,
-        string $contentFormat = self::BROADCAST_CONTENT_FORMAT_TEXT,
-        ?string $renderProfile = null,
-        ?int $renderVersion = null,
-        ?string $sourceKind = null
+        array $Silian_recipients,
+        string $Silian_title,
+        string $Silian_content,
+        string $Silian_priority = Message::PRIORITY_NORMAL,
+        string $Silian_contentFormat = self::BROADCAST_CONTENT_FORMAT_TEXT,
+        ?string $Silian_renderProfile = null,
+        ?int $Silian_renderVersion = null,
+        ?string $Silian_sourceKind = null
     ): bool {
-        if (empty($recipients)) {
+        if (empty($Silian_recipients)) {
             $this->lastError = 'No deliverable email recipients provided';
             return false;
         }
 
-        $subject = $this->buildAnnouncementSubject($title, $priority);
-        $priorityNotice = $this->buildPriorityNoticeText($priority);
+        $Silian_subject = $this->buildAnnouncementSubject($Silian_title, $Silian_priority);
+        $Silian_priorityNotice = $this->buildPriorityNoticeText($Silian_priority);
 
-        $contentHtml = '<p style="margin:0 0 16px 0;">'
+        $Silian_contentHtml = '<p style="margin:0 0 16px 0;">'
             . sprintf('Hello %s community member,', $this->esc($this->appName))
             . '</p>';
 
-        if ($priorityNotice !== '') {
-            $contentHtml .= '<p style="margin:0 0 16px 0;color:#dc2626;font-weight:600;">' . $this->esc($priorityNotice) . '</p>';
+        if ($Silian_priorityNotice !== '') {
+            $Silian_contentHtml .= '<p style="margin:0 0 16px 0;color:#dc2626;font-weight:600;">' . $this->esc($Silian_priorityNotice) . '</p>';
         }
 
-        $leadIn = $this->esc($this->appName) . ' has published a new announcement';
-        $contentHtml .= '<p style="margin:0 0 12px 0;">'
-            . $leadIn
+        $Silian_leadIn = $this->esc($this->appName) . ' has published a new announcement';
+        $Silian_contentHtml .= '<p style="margin:0 0 12px 0;">'
+            . $Silian_leadIn
             . ':</p>';
 
-        $contentHtml .= '<div style="margin:16px 0;padding:16px;background:#f8fafc;border-radius:12px;">'
-            . '<h2 style="margin:0 0 12px 0;font-size:18px;color:#0f172a;">' . $this->esc($title) . '</h2>'
-            . $this->renderAnnouncementContentHtml($content, $contentFormat, $renderProfile)
+        $Silian_contentHtml .= '<div style="margin:16px 0;padding:16px;background:#f8fafc;border-radius:12px;">'
+            . '<h2 style="margin:0 0 12px 0;font-size:18px;color:#0f172a;">' . $this->esc($Silian_title) . '</h2>'
+            . $this->renderAnnouncementContentHtml($Silian_content, $Silian_contentFormat, $Silian_renderProfile)
             . '</div>';
 
-        $contentHtml .= '<p style="margin:12px 0 0 0;">You can review the announcement in your inbox at any time.</p>';
+        $Silian_contentHtml .= '<p style="margin:12px 0 0 0;">You can review the announcement in your inbox at any time.</p>';
 
-        $buttons = [];
-        $messagesUrl = $this->buildFrontendUrl('messages');
-        if ($messagesUrl) {
-            $buttons[] = [
+        $Silian_buttons = [];
+        $Silian_messagesUrl = $this->buildFrontendUrl('messages');
+        if ($Silian_messagesUrl) {
+            $Silian_buttons[] = [
                 'text' => 'View announcements',
-                'url' => $messagesUrl,
+                'url' => $Silian_messagesUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $bodyHtml = $this->renderLayout($subject, $contentHtml, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout($Silian_subject, $Silian_contentHtml, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
         return $this->sendBroadcastEmail(
-            $recipients,
-            $subject,
-            $bodyHtml,
-            $bodyText,
+            $Silian_recipients,
+            $Silian_subject,
+            $Silian_bodyHtml,
+            $Silian_bodyText,
             NotificationPreferenceService::CATEGORY_ANNOUNCEMENT
         );
     }
@@ -515,43 +515,43 @@ HTML;
      * @param array<int, array{email:string,name:string|null}> $recipients
      */
     public function sendMessageNotificationToMany(
-        array $recipients,
-        string $subject,
-        string $messageBody,
-        string $category,
-        string $priority = Message::PRIORITY_NORMAL
+        array $Silian_recipients,
+        string $Silian_subject,
+        string $Silian_messageBody,
+        string $Silian_category,
+        string $Silian_priority = Message::PRIORITY_NORMAL
     ): bool {
-        if (empty($recipients)) {
+        if (empty($Silian_recipients)) {
             $this->lastError = 'No recipients provided for bulk notification.';
             return false;
         }
 
-        $buttons = [];
-        $messagesUrl = $this->buildFrontendUrl('messages');
-        if ($messagesUrl) {
-            $buttons[] = [
+        $Silian_buttons = [];
+        $Silian_messagesUrl = $this->buildFrontendUrl('messages');
+        if ($Silian_messagesUrl) {
+            $Silian_buttons[] = [
                 'text' => 'Open CarbonTrack',
-                'url' => $messagesUrl,
+                'url' => $Silian_messagesUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $priorityNotice = $this->buildPriorityNoticeText($priority);
+        $Silian_priorityNotice = $this->buildPriorityNoticeText($Silian_priority);
 
-        $contentHtml = '<p style="margin:0 0 16px 0;">Hello,</p>';
-        if ($priorityNotice !== '') {
-            $contentHtml .= '<p style="margin:0 0 16px 0;color:#dc2626;font-weight:600;">' . $this->esc($priorityNotice) . '</p>';
+        $Silian_contentHtml = '<p style="margin:0 0 16px 0;">Hello,</p>';
+        if ($Silian_priorityNotice !== '') {
+            $Silian_contentHtml .= '<p style="margin:0 0 16px 0;color:#dc2626;font-weight:600;">' . $this->esc($Silian_priorityNotice) . '</p>';
         }
-        $contentHtml .= '<p style="margin:0 0 12px 0;">There is a new notification in ' . $this->esc($this->appName) . ' that may require your attention.</p>';
-        $contentHtml .= '<div style="margin:16px 0;padding:16px;background:#f8fafc;border-radius:12px;">'
-            . $this->renderMessageContentHtml($messageBody)
+        $Silian_contentHtml .= '<p style="margin:0 0 12px 0;">There is a new notification in ' . $this->esc($this->appName) . ' that may require your attention.</p>';
+        $Silian_contentHtml .= '<div style="margin:16px 0;padding:16px;background:#f8fafc;border-radius:12px;">'
+            . $this->renderMessageContentHtml($Silian_messageBody)
             . '</div>';
-        $contentHtml .= '<p style="margin:12px 0 0 0;">You can review the full details in the app at any time.</p>';
+        $Silian_contentHtml .= '<p style="margin:12px 0 0 0;">You can review the full details in the app at any time.</p>';
 
-        $bodyHtml = $this->renderLayout($subject, $contentHtml, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout($Silian_subject, $Silian_contentHtml, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendBroadcastEmail($recipients, $subject, $bodyHtml, $bodyText, $category);
+        return $this->sendBroadcastEmail($Silian_recipients, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText, $Silian_category);
     }
 
     public function getLastError(): ?string
@@ -564,70 +564,70 @@ HTML;
         return $this->supportEmail;
     }
 
-    private function buildAnnouncementSubject(string $title, string $priority): string
+    private function buildAnnouncementSubject(string $Silian_title, string $Silian_priority): string
     {
-        $prefix = '';
-        $normalized = strtolower(trim($priority));
-        if ($normalized === Message::PRIORITY_URGENT) {
-            $prefix = '[URGENT] ';
-        } elseif ($normalized === Message::PRIORITY_HIGH) {
-            $prefix = '[HIGH] ';
+        $Silian_prefix = '';
+        $Silian_normalized = strtolower(trim($Silian_priority));
+        if ($Silian_normalized === Message::PRIORITY_URGENT) {
+            $Silian_prefix = '[URGENT] ';
+        } elseif ($Silian_normalized === Message::PRIORITY_HIGH) {
+            $Silian_prefix = '[HIGH] ';
         }
 
-        $trimmedTitle = trim($title);
-        if ($trimmedTitle === '') {
-            $trimmedTitle = 'Platform announcement';
+        $Silian_trimmedTitle = trim($Silian_title);
+        if ($Silian_trimmedTitle === '') {
+            $Silian_trimmedTitle = 'Platform announcement';
         }
 
-        return $prefix . $trimmedTitle;
+        return $Silian_prefix . $Silian_trimmedTitle;
     }
 
     /**
      * Load an email template from disk, falling back to provided content when unavailable.
      */
-    private function readTemplate(string $filename, string $fallback): string
+    private function readTemplate(string $Silian_filename, string $Silian_fallback): string
     {
-        $base = $this->config['templates_path'] ?? '';
-        $base = $base !== '' ? rtrim($base, "/\\") . DIRECTORY_SEPARATOR : '';
-        $path = $base . ltrim($filename, "/\\");
+        $Silian_base = $this->config['templates_path'] ?? '';
+        $Silian_base = $Silian_base !== '' ? rtrim($Silian_base, "/\\") . DIRECTORY_SEPARATOR : '';
+        $Silian_path = $Silian_base . ltrim($Silian_filename, "/\\");
 
         try {
-            $contents = @file_get_contents($path);
-        } catch (\Throwable $e) {
-            $contents = false;
+            $Silian_contents = @file_get_contents($Silian_path);
+        } catch (\Throwable $Silian_e) {
+            $Silian_contents = false;
         }
 
-        if ($contents === false || $contents === '') {
+        if ($Silian_contents === false || $Silian_contents === '') {
             try {
                 $this->logger->warning('Email template missing or unreadable', [
-                    'template' => $path
+                    'template' => $Silian_path
                 ]);
-            } catch (\Throwable $logError) {
+            } catch (\Throwable $Silian_logError) {
                 // Ignore logging failures to keep mail flow resilient
             }
-            return $fallback;
+            return $Silian_fallback;
         }
 
-        return $contents;
+        return $Silian_contents;
     }
 
-    private function esc(string $value): string
+    private function esc(string $Silian_value): string
     {
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        return htmlspecialchars($Silian_value, ENT_QUOTES, 'UTF-8');
     }
 
-    private function buildFrontendUrl(?string $path = null): ?string
+    private function buildFrontendUrl(?string $Silian_path = null): ?string
     {
         if ($this->frontendUrl === null || $this->frontendUrl === '') {
             return null;
         }
 
-        $base = rtrim($this->frontendUrl, '/');
-        if ($path === null || $path === '') {
-            return $base;
+        $Silian_base = rtrim($this->frontendUrl, '/');
+        if ($Silian_path === null || $Silian_path === '') {
+            return $Silian_base;
         }
 
-        return $base . '/' . ltrim($path, '/');
+        return $Silian_base . '/' . ltrim($Silian_path, '/');
     }
 
     /**
@@ -635,22 +635,22 @@ HTML;
      *
      * @param array<int, array{text:string,url:string,color?:string}> $buttons
      */
-    private function renderLayout(string $title, string $contentHtml, array $buttons = [], ?string $footerNote = null): string
+    private function renderLayout(string $Silian_title, string $Silian_contentHtml, array $Silian_buttons = [], ?string $Silian_footerNote = null): string
     {
-        $layout = $this->readTemplate('layout.html', self::DEFAULT_LAYOUT_TEMPLATE);
-        $buttonHtml = $this->buildButtonsHtml($buttons);
+        $Silian_layout = $this->readTemplate('layout.html', self::DEFAULT_LAYOUT_TEMPLATE);
+        $Silian_buttonHtml = $this->buildButtonsHtml($Silian_buttons);
 
-        $replacements = [
-            '{{email_title}}' => $this->esc($title),
-            '{{content}}' => $contentHtml,
-            '{{buttons}}' => $buttonHtml,
+        $Silian_replacements = [
+            '{{email_title}}' => $this->esc($Silian_title),
+            '{{content}}' => $Silian_contentHtml,
+            '{{buttons}}' => $Silian_buttonHtml,
             '{{app_name}}' => $this->esc($this->appName),
             '{{current_year}}' => date('Y'),
             '{{support_email}}' => $this->esc($this->supportEmail),
-            '{{footer_note}}' => $footerNote ? '<p>' . $this->esc($footerNote) . '</p>' : '',
+            '{{footer_note}}' => $Silian_footerNote ? '<p>' . $this->esc($Silian_footerNote) . '</p>' : '',
         ];
 
-        return str_replace(array_keys($replacements), array_values($replacements), $layout);
+        return str_replace(array_keys($Silian_replacements), array_values($Silian_replacements), $Silian_layout);
     }
 
     /**
@@ -665,197 +665,197 @@ HTML;
      *   closing?: string
      * } $payload
      */
-    private function renderSupportTicketNotificationContent(array $payload): string
+    private function renderSupportTicketNotificationContent(array $Silian_payload): string
     {
-        $contentHtml = '';
-        $eyebrow = trim((string) ($payload['eyebrow'] ?? 'Support ticket'));
-        $intro = trim((string) ($payload['intro'] ?? ''));
-        $summary = trim((string) ($payload['summary'] ?? ''));
-        $ticket = is_array($payload['ticket'] ?? null) ? $payload['ticket'] : [];
-        $ticketId = trim((string) ($ticket['id'] ?? ''));
-        $ticketSubject = trim((string) ($ticket['subject'] ?? ''));
+        $Silian_contentHtml = '';
+        $Silian_eyebrow = trim((string) ($Silian_payload['eyebrow'] ?? 'Support ticket'));
+        $Silian_intro = trim((string) ($Silian_payload['intro'] ?? ''));
+        $Silian_summary = trim((string) ($Silian_payload['summary'] ?? ''));
+        $Silian_ticket = is_array($Silian_payload['ticket'] ?? null) ? $Silian_payload['ticket'] : [];
+        $Silian_ticketId = trim((string) ($Silian_ticket['id'] ?? ''));
+        $Silian_ticketSubject = trim((string) ($Silian_ticket['subject'] ?? ''));
 
-        if ($eyebrow !== '') {
-            $contentHtml .= '<div style="display:inline-block;margin:0 0 14px 0;padding:6px 12px;border-radius:999px;background:#e0f2fe;color:#0369a1;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">'
-                . $this->esc($eyebrow)
+        if ($Silian_eyebrow !== '') {
+            $Silian_contentHtml .= '<div style="display:inline-block;margin:0 0 14px 0;padding:6px 12px;border-radius:999px;background:#e0f2fe;color:#0369a1;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">'
+                . $this->esc($Silian_eyebrow)
                 . '</div>';
         }
 
-        if ($intro !== '') {
-            $contentHtml .= '<p style="margin:0 0 14px 0;">' . $this->esc($intro) . '</p>';
+        if ($Silian_intro !== '') {
+            $Silian_contentHtml .= '<p style="margin:0 0 14px 0;">' . $this->esc($Silian_intro) . '</p>';
         }
 
-        $contentHtml .= '<div style="margin:18px 0 22px 0;padding:22px 22px 18px 22px;border-radius:18px;background:linear-gradient(180deg,#f8fbff 0%,#eef6ff 100%);border:1px solid #dbeafe;">';
-        if ($ticketId !== '') {
-            $contentHtml .= '<p style="margin:0 0 8px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0369a1;">Ticket #' . $this->esc($ticketId) . '</p>';
+        $Silian_contentHtml .= '<div style="margin:18px 0 22px 0;padding:22px 22px 18px 22px;border-radius:18px;background:linear-gradient(180deg,#f8fbff 0%,#eef6ff 100%);border:1px solid #dbeafe;">';
+        if ($Silian_ticketId !== '') {
+            $Silian_contentHtml .= '<p style="margin:0 0 8px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0369a1;">Ticket #' . $this->esc($Silian_ticketId) . '</p>';
         }
-        if ($ticketSubject !== '') {
-            $contentHtml .= '<h2 style="margin:0 0 12px 0;font-size:24px;line-height:1.3;color:#0f172a;">' . $this->esc($ticketSubject) . '</h2>';
+        if ($Silian_ticketSubject !== '') {
+            $Silian_contentHtml .= '<h2 style="margin:0 0 12px 0;font-size:24px;line-height:1.3;color:#0f172a;">' . $this->esc($Silian_ticketSubject) . '</h2>';
         }
-        if ($summary !== '') {
-            $contentHtml .= '<p style="margin:0;color:#334155;font-size:15px;line-height:1.7;">' . $this->esc($summary) . '</p>';
+        if ($Silian_summary !== '') {
+            $Silian_contentHtml .= '<p style="margin:0;color:#334155;font-size:15px;line-height:1.7;">' . $this->esc($Silian_summary) . '</p>';
         }
-        $contentHtml .= $this->renderSupportTicketDetailsHtml(is_array($payload['details'] ?? null) ? $payload['details'] : []);
-        $contentHtml .= '</div>';
+        $Silian_contentHtml .= $this->renderSupportTicketDetailsHtml(is_array($Silian_payload['details'] ?? null) ? $Silian_payload['details'] : []);
+        $Silian_contentHtml .= '</div>';
 
-        $contentHtml .= $this->renderSupportTicketChangesHtml(is_array($payload['changes'] ?? null) ? $payload['changes'] : []);
+        $Silian_contentHtml .= $this->renderSupportTicketChangesHtml(is_array($Silian_payload['changes'] ?? null) ? $Silian_payload['changes'] : []);
 
-        if (is_array($payload['message'] ?? null)) {
-            $message = $payload['message'];
-            $messageBody = trim((string) ($message['body'] ?? ''));
-            if ($messageBody !== '') {
-                $label = trim((string) ($message['label'] ?? 'Latest update'));
-                $contentHtml .= '<div style="margin:0 0 22px 0;padding:20px;border-radius:16px;background:#f8fafc;border-left:4px solid #0ea5e9;">';
-                if ($label !== '') {
-                    $contentHtml .= '<p style="margin:0 0 12px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0369a1;">'
-                        . $this->esc($label)
+        if (is_array($Silian_payload['message'] ?? null)) {
+            $Silian_message = $Silian_payload['message'];
+            $Silian_messageBody = trim((string) ($Silian_message['body'] ?? ''));
+            if ($Silian_messageBody !== '') {
+                $Silian_label = trim((string) ($Silian_message['label'] ?? 'Latest update'));
+                $Silian_contentHtml .= '<div style="margin:0 0 22px 0;padding:20px;border-radius:16px;background:#f8fafc;border-left:4px solid #0ea5e9;">';
+                if ($Silian_label !== '') {
+                    $Silian_contentHtml .= '<p style="margin:0 0 12px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0369a1;">'
+                        . $this->esc($Silian_label)
                         . '</p>';
                 }
-                $contentHtml .= $this->renderMessageContentHtml($messageBody);
-                $contentHtml .= '</div>';
+                $Silian_contentHtml .= $this->renderMessageContentHtml($Silian_messageBody);
+                $Silian_contentHtml .= '</div>';
             }
         }
 
-        $closing = trim((string) ($payload['closing'] ?? ''));
-        if ($closing !== '') {
-            $contentHtml .= '<p style="margin:0;">' . $this->esc($closing) . '</p>';
+        $Silian_closing = trim((string) ($Silian_payload['closing'] ?? ''));
+        if ($Silian_closing !== '') {
+            $Silian_contentHtml .= '<p style="margin:0;">' . $this->esc($Silian_closing) . '</p>';
         }
 
-        return $contentHtml;
+        return $Silian_contentHtml;
     }
 
     /**
      * @param array<int, array{label:string,value:string}> $details
      */
-    private function renderSupportTicketDetailsHtml(array $details): string
+    private function renderSupportTicketDetailsHtml(array $Silian_details): string
     {
-        $rows = [];
-        foreach ($details as $detail) {
-            $label = trim((string) ($detail['label'] ?? ''));
-            $value = trim((string) ($detail['value'] ?? ''));
-            if ($label === '' || $value === '') {
+        $Silian_rows = [];
+        foreach ($Silian_details as $Silian_detail) {
+            $Silian_label = trim((string) ($Silian_detail['label'] ?? ''));
+            $Silian_value = trim((string) ($Silian_detail['value'] ?? ''));
+            if ($Silian_label === '' || $Silian_value === '') {
                 continue;
             }
 
-            $rows[] = '<tr>'
-                . '<td style="padding:0 14px 10px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;vertical-align:top;">' . $this->esc($label) . '</td>'
-                . '<td style="padding:0 0 10px 0;font-size:15px;font-weight:600;color:#0f172a;vertical-align:top;">' . $this->esc($value) . '</td>'
+            $Silian_rows[] = '<tr>'
+                . '<td style="padding:0 14px 10px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;vertical-align:top;">' . $this->esc($Silian_label) . '</td>'
+                . '<td style="padding:0 0 10px 0;font-size:15px;font-weight:600;color:#0f172a;vertical-align:top;">' . $this->esc($Silian_value) . '</td>'
                 . '</tr>';
         }
 
-        if ($rows === []) {
+        if ($Silian_rows === []) {
             return '';
         }
 
         return '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:18px;border-collapse:collapse;">'
-            . implode('', $rows)
+            . implode('', $Silian_rows)
             . '</table>';
     }
 
     /**
      * @param array<int, array{label:string,from?:string|null,to?:string|null,value?:string|null}> $changes
      */
-    private function renderSupportTicketChangesHtml(array $changes): string
+    private function renderSupportTicketChangesHtml(array $Silian_changes): string
     {
-        $items = [];
-        foreach ($changes as $change) {
-            $label = trim((string) ($change['label'] ?? ''));
-            if ($label === '') {
+        $Silian_items = [];
+        foreach ($Silian_changes as $Silian_change) {
+            $Silian_label = trim((string) ($Silian_change['label'] ?? ''));
+            if ($Silian_label === '') {
                 continue;
             }
 
-            $value = trim((string) ($change['value'] ?? ''));
-            $from = trim((string) ($change['from'] ?? ''));
-            $to = trim((string) ($change['to'] ?? ''));
+            $Silian_value = trim((string) ($Silian_change['value'] ?? ''));
+            $Silian_from = trim((string) ($Silian_change['from'] ?? ''));
+            $Silian_to = trim((string) ($Silian_change['to'] ?? ''));
 
-            if ($value === '' && $to !== '') {
-                $value = $from !== ''
-                    ? $this->esc($from) . ' <span style="color:#94a3b8;">&rarr;</span> ' . $this->esc($to)
-                    : $this->esc($to);
-            } elseif ($value !== '') {
-                $value = $this->esc($value);
+            if ($Silian_value === '' && $Silian_to !== '') {
+                $Silian_value = $Silian_from !== ''
+                    ? $this->esc($Silian_from) . ' <span style="color:#94a3b8;">&rarr;</span> ' . $this->esc($Silian_to)
+                    : $this->esc($Silian_to);
+            } elseif ($Silian_value !== '') {
+                $Silian_value = $this->esc($Silian_value);
             }
 
-            if ($value === '') {
+            if ($Silian_value === '') {
                 continue;
             }
 
-            $items[] = '<li style="margin:0 0 10px 0;line-height:1.6;color:#334155;">'
-                . '<strong style="color:#0f172a;">' . $this->esc($label) . ':</strong> '
-                . $value
+            $Silian_items[] = '<li style="margin:0 0 10px 0;line-height:1.6;color:#334155;">'
+                . '<strong style="color:#0f172a;">' . $this->esc($Silian_label) . ':</strong> '
+                . $Silian_value
                 . '</li>';
         }
 
-        if ($items === []) {
+        if ($Silian_items === []) {
             return '';
         }
 
         return '<div style="margin:0 0 22px 0;">'
             . '<p style="margin:0 0 10px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0369a1;">What changed</p>'
-            . '<ul style="margin:0;padding-left:20px;">' . implode('', $items) . '</ul>'
+            . '<ul style="margin:0;padding-left:20px;">' . implode('', $Silian_items) . '</ul>'
             . '</div>';
     }
 
-    private function renderMessageContentHtml(string $messageBody): string
+    private function renderMessageContentHtml(string $Silian_messageBody): string
     {
-        $normalized = preg_replace("/\r\n|\r/", "\n", (string) $messageBody);
-        $normalized = trim($normalized ?? '');
-        if ($normalized === '') {
+        $Silian_normalized = preg_replace("/\r\n|\r/", "\n", (string) $Silian_messageBody);
+        $Silian_normalized = trim($Silian_normalized ?? '');
+        if ($Silian_normalized === '') {
             return '<p style="margin:0;color:#475569;">No additional message details were provided.</p>';
         }
 
-        $blocks = preg_split("/\n{2,}/", $normalized) ?: [$normalized];
-        $htmlSegments = [];
-        foreach ($blocks as $block) {
-            $trimmed = trim($block);
-            if ($trimmed === '') {
+        $Silian_blocks = preg_split("/\n{2,}/", $Silian_normalized) ?: [$Silian_normalized];
+        $Silian_htmlSegments = [];
+        foreach ($Silian_blocks as $Silian_block) {
+            $Silian_trimmed = trim($Silian_block);
+            if ($Silian_trimmed === '') {
                 continue;
             }
-            $htmlSegments[] = '<p style="margin:0 0 12px 0;">' . nl2br($this->esc($trimmed)) . '</p>';
+            $Silian_htmlSegments[] = '<p style="margin:0 0 12px 0;">' . nl2br($this->esc($Silian_trimmed)) . '</p>';
         }
 
-        if (empty($htmlSegments)) {
-            $htmlSegments[] = '<p style="margin:0;color:#475569;">' . $this->esc($normalized) . '</p>';
+        if (empty($Silian_htmlSegments)) {
+            $Silian_htmlSegments[] = '<p style="margin:0;color:#475569;">' . $this->esc($Silian_normalized) . '</p>';
         }
 
-        return implode('', $htmlSegments);
+        return implode('', $Silian_htmlSegments);
     }
 
     private function renderAnnouncementContentHtml(
-        string $content,
-        string $contentFormat = self::BROADCAST_CONTENT_FORMAT_TEXT,
-        ?string $renderProfile = null
+        string $Silian_content,
+        string $Silian_contentFormat = self::BROADCAST_CONTENT_FORMAT_TEXT,
+        ?string $Silian_renderProfile = null
     ): string {
-        $normalizedFormat = $this->normalizeBroadcastContentFormat($contentFormat);
-        if ($normalizedFormat !== self::BROADCAST_CONTENT_FORMAT_HTML) {
-            return $this->renderMessageContentHtml($content);
+        $Silian_normalizedFormat = $this->normalizeBroadcastContentFormat($Silian_contentFormat);
+        if ($Silian_normalizedFormat !== self::BROADCAST_CONTENT_FORMAT_HTML) {
+            return $this->renderMessageContentHtml($Silian_content);
         }
 
-        $normalizedProfile = trim((string) ($renderProfile ?? self::BROADCAST_RENDER_PROFILE_HTML));
-        if ($normalizedProfile !== self::BROADCAST_RENDER_PROFILE_HTML) {
-            return $this->renderMessageContentHtml(strip_tags($content));
+        $Silian_normalizedProfile = trim((string) ($Silian_renderProfile ?? self::BROADCAST_RENDER_PROFILE_HTML));
+        if ($Silian_normalizedProfile !== self::BROADCAST_RENDER_PROFILE_HTML) {
+            return $this->renderMessageContentHtml(strip_tags($Silian_content));
         }
 
-        $normalizedContent = trim($content);
-        if ($normalizedContent === '') {
+        $Silian_normalizedContent = trim($Silian_content);
+        if ($Silian_normalizedContent === '') {
             return $this->renderMessageContentHtml('');
         }
 
-        return $normalizedContent;
+        return $Silian_normalizedContent;
     }
 
-    private function normalizeBroadcastContentFormat(string $value): string
+    private function normalizeBroadcastContentFormat(string $Silian_value): string
     {
-        $normalized = strtolower(trim($value));
-        return $normalized === self::BROADCAST_CONTENT_FORMAT_HTML
+        $Silian_normalized = strtolower(trim($Silian_value));
+        return $Silian_normalized === self::BROADCAST_CONTENT_FORMAT_HTML
             ? self::BROADCAST_CONTENT_FORMAT_HTML
             : self::BROADCAST_CONTENT_FORMAT_TEXT;
     }
 
-    private function buildPriorityNoticeText(string $priority): string
+    private function buildPriorityNoticeText(string $Silian_priority): string
     {
-        $normalized = strtolower(trim($priority));
-        switch ($normalized) {
+        $Silian_normalized = strtolower(trim($Silian_priority));
+        switch ($Silian_normalized) {
             case 'urgent':
                 return 'This notification is marked as URGENT. Please review it as soon as possible.';
             case 'high':
@@ -868,54 +868,54 @@ HTML;
     /**
      * @param array<int, array{text:string,url:string,color?:string}> $buttons
      */
-    private function buildButtonsHtml(array $buttons): string
+    private function buildButtonsHtml(array $Silian_buttons): string
     {
-        $items = [];
-        foreach ($buttons as $button) {
-            $text = trim((string) ($button['text'] ?? ''));
-            $url = trim((string) ($button['url'] ?? ''));
-            if ($text === '' || $url === '') {
+        $Silian_items = [];
+        foreach ($Silian_buttons as $Silian_button) {
+            $Silian_text = trim((string) ($Silian_button['text'] ?? ''));
+            $Silian_url = trim((string) ($Silian_button['url'] ?? ''));
+            if ($Silian_text === '' || $Silian_url === '') {
                 continue;
             }
-            $color = trim((string) ($button['color'] ?? self::DEFAULT_BUTTON_COLOR));
-            $items[] = sprintf(
+            $Silian_color = trim((string) ($Silian_button['color'] ?? self::DEFAULT_BUTTON_COLOR));
+            $Silian_items[] = sprintf(
                 '<a class="cta-button" href="%s" style="background-color:%s">%s</a>',
-                $this->esc($url),
-                $this->esc($color),
-                $this->esc($text)
+                $this->esc($Silian_url),
+                $this->esc($Silian_color),
+                $this->esc($Silian_text)
             );
         }
 
-        if (empty($items)) {
+        if (empty($Silian_items)) {
             return '';
         }
 
-        return '<div class="button-group">' . implode('', $items) . '</div>';
+        return '<div class="button-group">' . implode('', $Silian_items) . '</div>';
     }
 
     /**
      * @param array<int, array{text:string,url:string,color?:string}> $buttons
      */
-    private function appendButtonActionsToText(string $bodyText, array $buttons): string
+    private function appendButtonActionsToText(string $Silian_bodyText, array $Silian_buttons): string
     {
-        $links = [];
-        foreach ($buttons as $button) {
-            $text = trim((string) ($button['text'] ?? ''));
-            $url = trim((string) ($button['url'] ?? ''));
-            if ($text === '' || $url === '') {
+        $Silian_links = [];
+        foreach ($Silian_buttons as $Silian_button) {
+            $Silian_text = trim((string) ($Silian_button['text'] ?? ''));
+            $Silian_url = trim((string) ($Silian_button['url'] ?? ''));
+            if ($Silian_text === '' || $Silian_url === '') {
                 continue;
             }
-            $links[] = $text . ': ' . $url;
+            $Silian_links[] = $Silian_text . ': ' . $Silian_url;
         }
 
-        if (empty($links)) {
-            return $bodyText;
+        if (empty($Silian_links)) {
+            return $Silian_bodyText;
         }
 
-        $bodyText = rtrim($bodyText);
-        $bodyText .= "\n\nActions:\n" . implode("\n", $links) . "\n";
+        $Silian_bodyText = rtrim($Silian_bodyText);
+        $Silian_bodyText .= "\n\nActions:\n" . implode("\n", $Silian_links) . "\n";
 
-        return $bodyText;
+        return $Silian_bodyText;
     }
 
     /**
@@ -923,31 +923,31 @@ HTML;
      *
      * @param array<int, array{text:string,url:string,color?:string}> $buttons
      */
-    private function buildTextBody(string $html, array $buttons = []): string
+    private function buildTextBody(string $Silian_html, array $Silian_buttons = []): string
     {
-        $replacements = [
+        $Silian_replacements = [
             '<br>' => "\n",
             '<br/>' => "\n",
             '<br />' => "\n",
         ];
-        $blockBreaksPattern = '/<\s*\/?(p|div|section|article|li|tr|td|h[1-6])[^>]*>/i';
-        $normalized = str_ireplace(array_keys($replacements), array_values($replacements), $html);
-        $normalized = preg_replace($blockBreaksPattern, "\n", $normalized ?? $html);
+        $Silian_blockBreaksPattern = '/<\s*\/?(p|div|section|article|li|tr|td|h[1-6])[^>]*>/i';
+        $Silian_normalized = str_ireplace(array_keys($Silian_replacements), array_values($Silian_replacements), $Silian_html);
+        $Silian_normalized = preg_replace($Silian_blockBreaksPattern, "\n", $Silian_normalized ?? $Silian_html);
 
-        $text = strip_tags($normalized ?? $html);
-        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-        $text = preg_replace("/\r\n|\r/", "\n", $text);
-        $text = preg_replace("/[ \t]+\n/", "\n", $text);
-        $text = preg_replace("/\n{3,}/", "\n\n", $text);
-        $text = trim($text ?? '');
+        $Silian_text = strip_tags($Silian_normalized ?? $Silian_html);
+        $Silian_text = html_entity_decode($Silian_text, ENT_QUOTES, 'UTF-8');
+        $Silian_text = preg_replace("/\r\n|\r/", "\n", $Silian_text);
+        $Silian_text = preg_replace("/[ \t]+\n/", "\n", $Silian_text);
+        $Silian_text = preg_replace("/\n{3,}/", "\n\n", $Silian_text);
+        $Silian_text = trim($Silian_text ?? '');
 
-        return $this->appendButtonActionsToText($text, $buttons);
+        return $this->appendButtonActionsToText($Silian_text, $Silian_buttons);
     }
 
-    private function formatNumber(float $value): string
+    private function formatNumber(float $Silian_value): string
     {
-        $formatted = number_format($value, 2, '.', '');
-        return rtrim(rtrim($formatted, '0'), '.');
+        $Silian_formatted = number_format($Silian_value, 2, '.', '');
+        return rtrim(rtrim($Silian_formatted, '0'), '.');
     }
 
     public function getAppName(): string
@@ -960,77 +960,77 @@ HTML;
      *
      * @param callable $callback Receives a boolean flag indicating whether it's running in async context.
      */
-    public function dispatchAsyncEmail(callable $callback, array $context = [], bool $preferAsync = true): bool
+    public function dispatchAsyncEmail(callable $Silian_callback, array $Silian_context = [], bool $Silian_preferAsync = true): bool
     {
-        $sapi = PHP_SAPI ?? php_sapi_name();
-        $isCli = in_array($sapi, ['cli', 'phpdbg', 'embed'], true);
+        $Silian_sapi = PHP_SAPI ?? php_sapi_name();
+        $Silian_isCli = in_array($Silian_sapi, ['cli', 'phpdbg', 'embed'], true);
 
-        if (!$preferAsync || $this->forceSimulation || $isCli) {
-            return (bool) $callback(false);
+        if (!$Silian_preferAsync || $this->forceSimulation || $Silian_isCli) {
+            return (bool) $Silian_callback(false);
         }
 
         try {
-            register_shutdown_function(function () use ($callback, $context): void {
+            register_shutdown_function(function () use ($Silian_callback, $Silian_context): void {
                 try {
-                    $callback(true);
-                } catch (\Throwable $e) {
+                    $Silian_callback(true);
+                } catch (\Throwable $Silian_e) {
                     try {
                         $this->logger->error('Async email callback failed', [
-                            'error' => $e->getMessage(),
-                            'context' => $context,
+                            'error' => $Silian_e->getMessage(),
+                            'context' => $Silian_context,
                         ]);
-                    } catch (\Throwable $logError) {
+                    } catch (\Throwable $Silian_logError) {
                         // ignore logging issues in shutdown context
                     }
-                    $this->logAudit('async_email_callback_failed', $context + [
+                    $this->logAudit('async_email_callback_failed', $Silian_context + [
                         'execution_mode' => 'shutdown',
                     ], 'failed');
-                    $this->logError($e, '/internal/email/async-callback', 'Async email callback failed', $context + [
+                    $this->logError($Silian_e, '/internal/email/async-callback', 'Async email callback failed', $Silian_context + [
                         'execution_mode' => 'shutdown',
                     ]);
                 }
             });
 
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             try {
                 $this->logger->debug('Failed to register async email callback; falling back to sync send', [
-                    'error' => $e->getMessage(),
-                    'context' => $context,
+                    'error' => $Silian_e->getMessage(),
+                    'context' => $Silian_context,
                 ]);
-            } catch (\Throwable $logError) {
+            } catch (\Throwable $Silian_logError) {
                 // ignore
             }
 
-            $this->logAudit('async_email_callback_registration_failed', $context, 'failed');
-            $this->logError($e, '/internal/email/async-register', 'Failed to register async email callback', $context);
+            $this->logAudit('async_email_callback_registration_failed', $Silian_context, 'failed');
+            $this->logError($Silian_e, '/internal/email/async-register', 'Failed to register async email callback', $Silian_context);
 
-            return (bool) $callback(false);
+            return (bool) $Silian_callback(false);
         }
     }
 
-    private function shouldSendEmail(string $email, string $category): bool
+    private function shouldSendEmail(string $Silian_email, string $Silian_category): bool
     {
         if ($this->preferenceService === null) {
             return true;
         }
 
         try {
-            return $this->preferenceService->shouldSendEmailByEmail($email, $category);
-        } catch (\Throwable $e) {
+            return $this->preferenceService->shouldSendEmailByEmail($Silian_email, $Silian_category);
+        } catch (\Throwable $Silian_e) {
             $this->logger->warning('Failed to resolve notification preference, falling back to send', [
-                'email' => $email,
-                'category' => $category,
-                'error' => $e->getMessage(),
+                'email' => $Silian_email,
+                'category' => $Silian_category,
+                'error' => $Silian_e->getMessage(),
             ]);
 
             $this->logAudit('email_preference_lookup_failed', [
-                'email' => $email,
-                'category' => $category,
+                'email' => $Silian_email,
+                'category' => $Silian_category,
             ], 'failed');
-            $this->logError($e, '/internal/email/preferences', 'Failed to resolve notification preference', [
-                'email' => $email,
-                'category' => $category,
+            $this->logError($Silian_e, '/internal/email/preferences', 'Failed to resolve notification preference', [
+                'email' => $Silian_email,
+                'category' => $Silian_category,
             ]);
 
             return true;
@@ -1038,66 +1038,66 @@ HTML;
     }
 
     public function sendVerificationCode(
-        string $toEmail,
-        string $toName,
-        string $code,
-        int $expiryMinutes = 30,
-        ?string $verificationLink = null
+        string $Silian_toEmail,
+        string $Silian_toName,
+        string $Silian_code,
+        int $Silian_expiryMinutes = 30,
+        ?string $Silian_verificationLink = null
     ): bool {
-        if (!$this->shouldSendEmail($toEmail, NotificationPreferenceService::CATEGORY_VERIFICATION)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, NotificationPreferenceService::CATEGORY_VERIFICATION)) {
             return false;
         }
 
-        $subject = $this->config['subjects']['verification_code'] ?? 'Your Verification Code';
+        $Silian_subject = $this->config['subjects']['verification_code'] ?? 'Your Verification Code';
 
-        $htmlTemplate = $this->readTemplate(
+        $Silian_htmlTemplate = $this->readTemplate(
             'verification_code.html',
             '<p>Hello {{username}},</p><p>Your verification code is <strong>{{verification_code}}</strong>. '
             . 'The code expires in {{expiry_minutes}} minutes.</p>{{link_block}}'
             . '<p>If you did not request this code you can safely ignore this email.</p>'
         );
 
-        $buttons = [];
-        $linkBlockHtml = '';
-        $safeLink = null;
-        if ($verificationLink) {
-            $safeLink = $this->esc($verificationLink);
-            $buttons[] = [
+        $Silian_buttons = [];
+        $Silian_linkBlockHtml = '';
+        $Silian_safeLink = null;
+        if ($Silian_verificationLink) {
+            $Silian_safeLink = $this->esc($Silian_verificationLink);
+            $Silian_buttons[] = [
                 'text' => 'Verify Email',
-                'url' => $verificationLink,
+                'url' => $Silian_verificationLink,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
-            $linkBlockHtml = sprintf(
+            $Silian_linkBlockHtml = sprintf(
                 '<p>You can also open this link directly: <a href="%1$s">%1$s</a></p>',
-                $safeLink
+                $Silian_safeLink
             );
         }
 
-        $replacements = [
-            '{{code}}' => $this->esc($code),
-            '{{verification_code}}' => $this->esc($code),
-            '{{username}}' => $this->esc($toName),
-            '{{expiry_minutes}}' => $this->esc((string) $expiryMinutes),
-            '{{link_block}}' => $linkBlockHtml,
-            '{{verification_link}}' => $safeLink ?? '',
-            '{{link}}' => $safeLink ?? '',
+        $Silian_replacements = [
+            '{{code}}' => $this->esc($Silian_code),
+            '{{verification_code}}' => $this->esc($Silian_code),
+            '{{username}}' => $this->esc($Silian_toName),
+            '{{expiry_minutes}}' => $this->esc((string) $Silian_expiryMinutes),
+            '{{link_block}}' => $Silian_linkBlockHtml,
+            '{{verification_link}}' => $Silian_safeLink ?? '',
+            '{{link}}' => $Silian_safeLink ?? '',
         ];
 
-        $bodyHtmlContent = str_replace(array_keys($replacements), array_values($replacements), $htmlTemplate);
-        $bodyHtml = $this->renderLayout('Verify your email address', $bodyHtmlContent, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtmlContent = str_replace(array_keys($Silian_replacements), array_values($Silian_replacements), $Silian_htmlTemplate);
+        $Silian_bodyHtml = $this->renderLayout('Verify your email address', $Silian_bodyHtmlContent, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
-    public function sendPasswordResetLink(string $toEmail, string $toName, string $link)
+    public function sendPasswordResetLink(string $Silian_toEmail, string $Silian_toName, string $Silian_link)
     {
-        if (!$this->shouldSendEmail($toEmail, NotificationPreferenceService::CATEGORY_SECURITY)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, NotificationPreferenceService::CATEGORY_SECURITY)) {
             return false;
         }
 
-        $subject = $this->config['subjects']['password_reset'] ?? 'Password Reset Request';
-        $htmlTemplate = $this->readTemplate(
+        $Silian_subject = $this->config['subjects']['password_reset'] ?? 'Password Reset Request';
+        $Silian_htmlTemplate = $this->readTemplate(
             'password_reset.html',
             '<p>Hello {{username}},</p>'
             . '<p>We received a request to reset your password.</p>'
@@ -1105,78 +1105,78 @@ HTML;
             . '<p>If you did not request a password reset you can ignore this message.</p>'
         );
 
-        $buttons = [];
-        if (trim($link) !== '') {
-            $buttons[] = [
+        $Silian_buttons = [];
+        if (trim($Silian_link) !== '') {
+            $Silian_buttons[] = [
                 'text' => 'Reset password',
-                'url' => $link,
+                'url' => $Silian_link,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $contentHtml = str_replace(
+        $Silian_contentHtml = str_replace(
             ['{{username}}', '{{link}}'],
-            [$this->esc($toName), $this->esc($link)],
-            $htmlTemplate
+            [$this->esc($Silian_toName), $this->esc($Silian_link)],
+            $Silian_htmlTemplate
         );
-        $bodyHtml = $this->renderLayout('Reset your password', $contentHtml, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout('Reset your password', $Silian_contentHtml, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
-    public function sendActivityApprovedNotification(string $toEmail, string $toName, string $activityName, float $pointsEarned)
+    public function sendActivityApprovedNotification(string $Silian_toEmail, string $Silian_toName, string $Silian_activityName, float $Silian_pointsEarned)
     {
-        if (!$this->shouldSendEmail($toEmail, NotificationPreferenceService::CATEGORY_ACTIVITY)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, NotificationPreferenceService::CATEGORY_ACTIVITY)) {
             return false;
         }
 
-        $subject = $this->config['subjects']['activity_approved'] ?? 'Your Carbon Activity Approved!';
-        $htmlTemplate = $this->readTemplate(
+        $Silian_subject = $this->config['subjects']['activity_approved'] ?? 'Your Carbon Activity Approved!';
+        $Silian_htmlTemplate = $this->readTemplate(
             'activity_approved.html',
             '<p>Hello {{username}},</p>'
             . '<p>Your submission <strong>{{activity_name}}</strong> has been approved.</p>'
             . '<p>You earned <strong>{{points_earned}}</strong> points for this activity.</p>'
         );
 
-        $buttons = [];
-        $activityUrl = $this->buildFrontendUrl('dashboard/activities');
-        if ($activityUrl) {
-            $buttons[] = [
+        $Silian_buttons = [];
+        $Silian_activityUrl = $this->buildFrontendUrl('dashboard/activities');
+        if ($Silian_activityUrl) {
+            $Silian_buttons[] = [
                 'text' => 'View activity history',
-                'url' => $activityUrl,
+                'url' => $Silian_activityUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $points = $this->formatNumber($pointsEarned);
-        $bodyHtmlContent = str_replace(
+        $Silian_points = $this->formatNumber($Silian_pointsEarned);
+        $Silian_bodyHtmlContent = str_replace(
             [
                 '{{username}}',
                 self::TAG_ACTIVITY_NAME,
                 self::TAG_POINTS_EARNED,
             ],
             [
-                $this->esc($toName),
-                $this->esc($activityName),
-                $this->esc($points),
+                $this->esc($Silian_toName),
+                $this->esc($Silian_activityName),
+                $this->esc($Silian_points),
             ],
-            $htmlTemplate
+            $Silian_htmlTemplate
         );
-        $bodyHtml = $this->renderLayout('Activity approved', $bodyHtmlContent, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout('Activity approved', $Silian_bodyHtmlContent, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
-    public function sendActivityRejectedNotification(string $toEmail, string $toName, string $activityName, string $reason)
+    public function sendActivityRejectedNotification(string $Silian_toEmail, string $Silian_toName, string $Silian_activityName, string $Silian_reason)
     {
-        if (!$this->shouldSendEmail($toEmail, NotificationPreferenceService::CATEGORY_ACTIVITY)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, NotificationPreferenceService::CATEGORY_ACTIVITY)) {
             return false;
         }
 
-        $subject = $this->config['subjects']['activity_rejected'] ?? 'Your Carbon Activity Rejected';
-        $htmlTemplate = $this->readTemplate(
+        $Silian_subject = $this->config['subjects']['activity_rejected'] ?? 'Your Carbon Activity Rejected';
+        $Silian_htmlTemplate = $this->readTemplate(
             'activity_rejected.html',
             '<p>Hello {{username}},</p>'
             . '<p>We reviewed <strong>{{activity_name}}</strong> but could not approve it.</p>'
@@ -1184,143 +1184,143 @@ HTML;
             . '<p>You can review the submission, make changes, and resubmit at any time.</p>'
         );
 
-        $buttons = [];
-        $activityUrl = $this->buildFrontendUrl('dashboard/activities');
-        if ($activityUrl) {
-            $buttons[] = [
+        $Silian_buttons = [];
+        $Silian_activityUrl = $this->buildFrontendUrl('dashboard/activities');
+        if ($Silian_activityUrl) {
+            $Silian_buttons[] = [
                 'text' => 'Review submission',
-                'url' => $activityUrl,
+                'url' => $Silian_activityUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $bodyHtmlContent = str_replace(
+        $Silian_bodyHtmlContent = str_replace(
             [
                 '{{username}}',
                 self::TAG_ACTIVITY_NAME,
                 self::TAG_REASON,
             ],
             [
-                $this->esc($toName),
-                $this->esc($activityName),
-                $this->esc($reason),
+                $this->esc($Silian_toName),
+                $this->esc($Silian_activityName),
+                $this->esc($Silian_reason),
             ],
-            $htmlTemplate
+            $Silian_htmlTemplate
         );
-        $bodyHtml = $this->renderLayout('Activity requires updates', $bodyHtmlContent, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout('Activity requires updates', $Silian_bodyHtmlContent, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
     public function sendCarbonRecordReviewSummaryEmail(
-        string $toEmail,
-        string $toName,
-        string $action,
-        array $records,
-        string $title,
-        ?string $reviewNote = null,
-        ?string $reviewedBy = null
+        string $Silian_toEmail,
+        string $Silian_toName,
+        string $Silian_action,
+        array $Silian_records,
+        string $Silian_title,
+        ?string $Silian_reviewNote = null,
+        ?string $Silian_reviewedBy = null
     ): bool {
-        if (!$this->shouldSendEmail($toEmail, NotificationPreferenceService::CATEGORY_ACTIVITY)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, NotificationPreferenceService::CATEGORY_ACTIVITY)) {
             return false;
         }
 
-        $normalizedAction = strtolower(trim($action));
-        if ($normalizedAction === 'approved') {
-            $normalizedAction = 'approve';
-        } elseif ($normalizedAction === 'rejected') {
-            $normalizedAction = 'reject';
+        $Silian_normalizedAction = strtolower(trim($Silian_action));
+        if ($Silian_normalizedAction === 'approved') {
+            $Silian_normalizedAction = 'approve';
+        } elseif ($Silian_normalizedAction === 'rejected') {
+            $Silian_normalizedAction = 'reject';
         }
-        $isApprove = $normalizedAction === 'approve';
+        $Silian_isApprove = $Silian_normalizedAction === 'approve';
 
-        $subjectMap = $this->config['subjects']['carbon_record_review_summary'] ?? [];
-        if (is_array($subjectMap)) {
-            $subject = (string) ($subjectMap[$normalizedAction] ?? ($isApprove ? 'Carbon record review approved' : 'Carbon record review result'));
+        $Silian_subjectMap = $this->config['subjects']['carbon_record_review_summary'] ?? [];
+        if (is_array($Silian_subjectMap)) {
+            $Silian_subject = (string) ($Silian_subjectMap[$Silian_normalizedAction] ?? ($Silian_isApprove ? 'Carbon record review approved' : 'Carbon record review result'));
         } else {
-            $subject = is_string($subjectMap) ? (string) $subjectMap : ($isApprove ? 'Carbon record review approved' : 'Carbon record review result');
+            $Silian_subject = is_string($Silian_subjectMap) ? (string) $Silian_subjectMap : ($Silian_isApprove ? 'Carbon record review approved' : 'Carbon record review result');
         }
 
-        $headline = $title !== '' ? $title : ($isApprove ? 'Carbon record review approved' : 'Carbon record review result');
-        $intro = $isApprove
+        $Silian_headline = $Silian_title !== '' ? $Silian_title : ($Silian_isApprove ? 'Carbon record review approved' : 'Carbon record review result');
+        $Silian_intro = $Silian_isApprove
             ? 'The following carbon reduction records were approved:'
             : 'The following carbon reduction records require your attention:';
 
-        $items = [];
-        foreach ($records as $record) {
-            if (!is_array($record)) {
+        $Silian_items = [];
+        foreach ($Silian_records as $Silian_record) {
+            if (!is_array($Silian_record)) {
                 continue;
             }
 
-            $activity = (string) ($record['activity_name'] ?? 'Activity');
-            $value = $record['data_value'] ?? null;
-            $unit = $record['unit'] ?? null;
-            $points = $record['points_earned'] ?? null;
-            $date = $record['date'] ?? null;
+            $Silian_activity = (string) ($Silian_record['activity_name'] ?? 'Activity');
+            $Silian_value = $Silian_record['data_value'] ?? null;
+            $Silian_unit = $Silian_record['unit'] ?? null;
+            $Silian_points = $Silian_record['points_earned'] ?? null;
+            $Silian_date = $Silian_record['date'] ?? null;
 
-            $parts = ['Activity: ' . $this->esc($activity)];
-            if ($value !== null && $value !== '') {
-                $dataText = (string) $value;
-                if ($unit !== null && $unit !== '') {
-                    $dataText .= ' ' . $unit;
+            $Silian_parts = ['Activity: ' . $this->esc($Silian_activity)];
+            if ($Silian_value !== null && $Silian_value !== '') {
+                $Silian_dataText = (string) $Silian_value;
+                if ($Silian_unit !== null && $Silian_unit !== '') {
+                    $Silian_dataText .= ' ' . $Silian_unit;
                 }
-                $parts[] = 'Data: ' . $this->esc($dataText);
+                $Silian_parts[] = 'Data: ' . $this->esc($Silian_dataText);
             }
-            if ($points !== null && $points !== '') {
-                $parts[] = 'Points: ' . $this->esc((string) $points);
+            if ($Silian_points !== null && $Silian_points !== '') {
+                $Silian_parts[] = 'Points: ' . $this->esc((string) $Silian_points);
             }
-            if ($date !== null && $date !== '') {
-                $parts[] = 'Date: ' . $this->esc((string) $date);
-            }
-
-            if ($reviewNote && !empty($record['review_note'])) {
-                $parts[] = 'Note: ' . $this->esc((string) $record['review_note']);
+            if ($Silian_date !== null && $Silian_date !== '') {
+                $Silian_parts[] = 'Date: ' . $this->esc((string) $Silian_date);
             }
 
-            $items[] = '<li>' . implode(' · ', $parts) . '</li>';
+            if ($Silian_reviewNote && !empty($Silian_record['review_note'])) {
+                $Silian_parts[] = 'Note: ' . $this->esc((string) $Silian_record['review_note']);
+            }
+
+            $Silian_items[] = '<li>' . implode(' · ', $Silian_parts) . '</li>';
         }
 
-        if (empty($items)) {
-            $items[] = '<li>No record details provided.</li>';
+        if (empty($Silian_items)) {
+            $Silian_items[] = '<li>No record details provided.</li>';
         }
 
-        $listHtml = '<ul style="padding-left:20px;">' . implode('', $items) . '</ul>';
+        $Silian_listHtml = '<ul style="padding-left:20px;">' . implode('', $Silian_items) . '</ul>';
 
-        $contentHtml = '<p>Hello ' . $this->esc($toName) . ',</p>'
-            . '<p>' . $this->esc($intro) . '</p>'
-            . $listHtml;
+        $Silian_contentHtml = '<p>Hello ' . $this->esc($Silian_toName) . ',</p>'
+            . '<p>' . $this->esc($Silian_intro) . '</p>'
+            . $Silian_listHtml;
 
-        if ($reviewNote) {
-            $contentHtml .= '<p>Review note: ' . $this->esc($reviewNote) . '</p>';
+        if ($Silian_reviewNote) {
+            $Silian_contentHtml .= '<p>Review note: ' . $this->esc($Silian_reviewNote) . '</p>';
         }
-        if ($reviewedBy) {
-            $contentHtml .= '<p>Reviewer: ' . $this->esc($reviewedBy) . '</p>';
+        if ($Silian_reviewedBy) {
+            $Silian_contentHtml .= '<p>Reviewer: ' . $this->esc($Silian_reviewedBy) . '</p>';
         }
 
-        $buttons = [];
-        $activitiesUrl = $this->buildFrontendUrl('dashboard/activities');
-        if ($activitiesUrl) {
-            $buttons[] = [
-                'text' => $isApprove ? 'View approved records' : 'Review records',
-                'url' => $activitiesUrl,
+        $Silian_buttons = [];
+        $Silian_activitiesUrl = $this->buildFrontendUrl('dashboard/activities');
+        if ($Silian_activitiesUrl) {
+            $Silian_buttons[] = [
+                'text' => $Silian_isApprove ? 'View approved records' : 'Review records',
+                'url' => $Silian_activitiesUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $bodyHtml = $this->renderLayout($headline, $contentHtml, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout($Silian_headline, $Silian_contentHtml, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
-    public function sendExchangeConfirmation(string $toEmail, string $toName, string $productName, int $quantity, float $totalPoints)
+    public function sendExchangeConfirmation(string $Silian_toEmail, string $Silian_toName, string $Silian_productName, int $Silian_quantity, float $Silian_totalPoints)
     {
-        if (!$this->shouldSendEmail($toEmail, NotificationPreferenceService::CATEGORY_TRANSACTION)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, NotificationPreferenceService::CATEGORY_TRANSACTION)) {
             return false;
         }
 
-        $subject = $this->config['subjects']['exchange_confirmation'] ?? 'Your Exchange Order Confirmed';
-        $htmlTemplate = $this->readTemplate(
+        $Silian_subject = $this->config['subjects']['exchange_confirmation'] ?? 'Your Exchange Order Confirmed';
+        $Silian_htmlTemplate = $this->readTemplate(
             'exchange_confirmation.html',
             '<p>Hello {{username}},</p>'
             . '<p>Thanks for redeeming <strong>{{product_name}}</strong>.</p>'
@@ -1328,17 +1328,17 @@ HTML;
             . '<p>We will notify you when the exchange is ready for pickup.</p>'
         );
 
-        $buttons = [];
-        $storeUrl = $this->buildFrontendUrl('store');
-        if ($storeUrl) {
-            $buttons[] = [
+        $Silian_buttons = [];
+        $Silian_storeUrl = $this->buildFrontendUrl('store');
+        if ($Silian_storeUrl) {
+            $Silian_buttons[] = [
                 'text' => 'Browse more rewards',
-                'url' => $storeUrl,
+                'url' => $Silian_storeUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $bodyHtmlContent = str_replace(
+        $Silian_bodyHtmlContent = str_replace(
             [
                 '{{username}}',
                 self::TAG_PRODUCT_NAME,
@@ -1346,28 +1346,28 @@ HTML;
                 self::TAG_TOTAL_POINTS,
             ],
             [
-                $this->esc($toName),
-                $this->esc($productName),
-                $this->esc((string) $quantity),
-                $this->esc($this->formatNumber($totalPoints)),
+                $this->esc($Silian_toName),
+                $this->esc($Silian_productName),
+                $this->esc((string) $Silian_quantity),
+                $this->esc($this->formatNumber($Silian_totalPoints)),
             ],
-            $htmlTemplate
+            $Silian_htmlTemplate
         );
-        $bodyHtml = $this->renderLayout('Exchange confirmed', $bodyHtmlContent, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout('Exchange confirmed', $Silian_bodyHtmlContent, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
 
-    public function sendExchangeStatusUpdate(string $toEmail, string $toName, string $productName, string $status, string $adminNotes = '')
+    public function sendExchangeStatusUpdate(string $Silian_toEmail, string $Silian_toName, string $Silian_productName, string $Silian_status, string $Silian_adminNotes = '')
     {
-        if (!$this->shouldSendEmail($toEmail, NotificationPreferenceService::CATEGORY_TRANSACTION)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, NotificationPreferenceService::CATEGORY_TRANSACTION)) {
             return false;
         }
 
-        $subject = $this->config['subjects']['exchange_status_update'] ?? 'Your Exchange Order Status Updated';
-        $htmlTemplate = $this->readTemplate(
+        $Silian_subject = $this->config['subjects']['exchange_status_update'] ?? 'Your Exchange Order Status Updated';
+        $Silian_htmlTemplate = $this->readTemplate(
             'exchange_status_update.html',
             '<p>Hello {{username}},</p>'
             . '<p>Your exchange for <strong>{{product_name}}</strong> was updated to <strong>{{status}}</strong>.</p>'
@@ -1375,24 +1375,24 @@ HTML;
             . '<p>Thank you for helping us reduce carbon emissions.</p>'
         );
 
-        $buttons = [];
-        $storeUrl = $this->buildFrontendUrl('store');
-        if ($storeUrl) {
-            $buttons[] = [
+        $Silian_buttons = [];
+        $Silian_storeUrl = $this->buildFrontendUrl('store');
+        if ($Silian_storeUrl) {
+            $Silian_buttons[] = [
                 'text' => 'View rewards',
-                'url' => $storeUrl,
+                'url' => $Silian_storeUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $notesHtml = '';
-        $notesText = '';
-        if ($adminNotes !== '') {
-            $notesHtml = '<p>Notes from our team: ' . $this->esc($adminNotes) . '</p>';
-            $notesText = 'Notes from our team: ' . $adminNotes;
+        $Silian_notesHtml = '';
+        $Silian_notesText = '';
+        if ($Silian_adminNotes !== '') {
+            $Silian_notesHtml = '<p>Notes from our team: ' . $this->esc($Silian_adminNotes) . '</p>';
+            $Silian_notesText = 'Notes from our team: ' . $Silian_adminNotes;
         }
 
-        $bodyHtmlContent = str_replace(
+        $Silian_bodyHtmlContent = str_replace(
             [
                 '{{username}}',
                 self::TAG_PRODUCT_NAME,
@@ -1401,28 +1401,28 @@ HTML;
                 '{{admin_notes_block}}',
             ],
             [
-                $this->esc($toName),
-                $this->esc($productName),
-                $this->esc($status),
-                $this->esc($adminNotes),
-                $notesHtml,
+                $this->esc($Silian_toName),
+                $this->esc($Silian_productName),
+                $this->esc($Silian_status),
+                $this->esc($Silian_adminNotes),
+                $Silian_notesHtml,
             ],
-            $htmlTemplate
+            $Silian_htmlTemplate
         );
-        $bodyHtml = $this->renderLayout('Exchange status update', $bodyHtmlContent, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout('Exchange status update', $Silian_bodyHtmlContent, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
-    public function sendWelcomeEmail(string $toEmail, string $toName): bool
+    public function sendWelcomeEmail(string $Silian_toEmail, string $Silian_toName): bool
     {
-        if (!$this->shouldSendEmail($toEmail, NotificationPreferenceService::CATEGORY_SYSTEM)) {
+        if (!$this->shouldSendEmail($Silian_toEmail, NotificationPreferenceService::CATEGORY_SYSTEM)) {
             return false;
         }
 
-        $subject = $this->config['subjects']['welcome'] ?? 'Welcome to CarbonTrack';
-        $contentHtml = sprintf(
+        $Silian_subject = $this->config['subjects']['welcome'] ?? 'Welcome to CarbonTrack';
+        $Silian_contentHtml = sprintf(
             '<p>Hello %s,</p>'
             . '<p>Welcome to %s! Your account is ready to go.</p>'
             . '<p>Here are a few ideas to get started:</p>'
@@ -1431,42 +1431,42 @@ HTML;
             . '<li>Explore the store for rewards.</li>'
             . '<li>Invite friends to join your sustainability journey.</li>'
             . '</ul>',
-            $this->esc($toName),
+            $this->esc($Silian_toName),
             $this->esc($this->appName)
         );
 
-        $buttons = [];
-        $dashboardUrl = $this->buildFrontendUrl('dashboard');
-        if ($dashboardUrl) {
-            $buttons[] = [
+        $Silian_buttons = [];
+        $Silian_dashboardUrl = $this->buildFrontendUrl('dashboard');
+        if ($Silian_dashboardUrl) {
+            $Silian_buttons[] = [
                 'text' => 'Open dashboard',
-                'url' => $dashboardUrl,
+                'url' => $Silian_dashboardUrl,
                 'color' => self::DEFAULT_BUTTON_COLOR,
             ];
         }
 
-        $bodyHtml = $this->renderLayout('Welcome aboard', $contentHtml, $buttons);
-        $bodyText = $this->buildTextBody($bodyHtml, $buttons);
+        $Silian_bodyHtml = $this->renderLayout('Welcome aboard', $Silian_contentHtml, $Silian_buttons);
+        $Silian_bodyText = $this->buildTextBody($Silian_bodyHtml, $Silian_buttons);
 
-        return $this->sendEmail($toEmail, $toName, $subject, $bodyHtml, $bodyText);
+        return $this->sendEmail($Silian_toEmail, $Silian_toName, $Silian_subject, $Silian_bodyHtml, $Silian_bodyText);
     }
 
-    public function sendPasswordResetEmail(string $toEmail, string $toName, string $token): bool
+    public function sendPasswordResetEmail(string $Silian_toEmail, string $Silian_toName, string $Silian_token): bool
     {
-        $base = $this->config['reset_link_base']
+        $Silian_base = $this->config['reset_link_base']
             ?? ($_ENV['FRONTEND_URL'] ?? ($_ENV['APP_URL'] ?? ''));
-        $link = '#';
-        if ($base) {
-            $link = rtrim($base, '/') . '/reset-password?token=' . urlencode($token);
-            if ($toEmail !== '') {
-                $link .= '&email=' . urlencode($toEmail);
+        $Silian_link = '#';
+        if ($Silian_base) {
+            $Silian_link = rtrim($Silian_base, '/') . '/reset-password?token=' . urlencode($Silian_token);
+            if ($Silian_toEmail !== '') {
+                $Silian_link .= '&email=' . urlencode($Silian_toEmail);
             }
         }
 
-        return $this->sendPasswordResetLink($toEmail, $toName, $link);
+        return $this->sendPasswordResetLink($Silian_toEmail, $Silian_toName, $Silian_link);
     }
 
-    private function logAudit(string $action, array $context = [], string $status = 'success'): void
+    private function logAudit(string $Silian_action, array $Silian_context = [], string $Silian_status = 'success'): void
     {
         if ($this->auditLogService === null) {
             return;
@@ -1474,27 +1474,27 @@ HTML;
 
         try {
             $this->auditLogService->log([
-                'action' => $action,
+                'action' => $Silian_action,
                 'operation_category' => 'notification',
                 'actor_type' => 'system',
-                'status' => $status,
-                'data' => $context,
+                'status' => $Silian_status,
+                'data' => $Silian_context,
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // ignore audit logging failures inside email service
         }
     }
 
-    private function logError(\Throwable $e, string $path, string $message, array $context = []): void
+    private function logError(\Throwable $Silian_e, string $Silian_path, string $Silian_message, array $Silian_context = []): void
     {
         if ($this->errorLogService === null) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext($path, 'POST', null, [], $context);
-            $this->errorLogService->logException($e, $request, ['context_message' => $message] + $context);
-        } catch (\Throwable $ignore) {
+            $Silian_request = SyntheticRequestFactory::fromContext($Silian_path, 'POST', null, [], $Silian_context);
+            $this->errorLogService->logException($Silian_e, $Silian_request, ['context_message' => $Silian_message] + $Silian_context);
+        } catch (\Throwable $Silian_ignore) {
             // ignore error logging failures inside email service
         }
     }

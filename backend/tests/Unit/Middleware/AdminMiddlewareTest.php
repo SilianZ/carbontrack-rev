@@ -34,46 +34,46 @@ class AdminMiddlewareTest extends TestCase
 
     public function testRejectsWhenNotAuthenticated(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(null);
-        $mw = new AdminMiddleware($auth);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(null);
+        $Silian_mw = new AdminMiddleware($Silian_auth);
 
-        $request = makeRequest('GET', '/');
-        $handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(401, $resp->getStatusCode());
+        $Silian_request = makeRequest('GET', '/');
+        $Silian_handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(401, $Silian_resp->getStatusCode());
     }
 
     public function testRejectsWhenNotAdmin(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id'=>1,'is_admin'=>0]);
-        $auth->method('isAdminUser')->willReturn(false);
-        $mw = new AdminMiddleware($auth);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id'=>1,'is_admin'=>0]);
+        $Silian_auth->method('isAdminUser')->willReturn(false);
+        $Silian_mw = new AdminMiddleware($Silian_auth);
 
-        $request = makeRequest('GET', '/');
-        $handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(403, $resp->getStatusCode());
+        $Silian_request = makeRequest('GET', '/');
+        $Silian_handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(403, $Silian_resp->getStatusCode());
     }
 
     public function testPassThroughWhenAdmin(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id'=>1,'is_admin'=>1]);
-        $auth->method('isAdminUser')->willReturn(true);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id'=>1,'is_admin'=>1]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
 
-        $mw = new AdminMiddleware($auth);
-        $request = makeRequest('GET', '/');
-        $handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
-            public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
-                $resp = new \Slim\Psr7\Response();
-                $resp->getBody()->write('ok');
-                return $resp;
+        $Silian_mw = new AdminMiddleware($Silian_auth);
+        $Silian_request = makeRequest('GET', '/');
+        $Silian_handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
+            public function handle(\Psr\Http\Message\ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface {
+                $Silian_resp = new \Slim\Psr7\Response();
+                $Silian_resp->getBody()->write('ok');
+                return $Silian_resp;
             }
         };
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(200, $resp->getStatusCode());
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
     }
 }
 

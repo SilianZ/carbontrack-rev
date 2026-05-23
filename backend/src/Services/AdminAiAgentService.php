@@ -45,28 +45,28 @@ class AdminAiAgentService
         private PDO $db,
         private ?LlmClientInterface $client,
         private LoggerInterface $logger,
-        array $config = [],
-        ?array $commandConfig = null,
+        array $Silian_config = [],
+        ?array $Silian_commandConfig = null,
         private ?LlmLogService $llmLogService = null,
         private ?AuditLogService $auditLogService = null,
         private ?ErrorLogService $errorLogService = null,
         private ?StatisticsService $statisticsService = null,
         private ?MessageService $messageService = null,
         private ?BadgeService $badgeService = null,
-        ?AdminAiReadModelService $readModelService = null,
-        ?AdminAiWriteActionService $writeActionService = null,
-        ?AdminAiConversationStoreService $conversationStoreService = null,
-        ?AdminAiResultFormatterService $resultFormatterService = null
+        ?AdminAiReadModelService $Silian_readModelService = null,
+        ?AdminAiWriteActionService $Silian_writeActionService = null,
+        ?AdminAiConversationStoreService $Silian_conversationStoreService = null,
+        ?AdminAiResultFormatterService $Silian_resultFormatterService = null
     ) {
-        $this->model = (string) ($config['model'] ?? 'google/gemini-2.5-flash-lite');
-        $this->temperature = isset($config['temperature']) ? (float) $config['temperature'] : 0.2;
-        $this->maxTokens = isset($config['max_tokens']) ? (int) $config['max_tokens'] : 900;
+        $this->model = (string) ($Silian_config['model'] ?? 'google/gemini-2.5-flash-lite');
+        $this->temperature = isset($Silian_config['temperature']) ? (float) $Silian_config['temperature'] : 0.2;
+        $this->maxTokens = isset($Silian_config['max_tokens']) ? (int) $Silian_config['max_tokens'] : 900;
         $this->enabled = $client !== null;
-        $this->conversationStoreService = $conversationStoreService ?? new AdminAiConversationStoreService($db, $logger, $this->auditLogService);
-        $this->readModelService = $readModelService ?? new AdminAiReadModelService($db, $this->statisticsService);
-        $this->writeActionService = $writeActionService ?? new AdminAiWriteActionService($db, $this->auditLogService, $this->messageService, $this->badgeService);
-        $this->resultFormatterService = $resultFormatterService ?? new AdminAiResultFormatterService();
-        $this->loadCommandConfig($commandConfig ?? []);
+        $this->conversationStoreService = $Silian_conversationStoreService ?? new AdminAiConversationStoreService($db, $logger, $this->auditLogService);
+        $this->readModelService = $Silian_readModelService ?? new AdminAiReadModelService($db, $this->statisticsService);
+        $this->writeActionService = $Silian_writeActionService ?? new AdminAiWriteActionService($db, $this->auditLogService, $this->messageService, $this->badgeService);
+        $this->resultFormatterService = $Silian_resultFormatterService ?? new AdminAiResultFormatterService();
+        $this->loadCommandConfig($Silian_commandConfig ?? []);
     }
 
     public function isEnabled(): bool
@@ -81,87 +81,87 @@ class AdminAiAgentService
      * @return array<string,mixed>
      */
     public function chat(
-        ?string $conversationId,
-        ?string $message,
-        array $context = [],
-        ?array $decision = null,
-        array $logContext = []
+        ?string $Silian_conversationId,
+        ?string $Silian_message,
+        array $Silian_context = [],
+        ?array $Silian_decision = null,
+        array $Silian_logContext = []
     ): array {
         if (!$this->enabled) {
             throw new \RuntimeException('AI agent service is disabled');
         }
 
-        $normalizedContext = $this->normalizeContext($context);
-        $normalizedMessage = trim((string) ($message ?? ''));
-        $conversationId = $this->normalizeConversationId($conversationId) ?? $this->generateConversationId();
+        $Silian_normalizedContext = $this->normalizeContext($Silian_context);
+        $Silian_normalizedMessage = trim((string) ($Silian_message ?? ''));
+        $Silian_conversationId = $this->normalizeConversationId($Silian_conversationId) ?? $this->generateConversationId();
 
-        if ($normalizedMessage === '' && $decision === null) {
+        if ($Silian_normalizedMessage === '' && $Silian_decision === null) {
             throw new \InvalidArgumentException('Either message or decision is required.');
         }
 
-        if ($decision !== null) {
-            return $this->handleDecision($conversationId, $decision, $normalizedContext, $logContext);
+        if ($Silian_decision !== null) {
+            return $this->handleDecision($Silian_conversationId, $Silian_decision, $Silian_normalizedContext, $Silian_logContext);
         }
 
-        $this->conversationStoreService->logConversationEvent('admin_ai_user_message', $logContext, [
-            'conversation_id' => $conversationId,
-            'visible_text' => $normalizedMessage,
+        $this->conversationStoreService->logConversationEvent('admin_ai_user_message', $Silian_logContext, [
+            'conversation_id' => $Silian_conversationId,
+            'visible_text' => $Silian_normalizedMessage,
             'role' => 'user',
-            'context' => $normalizedContext,
+            'context' => $Silian_normalizedContext,
         ]);
 
-        $turnNo = $this->conversationStoreService->getNextTurnNo($conversationId);
-        $history = $this->conversationStoreService->fetchHistoryMessages(
-            $conversationId,
+        $Silian_turnNo = $this->conversationStoreService->getNextTurnNo($Silian_conversationId);
+        $Silian_history = $this->conversationStoreService->fetchHistoryMessages(
+            $Silian_conversationId,
             max(2, (int) ($this->agentConfig['max_history_messages'] ?? 12))
         );
-        $payload = [
+        $Silian_payload = [
             'model' => $this->model,
             'temperature' => $this->temperature,
             'max_tokens' => $this->maxTokens,
-            'messages' => $this->buildMessages($history, $normalizedMessage, $normalizedContext),
+            'messages' => $this->buildMessages($Silian_history, $Silian_normalizedMessage, $Silian_normalizedContext),
             'tools' => $this->buildTools(),
             'tool_choice' => 'auto',
         ];
 
-        $startedAt = microtime(true);
-        $llmLogId = null;
+        $Silian_startedAt = microtime(true);
+        $Silian_llmLogId = null;
         try {
-            $rawResponse = $this->client->createChatCompletion($payload);
-            $llmLogId = $this->logLlmCall($payload['messages'], $rawResponse, $logContext, $normalizedContext, $conversationId, $turnNo, $startedAt);
-        } catch (\Throwable $exception) {
-            $this->logLlmFailure($payload['messages'], $logContext, $normalizedContext, $conversationId, $turnNo, $startedAt, $exception);
-            $this->logError($exception, $logContext, [
-                'conversation_id' => $conversationId,
-                'message' => $normalizedMessage,
-                'context' => $normalizedContext,
+            $Silian_rawResponse = $this->client->createChatCompletion($Silian_payload);
+            $Silian_llmLogId = $this->logLlmCall($Silian_payload['messages'], $Silian_rawResponse, $Silian_logContext, $Silian_normalizedContext, $Silian_conversationId, $Silian_turnNo, $Silian_startedAt);
+        } catch (\Throwable $Silian_exception) {
+            $this->logLlmFailure($Silian_payload['messages'], $Silian_logContext, $Silian_normalizedContext, $Silian_conversationId, $Silian_turnNo, $Silian_startedAt, $Silian_exception);
+            $this->logError($Silian_exception, $Silian_logContext, [
+                'conversation_id' => $Silian_conversationId,
+                'message' => $Silian_normalizedMessage,
+                'context' => $Silian_normalizedContext,
             ]);
-            throw new \RuntimeException('LLM_UNAVAILABLE', 0, $exception);
+            throw new \RuntimeException('LLM_UNAVAILABLE', 0, $Silian_exception);
         }
 
-        $outcome = $this->processModelResponse($conversationId, $normalizedMessage, $normalizedContext, $logContext, $rawResponse);
-        $this->updateLlmConversationSnapshot($llmLogId, $normalizedMessage, $outcome, $normalizedContext);
+        $Silian_outcome = $this->processModelResponse($Silian_conversationId, $Silian_normalizedMessage, $Silian_normalizedContext, $Silian_logContext, $Silian_rawResponse);
+        $this->updateLlmConversationSnapshot($Silian_llmLogId, $Silian_normalizedMessage, $Silian_outcome, $Silian_normalizedContext);
 
-        if (($outcome['assistant_text'] ?? '') !== '') {
-            $this->conversationStoreService->logConversationEvent('admin_ai_assistant_message', $logContext, [
-                'conversation_id' => $conversationId,
-                'visible_text' => $outcome['assistant_text'],
+        if (($Silian_outcome['assistant_text'] ?? '') !== '') {
+            $this->conversationStoreService->logConversationEvent('admin_ai_assistant_message', $Silian_logContext, [
+                'conversation_id' => $Silian_conversationId,
+                'visible_text' => $Silian_outcome['assistant_text'],
                 'role' => 'assistant',
-                'meta' => $outcome['meta'] ?? null,
-                'suggestion' => $outcome['suggestion'] ?? null,
-                'proposal' => $outcome['proposal'] ?? null,
-                'result' => $outcome['result'] ?? null,
+                'meta' => $Silian_outcome['meta'] ?? null,
+                'suggestion' => $Silian_outcome['suggestion'] ?? null,
+                'proposal' => $Silian_outcome['proposal'] ?? null,
+                'result' => $Silian_outcome['result'] ?? null,
             ]);
         }
 
         return [
             'success' => true,
-            'conversation_id' => $conversationId,
-            'message' => $outcome['assistant_text'] ?? '',
-            'metadata' => array_merge($outcome['metadata'] ?? [], [
+            'conversation_id' => $Silian_conversationId,
+            'message' => $Silian_outcome['assistant_text'] ?? '',
+            'metadata' => array_merge($Silian_outcome['metadata'] ?? [], [
                 'timestamp' => gmdate(DATE_ATOM),
             ]),
-            'conversation' => $this->getConversationDetail($conversationId),
+            'conversation' => $this->getConversationDetail($Silian_conversationId),
         ];
     }
 
@@ -169,46 +169,46 @@ class AdminAiAgentService
      * @param array<string,mixed> $filters
      * @return array<int,array<string,mixed>>
      */
-    public function listConversations(array $filters = []): array
+    public function listConversations(array $Silian_filters = []): array
     {
-        return $this->conversationStoreService->listConversations($filters);
+        return $this->conversationStoreService->listConversations($Silian_filters);
     }
 
 
     /**
      * @return array<string,mixed>
      */
-    public function getConversationDetail(string $conversationId): array
+    public function getConversationDetail(string $Silian_conversationId): array
     {
-        return $this->conversationStoreService->getConversationDetail($conversationId);
+        return $this->conversationStoreService->getConversationDetail($Silian_conversationId);
     }
 
-    private function loadCommandConfig(array $commandConfig): void
+    private function loadCommandConfig(array $Silian_commandConfig): void
     {
-        $defaults = self::defaultCommandConfig();
-        $provided = $commandConfig;
+        $Silian_defaults = self::defaultCommandConfig();
+        $Silian_provided = $Silian_commandConfig;
 
-        $this->navigationTargets = $this->indexById($provided['navigationTargets'] ?? $defaults['navigationTargets']);
-        $this->quickActions = $this->indexById($provided['quickActions'] ?? $defaults['quickActions']);
-        $this->actionDefinitions = $this->indexById($provided['managementActions'] ?? $defaults['managementActions'], 'name');
-        $this->agentConfig = is_array($provided['agent'] ?? null) ? $provided['agent'] : ($defaults['agent'] ?? []);
+        $this->navigationTargets = $this->indexById($Silian_provided['navigationTargets'] ?? $Silian_defaults['navigationTargets']);
+        $this->quickActions = $this->indexById($Silian_provided['quickActions'] ?? $Silian_defaults['quickActions']);
+        $this->actionDefinitions = $this->indexById($Silian_provided['managementActions'] ?? $Silian_defaults['managementActions'], 'name');
+        $this->agentConfig = is_array($Silian_provided['agent'] ?? null) ? $Silian_provided['agent'] : ($Silian_defaults['agent'] ?? []);
     }
 
-    private function indexById(array $items, string $key = 'id'): array
+    private function indexById(array $Silian_items, string $Silian_key = 'id'): array
     {
-        $indexed = [];
-        foreach ($items as $item) {
-            if (!is_array($item)) {
+        $Silian_indexed = [];
+        foreach ($Silian_items as $Silian_item) {
+            if (!is_array($Silian_item)) {
                 continue;
             }
-            $identifier = $item[$key] ?? null;
-            if (!is_string($identifier) || $identifier === '') {
+            $Silian_identifier = $Silian_item[$Silian_key] ?? null;
+            if (!is_string($Silian_identifier) || $Silian_identifier === '') {
                 continue;
             }
-            $indexed[$identifier] = $item;
+            $Silian_indexed[$Silian_identifier] = $Silian_item;
         }
 
-        return $indexed;
+        return $Silian_indexed;
     }
 
     private static function defaultCommandConfig(): array
@@ -226,7 +226,7 @@ class AdminAiAgentService
 
     private function buildSystemPrompt(): string
     {
-        $lines = [
+        $Silian_lines = [
             'You are the CarbonTrack admin AI assistant.',
             'Operate as a multi-turn administrative agent.',
             'Use tools whenever navigation, data lookup, or execution is required.',
@@ -236,65 +236,65 @@ class AdminAiAgentService
         ];
 
         if ($this->actionDefinitions !== []) {
-            $lines[] = 'Available management actions:';
-            foreach ($this->actionDefinitions as $name => $definition) {
-                $lines[] = sprintf(
+            $Silian_lines[] = 'Available management actions:';
+            foreach ($this->actionDefinitions as $Silian_name => $Silian_definition) {
+                $Silian_lines[] = sprintf(
                     '- %s (%s): %s [risk=%s, confirm=%s]',
-                    $name,
-                    (string) ($definition['label'] ?? $name),
-                    (string) ($definition['description'] ?? $definition['label'] ?? $name),
-                    (string) ($definition['risk_level'] ?? 'read'),
-                    !empty($definition['requires_confirmation']) ? 'yes' : 'no'
+                    $Silian_name,
+                    (string) ($Silian_definition['label'] ?? $Silian_name),
+                    (string) ($Silian_definition['description'] ?? $Silian_definition['label'] ?? $Silian_name),
+                    (string) ($Silian_definition['risk_level'] ?? 'read'),
+                    !empty($Silian_definition['requires_confirmation']) ? 'yes' : 'no'
                 );
 
-                $keywords = array_values(array_filter(
-                    is_array($definition['keywords'] ?? null) ? $definition['keywords'] : [],
-                    static fn ($item): bool => is_string($item) && trim($item) !== ''
+                $Silian_keywords = array_values(array_filter(
+                    is_array($Silian_definition['keywords'] ?? null) ? $Silian_definition['keywords'] : [],
+                    static fn ($Silian_item): bool => is_string($Silian_item) && trim($Silian_item) !== ''
                 ));
-                if ($keywords !== []) {
-                    $lines[] = '  keywords: ' . implode(', ', $keywords);
+                if ($Silian_keywords !== []) {
+                    $Silian_lines[] = '  keywords: ' . implode(', ', $Silian_keywords);
                 }
             }
         }
 
-        return implode("\n", $lines);
+        return implode("\n", $Silian_lines);
     }
 
-    private function buildMessages(array $history, string $message, array $context): array
+    private function buildMessages(array $Silian_history, string $Silian_message, array $Silian_context): array
     {
-        $messages = [[
+        $Silian_messages = [[
             'role' => 'system',
             'content' => $this->buildSystemPrompt(),
         ]];
 
-        foreach ($history as $entry) {
-            $messages[] = [
-                'role' => $entry['role'],
-                'content' => $entry['content'],
+        foreach ($Silian_history as $Silian_entry) {
+            $Silian_messages[] = [
+                'role' => $Silian_entry['role'],
+                'content' => $Silian_entry['content'],
             ];
         }
 
-        if ($context !== []) {
-            $messages[] = [
+        if ($Silian_context !== []) {
+            $Silian_messages[] = [
                 'role' => 'system',
-                'content' => 'Current admin UI context: ' . json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                'content' => 'Current admin UI context: ' . json_encode($Silian_context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             ];
         }
 
-        $messages[] = [
+        $Silian_messages[] = [
             'role' => 'user',
-            'content' => $message,
+            'content' => $Silian_message,
         ];
 
-        return $messages;
+        return $Silian_messages;
     }
 
     private function buildTools(): array
     {
-        $tools = [];
+        $Silian_tools = [];
 
         if ($this->navigationTargets !== []) {
-            $tools[] = [
+            $Silian_tools[] = [
                 'type' => 'function',
                 'function' => [
                     'name' => 'navigate',
@@ -318,7 +318,7 @@ class AdminAiAgentService
         }
 
         if ($this->quickActions !== []) {
-            $tools[] = [
+            $Silian_tools[] = [
                 'type' => 'function',
                 'function' => [
                     'name' => 'execute_shortcut',
@@ -338,7 +338,7 @@ class AdminAiAgentService
         }
 
         if ($this->actionDefinitions !== []) {
-            $tools[] = [
+            $Silian_tools[] = [
                 'type' => 'function',
                 'function' => [
                     'name' => 'manage_admin',
@@ -361,453 +361,453 @@ class AdminAiAgentService
             ];
         }
 
-        return $tools;
+        return $Silian_tools;
     }
 
-    private function processModelResponse(string $conversationId, string $userMessage, array $context, array $logContext, array $rawResponse): array
+    private function processModelResponse(string $Silian_conversationId, string $Silian_userMessage, array $Silian_context, array $Silian_logContext, array $Silian_rawResponse): array
     {
-        $choice = $rawResponse['choices'][0] ?? [];
-        $message = $choice['message'] ?? [];
-        $toolCalls = $message['tool_calls'] ?? [];
-        $content = isset($message['content']) ? trim((string) $message['content']) : '';
+        $Silian_choice = $Silian_rawResponse['choices'][0] ?? [];
+        $Silian_message = $Silian_choice['message'] ?? [];
+        $Silian_toolCalls = $Silian_message['tool_calls'] ?? [];
+        $Silian_content = isset($Silian_message['content']) ? trim((string) $Silian_message['content']) : '';
 
-        if ($toolCalls === []) {
-            $fallback = $this->resolveKeywordFallbackAction($userMessage, $content);
-            if ($fallback !== null) {
-                return $this->handleManageAdminTool($conversationId, $fallback, $context, $logContext, $rawResponse);
+        if ($Silian_toolCalls === []) {
+            $Silian_fallback = $this->resolveKeywordFallbackAction($Silian_userMessage, $Silian_content);
+            if ($Silian_fallback !== null) {
+                return $this->handleManageAdminTool($Silian_conversationId, $Silian_fallback, $Silian_context, $Silian_logContext, $Silian_rawResponse);
             }
 
             return [
-                'assistant_text' => $content !== '' ? $content : '我暂时无法完成这项操作，请再具体一些。',
-                'metadata' => $this->extractMetadata($rawResponse),
+                'assistant_text' => $Silian_content !== '' ? $Silian_content : '我暂时无法完成这项操作，请再具体一些。',
+                'metadata' => $this->extractMetadata($Silian_rawResponse),
             ];
         }
 
-        $toolCall = $toolCalls[0];
-        $functionName = (string) ($toolCall['function']['name'] ?? '');
-        $arguments = json_decode((string) ($toolCall['function']['arguments'] ?? '{}'), true);
-        if (!is_array($arguments)) {
-            $arguments = [];
+        $Silian_toolCall = $Silian_toolCalls[0];
+        $Silian_functionName = (string) ($Silian_toolCall['function']['name'] ?? '');
+        $Silian_arguments = json_decode((string) ($Silian_toolCall['function']['arguments'] ?? '{}'), true);
+        if (!is_array($Silian_arguments)) {
+            $Silian_arguments = [];
         }
 
-        return match ($functionName) {
-            'navigate' => $this->handleNavigationTool($arguments, $rawResponse),
-            'execute_shortcut' => $this->handleShortcutTool($arguments, $rawResponse),
-            'manage_admin' => $this->handleManageAdminTool($conversationId, $arguments, $context, $logContext, $rawResponse),
+        return match ($Silian_functionName) {
+            'navigate' => $this->handleNavigationTool($Silian_arguments, $Silian_rawResponse),
+            'execute_shortcut' => $this->handleShortcutTool($Silian_arguments, $Silian_rawResponse),
+            'manage_admin' => $this->handleManageAdminTool($Silian_conversationId, $Silian_arguments, $Silian_context, $Silian_logContext, $Silian_rawResponse),
             default => [
                 'assistant_text' => '我没有找到可执行的管理员工具，请换个说法再试一次。',
-                'metadata' => $this->extractMetadata($rawResponse),
+                'metadata' => $this->extractMetadata($Silian_rawResponse),
             ],
         };
     }
 
-    private function handleNavigationTool(array $arguments, array $rawResponse): array
+    private function handleNavigationTool(array $Silian_arguments, array $Silian_rawResponse): array
     {
-        $destination = $arguments['destination'] ?? null;
-        if (!is_string($destination) || !isset($this->navigationTargets[$destination])) {
+        $Silian_destination = $Silian_arguments['destination'] ?? null;
+        if (!is_string($Silian_destination) || !isset($this->navigationTargets[$Silian_destination])) {
             return [
                 'assistant_text' => '我暂时无法定位到对应的后台页面。',
-                'metadata' => $this->extractMetadata($rawResponse),
+                'metadata' => $this->extractMetadata($Silian_rawResponse),
             ];
         }
 
-        $target = $this->navigationTargets[$destination];
-        $query = isset($arguments['parameters']) && is_array($arguments['parameters']) ? $arguments['parameters'] : [];
+        $Silian_target = $this->navigationTargets[$Silian_destination];
+        $Silian_query = isset($Silian_arguments['parameters']) && is_array($Silian_arguments['parameters']) ? $Silian_arguments['parameters'] : [];
 
         return [
-            'assistant_text' => sprintf('建议前往“%s”继续处理。', (string) ($target['label'] ?? $destination)),
+            'assistant_text' => sprintf('建议前往“%s”继续处理。', (string) ($Silian_target['label'] ?? $Silian_destination)),
             'suggestion' => [
                 'type' => 'navigate',
-                'label' => $target['label'] ?? $destination,
-                'route' => $target['route'] ?? null,
-                'query' => $query,
+                'label' => $Silian_target['label'] ?? $Silian_destination,
+                'route' => $Silian_target['route'] ?? null,
+                'query' => $Silian_query,
             ],
-            'metadata' => $this->extractMetadata($rawResponse),
+            'metadata' => $this->extractMetadata($Silian_rawResponse),
         ];
     }
 
-    private function handleShortcutTool(array $arguments, array $rawResponse): array
+    private function handleShortcutTool(array $Silian_arguments, array $Silian_rawResponse): array
     {
-        $shortcutId = $arguments['shortcut_id'] ?? null;
-        if (!is_string($shortcutId) || !isset($this->quickActions[$shortcutId])) {
+        $Silian_shortcutId = $Silian_arguments['shortcut_id'] ?? null;
+        if (!is_string($Silian_shortcutId) || !isset($this->quickActions[$Silian_shortcutId])) {
             return [
                 'assistant_text' => '我暂时无法定位到对应的快捷操作。',
-                'metadata' => $this->extractMetadata($rawResponse),
+                'metadata' => $this->extractMetadata($Silian_rawResponse),
             ];
         }
 
-        $target = $this->quickActions[$shortcutId];
+        $Silian_target = $this->quickActions[$Silian_shortcutId];
         return [
-            'assistant_text' => sprintf('建议直接使用快捷操作“%s”。', (string) ($target['label'] ?? $shortcutId)),
+            'assistant_text' => sprintf('建议直接使用快捷操作“%s”。', (string) ($Silian_target['label'] ?? $Silian_shortcutId)),
             'suggestion' => [
                 'type' => 'quick_action',
-                'label' => $target['label'] ?? $shortcutId,
-                'route' => $target['route'] ?? null,
-                'query' => $target['query'] ?? [],
+                'label' => $Silian_target['label'] ?? $Silian_shortcutId,
+                'route' => $Silian_target['route'] ?? null,
+                'query' => $Silian_target['query'] ?? [],
             ],
-            'metadata' => $this->extractMetadata($rawResponse),
+            'metadata' => $this->extractMetadata($Silian_rawResponse),
         ];
     }
 
     private function handleManageAdminTool(
-        string $conversationId,
-        array $arguments,
-        array $context,
-        array $logContext,
-        array $rawResponse
+        string $Silian_conversationId,
+        array $Silian_arguments,
+        array $Silian_context,
+        array $Silian_logContext,
+        array $Silian_rawResponse
     ): array {
-        $actionName = $arguments['action'] ?? null;
-        if (!is_string($actionName) || !isset($this->actionDefinitions[$actionName])) {
+        $Silian_actionName = $Silian_arguments['action'] ?? null;
+        if (!is_string($Silian_actionName) || !isset($this->actionDefinitions[$Silian_actionName])) {
             return [
                 'assistant_text' => '我暂时无法执行这个后台动作。',
-                'metadata' => $this->extractMetadata($rawResponse),
+                'metadata' => $this->extractMetadata($Silian_rawResponse),
             ];
         }
 
-        $definition = $this->actionDefinitions[$actionName];
-        $payload = isset($arguments['payload']) && is_array($arguments['payload']) ? $arguments['payload'] : [];
-        $payload = $this->applyPayloadTemplate($definition, $payload, $context);
-        $missing = $this->resolveMissingRequirements((array) ($definition['requires'] ?? []), $payload);
+        $Silian_definition = $this->actionDefinitions[$Silian_actionName];
+        $Silian_payload = isset($Silian_arguments['payload']) && is_array($Silian_arguments['payload']) ? $Silian_arguments['payload'] : [];
+        $Silian_payload = $this->applyPayloadTemplate($Silian_definition, $Silian_payload, $Silian_context);
+        $Silian_missing = $this->resolveMissingRequirements((array) ($Silian_definition['requires'] ?? []), $Silian_payload);
 
-        if ($missing !== []) {
+        if ($Silian_missing !== []) {
             return [
-                'assistant_text' => '还缺少必要信息：' . implode('、', array_map(static fn (array $item) => (string) $item['field'], $missing)) . '。',
-                'metadata' => $this->extractMetadata($rawResponse),
-                'meta' => ['missing' => $missing],
+                'assistant_text' => '还缺少必要信息：' . implode('、', array_map(static fn (array $Silian_item) => (string) $Silian_item['field'], $Silian_missing)) . '。',
+                'metadata' => $this->extractMetadata($Silian_rawResponse),
+                'meta' => ['missing' => $Silian_missing],
             ];
         }
 
-        $persistedPayload = $this->preparePersistedActionPayload($actionName, $payload);
-        $toolLabel = (string) ($definition['label'] ?? $actionName);
-        $toolSummary = $this->resultFormatterService->buildProposalSummary($definition, $payload);
+        $Silian_persistedPayload = $this->preparePersistedActionPayload($Silian_actionName, $Silian_payload);
+        $Silian_toolLabel = (string) ($Silian_definition['label'] ?? $Silian_actionName);
+        $Silian_toolSummary = $this->resultFormatterService->buildProposalSummary($Silian_definition, $Silian_payload);
 
-        $this->conversationStoreService->logConversationEvent('admin_ai_tool_invocation', $logContext, [
-            'conversation_id' => $conversationId,
-            'visible_text' => sprintf('调用工具：%s', $toolLabel),
-            'tool_name' => $actionName,
-            'action_name' => $actionName,
-            'label' => $toolLabel,
-            'summary' => $toolSummary,
+        $this->conversationStoreService->logConversationEvent('admin_ai_tool_invocation', $Silian_logContext, [
+            'conversation_id' => $Silian_conversationId,
+            'visible_text' => sprintf('调用工具：%s', $Silian_toolLabel),
+            'tool_name' => $Silian_actionName,
+            'action_name' => $Silian_actionName,
+            'label' => $Silian_toolLabel,
+            'summary' => $Silian_toolSummary,
             'request_data' => [
-                'action_name' => $actionName,
-                'label' => $toolLabel,
-                'summary' => $toolSummary,
-                'payload' => $persistedPayload,
+                'action_name' => $Silian_actionName,
+                'label' => $Silian_toolLabel,
+                'summary' => $Silian_toolSummary,
+                'payload' => $Silian_persistedPayload,
             ],
         ]);
 
-        $isReadAction = ($definition['risk_level'] ?? 'read') === 'read' && empty($definition['requires_confirmation']);
-        if ($isReadAction) {
-            $result = $this->executeReadAction($actionName, $payload);
+        $Silian_isReadAction = ($Silian_definition['risk_level'] ?? 'read') === 'read' && empty($Silian_definition['requires_confirmation']);
+        if ($Silian_isReadAction) {
+            $Silian_result = $this->executeReadAction($Silian_actionName, $Silian_payload);
             return [
-                'assistant_text' => $this->resultFormatterService->formatReadActionResult($actionName, $result),
-                'result' => $result,
-                'metadata' => $this->extractMetadata($rawResponse),
-                'meta' => ['action_name' => $actionName],
+                'assistant_text' => $this->resultFormatterService->formatReadActionResult($Silian_actionName, $Silian_result),
+                'result' => $Silian_result,
+                'metadata' => $this->extractMetadata($Silian_rawResponse),
+                'meta' => ['action_name' => $Silian_actionName],
             ];
         }
 
-        $summary = $this->resultFormatterService->buildProposalSummary($definition, $payload);
-        $proposalData = [
-            'conversation_id' => $conversationId,
-            'action_name' => $actionName,
-            'label' => $definition['label'] ?? $actionName,
-            'summary' => $summary,
-            'payload' => $persistedPayload,
-            'risk_level' => $definition['risk_level'] ?? 'write',
+        $Silian_summary = $this->resultFormatterService->buildProposalSummary($Silian_definition, $Silian_payload);
+        $Silian_proposalData = [
+            'conversation_id' => $Silian_conversationId,
+            'action_name' => $Silian_actionName,
+            'label' => $Silian_definition['label'] ?? $Silian_actionName,
+            'summary' => $Silian_summary,
+            'payload' => $Silian_persistedPayload,
+            'risk_level' => $Silian_definition['risk_level'] ?? 'write',
             'requires_confirmation' => true,
         ];
 
-        $proposalId = $this->conversationStoreService->logConversationEvent('admin_ai_action_proposed', $logContext, [
-            'conversation_id' => $conversationId,
-            'visible_text' => $summary,
-            'request_data' => $proposalData,
+        $Silian_proposalId = $this->conversationStoreService->logConversationEvent('admin_ai_action_proposed', $Silian_logContext, [
+            'conversation_id' => $Silian_conversationId,
+            'visible_text' => $Silian_summary,
+            'request_data' => $Silian_proposalData,
             'status' => 'pending',
         ]);
 
         return [
-            'assistant_text' => sprintf("已整理待执行操作：%s\n如需执行，请确认。", $summary),
-            'proposal' => array_merge($proposalData, [
-                'proposal_id' => $proposalId,
+            'assistant_text' => sprintf("已整理待执行操作：%s\n如需执行，请确认。", $Silian_summary),
+            'proposal' => array_merge($Silian_proposalData, [
+                'proposal_id' => $Silian_proposalId,
                 'status' => 'pending',
             ]),
-            'metadata' => $this->extractMetadata($rawResponse),
-            'meta' => ['action_name' => $actionName, 'proposal_id' => $proposalId],
+            'metadata' => $this->extractMetadata($Silian_rawResponse),
+            'meta' => ['action_name' => $Silian_actionName, 'proposal_id' => $Silian_proposalId],
         ];
     }
 
-    private function handleDecision(string $conversationId, array $decision, array $context, array $logContext): array
+    private function handleDecision(string $Silian_conversationId, array $Silian_decision, array $Silian_context, array $Silian_logContext): array
     {
-        $proposalId = isset($decision['proposal_id']) && is_numeric((string) $decision['proposal_id'])
-            ? (int) $decision['proposal_id']
+        $Silian_proposalId = isset($Silian_decision['proposal_id']) && is_numeric((string) $Silian_decision['proposal_id'])
+            ? (int) $Silian_decision['proposal_id']
             : 0;
-        $outcome = strtolower(trim((string) ($decision['outcome'] ?? '')));
+        $Silian_outcome = strtolower(trim((string) ($Silian_decision['outcome'] ?? '')));
 
-        if ($proposalId <= 0 || !in_array($outcome, ['confirm', 'reject'], true)) {
+        if ($Silian_proposalId <= 0 || !in_array($Silian_outcome, ['confirm', 'reject'], true)) {
             throw new \InvalidArgumentException('Invalid decision payload.');
         }
 
-        $proposal = $this->conversationStoreService->findProposal($conversationId, $proposalId);
-        if ($proposal === null) {
+        $Silian_proposal = $this->conversationStoreService->findProposal($Silian_conversationId, $Silian_proposalId);
+        if ($Silian_proposal === null) {
             throw new \RuntimeException('PROPOSAL_NOT_FOUND');
         }
 
-        $actionName = (string) ($proposal['action_name'] ?? '');
-        $payload = is_array($proposal['payload'] ?? null) ? $proposal['payload'] : [];
+        $Silian_actionName = (string) ($Silian_proposal['action_name'] ?? '');
+        $Silian_payload = is_array($Silian_proposal['payload'] ?? null) ? $Silian_proposal['payload'] : [];
 
-        if ($outcome === 'reject') {
-            $this->conversationStoreService->updateProposalStatus($proposalId, 'failed', ['decision' => 'rejected']);
-            $this->conversationStoreService->logConversationEvent('admin_ai_action_rejected', $logContext, [
-                'conversation_id' => $conversationId,
-                'proposal_id' => $proposalId,
-                'action_name' => $actionName,
-                'request_data' => $payload,
+        if ($Silian_outcome === 'reject') {
+            $this->conversationStoreService->updateProposalStatus($Silian_proposalId, 'failed', ['decision' => 'rejected']);
+            $this->conversationStoreService->logConversationEvent('admin_ai_action_rejected', $Silian_logContext, [
+                'conversation_id' => $Silian_conversationId,
+                'proposal_id' => $Silian_proposalId,
+                'action_name' => $Silian_actionName,
+                'request_data' => $Silian_payload,
             ]);
-            $assistantText = '已取消该待执行操作。你可以补充条件后重新下达指令。';
-            $this->conversationStoreService->logConversationEvent('admin_ai_assistant_message', $logContext, [
-                'conversation_id' => $conversationId,
-                'visible_text' => $assistantText,
+            $Silian_assistantText = '已取消该待执行操作。你可以补充条件后重新下达指令。';
+            $this->conversationStoreService->logConversationEvent('admin_ai_assistant_message', $Silian_logContext, [
+                'conversation_id' => $Silian_conversationId,
+                'visible_text' => $Silian_assistantText,
                 'role' => 'assistant',
-                'meta' => ['decision' => 'rejected', 'proposal_id' => $proposalId],
+                'meta' => ['decision' => 'rejected', 'proposal_id' => $Silian_proposalId],
             ]);
             return [
                 'success' => true,
-                'conversation_id' => $conversationId,
-                'message' => $assistantText,
+                'conversation_id' => $Silian_conversationId,
+                'message' => $Silian_assistantText,
                 'metadata' => ['decision' => 'rejected', 'timestamp' => gmdate(DATE_ATOM)],
-                'conversation' => $this->getConversationDetail($conversationId),
+                'conversation' => $this->getConversationDetail($Silian_conversationId),
             ];
         }
 
-            $this->conversationStoreService->logConversationEvent('admin_ai_action_confirmed', $logContext, [
-            'conversation_id' => $conversationId,
-            'proposal_id' => $proposalId,
-            'action_name' => $actionName,
-            'request_data' => $payload,
+            $this->conversationStoreService->logConversationEvent('admin_ai_action_confirmed', $Silian_logContext, [
+            'conversation_id' => $Silian_conversationId,
+            'proposal_id' => $Silian_proposalId,
+            'action_name' => $Silian_actionName,
+            'request_data' => $Silian_payload,
         ]);
 
         try {
-            $executeLogContext = $logContext;
-            $executeLogContext['conversation_id'] = $conversationId;
-            $result = $this->executeWriteAction($actionName, $payload, $executeLogContext);
-            $this->conversationStoreService->updateProposalStatus($proposalId, 'success', ['decision' => 'confirmed', 'result' => $result]);
-            $this->conversationStoreService->logConversationEvent('admin_ai_action_executed', $logContext, [
-                'conversation_id' => $conversationId,
-                'proposal_id' => $proposalId,
-                'action_name' => $actionName,
-                'request_data' => $payload,
-                'new_data' => $result,
+            $Silian_executeLogContext = $Silian_logContext;
+            $Silian_executeLogContext['conversation_id'] = $Silian_conversationId;
+            $Silian_result = $this->executeWriteAction($Silian_actionName, $Silian_payload, $Silian_executeLogContext);
+            $this->conversationStoreService->updateProposalStatus($Silian_proposalId, 'success', ['decision' => 'confirmed', 'result' => $Silian_result]);
+            $this->conversationStoreService->logConversationEvent('admin_ai_action_executed', $Silian_logContext, [
+                'conversation_id' => $Silian_conversationId,
+                'proposal_id' => $Silian_proposalId,
+                'action_name' => $Silian_actionName,
+                'request_data' => $Silian_payload,
+                'new_data' => $Silian_result,
             ]);
-            $assistantText = $this->resultFormatterService->formatWriteActionResult($actionName, $result);
-            $meta = ['decision' => 'confirmed', 'proposal_id' => $proposalId, 'result' => $result];
-        } catch (\Throwable $exception) {
-            $this->conversationStoreService->updateProposalStatus($proposalId, 'failed', ['decision' => 'confirmed', 'error' => $exception->getMessage()]);
-            $this->conversationStoreService->logConversationEvent('admin_ai_action_failed', $logContext, [
-                'conversation_id' => $conversationId,
-                'proposal_id' => $proposalId,
-                'action_name' => $actionName,
-                'request_data' => $payload,
+            $Silian_assistantText = $this->resultFormatterService->formatWriteActionResult($Silian_actionName, $Silian_result);
+            $Silian_meta = ['decision' => 'confirmed', 'proposal_id' => $Silian_proposalId, 'result' => $Silian_result];
+        } catch (\Throwable $Silian_exception) {
+            $this->conversationStoreService->updateProposalStatus($Silian_proposalId, 'failed', ['decision' => 'confirmed', 'error' => $Silian_exception->getMessage()]);
+            $this->conversationStoreService->logConversationEvent('admin_ai_action_failed', $Silian_logContext, [
+                'conversation_id' => $Silian_conversationId,
+                'proposal_id' => $Silian_proposalId,
+                'action_name' => $Silian_actionName,
+                'request_data' => $Silian_payload,
                 'status' => 'failed',
             ]);
-            $this->logError($exception, $logContext, [
-                'conversation_id' => $conversationId,
-                'proposal_id' => $proposalId,
-                'action_name' => $actionName,
+            $this->logError($Silian_exception, $Silian_logContext, [
+                'conversation_id' => $Silian_conversationId,
+                'proposal_id' => $Silian_proposalId,
+                'action_name' => $Silian_actionName,
             ]);
-            $assistantText = '执行该操作时出现错误，请稍后重试。';
-            $meta = ['decision' => 'confirmed', 'proposal_id' => $proposalId, 'error' => $exception->getMessage()];
+            $Silian_assistantText = '执行该操作时出现错误，请稍后重试。';
+            $Silian_meta = ['decision' => 'confirmed', 'proposal_id' => $Silian_proposalId, 'error' => $Silian_exception->getMessage()];
         }
 
-        $this->conversationStoreService->logConversationEvent('admin_ai_assistant_message', $logContext, [
-            'conversation_id' => $conversationId,
-            'visible_text' => $assistantText,
+        $this->conversationStoreService->logConversationEvent('admin_ai_assistant_message', $Silian_logContext, [
+            'conversation_id' => $Silian_conversationId,
+            'visible_text' => $Silian_assistantText,
             'role' => 'assistant',
-            'meta' => $meta,
+            'meta' => $Silian_meta,
         ]);
 
         return [
             'success' => true,
-            'conversation_id' => $conversationId,
-            'message' => $assistantText,
-            'metadata' => array_merge($meta, ['timestamp' => gmdate(DATE_ATOM)]),
-            'conversation' => $this->getConversationDetail($conversationId),
+            'conversation_id' => $Silian_conversationId,
+            'message' => $Silian_assistantText,
+            'metadata' => array_merge($Silian_meta, ['timestamp' => gmdate(DATE_ATOM)]),
+            'conversation' => $this->getConversationDetail($Silian_conversationId),
         ];
     }
 
-    private function applyPayloadTemplate(array $definition, array $payload, array $context): array
+    private function applyPayloadTemplate(array $Silian_definition, array $Silian_payload, array $Silian_context): array
     {
-        $template = isset($definition['api']['payloadTemplate']) && is_array($definition['api']['payloadTemplate'])
-            ? $definition['api']['payloadTemplate']
+        $Silian_template = isset($Silian_definition['api']['payloadTemplate']) && is_array($Silian_definition['api']['payloadTemplate'])
+            ? $Silian_definition['api']['payloadTemplate']
             : [];
-        $finalPayload = array_merge($template, $payload);
+        $Silian_finalPayload = array_merge($Silian_template, $Silian_payload);
 
-        $contextHints = isset($definition['contextHints']) && is_array($definition['contextHints'])
-            ? $definition['contextHints']
+        $Silian_contextHints = isset($Silian_definition['contextHints']) && is_array($Silian_definition['contextHints'])
+            ? $Silian_definition['contextHints']
             : [];
-        if (in_array('selectedRecordIds', $contextHints, true) && empty($finalPayload['record_ids']) && !empty($context['selectedRecordIds'])) {
-            $finalPayload['record_ids'] = array_values((array) $context['selectedRecordIds']);
+        if (in_array('selectedRecordIds', $Silian_contextHints, true) && empty($Silian_finalPayload['record_ids']) && !empty($Silian_context['selectedRecordIds'])) {
+            $Silian_finalPayload['record_ids'] = array_values((array) $Silian_context['selectedRecordIds']);
         }
         if (
-            in_array('selectedUserId', $contextHints, true)
-            && empty($finalPayload['user_id'])
-            && !empty($context['selectedUserId'])
-            && is_numeric((string) $context['selectedUserId'])
+            in_array('selectedUserId', $Silian_contextHints, true)
+            && empty($Silian_finalPayload['user_id'])
+            && !empty($Silian_context['selectedUserId'])
+            && is_numeric((string) $Silian_context['selectedUserId'])
         ) {
-            $finalPayload['user_id'] = (int) $context['selectedUserId'];
+            $Silian_finalPayload['user_id'] = (int) $Silian_context['selectedUserId'];
         }
-        if (isset($finalPayload['days']) && is_numeric($finalPayload['days'])) {
-            $finalPayload['days'] = max(7, min(90, (int) $finalPayload['days']));
+        if (isset($Silian_finalPayload['days']) && is_numeric($Silian_finalPayload['days'])) {
+            $Silian_finalPayload['days'] = max(7, min(90, (int) $Silian_finalPayload['days']));
         }
-        if (isset($finalPayload['limit']) && is_numeric($finalPayload['limit'])) {
-            $finalPayload['limit'] = max(1, min(50, (int) $finalPayload['limit']));
+        if (isset($Silian_finalPayload['limit']) && is_numeric($Silian_finalPayload['limit'])) {
+            $Silian_finalPayload['limit'] = max(1, min(50, (int) $Silian_finalPayload['limit']));
         }
 
-        return $finalPayload;
+        return $Silian_finalPayload;
     }
 
-    private function resolveMissingRequirements(array $requirements, array $payload): array
+    private function resolveMissingRequirements(array $Silian_requirements, array $Silian_payload): array
     {
-        $missing = [];
-        foreach ($requirements as $field) {
-            if (is_array($field) && isset($field['anyOf']) && is_array($field['anyOf'])) {
-                $hasValue = false;
-                foreach ($field['anyOf'] as $candidate) {
-                    if (!is_string($candidate) || $candidate === '') {
+        $Silian_missing = [];
+        foreach ($Silian_requirements as $Silian_field) {
+            if (is_array($Silian_field) && isset($Silian_field['anyOf']) && is_array($Silian_field['anyOf'])) {
+                $Silian_hasValue = false;
+                foreach ($Silian_field['anyOf'] as $Silian_candidate) {
+                    if (!is_string($Silian_candidate) || $Silian_candidate === '') {
                         continue;
                     }
-                    $value = $payload[$candidate] ?? null;
-                    $hasCandidateValue = is_array($value)
-                        ? count(array_filter($value, static fn ($item) => $item !== null && $item !== '' && $item !== [])) > 0
-                        : ($value !== null && $value !== '');
-                    if ($hasCandidateValue) {
-                        $hasValue = true;
+                    $Silian_value = $Silian_payload[$Silian_candidate] ?? null;
+                    $Silian_hasCandidateValue = is_array($Silian_value)
+                        ? count(array_filter($Silian_value, static fn ($Silian_item) => $Silian_item !== null && $Silian_item !== '' && $Silian_item !== [])) > 0
+                        : ($Silian_value !== null && $Silian_value !== '');
+                    if ($Silian_hasCandidateValue) {
+                        $Silian_hasValue = true;
                         break;
                     }
                 }
 
-                if (!$hasValue) {
-                    $missing[] = ['field' => (string) ($field['label'] ?? implode('_or_', $field['anyOf']))];
+                if (!$Silian_hasValue) {
+                    $Silian_missing[] = ['field' => (string) ($Silian_field['label'] ?? implode('_or_', $Silian_field['anyOf']))];
                 }
                 continue;
             }
 
-            if (!is_string($field) || $field === '') {
+            if (!is_string($Silian_field) || $Silian_field === '') {
                 continue;
             }
 
-            $value = $payload[$field] ?? null;
-            $isMissing = is_array($value)
-                ? count(array_filter($value, static fn ($item) => $item !== null && $item !== '' && $item !== [])) === 0
-                : ($value === null || $value === '');
+            $Silian_value = $Silian_payload[$Silian_field] ?? null;
+            $Silian_isMissing = is_array($Silian_value)
+                ? count(array_filter($Silian_value, static fn ($Silian_item) => $Silian_item !== null && $Silian_item !== '' && $Silian_item !== [])) === 0
+                : ($Silian_value === null || $Silian_value === '');
 
-            if ($isMissing) {
-                $missing[] = ['field' => $field];
+            if ($Silian_isMissing) {
+                $Silian_missing[] = ['field' => $Silian_field];
             }
         }
 
-        return $missing;
+        return $Silian_missing;
     }
 
-    private function executeReadAction(string $actionName, array $payload): array
+    private function executeReadAction(string $Silian_actionName, array $Silian_payload): array
     {
-        return $this->readModelService->execute($actionName, $payload);
+        return $this->readModelService->execute($Silian_actionName, $Silian_payload);
     }
 
-    private function executeWriteAction(string $actionName, array $payload, array $logContext): array
+    private function executeWriteAction(string $Silian_actionName, array $Silian_payload, array $Silian_logContext): array
     {
-        return $this->writeActionService->execute($actionName, $payload, $logContext);
+        return $this->writeActionService->execute($Silian_actionName, $Silian_payload, $Silian_logContext);
     }
 
     private function logLlmCall(
-        array $messages,
-        array $rawResponse,
-        array $logContext,
-        array $context,
-        string $conversationId,
-        int $turnNo,
-        float $startedAt
+        array $Silian_messages,
+        array $Silian_rawResponse,
+        array $Silian_logContext,
+        array $Silian_context,
+        string $Silian_conversationId,
+        int $Silian_turnNo,
+        float $Silian_startedAt
     ): ?int {
         if ($this->llmLogService === null) {
             return null;
         }
 
-        $choice = $rawResponse['choices'][0] ?? [];
-        $message = $choice['message'] ?? [];
-        $responseId = $rawResponse['id'] ?? ($rawResponse['response_id'] ?? null);
-        $responseText = isset($message['content']) ? (string) $message['content'] : json_encode($rawResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $Silian_choice = $Silian_rawResponse['choices'][0] ?? [];
+        $Silian_message = $Silian_choice['message'] ?? [];
+        $Silian_responseId = $Silian_rawResponse['id'] ?? ($Silian_rawResponse['response_id'] ?? null);
+        $Silian_responseText = isset($Silian_message['content']) ? (string) $Silian_message['content'] : json_encode($Silian_rawResponse, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         return $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'admin',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'conversation_id' => $conversationId,
-            'turn_no' => $turnNo,
-            'source' => $logContext['source'] ?? '/admin/ai/chat',
-            'model' => $rawResponse['model'] ?? $this->model,
-            'prompt' => $messages,
-            'response_raw' => $responseText,
-            'response_id' => is_string($responseId) ? $responseId : null,
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'admin',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'conversation_id' => $Silian_conversationId,
+            'turn_no' => $Silian_turnNo,
+            'source' => $Silian_logContext['source'] ?? '/admin/ai/chat',
+            'model' => $Silian_rawResponse['model'] ?? $this->model,
+            'prompt' => $Silian_messages,
+            'response_raw' => $Silian_responseText,
+            'response_id' => is_string($Silian_responseId) ? $Silian_responseId : null,
             'status' => 'success',
-            'usage' => $rawResponse['usage'] ?? null,
-            'latency_ms' => round((microtime(true) - $startedAt) * 1000, 2),
+            'usage' => $Silian_rawResponse['usage'] ?? null,
+            'latency_ms' => round((microtime(true) - $Silian_startedAt) * 1000, 2),
             'context' => [
-                'conversation_context' => $context,
-                'tool_calls' => $message['tool_calls'] ?? [],
+                'conversation_context' => $Silian_context,
+                'tool_calls' => $Silian_message['tool_calls'] ?? [],
             ],
         ]);
     }
 
     private function logLlmFailure(
-        array $messages,
-        array $logContext,
-        array $context,
-        string $conversationId,
-        int $turnNo,
-        float $startedAt,
-        \Throwable $exception
+        array $Silian_messages,
+        array $Silian_logContext,
+        array $Silian_context,
+        string $Silian_conversationId,
+        int $Silian_turnNo,
+        float $Silian_startedAt,
+        \Throwable $Silian_exception
     ): void {
         if ($this->llmLogService === null) {
             return;
         }
 
         $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'admin',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'conversation_id' => $conversationId,
-            'turn_no' => $turnNo,
-            'source' => $logContext['source'] ?? '/admin/ai/chat',
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'admin',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'conversation_id' => $Silian_conversationId,
+            'turn_no' => $Silian_turnNo,
+            'source' => $Silian_logContext['source'] ?? '/admin/ai/chat',
             'model' => $this->model,
-            'prompt' => $messages,
+            'prompt' => $Silian_messages,
             'response_raw' => null,
             'status' => 'failed',
-            'error_message' => $exception->getMessage(),
-            'latency_ms' => round((microtime(true) - $startedAt) * 1000, 2),
+            'error_message' => $Silian_exception->getMessage(),
+            'latency_ms' => round((microtime(true) - $Silian_startedAt) * 1000, 2),
             'context' => [
-                'conversation_context' => $context,
+                'conversation_context' => $Silian_context,
             ],
         ]);
     }
 
-    private function logError(\Throwable $exception, array $logContext, array $extra = []): void
+    private function logError(\Throwable $Silian_exception, array $Silian_logContext, array $Silian_extra = []): void
     {
         if ($this->errorLogService === null) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext(
-                $logContext['source'] ?? '/admin/ai/chat',
+            $Silian_request = SyntheticRequestFactory::fromContext(
+                $Silian_logContext['source'] ?? '/admin/ai/chat',
                 'POST',
-                isset($logContext['request_id']) ? (string) $logContext['request_id'] : null,
+                isset($Silian_logContext['request_id']) ? (string) $Silian_logContext['request_id'] : null,
                 [],
-                $extra
+                $Silian_extra
             );
-            $this->errorLogService->logException($exception, $request, $extra);
-        } catch (\Throwable $loggingError) {
+            $this->errorLogService->logException($Silian_exception, $Silian_request, $Silian_extra);
+        } catch (\Throwable $Silian_loggingError) {
             $this->logger->warning('Failed to persist admin AI error log.', [
-                'error' => $loggingError->getMessage(),
-                'original_error' => $exception->getMessage(),
+                'error' => $Silian_loggingError->getMessage(),
+                'original_error' => $Silian_exception->getMessage(),
             ]);
         }
     }
@@ -816,165 +816,165 @@ class AdminAiAgentService
      * @param array<string,mixed> $outcome
      * @param array<string,mixed> $context
      */
-    private function updateLlmConversationSnapshot(?int $llmLogId, string $userMessage, array $outcome, array $context): void
+    private function updateLlmConversationSnapshot(?int $Silian_llmLogId, string $Silian_userMessage, array $Silian_outcome, array $Silian_context): void
     {
-        if ($llmLogId === null) {
+        if ($Silian_llmLogId === null) {
             return;
         }
 
         try {
-            $stmt = $this->db->prepare('SELECT context_json FROM llm_logs WHERE id = :id LIMIT 1');
-            $stmt->execute([':id' => $llmLogId]);
-            $existing = $this->decodeJson($stmt->fetchColumn() ?: null);
-            $existing['conversation_context'] = $context;
-            $existing['conversation_snapshot'] = array_filter([
-                'user_message' => $userMessage !== '' ? $userMessage : null,
-                'assistant_message' => isset($outcome['assistant_text']) && trim((string) $outcome['assistant_text']) !== ''
-                    ? trim((string) $outcome['assistant_text'])
+            $Silian_stmt = $this->db->prepare('SELECT context_json FROM llm_logs WHERE id = :id LIMIT 1');
+            $Silian_stmt->execute([':id' => $Silian_llmLogId]);
+            $Silian_existing = $this->decodeJson($Silian_stmt->fetchColumn() ?: null);
+            $Silian_existing['conversation_context'] = $Silian_context;
+            $Silian_existing['conversation_snapshot'] = array_filter([
+                'user_message' => $Silian_userMessage !== '' ? $Silian_userMessage : null,
+                'assistant_message' => isset($Silian_outcome['assistant_text']) && trim((string) $Silian_outcome['assistant_text']) !== ''
+                    ? trim((string) $Silian_outcome['assistant_text'])
                     : null,
-                'suggestion' => isset($outcome['suggestion']) && is_array($outcome['suggestion']) ? $outcome['suggestion'] : null,
-                'proposal' => isset($outcome['proposal']) && is_array($outcome['proposal']) ? $outcome['proposal'] : null,
-                'result' => isset($outcome['result']) && is_array($outcome['result']) ? $outcome['result'] : null,
-                'meta' => isset($outcome['meta']) && is_array($outcome['meta']) ? $outcome['meta'] : null,
-                'metadata' => isset($outcome['metadata']) && is_array($outcome['metadata']) ? $outcome['metadata'] : null,
-            ], static fn ($value) => $value !== null && $value !== '');
+                'suggestion' => isset($Silian_outcome['suggestion']) && is_array($Silian_outcome['suggestion']) ? $Silian_outcome['suggestion'] : null,
+                'proposal' => isset($Silian_outcome['proposal']) && is_array($Silian_outcome['proposal']) ? $Silian_outcome['proposal'] : null,
+                'result' => isset($Silian_outcome['result']) && is_array($Silian_outcome['result']) ? $Silian_outcome['result'] : null,
+                'meta' => isset($Silian_outcome['meta']) && is_array($Silian_outcome['meta']) ? $Silian_outcome['meta'] : null,
+                'metadata' => isset($Silian_outcome['metadata']) && is_array($Silian_outcome['metadata']) ? $Silian_outcome['metadata'] : null,
+            ], static fn ($Silian_value) => $Silian_value !== null && $Silian_value !== '');
 
-            $update = $this->db->prepare('UPDATE llm_logs SET context_json = :context_json WHERE id = :id');
-            $update->execute([
-                ':context_json' => json_encode($existing, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                ':id' => $llmLogId,
+            $Silian_update = $this->db->prepare('UPDATE llm_logs SET context_json = :context_json WHERE id = :id');
+            $Silian_update->execute([
+                ':context_json' => json_encode($Silian_existing, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                ':id' => $Silian_llmLogId,
             ]);
-        } catch (\Throwable $exception) {
+        } catch (\Throwable $Silian_exception) {
             $this->logger->warning('Failed to update admin AI LLM conversation snapshot.', [
-                'llm_log_id' => $llmLogId,
-                'error' => $exception->getMessage(),
+                'llm_log_id' => $Silian_llmLogId,
+                'error' => $Silian_exception->getMessage(),
             ]);
         }
     }
 
-    private function extractMetadata(array $rawResponse): array
+    private function extractMetadata(array $Silian_rawResponse): array
     {
-        $choice = $rawResponse['choices'][0] ?? [];
-        $finishReason = $choice['finish_reason'] ?? null;
+        $Silian_choice = $Silian_rawResponse['choices'][0] ?? [];
+        $Silian_finishReason = $Silian_choice['finish_reason'] ?? null;
 
         return array_filter([
-            'model' => $rawResponse['model'] ?? $this->model,
-            'usage' => is_array($rawResponse['usage'] ?? null) ? $rawResponse['usage'] : null,
-            'finish_reason' => is_string($finishReason) ? $finishReason : null,
-            'response_id' => isset($rawResponse['id']) && is_string($rawResponse['id']) ? $rawResponse['id'] : null,
-        ], static fn ($value) => $value !== null);
+            'model' => $Silian_rawResponse['model'] ?? $this->model,
+            'usage' => is_array($Silian_rawResponse['usage'] ?? null) ? $Silian_rawResponse['usage'] : null,
+            'finish_reason' => is_string($Silian_finishReason) ? $Silian_finishReason : null,
+            'response_id' => isset($Silian_rawResponse['id']) && is_string($Silian_rawResponse['id']) ? $Silian_rawResponse['id'] : null,
+        ], static fn ($Silian_value) => $Silian_value !== null);
     }
 
-    private function normalizeContext(array $context): array
+    private function normalizeContext(array $Silian_context): array
     {
-        $normalized = [];
-        foreach (self::ALLOWED_CONTEXT_KEYS as $key) {
-            if (!array_key_exists($key, $context)) {
+        $Silian_normalized = [];
+        foreach (self::ALLOWED_CONTEXT_KEYS as $Silian_key) {
+            if (!array_key_exists($Silian_key, $Silian_context)) {
                 continue;
             }
-            $value = $context[$key];
-            if (is_string($value)) {
-                $trimmed = trim($value);
-                if ($trimmed !== '') {
-                    $normalized[$key] = $trimmed;
+            $Silian_value = $Silian_context[$Silian_key];
+            if (is_string($Silian_value)) {
+                $Silian_trimmed = trim($Silian_value);
+                if ($Silian_trimmed !== '') {
+                    $Silian_normalized[$Silian_key] = $Silian_trimmed;
                 }
                 continue;
             }
-            if (is_int($value) || is_float($value) || is_bool($value)) {
-                $normalized[$key] = $value;
+            if (is_int($Silian_value) || is_float($Silian_value) || is_bool($Silian_value)) {
+                $Silian_normalized[$Silian_key] = $Silian_value;
                 continue;
             }
-            if (is_array($value)) {
-                $normalized[$key] = array_values(array_filter($value, static fn ($item) => !is_array($item) && !is_object($item) && trim((string) $item) !== ''));
+            if (is_array($Silian_value)) {
+                $Silian_normalized[$Silian_key] = array_values(array_filter($Silian_value, static fn ($Silian_item) => !is_array($Silian_item) && !is_object($Silian_item) && trim((string) $Silian_item) !== ''));
             }
         }
 
-        return $normalized;
+        return $Silian_normalized;
     }
 
     /**
      * @return array<string,mixed>|null
      */
-    private function resolveKeywordFallbackAction(string $userMessage, string $assistantContent = ''): ?array
+    private function resolveKeywordFallbackAction(string $Silian_userMessage, string $Silian_assistantContent = ''): ?array
     {
         if ($this->actionDefinitions === []) {
             return null;
         }
 
-        $combined = trim($userMessage . ' ' . $assistantContent);
-        if ($combined === '') {
+        $Silian_combined = trim($Silian_userMessage . ' ' . $Silian_assistantContent);
+        if ($Silian_combined === '') {
             return null;
         }
 
-        $normalizedText = $this->normalizeMatchText($combined);
-        $bestAction = null;
-        $bestScore = 0;
+        $Silian_normalizedText = $this->normalizeMatchText($Silian_combined);
+        $Silian_bestAction = null;
+        $Silian_bestScore = 0;
 
-        foreach ($this->actionDefinitions as $name => $definition) {
-            $score = $this->scoreActionKeywordMatch($normalizedText, $name, $definition);
-            if ($score > $bestScore) {
-                $bestScore = $score;
-                $bestAction = $name;
+        foreach ($this->actionDefinitions as $Silian_name => $Silian_definition) {
+            $Silian_score = $this->scoreActionKeywordMatch($Silian_normalizedText, $Silian_name, $Silian_definition);
+            if ($Silian_score > $Silian_bestScore) {
+                $Silian_bestScore = $Silian_score;
+                $Silian_bestAction = $Silian_name;
             }
         }
 
-        if ($bestAction === null || $bestScore < 2) {
+        if ($Silian_bestAction === null || $Silian_bestScore < 2) {
             return null;
         }
 
         return [
-            'action' => $bestAction,
+            'action' => $Silian_bestAction,
             'payload' => [],
         ];
     }
 
-    private function scoreActionKeywordMatch(string $normalizedText, string $name, array $definition): int
+    private function scoreActionKeywordMatch(string $Silian_normalizedText, string $Silian_name, array $Silian_definition): int
     {
-        $score = 0;
-        $terms = array_merge(
-            [$name],
-            [(string) ($definition['label'] ?? '')],
-            [(string) ($definition['description'] ?? '')],
-            is_array($definition['keywords'] ?? null) ? $definition['keywords'] : []
+        $Silian_score = 0;
+        $Silian_terms = array_merge(
+            [$Silian_name],
+            [(string) ($Silian_definition['label'] ?? '')],
+            [(string) ($Silian_definition['description'] ?? '')],
+            is_array($Silian_definition['keywords'] ?? null) ? $Silian_definition['keywords'] : []
         );
 
-        foreach ($terms as $term) {
-            if (!is_string($term)) {
+        foreach ($Silian_terms as $Silian_term) {
+            if (!is_string($Silian_term)) {
                 continue;
             }
 
-            $candidate = $this->normalizeMatchText($term);
-            if ($candidate === '' || mb_strlen($candidate, 'UTF-8') < 2) {
+            $Silian_candidate = $this->normalizeMatchText($Silian_term);
+            if ($Silian_candidate === '' || mb_strlen($Silian_candidate, 'UTF-8') < 2) {
                 continue;
             }
 
-            if (str_contains($normalizedText, $candidate)) {
-                $score += mb_strlen($candidate, 'UTF-8') >= 6 ? 3 : 2;
+            if (str_contains($Silian_normalizedText, $Silian_candidate)) {
+                $Silian_score += mb_strlen($Silian_candidate, 'UTF-8') >= 6 ? 3 : 2;
             }
         }
 
-        return $score;
+        return $Silian_score;
     }
 
-    private function normalizeMatchText(string $value): string
+    private function normalizeMatchText(string $Silian_value): string
     {
-        $lower = function_exists('mb_strtolower') ? mb_strtolower($value, 'UTF-8') : strtolower($value);
-        $normalized = preg_replace('/[\s\-_]+/u', '', $lower);
-        return is_string($normalized) ? $normalized : trim($lower);
+        $Silian_lower = function_exists('mb_strtolower') ? mb_strtolower($Silian_value, 'UTF-8') : strtolower($Silian_value);
+        $Silian_normalized = preg_replace('/[\s\-_]+/u', '', $Silian_lower);
+        return is_string($Silian_normalized) ? $Silian_normalized : trim($Silian_lower);
     }
 
-    private function normalizeConversationId(?string $conversationId): ?string
+    private function normalizeConversationId(?string $Silian_conversationId): ?string
     {
-        if (!is_string($conversationId)) {
+        if (!is_string($Silian_conversationId)) {
             return null;
         }
 
-        $normalized = trim($conversationId);
-        if ($normalized === '') {
+        $Silian_normalized = trim($Silian_conversationId);
+        if ($Silian_normalized === '') {
             return null;
         }
 
-        return preg_match('/^[A-Za-z0-9._:-]{8,64}$/', $normalized) === 1 ? $normalized : null;
+        return preg_match('/^[A-Za-z0-9._:-]{8,64}$/', $Silian_normalized) === 1 ? $Silian_normalized : null;
     }
 
     private function generateConversationId(): string
@@ -986,41 +986,41 @@ class AdminAiAgentService
         }
     }
 
-    private function preparePersistedActionPayload(string $actionName, array $payload): array
+    private function preparePersistedActionPayload(string $Silian_actionName, array $Silian_payload): array
     {
-        if ($actionName !== 'create_user') {
-            return $payload;
+        if ($Silian_actionName !== 'create_user') {
+            return $Silian_payload;
         }
 
-        $sanitized = $payload;
-        $password = isset($sanitized['password']) ? trim((string) $sanitized['password']) : '';
-        if ($password !== '' && empty($sanitized['password_hash'])) {
-            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-            if (!is_string($passwordHash) || $passwordHash === '') {
+        $Silian_sanitized = $Silian_payload;
+        $Silian_password = isset($Silian_sanitized['password']) ? trim((string) $Silian_sanitized['password']) : '';
+        if ($Silian_password !== '' && empty($Silian_sanitized['password_hash'])) {
+            $Silian_passwordHash = password_hash($Silian_password, PASSWORD_DEFAULT);
+            if (!is_string($Silian_passwordHash) || $Silian_passwordHash === '') {
                 throw new \RuntimeException('Unable to hash password.');
             }
-            $sanitized['password_hash'] = $passwordHash;
+            $Silian_sanitized['password_hash'] = $Silian_passwordHash;
         }
 
-        unset($sanitized['password']);
-        if (!empty($sanitized['password_hash'])) {
-            $sanitized['password_provided'] = true;
+        unset($Silian_sanitized['password']);
+        if (!empty($Silian_sanitized['password_hash'])) {
+            $Silian_sanitized['password_provided'] = true;
         }
 
-        return $sanitized;
+        return $Silian_sanitized;
     }
 
     /**
      * @return array<string,mixed>
      */
-    private function decodeJson($raw): array
+    private function decodeJson($Silian_raw): array
     {
-        if (!is_string($raw) || $raw === '') {
+        if (!is_string($Silian_raw) || $Silian_raw === '') {
             return [];
         }
 
-        $decoded = json_decode($raw, true);
-        return is_array($decoded) ? $decoded : [];
+        $Silian_decoded = json_decode($Silian_raw, true);
+        return is_array($Silian_decoded) ? $Silian_decoded : [];
     }
 
 }

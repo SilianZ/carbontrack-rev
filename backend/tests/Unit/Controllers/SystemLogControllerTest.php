@@ -13,54 +13,54 @@ class SystemLogControllerTest extends TestCase
 {
     public function testListUsesDistinctGeneralSearchBindings(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $auth = $this->createMock(AuthService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => true]);
-        $auth->method('isAdminUser')->willReturn(true);
-        $bound = [];
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => true]);
+        $Silian_auth->method('isAdminUser')->willReturn(true);
+        $Silian_bound = [];
 
-        $countStmt = $this->createMock(\PDOStatement::class);
-        $countStmt->expects($this->exactly(9))
+        $Silian_countStmt = $this->createMock(\PDOStatement::class);
+        $Silian_countStmt->expects($this->exactly(9))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$bound) {
-                $bound['count'][$key] = [$value, $type];
+            ->willReturnCallback(function (string $Silian_key, $Silian_value, ?int $Silian_type = null) use (&$Silian_bound) {
+                $Silian_bound['count'][$Silian_key] = [$Silian_value, $Silian_type];
                 return true;
             });
-        $countStmt->expects($this->once())->method('execute')->willReturn(true);
-        $countStmt->expects($this->once())->method('fetchColumn')->willReturn(0);
+        $Silian_countStmt->expects($this->once())->method('execute')->willReturn(true);
+        $Silian_countStmt->expects($this->once())->method('fetchColumn')->willReturn(0);
 
-        $listStmt = $this->createMock(\PDOStatement::class);
-        $listStmt->expects($this->exactly(11))
+        $Silian_listStmt = $this->createMock(\PDOStatement::class);
+        $Silian_listStmt->expects($this->exactly(11))
             ->method('bindValue')
-            ->willReturnCallback(function (string $key, $value, ?int $type = null) use (&$bound) {
-                $bound['list'][$key] = [$value, $type];
+            ->willReturnCallback(function (string $Silian_key, $Silian_value, ?int $Silian_type = null) use (&$Silian_bound) {
+                $Silian_bound['list'][$Silian_key] = [$Silian_value, $Silian_type];
                 return true;
             });
-        $listStmt->expects($this->once())->method('execute')->willReturn(true);
-        $listStmt->expects($this->once())->method('fetchAll')->willReturn([]);
+        $Silian_listStmt->expects($this->once())->method('execute')->willReturn(true);
+        $Silian_listStmt->expects($this->once())->method('fetchAll')->willReturn([]);
 
-        $pdo->expects($this->exactly(2))
+        $Silian_pdo->expects($this->exactly(2))
             ->method('prepare')
-            ->willReturnCallback(function (string $sql) use ($countStmt, $listStmt) {
-                static $prepareCalls = 0;
-                $prepareCalls++;
-                $this->assertStringContainsString('request_id LIKE :q_request_id', $sql);
-                $this->assertStringContainsString('path LIKE :q_path', $sql);
-                $this->assertStringContainsString('server_meta LIKE :q_server_meta', $sql);
-                return $prepareCalls === 1 ? $countStmt : $listStmt;
+            ->willReturnCallback(function (string $Silian_sql) use ($Silian_countStmt, $Silian_listStmt) {
+                static $Silian_prepareCalls = 0;
+                $Silian_prepareCalls++;
+                $this->assertStringContainsString('request_id LIKE :q_request_id', $Silian_sql);
+                $this->assertStringContainsString('path LIKE :q_path', $Silian_sql);
+                $this->assertStringContainsString('server_meta LIKE :q_server_meta', $Silian_sql);
+                return $Silian_prepareCalls === 1 ? $Silian_countStmt : $Silian_listStmt;
             });
 
-        $controller = new SystemLogController($pdo, $auth, $audit);
-        $request = makeRequest('GET', '/admin/system-logs', null, ['q' => 'trace']);
-        $response = new \Slim\Psr7\Response();
+        $Silian_controller = new SystemLogController($Silian_pdo, $Silian_auth, $Silian_audit);
+        $Silian_request = makeRequest('GET', '/admin/system-logs', null, ['q' => 'trace']);
+        $Silian_response = new \Slim\Psr7\Response();
 
-        $result = $controller->list($request, $response);
-        $this->assertSame(200, $result->getStatusCode());
-        $this->assertSame('%trace%', $bound['count'][':q_request_id'][0] ?? null);
-        $this->assertSame('%trace%', $bound['count'][':q_path'][0] ?? null);
-        $this->assertSame('%trace%', $bound['count'][':q_server_meta'][0] ?? null);
-        $this->assertSame(20, $bound['list'][':limit'][0] ?? null);
-        $this->assertSame(0, $bound['list'][':offset'][0] ?? null);
+        $Silian_result = $Silian_controller->list($Silian_request, $Silian_response);
+        $this->assertSame(200, $Silian_result->getStatusCode());
+        $this->assertSame('%trace%', $Silian_bound['count'][':q_request_id'][0] ?? null);
+        $this->assertSame('%trace%', $Silian_bound['count'][':q_path'][0] ?? null);
+        $this->assertSame('%trace%', $Silian_bound['count'][':q_server_meta'][0] ?? null);
+        $this->assertSame(20, $Silian_bound['list'][':limit'][0] ?? null);
+        $this->assertSame(0, $Silian_bound['list'][':offset'][0] ?? null);
     }
 }

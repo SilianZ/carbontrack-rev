@@ -9,12 +9,12 @@ use RuntimeException;
 class PasskeyOperationException extends RuntimeException
 {
     public function __construct(
-        string $message,
+        string $Silian_message,
         private string $errorCode,
         private int $httpStatus = 400,
-        ?\Throwable $previous = null
+        ?\Throwable $Silian_previous = null
     ) {
-        parent::__construct($message, 0, $previous);
+        parent::__construct($Silian_message, 0, $Silian_previous);
     }
 
     public function getErrorCode(): string

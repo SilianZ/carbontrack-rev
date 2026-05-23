@@ -1,16 +1,16 @@
-import React from 'react';
-import { AlertCircle } from 'lucide-react';
-import { Button } from '../ui/Button';
-import PropTypes from 'prop-types';
+import Silian_React from 'react';
+import { AlertCircle as Silian_AlertCircle } from 'lucide-react';
+import { Button as Silian_Button } from '../ui/Button';
+import Silian_PropTypes from 'prop-types';
 
-export default class RouteErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
+export default class RouteErrorBoundary extends Silian_React.Component {
+  constructor(Silian_props) {
+    super(Silian_props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
+  static getDerivedStateFromError(Silian_error) {
+    return { hasError: true, error: Silian_error };
   }
 
   componentDidCatch() {
@@ -30,25 +30,25 @@ export default class RouteErrorBoundary extends React.Component {
   };
 
   render() {
-    const { hasError } = this.state;
-    const { t } = this.props; // 允许外部传入翻译函数，避免在错误状态下的 hooks 使用
+    const { hasError: Silian_hasError } = this.state;
+    const { t: Silian_t } = this.props; // 允许外部传入翻译函数，避免在错误状态下的 hooks 使用
 
-    if (!hasError) return this.props.children;
+    if (!Silian_hasError) return this.props.children;
 
-    const translate = typeof t === 'function' ? t : (k) => k;
+    const Silian_translate = typeof Silian_t === 'function' ? Silian_t : (Silian_k) => Silian_k;
 
     return (
       <div className="container mx-auto py-16 px-4">
         <div className="max-w-xl mx-auto bg-white border rounded-lg shadow-sm p-6 text-center">
           <div className="flex items-center justify-center mb-4 text-red-600">
-            <AlertCircle className="h-8 w-8" />
+            <Silian_AlertCircle className="h-8 w-8" />
           </div>
-          <h2 className="text-2xl font-semibold mb-2">{translate('errors.unexpected')}</h2>
-          <p className="text-muted-foreground mb-6">{translate('errors.tryAgain')}</p>
+          <h2 className="text-2xl font-semibold mb-2">{Silian_translate('errors.unexpected')}</h2>
+          <p className="text-muted-foreground mb-6">{Silian_translate('errors.tryAgain')}</p>
           <div className="flex justify-center">
-            <Button variant="outline" onClick={this.handleRetry}>
-              {translate('common.retry')}
-            </Button>
+            <Silian_Button variant="outline" onClick={this.handleRetry}>
+              {Silian_translate('common.retry')}
+            </Silian_Button>
           </div>
         </div>
       </div>
@@ -57,7 +57,7 @@ export default class RouteErrorBoundary extends React.Component {
 }
 
 RouteErrorBoundary.propTypes = {
-  t: PropTypes.func,
-  onRetry: PropTypes.func,
-  children: PropTypes.node,
+  t: Silian_PropTypes.func,
+  onRetry: Silian_PropTypes.func,
+  children: Silian_PropTypes.node,
 };

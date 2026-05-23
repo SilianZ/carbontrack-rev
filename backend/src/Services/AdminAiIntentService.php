@@ -37,48 +37,48 @@ class AdminAiIntentService
     public function __construct(
         private ?LlmClientInterface $client,
         private LoggerInterface $logger,
-        array $config = [],
-        ?array $commandConfig = null,
+        array $Silian_config = [],
+        ?array $Silian_commandConfig = null,
         private ?LlmLogService $llmLogService = null,
         private ?AuditLogService $auditLogService = null,
         private ?ErrorLogService $errorLogService = null
     ) {
-        $this->model = (string)($config['model'] ?? 'google/gemini-2.5-flash-lite');
-        $this->temperature = isset($config['temperature']) ? (float)$config['temperature'] : 0.2;
-        $this->maxTokens = isset($config['max_tokens']) ? (int)$config['max_tokens'] : 800;
+        $this->model = (string)($Silian_config['model'] ?? 'google/gemini-2.5-flash-lite');
+        $this->temperature = isset($Silian_config['temperature']) ? (float)$Silian_config['temperature'] : 0.2;
+        $this->maxTokens = isset($Silian_config['max_tokens']) ? (int)$Silian_config['max_tokens'] : 800;
         $this->enabled = $client !== null;
-        $this->loadCommandConfig($commandConfig ?? []);
+        $this->loadCommandConfig($Silian_commandConfig ?? []);
     }
 
-    private function loadCommandConfig(array $commandConfig): void
+    private function loadCommandConfig(array $Silian_commandConfig): void
     {
-        $defaults = self::defaultCommandConfig();
+        $Silian_defaults = self::defaultCommandConfig();
 
-        $provided = $commandConfig;
-        $navigationTargets = $provided['navigationTargets'] ?? $defaults['navigationTargets'];
-        $quickActions = $provided['quickActions'] ?? $defaults['quickActions'];
-        $managementActions = $provided['managementActions'] ?? $defaults['managementActions'];
+        $Silian_provided = $Silian_commandConfig;
+        $Silian_navigationTargets = $Silian_provided['navigationTargets'] ?? $Silian_defaults['navigationTargets'];
+        $Silian_quickActions = $Silian_provided['quickActions'] ?? $Silian_defaults['quickActions'];
+        $Silian_managementActions = $Silian_provided['managementActions'] ?? $Silian_defaults['managementActions'];
 
-        $this->navigationTargets = $this->indexById($navigationTargets);
-        $this->quickActions = $this->indexById($quickActions);
-        $this->actionDefinitions = $this->indexById($managementActions, 'name');
+        $this->navigationTargets = $this->indexById($Silian_navigationTargets);
+        $this->quickActions = $this->indexById($Silian_quickActions);
+        $this->actionDefinitions = $this->indexById($Silian_managementActions, 'name');
     }
 
-    private function indexById(array $items, string $key = 'id'): array
+    private function indexById(array $Silian_items, string $Silian_key = 'id'): array
     {
-        $indexed = [];
-        foreach ($items as $item) {
-            if (!is_array($item)) {
+        $Silian_indexed = [];
+        foreach ($Silian_items as $Silian_item) {
+            if (!is_array($Silian_item)) {
                 continue;
             }
-            $identifier = $item[$key] ?? null;
-            if (!is_string($identifier) || $identifier === '') {
+            $Silian_identifier = $Silian_item[$Silian_key] ?? null;
+            if (!is_string($Silian_identifier) || $Silian_identifier === '') {
                 continue;
             }
-            $indexed[$identifier] = $item;
+            $Silian_indexed[$Silian_identifier] = $Silian_item;
         }
 
-        return $indexed;
+        return $Silian_indexed;
     }
 
     private static function defaultCommandConfig(): array
@@ -242,9 +242,9 @@ class AdminAiIntentService
         return $this->enabled;
     }
 
-    public function getDiagnostics(bool $performConnectivityCheck = false): array
+    public function getDiagnostics(bool $Silian_performConnectivityCheck = false): array
     {
-        $diagnostics = [
+        $Silian_diagnostics = [
             'enabled' => $this->enabled,
             'configuration' => [
                 'model' => $this->model,
@@ -265,21 +265,21 @@ class AdminAiIntentService
             ],
         ];
 
-        if (!$performConnectivityCheck) {
-            return $diagnostics;
+        if (!$Silian_performConnectivityCheck) {
+            return $Silian_diagnostics;
         }
 
         if (!$this->enabled) {
-            $diagnostics['connectivity'] = [
+            $Silian_diagnostics['connectivity'] = [
                 'status' => 'skipped',
                 'reason' => 'LLM client not configured',
             ];
 
-            return $diagnostics;
+            return $Silian_diagnostics;
         }
 
         try {
-            $payload = [
+            $Silian_payload = [
                 'model' => $this->model,
                 'temperature' => 0.0,
                 'max_tokens' => 1,
@@ -295,13 +295,13 @@ class AdminAiIntentService
                 ],
             ];
 
-            $response = $this->client->createChatCompletion($payload);
+            $Silian_response = $this->client->createChatCompletion($Silian_payload);
 
-            $diagnostics['connectivity'] = [
+            $Silian_diagnostics['connectivity'] = [
                 'status' => 'ok',
-                'model' => $response['model'] ?? null,
-                'finish_reason' => $response['choices'][0]['finish_reason'] ?? null,
-                'usage' => $response['usage'] ?? null,
+                'model' => $Silian_response['model'] ?? null,
+                'finish_reason' => $Silian_response['choices'][0]['finish_reason'] ?? null,
+                'usage' => $Silian_response['usage'] ?? null,
             ];
             $this->logAudit('admin_ai_diagnostics_connectivity_checked', [
                 'actor_type' => 'admin',
@@ -309,101 +309,101 @@ class AdminAiIntentService
             ], [
                 'request_data' => [
                     'status' => 'ok',
-                    'model' => $response['model'] ?? null,
+                    'model' => $Silian_response['model'] ?? null,
                 ],
             ]);
-        } catch (\Throwable $exception) {
+        } catch (\Throwable $Silian_exception) {
             $this->logger->error('Admin AI diagnostics connectivity check failed', [
-                'exception' => $exception::class,
-                'message' => $exception->getMessage(),
+                'exception' => $Silian_exception::class,
+                'message' => $Silian_exception->getMessage(),
             ]);
             $this->logAudit('admin_ai_diagnostics_connectivity_failed', [
                 'actor_type' => 'admin',
                 'source' => '/admin/ai/diagnostics',
             ], [
                 'status' => 'failed',
-                'request_data' => ['error' => $exception->getMessage()],
+                'request_data' => ['error' => $Silian_exception->getMessage()],
             ]);
-            $this->logError($exception, [
+            $this->logError($Silian_exception, [
                 'actor_type' => 'admin',
                 'source' => '/admin/ai/diagnostics',
             ], [
                 'perform_check' => true,
             ]);
 
-            $diagnostics['connectivity'] = [
+            $Silian_diagnostics['connectivity'] = [
                 'status' => 'error',
-                'exception' => $exception::class,
-                'error' => $exception->getMessage(),
+                'exception' => $Silian_exception::class,
+                'error' => $Silian_exception->getMessage(),
             ];
         }
 
-        return $diagnostics;
+        return $Silian_diagnostics;
     }
 
-    public function analyzeIntent(string $query, array $context = [], array $logContext = []): array
+    public function analyzeIntent(string $Silian_query, array $Silian_context = [], array $Silian_logContext = []): array
     {
         if (!$this->enabled) {
             throw new \RuntimeException('AI intent service is disabled');
         }
 
-        $tools = $this->buildTools();
-        
-        $payload = [
+        $Silian_tools = $this->buildTools();
+
+        $Silian_payload = [
             'model' => $this->model,
             'temperature' => $this->temperature,
             'max_tokens' => $this->maxTokens,
-            'messages' => $this->buildMessages($query, $context),
-            'tools' => $tools,
+            'messages' => $this->buildMessages($Silian_query, $Silian_context),
+            'tools' => $Silian_tools,
             'tool_choice' => 'auto',
         ];
 
-        $startedAt = microtime(true);
+        $Silian_startedAt = microtime(true);
         try {
-            $rawResponse = $this->client->createChatCompletion($payload);
-            $this->logLlmCall($query, $rawResponse, $logContext, $context, $startedAt);
-        } catch (\Throwable $e) {
+            $Silian_rawResponse = $this->client->createChatCompletion($Silian_payload);
+            $this->logLlmCall($Silian_query, $Silian_rawResponse, $Silian_logContext, $Silian_context, $Silian_startedAt);
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Admin AI intent call failed', [
-                'exception' => $e::class,
-                'message' => $e->getMessage(),
+                'exception' => $Silian_e::class,
+                'message' => $Silian_e->getMessage(),
             ]);
-            $this->logLlmFailure($query, $logContext, $context, $startedAt, $e);
-            $this->logAudit('admin_ai_intent_service_failed', $logContext, [
+            $this->logLlmFailure($Silian_query, $Silian_logContext, $Silian_context, $Silian_startedAt, $Silian_e);
+            $this->logAudit('admin_ai_intent_service_failed', $Silian_logContext, [
                 'status' => 'failed',
                 'request_data' => [
-                    'query_length' => mb_strlen($query),
-                    'source' => $logContext['source'] ?? null,
-                    'error' => $e->getMessage(),
+                    'query_length' => mb_strlen($Silian_query),
+                    'source' => $Silian_logContext['source'] ?? null,
+                    'error' => $Silian_e->getMessage(),
                 ],
             ]);
-            $this->logError($e, $logContext, [
-                'query' => $query,
-                'context' => $this->filterContextForLogging($context),
+            $this->logError($Silian_e, $Silian_logContext, [
+                'query' => $Silian_query,
+                'context' => $this->filterContextForLogging($Silian_context),
             ]);
-            throw new \RuntimeException('LLM_UNAVAILABLE', 0, $e);
+            throw new \RuntimeException('LLM_UNAVAILABLE', 0, $Silian_e);
         }
 
-        $result = $this->processResponse($rawResponse, $query);
-        $this->logAudit('admin_ai_intent_service_succeeded', $logContext, [
+        $Silian_result = $this->processResponse($Silian_rawResponse, $Silian_query);
+        $this->logAudit('admin_ai_intent_service_succeeded', $Silian_logContext, [
             'request_data' => [
-                'query_length' => mb_strlen($query),
-                'source' => $logContext['source'] ?? null,
-                'intent_type' => $result['intent']['type'] ?? null,
-                'model' => $rawResponse['model'] ?? $this->model,
+                'query_length' => mb_strlen($Silian_query),
+                'source' => $Silian_logContext['source'] ?? null,
+                'intent_type' => $Silian_result['intent']['type'] ?? null,
+                'model' => $Silian_rawResponse['model'] ?? $this->model,
             ],
         ]);
 
-        return $result;
+        return $Silian_result;
     }
 
     private function buildTools(): array
     {
-        $tools = [];
+        $Silian_tools = [];
 
         // Tool 1: navigate
-        $navEnum = array_keys($this->navigationTargets);
-        if (!empty($navEnum)) {
-            $tools[] = [
+        $Silian_navEnum = array_keys($this->navigationTargets);
+        if (!empty($Silian_navEnum)) {
+            $Silian_tools[] = [
                 'type' => 'function',
                 'function' => [
                     'name' => 'navigate',
@@ -413,7 +413,7 @@ class AdminAiIntentService
                         'properties' => [
                             'destination' => [
                                 'type' => 'string',
-                                'enum' => $navEnum,
+                                'enum' => $Silian_navEnum,
                                 'description' => 'The ID of the page to navigate to.',
                             ],
                             'parameters' => [
@@ -429,9 +429,9 @@ class AdminAiIntentService
         }
 
         // Tool 2: execute_shortcut
-        $shortcutEnum = array_keys($this->quickActions);
-        if (!empty($shortcutEnum)) {
-            $tools[] = [
+        $Silian_shortcutEnum = array_keys($this->quickActions);
+        if (!empty($Silian_shortcutEnum)) {
+            $Silian_tools[] = [
                 'type' => 'function',
                 'function' => [
                     'name' => 'execute_shortcut',
@@ -441,7 +441,7 @@ class AdminAiIntentService
                         'properties' => [
                             'shortcut_id' => [
                                 'type' => 'string',
-                                'enum' => $shortcutEnum,
+                                'enum' => $Silian_shortcutEnum,
                                 'description' => 'The ID of the shortcut to execute.',
                             ],
                         ],
@@ -452,9 +452,9 @@ class AdminAiIntentService
         }
 
         // Tool 3: manage_records (generic for management actions)
-        $actionEnum = array_keys($this->actionDefinitions);
-        if (!empty($actionEnum)) {
-            $tools[] = [
+        $Silian_actionEnum = array_keys($this->actionDefinitions);
+        if (!empty($Silian_actionEnum)) {
+            $Silian_tools[] = [
                 'type' => 'function',
                 'function' => [
                     'name' => 'manage_records',
@@ -464,7 +464,7 @@ class AdminAiIntentService
                         'properties' => [
                             'action' => [
                                 'type' => 'string',
-                                'enum' => $actionEnum,
+                                'enum' => $Silian_actionEnum,
                                 'description' => 'The name of the action to perform.',
                             ],
                             'payload' => [
@@ -479,442 +479,442 @@ class AdminAiIntentService
             ];
         }
 
-        return $tools;
+        return $Silian_tools;
     }
 
-    private function buildMessages(string $query, array $context): array
+    private function buildMessages(string $Silian_query, array $Silian_context): array
     {
-        $systemPrompt = $this->buildSystemPrompt();
-        $userPayload = $this->buildUserPayload($query, $context);
+        $Silian_systemPrompt = $this->buildSystemPrompt();
+        $Silian_userPayload = $this->buildUserPayload($Silian_query, $Silian_context);
 
         return [
             [
                 'role' => 'system',
-                'content' => $systemPrompt,
+                'content' => $Silian_systemPrompt,
             ],
             [
                 'role' => 'user',
-                'content' => $userPayload,
+                'content' => $Silian_userPayload,
             ],
         ];
     }
 
     private function buildSystemPrompt(): string
     {
-        $navDescriptions = [];
-        foreach ($this->navigationTargets as $id => $target) {
-            $desc = $target['description'] ?? '';
-            $navDescriptions[] = "- {$id}: {$desc} (Keywords: " . implode(', ', $target['keywords'] ?? []) . ")";
-        }
-        
-        $shortcutDescriptions = [];
-        foreach ($this->quickActions as $id => $action) {
-            $desc = $action['description'] ?? '';
-            $shortcutDescriptions[] = "- {$id}: {$desc} (Keywords: " . implode(', ', $action['keywords'] ?? []) . ")";
-        }
-        
-        $actionDescriptions = [];
-        foreach ($this->actionDefinitions as $name => $def) {
-            $desc = $def['description'] ?? '';
-            $actionDescriptions[] = "- {$name}: {$desc} (Requires: " . implode(', ', $def['requires'] ?? []) . ")";
+        $Silian_navDescriptions = [];
+        foreach ($this->navigationTargets as $Silian_id => $Silian_target) {
+            $Silian_desc = $Silian_target['description'] ?? '';
+            $Silian_navDescriptions[] = "- {$Silian_id}: {$Silian_desc} (Keywords: " . implode(', ', $Silian_target['keywords'] ?? []) . ")";
         }
 
-        $prompt = "You are CarbonTrack's admin AI command planner. Convert administrator natural language into precise instructions using the provided tools.\n\n";
-        
-        if (!empty($navDescriptions)) {
-            $prompt .= "Navigation Targets:\n" . implode("\n", $navDescriptions) . "\n\n";
+        $Silian_shortcutDescriptions = [];
+        foreach ($this->quickActions as $Silian_id => $Silian_action) {
+            $Silian_desc = $Silian_action['description'] ?? '';
+            $Silian_shortcutDescriptions[] = "- {$Silian_id}: {$Silian_desc} (Keywords: " . implode(', ', $Silian_action['keywords'] ?? []) . ")";
         }
-        
-        if (!empty($shortcutDescriptions)) {
-            $prompt .= "Shortcuts:\n" . implode("\n", $shortcutDescriptions) . "\n\n";
-        }
-        
-        if (!empty($actionDescriptions)) {
-            $prompt .= "Management Actions:\n" . implode("\n", $actionDescriptions) . "\n\n";
-        }
-        
-        $prompt .= "Rules:\n";
-        $prompt .= "- Use 'navigate' for page navigation.\n";
-        $prompt .= "- Use 'execute_shortcut' for quick actions.\n";
-        $prompt .= "- Use 'manage_records' for data modification actions.\n";
-        $prompt .= "- If the user's intent is unclear or not supported, do not call any tool.\n";
-        $prompt .= "- Use Chinese labels/reasoning if the user query is Chinese.\n";
 
-        return $prompt;
+        $Silian_actionDescriptions = [];
+        foreach ($this->actionDefinitions as $Silian_name => $Silian_def) {
+            $Silian_desc = $Silian_def['description'] ?? '';
+            $Silian_actionDescriptions[] = "- {$Silian_name}: {$Silian_desc} (Requires: " . implode(', ', $Silian_def['requires'] ?? []) . ")";
+        }
+
+        $Silian_prompt = "You are CarbonTrack's admin AI command planner. Convert administrator natural language into precise instructions using the provided tools.\n\n";
+
+        if (!empty($Silian_navDescriptions)) {
+            $Silian_prompt .= "Navigation Targets:\n" . implode("\n", $Silian_navDescriptions) . "\n\n";
+        }
+
+        if (!empty($Silian_shortcutDescriptions)) {
+            $Silian_prompt .= "Shortcuts:\n" . implode("\n", $Silian_shortcutDescriptions) . "\n\n";
+        }
+
+        if (!empty($Silian_actionDescriptions)) {
+            $Silian_prompt .= "Management Actions:\n" . implode("\n", $Silian_actionDescriptions) . "\n\n";
+        }
+
+        $Silian_prompt .= "Rules:\n";
+        $Silian_prompt .= "- Use 'navigate' for page navigation.\n";
+        $Silian_prompt .= "- Use 'execute_shortcut' for quick actions.\n";
+        $Silian_prompt .= "- Use 'manage_records' for data modification actions.\n";
+        $Silian_prompt .= "- If the user's intent is unclear or not supported, do not call any tool.\n";
+        $Silian_prompt .= "- Use Chinese labels/reasoning if the user query is Chinese.\n";
+
+        return $Silian_prompt;
     }
 
-    private function buildUserPayload(string $query, array $context): string
+    private function buildUserPayload(string $Silian_query, array $Silian_context): string
     {
-        $filteredContext = array_intersect_key($context, array_flip(self::ALLOWED_CONTEXT_KEYS));
+        $Silian_filteredContext = array_intersect_key($Silian_context, array_flip(self::ALLOWED_CONTEXT_KEYS));
 
         return json_encode([
-            'query' => $query,
-            'context' => $filteredContext,
+            'query' => $Silian_query,
+            'context' => $Silian_filteredContext,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
-    private function logLlmCall(string $prompt, array $rawResponse, array $logContext, array $context, float $startedAt): void
+    private function logLlmCall(string $Silian_prompt, array $Silian_rawResponse, array $Silian_logContext, array $Silian_context, float $Silian_startedAt): void
     {
         if (!$this->llmLogService) {
             return;
         }
 
-        $durationMs = (microtime(true) - $startedAt) * 1000.0;
-        $responseId = $rawResponse['id'] ?? ($rawResponse['metadata']['request_id'] ?? null);
-        $contextPayload = $this->filterContextForLogging($context);
+        $Silian_durationMs = (microtime(true) - $Silian_startedAt) * 1000.0;
+        $Silian_responseId = $Silian_rawResponse['id'] ?? ($Silian_rawResponse['metadata']['request_id'] ?? null);
+        $Silian_contextPayload = $this->filterContextForLogging($Silian_context);
 
         $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'admin',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'source' => $logContext['source'] ?? null,
-            'model' => $rawResponse['model'] ?? $this->model,
-            'prompt' => $prompt,
-            'response_raw' => $rawResponse,
-            'response_id' => $responseId,
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'admin',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'source' => $Silian_logContext['source'] ?? null,
+            'model' => $Silian_rawResponse['model'] ?? $this->model,
+            'prompt' => $Silian_prompt,
+            'response_raw' => $Silian_rawResponse,
+            'response_id' => $Silian_responseId,
             'status' => 'success',
             'error_message' => null,
-            'usage' => $rawResponse['usage'] ?? null,
-            'latency_ms' => round($durationMs, 2),
-            'context' => $contextPayload ?: null,
+            'usage' => $Silian_rawResponse['usage'] ?? null,
+            'latency_ms' => round($Silian_durationMs, 2),
+            'context' => $Silian_contextPayload ?: null,
         ]);
     }
 
-    private function logLlmFailure(string $prompt, array $logContext, array $context, float $startedAt, \Throwable $error): void
+    private function logLlmFailure(string $Silian_prompt, array $Silian_logContext, array $Silian_context, float $Silian_startedAt, \Throwable $Silian_error): void
     {
         if (!$this->llmLogService) {
             return;
         }
 
-        $durationMs = (microtime(true) - $startedAt) * 1000.0;
-        $contextPayload = $this->filterContextForLogging($context);
+        $Silian_durationMs = (microtime(true) - $Silian_startedAt) * 1000.0;
+        $Silian_contextPayload = $this->filterContextForLogging($Silian_context);
 
         $this->llmLogService->log([
-            'request_id' => $logContext['request_id'] ?? null,
-            'actor_type' => $logContext['actor_type'] ?? 'admin',
-            'actor_id' => $logContext['actor_id'] ?? null,
-            'source' => $logContext['source'] ?? null,
+            'request_id' => $Silian_logContext['request_id'] ?? null,
+            'actor_type' => $Silian_logContext['actor_type'] ?? 'admin',
+            'actor_id' => $Silian_logContext['actor_id'] ?? null,
+            'source' => $Silian_logContext['source'] ?? null,
             'model' => $this->model,
-            'prompt' => $prompt,
+            'prompt' => $Silian_prompt,
             'response_raw' => null,
             'response_id' => null,
             'status' => 'failed',
-            'error_message' => $error->getMessage(),
+            'error_message' => $Silian_error->getMessage(),
             'usage' => null,
-            'latency_ms' => round($durationMs, 2),
-            'context' => $contextPayload ?: null,
+            'latency_ms' => round($Silian_durationMs, 2),
+            'context' => $Silian_contextPayload ?: null,
         ]);
     }
 
-    private function filterContextForLogging(array $context): array
+    private function filterContextForLogging(array $Silian_context): array
     {
-        if (empty($context)) {
+        if (empty($Silian_context)) {
             return [];
         }
 
-        $filtered = array_intersect_key($context, array_flip(self::ALLOWED_CONTEXT_KEYS));
-        if (isset($filtered['selectedRecordIds']) && is_array($filtered['selectedRecordIds'])) {
-            $ids = array_values(array_filter($filtered['selectedRecordIds'], fn ($item) => $item !== null && $item !== ''));
-            $filtered['selectedRecordIds'] = array_slice($ids, 0, 20);
-            if (count($ids) > 20) {
-                $filtered['selectedRecordIds_truncated'] = true;
-                $filtered['selectedRecordIds_total'] = count($ids);
+        $Silian_filtered = array_intersect_key($Silian_context, array_flip(self::ALLOWED_CONTEXT_KEYS));
+        if (isset($Silian_filtered['selectedRecordIds']) && is_array($Silian_filtered['selectedRecordIds'])) {
+            $Silian_ids = array_values(array_filter($Silian_filtered['selectedRecordIds'], fn ($Silian_item) => $Silian_item !== null && $Silian_item !== ''));
+            $Silian_filtered['selectedRecordIds'] = array_slice($Silian_ids, 0, 20);
+            if (count($Silian_ids) > 20) {
+                $Silian_filtered['selectedRecordIds_truncated'] = true;
+                $Silian_filtered['selectedRecordIds_total'] = count($Silian_ids);
             }
         }
 
-        return $filtered;
+        return $Silian_filtered;
     }
 
-    private function extractIntentFromContent(?string $content, string $originalQuery, array $rawResponse): ?array
+    private function extractIntentFromContent(?string $Silian_content, string $Silian_originalQuery, array $Silian_rawResponse): ?array
     {
-        if (!is_string($content) || trim($content) === '') {
+        if (!is_string($Silian_content) || trim($Silian_content) === '') {
             return null;
         }
 
-        $decoded = json_decode($content, true);
-        if (!is_array($decoded) || !isset($decoded['intent']) || !is_array($decoded['intent'])) {
+        $Silian_decoded = json_decode($Silian_content, true);
+        if (!is_array($Silian_decoded) || !isset($Silian_decoded['intent']) || !is_array($Silian_decoded['intent'])) {
             return null;
         }
 
-        $intentData = $decoded['intent'];
-        $intentType = $intentData['type'] ?? null;
-        $intent = null;
+        $Silian_intentData = $Silian_decoded['intent'];
+        $Silian_intentType = $Silian_intentData['type'] ?? null;
+        $Silian_intent = null;
 
-        switch ($intentType) {
+        switch ($Silian_intentType) {
             case 'navigate':
-                $destination = $intentData['target']['routeId'] ?? ($intentData['target']['route'] ?? null);
-                $intent = $this->createNavigationIntent([
-                    'destination' => $destination,
-                    'parameters' => $intentData['target']['query'] ?? [],
+                $Silian_destination = $Silian_intentData['target']['routeId'] ?? ($Silian_intentData['target']['route'] ?? null);
+                $Silian_intent = $this->createNavigationIntent([
+                    'destination' => $Silian_destination,
+                    'parameters' => $Silian_intentData['target']['query'] ?? [],
                 ]);
-                if ($intent === null) {
-                    return $this->fallbackIntent($rawResponse);
+                if ($Silian_intent === null) {
+                    return $this->fallbackIntent($Silian_rawResponse);
                 }
                 break;
             case 'quick_action':
-                $shortcutId = $intentData['target']['routeId'] ?? ($intentData['target']['id'] ?? null);
-                $intent = $this->createShortcutIntent([
-                    'shortcut_id' => $shortcutId,
+                $Silian_shortcutId = $Silian_intentData['target']['routeId'] ?? ($Silian_intentData['target']['id'] ?? null);
+                $Silian_intent = $this->createShortcutIntent([
+                    'shortcut_id' => $Silian_shortcutId,
                 ]);
-                if ($intent === null) {
-                    return $this->fallbackIntent($rawResponse);
+                if ($Silian_intent === null) {
+                    return $this->fallbackIntent($Silian_rawResponse);
                 }
                 break;
             case 'action':
-                $actionName = $intentData['action']['name'] ?? null;
-                $payload = $intentData['action']['api']['payload'] ?? [];
-                $intent = $this->createManagementIntent([
-                    'action' => $actionName,
-                    'payload' => $payload,
+                $Silian_actionName = $Silian_intentData['action']['name'] ?? null;
+                $Silian_payload = $Silian_intentData['action']['api']['payload'] ?? [];
+                $Silian_intent = $this->createManagementIntent([
+                    'action' => $Silian_actionName,
+                    'payload' => $Silian_payload,
                 ]);
-                if ($intent === null) {
-                    return $this->fallbackIntent($rawResponse);
+                if ($Silian_intent === null) {
+                    return $this->fallbackIntent($Silian_rawResponse);
                 }
                 break;
             case 'fallback':
-                $heuristic = $this->guessNavigationIntent($originalQuery);
-                if ($heuristic) {
+                $Silian_heuristic = $this->guessNavigationIntent($Silian_originalQuery);
+                if ($Silian_heuristic) {
                     return [
-                        'intent' => $heuristic,
+                        'intent' => $Silian_heuristic,
                         'alternatives' => [],
-                        'metadata' => $this->extractMetadata($rawResponse),
+                        'metadata' => $this->extractMetadata($Silian_rawResponse),
                     ];
                 }
-                return $this->fallbackIntent($rawResponse);
+                return $this->fallbackIntent($Silian_rawResponse);
         }
 
-        if ($intent === null) {
+        if ($Silian_intent === null) {
             return null;
         }
 
         return [
-            'intent' => $intent,
+            'intent' => $Silian_intent,
             'alternatives' => [],
-            'metadata' => $this->extractMetadata($rawResponse),
+            'metadata' => $this->extractMetadata($Silian_rawResponse),
         ];
     }
 
-    private function processResponse(array $rawResponse, string $originalQuery): array
+    private function processResponse(array $Silian_rawResponse, string $Silian_originalQuery): array
     {
-        $choice = $rawResponse['choices'][0] ?? [];
-        $message = $choice['message'] ?? [];
-        $toolCalls = $message['tool_calls'] ?? [];
-        $content = $message['content'] ?? null;
+        $Silian_choice = $Silian_rawResponse['choices'][0] ?? [];
+        $Silian_message = $Silian_choice['message'] ?? [];
+        $Silian_toolCalls = $Silian_message['tool_calls'] ?? [];
+        $Silian_content = $Silian_message['content'] ?? null;
 
-        if ($contentIntent = $this->extractIntentFromContent($content, $originalQuery, $rawResponse)) {
-            return $contentIntent;
+        if ($Silian_contentIntent = $this->extractIntentFromContent($Silian_content, $Silian_originalQuery, $Silian_rawResponse)) {
+            return $Silian_contentIntent;
         }
 
-        if (empty($toolCalls)) {
+        if (empty($Silian_toolCalls)) {
             // Try to parse JSON from content if tool_calls is empty
-            if (is_string($content) && $content !== '') {
-                $jsonContent = null;
-                if (preg_match('/```(?:json)?\s*(\{.*?\})\s*```/s', $content, $matches)) {
-                    $jsonContent = $matches[1];
-                } elseif (preg_match('/^\s*\{.*\}\s*$/s', $content) || stripos($content, '{') !== false) {
-                    $start = strpos($content, '{');
-                    $end = strrpos($content, '}');
-                    if ($start !== false && $end !== false && $end > $start) {
-                        $jsonContent = substr($content, $start, $end - $start + 1);
+            if (is_string($Silian_content) && $Silian_content !== '') {
+                $Silian_jsonContent = null;
+                if (preg_match('/```(?:json)?\s*(\{.*?\})\s*```/s', $Silian_content, $Silian_matches)) {
+                    $Silian_jsonContent = $Silian_matches[1];
+                } elseif (preg_match('/^\s*\{.*\}\s*$/s', $Silian_content) || stripos($Silian_content, '{') !== false) {
+                    $Silian_start = strpos($Silian_content, '{');
+                    $Silian_end = strrpos($Silian_content, '}');
+                    if ($Silian_start !== false && $Silian_end !== false && $Silian_end > $Silian_start) {
+                        $Silian_jsonContent = substr($Silian_content, $Silian_start, $Silian_end - $Silian_start + 1);
                     }
                 }
 
-                if ($jsonContent !== null) {
+                if ($Silian_jsonContent !== null) {
                     try {
-                        $data = json_decode($jsonContent, true, 512, JSON_THROW_ON_ERROR);
-                        if (is_array($data) && isset($data['function'], $data['parameters'])) {
-                            $func = $data['function'];
-                            $args = $data['parameters'];
-                            $intent = null;
-                            if ($func === 'navigate') $intent = $this->createNavigationIntent($args);
-                            elseif ($func === 'execute_shortcut') $intent = $this->createShortcutIntent($args);
-                            elseif ($func === 'manage_records') $intent = $this->createManagementIntent($args);
+                        $Silian_data = json_decode($Silian_jsonContent, true, 512, JSON_THROW_ON_ERROR);
+                        if (is_array($Silian_data) && isset($Silian_data['function'], $Silian_data['parameters'])) {
+                            $Silian_func = $Silian_data['function'];
+                            $Silian_args = $Silian_data['parameters'];
+                            $Silian_intent = null;
+                            if ($Silian_func === 'navigate') $Silian_intent = $this->createNavigationIntent($Silian_args);
+                            elseif ($Silian_func === 'execute_shortcut') $Silian_intent = $this->createShortcutIntent($Silian_args);
+                            elseif ($Silian_func === 'manage_records') $Silian_intent = $this->createManagementIntent($Silian_args);
 
-                            if ($intent) {
+                            if ($Silian_intent) {
                                 return [
-                                    'intent' => $intent,
+                                    'intent' => $Silian_intent,
                                     'alternatives' => [],
-                                    'metadata' => $this->extractMetadata($rawResponse),
+                                    'metadata' => $this->extractMetadata($Silian_rawResponse),
                                 ];
                             }
                         }
-                    } catch (\Throwable $e) {
+                    } catch (\Throwable $Silian_e) {
                         // ignore json parse error
                     }
                 }
             }
 
             // Fallback to heuristic if no tool called
-            $heuristic = $this->guessNavigationIntent($originalQuery);
-            if ($heuristic) {
+            $Silian_heuristic = $this->guessNavigationIntent($Silian_originalQuery);
+            if ($Silian_heuristic) {
                 return [
-                    'intent' => $heuristic,
+                    'intent' => $Silian_heuristic,
                     'alternatives' => [],
-                    'metadata' => $this->extractMetadata($rawResponse),
+                    'metadata' => $this->extractMetadata($Silian_rawResponse),
                 ];
             }
-            return $this->fallbackIntent($rawResponse);
+            return $this->fallbackIntent($Silian_rawResponse);
         }
 
         // Process the first tool call (we assume single intent for now)
-        $toolCall = $toolCalls[0];
-        $functionName = $toolCall['function']['name'] ?? '';
-        $arguments = json_decode($toolCall['function']['arguments'] ?? '{}', true);
+        $Silian_toolCall = $Silian_toolCalls[0];
+        $Silian_functionName = $Silian_toolCall['function']['name'] ?? '';
+        $Silian_arguments = json_decode($Silian_toolCall['function']['arguments'] ?? '{}', true);
 
-        $intent = null;
+        $Silian_intent = null;
 
-        switch ($functionName) {
+        switch ($Silian_functionName) {
             case 'navigate':
-                $intent = $this->createNavigationIntent($arguments);
+                $Silian_intent = $this->createNavigationIntent($Silian_arguments);
                 break;
             case 'execute_shortcut':
-                $intent = $this->createShortcutIntent($arguments);
+                $Silian_intent = $this->createShortcutIntent($Silian_arguments);
                 break;
             case 'manage_records':
-                $intent = $this->createManagementIntent($arguments);
+                $Silian_intent = $this->createManagementIntent($Silian_arguments);
                 break;
         }
 
-        if (!$intent) {
-             return $this->fallbackIntent($rawResponse);
+        if (!$Silian_intent) {
+             return $this->fallbackIntent($Silian_rawResponse);
         }
 
         return [
-            'intent' => $intent,
+            'intent' => $Silian_intent,
             'alternatives' => [], // We could potentially ask for multiple tool calls for alternatives
-            'metadata' => $this->extractMetadata($rawResponse),
+            'metadata' => $this->extractMetadata($Silian_rawResponse),
         ];
     }
 
-    private function createNavigationIntent(array $args): ?array
+    private function createNavigationIntent(array $Silian_args): ?array
     {
-        $destination = $args['destination'] ?? null;
-        if (!$destination || !isset($this->navigationTargets[$destination])) {
+        $Silian_destination = $Silian_args['destination'] ?? null;
+        if (!$Silian_destination || !isset($this->navigationTargets[$Silian_destination])) {
             return null;
         }
 
-        $target = $this->navigationTargets[$destination];
-        $query = $args['parameters'] ?? [];
+        $Silian_target = $this->navigationTargets[$Silian_destination];
+        $Silian_query = $Silian_args['parameters'] ?? [];
 
         return [
             'type' => 'navigate',
-            'label' => $target['label'],
+            'label' => $Silian_target['label'],
             'confidence' => 0.9,
             'reasoning' => 'AI determined navigation intent via tool call.',
             'target' => [
-                'routeId' => $destination,
-                'route' => $target['route'],
+                'routeId' => $Silian_destination,
+                'route' => $Silian_target['route'],
                 'mode' => 'navigation',
-                'query' => $query,
+                'query' => $Silian_query,
             ],
             'missing' => [],
         ];
     }
 
-    private function createShortcutIntent(array $args): ?array
+    private function createShortcutIntent(array $Silian_args): ?array
     {
-        $shortcutId = $args['shortcut_id'] ?? null;
-        if (!$shortcutId || !isset($this->quickActions[$shortcutId])) {
+        $Silian_shortcutId = $Silian_args['shortcut_id'] ?? null;
+        if (!$Silian_shortcutId || !isset($this->quickActions[$Silian_shortcutId])) {
             return null;
         }
 
-        $action = $this->quickActions[$shortcutId];
+        $Silian_action = $this->quickActions[$Silian_shortcutId];
 
         return [
             'type' => 'quick_action',
-            'label' => $action['label'],
+            'label' => $Silian_action['label'],
             'confidence' => 0.9,
             'reasoning' => 'AI determined shortcut intent via tool call.',
             'target' => [
-                'routeId' => $action['routeId'] ?? $shortcutId,
-                'route' => $action['route'] ?? null,
-                'mode' => $action['mode'] ?? 'shortcut',
-                'query' => $action['query'] ?? [],
+                'routeId' => $Silian_action['routeId'] ?? $Silian_shortcutId,
+                'route' => $Silian_action['route'] ?? null,
+                'mode' => $Silian_action['mode'] ?? 'shortcut',
+                'query' => $Silian_action['query'] ?? [],
             ],
             'missing' => [],
         ];
     }
 
-    private function createManagementIntent(array $args): ?array
+    private function createManagementIntent(array $Silian_args): ?array
     {
-        $actionName = $args['action'] ?? null;
-        if (!$actionName || !isset($this->actionDefinitions[$actionName])) {
+        $Silian_actionName = $Silian_args['action'] ?? null;
+        if (!$Silian_actionName || !isset($this->actionDefinitions[$Silian_actionName])) {
             return null;
         }
 
-        $definition = $this->actionDefinitions[$actionName];
-        $payload = $args['payload'] ?? [];
+        $Silian_definition = $this->actionDefinitions[$Silian_actionName];
+        $Silian_payload = $Silian_args['payload'] ?? [];
 
         // Merge with template
-        $apiDefinition = $definition['api'] ?? [];
-        $payloadTemplate = $apiDefinition['payloadTemplate'] ?? [];
-        $finalPayload = $this->mergePayloadTemplate($payloadTemplate, $payload);
+        $Silian_apiDefinition = $Silian_definition['api'] ?? [];
+        $Silian_payloadTemplate = $Silian_apiDefinition['payloadTemplate'] ?? [];
+        $Silian_finalPayload = $this->mergePayloadTemplate($Silian_payloadTemplate, $Silian_payload);
 
         // Check requirements
-        $requires = $definition['requires'] ?? [];
-        $missing = $this->resolveMissingRequirements($requires, $finalPayload);
+        $Silian_requires = $Silian_definition['requires'] ?? [];
+        $Silian_missing = $this->resolveMissingRequirements($Silian_requires, $Silian_finalPayload);
 
         return [
             'type' => 'action',
-            'label' => $definition['label'],
+            'label' => $Silian_definition['label'],
             'confidence' => 0.9,
             'reasoning' => 'AI determined management action via tool call.',
             'action' => [
-                'name' => $actionName,
-                'summary' => $definition['label'],
+                'name' => $Silian_actionName,
+                'summary' => $Silian_definition['label'],
                 'api' => [
-                    'method' => $apiDefinition['method'] ?? 'POST',
-                    'path' => $apiDefinition['path'] ?? '',
-                    'payload' => $finalPayload,
+                    'method' => $Silian_apiDefinition['method'] ?? 'POST',
+                    'path' => $Silian_apiDefinition['path'] ?? '',
+                    'payload' => $Silian_finalPayload,
                 ],
-                'autoExecute' => $definition['autoExecute'] ?? false,
-                'requires' => $requires,
+                'autoExecute' => $Silian_definition['autoExecute'] ?? false,
+                'requires' => $Silian_requires,
             ],
-            'missing' => $missing,
+            'missing' => $Silian_missing,
         ];
     }
 
-    private function extractMetadata(array $rawResponse): array
+    private function extractMetadata(array $Silian_rawResponse): array
     {
         return [
-            'model' => $rawResponse['model'] ?? $this->model,
-            'usage' => $rawResponse['usage'] ?? null,
-            'finish_reason' => $rawResponse['choices'][0]['finish_reason'] ?? null,
+            'model' => $Silian_rawResponse['model'] ?? $this->model,
+            'usage' => $Silian_rawResponse['usage'] ?? null,
+            'finish_reason' => $Silian_rawResponse['choices'][0]['finish_reason'] ?? null,
         ];
     }
 
-    private function mergePayloadTemplate(array $template, array $payload): array
+    private function mergePayloadTemplate(array $Silian_template, array $Silian_payload): array
     {
-        $result = $template;
-        foreach ($payload as $key => $value) {
-            $result[$key] = $value;
+        $Silian_result = $Silian_template;
+        foreach ($Silian_payload as $Silian_key => $Silian_value) {
+            $Silian_result[$Silian_key] = $Silian_value;
         }
-        return $result;
+        return $Silian_result;
     }
 
-    private function resolveMissingRequirements(array $requirements, array $payload): array
+    private function resolveMissingRequirements(array $Silian_requirements, array $Silian_payload): array
     {
-        $missing = [];
-        foreach ($requirements as $field) {
-            $value = $payload[$field] ?? null;
-            $isMissing = false;
-            if (is_array($value)) {
-                $isMissing = count(array_filter($value, fn ($item) => $item !== null && $item !== '')) === 0;
+        $Silian_missing = [];
+        foreach ($Silian_requirements as $Silian_field) {
+            $Silian_value = $Silian_payload[$Silian_field] ?? null;
+            $Silian_isMissing = false;
+            if (is_array($Silian_value)) {
+                $Silian_isMissing = count(array_filter($Silian_value, fn ($Silian_item) => $Silian_item !== null && $Silian_item !== '')) === 0;
             } else {
-                $isMissing = $value === null || $value === '' || $value === [];
+                $Silian_isMissing = $Silian_value === null || $Silian_value === '' || $Silian_value === [];
             }
 
-            if ($isMissing) {
-                $missing[] = [
-                    'field' => $field,
-                    'description' => sprintf('Provide a value for %s.', $field),
+            if ($Silian_isMissing) {
+                $Silian_missing[] = [
+                    'field' => $Silian_field,
+                    'description' => sprintf('Provide a value for %s.', $Silian_field),
                 ];
             }
         }
-        return $missing;
+        return $Silian_missing;
     }
 
-    private function fallbackIntent(array $rawResponse = []): array
+    private function fallbackIntent(array $Silian_rawResponse = []): array
     {
         return [
             'intent' => [
@@ -927,180 +927,180 @@ class AdminAiIntentService
             'alternatives' => [],
             'metadata' => [
                 'model' => $this->model,
-                'usage' => $rawResponse['usage'] ?? null,
+                'usage' => $Silian_rawResponse['usage'] ?? null,
                 'finish_reason' => 'fallback',
             ],
         ];
     }
 
-    private function guessNavigationIntent(string $query): ?array
+    private function guessNavigationIntent(string $Silian_query): ?array
     {
-        $normalizedQuery = trim(mb_strtolower($query));
-        if ($normalizedQuery === '') {
+        $Silian_normalizedQuery = trim(mb_strtolower($Silian_query));
+        if ($Silian_normalizedQuery === '') {
             return null;
         }
 
-        $best = null;
-        $bestScore = 0;
-        $matchedKeywords = [];
+        $Silian_best = null;
+        $Silian_bestScore = 0;
+        $Silian_matchedKeywords = [];
 
-        foreach ($this->navigationTargets as $id => $definition) {
-            $match = $this->computeDefinitionMatch($normalizedQuery, $definition);
-            if ($match['score'] > $bestScore) {
-                $bestScore = $match['score'];
-                $best = [
+        foreach ($this->navigationTargets as $Silian_id => $Silian_definition) {
+            $Silian_match = $this->computeDefinitionMatch($Silian_normalizedQuery, $Silian_definition);
+            if ($Silian_match['score'] > $Silian_bestScore) {
+                $Silian_bestScore = $Silian_match['score'];
+                $Silian_best = [
                     'type' => 'navigate',
-                    'definition' => $definition,
-                    'routeId' => is_string($id) ? $id : ($definition['id'] ?? null),
+                    'definition' => $Silian_definition,
+                    'routeId' => is_string($Silian_id) ? $Silian_id : ($Silian_definition['id'] ?? null),
                 ];
-                $matchedKeywords = $match['keywords'];
+                $Silian_matchedKeywords = $Silian_match['keywords'];
             }
         }
 
-        foreach ($this->quickActions as $id => $definition) {
-            $match = $this->computeDefinitionMatch($normalizedQuery, $definition);
-            if ($match['score'] > $bestScore) {
-                $bestScore = $match['score'];
-                $best = [
+        foreach ($this->quickActions as $Silian_id => $Silian_definition) {
+            $Silian_match = $this->computeDefinitionMatch($Silian_normalizedQuery, $Silian_definition);
+            if ($Silian_match['score'] > $Silian_bestScore) {
+                $Silian_bestScore = $Silian_match['score'];
+                $Silian_best = [
                     'type' => 'quick_action',
-                    'definition' => $definition,
-                    'routeId' => is_string($id) ? $id : ($definition['id'] ?? null),
+                    'definition' => $Silian_definition,
+                    'routeId' => is_string($Silian_id) ? $Silian_id : ($Silian_definition['id'] ?? null),
                 ];
-                $matchedKeywords = $match['keywords'];
+                $Silian_matchedKeywords = $Silian_match['keywords'];
             }
         }
 
-        if ($best === null || $bestScore === 0) {
+        if ($Silian_best === null || $Silian_bestScore === 0) {
             return null;
         }
 
-        $definition = $best['definition'];
-        $route = $definition['route'] ?? null;
-        if (!is_string($route) || $route === '') {
+        $Silian_definition = $Silian_best['definition'];
+        $Silian_route = $Silian_definition['route'] ?? null;
+        if (!is_string($Silian_route) || $Silian_route === '') {
             return null;
         }
 
-        $mode = $best['type'] === 'quick_action' ? ($definition['mode'] ?? 'shortcut') : 'navigation';
-        $queryParams = [];
-        if (isset($definition['query']) && is_array($definition['query'])) {
-            $queryParams = $definition['query'];
+        $Silian_mode = $Silian_best['type'] === 'quick_action' ? ($Silian_definition['mode'] ?? 'shortcut') : 'navigation';
+        $Silian_queryParams = [];
+        if (isset($Silian_definition['query']) && is_array($Silian_definition['query'])) {
+            $Silian_queryParams = $Silian_definition['query'];
         }
 
-        $confidence = min(0.9, 0.45 + 0.12 * min($bestScore, 6));
-        $reasoning = 'Matched keywords: ' . implode(', ', array_unique($matchedKeywords));
+        $Silian_confidence = min(0.9, 0.45 + 0.12 * min($Silian_bestScore, 6));
+        $Silian_reasoning = 'Matched keywords: ' . implode(', ', array_unique($Silian_matchedKeywords));
 
         return [
-            'type' => $best['type'],
-            'label' => $definition['label'] ?? ($best['routeId'] ?? 'Navigate'),
-            'confidence' => round($confidence, 2),
-            'reasoning' => $reasoning,
+            'type' => $Silian_best['type'],
+            'label' => $Silian_definition['label'] ?? ($Silian_best['routeId'] ?? 'Navigate'),
+            'confidence' => round($Silian_confidence, 2),
+            'reasoning' => $Silian_reasoning,
             'target' => [
-                'routeId' => $best['routeId'],
-                'route' => $route,
-                'mode' => $mode,
-                'query' => $queryParams,
+                'routeId' => $Silian_best['routeId'],
+                'route' => $Silian_route,
+                'mode' => $Silian_mode,
+                'query' => $Silian_queryParams,
             ],
             'missing' => [],
         ];
     }
 
-    private function computeDefinitionMatch(string $normalizedQuery, array $definition): array
+    private function computeDefinitionMatch(string $Silian_normalizedQuery, array $Silian_definition): array
     {
-        $score = 0;
-        $matches = [];
+        $Silian_score = 0;
+        $Silian_matches = [];
 
-        foreach ($this->collectDefinitionKeywords($definition) as $keyword) {
-            $keyword = trim(mb_strtolower($keyword));
-            if ($keyword === '') {
+        foreach ($this->collectDefinitionKeywords($Silian_definition) as $Silian_keyword) {
+            $Silian_keyword = trim(mb_strtolower($Silian_keyword));
+            if ($Silian_keyword === '') {
                 continue;
             }
-            if (mb_strpos($normalizedQuery, $keyword) !== false) {
-                $score += max(1, (int) floor(mb_strlen($keyword) / 4));
-                $matches[] = $keyword;
+            if (mb_strpos($Silian_normalizedQuery, $Silian_keyword) !== false) {
+                $Silian_score += max(1, (int) floor(mb_strlen($Silian_keyword) / 4));
+                $Silian_matches[] = $Silian_keyword;
             }
         }
 
-        return ['score' => $score, 'keywords' => $matches];
+        return ['score' => $Silian_score, 'keywords' => $Silian_matches];
     }
 
-    private function collectDefinitionKeywords(array $definition): array
+    private function collectDefinitionKeywords(array $Silian_definition): array
     {
-        $keywords = [];
+        $Silian_keywords = [];
 
-        if (!empty($definition['keywords']) && is_array($definition['keywords'])) {
-            foreach ($definition['keywords'] as $keyword) {
-                if (is_string($keyword)) {
-                    $keywords[] = $keyword;
+        if (!empty($Silian_definition['keywords']) && is_array($Silian_definition['keywords'])) {
+            foreach ($Silian_definition['keywords'] as $Silian_keyword) {
+                if (is_string($Silian_keyword)) {
+                    $Silian_keywords[] = $Silian_keyword;
                 }
             }
         }
 
-        foreach (['label', 'description'] as $field) {
-            if (!empty($definition[$field]) && is_string($definition[$field])) {
-                $keywords[] = $definition[$field];
+        foreach (['label', 'description'] as $Silian_field) {
+            if (!empty($Silian_definition[$Silian_field]) && is_string($Silian_definition[$Silian_field])) {
+                $Silian_keywords[] = $Silian_definition[$Silian_field];
             }
         }
 
-        if (!empty($definition['route']) && is_string($definition['route'])) {
-            $keywords[] = str_replace(['/admin/', '/'], ' ', $definition['route']);
+        if (!empty($Silian_definition['route']) && is_string($Silian_definition['route'])) {
+            $Silian_keywords[] = str_replace(['/admin/', '/'], ' ', $Silian_definition['route']);
         }
 
-        return $keywords;
+        return $Silian_keywords;
     }
 
-    private function logAudit(string $action, array $logContext, array $context = []): void
+    private function logAudit(string $Silian_action, array $Silian_logContext, array $Silian_context = []): void
     {
         if (!$this->auditLogService) {
             return;
         }
 
         try {
-            $actorType = $logContext['actor_type'] ?? 'admin';
-            $actorId = isset($logContext['actor_id']) && is_numeric((string) $logContext['actor_id'])
-                ? (int) $logContext['actor_id']
+            $Silian_actorType = $Silian_logContext['actor_type'] ?? 'admin';
+            $Silian_actorId = isset($Silian_logContext['actor_id']) && is_numeric((string) $Silian_logContext['actor_id'])
+                ? (int) $Silian_logContext['actor_id']
                 : null;
-            $payload = array_merge([
-                'request_id' => $logContext['request_id'] ?? null,
-                'endpoint' => $logContext['source'] ?? '/admin/ai/intents',
+            $Silian_payload = array_merge([
+                'request_id' => $Silian_logContext['request_id'] ?? null,
+                'endpoint' => $Silian_logContext['source'] ?? '/admin/ai/intents',
                 'request_method' => 'POST',
                 'status' => 'success',
-            ], $context);
+            ], $Silian_context);
 
-            if ($actorType === 'admin') {
-                $this->auditLogService->logAdminOperation($action, $actorId, 'admin_ai_service', $payload);
+            if ($Silian_actorType === 'admin') {
+                $this->auditLogService->logAdminOperation($Silian_action, $Silian_actorId, 'admin_ai_service', $Silian_payload);
                 return;
             }
 
-            if ($actorType === 'user') {
-                $this->auditLogService->logUserAction($actorId, $action, $payload);
+            if ($Silian_actorType === 'user') {
+                $this->auditLogService->logUserAction($Silian_actorId, $Silian_action, $Silian_payload);
                 return;
             }
 
-            $this->auditLogService->logSystemEvent($action, 'admin_ai_service', $payload);
-        } catch (\Throwable $ignore) {
+            $this->auditLogService->logSystemEvent($Silian_action, 'admin_ai_service', $Silian_payload);
+        } catch (\Throwable $Silian_ignore) {
             // 审计日志失败不阻断主流程
         }
     }
 
-    private function logError(\Throwable $exception, array $logContext, array $context = []): void
+    private function logError(\Throwable $Silian_exception, array $Silian_logContext, array $Silian_context = []): void
     {
         if (!$this->errorLogService) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext(
-                $logContext['source'] ?? '/admin/ai/intents',
+            $Silian_request = SyntheticRequestFactory::fromContext(
+                $Silian_logContext['source'] ?? '/admin/ai/intents',
                 'POST',
-                $logContext['request_id'] ?? null,
+                $Silian_logContext['request_id'] ?? null,
                 [],
-                $context
+                $Silian_context
             );
-            $this->errorLogService->logException($exception, $request, [
-                'request_id' => $logContext['request_id'] ?? null,
-                'actor_type' => $logContext['actor_type'] ?? 'admin',
+            $this->errorLogService->logException($Silian_exception, $Silian_request, [
+                'request_id' => $Silian_logContext['request_id'] ?? null,
+                'actor_type' => $Silian_logContext['actor_type'] ?? 'admin',
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // swallow secondary logging failure
         }
     }

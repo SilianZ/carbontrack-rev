@@ -60,11 +60,11 @@ class NotificationPreferenceService
     private ?AuditLogService $auditLogService;
     private ?ErrorLogService $errorLogService;
 
-    public function __construct(Logger $logger, ?AuditLogService $auditLogService = null, ?ErrorLogService $errorLogService = null)
+    public function __construct(Logger $Silian_logger, ?AuditLogService $Silian_auditLogService = null, ?ErrorLogService $Silian_errorLogService = null)
     {
-        $this->logger = $logger;
-        $this->auditLogService = $auditLogService;
-        $this->errorLogService = $errorLogService;
+        $this->logger = $Silian_logger;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->errorLogService = $Silian_errorLogService;
     }
 
     /**
@@ -78,183 +78,183 @@ class NotificationPreferenceService
     /**
      * @return array<int, array{category:string,label:string,locked:bool,email_enabled:bool}>
      */
-    public function getPreferencesForUser(int $userId): array
+    public function getPreferencesForUser(int $Silian_userId): array
     {
-        $mask = $this->getMaskForUser($userId);
+        $Silian_mask = $this->getMaskForUser($Silian_userId);
 
-        $result = [];
-        foreach (self::CATEGORY_DEFINITIONS as $category => $meta) {
-            $emailEnabled = true;
-            if (!$meta['locked'] && isset(self::CATEGORY_BITMASKS[$category])) {
-                $emailEnabled = ($mask & self::CATEGORY_BITMASKS[$category]) === 0;
+        $Silian_result = [];
+        foreach (self::CATEGORY_DEFINITIONS as $Silian_category => $Silian_meta) {
+            $Silian_emailEnabled = true;
+            if (!$Silian_meta['locked'] && isset(self::CATEGORY_BITMASKS[$Silian_category])) {
+                $Silian_emailEnabled = ($Silian_mask & self::CATEGORY_BITMASKS[$Silian_category]) === 0;
             }
 
-            $result[] = [
-                'category' => $category,
-                'label' => $meta['label'],
-                'locked' => $meta['locked'],
-                'email_enabled' => $meta['locked'] ? true : $emailEnabled,
+            $Silian_result[] = [
+                'category' => $Silian_category,
+                'label' => $Silian_meta['label'],
+                'locked' => $Silian_meta['locked'],
+                'email_enabled' => $Silian_meta['locked'] ? true : $Silian_emailEnabled,
             ];
         }
 
-        return $result;
+        return $Silian_result;
     }
 
     /**
      * @param array<int, array{category:string,email_enabled:bool}> $preferences
      */
-    public function updatePreferences(int $userId, array $preferences): void
+    public function updatePreferences(int $Silian_userId, array $Silian_preferences): void
     {
-        $currentMask = $this->getMaskForUser($userId);
-        $updatedMask = $currentMask;
+        $Silian_currentMask = $this->getMaskForUser($Silian_userId);
+        $Silian_updatedMask = $Silian_currentMask;
 
-        foreach ($preferences as $entry) {
-            $category = (string) ($entry['category'] ?? '');
-            if (!$this->isValidCategory($category)) {
+        foreach ($Silian_preferences as $Silian_entry) {
+            $Silian_category = (string) ($Silian_entry['category'] ?? '');
+            if (!$this->isValidCategory($Silian_category)) {
                 continue;
             }
 
-            if ($this->isLockedCategory($category)) {
+            if ($this->isLockedCategory($Silian_category)) {
                 continue;
             }
 
-            $enabled = (bool) ($entry['email_enabled'] ?? true);
-            $bit = self::CATEGORY_BITMASKS[$category] ?? null;
-            if ($bit === null) {
+            $Silian_enabled = (bool) ($Silian_entry['email_enabled'] ?? true);
+            $Silian_bit = self::CATEGORY_BITMASKS[$Silian_category] ?? null;
+            if ($Silian_bit === null) {
                 continue;
             }
 
-            if ($enabled) {
-                $updatedMask &= ~$bit;
+            if ($Silian_enabled) {
+                $Silian_updatedMask &= ~$Silian_bit;
             } else {
-                $updatedMask |= $bit;
+                $Silian_updatedMask |= $Silian_bit;
             }
         }
 
-        if ($updatedMask !== $currentMask) {
+        if ($Silian_updatedMask !== $Silian_currentMask) {
             try {
                 User::query()
-                    ->where('id', $userId)
+                    ->where('id', $Silian_userId)
                     ->update([
-                        'notification_email_mask' => $updatedMask,
+                        'notification_email_mask' => $Silian_updatedMask,
                         'updated_at' => date('Y-m-d H:i:s'),
                     ]);
-            } catch (\Throwable $e) {
-                $this->logFailure('notification_preferences_update_failed', $e, [
-                    'user_id' => $userId,
-                    'notification_email_mask' => $updatedMask,
+            } catch (\Throwable $Silian_e) {
+                $this->logFailure('notification_preferences_update_failed', $Silian_e, [
+                    'user_id' => $Silian_userId,
+                    'notification_email_mask' => $Silian_updatedMask,
                 ], '/internal/notification-preferences/update');
                 $this->logger->error('Failed to update notification mask', [
-                    'user_id' => $userId,
-                    'error' => $e->getMessage(),
+                    'user_id' => $Silian_userId,
+                    'error' => $Silian_e->getMessage(),
                 ]);
-                throw $e;
+                throw $Silian_e;
             }
 
-            $this->maskCache[$userId] = $updatedMask;
+            $this->maskCache[$Silian_userId] = $Silian_updatedMask;
         }
     }
 
-    public function shouldSendEmailByEmail(string $email, string $category): bool
+    public function shouldSendEmailByEmail(string $Silian_email, string $Silian_category): bool
     {
-        $category = trim($category);
-        if ($category === '' || !isset(self::CATEGORY_DEFINITIONS[$category])) {
+        $Silian_category = trim($Silian_category);
+        if ($Silian_category === '' || !isset(self::CATEGORY_DEFINITIONS[$Silian_category])) {
             return true;
         }
 
-        if ($this->isLockedCategory($category)) {
+        if ($this->isLockedCategory($Silian_category)) {
             return true;
         }
 
-        if (!isset($this->userIdByEmailCache[$email])) {
-            $user = User::query()
-                ->where('email', $email)
+        if (!isset($this->userIdByEmailCache[$Silian_email])) {
+            $Silian_user = User::query()
+                ->where('email', $Silian_email)
                 ->whereNull('deleted_at')
                 ->first(['id', 'notification_email_mask']);
 
-            if ($user) {
-                $this->userIdByEmailCache[$email] = (int) $user->id;
-                $this->maskCache[$user->id] = (int) ($user->notification_email_mask ?? 0);
+            if ($Silian_user) {
+                $this->userIdByEmailCache[$Silian_email] = (int) $Silian_user->id;
+                $this->maskCache[$Silian_user->id] = (int) ($Silian_user->notification_email_mask ?? 0);
             } else {
-                $this->userIdByEmailCache[$email] = 0;
+                $this->userIdByEmailCache[$Silian_email] = 0;
             }
         }
 
-        $userId = $this->userIdByEmailCache[$email];
-        if ($userId === 0) {
+        $Silian_userId = $this->userIdByEmailCache[$Silian_email];
+        if ($Silian_userId === 0) {
             return true;
         }
 
-        return $this->shouldSendEmail($userId, $category);
+        return $this->shouldSendEmail($Silian_userId, $Silian_category);
     }
 
-    public function shouldSendEmail(int $userId, string $category): bool
+    public function shouldSendEmail(int $Silian_userId, string $Silian_category): bool
     {
-        if (!isset(self::CATEGORY_DEFINITIONS[$category])) {
+        if (!isset(self::CATEGORY_DEFINITIONS[$Silian_category])) {
             return true;
         }
 
-        if ($this->isLockedCategory($category)) {
+        if ($this->isLockedCategory($Silian_category)) {
             return true;
         }
 
-        $bit = self::CATEGORY_BITMASKS[$category] ?? null;
-        if ($bit === null) {
+        $Silian_bit = self::CATEGORY_BITMASKS[$Silian_category] ?? null;
+        if ($Silian_bit === null) {
             return true;
         }
 
-        $mask = $this->getMaskForUser($userId);
+        $Silian_mask = $this->getMaskForUser($Silian_userId);
 
-        return ($mask & $bit) === 0;
+        return ($Silian_mask & $Silian_bit) === 0;
     }
 
-    private function getMaskForUser(int $userId): int
+    private function getMaskForUser(int $Silian_userId): int
     {
-        if (!array_key_exists($userId, $this->maskCache)) {
+        if (!array_key_exists($Silian_userId, $this->maskCache)) {
             try {
-                $mask = User::query()
-                    ->where('id', $userId)
+                $Silian_mask = User::query()
+                    ->where('id', $Silian_userId)
                     ->whereNull('deleted_at')
                     ->value('notification_email_mask');
-            } catch (\Throwable $e) {
-                $this->logFailure('notification_preferences_load_failed', $e, [
-                    'user_id' => $userId,
+            } catch (\Throwable $Silian_e) {
+                $this->logFailure('notification_preferences_load_failed', $Silian_e, [
+                    'user_id' => $Silian_userId,
                 ], '/internal/notification-preferences/load');
                 $this->logger->warning('Failed to load notification mask; assuming defaults', [
-                    'user_id' => $userId,
-                    'error' => $e->getMessage(),
+                    'user_id' => $Silian_userId,
+                    'error' => $Silian_e->getMessage(),
                 ]);
-                $mask = 0;
+                $Silian_mask = 0;
             }
 
-            $this->maskCache[$userId] = (int) ($mask ?? 0);
+            $this->maskCache[$Silian_userId] = (int) ($Silian_mask ?? 0);
         }
 
-        return $this->maskCache[$userId];
+        return $this->maskCache[$Silian_userId];
     }
 
-    private function isLockedCategory(string $category): bool
+    private function isLockedCategory(string $Silian_category): bool
     {
-        return self::CATEGORY_DEFINITIONS[$category]['locked'] ?? false;
+        return self::CATEGORY_DEFINITIONS[$Silian_category]['locked'] ?? false;
     }
 
-    private function isValidCategory(string $category): bool
+    private function isValidCategory(string $Silian_category): bool
     {
-        return isset(self::CATEGORY_DEFINITIONS[$category]);
+        return isset(self::CATEGORY_DEFINITIONS[$Silian_category]);
     }
 
-    private function logFailure(string $action, \Throwable $e, array $context, string $path): void
+    private function logFailure(string $Silian_action, \Throwable $Silian_e, array $Silian_context, string $Silian_path): void
     {
         if ($this->auditLogService !== null) {
             try {
                 $this->auditLogService->log([
-                    'action' => $action,
+                    'action' => $Silian_action,
                     'operation_category' => 'notification',
                     'actor_type' => 'system',
                     'status' => 'failed',
-                    'data' => $context,
+                    'data' => $Silian_context,
                 ]);
-            } catch (\Throwable $ignore) {
+            } catch (\Throwable $Silian_ignore) {
                 // ignore audit failures for preference service
             }
         }
@@ -264,9 +264,9 @@ class NotificationPreferenceService
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext($path, 'POST', null, [], $context);
-            $this->errorLogService->logException($e, $request, ['context_message' => $action] + $context);
-        } catch (\Throwable $ignore) {
+            $Silian_request = SyntheticRequestFactory::fromContext($Silian_path, 'POST', null, [], $Silian_context);
+            $this->errorLogService->logException($Silian_e, $Silian_request, ['context_message' => $Silian_action] + $Silian_context);
+        } catch (\Throwable $Silian_ignore) {
             // ignore error log failures for preference service
         }
     }

@@ -8,115 +8,115 @@ class QuotaConfigService
 {
     public function getQuotaDefinitions(): array
     {
-        static $definitions = null;
-        if ($definitions !== null) {
-            return $definitions;
+        static $Silian_definitions = null;
+        if ($Silian_definitions !== null) {
+            return $Silian_definitions;
         }
 
-        $raw = $_ENV['QUOTA_DEFINITIONS'] ?? getenv('QUOTA_DEFINITIONS') ?: '';
-        $definitions = array_values(array_filter(array_map('trim', explode(',', $raw)), 'strlen'));
-        return $definitions;
+        $Silian_raw = $_ENV['QUOTA_DEFINITIONS'] ?? getenv('QUOTA_DEFINITIONS') ?: '';
+        $Silian_definitions = array_values(array_filter(array_map('trim', explode(',', $Silian_raw)), 'strlen'));
+        return $Silian_definitions;
     }
 
-    public function decodeJsonToArray($value): ?array
+    public function decodeJsonToArray($Silian_value): ?array
     {
-        if (is_array($value)) {
-            return $value;
+        if (is_array($Silian_value)) {
+            return $Silian_value;
         }
-        if (!is_string($value)) {
+        if (!is_string($Silian_value)) {
             return null;
         }
-        $trimmed = trim($value);
-        if ($trimmed === '') {
+        $Silian_trimmed = trim($Silian_value);
+        if ($Silian_trimmed === '') {
             return null;
         }
-        $decoded = json_decode($trimmed, true);
-        if (is_array($decoded)) {
-            return $decoded;
+        $Silian_decoded = json_decode($Silian_trimmed, true);
+        if (is_array($Silian_decoded)) {
+            return $Silian_decoded;
         }
-        if (is_string($decoded)) {
-            $decodedAgain = json_decode($decoded, true);
-            return is_array($decodedAgain) ? $decodedAgain : null;
+        if (is_string($Silian_decoded)) {
+            $Silian_decodedAgain = json_decode($Silian_decoded, true);
+            return is_array($Silian_decodedAgain) ? $Silian_decodedAgain : null;
         }
         return null;
     }
 
-    public function flattenQuotas(?array $json): array
+    public function flattenQuotas(?array $Silian_json): array
     {
-        $json = $this->normalizeQuotaConfig($json);
-        $flat = [];
-        foreach ($this->getQuotaDefinitions() as $key) {
-            $parts = explode('.', $key);
-            $value = $json;
-            foreach ($parts as $part) {
-                if (is_array($value) && array_key_exists($part, $value)) {
-                    $value = $value[$part];
+        $Silian_json = $this->normalizeQuotaConfig($Silian_json);
+        $Silian_flat = [];
+        foreach ($this->getQuotaDefinitions() as $Silian_key) {
+            $Silian_parts = explode('.', $Silian_key);
+            $Silian_value = $Silian_json;
+            foreach ($Silian_parts as $Silian_part) {
+                if (is_array($Silian_value) && array_key_exists($Silian_part, $Silian_value)) {
+                    $Silian_value = $Silian_value[$Silian_part];
                 } else {
-                    $value = null;
+                    $Silian_value = null;
                     break;
                 }
             }
-            $flat[$key] = $value;
+            $Silian_flat[$Silian_key] = $Silian_value;
         }
-        return $flat;
+        return $Silian_flat;
     }
 
-    public function unflattenQuotas(array $flat, ?array $currentJson): array
+    public function unflattenQuotas(array $Silian_flat, ?array $Silian_currentJson): array
     {
-        $result = $this->normalizeQuotaConfig($currentJson);
+        $Silian_result = $this->normalizeQuotaConfig($Silian_currentJson);
 
-        foreach ($flat as $dotKey => $value) {
-            if (!in_array($dotKey, $this->getQuotaDefinitions(), true)) {
+        foreach ($Silian_flat as $Silian_dotKey => $Silian_value) {
+            if (!in_array($Silian_dotKey, $this->getQuotaDefinitions(), true)) {
                 continue;
             }
 
-            $parts = explode('.', $dotKey);
-            $temp = &$result;
+            $Silian_parts = explode('.', $Silian_dotKey);
+            $Silian_temp = &$Silian_result;
 
-            foreach ($parts as $i => $part) {
-                if ($i === count($parts) - 1) {
-                    if ($value === '' || $value === null) {
-                        unset($temp[$part]);
+            foreach ($Silian_parts as $Silian_i => $Silian_part) {
+                if ($Silian_i === count($Silian_parts) - 1) {
+                    if ($Silian_value === '' || $Silian_value === null) {
+                        unset($Silian_temp[$Silian_part]);
                     } else {
-                        $temp[$part] = is_numeric($value) ? (int) $value : $value;
+                        $Silian_temp[$Silian_part] = is_numeric($Silian_value) ? (int) $Silian_value : $Silian_value;
                     }
                 } else {
-                    if (!isset($temp[$part]) || !is_array($temp[$part])) {
-                        $temp[$part] = [];
+                    if (!isset($Silian_temp[$Silian_part]) || !is_array($Silian_temp[$Silian_part])) {
+                        $Silian_temp[$Silian_part] = [];
                     }
-                    $temp = &$temp[$part];
+                    $Silian_temp = &$Silian_temp[$Silian_part];
                 }
             }
         }
 
-        return $result;
+        return $Silian_result;
     }
 
-    public function normalizeQuotaConfig(?array $config): array
+    public function normalizeQuotaConfig(?array $Silian_config): array
     {
-        $normalized = $config ?? [];
+        $Silian_normalized = $Silian_config ?? [];
 
-        foreach ($this->getQuotaDefinitions() as $dotKey) {
-            if (!array_key_exists($dotKey, $normalized)) {
+        foreach ($this->getQuotaDefinitions() as $Silian_dotKey) {
+            if (!array_key_exists($Silian_dotKey, $Silian_normalized)) {
                 continue;
             }
-            $value = $normalized[$dotKey];
-            unset($normalized[$dotKey]);
+            $Silian_value = $Silian_normalized[$Silian_dotKey];
+            unset($Silian_normalized[$Silian_dotKey]);
 
-            $parts = explode('.', $dotKey);
-            $temp = &$normalized;
-            foreach ($parts as $i => $part) {
-                if ($i === count($parts) - 1) {
-                    $temp[$part] = $value;
+            $Silian_parts = explode('.', $Silian_dotKey);
+            $Silian_temp = &$Silian_normalized;
+            foreach ($Silian_parts as $Silian_i => $Silian_part) {
+                if ($Silian_i === count($Silian_parts) - 1) {
+                    $Silian_temp[$Silian_part] = $Silian_value;
                 } else {
-                    if (!isset($temp[$part]) || !is_array($temp[$part])) {
-                        $temp[$part] = [];
+                    if (!isset($Silian_temp[$Silian_part]) || !is_array($Silian_temp[$Silian_part])) {
+                        $Silian_temp[$Silian_part] = [];
                     }
-                    $temp = &$temp[$part];
+                    $Silian_temp = &$Silian_temp[$Silian_part];
                 }
             }
         }
 
-        return $normalized;
+        return $Silian_normalized;
     }
 }

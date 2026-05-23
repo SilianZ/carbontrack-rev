@@ -1,8 +1,8 @@
-import React from 'react';
-import { RegisterForm } from '../components/auth/RegisterForm';
+import Silian_React from 'react';
+import { RegisterForm as Silian_RegisterForm } from '../components/auth/RegisterForm';
 
 export default function RegisterPage() {
-  return <RegisterForm />;
+  return <Silian_RegisterForm />;
 }
 
 

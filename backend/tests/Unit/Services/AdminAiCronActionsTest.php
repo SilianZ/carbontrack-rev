@@ -16,11 +16,11 @@ class AdminAiCronActionsTest extends TestCase
 {
     public function testReadModelSupportsCronTasksAndRuns(): void
     {
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('listTasks')
             ->willReturn([['task_key' => 'support_sla_sweep']]);
-        $scheduler->expects($this->once())
+        $Silian_scheduler->expects($this->once())
             ->method('listRuns')
             ->with(['task_key' => 'support_sla_sweep'])
             ->willReturn([
@@ -28,25 +28,25 @@ class AdminAiCronActionsTest extends TestCase
                 'pagination' => ['page' => 1, 'limit' => 20, 'total' => 1],
             ]);
 
-        $service = new AdminAiReadModelService(
+        $Silian_service = new AdminAiReadModelService(
             new \PDO('sqlite::memory:'),
             null,
-            $scheduler
+            $Silian_scheduler
         );
 
-        $tasks = $service->execute('get_cron_tasks', []);
-        $runs = $service->execute('get_cron_runs', ['task_key' => 'support_sla_sweep']);
+        $Silian_tasks = $Silian_service->execute('get_cron_tasks', []);
+        $Silian_runs = $Silian_service->execute('get_cron_runs', ['task_key' => 'support_sla_sweep']);
 
-        $this->assertSame('cron_tasks', $tasks['scope']);
-        $this->assertSame('cron_runs', $runs['scope']);
-        $this->assertCount(1, $tasks['items']);
-        $this->assertCount(1, $runs['items']);
+        $this->assertSame('cron_tasks', $Silian_tasks['scope']);
+        $this->assertSame('cron_runs', $Silian_runs['scope']);
+        $this->assertCount(1, $Silian_tasks['items']);
+        $this->assertCount(1, $Silian_runs['items']);
     }
 
     public function testWriteModelSupportsCronTaskUpdateAndRun(): void
     {
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('updateTask')
             ->with('support_sla_sweep', [
                 'enabled' => false,
@@ -59,23 +59,23 @@ class AdminAiCronActionsTest extends TestCase
                 'interval_minutes' => 15,
                 'settings' => ['notify' => true],
             ]);
-        $scheduler->expects($this->once())
+        $Silian_scheduler->expects($this->once())
             ->method('runTaskNow')
             ->with('support_sla_sweep', 'admin_manual', $this->arrayHasKey('request_id'))
             ->willReturn(['task_key' => 'support_sla_sweep', 'status' => 'success']);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->exactly(2))->method('logAdminOperation');
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->exactly(2))->method('logAdminOperation');
 
-        $service = new AdminAiWriteActionService(
+        $Silian_service = new AdminAiWriteActionService(
             new \PDO('sqlite::memory:'),
-            $audit,
+            $Silian_audit,
             $this->createMock(MessageService::class),
             $this->createMock(BadgeService::class),
-            $scheduler
+            $Silian_scheduler
         );
 
-        $updateResult = $service->execute('update_cron_task', [
+        $Silian_updateResult = $Silian_service->execute('update_cron_task', [
             'task_key' => 'support_sla_sweep',
             'enabled' => 'false',
             'interval_minutes' => '15',
@@ -86,7 +86,7 @@ class AdminAiCronActionsTest extends TestCase
             'conversation_id' => 'conv-1',
         ]);
 
-        $runResult = $service->execute('run_cron_task', [
+        $Silian_runResult = $Silian_service->execute('run_cron_task', [
             'task_key' => 'support_sla_sweep',
         ], [
             'actor_id' => 1,
@@ -94,16 +94,16 @@ class AdminAiCronActionsTest extends TestCase
             'conversation_id' => 'conv-2',
         ]);
 
-        $this->assertSame('update_cron_task', $updateResult['action']);
-        $this->assertSame('run_cron_task', $runResult['action']);
-        $this->assertSame('success', $runResult['task_run']['status']);
-        $this->assertSame(['notify' => true], $updateResult['task']['settings']);
+        $this->assertSame('update_cron_task', $Silian_updateResult['action']);
+        $this->assertSame('run_cron_task', $Silian_runResult['action']);
+        $this->assertSame('success', $Silian_runResult['task_run']['status']);
+        $this->assertSame(['notify' => true], $Silian_updateResult['task']['settings']);
     }
 
     public function testWriteModelThrowsWhenCronRunIsNotSuccessful(): void
     {
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('runTaskNow')
             ->willReturn([
                 'task_key' => 'support_sla_sweep',
@@ -111,21 +111,21 @@ class AdminAiCronActionsTest extends TestCase
                 'error_message' => 'task_failed',
             ]);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logAdminOperation');
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('logAdminOperation');
 
-        $service = new AdminAiWriteActionService(
+        $Silian_service = new AdminAiWriteActionService(
             new \PDO('sqlite::memory:'),
-            $audit,
+            $Silian_audit,
             $this->createMock(MessageService::class),
             $this->createMock(BadgeService::class),
-            $scheduler
+            $Silian_scheduler
         );
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('task_failed');
 
-        $service->execute('run_cron_task', [
+        $Silian_service->execute('run_cron_task', [
             'task_key' => 'support_sla_sweep',
         ], [
             'actor_id' => 1,
@@ -136,21 +136,21 @@ class AdminAiCronActionsTest extends TestCase
 
     public function testWriteModelRejectsInvalidCronTaskUpdatePayload(): void
     {
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->never())->method('updateTask');
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->never())->method('updateTask');
 
-        $service = new AdminAiWriteActionService(
+        $Silian_service = new AdminAiWriteActionService(
             new \PDO('sqlite::memory:'),
             $this->createMock(AuditLogService::class),
             $this->createMock(MessageService::class),
             $this->createMock(BadgeService::class),
-            $scheduler
+            $Silian_scheduler
         );
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('settings must be an object or array.');
 
-        $service->execute('update_cron_task', [
+        $Silian_service->execute('update_cron_task', [
             'task_key' => 'support_sla_sweep',
             'enabled' => 'false',
             'interval_minutes' => '15',
@@ -164,28 +164,28 @@ class AdminAiCronActionsTest extends TestCase
 
     public function testWriteModelRejectsMissingCronTaskKeyForUpdateAndRun(): void
     {
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->never())->method('updateTask');
-        $scheduler->expects($this->never())->method('runTaskNow');
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->never())->method('updateTask');
+        $Silian_scheduler->expects($this->never())->method('runTaskNow');
 
-        $service = new AdminAiWriteActionService(
+        $Silian_service = new AdminAiWriteActionService(
             new \PDO('sqlite::memory:'),
             $this->createMock(AuditLogService::class),
             $this->createMock(MessageService::class),
             $this->createMock(BadgeService::class),
-            $scheduler
+            $Silian_scheduler
         );
 
         try {
-            $service->execute('update_cron_task', [], []);
+            $Silian_service->execute('update_cron_task', [], []);
             $this->fail('Expected InvalidArgumentException for missing task_key on update.');
-        } catch (\InvalidArgumentException $exception) {
-            $this->assertSame('task_key is required.', $exception->getMessage());
+        } catch (\InvalidArgumentException $Silian_exception) {
+            $this->assertSame('task_key is required.', $Silian_exception->getMessage());
         }
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('task_key is required.');
 
-        $service->execute('run_cron_task', [], []);
+        $Silian_service->execute('run_cron_task', [], []);
     }
 }
