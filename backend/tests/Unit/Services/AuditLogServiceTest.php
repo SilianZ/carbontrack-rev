@@ -61,40 +61,40 @@ class AuditLogServiceTest extends TestCase
 
     public function testLogUserActionInsertsAndLogs(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $pdo->method('prepare')->willReturn($stmt);
-        $logger->expects($this->once())->method('info');
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->method('execute')->willReturn(true);
+        $Silian_pdo->method('prepare')->willReturn($Silian_stmt);
+        $Silian_logger->expects($this->once())->method('info');
 
-        $svc = new AuditLogService($pdo, $logger);
-        $svc->logUserAction(1, 'login', ['ip'=>'127.0.0.1'], '127.0.0.1');
+        $Silian_svc = new AuditLogService($Silian_pdo, $Silian_logger);
+        $Silian_svc->logUserAction(1, 'login', ['ip'=>'127.0.0.1'], '127.0.0.1');
         $this->assertTrue(true);
     }
 
     public function testGetUserLogsReturnsArray(): void
     {
-        $pdo = $this->createMock(\PDO::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $stmt->method('fetchAll')->willReturn([
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->method('execute')->willReturn(true);
+        $Silian_stmt->method('fetchAll')->willReturn([
             ['id'=>1,'user_id'=>1,'action'=>'login']
         ]);
-        $pdo->method('prepare')->willReturn($stmt);
+        $Silian_pdo->method('prepare')->willReturn($Silian_stmt);
 
-        $svc = new AuditLogService($pdo, $logger);
-        $logs = $svc->getUserLogs(1, 10);
-        $this->assertCount(1, $logs);
-        $this->assertEquals('login', $logs[0]['action']);
+        $Silian_svc = new AuditLogService($Silian_pdo, $Silian_logger);
+        $Silian_logs = $Silian_svc->getUserLogs(1, 10);
+        $this->assertCount(1, $Silian_logs);
+        $this->assertEquals('login', $Silian_logs[0]['action']);
     }
 
     public function testLogSystemEventPersistsNullUserIdForSystemActor(): void
     {
-        $pdo = new \PDO('sqlite::memory:');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $pdo->exec(
+        $Silian_pdo = new \PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $Silian_pdo->exec(
             "CREATE TABLE audit_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NULL,
@@ -123,23 +123,23 @@ class AuditLogServiceTest extends TestCase
             )"
         );
 
-        $service = new AuditLogService($pdo, new Logger('test'));
+        $Silian_service = new AuditLogService($Silian_pdo, new Logger('test'));
 
-        $this->assertTrue($service->logSystemEvent('statistics_public_computed', 'statistics_service', [
+        $this->assertTrue($Silian_service->logSystemEvent('statistics_public_computed', 'statistics_service', [
             'status' => 'success',
             'request_method' => 'SYSTEM',
             'endpoint' => '/internal/statistics',
             'request_data' => ['force_refresh' => false],
         ]));
 
-        $row = $pdo->query('SELECT user_id, actor_type, action, operation_category FROM audit_logs LIMIT 1')
+        $Silian_row = $Silian_pdo->query('SELECT user_id, actor_type, action, operation_category FROM audit_logs LIMIT 1')
             ?->fetch(\PDO::FETCH_ASSOC);
 
-        $this->assertIsArray($row);
-        $this->assertNull($row['user_id']);
-        $this->assertSame('system', $row['actor_type']);
-        $this->assertSame('statistics_public_computed', $row['action']);
-        $this->assertSame('statistics_service', $row['operation_category']);
+        $this->assertIsArray($Silian_row);
+        $this->assertNull($Silian_row['user_id']);
+        $this->assertSame('system', $Silian_row['actor_type']);
+        $this->assertSame('statistics_public_computed', $Silian_row['action']);
+        $this->assertSame('statistics_service', $Silian_row['operation_category']);
     }
 
     public function testLogAuditSkipsInsertWhenWritesDisabled(): void
@@ -147,12 +147,12 @@ class AuditLogServiceTest extends TestCase
         $_ENV['DISABLE_AUDIT_LOG_WRITES'] = 'true';
         $_SERVER['DISABLE_AUDIT_LOG_WRITES'] = 'true';
 
-        $pdo = $this->createMock(\PDO::class);
-        $pdo->expects($this->never())->method('prepare');
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_pdo->expects($this->never())->method('prepare');
 
-        $service = new AuditLogService($pdo, $this->createMock(\Monolog\Logger::class));
+        $Silian_service = new AuditLogService($Silian_pdo, $this->createMock(\Monolog\Logger::class));
 
-        $this->assertFalse($service->log([
+        $this->assertFalse($Silian_service->log([
             'action' => 'register',
             'operation_category' => 'authentication',
         ]));
@@ -165,15 +165,15 @@ class AuditLogServiceTest extends TestCase
         $_ENV['DISABLE_AUDIT_LOG_WRITES'] = 'true';
         $_SERVER['DISABLE_AUDIT_LOG_WRITES'] = 'true';
 
-        $pdo = $this->createMock(\PDO::class);
-        $stmt = $this->createMock(\PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
-        $pdo->expects($this->once())->method('prepare')->willReturn($stmt);
-        $pdo->method('lastInsertId')->willReturn('1');
+        $Silian_pdo = $this->createMock(\PDO::class);
+        $Silian_stmt = $this->createMock(\PDOStatement::class);
+        $Silian_stmt->method('execute')->willReturn(true);
+        $Silian_pdo->expects($this->once())->method('prepare')->willReturn($Silian_stmt);
+        $Silian_pdo->method('lastInsertId')->willReturn('1');
 
-        $service = new AuditLogService($pdo, $this->createMock(\Monolog\Logger::class));
+        $Silian_service = new AuditLogService($Silian_pdo, $this->createMock(\Monolog\Logger::class));
 
-        $this->assertTrue($service->log([
+        $this->assertTrue($Silian_service->log([
             'action' => 'register',
             'operation_category' => 'authentication',
         ]));

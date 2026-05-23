@@ -1,321 +1,321 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2 } from 'lucide-react';
-import { useQueryClient } from 'react-query';
-import { useTranslation } from '../../hooks/useTranslation';
-import { profileAPI, schoolAPI } from '../../lib/api';
-import { userManager } from '../../lib/auth';
-import { Input } from '../ui/Input';
-import { Button } from '../ui/Button';
-import { Alert, AlertDescription } from '../ui/Alert';
-import { Badge } from '../ui/badge';
-import Turnstile from '../common/Turnstile';
-import { RegionSelector } from '../common/RegionSelector';
+import Silian_React, { useEffect as Silian_useEffect, useMemo as Silian_useMemo, useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { Loader2 as Silian_Loader2 } from 'lucide-react';
+import { useQueryClient as Silian_useQueryClient } from 'react-query';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { profileAPI as Silian_profileAPI, schoolAPI as Silian_schoolAPI } from '../../lib/api';
+import { userManager as Silian_userManager } from '../../lib/auth';
+import { Input as Silian_Input } from '../ui/Input';
+import { Button as Silian_Button } from '../ui/Button';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../ui/Alert';
+import { Badge as Silian_Badge } from '../ui/badge';
+import Silian_Turnstile from '../common/Turnstile';
+import { RegionSelector as Silian_RegionSelector } from '../common/RegionSelector';
 
-const FALLBACK = '—';
+const Silian_FALLBACK = '—';
 
-const renderField = (label, value) => (
-  <div className="space-y-1" key={label}>
-    <p className="text-sm font-medium text-foreground">{label}</p>
+const Silian_renderField = (Silian_label, Silian_value) => (
+  <div className="space-y-1" key={Silian_label}>
+    <p className="text-sm font-medium text-foreground">{Silian_label}</p>
     <div className="rounded-md border border-dashed border-border bg-muted/40 px-3 py-2 text-sm text-foreground">
-      {value ?? FALLBACK}
+      {Silian_value ?? Silian_FALLBACK}
     </div>
   </div>
 );
 
-const useDebouncedValue = (value, delay = 350) => {
-  const [debounced, setDebounced] = useState(value);
+const Silian_useDebouncedValue = (Silian_value, Silian_delay = 350) => {
+  const [Silian_debounced, Silian_setDebounced] = Silian_useState(Silian_value);
 
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
-  }, [value, delay]);
+  Silian_useEffect(() => {
+    const Silian_id = setTimeout(() => Silian_setDebounced(Silian_value), Silian_delay);
+    return () => clearTimeout(Silian_id);
+  }, [Silian_value, Silian_delay]);
 
-  return debounced;
+  return Silian_debounced;
 };
 
-export function ProfileForm({ user }) {
-  const { t } = useTranslation(['auth', 'profile']);
-  const queryClient = useQueryClient();
-  const turnstileRef = useRef(null);
+export function ProfileForm({ user: Silian_user }) {
+  const { t: Silian_t } = Silian_useTranslation(['auth', 'profile']);
+  const Silian_queryClient = Silian_useQueryClient();
+  const Silian_turnstileRef = Silian_useRef(null);
 
-  const [inputValue, setInputValue] = useState('');
-  const [selectedSchool, setSelectedSchool] = useState(
-    user?.school_id ? { id: user.school_id, name: user.school_name || '' } : null
+  const [Silian_inputValue, Silian_setInputValue] = Silian_useState('');
+  const [Silian_selectedSchool, Silian_setSelectedSchool] = Silian_useState(
+    Silian_user?.school_id ? { id: Silian_user.school_id, name: Silian_user.school_name || '' } : null
   );
-  const [suggestions, setSuggestions] = useState([]);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState('');
-  const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error', message: string }
-  
+  const [Silian_suggestions, Silian_setSuggestions] = Silian_useState([]);
+  const [Silian_loadingSuggestions, Silian_setLoadingSuggestions] = Silian_useState(false);
+  const [Silian_isSaving, Silian_setIsSaving] = Silian_useState(false);
+  const [Silian_turnstileToken, Silian_setTurnstileToken] = Silian_useState('');
+  const [Silian_feedback, Silian_setFeedback] = Silian_useState(null); // { type: 'success' | 'error', message: string }
+
   // Region state
-  const [countryCode, setCountryCode] = useState(user?.country_code || '');
-  const [stateCode, setStateCode] = useState(user?.state_code || '');
+  const [Silian_countryCode, Silian_setCountryCode] = Silian_useState(Silian_user?.country_code || '');
+  const [Silian_stateCode, Silian_setStateCode] = Silian_useState(Silian_user?.state_code || '');
 
-  const debouncedQuery = useDebouncedValue(inputValue.trim(), 350);
+  const Silian_debouncedQuery = Silian_useDebouncedValue(Silian_inputValue.trim(), 350);
 
-  const currentSchoolId = user?.school_id ?? null;
-  const currentSchoolName = (user?.school_name || '').trim();
+  const Silian_currentSchoolId = Silian_user?.school_id ?? null;
+  const Silian_currentSchoolName = (Silian_user?.school_name || '').trim();
 
-  useEffect(() => {
-    setSelectedSchool(currentSchoolId ? { id: currentSchoolId, name: currentSchoolName } : null);
-    setInputValue(currentSchoolName);
-  }, [currentSchoolId, currentSchoolName]);
+  Silian_useEffect(() => {
+    Silian_setSelectedSchool(Silian_currentSchoolId ? { id: Silian_currentSchoolId, name: Silian_currentSchoolName } : null);
+    Silian_setInputValue(Silian_currentSchoolName);
+  }, [Silian_currentSchoolId, Silian_currentSchoolName]);
 
-  useEffect(() => {
-    setCountryCode(user?.country_code || '');
-    setStateCode(user?.state_code || '');
-  }, [user?.country_code, user?.state_code]);
+  Silian_useEffect(() => {
+    Silian_setCountryCode(Silian_user?.country_code || '');
+    Silian_setStateCode(Silian_user?.state_code || '');
+  }, [Silian_user?.country_code, Silian_user?.state_code]);
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoadingSuggestions(true);
-    schoolAPI
-      .getSchools({ search: debouncedQuery || undefined, limit: 8, page: 1 })
-      .then((response) => {
-        if (cancelled) return;
-        const list = response.data?.data?.schools ?? [];
-        setSuggestions(list);
+  Silian_useEffect(() => {
+    let Silian_cancelled = false;
+    Silian_setLoadingSuggestions(true);
+    Silian_schoolAPI
+      .getSchools({ search: Silian_debouncedQuery || undefined, limit: 8, page: 1 })
+      .then((Silian_response) => {
+        if (Silian_cancelled) return;
+        const Silian_list = Silian_response.data?.data?.schools ?? [];
+        Silian_setSuggestions(Silian_list);
       })
       .catch(() => {
-        if (!cancelled) {
-          setSuggestions([]);
+        if (!Silian_cancelled) {
+          Silian_setSuggestions([]);
         }
       })
       .finally(() => {
-        if (!cancelled) {
-          setLoadingSuggestions(false);
+        if (!Silian_cancelled) {
+          Silian_setLoadingSuggestions(false);
         }
       });
 
     return () => {
-      cancelled = true;
+      Silian_cancelled = true;
     };
-  }, [debouncedQuery]);
+  }, [Silian_debouncedQuery]);
 
-  const trimmedInput = useMemo(() => inputValue.trim(), [inputValue]);
+  const Silian_trimmedInput = Silian_useMemo(() => Silian_inputValue.trim(), [Silian_inputValue]);
 
-  const pendingPayload = useMemo(() => {
-    if (!user) return null;
-    const payload = {};
-    let hasChanges = false;
+  const Silian_pendingPayload = Silian_useMemo(() => {
+    if (!Silian_user) return null;
+    const Silian_payload = {};
+    let Silian_hasChanges = false;
 
-    if (selectedSchool && selectedSchool.id !== currentSchoolId) {
-      payload.school_id = selectedSchool.id;
-      hasChanges = true;
+    if (Silian_selectedSchool && Silian_selectedSchool.id !== Silian_currentSchoolId) {
+      Silian_payload.school_id = Silian_selectedSchool.id;
+      Silian_hasChanges = true;
     }
-    if (!selectedSchool && trimmedInput && trimmedInput !== currentSchoolName) {
-      payload.new_school_name = trimmedInput;
-      hasChanges = true;
+    if (!Silian_selectedSchool && Silian_trimmedInput && Silian_trimmedInput !== Silian_currentSchoolName) {
+      Silian_payload.new_school_name = Silian_trimmedInput;
+      Silian_hasChanges = true;
     }
 
     // Region changes
-    if (countryCode !== (user.country_code || '') || stateCode !== (user.state_code || '')) {
-        if (countryCode && stateCode) {
-             payload.country_code = countryCode;
-             payload.state_code = stateCode;
-             hasChanges = true;
+    if (Silian_countryCode !== (Silian_user.country_code || '') || Silian_stateCode !== (Silian_user.state_code || '')) {
+        if (Silian_countryCode && Silian_stateCode) {
+             Silian_payload.country_code = Silian_countryCode;
+             Silian_payload.state_code = Silian_stateCode;
+             Silian_hasChanges = true;
         }
     }
 
-    return hasChanges ? payload : null;
-  }, [currentSchoolId, currentSchoolName, selectedSchool, trimmedInput, user, countryCode, stateCode]);
+    return Silian_hasChanges ? Silian_payload : null;
+  }, [Silian_currentSchoolId, Silian_currentSchoolName, Silian_selectedSchool, Silian_trimmedInput, Silian_user, Silian_countryCode, Silian_stateCode]);
 
-  const requiresVerification = Boolean(pendingPayload);
-  const submitDisabled = !pendingPayload || isSaving || (requiresVerification && !turnstileToken);
+  const Silian_requiresVerification = Boolean(Silian_pendingPayload);
+  const Silian_submitDisabled = !Silian_pendingPayload || Silian_isSaving || (Silian_requiresVerification && !Silian_turnstileToken);
 
-  const formattedUpdatedAt = useMemo(() => {
-    if (!user?.updated_at) return FALLBACK;
-    const dateValue = new Date(user.updated_at);
-    if (Number.isNaN(dateValue.getTime())) {
-      return user.updated_at;
+  const Silian_formattedUpdatedAt = Silian_useMemo(() => {
+    if (!Silian_user?.updated_at) return Silian_FALLBACK;
+    const Silian_dateValue = new Date(Silian_user.updated_at);
+    if (Number.isNaN(Silian_dateValue.getTime())) {
+      return Silian_user.updated_at;
     }
-    return dateValue.toLocaleString();
-  }, [user?.updated_at]);
+    return Silian_dateValue.toLocaleString();
+  }, [Silian_user?.updated_at]);
 
-  const summaryItems = [
+  const Silian_summaryItems = [
     {
-      label: t('profile.userId'),
-      value: user?.id ?? FALLBACK,
+      label: Silian_t('profile.userId'),
+      value: Silian_user?.id ?? Silian_FALLBACK,
     },
     {
-      label: t('profile.uuid'),
-      value: user?.uuid || FALLBACK,
+      label: Silian_t('profile.uuid'),
+      value: Silian_user?.uuid || Silian_FALLBACK,
     },
     {
-      label: t('profile.points'),
-      value: user?.points ?? 0,
+      label: Silian_t('profile.points'),
+      value: Silian_user?.points ?? 0,
     },
     {
-      label: t('profile.lastUpdated'),
-      value: formattedUpdatedAt,
+      label: Silian_t('profile.lastUpdated'),
+      value: Silian_formattedUpdatedAt,
     },
   ];
 
-  const detailFields = [
+  const Silian_detailFields = [
     {
-      label: t('profile.username'),
-      value: user?.username || FALLBACK,
+      label: Silian_t('profile.username'),
+      value: Silian_user?.username || Silian_FALLBACK,
     },
     {
-      label: t('profile.email'),
-      value: user?.email || FALLBACK,
+      label: Silian_t('profile.email'),
+      value: Silian_user?.email || Silian_FALLBACK,
     },
     {
-      label: t('profile.region'),
-      value: user?.region_label || user?.region_code || FALLBACK,
+      label: Silian_t('profile.region'),
+      value: Silian_user?.region_label || Silian_user?.region_code || Silian_FALLBACK,
     },
     {
-      label: t('profile.school'),
-      value: currentSchoolName || t('profile.schoolUnset'),
+      label: Silian_t('profile.school'),
+      value: Silian_currentSchoolName || Silian_t('profile.schoolUnset'),
     },
   ];
 
-  const handleInputChange = (event) => {
-    const { value } = event.target;
-    setInputValue(value);
-    setFeedback(null);
+  const Silian_handleInputChange = (Silian_event) => {
+    const { value: Silian_value } = Silian_event.target;
+    Silian_setInputValue(Silian_value);
+    Silian_setFeedback(null);
 
-    if (selectedSchool && value.trim() !== (selectedSchool.name || '').trim()) {
-      setSelectedSchool(null);
+    if (Silian_selectedSchool && Silian_value.trim() !== (Silian_selectedSchool.name || '').trim()) {
+      Silian_setSelectedSchool(null);
     }
   };
 
-  const handleSelectSchool = (school) => {
-    setSelectedSchool({ id: school.id, name: school.name });
-    setInputValue(school.name || '');
-    setFeedback(null);
+  const Silian_handleSelectSchool = (Silian_school) => {
+    Silian_setSelectedSchool({ id: Silian_school.id, name: Silian_school.name });
+    Silian_setInputValue(Silian_school.name || '');
+    Silian_setFeedback(null);
   };
 
-  const handleClearSelection = () => {
-    setSelectedSchool(null);
-    setInputValue('');
-    setFeedback(null);
+  const Silian_handleClearSelection = () => {
+    Silian_setSelectedSchool(null);
+    Silian_setInputValue('');
+    Silian_setFeedback(null);
   };
 
-  const handleReset = () => {
-    setSelectedSchool(currentSchoolId ? { id: currentSchoolId, name: currentSchoolName } : null);
-    setInputValue(currentSchoolName);
-    setCountryCode(user?.country_code || '');
-    setStateCode(user?.state_code || '');
-    setFeedback(null);
-    setTurnstileToken('');
-    turnstileRef.current?.reset?.();
+  const Silian_handleReset = () => {
+    Silian_setSelectedSchool(Silian_currentSchoolId ? { id: Silian_currentSchoolId, name: Silian_currentSchoolName } : null);
+    Silian_setInputValue(Silian_currentSchoolName);
+    Silian_setCountryCode(Silian_user?.country_code || '');
+    Silian_setStateCode(Silian_user?.state_code || '');
+    Silian_setFeedback(null);
+    Silian_setTurnstileToken('');
+    Silian_turnstileRef.current?.reset?.();
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!pendingPayload) {
-      setFeedback({
+  const Silian_handleSubmit = async (Silian_event) => {
+    Silian_event.preventDefault();
+    if (!Silian_pendingPayload) {
+      Silian_setFeedback({
         type: 'error',
-        message: t('profile.noChanges'),
+        message: Silian_t('profile.noChanges'),
       });
       return;
     }
 
-    setIsSaving(true);
-    setFeedback(null);
+    Silian_setIsSaving(true);
+    Silian_setFeedback(null);
 
     try {
-      const payload = {
-        ...pendingPayload,
-        cf_turnstile_response: turnstileToken || undefined,
+      const Silian_payload = {
+        ...Silian_pendingPayload,
+        cf_turnstile_response: Silian_turnstileToken || undefined,
       };
-      const response = await profileAPI.updateProfile(payload);
-      if (!response.data?.success) {
-        throw new Error(response.data?.message || 'Failed to update profile');
+      const Silian_response = await Silian_profileAPI.updateProfile(Silian_payload);
+      if (!Silian_response.data?.success) {
+        throw new Error(Silian_response.data?.message || 'Failed to update profile');
       }
 
-      const updatedUser = response.data?.data;
-      if (updatedUser) {
-        userManager.setUser(updatedUser);
-        queryClient.invalidateQueries('currentUser');
-        setSelectedSchool(
-          updatedUser.school_id
-            ? { id: updatedUser.school_id, name: updatedUser.school_name || '' }
+      const Silian_updatedUser = Silian_response.data?.data;
+      if (Silian_updatedUser) {
+        Silian_userManager.setUser(Silian_updatedUser);
+        Silian_queryClient.invalidateQueries('currentUser');
+        Silian_setSelectedSchool(
+          Silian_updatedUser.school_id
+            ? { id: Silian_updatedUser.school_id, name: Silian_updatedUser.school_name || '' }
             : null
         );
-        setCountryCode(updatedUser.country_code || '');
-        setStateCode(updatedUser.state_code || '');
+        Silian_setCountryCode(Silian_updatedUser.country_code || '');
+        Silian_setStateCode(Silian_updatedUser.state_code || '');
       }
 
-      setInputValue('');
-      setFeedback({
+      Silian_setInputValue('');
+      Silian_setFeedback({
         type: 'success',
-        message: t('profile.updateSuccess'),
+        message: Silian_t('profile.updateSuccess'),
       });
-    } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        t('profile.updateFailed');
-      setFeedback({ type: 'error', message });
+    } catch (Silian_error) {
+      const Silian_message =
+        Silian_error.response?.data?.message ||
+        Silian_error.message ||
+        Silian_t('profile.updateFailed');
+      Silian_setFeedback({ type: 'error', message: Silian_message });
     } finally {
-      setIsSaving(false);
-      setTurnstileToken('');
-      turnstileRef.current?.reset?.();
+      Silian_setIsSaving(false);
+      Silian_setTurnstileToken('');
+      Silian_turnstileRef.current?.reset?.();
     }
   };
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/40 p-4 sm:grid-cols-2">
-        {summaryItems.map((item) => (
-          <div className="min-w-0" key={item.label}>
-            <p className="text-xs text-muted-foreground">{item.label}</p>
-            <p className="break-words text-sm font-medium">{item.value}</p>
+        {Silian_summaryItems.map((Silian_item) => (
+          <div className="min-w-0" key={Silian_item.label}>
+            <p className="text-xs text-muted-foreground">{Silian_item.label}</p>
+            <p className="break-words text-sm font-medium">{Silian_item.value}</p>
           </div>
         ))}
       </div>
 
       <div className="space-y-4">
-        {detailFields.map(({ label, value }) => renderField(label, value))}
+        {Silian_detailFields.map(({ label: Silian_label, value: Silian_value }) => Silian_renderField(Silian_label, Silian_value))}
       </div>
 
       <section className="rounded-lg border p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
           <div>
             <h3 className="text-base font-semibold text-foreground">
-              {t('profile.editProfile')}
+              {Silian_t('profile.editProfile')}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {t(
+              {Silian_t(
                 'profile.editDescription')}
             </p>
           </div>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          
+        <form className="space-y-6" onSubmit={Silian_handleSubmit}>
+
           <div className="space-y-4">
-             <h4 className="border-b border-border pb-2 text-sm font-medium text-foreground">{t('profile.regionSettings')}</h4>
-             <RegionSelector
-                countryCode={countryCode}
-                stateCode={stateCode}
-                onCountryChange={setCountryCode}
-                onStateChange={setStateCode}
+             <h4 className="border-b border-border pb-2 text-sm font-medium text-foreground">{Silian_t('profile.regionSettings')}</h4>
+             <Silian_RegionSelector
+                countryCode={Silian_countryCode}
+                stateCode={Silian_stateCode}
+                onCountryChange={Silian_setCountryCode}
+                onStateChange={Silian_setStateCode}
              />
           </div>
 
           <div className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h4 className="w-full border-b border-border pb-2 text-sm font-medium text-foreground">{t('profile.schoolSettings')}</h4>
+                <h4 className="w-full border-b border-border pb-2 text-sm font-medium text-foreground">{Silian_t('profile.schoolSettings')}</h4>
             </div>
-            
+
             <div>
                 <label htmlFor="schoolSearch" className="block text-sm font-medium text-foreground">
-                {t('auth.school')}
+                {Silian_t('auth.school')}
                 </label>
-                <Input
+                <Silian_Input
                 id="schoolSearch"
                 className="mt-2"
-                placeholder={t(
+                placeholder={Silian_t(
                     'profile.schoolSearchPlaceholder')}
-                value={inputValue}
-                onChange={handleInputChange}
+                value={Silian_inputValue}
+                onChange={Silian_handleInputChange}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                {t(
+                {Silian_t(
                     'profile.schoolInputHint')}
                 </p>
             </div>
@@ -323,72 +323,72 @@ export function ProfileForm({ user }) {
             <div className="rounded-md border border-border bg-card">
                 <div className="flex items-center justify-between border-b border-border px-3 py-2">
                 <span className="text-sm font-medium text-muted-foreground">
-                    {t('profile.schoolSuggestions')}
+                    {Silian_t('profile.schoolSuggestions')}
                 </span>
-                <Button type="button" variant="ghost" size="sm" onClick={handleClearSelection}>
-                    {t('profile.clearSelection')}
-                </Button>
+                <Silian_Button type="button" variant="ghost" size="sm" onClick={Silian_handleClearSelection}>
+                    {Silian_t('profile.clearSelection')}
+                </Silian_Button>
                 </div>
                 <div className="max-h-48 overflow-y-auto">
-                {loadingSuggestions ? (
+                {Silian_loadingSuggestions ? (
                     <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {t('profile.loadingSchools')}
+                    <Silian_Loader2 className="h-4 w-4 animate-spin" />
+                    {Silian_t('profile.loadingSchools')}
                     </div>
-                ) : suggestions.length > 0 ? (
-                    suggestions.map((school) => {
-                    const isActive = selectedSchool?.id === school.id;
+                ) : Silian_suggestions.length > 0 ? (
+                    Silian_suggestions.map((Silian_school) => {
+                    const Silian_isActive = Silian_selectedSchool?.id === Silian_school.id;
                     return (
                         <button
                         type="button"
-                        key={school.id}
-                        onClick={() => handleSelectSchool(school)}
+                        key={Silian_school.id}
+                        onClick={() => Silian_handleSelectSchool(Silian_school)}
                         className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted ${
-                            isActive ? 'bg-green-500/12 text-green-500' : 'text-foreground'
+                            Silian_isActive ? 'bg-green-500/12 text-green-500' : 'text-foreground'
                         }`}
                         >
-                        <span>{school.name}</span>
-                        {isActive && <Badge variant="outline">{t('profile.selected')}</Badge>}
+                        <span>{Silian_school.name}</span>
+                        {Silian_isActive && <Silian_Badge variant="outline">{Silian_t('profile.selected')}</Silian_Badge>}
                         </button>
                     );
                     })
                 ) : (
                     <div className="px-3 py-3 text-sm text-muted-foreground">
-                    {t('profile.schoolNoResults')}
+                    {Silian_t('profile.schoolNoResults')}
                     </div>
                 )}
                 </div>
             </div>
           </div>
 
-          {feedback && (
-            <Alert variant={feedback.type === 'error' ? 'destructive' : 'success'}>
-              <AlertDescription>{feedback.message}</AlertDescription>
-            </Alert>
+          {Silian_feedback && (
+            <Silian_Alert variant={Silian_feedback.type === 'error' ? 'destructive' : 'success'}>
+              <Silian_AlertDescription>{Silian_feedback.message}</Silian_AlertDescription>
+            </Silian_Alert>
           )}
 
           <div className="space-y-3">
-            <Turnstile
-              ref={turnstileRef}
+            <Silian_Turnstile
+              ref={Silian_turnstileRef}
               className="flex flex-col items-center"
-              onVerify={setTurnstileToken}
-              onExpire={() => setTurnstileToken('')}
-              onError={() => setTurnstileToken('')}
+              onVerify={Silian_setTurnstileToken}
+              onExpire={() => Silian_setTurnstileToken('')}
+              onError={() => Silian_setTurnstileToken('')}
               require
             />
             <p className="text-xs text-muted-foreground text-center">
-              {t(
+              {Silian_t(
                 'profile.turnstileNotice')}
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button type="submit" className="flex-1" loading={isSaving} disabled={submitDisabled}>
-              {t('profile.saveChanges')}
-            </Button>
-            <Button type="button" variant="outline" className="flex-1" onClick={handleReset}>
-              {t('profile.reset')}
-            </Button>
+            <Silian_Button type="submit" className="flex-1" loading={Silian_isSaving} disabled={Silian_submitDisabled}>
+              {Silian_t('profile.saveChanges')}
+            </Silian_Button>
+            <Silian_Button type="button" variant="outline" className="flex-1" onClick={Silian_handleReset}>
+              {Silian_t('profile.reset')}
+            </Silian_Button>
           </div>
         </form>
       </section>

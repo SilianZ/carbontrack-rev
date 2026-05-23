@@ -40,7 +40,7 @@ class UserAiControllerTest extends TestCase
 
         // Default quota check pass
         $this->quotaService->method('checkAndConsume')->willReturn(true);
-        
+
         // Mock getUserIdFromRequest
         $this->authService->method('getUserIdFromRequest')->willReturn(1);
         $this->authService->method('getCurrentUserModel')->willReturn($this->createMock(\CarbonTrack\Models\User::class));
@@ -81,31 +81,31 @@ class UserAiControllerTest extends TestCase
             ]
         ]);
 
-        $controller = $this->createController();
+        $Silian_controller = $this->createController();
 
-        $request = makeRequest('POST', '/ai/suggest-activity', ['query' => 'I took a 5km bus ride']);
-        $response = $controller->suggestActivity($request, new Response());
+        $Silian_request = makeRequest('POST', '/ai/suggest-activity', ['query' => 'I took a 5km bus ride']);
+        $Silian_response = $Silian_controller->suggestActivity($Silian_request, new Response());
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertSame('Bus Ride', $payload['prediction']['activity_name']);
-        $this->assertSame(5, $payload['prediction']['amount']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertSame('Bus Ride', $Silian_payload['prediction']['activity_name']);
+        $this->assertSame(5, $Silian_payload['prediction']['amount']);
     }
 
     public function testSuggestActivityValidatesEmptyQuery(): void
     {
         $this->auditLogService->expects($this->once())->method('logUserAction')->willReturn(true);
 
-        $controller = $this->createController();
+        $Silian_controller = $this->createController();
 
-        $request = makeRequest('POST', '/ai/suggest-activity', ['query' => '   ']);
-        $response = $controller->suggestActivity($request, new Response());
+        $Silian_request = makeRequest('POST', '/ai/suggest-activity', ['query' => '   ']);
+        $Silian_response = $Silian_controller->suggestActivity($Silian_request, new Response());
 
-        $this->assertSame(400, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('Query is required', $payload['error']);
+        $this->assertSame(400, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('Query is required', $Silian_payload['error']);
     }
 
     public function testSuggestActivityHandlesServiceException(): void
@@ -116,16 +116,16 @@ class UserAiControllerTest extends TestCase
         $this->aiService->method('suggestActivity')->willThrowException(new \RuntimeException('Service unavailable'));
         $this->calculatorService->method('getAvailableActivities')->willReturn([]);
 
-        $controller = $this->createController();
+        $Silian_controller = $this->createController();
 
-        $request = makeRequest('POST', '/ai/suggest-activity', ['query' => 'test']);
-        $response = $controller->suggestActivity($request, new Response());
+        $Silian_request = makeRequest('POST', '/ai/suggest-activity', ['query' => 'test']);
+        $Silian_response = $Silian_controller->suggestActivity($Silian_request, new Response());
 
-        $this->assertSame(503, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
+        $this->assertSame(503, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
     }
-    
+
     public function testSuggestActivityEnforcesQuota(): void
     {
         // Re-configure the stub for this specific test
@@ -133,19 +133,19 @@ class UserAiControllerTest extends TestCase
         $this->quotaService->method('checkAndConsume')->willReturn(false);
         $this->auditLogService = $this->createMock(AuditLogService::class);
         $this->auditLogService->expects($this->once())->method('logUserAction')->willReturn(true);
-        
+
         $this->authService = $this->createMock(AuthService::class);
         $this->authService->method('getCurrentUserModel')->willReturn($this->createMock(\CarbonTrack\Models\User::class));
 
-        $controller = $this->createController();
+        $Silian_controller = $this->createController();
 
-        $request = makeRequest('POST', '/ai/suggest-activity', ['query' => 'test']);
-        $response = $controller->suggestActivity($request, new Response());
+        $Silian_request = makeRequest('POST', '/ai/suggest-activity', ['query' => 'test']);
+        $Silian_response = $Silian_controller->suggestActivity($Silian_request, new Response());
 
         // Assuming controller returns 429 when checkAndConsume returns false
-        $this->assertSame(429, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('Daily limit or rate limit exceeded', $payload['error']);
+        $this->assertSame(429, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('Daily limit or rate limit exceeded', $Silian_payload['error']);
     }
 }

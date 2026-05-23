@@ -24,52 +24,52 @@ class SupportTicketControllerTest extends TestCase
     }
 
     private function makeController(
-        ?SupportTicketService $supportTicketService = null,
-        ?AuthService $authService = null,
-        ?TurnstileService $turnstileService = null,
-        ?SupportRoutingEngineService $supportRoutingEngineService = null,
-        ?AuditLogService $auditLogService = null,
-        ?CronSchedulerService $cronSchedulerService = null
+        ?SupportTicketService $Silian_supportTicketService = null,
+        ?AuthService $Silian_authService = null,
+        ?TurnstileService $Silian_turnstileService = null,
+        ?SupportRoutingEngineService $Silian_supportRoutingEngineService = null,
+        ?AuditLogService $Silian_auditLogService = null,
+        ?CronSchedulerService $Silian_cronSchedulerService = null
     ): SupportTicketController {
         return new SupportTicketController(
-            $supportTicketService ?? $this->createMock(SupportTicketService::class),
-            $authService ?? $this->createMock(AuthService::class),
-            $turnstileService ?? $this->createMock(TurnstileService::class),
+            $Silian_supportTicketService ?? $this->createMock(SupportTicketService::class),
+            $Silian_authService ?? $this->createMock(AuthService::class),
+            $Silian_turnstileService ?? $this->createMock(TurnstileService::class),
             $this->createMock(LoggerInterface::class),
             $this->createMock(ErrorLogService::class),
-            $supportRoutingEngineService,
-            $auditLogService,
-            $cronSchedulerService
+            $Silian_supportRoutingEngineService,
+            $Silian_auditLogService,
+            $Silian_cronSchedulerService
         );
     }
 
     public function testCreateTicketRequiresAuthentication(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(null);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(null);
 
-        $controller = $this->makeController(authService: $auth);
-        $response = $controller->createTicket(
+        $Silian_controller = $this->makeController(Silian_authService: $Silian_auth);
+        $Silian_response = $Silian_controller->createTicket(
             makeRequest('POST', '/api/v1/tickets', ['subject' => 'Need help']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(401, $response->getStatusCode());
+        $this->assertSame(401, $Silian_response->getStatusCode());
     }
 
     public function testCreateTicketRejectsFailedTurnstile(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 9, 'username' => 'user', 'email' => 'user@example.com']);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 9, 'username' => 'user', 'email' => 'user@example.com']);
 
-        $turnstile = $this->createMock(TurnstileService::class);
-        $turnstile->expects($this->once())
+        $Silian_turnstile = $this->createMock(TurnstileService::class);
+        $Silian_turnstile->expects($this->once())
             ->method('verify')
             ->with('bad-token', null)
             ->willReturn(['success' => false]);
 
-        $controller = $this->makeController(authService: $auth, turnstileService: $turnstile);
-        $response = $controller->createTicket(
+        $Silian_controller = $this->makeController(Silian_authService: $Silian_auth, Silian_turnstileService: $Silian_turnstile);
+        $Silian_response = $Silian_controller->createTicket(
             makeRequest('POST', '/api/v1/tickets', [
                 'subject' => 'Broken page',
                 'content' => 'Details',
@@ -79,284 +79,284 @@ class SupportTicketControllerTest extends TestCase
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(403, $response->getStatusCode());
+        $this->assertSame(403, $Silian_response->getStatusCode());
     }
 
     public function testGetMyTicketReturnsValidationErrorForInvalidTicketId(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 9, 'role' => 'user']);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 9, 'role' => 'user']);
 
-        $service = $this->createMock(SupportTicketService::class);
-        $service->expects($this->never())->method('getTicketDetailForUser');
+        $Silian_service = $this->createMock(SupportTicketService::class);
+        $Silian_service->expects($this->never())->method('getTicketDetailForUser');
 
-        $controller = $this->makeController($service, $auth);
-        $response = $controller->getMyTicket(
+        $Silian_controller = $this->makeController($Silian_service, $Silian_auth);
+        $Silian_response = $Silian_controller->getMyTicket(
             makeRequest('GET', '/api/v1/tickets/0'),
             new \Slim\Psr7\Response(),
             ['ticketId' => '0']
         );
 
-        $this->assertSame(422, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame('VALIDATION_ERROR', $payload['code']);
-        $this->assertSame('Invalid ticket id', $payload['message']);
+        $this->assertSame(422, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('VALIDATION_ERROR', $Silian_payload['code']);
+        $this->assertSame('Invalid ticket id', $Silian_payload['message']);
     }
 
     public function testListSupportTicketsRequiresAuthentication(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(null);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(null);
 
-        $controller = $this->makeController(authService: $auth);
-        $response = $controller->listSupportTickets(
+        $Silian_controller = $this->makeController(Silian_authService: $Silian_auth);
+        $Silian_response = $Silian_controller->listSupportTickets(
             makeRequest('GET', '/api/v1/support/tickets'),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(401, $response->getStatusCode());
+        $this->assertSame(401, $Silian_response->getStatusCode());
     }
 
     public function testGetSupportTicketReturnsNotFound(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'role' => 'support', 'is_support' => true]);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'role' => 'support', 'is_support' => true]);
 
-        $service = $this->createMock(SupportTicketService::class);
-        $service->expects($this->once())
+        $Silian_service = $this->createMock(SupportTicketService::class);
+        $Silian_service->expects($this->once())
             ->method('getTicketDetailForSupport')
             ->with(['id' => 1, 'role' => 'support', 'is_support' => true], 42)
             ->willThrowException(new \RuntimeException('Ticket not found'));
 
-        $controller = $this->makeController($service, $auth);
-        $response = $controller->getSupportTicket(
+        $Silian_controller = $this->makeController($Silian_service, $Silian_auth);
+        $Silian_response = $Silian_controller->getSupportTicket(
             makeRequest('GET', '/api/v1/support/tickets/42'),
             new \Slim\Psr7\Response(),
             ['ticketId' => '42']
         );
 
-        $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame(404, $Silian_response->getStatusCode());
     }
 
     public function testGetSupportTicketReturnsValidationErrorForInvalidId(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'role' => 'support', 'is_support' => true]);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'role' => 'support', 'is_support' => true]);
 
-        $service = $this->createMock(SupportTicketService::class);
-        $service->expects($this->never())->method('getTicketDetailForSupport');
+        $Silian_service = $this->createMock(SupportTicketService::class);
+        $Silian_service->expects($this->never())->method('getTicketDetailForSupport');
 
-        $controller = $this->makeController($service, $auth);
-        $response = $controller->getSupportTicket(
+        $Silian_controller = $this->makeController($Silian_service, $Silian_auth);
+        $Silian_response = $Silian_controller->getSupportTicket(
             makeRequest('GET', '/api/v1/support/tickets/0'),
             new \Slim\Psr7\Response(),
             ['ticketId' => '0']
         );
 
-        $this->assertSame(422, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame('VALIDATION_ERROR', $payload['code']);
-        $this->assertSame('Invalid ticket id', $payload['message']);
+        $this->assertSame(422, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('VALIDATION_ERROR', $Silian_payload['code']);
+        $this->assertSame('Invalid ticket id', $Silian_payload['message']);
     }
 
     public function testUpdateSupportTicketReturnsValidationError(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 2, 'role' => 'support', 'is_support' => true]);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 2, 'role' => 'support', 'is_support' => true]);
 
-        $service = $this->createMock(SupportTicketService::class);
-        $service->expects($this->once())
+        $Silian_service = $this->createMock(SupportTicketService::class);
+        $Silian_service->expects($this->once())
             ->method('updateTicketFromSupport')
             ->willThrowException(new \InvalidArgumentException('Invalid status'));
 
-        $controller = $this->makeController($service, $auth);
-        $response = $controller->updateSupportTicket(
+        $Silian_controller = $this->makeController($Silian_service, $Silian_auth);
+        $Silian_response = $Silian_controller->updateSupportTicket(
             makeRequest('PATCH', '/api/v1/support/tickets/12', ['status' => 'bad_status']),
             new \Slim\Psr7\Response(),
             ['ticketId' => '12']
         );
 
-        $this->assertSame(422, $response->getStatusCode());
+        $this->assertSame(422, $Silian_response->getStatusCode());
     }
 
     public function testListSupportAssigneesReturnsSuccess(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 2, 'role' => 'support', 'is_support' => true]);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 2, 'role' => 'support', 'is_support' => true]);
 
-        $service = $this->createMock(SupportTicketService::class);
-        $service->expects($this->once())
+        $Silian_service = $this->createMock(SupportTicketService::class);
+        $Silian_service->expects($this->once())
             ->method('listSupportAssignees')
             ->with(['id' => 2, 'role' => 'support', 'is_support' => true])
             ->willReturn([
                 ['id' => 5, 'username' => 'support-a', 'assigned_total_count' => 6, 'open_count' => 2, 'in_progress_count' => 3],
             ]);
 
-        $controller = $this->makeController($service, $auth);
-        $response = $controller->listSupportAssignees(
+        $Silian_controller = $this->makeController($Silian_service, $Silian_auth);
+        $Silian_response = $Silian_controller->listSupportAssignees(
             makeRequest('GET', '/api/v1/support/assignees'),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(200, $Silian_response->getStatusCode());
     }
 
     public function testCreateTransferRequestReturnsForbidden(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 2, 'role' => 'support', 'is_support' => true]);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 2, 'role' => 'support', 'is_support' => true]);
 
-        $service = $this->createMock(SupportTicketService::class);
-        $service->expects($this->once())
+        $Silian_service = $this->createMock(SupportTicketService::class);
+        $Silian_service->expects($this->once())
             ->method('createTransferRequest')
             ->willThrowException(new \DomainException('Only the current assignee can request a transfer'));
 
-        $controller = $this->makeController($service, $auth);
-        $response = $controller->createTransferRequest(
+        $Silian_controller = $this->makeController($Silian_service, $Silian_auth);
+        $Silian_response = $Silian_controller->createTransferRequest(
             makeRequest('POST', '/api/v1/support/tickets/12/transfer-requests', ['to_assignee' => 5]),
             new \Slim\Psr7\Response(),
             ['ticketId' => '12']
         );
 
-        $this->assertSame(403, $response->getStatusCode());
+        $this->assertSame(403, $Silian_response->getStatusCode());
     }
 
     public function testSubmitMyTicketFeedbackReturnsValidationError(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 9, 'role' => 'user']);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 9, 'role' => 'user']);
 
-        $service = $this->createMock(SupportTicketService::class);
-        $service->expects($this->once())
+        $Silian_service = $this->createMock(SupportTicketService::class);
+        $Silian_service->expects($this->once())
             ->method('submitTicketFeedback')
             ->with(['id' => 9, 'role' => 'user'], 12, ['rated_user_id' => 5, 'rating' => 9])
             ->willThrowException(new \InvalidArgumentException('rating must be between 1 and 5'));
 
-        $controller = $this->makeController($service, $auth);
-        $response = $controller->submitMyTicketFeedback(
+        $Silian_controller = $this->makeController($Silian_service, $Silian_auth);
+        $Silian_response = $Silian_controller->submitMyTicketFeedback(
             makeRequest('POST', '/api/v1/tickets/12/feedback', ['rated_user_id' => 5, 'rating' => 9]),
             new \Slim\Psr7\Response(),
             ['ticketId' => '12']
         );
 
-        $this->assertSame(422, $response->getStatusCode());
+        $this->assertSame(422, $Silian_response->getStatusCode());
     }
 
     public function testReviewTransferRequestReturnsValidationErrorForInvalidId(): void
     {
-        $auth = $this->createMock(AuthService::class);
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'role' => 'admin', 'is_admin' => true]);
+        $Silian_auth = $this->createMock(AuthService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'role' => 'admin', 'is_admin' => true]);
 
-        $controller = $this->makeController(authService: $auth);
-        $response = $controller->reviewTransferRequest(
+        $Silian_controller = $this->makeController(Silian_authService: $Silian_auth);
+        $Silian_response = $Silian_controller->reviewTransferRequest(
             makeRequest('PATCH', '/api/v1/support/transfer-requests/bad', ['status' => 'approved']),
             new \Slim\Psr7\Response(),
             ['requestId' => 'bad']
         );
 
-        $this->assertSame(422, $response->getStatusCode());
+        $this->assertSame(422, $Silian_response->getStatusCode());
     }
 
     public function testRunSlaSweepReturnsForbiddenForInvalidKey(): void
     {
         $_ENV['SUPPORT_SLA_SWEEP_KEY'] = 'expected-secret';
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logSystemEvent');
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('logSystemEvent');
 
-        $controller = $this->makeController(
-            supportRoutingEngineService: $this->createMock(SupportRoutingEngineService::class),
-            auditLogService: $audit
+        $Silian_controller = $this->makeController(
+            Silian_supportRoutingEngineService: $this->createMock(SupportRoutingEngineService::class),
+            Silian_auditLogService: $Silian_audit
         );
 
-        $response = $controller->runSlaSweep(
+        $Silian_response = $Silian_controller->runSlaSweep(
             makeRequest('POST', '/api/v1/support/sla-sweep', ['key' => 'bad']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(403, $response->getStatusCode());
-        $this->assertSame('no-store, no-cache, max-age=0, must-revalidate', $response->getHeaderLine('Cache-Control'));
+        $this->assertSame(403, $Silian_response->getStatusCode());
+        $this->assertSame('no-store, no-cache, max-age=0, must-revalidate', $Silian_response->getHeaderLine('Cache-Control'));
     }
 
     public function testRunSlaSweepReturnsSummaryForValidKey(): void
     {
         $_ENV['SUPPORT_SLA_SWEEP_KEY'] = 'expected-secret';
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())
             ->method('logSystemEvent')
             ->with(
                 'support_sla_sweep_endpoint_triggered',
                 'support_sla_sweep',
-                $this->callback(static function (array $context): bool {
-                    return ($context['request_id'] ?? null) === null || is_string($context['request_id'] ?? null);
+                $this->callback(static function (array $Silian_context): bool {
+                    return ($Silian_context['request_id'] ?? null) === null || is_string($Silian_context['request_id'] ?? null);
                 })
             );
 
-        $engine = $this->createMock(SupportRoutingEngineService::class);
-        $engine->expects($this->once())
+        $Silian_engine = $this->createMock(SupportRoutingEngineService::class);
+        $Silian_engine->expects($this->once())
             ->method('runSlaSweep')
             ->willReturn(['processed' => 4, 'breached' => 2, 'rerouted' => 1]);
 
-        $controller = $this->makeController(
-            supportRoutingEngineService: $engine,
-            auditLogService: $audit
+        $Silian_controller = $this->makeController(
+            Silian_supportRoutingEngineService: $Silian_engine,
+            Silian_auditLogService: $Silian_audit
         );
 
-        $response = $controller->runSlaSweep(
+        $Silian_response = $Silian_controller->runSlaSweep(
             makeRequest('POST', '/api/v1/support/sla-sweep', ['key' => 'expected-secret']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(200, $Silian_response->getStatusCode());
     }
 
     public function testRunSlaSweepUsesSchedulerWhenAvailable(): void
     {
         $_ENV['SUPPORT_SLA_SWEEP_KEY'] = 'expected-secret';
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())->method('logSystemEvent');
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())->method('logSystemEvent');
 
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('runTaskNow')
             ->with(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'legacy_endpoint', $this->arrayHasKey('request_id'))
             ->willReturn(['task_key' => CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'status' => 'success', 'result' => ['processed' => 3]]);
 
-        $controller = $this->makeController(
-            supportRoutingEngineService: $this->createMock(SupportRoutingEngineService::class),
-            auditLogService: $audit,
-            cronSchedulerService: $scheduler
+        $Silian_controller = $this->makeController(
+            Silian_supportRoutingEngineService: $this->createMock(SupportRoutingEngineService::class),
+            Silian_auditLogService: $Silian_audit,
+            Silian_cronSchedulerService: $Silian_scheduler
         );
 
-        $response = $controller->runSlaSweep(
+        $Silian_response = $Silian_controller->runSlaSweep(
             makeRequest('POST', '/api/v1/support/sla-sweep', ['key' => 'expected-secret']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertSame(3, $payload['data']['processed']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertSame(3, $Silian_payload['data']['processed']);
     }
 
     public function testRunSlaSweepReturnsFailureWhenSchedulerRunFails(): void
     {
         $_ENV['SUPPORT_SLA_SWEEP_KEY'] = 'expected-secret';
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())
             ->method('logSystemEvent')
             ->with(
                 'support_sla_sweep_endpoint_triggered',
                 'support_sla_sweep',
-                $this->callback(static function (array $context): bool {
-                    return ($context['request_id'] ?? null) === null || is_string($context['request_id'] ?? null);
+                $this->callback(static function (array $Silian_context): bool {
+                    return ($Silian_context['request_id'] ?? null) === null || is_string($Silian_context['request_id'] ?? null);
                 })
             );
 
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('runTaskNow')
             ->willReturn([
                 'task_key' => CronSchedulerService::TASK_SUPPORT_SLA_SWEEP,
@@ -365,19 +365,19 @@ class SupportTicketControllerTest extends TestCase
                 'result' => [],
             ]);
 
-        $controller = $this->makeController(
-            supportRoutingEngineService: $this->createMock(SupportRoutingEngineService::class),
-            auditLogService: $audit,
-            cronSchedulerService: $scheduler
+        $Silian_controller = $this->makeController(
+            Silian_supportRoutingEngineService: $this->createMock(SupportRoutingEngineService::class),
+            Silian_auditLogService: $Silian_audit,
+            Silian_cronSchedulerService: $Silian_scheduler
         );
 
-        $response = $controller->runSlaSweep(
+        $Silian_response = $Silian_controller->runSlaSweep(
             makeRequest('POST', '/api/v1/support/sla-sweep', ['key' => 'expected-secret']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(503, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
+        $this->assertSame(503, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
     }
 }

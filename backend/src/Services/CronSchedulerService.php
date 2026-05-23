@@ -55,407 +55,407 @@ class CronSchedulerService
 
     public function listTasks(): array
     {
-        $now = $this->now();
+        $Silian_now = $this->now();
 
         return array_map(
-            fn (CronTask $task): array => $this->formatTask($task, $now),
+            fn (CronTask $Silian_task): array => $this->formatTask($Silian_task, $Silian_now),
             CronTask::query()->orderBy('task_key')->get()->all()
         );
     }
 
-    public function updateTask(string $taskKey, array $payload): array
+    public function updateTask(string $Silian_taskKey, array $Silian_payload): array
     {
-        $taskKey = $this->normalizeLookupTaskKey($taskKey);
-        $task = $this->findTask($taskKey);
-        if ($task === null) {
+        $Silian_taskKey = $this->normalizeLookupTaskKey($Silian_taskKey);
+        $Silian_task = $this->findTask($Silian_taskKey);
+        if ($Silian_task === null) {
             throw new \RuntimeException('Cron task not found');
         }
 
-        $isRegisteredTask = $this->isRegisteredTaskKey($taskKey);
-        if (!$isRegisteredTask) {
-            $this->assertOnlyDisableForUnregisteredTask($payload);
+        $Silian_isRegisteredTask = $this->isRegisteredTaskKey($Silian_taskKey);
+        if (!$Silian_isRegisteredTask) {
+            $this->assertOnlyDisableForUnregisteredTask($Silian_payload);
         }
 
-        $changed = false;
-        $scheduleChanged = false;
-        if (array_key_exists('enabled', $payload)) {
-            $task->enabled = $this->normalizeBoolean($payload['enabled'], 'enabled');
-            $changed = true;
-            $scheduleChanged = true;
+        $Silian_changed = false;
+        $Silian_scheduleChanged = false;
+        if (array_key_exists('enabled', $Silian_payload)) {
+            $Silian_task->enabled = $this->normalizeBoolean($Silian_payload['enabled'], 'enabled');
+            $Silian_changed = true;
+            $Silian_scheduleChanged = true;
         }
 
-        if (array_key_exists('interval_minutes', $payload)) {
-            $task->interval_minutes = $this->normalizeIntervalMinutes($payload['interval_minutes']);
-            $changed = true;
-            $scheduleChanged = true;
+        if (array_key_exists('interval_minutes', $Silian_payload)) {
+            $Silian_task->interval_minutes = $this->normalizeIntervalMinutes($Silian_payload['interval_minutes']);
+            $Silian_changed = true;
+            $Silian_scheduleChanged = true;
         }
 
-        if (array_key_exists('settings', $payload)) {
-            $settings = $payload['settings'];
-            if ($settings !== null && !is_array($settings)) {
+        if (array_key_exists('settings', $Silian_payload)) {
+            $Silian_settings = $Silian_payload['settings'];
+            if ($Silian_settings !== null && !is_array($Silian_settings)) {
                 throw new \InvalidArgumentException('settings must be an object');
             }
-            $task->settings_json = $this->encodeJson($settings ?? []);
-            $changed = true;
+            $Silian_task->settings_json = $this->encodeJson($Silian_settings ?? []);
+            $Silian_changed = true;
         }
 
-        if (!$changed) {
+        if (!$Silian_changed) {
             throw new \InvalidArgumentException('No cron task fields provided');
         }
 
-        $now = $this->now();
-        if ($scheduleChanged) {
-            if ($task->enabled) {
-                $task->next_run_at = $this->addMinutes($now, (int) $task->interval_minutes);
+        $Silian_now = $this->now();
+        if ($Silian_scheduleChanged) {
+            if ($Silian_task->enabled) {
+                $Silian_task->next_run_at = $this->addMinutes($Silian_now, (int) $Silian_task->interval_minutes);
             } else {
-                $task->next_run_at = null;
+                $Silian_task->next_run_at = null;
             }
         }
 
-        $task->updated_at = $now;
-        $task->save();
+        $Silian_task->updated_at = $Silian_now;
+        $Silian_task->save();
 
-        return $this->formatTask($task, $now);
+        return $this->formatTask($Silian_task, $Silian_now);
     }
 
-    public function listRuns(array $query = []): array
+    public function listRuns(array $Silian_query = []): array
     {
-        $page = max(1, (int) ($query['page'] ?? 1));
-        $limit = min(100, max(1, (int) ($query['limit'] ?? 20)));
+        $Silian_page = max(1, (int) ($Silian_query['page'] ?? 1));
+        $Silian_limit = min(100, max(1, (int) ($Silian_query['limit'] ?? 20)));
 
-        $runsQuery = CronRun::query()->orderByDesc('id');
-        if (!empty($query['task_key'])) {
-            $taskKey = strtolower(trim((string) $query['task_key']));
-            if ($taskKey === '') {
+        $Silian_runsQuery = CronRun::query()->orderByDesc('id');
+        if (!empty($Silian_query['task_key'])) {
+            $Silian_taskKey = strtolower(trim((string) $Silian_query['task_key']));
+            if ($Silian_taskKey === '') {
                 throw new \InvalidArgumentException('Invalid cron task key filter');
             }
-            $runsQuery->where('task_key', $taskKey);
+            $Silian_runsQuery->where('task_key', $Silian_taskKey);
         }
-        if (!empty($query['status'])) {
-            $status = strtolower(trim((string) $query['status']));
-            if (!in_array($status, self::VALID_RUN_STATUSES, true)) {
+        if (!empty($Silian_query['status'])) {
+            $Silian_status = strtolower(trim((string) $Silian_query['status']));
+            if (!in_array($Silian_status, self::VALID_RUN_STATUSES, true)) {
                 throw new \InvalidArgumentException('Invalid cron run status');
             }
-            $runsQuery->where('status', $status);
+            $Silian_runsQuery->where('status', $Silian_status);
         }
-        if (!empty($query['trigger_source'])) {
-            $triggerSource = strtolower(trim((string) $query['trigger_source']));
-            if (!in_array($triggerSource, self::VALID_TRIGGER_SOURCES, true)) {
+        if (!empty($Silian_query['trigger_source'])) {
+            $Silian_triggerSource = strtolower(trim((string) $Silian_query['trigger_source']));
+            if (!in_array($Silian_triggerSource, self::VALID_TRIGGER_SOURCES, true)) {
                 throw new \InvalidArgumentException('Invalid cron trigger source');
             }
-            $runsQuery->where('trigger_source', $triggerSource);
+            $Silian_runsQuery->where('trigger_source', $Silian_triggerSource);
         }
 
-        $total = (clone $runsQuery)->count();
-        $items = $runsQuery
-            ->forPage($page, $limit)
+        $Silian_total = (clone $Silian_runsQuery)->count();
+        $Silian_items = $Silian_runsQuery
+            ->forPage($Silian_page, $Silian_limit)
             ->get()
-            ->map(fn (CronRun $run): array => $this->formatRun($run))
+            ->map(fn (CronRun $Silian_run): array => $this->formatRun($Silian_run))
             ->all();
 
         return [
-            'items' => $items,
+            'items' => $Silian_items,
             'pagination' => [
-                'page' => $page,
-                'limit' => $limit,
-                'total' => $total,
+                'page' => $Silian_page,
+                'limit' => $Silian_limit,
+                'total' => $Silian_total,
             ],
         ];
     }
 
-    public function runDueTasks(string $triggerSource = 'cron_endpoint', array $context = []): array
+    public function runDueTasks(string $Silian_triggerSource = 'cron_endpoint', array $Silian_context = []): array
     {
-        $triggerSource = $this->normalizeTriggerSource($triggerSource);
-        $now = $this->now();
-        $dueTasks = CronTask::query()
+        $Silian_triggerSource = $this->normalizeTriggerSource($Silian_triggerSource);
+        $Silian_now = $this->now();
+        $Silian_dueTasks = CronTask::query()
             ->where('enabled', true)
             ->whereNotNull('next_run_at')
-            ->where('next_run_at', '<=', $now)
+            ->where('next_run_at', '<=', $Silian_now)
             ->orderBy('next_run_at')
             ->orderBy('task_key')
             ->get()
             ->all();
 
-        $response = [
-            'triggered_at' => $now,
-            'due' => array_map(static fn (CronTask $task): string => (string) $task->task_key, $dueTasks),
+        $Silian_response = [
+            'triggered_at' => $Silian_now,
+            'due' => array_map(static fn (CronTask $Silian_task): string => (string) $Silian_task->task_key, $Silian_dueTasks),
             'executed' => [],
             'failed' => [],
             'skipped' => [],
         ];
 
-        foreach ($dueTasks as $task) {
-            $runResult = $this->runTaskInternal((string) $task->task_key, false, $triggerSource, $context);
-            if ($runResult['status'] === self::RUN_STATUS_SUCCESS) {
-                $response['executed'][] = $runResult;
-            } elseif ($runResult['status'] === self::RUN_STATUS_FAILED) {
-                $response['failed'][] = $runResult;
+        foreach ($Silian_dueTasks as $Silian_task) {
+            $Silian_runResult = $this->runTaskInternal((string) $Silian_task->task_key, false, $Silian_triggerSource, $Silian_context);
+            if ($Silian_runResult['status'] === self::RUN_STATUS_SUCCESS) {
+                $Silian_response['executed'][] = $Silian_runResult;
+            } elseif ($Silian_runResult['status'] === self::RUN_STATUS_FAILED) {
+                $Silian_response['failed'][] = $Silian_runResult;
             } else {
-                $response['skipped'][] = $runResult;
+                $Silian_response['skipped'][] = $Silian_runResult;
             }
         }
 
         try {
             $this->auditLogService->logSystemEvent('cron_scheduler_batch_completed', 'cron_scheduler', [
-                'status' => !empty($response['failed']) || !empty($response['skipped']) ? 'failed' : 'success',
+                'status' => !empty($Silian_response['failed']) || !empty($Silian_response['skipped']) ? 'failed' : 'success',
                 'request_method' => 'SYSTEM',
                 'endpoint' => '/cron/run',
-                'request_id' => $context['request_id'] ?? null,
+                'request_id' => $Silian_context['request_id'] ?? null,
                 'request_data' => [
-                    'trigger_source' => $triggerSource,
-                    'due_count' => count($response['due']),
-                    'executed_count' => count($response['executed']),
-                    'failed_count' => count($response['failed']),
-                    'skipped_count' => count($response['skipped']),
+                    'trigger_source' => $Silian_triggerSource,
+                    'due_count' => count($Silian_response['due']),
+                    'executed_count' => count($Silian_response['executed']),
+                    'failed_count' => count($Silian_response['failed']),
+                    'skipped_count' => count($Silian_response['skipped']),
                 ],
             ]);
-        } catch (\Throwable $exception) {
+        } catch (\Throwable $Silian_exception) {
             $this->logNonCriticalPostRunFailure(
                 'Cron scheduler batch audit logging failed',
                 'batch',
-                $triggerSource,
-                $context,
-                $exception,
+                $Silian_triggerSource,
+                $Silian_context,
+                $Silian_exception,
                 '/cron/run',
                 'cron_scheduler_batch_logging_failed'
             );
         }
 
-        return $response;
+        return $Silian_response;
     }
 
-    public function runTaskNow(string $taskKey, string $triggerSource = 'admin_manual', array $context = []): array
+    public function runTaskNow(string $Silian_taskKey, string $Silian_triggerSource = 'admin_manual', array $Silian_context = []): array
     {
-        $taskKey = $this->normalizeLookupTaskKey($taskKey);
-        $task = $this->findTask($taskKey);
-        if ($task === null) {
+        $Silian_taskKey = $this->normalizeLookupTaskKey($Silian_taskKey);
+        $Silian_task = $this->findTask($Silian_taskKey);
+        if ($Silian_task === null) {
             throw new \RuntimeException('Cron task not found');
         }
-        $this->ensureRegisteredTaskKey($taskKey);
+        $this->ensureRegisteredTaskKey($Silian_taskKey);
 
-        return $this->runTaskInternal($taskKey, true, $this->normalizeTriggerSource($triggerSource), $context);
+        return $this->runTaskInternal($Silian_taskKey, true, $this->normalizeTriggerSource($Silian_triggerSource), $Silian_context);
     }
 
-    private function runTaskInternal(string $taskKey, bool $forceRun, string $triggerSource, array $context): array
+    private function runTaskInternal(string $Silian_taskKey, bool $Silian_forceRun, string $Silian_triggerSource, array $Silian_context): array
     {
-        $task = $this->findTask($taskKey);
-        if ($task === null) {
+        $Silian_task = $this->findTask($Silian_taskKey);
+        if ($Silian_task === null) {
             throw new \RuntimeException('Cron task not found');
         }
 
-        $lockNow = $this->now();
-        if ($this->isFreshLockActive($task, $lockNow)) {
-            return $this->recordSkippedRun($task, $triggerSource, $context, 'task_locked');
+        $Silian_lockNow = $this->now();
+        if ($this->isFreshLockActive($Silian_task, $Silian_lockNow)) {
+            return $this->recordSkippedRun($Silian_task, $Silian_triggerSource, $Silian_context, 'task_locked');
         }
 
-        $lockToken = $this->generateLockToken();
-        if (!$this->acquireLock($taskKey, $lockToken, $lockNow, $forceRun)) {
-            return $this->recordSkippedRun($task, $triggerSource, $context, $this->determineSkipReason($task, $forceRun, $lockNow));
+        $Silian_lockToken = $this->generateLockToken();
+        if (!$this->acquireLock($Silian_taskKey, $Silian_lockToken, $Silian_lockNow, $Silian_forceRun)) {
+            return $this->recordSkippedRun($Silian_task, $Silian_triggerSource, $Silian_context, $this->determineSkipReason($Silian_task, $Silian_forceRun, $Silian_lockNow));
         }
 
-        $startedAt = $lockNow;
-        $startedAtMicro = microtime(true);
+        $Silian_startedAt = $Silian_lockNow;
+        $Silian_startedAtMicro = microtime(true);
         try {
-            $rawResult = $this->executeTaskHandler($taskKey, $triggerSource);
-            $result = $this->normalizeTaskResult($taskKey, $rawResult);
-            $finishedAt = $this->now();
-            $durationMs = $this->diffMilliseconds($startedAtMicro, microtime(true));
-            $freshTask = $this->findTask($taskKey);
-            $nextRunAt = null;
-            if ($freshTask?->enabled) {
-                $nextRunAt = $freshTask->next_run_at;
-                $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
+            $Silian_rawResult = $this->executeTaskHandler($Silian_taskKey, $Silian_triggerSource);
+            $Silian_result = $this->normalizeTaskResult($Silian_taskKey, $Silian_rawResult);
+            $Silian_finishedAt = $this->now();
+            $Silian_durationMs = $this->diffMilliseconds($Silian_startedAtMicro, microtime(true));
+            $Silian_freshTask = $this->findTask($Silian_taskKey);
+            $Silian_nextRunAt = null;
+            if ($Silian_freshTask?->enabled) {
+                $Silian_nextRunAt = $Silian_freshTask->next_run_at;
+                $Silian_nextRunAt = $this->addMinutes($Silian_finishedAt, (int) $Silian_freshTask->interval_minutes);
             }
 
-            if (!$this->finalizeTaskRun($taskKey, $lockToken, [
-                'last_finished_at' => $finishedAt,
+            if (!$this->finalizeTaskRun($Silian_taskKey, $Silian_lockToken, [
+                'last_finished_at' => $Silian_finishedAt,
                 'last_status' => self::TASK_STATUS_SUCCESS,
                 'last_error' => null,
-                'last_duration_ms' => $durationMs,
+                'last_duration_ms' => $Silian_durationMs,
                 'consecutive_failures' => 0,
-                'next_run_at' => $freshTask?->enabled ? $nextRunAt : null,
-                'updated_at' => $finishedAt,
-            ], $triggerSource, $context)) {
-                return $this->recordStaleCompletion($task, $triggerSource, $context, $startedAt, $finishedAt, $durationMs, $result);
+                'next_run_at' => $Silian_freshTask?->enabled ? $Silian_nextRunAt : null,
+                'updated_at' => $Silian_finishedAt,
+            ], $Silian_triggerSource, $Silian_context)) {
+                return $this->recordStaleCompletion($Silian_task, $Silian_triggerSource, $Silian_context, $Silian_startedAt, $Silian_finishedAt, $Silian_durationMs, $Silian_result);
             }
 
-            $freshTask = $this->findTask($taskKey);
-            $nextRunAt = $freshTask?->next_run_at;
+            $Silian_freshTask = $this->findTask($Silian_taskKey);
+            $Silian_nextRunAt = $Silian_freshTask?->next_run_at;
 
-            $runId = null;
+            $Silian_runId = null;
             try {
-                $run = CronRun::create([
-                    'task_key' => $taskKey,
-                    'trigger_source' => $triggerSource,
-                    'request_id' => $context['request_id'] ?? null,
+                $Silian_run = CronRun::create([
+                    'task_key' => $Silian_taskKey,
+                    'trigger_source' => $Silian_triggerSource,
+                    'request_id' => $Silian_context['request_id'] ?? null,
                     'status' => self::RUN_STATUS_SUCCESS,
-                    'started_at' => $startedAt,
-                    'finished_at' => $finishedAt,
-                    'duration_ms' => $durationMs,
-                    'result_json' => $this->encodeJson($result),
+                    'started_at' => $Silian_startedAt,
+                    'finished_at' => $Silian_finishedAt,
+                    'duration_ms' => $Silian_durationMs,
+                    'result_json' => $this->encodeJson($Silian_result),
                     'error_message' => null,
                 ]);
-                $runId = (int) $run->id;
-            } catch (\Throwable $persistenceException) {
-                $this->logNonCriticalPostRunFailure('Cron task run-history persistence failed', $taskKey, $triggerSource, $context, $persistenceException);
+                $Silian_runId = (int) $Silian_run->id;
+            } catch (\Throwable $Silian_persistenceException) {
+                $this->logNonCriticalPostRunFailure('Cron task run-history persistence failed', $Silian_taskKey, $Silian_triggerSource, $Silian_context, $Silian_persistenceException);
             }
 
             try {
                 $this->auditLogService->logSystemEvent('cron_task_run_completed', 'cron_scheduler', [
                     'status' => 'success',
                     'request_method' => 'SYSTEM',
-                    'endpoint' => '/internal/cron/' . $taskKey,
-                    'request_id' => $context['request_id'] ?? null,
+                    'endpoint' => '/internal/cron/' . $Silian_taskKey,
+                    'request_id' => $Silian_context['request_id'] ?? null,
                     'request_data' => [
-                        'task_key' => $taskKey,
-                        'trigger_source' => $triggerSource,
-                        'duration_ms' => $durationMs,
+                        'task_key' => $Silian_taskKey,
+                        'trigger_source' => $Silian_triggerSource,
+                        'duration_ms' => $Silian_durationMs,
                     ],
-                    'new_data' => $result,
+                    'new_data' => $Silian_result,
                 ]);
-            } catch (\Throwable $loggingException) {
+            } catch (\Throwable $Silian_loggingException) {
                 $this->logNonCriticalPostRunFailure(
                     'Cron task completion audit logging failed',
-                    $taskKey,
-                    $triggerSource,
-                    $context,
-                    $loggingException
+                    $Silian_taskKey,
+                    $Silian_triggerSource,
+                    $Silian_context,
+                    $Silian_loggingException
                 );
             }
 
             return [
-                'task_key' => $taskKey,
-                'task_name' => $task->task_name,
+                'task_key' => $Silian_taskKey,
+                'task_name' => $Silian_task->task_name,
                 'status' => self::RUN_STATUS_SUCCESS,
-                'run_id' => $runId,
-                'started_at' => $startedAt,
-                'finished_at' => $finishedAt,
-                'duration_ms' => $durationMs,
-                'result' => $result,
-                'next_run_at' => $nextRunAt,
+                'run_id' => $Silian_runId,
+                'started_at' => $Silian_startedAt,
+                'finished_at' => $Silian_finishedAt,
+                'duration_ms' => $Silian_durationMs,
+                'result' => $Silian_result,
+                'next_run_at' => $Silian_nextRunAt,
             ];
-        } catch (\Throwable $exception) {
-            $finishedAt = $this->now();
-            $durationMs = $this->diffMilliseconds($startedAtMicro, microtime(true));
-            $errorMessage = trim($exception->getMessage()) !== '' ? $exception->getMessage() : 'Unknown cron task error';
-            $freshTask = $this->findTask($taskKey);
-            $nextRunAt = null;
-            if ($freshTask?->enabled) {
-                $nextRunAt = $freshTask->next_run_at;
-                $nextRunAt = $this->addMinutes($finishedAt, (int) $freshTask->interval_minutes);
+        } catch (\Throwable $Silian_exception) {
+            $Silian_finishedAt = $this->now();
+            $Silian_durationMs = $this->diffMilliseconds($Silian_startedAtMicro, microtime(true));
+            $Silian_errorMessage = trim($Silian_exception->getMessage()) !== '' ? $Silian_exception->getMessage() : 'Unknown cron task error';
+            $Silian_freshTask = $this->findTask($Silian_taskKey);
+            $Silian_nextRunAt = null;
+            if ($Silian_freshTask?->enabled) {
+                $Silian_nextRunAt = $Silian_freshTask->next_run_at;
+                $Silian_nextRunAt = $this->addMinutes($Silian_finishedAt, (int) $Silian_freshTask->interval_minutes);
             }
 
-            if (!$this->finalizeTaskRun($taskKey, $lockToken, [
-                'last_finished_at' => $finishedAt,
+            if (!$this->finalizeTaskRun($Silian_taskKey, $Silian_lockToken, [
+                'last_finished_at' => $Silian_finishedAt,
                 'last_status' => self::TASK_STATUS_FAILED,
-                'last_error' => $errorMessage,
-                'last_duration_ms' => $durationMs,
-                'consecutive_failures' => (int) ($task->consecutive_failures ?? 0) + 1,
-                'next_run_at' => $freshTask?->enabled ? $nextRunAt : null,
-                'updated_at' => $finishedAt,
-            ], $triggerSource, $context)) {
+                'last_error' => $Silian_errorMessage,
+                'last_duration_ms' => $Silian_durationMs,
+                'consecutive_failures' => (int) ($Silian_task->consecutive_failures ?? 0) + 1,
+                'next_run_at' => $Silian_freshTask?->enabled ? $Silian_nextRunAt : null,
+                'updated_at' => $Silian_finishedAt,
+            ], $Silian_triggerSource, $Silian_context)) {
                 return $this->recordStaleCompletion(
-                    $task,
-                    $triggerSource,
-                    $context,
-                    $startedAt,
-                    $finishedAt,
-                    $durationMs,
-                    ['reason' => self::STALE_COMPLETION_ERROR, 'original_error' => $errorMessage],
-                    $exception
+                    $Silian_task,
+                    $Silian_triggerSource,
+                    $Silian_context,
+                    $Silian_startedAt,
+                    $Silian_finishedAt,
+                    $Silian_durationMs,
+                    ['reason' => self::STALE_COMPLETION_ERROR, 'original_error' => $Silian_errorMessage],
+                    $Silian_exception
                 );
             }
 
-            $freshTask = $this->findTask($taskKey);
-            $nextRunAt = $freshTask?->next_run_at;
+            $Silian_freshTask = $this->findTask($Silian_taskKey);
+            $Silian_nextRunAt = $Silian_freshTask?->next_run_at;
 
-            $runId = null;
+            $Silian_runId = null;
             try {
-                $run = CronRun::create([
-                    'task_key' => $taskKey,
-                    'trigger_source' => $triggerSource,
-                    'request_id' => $context['request_id'] ?? null,
+                $Silian_run = CronRun::create([
+                    'task_key' => $Silian_taskKey,
+                    'trigger_source' => $Silian_triggerSource,
+                    'request_id' => $Silian_context['request_id'] ?? null,
                     'status' => self::RUN_STATUS_FAILED,
-                    'started_at' => $startedAt,
-                    'finished_at' => $finishedAt,
-                    'duration_ms' => $durationMs,
+                    'started_at' => $Silian_startedAt,
+                    'finished_at' => $Silian_finishedAt,
+                    'duration_ms' => $Silian_durationMs,
                     'result_json' => $this->encodeJson([]),
-                    'error_message' => $errorMessage,
+                    'error_message' => $Silian_errorMessage,
                 ]);
-                $runId = (int) $run->id;
-            } catch (\Throwable $persistenceException) {
+                $Silian_runId = (int) $Silian_run->id;
+            } catch (\Throwable $Silian_persistenceException) {
                 $this->logNonCriticalPostRunFailure(
                     'Cron task failed-run persistence failed',
-                    $taskKey,
-                    $triggerSource,
-                    $context,
-                    $persistenceException
+                    $Silian_taskKey,
+                    $Silian_triggerSource,
+                    $Silian_context,
+                    $Silian_persistenceException
                 );
             }
 
-            $this->logTaskException($taskKey, $triggerSource, $context, $exception);
+            $this->logTaskException($Silian_taskKey, $Silian_triggerSource, $Silian_context, $Silian_exception);
             try {
                 $this->auditLogService->logSystemEvent('cron_task_run_failed', 'cron_scheduler', [
                     'status' => 'failed',
                     'request_method' => 'SYSTEM',
-                    'endpoint' => '/internal/cron/' . $taskKey,
-                    'request_id' => $context['request_id'] ?? null,
+                    'endpoint' => '/internal/cron/' . $Silian_taskKey,
+                    'request_id' => $Silian_context['request_id'] ?? null,
                     'request_data' => [
-                        'task_key' => $taskKey,
-                        'trigger_source' => $triggerSource,
-                        'duration_ms' => $durationMs,
+                        'task_key' => $Silian_taskKey,
+                        'trigger_source' => $Silian_triggerSource,
+                        'duration_ms' => $Silian_durationMs,
                     ],
-                    'data' => ['error' => $errorMessage],
+                    'data' => ['error' => $Silian_errorMessage],
                 ]);
-            } catch (\Throwable $loggingException) {
+            } catch (\Throwable $Silian_loggingException) {
                 $this->logNonCriticalPostRunFailure(
                     'Cron task failure audit logging failed',
-                    $taskKey,
-                    $triggerSource,
-                    $context,
-                    $loggingException
+                    $Silian_taskKey,
+                    $Silian_triggerSource,
+                    $Silian_context,
+                    $Silian_loggingException
                 );
             }
 
             return [
-                'task_key' => $taskKey,
-                'task_name' => $task->task_name,
+                'task_key' => $Silian_taskKey,
+                'task_name' => $Silian_task->task_name,
                 'status' => self::RUN_STATUS_FAILED,
-                'run_id' => $runId,
-                'started_at' => $startedAt,
-                'finished_at' => $finishedAt,
-                'duration_ms' => $durationMs,
+                'run_id' => $Silian_runId,
+                'started_at' => $Silian_startedAt,
+                'finished_at' => $Silian_finishedAt,
+                'duration_ms' => $Silian_durationMs,
                 'result' => [],
-                'error_message' => $errorMessage,
-                'next_run_at' => $nextRunAt,
+                'error_message' => $Silian_errorMessage,
+                'next_run_at' => $Silian_nextRunAt,
             ];
         }
     }
 
-    private function recordSkippedRun(CronTask $task, string $triggerSource, array $context, string $reason): array
+    private function recordSkippedRun(CronTask $Silian_task, string $Silian_triggerSource, array $Silian_context, string $Silian_reason): array
     {
-        $now = $this->now();
-        $runId = null;
+        $Silian_now = $this->now();
+        $Silian_runId = null;
         try {
-            $run = CronRun::create([
-                'task_key' => (string) $task->task_key,
-                'trigger_source' => $triggerSource,
-                'request_id' => $context['request_id'] ?? null,
+            $Silian_run = CronRun::create([
+                'task_key' => (string) $Silian_task->task_key,
+                'trigger_source' => $Silian_triggerSource,
+                'request_id' => $Silian_context['request_id'] ?? null,
                 'status' => self::RUN_STATUS_SKIPPED,
-                'started_at' => $now,
-                'finished_at' => $now,
+                'started_at' => $Silian_now,
+                'finished_at' => $Silian_now,
                 'duration_ms' => 0,
-                'result_json' => $this->encodeJson(['reason' => $reason]),
-                'error_message' => $reason,
+                'result_json' => $this->encodeJson(['reason' => $Silian_reason]),
+                'error_message' => $Silian_reason,
             ]);
-            $runId = (int) $run->id;
-        } catch (\Throwable $persistenceException) {
+            $Silian_runId = (int) $Silian_run->id;
+        } catch (\Throwable $Silian_persistenceException) {
             $this->logNonCriticalPostRunFailure(
                 'Cron task skipped-run persistence failed',
-                (string) $task->task_key,
-                $triggerSource,
-                $context,
-                $persistenceException
+                (string) $Silian_task->task_key,
+                $Silian_triggerSource,
+                $Silian_context,
+                $Silian_persistenceException
             );
         }
 
@@ -463,42 +463,42 @@ class CronSchedulerService
             $this->auditLogService->logSystemEvent('cron_task_run_skipped', 'cron_scheduler', [
                 'status' => 'skipped',
                 'request_method' => 'SYSTEM',
-                'endpoint' => '/internal/cron/' . $task->task_key,
-                'request_id' => $context['request_id'] ?? null,
+                'endpoint' => '/internal/cron/' . $Silian_task->task_key,
+                'request_id' => $Silian_context['request_id'] ?? null,
                 'request_data' => [
-                    'task_key' => $task->task_key,
-                    'trigger_source' => $triggerSource,
-                    'reason' => $reason,
+                    'task_key' => $Silian_task->task_key,
+                    'trigger_source' => $Silian_triggerSource,
+                    'reason' => $Silian_reason,
                 ],
             ]);
-        } catch (\Throwable $loggingException) {
+        } catch (\Throwable $Silian_loggingException) {
             $this->logNonCriticalPostRunFailure(
                 'Cron task skipped audit logging failed',
-                (string) $task->task_key,
-                $triggerSource,
-                $context,
-                $loggingException
+                (string) $Silian_task->task_key,
+                $Silian_triggerSource,
+                $Silian_context,
+                $Silian_loggingException
             );
         }
 
         return [
-            'task_key' => (string) $task->task_key,
-            'task_name' => (string) $task->task_name,
+            'task_key' => (string) $Silian_task->task_key,
+            'task_name' => (string) $Silian_task->task_name,
             'status' => self::RUN_STATUS_SKIPPED,
-            'run_id' => $runId,
-            'started_at' => $now,
-            'finished_at' => $now,
+            'run_id' => $Silian_runId,
+            'started_at' => $Silian_now,
+            'finished_at' => $Silian_now,
             'duration_ms' => 0,
             'result' => [],
-            'error_message' => $reason,
-            'next_run_at' => $task->next_run_at,
+            'error_message' => $Silian_reason,
+            'next_run_at' => $Silian_task->next_run_at,
         ];
     }
 
-    private function acquireLock(string $taskKey, string $lockToken, string $now, bool $forceRun): bool
+    private function acquireLock(string $Silian_taskKey, string $Silian_lockToken, string $Silian_now, bool $Silian_forceRun): bool
     {
-        $staleBefore = $this->addSeconds($now, -self::LOCK_TIMEOUT_SECONDS);
-        $sql = '
+        $Silian_staleBefore = $this->addSeconds($Silian_now, -self::LOCK_TIMEOUT_SECONDS);
+        $Silian_sql = '
             UPDATE cron_tasks
             SET
                 lock_token = :lock_token,
@@ -513,309 +513,309 @@ class CronSchedulerService
                     OR locked_at < :stale_before
                   )
         ';
-        if ($forceRun) {
-            $params = [
-                'lock_token' => $lockToken,
-                'locked_at' => $now,
-                'last_started_at' => $now,
+        if ($Silian_forceRun) {
+            $Silian_params = [
+                'lock_token' => $Silian_lockToken,
+                'locked_at' => $Silian_now,
+                'last_started_at' => $Silian_now,
                 'last_status' => self::TASK_STATUS_RUNNING,
-                'updated_at' => $now,
-                'task_key' => $taskKey,
-                'stale_before' => $staleBefore,
+                'updated_at' => $Silian_now,
+                'task_key' => $Silian_taskKey,
+                'stale_before' => $Silian_staleBefore,
             ];
         } else {
-            $sql .= '
+            $Silian_sql .= '
               AND enabled = 1
               AND next_run_at IS NOT NULL
               AND next_run_at <= :now_value
             ';
-            $params = [
-                'lock_token' => $lockToken,
-                'locked_at' => $now,
-                'last_started_at' => $now,
+            $Silian_params = [
+                'lock_token' => $Silian_lockToken,
+                'locked_at' => $Silian_now,
+                'last_started_at' => $Silian_now,
                 'last_status' => self::TASK_STATUS_RUNNING,
-                'updated_at' => $now,
-                'task_key' => $taskKey,
-                'stale_before' => $staleBefore,
-                'now_value' => $now,
+                'updated_at' => $Silian_now,
+                'task_key' => $Silian_taskKey,
+                'stale_before' => $Silian_staleBefore,
+                'now_value' => $Silian_now,
             ];
         }
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_params);
 
-        return $stmt->rowCount() > 0;
+        return $Silian_stmt->rowCount() > 0;
     }
 
-    private function completeTaskRun(string $taskKey, string $lockToken, array $fields): bool
+    private function completeTaskRun(string $Silian_taskKey, string $Silian_lockToken, array $Silian_fields): bool
     {
-        $set = [];
-        $params = [
-            'task_key' => $taskKey,
-            'lock_token_match' => $lockToken,
+        $Silian_set = [];
+        $Silian_params = [
+            'task_key' => $Silian_taskKey,
+            'lock_token_match' => $Silian_lockToken,
         ];
 
-        foreach ($fields as $field => $value) {
-            $set[] = "{$field} = :{$field}";
-            $params[$field] = $value;
+        foreach ($Silian_fields as $Silian_field => $Silian_value) {
+            $Silian_set[] = "{$Silian_field} = :{$Silian_field}";
+            $Silian_params[$Silian_field] = $Silian_value;
         }
 
-        $sql = 'UPDATE cron_tasks SET ' . implode(', ', $set) . ' WHERE task_key = :task_key AND lock_token = :lock_token_match';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
+        $Silian_sql = 'UPDATE cron_tasks SET ' . implode(', ', $Silian_set) . ' WHERE task_key = :task_key AND lock_token = :lock_token_match';
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_params);
 
-        return $stmt->rowCount() > 0;
+        return $Silian_stmt->rowCount() > 0;
     }
 
     private function finalizeTaskRun(
-        string $taskKey,
-        string $lockToken,
-        array $fields,
-        string $triggerSource = 'internal',
-        array $context = []
+        string $Silian_taskKey,
+        string $Silian_lockToken,
+        array $Silian_fields,
+        string $Silian_triggerSource = 'internal',
+        array $Silian_context = []
     ): bool
     {
         try {
-            return $this->completeTaskRun($taskKey, $lockToken, $fields + [
+            return $this->completeTaskRun($Silian_taskKey, $Silian_lockToken, $Silian_fields + [
                 'lock_token' => null,
                 'locked_at' => null,
             ]);
-        } catch (\Throwable $releaseException) {
+        } catch (\Throwable $Silian_releaseException) {
             $this->logNonCriticalPostRunFailure(
                 'Cron task release failed after completion',
-                $taskKey,
-                $triggerSource,
-                $context,
-                $releaseException
+                $Silian_taskKey,
+                $Silian_triggerSource,
+                $Silian_context,
+                $Silian_releaseException
             );
 
-            $fallbackFields = $fields;
-            unset($fallbackFields['next_run_at']);
+            $Silian_fallbackFields = $Silian_fields;
+            unset($Silian_fallbackFields['next_run_at']);
 
-            return $this->completeTaskRun($taskKey, $lockToken, $fallbackFields);
+            return $this->completeTaskRun($Silian_taskKey, $Silian_lockToken, $Silian_fallbackFields);
         }
     }
 
-    private function executeTaskHandler(string $taskKey, string $triggerSource): array
+    private function executeTaskHandler(string $Silian_taskKey, string $Silian_triggerSource): array
     {
-        return match ($taskKey) {
+        return match ($Silian_taskKey) {
             self::TASK_SUPPORT_SLA_SWEEP => $this->supportRoutingEngineService->runSlaSweep(),
             self::TASK_BADGE_AUTO_AWARD => $this->badgeService->runAutoGrant(),
-            self::TASK_LEADERBOARD_REFRESH => $this->leaderboardService->rebuildCache($this->reasonForTrigger($triggerSource)),
-            self::TASK_STREAK_LEADERBOARD_REFRESH => $this->streakLeaderboardService->rebuildCache($this->reasonForTrigger($triggerSource)),
+            self::TASK_LEADERBOARD_REFRESH => $this->leaderboardService->rebuildCache($this->reasonForTrigger($Silian_triggerSource)),
+            self::TASK_STREAK_LEADERBOARD_REFRESH => $this->streakLeaderboardService->rebuildCache($this->reasonForTrigger($Silian_triggerSource)),
             default => throw new \RuntimeException('Unsupported cron task'),
         };
     }
 
-    private function reasonForTrigger(string $triggerSource): string
+    private function reasonForTrigger(string $Silian_triggerSource): string
     {
-        return match ($triggerSource) {
+        return match ($Silian_triggerSource) {
             'cron_endpoint' => 'cron',
             'legacy_endpoint' => 'legacy-endpoint',
             'admin_manual' => 'admin-manual',
-            default => $triggerSource,
+            default => $Silian_triggerSource,
         };
     }
 
-    private function normalizeTaskResult(string $taskKey, array $rawResult): array
+    private function normalizeTaskResult(string $Silian_taskKey, array $Silian_rawResult): array
     {
-        return match ($taskKey) {
+        return match ($Silian_taskKey) {
             self::TASK_SUPPORT_SLA_SWEEP => [
-                'processed' => (int) ($rawResult['processed'] ?? 0),
-                'breached' => (int) ($rawResult['breached'] ?? 0),
-                'rerouted' => (int) ($rawResult['rerouted'] ?? 0),
+                'processed' => (int) ($Silian_rawResult['processed'] ?? 0),
+                'breached' => (int) ($Silian_rawResult['breached'] ?? 0),
+                'rerouted' => (int) ($Silian_rawResult['rerouted'] ?? 0),
             ],
             self::TASK_BADGE_AUTO_AWARD => [
-                'awarded' => (int) ($rawResult['awarded'] ?? 0),
-                'skipped' => (int) ($rawResult['skipped'] ?? 0),
-                'badges' => (int) ($rawResult['badges'] ?? 0),
-                'users' => (int) ($rawResult['users'] ?? 0),
+                'awarded' => (int) ($Silian_rawResult['awarded'] ?? 0),
+                'skipped' => (int) ($Silian_rawResult['skipped'] ?? 0),
+                'badges' => (int) ($Silian_rawResult['badges'] ?? 0),
+                'users' => (int) ($Silian_rawResult['users'] ?? 0),
             ],
             self::TASK_LEADERBOARD_REFRESH,
             self::TASK_STREAK_LEADERBOARD_REFRESH => [
-                'generated_at' => $rawResult['generated_at'] ?? null,
-                'expires_at' => $rawResult['expires_at'] ?? null,
-                'global_count' => count($rawResult['global'] ?? []),
-                'regions_count' => count($rawResult['regions'] ?? []),
-                'schools_count' => count($rawResult['schools'] ?? []),
+                'generated_at' => $Silian_rawResult['generated_at'] ?? null,
+                'expires_at' => $Silian_rawResult['expires_at'] ?? null,
+                'global_count' => count($Silian_rawResult['global'] ?? []),
+                'regions_count' => count($Silian_rawResult['regions'] ?? []),
+                'schools_count' => count($Silian_rawResult['schools'] ?? []),
             ],
-            default => $rawResult,
+            default => $Silian_rawResult,
         };
     }
 
-    private function formatTask(CronTask $task, string $now): array
+    private function formatTask(CronTask $Silian_task, string $Silian_now): array
     {
-        $lockedAt = $this->normalizeDateValue($task->locked_at);
-        $settings = $this->decodeJsonObject($task->settings_json) ?? [];
+        $Silian_lockedAt = $this->normalizeDateValue($Silian_task->locked_at);
+        $Silian_settings = $this->decodeJsonObject($Silian_task->settings_json) ?? [];
 
         return [
-            'task_key' => (string) $task->task_key,
-            'task_name' => (string) $task->task_name,
-            'description' => $task->description,
-            'is_registered' => $this->isRegisteredTaskKey((string) $task->task_key),
-            'interval_minutes' => (int) ($task->interval_minutes ?? 0),
-            'enabled' => (bool) $task->enabled,
-            'next_run_at' => $task->next_run_at,
-            'last_started_at' => $task->last_started_at,
-            'last_finished_at' => $task->last_finished_at,
-            'last_status' => $task->last_status,
-            'last_error' => $task->last_error,
-            'last_duration_ms' => $task->last_duration_ms !== null ? (int) $task->last_duration_ms : null,
-            'consecutive_failures' => (int) ($task->consecutive_failures ?? 0),
-            'locked_at' => $lockedAt,
-            'settings' => $settings,
-            'is_due' => (bool) $task->enabled
-                && is_string($task->next_run_at)
-                && $task->next_run_at !== ''
-                && $task->next_run_at <= $now,
-            'is_locked' => $lockedAt !== null && $lockedAt >= $this->addSeconds($now, -self::LOCK_TIMEOUT_SECONDS),
+            'task_key' => (string) $Silian_task->task_key,
+            'task_name' => (string) $Silian_task->task_name,
+            'description' => $Silian_task->description,
+            'is_registered' => $this->isRegisteredTaskKey((string) $Silian_task->task_key),
+            'interval_minutes' => (int) ($Silian_task->interval_minutes ?? 0),
+            'enabled' => (bool) $Silian_task->enabled,
+            'next_run_at' => $Silian_task->next_run_at,
+            'last_started_at' => $Silian_task->last_started_at,
+            'last_finished_at' => $Silian_task->last_finished_at,
+            'last_status' => $Silian_task->last_status,
+            'last_error' => $Silian_task->last_error,
+            'last_duration_ms' => $Silian_task->last_duration_ms !== null ? (int) $Silian_task->last_duration_ms : null,
+            'consecutive_failures' => (int) ($Silian_task->consecutive_failures ?? 0),
+            'locked_at' => $Silian_lockedAt,
+            'settings' => $Silian_settings,
+            'is_due' => (bool) $Silian_task->enabled
+                && is_string($Silian_task->next_run_at)
+                && $Silian_task->next_run_at !== ''
+                && $Silian_task->next_run_at <= $Silian_now,
+            'is_locked' => $Silian_lockedAt !== null && $Silian_lockedAt >= $this->addSeconds($Silian_now, -self::LOCK_TIMEOUT_SECONDS),
         ];
     }
 
-    private function formatRun(CronRun $run): array
+    private function formatRun(CronRun $Silian_run): array
     {
         return [
-            'id' => (int) $run->id,
-            'task_key' => (string) $run->task_key,
-            'trigger_source' => (string) $run->trigger_source,
-            'request_id' => $run->request_id,
-            'status' => (string) $run->status,
-            'started_at' => $run->started_at,
-            'finished_at' => $run->finished_at,
-            'duration_ms' => $run->duration_ms !== null ? (int) $run->duration_ms : null,
-            'result' => $this->decodeJsonObject($run->result_json) ?? [],
-            'error_message' => $run->error_message,
-            'created_at' => $run->created_at,
+            'id' => (int) $Silian_run->id,
+            'task_key' => (string) $Silian_run->task_key,
+            'trigger_source' => (string) $Silian_run->trigger_source,
+            'request_id' => $Silian_run->request_id,
+            'status' => (string) $Silian_run->status,
+            'started_at' => $Silian_run->started_at,
+            'finished_at' => $Silian_run->finished_at,
+            'duration_ms' => $Silian_run->duration_ms !== null ? (int) $Silian_run->duration_ms : null,
+            'result' => $this->decodeJsonObject($Silian_run->result_json) ?? [],
+            'error_message' => $Silian_run->error_message,
+            'created_at' => $Silian_run->created_at,
         ];
     }
 
-    private function findTask(string $taskKey): ?CronTask
+    private function findTask(string $Silian_taskKey): ?CronTask
     {
-        return CronTask::query()->where('task_key', $taskKey)->first();
+        return CronTask::query()->where('task_key', $Silian_taskKey)->first();
     }
 
-    private function determineSkipReason(CronTask $task, bool $forceRun, string $now): string
+    private function determineSkipReason(CronTask $Silian_task, bool $Silian_forceRun, string $Silian_now): string
     {
-        if (!$forceRun && !$task->enabled) {
+        if (!$Silian_forceRun && !$Silian_task->enabled) {
             return 'task_disabled';
         }
-        if (!$forceRun && (!is_string($task->next_run_at) || $task->next_run_at === '' || $task->next_run_at > $now)) {
+        if (!$Silian_forceRun && (!is_string($Silian_task->next_run_at) || $Silian_task->next_run_at === '' || $Silian_task->next_run_at > $Silian_now)) {
             return 'task_not_due';
         }
         return 'task_locked';
     }
 
-    private function isFreshLockActive(CronTask $task, string $now): bool
+    private function isFreshLockActive(CronTask $Silian_task, string $Silian_now): bool
     {
-        if (!is_string($task->lock_token) || trim($task->lock_token) === '') {
+        if (!is_string($Silian_task->lock_token) || trim($Silian_task->lock_token) === '') {
             return false;
         }
-        $lockedAt = $this->normalizeDateValue($task->locked_at);
-        if ($lockedAt === null) {
+        $Silian_lockedAt = $this->normalizeDateValue($Silian_task->locked_at);
+        if ($Silian_lockedAt === null) {
             return false;
         }
 
-        return $lockedAt >= $this->addSeconds($now, -self::LOCK_TIMEOUT_SECONDS);
+        return $Silian_lockedAt >= $this->addSeconds($Silian_now, -self::LOCK_TIMEOUT_SECONDS);
     }
 
-    private function normalizeDateValue(mixed $value): ?string
+    private function normalizeDateValue(mixed $Silian_value): ?string
     {
-        if ($value instanceof \DateTimeInterface) {
-            return $value->format('Y-m-d H:i:s');
+        if ($Silian_value instanceof \DateTimeInterface) {
+            return $Silian_value->format('Y-m-d H:i:s');
         }
-        if (is_string($value) && trim($value) !== '') {
-            return trim($value);
+        if (is_string($Silian_value) && trim($Silian_value) !== '') {
+            return trim($Silian_value);
         }
 
         return null;
     }
 
-    private function normalizeTaskKey(string $taskKey): string
+    private function normalizeTaskKey(string $Silian_taskKey): string
     {
-        $normalized = strtolower(trim($taskKey));
-        if ($normalized === '') {
+        $Silian_normalized = strtolower(trim($Silian_taskKey));
+        if ($Silian_normalized === '') {
             throw new \InvalidArgumentException('Cron task key is required');
         }
-        return $normalized;
+        return $Silian_normalized;
     }
 
-    private function ensureRegisteredTaskKey(string $taskKey): void
+    private function ensureRegisteredTaskKey(string $Silian_taskKey): void
     {
-        if (!$this->isRegisteredTaskKey($taskKey)) {
+        if (!$this->isRegisteredTaskKey($Silian_taskKey)) {
             throw new \RuntimeException('Cron task not found');
         }
     }
 
-    private function isRegisteredTaskKey(string $taskKey): bool
+    private function isRegisteredTaskKey(string $Silian_taskKey): bool
     {
-        $definitions = $this->taskDefinitions();
-        return isset($definitions[$taskKey]);
+        $Silian_definitions = $this->taskDefinitions();
+        return isset($Silian_definitions[$Silian_taskKey]);
     }
 
-    private function normalizeLookupTaskKey(string $taskKey): string
+    private function normalizeLookupTaskKey(string $Silian_taskKey): string
     {
-        return $this->normalizeTaskKey($taskKey);
+        return $this->normalizeTaskKey($Silian_taskKey);
     }
 
-    private function assertOnlyDisableForUnregisteredTask(array $payload): void
+    private function assertOnlyDisableForUnregisteredTask(array $Silian_payload): void
     {
-        if (!array_key_exists('enabled', $payload)) {
+        if (!array_key_exists('enabled', $Silian_payload)) {
             throw new \InvalidArgumentException('Unregistered cron tasks can only be disabled');
         }
 
-        if ($this->normalizeBoolean($payload['enabled'], 'enabled')) {
+        if ($this->normalizeBoolean($Silian_payload['enabled'], 'enabled')) {
             throw new \InvalidArgumentException('Unregistered cron tasks can only be disabled');
         }
 
-        if (array_key_exists('interval_minutes', $payload) || array_key_exists('settings', $payload)) {
+        if (array_key_exists('interval_minutes', $Silian_payload) || array_key_exists('settings', $Silian_payload)) {
             throw new \InvalidArgumentException('Unregistered cron tasks can only be disabled');
         }
     }
 
-    private function normalizeTriggerSource(string $triggerSource): string
+    private function normalizeTriggerSource(string $Silian_triggerSource): string
     {
-        $normalized = strtolower(trim($triggerSource));
-        if (!in_array($normalized, self::VALID_TRIGGER_SOURCES, true)) {
+        $Silian_normalized = strtolower(trim($Silian_triggerSource));
+        if (!in_array($Silian_normalized, self::VALID_TRIGGER_SOURCES, true)) {
             throw new \InvalidArgumentException('Invalid cron trigger source');
         }
-        return $normalized;
+        return $Silian_normalized;
     }
 
-    private function normalizeBoolean(mixed $value, string $field): bool
+    private function normalizeBoolean(mixed $Silian_value, string $Silian_field): bool
     {
-        if (is_bool($value)) {
-            return $value;
+        if (is_bool($Silian_value)) {
+            return $Silian_value;
         }
-        if (is_int($value) || is_float($value) || (is_string($value) && is_numeric($value))) {
-            return (int) $value !== 0;
+        if (is_int($Silian_value) || is_float($Silian_value) || (is_string($Silian_value) && is_numeric($Silian_value))) {
+            return (int) $Silian_value !== 0;
         }
-        if (is_string($value)) {
-            $normalized = strtolower(trim($value));
-            if (in_array($normalized, ['true', 'yes', 'on'], true)) {
+        if (is_string($Silian_value)) {
+            $Silian_normalized = strtolower(trim($Silian_value));
+            if (in_array($Silian_normalized, ['true', 'yes', 'on'], true)) {
                 return true;
             }
-            if (in_array($normalized, ['false', 'no', 'off'], true)) {
+            if (in_array($Silian_normalized, ['false', 'no', 'off'], true)) {
                 return false;
             }
         }
 
-        throw new \InvalidArgumentException($field . ' must be a boolean');
+        throw new \InvalidArgumentException($Silian_field . ' must be a boolean');
     }
 
-    private function normalizeIntervalMinutes(mixed $value): int
+    private function normalizeIntervalMinutes(mixed $Silian_value): int
     {
-        if (is_int($value)) {
-            $interval = $value;
-        } elseif (is_string($value) && preg_match('/^\d+$/', trim($value)) === 1) {
-            $interval = (int) trim($value);
+        if (is_int($Silian_value)) {
+            $Silian_interval = $Silian_value;
+        } elseif (is_string($Silian_value) && preg_match('/^\d+$/', trim($Silian_value)) === 1) {
+            $Silian_interval = (int) trim($Silian_value);
         } else {
             throw new \InvalidArgumentException('interval_minutes must be an integer');
         }
-        if ($interval < 1 || $interval > 1440) {
+        if ($Silian_interval < 1 || $Silian_interval > 1440) {
             throw new \InvalidArgumentException('interval_minutes must be between 1 and 1440');
         }
 
-        return $interval;
+        return $Silian_interval;
     }
 
     private function taskDefinitions(): array
@@ -840,89 +840,89 @@ class CronSchedulerService
         ];
     }
 
-    private function encodeJson(array $value): string
+    private function encodeJson(array $Silian_value): string
     {
-        return json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}';
+        return json_encode($Silian_value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}';
     }
 
-    private function decodeJsonObject(?string $value): ?array
+    private function decodeJsonObject(?string $Silian_value): ?array
     {
-        if (!is_string($value) || trim($value) === '') {
+        if (!is_string($Silian_value) || trim($Silian_value) === '') {
             return null;
         }
 
-        $decoded = json_decode($value, true);
-        return is_array($decoded) ? $decoded : null;
+        $Silian_decoded = json_decode($Silian_value, true);
+        return is_array($Silian_decoded) ? $Silian_decoded : null;
     }
 
-    private function logTaskException(string $taskKey, string $triggerSource, array $context, \Throwable $exception): void
+    private function logTaskException(string $Silian_taskKey, string $Silian_triggerSource, array $Silian_context, \Throwable $Silian_exception): void
     {
         $this->logger->error('Cron task execution failed', [
-            'task_key' => $taskKey,
-            'trigger_source' => $triggerSource,
-            'error' => $exception->getMessage(),
+            'task_key' => $Silian_taskKey,
+            'trigger_source' => $Silian_triggerSource,
+            'error' => $Silian_exception->getMessage(),
         ]);
 
         try {
-            $request = SyntheticRequestFactory::fromContext(
-                '/internal/cron/' . $taskKey,
+            $Silian_request = SyntheticRequestFactory::fromContext(
+                '/internal/cron/' . $Silian_taskKey,
                 'SYSTEM',
-                is_string($context['request_id'] ?? null) ? (string) $context['request_id'] : null,
+                is_string($Silian_context['request_id'] ?? null) ? (string) $Silian_context['request_id'] : null,
                 [],
-                $context + [
-                    'task_key' => $taskKey,
-                    'trigger_source' => $triggerSource,
+                $Silian_context + [
+                    'task_key' => $Silian_taskKey,
+                    'trigger_source' => $Silian_triggerSource,
                 ],
                 ['PHP_SAPI' => PHP_SAPI]
             );
 
-            $this->errorLogService->logException($exception, $request, [
+            $this->errorLogService->logException($Silian_exception, $Silian_request, [
                 'context_message' => 'cron_task_run_failed',
-                'task_key' => $taskKey,
-                'trigger_source' => $triggerSource,
+                'task_key' => $Silian_taskKey,
+                'trigger_source' => $Silian_triggerSource,
             ]);
-        } catch (\Throwable $loggingException) {
+        } catch (\Throwable $Silian_loggingException) {
             $this->logger->warning('Cron task exception logging failed', [
-                'task_key' => $taskKey,
-                'trigger_source' => $triggerSource,
-                'error' => $loggingException->getMessage(),
+                'task_key' => $Silian_taskKey,
+                'trigger_source' => $Silian_triggerSource,
+                'error' => $Silian_loggingException->getMessage(),
             ]);
         }
     }
 
     private function logNonCriticalPostRunFailure(
-        string $message,
-        string $taskKey,
-        string $triggerSource,
-        array $context,
-        \Throwable $exception,
-        ?string $endpoint = null,
-        string $contextMessage = 'cron_task_post_run_recording_failed'
+        string $Silian_message,
+        string $Silian_taskKey,
+        string $Silian_triggerSource,
+        array $Silian_context,
+        \Throwable $Silian_exception,
+        ?string $Silian_endpoint = null,
+        string $Silian_contextMessage = 'cron_task_post_run_recording_failed'
     ): void
     {
-        $this->logger->warning($message, [
-            'task_key' => $taskKey,
-            'trigger_source' => $triggerSource,
-            'error' => $exception->getMessage(),
+        $this->logger->warning($Silian_message, [
+            'task_key' => $Silian_taskKey,
+            'trigger_source' => $Silian_triggerSource,
+            'error' => $Silian_exception->getMessage(),
         ]);
 
         try {
-            $request = SyntheticRequestFactory::fromContext(
-                $endpoint ?? '/internal/cron/' . $taskKey,
+            $Silian_request = SyntheticRequestFactory::fromContext(
+                $Silian_endpoint ?? '/internal/cron/' . $Silian_taskKey,
                 'SYSTEM',
-                is_string($context['request_id'] ?? null) ? (string) $context['request_id'] : null,
+                is_string($Silian_context['request_id'] ?? null) ? (string) $Silian_context['request_id'] : null,
                 [],
-                $context + [
-                    'task_key' => $taskKey,
-                    'trigger_source' => $triggerSource,
+                $Silian_context + [
+                    'task_key' => $Silian_taskKey,
+                    'trigger_source' => $Silian_triggerSource,
                 ],
                 ['PHP_SAPI' => PHP_SAPI]
             );
 
-            $this->errorLogService->logException($exception, $request, [
-                'context_message' => $contextMessage,
-                'task_key' => $taskKey,
-                'trigger_source' => $triggerSource,
+            $this->errorLogService->logException($Silian_exception, $Silian_request, [
+                'context_message' => $Silian_contextMessage,
+                'task_key' => $Silian_taskKey,
+                'trigger_source' => $Silian_triggerSource,
             ]);
         } catch (\Throwable) {
         }
@@ -932,51 +932,51 @@ class CronSchedulerService
      * @param array<string,mixed> $result
      */
     private function recordStaleCompletion(
-        CronTask $task,
-        string $triggerSource,
-        array $context,
-        string $startedAt,
-        string $finishedAt,
-        int $durationMs,
-        array $result = [],
-        ?\Throwable $exception = null
+        CronTask $Silian_task,
+        string $Silian_triggerSource,
+        array $Silian_context,
+        string $Silian_startedAt,
+        string $Silian_finishedAt,
+        int $Silian_durationMs,
+        array $Silian_result = [],
+        ?\Throwable $Silian_exception = null
     ): array {
-        $taskKey = (string) $task->task_key;
-        $errorMessage = self::STALE_COMPLETION_ERROR;
+        $Silian_taskKey = (string) $Silian_task->task_key;
+        $Silian_errorMessage = self::STALE_COMPLETION_ERROR;
 
         $this->logger->warning('Cron task completion aborted because lock ownership was lost', [
-            'task_key' => $taskKey,
-            'trigger_source' => $triggerSource,
-            'request_id' => $context['request_id'] ?? null,
-            'original_error' => $exception?->getMessage(),
+            'task_key' => $Silian_taskKey,
+            'trigger_source' => $Silian_triggerSource,
+            'request_id' => $Silian_context['request_id'] ?? null,
+            'original_error' => $Silian_exception?->getMessage(),
         ]);
 
-        if ($exception !== null) {
-            $this->logTaskException($taskKey, $triggerSource, $context, $exception);
+        if ($Silian_exception !== null) {
+            $this->logTaskException($Silian_taskKey, $Silian_triggerSource, $Silian_context, $Silian_exception);
         }
 
-        $runPayload = $result !== [] ? $result : ['reason' => $errorMessage];
-        $runId = null;
+        $Silian_runPayload = $Silian_result !== [] ? $Silian_result : ['reason' => $Silian_errorMessage];
+        $Silian_runId = null;
         try {
-            $run = CronRun::create([
-                'task_key' => $taskKey,
-                'trigger_source' => $triggerSource,
-                'request_id' => $context['request_id'] ?? null,
+            $Silian_run = CronRun::create([
+                'task_key' => $Silian_taskKey,
+                'trigger_source' => $Silian_triggerSource,
+                'request_id' => $Silian_context['request_id'] ?? null,
                 'status' => self::RUN_STATUS_FAILED,
-                'started_at' => $startedAt,
-                'finished_at' => $finishedAt,
-                'duration_ms' => $durationMs,
-                'result_json' => $this->encodeJson($runPayload),
-                'error_message' => $errorMessage,
+                'started_at' => $Silian_startedAt,
+                'finished_at' => $Silian_finishedAt,
+                'duration_ms' => $Silian_durationMs,
+                'result_json' => $this->encodeJson($Silian_runPayload),
+                'error_message' => $Silian_errorMessage,
             ]);
-            $runId = (int) $run->id;
-        } catch (\Throwable $persistenceException) {
+            $Silian_runId = (int) $Silian_run->id;
+        } catch (\Throwable $Silian_persistenceException) {
             $this->logNonCriticalPostRunFailure(
                 'Cron task stale-run persistence failed',
-                $taskKey,
-                $triggerSource,
-                $context,
-                $persistenceException
+                $Silian_taskKey,
+                $Silian_triggerSource,
+                $Silian_context,
+                $Silian_persistenceException
             );
         }
 
@@ -984,42 +984,42 @@ class CronSchedulerService
             $this->auditLogService->logSystemEvent('cron_task_run_failed', 'cron_scheduler', [
                 'status' => 'failed',
                 'request_method' => 'SYSTEM',
-                'endpoint' => '/internal/cron/' . $taskKey,
-                'request_id' => $context['request_id'] ?? null,
+                'endpoint' => '/internal/cron/' . $Silian_taskKey,
+                'request_id' => $Silian_context['request_id'] ?? null,
                 'request_data' => [
-                    'task_key' => $taskKey,
-                    'trigger_source' => $triggerSource,
-                    'duration_ms' => $durationMs,
-                    'reason' => $errorMessage,
+                    'task_key' => $Silian_taskKey,
+                    'trigger_source' => $Silian_triggerSource,
+                    'duration_ms' => $Silian_durationMs,
+                    'reason' => $Silian_errorMessage,
                 ],
                 'data' => [
-                    'error' => $errorMessage,
-                    'result' => $runPayload,
+                    'error' => $Silian_errorMessage,
+                    'result' => $Silian_runPayload,
                 ],
             ]);
-        } catch (\Throwable $loggingException) {
+        } catch (\Throwable $Silian_loggingException) {
             $this->logNonCriticalPostRunFailure(
                 'Cron task stale-completion audit logging failed',
-                $taskKey,
-                $triggerSource,
-                $context,
-                $loggingException
+                $Silian_taskKey,
+                $Silian_triggerSource,
+                $Silian_context,
+                $Silian_loggingException
             );
         }
 
-        $freshTask = $this->findTask($taskKey);
+        $Silian_freshTask = $this->findTask($Silian_taskKey);
 
         return [
-            'task_key' => $taskKey,
-            'task_name' => $task->task_name,
+            'task_key' => $Silian_taskKey,
+            'task_name' => $Silian_task->task_name,
             'status' => self::RUN_STATUS_FAILED,
-            'run_id' => $runId,
-            'started_at' => $startedAt,
-            'finished_at' => $finishedAt,
-            'duration_ms' => $durationMs,
-            'result' => $runPayload,
-            'error_message' => $errorMessage,
-            'next_run_at' => $freshTask?->next_run_at,
+            'run_id' => $Silian_runId,
+            'started_at' => $Silian_startedAt,
+            'finished_at' => $Silian_finishedAt,
+            'duration_ms' => $Silian_durationMs,
+            'result' => $Silian_runPayload,
+            'error_message' => $Silian_errorMessage,
+            'next_run_at' => $Silian_freshTask?->next_run_at,
         ];
     }
 
@@ -1028,24 +1028,24 @@ class CronSchedulerService
         return (new DateTimeImmutable('now', new DateTimeZone('Asia/Shanghai')))->format('Y-m-d H:i:s');
     }
 
-    private function addMinutes(string $dateTime, int $minutes): string
+    private function addMinutes(string $Silian_dateTime, int $Silian_minutes): string
     {
-        return (new DateTimeImmutable($dateTime, new DateTimeZone('Asia/Shanghai')))
-            ->modify(sprintf('+%d minutes', $minutes))
+        return (new DateTimeImmutable($Silian_dateTime, new DateTimeZone('Asia/Shanghai')))
+            ->modify(sprintf('+%d minutes', $Silian_minutes))
             ->format('Y-m-d H:i:s');
     }
 
-    private function addSeconds(string $dateTime, int $seconds): string
+    private function addSeconds(string $Silian_dateTime, int $Silian_seconds): string
     {
-        $modifier = $seconds >= 0 ? '+' . $seconds : (string) $seconds;
-        return (new DateTimeImmutable($dateTime, new DateTimeZone('Asia/Shanghai')))
-            ->modify($modifier . ' seconds')
+        $Silian_modifier = $Silian_seconds >= 0 ? '+' . $Silian_seconds : (string) $Silian_seconds;
+        return (new DateTimeImmutable($Silian_dateTime, new DateTimeZone('Asia/Shanghai')))
+            ->modify($Silian_modifier . ' seconds')
             ->format('Y-m-d H:i:s');
     }
 
-    private function diffMilliseconds(float $startedAt, float $finishedAt): int
+    private function diffMilliseconds(float $Silian_startedAt, float $Silian_finishedAt): int
     {
-        return (int) max(0, round(($finishedAt - $startedAt) * 1000));
+        return (int) max(0, round(($Silian_finishedAt - $Silian_startedAt) * 1000));
     }
 
     private function generateLockToken(): string
@@ -1057,12 +1057,12 @@ class CronSchedulerService
                 throw new \RuntimeException('Unable to generate cron lock token');
             }
 
-            $bytes = openssl_random_pseudo_bytes(16);
-            if (!is_string($bytes) || $bytes === '') {
+            $Silian_bytes = openssl_random_pseudo_bytes(16);
+            if (!is_string($Silian_bytes) || $Silian_bytes === '') {
                 throw new \RuntimeException('Unable to generate cron lock token');
             }
 
-            return bin2hex($bytes);
+            return bin2hex($Silian_bytes);
         }
     }
 }

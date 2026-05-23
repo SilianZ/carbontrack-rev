@@ -33,40 +33,40 @@ class CronSchedulerServiceTest extends TestCase
         self::$capsule->setAsGlobal();
         self::$capsule->bootEloquent();
 
-        self::$capsule->schema()->create('cron_tasks', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->string('task_key');
-            $table->string('task_name');
-            $table->string('description')->nullable();
-            $table->integer('interval_minutes')->default(5);
-            $table->boolean('enabled')->default(true);
-            $table->timestamp('next_run_at')->nullable();
-            $table->timestamp('last_started_at')->nullable();
-            $table->timestamp('last_finished_at')->nullable();
-            $table->string('last_status')->default('idle');
-            $table->text('last_error')->nullable();
-            $table->integer('last_duration_ms')->nullable();
-            $table->integer('consecutive_failures')->default(0);
-            $table->string('lock_token')->nullable();
-            $table->timestamp('locked_at')->nullable();
-            $table->text('settings_json')->nullable();
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+        self::$capsule->schema()->create('cron_tasks', function (Blueprint $Silian_table): void {
+            $Silian_table->increments('id');
+            $Silian_table->string('task_key');
+            $Silian_table->string('task_name');
+            $Silian_table->string('description')->nullable();
+            $Silian_table->integer('interval_minutes')->default(5);
+            $Silian_table->boolean('enabled')->default(true);
+            $Silian_table->timestamp('next_run_at')->nullable();
+            $Silian_table->timestamp('last_started_at')->nullable();
+            $Silian_table->timestamp('last_finished_at')->nullable();
+            $Silian_table->string('last_status')->default('idle');
+            $Silian_table->text('last_error')->nullable();
+            $Silian_table->integer('last_duration_ms')->nullable();
+            $Silian_table->integer('consecutive_failures')->default(0);
+            $Silian_table->string('lock_token')->nullable();
+            $Silian_table->timestamp('locked_at')->nullable();
+            $Silian_table->text('settings_json')->nullable();
+            $Silian_table->timestamp('created_at')->nullable();
+            $Silian_table->timestamp('updated_at')->nullable();
         });
 
-        self::$capsule->schema()->create('cron_runs', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->string('task_key');
-            $table->string('trigger_source');
-            $table->string('request_id')->nullable();
-            $table->string('status');
-            $table->timestamp('started_at')->nullable();
-            $table->timestamp('finished_at')->nullable();
-            $table->integer('duration_ms')->nullable();
-            $table->text('result_json')->nullable();
-            $table->text('error_message')->nullable();
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+        self::$capsule->schema()->create('cron_runs', function (Blueprint $Silian_table): void {
+            $Silian_table->increments('id');
+            $Silian_table->string('task_key');
+            $Silian_table->string('trigger_source');
+            $Silian_table->string('request_id')->nullable();
+            $Silian_table->string('status');
+            $Silian_table->timestamp('started_at')->nullable();
+            $Silian_table->timestamp('finished_at')->nullable();
+            $Silian_table->integer('duration_ms')->nullable();
+            $Silian_table->text('result_json')->nullable();
+            $Silian_table->text('error_message')->nullable();
+            $Silian_table->timestamp('created_at')->nullable();
+            $Silian_table->timestamp('updated_at')->nullable();
         });
     }
 
@@ -80,20 +80,20 @@ class CronSchedulerServiceTest extends TestCase
 
     public function testRunDueTasksExecutesAllRegisteredTasks(): void
     {
-        $now = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $now);
-        $this->seedTask(CronSchedulerService::TASK_BADGE_AUTO_AWARD, 'Badge Auto Award', 5, true, $now);
-        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $now);
-        $this->seedTask(CronSchedulerService::TASK_STREAK_LEADERBOARD_REFRESH, 'Streak Leaderboard Refresh', 10, true, $now);
+        $Silian_now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $Silian_now);
+        $this->seedTask(CronSchedulerService::TASK_BADGE_AUTO_AWARD, 'Badge Auto Award', 5, true, $Silian_now);
+        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $Silian_now);
+        $this->seedTask(CronSchedulerService::TASK_STREAK_LEADERBOARD_REFRESH, 'Streak Leaderboard Refresh', 10, true, $Silian_now);
 
-        $support = $this->createMock(SupportRoutingEngineService::class);
-        $support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 2, 'breached' => 1, 'rerouted' => 1]);
+        $Silian_support = $this->createMock(SupportRoutingEngineService::class);
+        $Silian_support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 2, 'breached' => 1, 'rerouted' => 1]);
 
-        $badge = $this->createMock(BadgeService::class);
-        $badge->expects($this->once())->method('runAutoGrant')->willReturn(['awarded' => 3, 'skipped' => 4, 'badges' => 2, 'users' => 5]);
+        $Silian_badge = $this->createMock(BadgeService::class);
+        $Silian_badge->expects($this->once())->method('runAutoGrant')->willReturn(['awarded' => 3, 'skipped' => 4, 'badges' => 2, 'users' => 5]);
 
-        $leaderboard = $this->createMock(LeaderboardService::class);
-        $leaderboard->expects($this->once())->method('rebuildCache')->with('cron')->willReturn([
+        $Silian_leaderboard = $this->createMock(LeaderboardService::class);
+        $Silian_leaderboard->expects($this->once())->method('rebuildCache')->with('cron')->willReturn([
             'generated_at' => '2026-04-10T00:00:00Z',
             'expires_at' => '2026-04-10T00:10:00Z',
             'global' => [1, 2],
@@ -101,8 +101,8 @@ class CronSchedulerServiceTest extends TestCase
             'schools' => [1, 2, 3],
         ]);
 
-        $streak = $this->createMock(StreakLeaderboardService::class);
-        $streak->expects($this->once())->method('rebuildCache')->with('cron')->willReturn([
+        $Silian_streak = $this->createMock(StreakLeaderboardService::class);
+        $Silian_streak->expects($this->once())->method('rebuildCache')->with('cron')->willReturn([
             'generated_at' => '2026-04-10T00:00:00Z',
             'expires_at' => '2026-04-10T00:10:00Z',
             'global' => [1],
@@ -110,13 +110,13 @@ class CronSchedulerServiceTest extends TestCase
             'schools' => [1],
         ]);
 
-        $service = $this->makeService($support, $badge, $leaderboard, $streak);
-        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-1']);
+        $Silian_service = $this->makeService($Silian_support, $Silian_badge, $Silian_leaderboard, $Silian_streak);
+        $Silian_result = $Silian_service->runDueTasks('cron_endpoint', ['request_id' => 'req-1']);
 
-        $this->assertCount(4, $result['due']);
-        $this->assertCount(4, $result['executed']);
-        $this->assertCount(0, $result['failed']);
-        $this->assertCount(0, $result['skipped']);
+        $this->assertCount(4, $Silian_result['due']);
+        $this->assertCount(4, $Silian_result['executed']);
+        $this->assertCount(0, $Silian_result['failed']);
+        $this->assertCount(0, $Silian_result['skipped']);
         $this->assertSame(4, CronRun::query()->count());
         $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('last_status'));
         $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_BADGE_AUTO_AWARD)->value('last_status'));
@@ -124,22 +124,22 @@ class CronSchedulerServiceTest extends TestCase
 
     public function testFailedTaskIncrementsFailureCounterAndRunHistory(): void
     {
-        $now = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_BADGE_AUTO_AWARD, 'Badge Auto Award', 5, true, $now);
+        $Silian_now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_BADGE_AUTO_AWARD, 'Badge Auto Award', 5, true, $Silian_now);
 
-        $badge = $this->createMock(BadgeService::class);
-        $badge->expects($this->once())->method('runAutoGrant')->willThrowException(new \RuntimeException('badge auto award failed'));
+        $Silian_badge = $this->createMock(BadgeService::class);
+        $Silian_badge->expects($this->once())->method('runAutoGrant')->willThrowException(new \RuntimeException('badge auto award failed'));
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
-            $badge,
+            $Silian_badge,
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-2']);
+        $Silian_result = $Silian_service->runDueTasks('cron_endpoint', ['request_id' => 'req-2']);
 
-        $this->assertCount(1, $result['failed']);
+        $this->assertCount(1, $Silian_result['failed']);
         $this->assertSame('failed', CronTask::query()->where('task_key', CronSchedulerService::TASK_BADGE_AUTO_AWARD)->value('last_status'));
         $this->assertSame(1, (int) CronTask::query()->where('task_key', CronSchedulerService::TASK_BADGE_AUTO_AWARD)->value('consecutive_failures'));
         $this->assertSame('failed', CronRun::query()->where('task_key', CronSchedulerService::TASK_BADGE_AUTO_AWARD)->value('status'));
@@ -149,8 +149,8 @@ class CronSchedulerServiceTest extends TestCase
     {
         $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, false, null);
 
-        $leaderboard = $this->createMock(LeaderboardService::class);
-        $leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
+        $Silian_leaderboard = $this->createMock(LeaderboardService::class);
+        $Silian_leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
             'generated_at' => '2026-04-10T00:00:00Z',
             'expires_at' => '2026-04-10T00:10:00Z',
             'global' => [],
@@ -158,66 +158,66 @@ class CronSchedulerServiceTest extends TestCase
             'schools' => [],
         ]);
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
-            $leaderboard,
+            $Silian_leaderboard,
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-3']);
+        $Silian_result = $Silian_service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-3']);
 
-        $this->assertSame('success', $result['status']);
-        $this->assertNull($result['next_run_at']);
+        $this->assertSame('success', $Silian_result['status']);
+        $this->assertNull($Silian_result['next_run_at']);
         $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('last_status'));
         $this->assertSame('success', CronRun::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('status'));
     }
 
     public function testLockedTaskIsSkipped(): void
     {
-        $now = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $now, [
+        $Silian_now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $Silian_now, [
             'lock_token' => 'existing-lock',
-            'locked_at' => $now,
+            'locked_at' => $Silian_now,
         ]);
 
-        $support = $this->createMock(SupportRoutingEngineService::class);
-        $support->expects($this->never())->method('runSlaSweep');
+        $Silian_support = $this->createMock(SupportRoutingEngineService::class);
+        $Silian_support->expects($this->never())->method('runSlaSweep');
 
-        $service = $this->makeService(
-            $support,
+        $Silian_service = $this->makeService(
+            $Silian_support,
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-4']);
+        $Silian_result = $Silian_service->runDueTasks('cron_endpoint', ['request_id' => 'req-4']);
 
-        $this->assertCount(1, $result['skipped']);
-        $this->assertSame('task_locked', $result['skipped'][0]['error_message']);
+        $this->assertCount(1, $Silian_result['skipped']);
+        $this->assertSame('task_locked', $Silian_result['skipped'][0]['error_message']);
         $this->assertSame('skipped', CronRun::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('status'));
     }
 
     public function testUpdateTaskDisablesFutureRunWithoutClearingActiveLock(): void
     {
-        $now = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $now, [
+        $Silian_now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $Silian_now, [
             'lock_token' => 'existing-lock',
-            'locked_at' => $now,
+            'locked_at' => $Silian_now,
         ]);
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, ['enabled' => false]);
+        $Silian_result = $Silian_service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, ['enabled' => false]);
 
-        $this->assertFalse($result['enabled']);
-        $this->assertNull($result['next_run_at']);
-        $this->assertFalse($result['is_due']);
+        $this->assertFalse($Silian_result['enabled']);
+        $this->assertNull($Silian_result['next_run_at']);
+        $this->assertFalse($Silian_result['is_due']);
         $this->assertSame('existing-lock', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('lock_token'));
     }
 
@@ -225,7 +225,7 @@ class CronSchedulerServiceTest extends TestCase
     {
         $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
@@ -235,7 +235,7 @@ class CronSchedulerServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('interval_minutes must be an integer');
 
-        $service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, ['interval_minutes' => '1.9']);
+        $Silian_service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, ['interval_minutes' => '1.9']);
     }
 
     public function testUpdateTaskAllowsDisablingUnregisteredTask(): void
@@ -254,18 +254,18 @@ class CronSchedulerServiceTest extends TestCase
             'updated_at' => $this->now(),
         ]);
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->updateTask('legacy_removed_task', ['enabled' => false]);
+        $Silian_result = $Silian_service->updateTask('legacy_removed_task', ['enabled' => false]);
 
-        $this->assertFalse($result['enabled']);
-        $this->assertFalse($result['is_registered']);
-        $this->assertNull($result['next_run_at']);
+        $this->assertFalse($Silian_result['enabled']);
+        $this->assertFalse($Silian_result['is_registered']);
+        $this->assertNull($Silian_result['next_run_at']);
     }
 
     public function testUpdateTaskRejectsUnsupportedFieldsForUnregisteredTaskAsValidationError(): void
@@ -284,7 +284,7 @@ class CronSchedulerServiceTest extends TestCase
             'updated_at' => $this->now(),
         ]);
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
@@ -294,7 +294,7 @@ class CronSchedulerServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unregistered cron tasks can only be disabled');
 
-        $service->updateTask('legacy_removed_task', [
+        $Silian_service->updateTask('legacy_removed_task', [
             'enabled' => false,
             'interval_minutes' => 15,
         ]);
@@ -302,33 +302,33 @@ class CronSchedulerServiceTest extends TestCase
 
     public function testUpdateTaskKeepsNextRunWhenOnlySettingsChange(): void
     {
-        $nextRunAt = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $nextRunAt, [
+        $Silian_nextRunAt = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $Silian_nextRunAt, [
             'settings_json' => '{"foo":"bar"}',
         ]);
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, [
+        $Silian_result = $Silian_service->updateTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, [
             'settings' => ['foo' => 'baz'],
         ]);
 
-        $this->assertSame($nextRunAt, $result['next_run_at']);
-        $this->assertSame($nextRunAt, CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('next_run_at'));
+        $this->assertSame($Silian_nextRunAt, $Silian_result['next_run_at']);
+        $this->assertSame($Silian_nextRunAt, CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('next_run_at'));
     }
 
     public function testSuccessfulRunUsesLatestTaskSettingsForNextRunAt(): void
     {
-        $now = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $now);
+        $Silian_now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $Silian_now);
 
-        $leaderboard = $this->createMock(LeaderboardService::class);
-        $leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
+        $Silian_leaderboard = $this->createMock(LeaderboardService::class);
+        $Silian_leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
             'generated_at' => '2026-04-10T00:00:00Z',
             'expires_at' => '2026-04-10T00:10:00Z',
             'global' => [],
@@ -336,25 +336,25 @@ class CronSchedulerServiceTest extends TestCase
             'schools' => [],
         ]);
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
-            $leaderboard,
+            $Silian_leaderboard,
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $service->updateTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, ['interval_minutes' => 30]);
-        $result = $service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-5']);
+        $Silian_service->updateTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, ['interval_minutes' => 30]);
+        $Silian_result = $Silian_service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-5']);
 
-        $this->assertSame('success', $result['status']);
-        $this->assertNotNull($result['next_run_at']);
-        $this->assertSame($result['next_run_at'], CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('next_run_at'));
+        $this->assertSame('success', $Silian_result['status']);
+        $this->assertNotNull($Silian_result['next_run_at']);
+        $this->assertSame($Silian_result['next_run_at'], CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('next_run_at'));
     }
 
     public function testNextRunAtUpdateDoesNotOverrideNewLock(): void
     {
-        $now = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $now);
+        $Silian_now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $Silian_now);
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_task_release_relock');
         self::$capsule->getConnection()->statement("
@@ -371,8 +371,8 @@ class CronSchedulerServiceTest extends TestCase
             END;
         ");
 
-        $leaderboard = $this->createMock(LeaderboardService::class);
-        $leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
+        $Silian_leaderboard = $this->createMock(LeaderboardService::class);
+        $Silian_leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
             'generated_at' => '2026-04-10T00:00:00Z',
             'expires_at' => '2026-04-10T00:10:00Z',
             'global' => [],
@@ -380,22 +380,22 @@ class CronSchedulerServiceTest extends TestCase
             'schools' => [],
         ]);
 
-        $service = new CronSchedulerService(
+        $Silian_service = new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
             $this->createMock(LoggerInterface::class),
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
-            $leaderboard,
+            $Silian_leaderboard,
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-6']);
+        $Silian_result = $Silian_service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-6']);
 
-        $this->assertSame('success', $result['status']);
-        $this->assertNotSame($now, $result['next_run_at']);
-        $this->assertSame($result['next_run_at'], CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('next_run_at'));
+        $this->assertSame('success', $Silian_result['status']);
+        $this->assertNotSame($Silian_now, $Silian_result['next_run_at']);
+        $this->assertSame($Silian_result['next_run_at'], CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('next_run_at'));
         $this->assertSame('new-lock', CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('lock_token'));
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_task_release_relock');
@@ -403,8 +403,8 @@ class CronSchedulerServiceTest extends TestCase
 
     public function testLockIsNotReleasedBeforeNextRunIsAdvanced(): void
     {
-        $now = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $now);
+        $Silian_now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'Leaderboard Refresh', 10, true, $Silian_now);
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_task_release_without_next_run_guard');
         self::$capsule->getConnection()->statement("
@@ -419,8 +419,8 @@ class CronSchedulerServiceTest extends TestCase
             END;
         ");
 
-        $leaderboard = $this->createMock(LeaderboardService::class);
-        $leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
+        $Silian_leaderboard = $this->createMock(LeaderboardService::class);
+        $Silian_leaderboard->expects($this->once())->method('rebuildCache')->with('admin-manual')->willReturn([
             'generated_at' => '2026-04-10T00:00:00Z',
             'expires_at' => '2026-04-10T00:10:00Z',
             'global' => [],
@@ -428,17 +428,17 @@ class CronSchedulerServiceTest extends TestCase
             'schools' => [],
         ]);
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
-            $leaderboard,
+            $Silian_leaderboard,
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-guard-1']);
+        $Silian_result = $Silian_service->runTaskNow(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'admin_manual', ['request_id' => 'req-guard-1']);
 
-        $this->assertSame('success', $result['status']);
-        $this->assertNotSame($now, $result['next_run_at']);
+        $this->assertSame('success', $Silian_result['status']);
+        $this->assertNotSame($Silian_now, $Silian_result['next_run_at']);
         $this->assertNull(CronTask::query()->where('task_key', CronSchedulerService::TASK_LEADERBOARD_REFRESH)->value('lock_token'));
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_task_release_without_next_run_guard');
@@ -448,29 +448,29 @@ class CronSchedulerServiceTest extends TestCase
     {
         $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());
 
-        $support = $this->createMock(SupportRoutingEngineService::class);
-        $support->expects($this->once())->method('runSlaSweep')->willReturnCallback(function () {
+        $Silian_support = $this->createMock(SupportRoutingEngineService::class);
+        $Silian_support->expects($this->once())->method('runSlaSweep')->willReturnCallback(function () {
             usleep(20000);
             return ['processed' => 1, 'breached' => 0, 'rerouted' => 0];
         });
 
-        $service = $this->makeService(
-            $support,
+        $Silian_service = $this->makeService(
+            $Silian_support,
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-7']);
+        $Silian_result = $Silian_service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-7']);
 
-        $this->assertGreaterThan(0, $result['duration_ms']);
+        $this->assertGreaterThan(0, $Silian_result['duration_ms']);
         $this->assertGreaterThan(0, (int) CronRun::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('duration_ms'));
     }
 
     public function testNextRunUpdateFailureDoesNotFlipSuccessfulRun(): void
     {
-        $now = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $now);
+        $Silian_now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $Silian_now);
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_task_next_run_fail');
         self::$capsule->getConnection()->statement("
@@ -483,26 +483,26 @@ class CronSchedulerServiceTest extends TestCase
             END;
         ");
 
-        $support = $this->createMock(SupportRoutingEngineService::class);
-        $support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
+        $Silian_support = $this->createMock(SupportRoutingEngineService::class);
+        $Silian_support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->atLeastOnce())->method('warning');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->atLeastOnce())->method('warning');
 
-        $service = new CronSchedulerService(
+        $Silian_service = new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
-            $logger,
+            $Silian_logger,
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
-            $support,
+            $Silian_support,
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-13']);
+        $Silian_result = $Silian_service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-13']);
 
-        $this->assertSame('success', $result['status']);
+        $this->assertSame('success', $Silian_result['status']);
         $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('last_status'));
         $this->assertNotNull(CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('lock_token'));
 
@@ -524,51 +524,51 @@ class CronSchedulerServiceTest extends TestCase
             'created_at' => $this->now(),
         ]);
 
-        $service = $this->makeService(
+        $Silian_service = $this->makeService(
             $this->createMock(SupportRoutingEngineService::class),
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->listRuns(['task_key' => 'legacy_removed_task']);
+        $Silian_result = $Silian_service->listRuns(['task_key' => 'legacy_removed_task']);
 
-        $this->assertSame(1, $result['pagination']['total']);
-        $this->assertSame('legacy_removed_task', $result['items'][0]['task_key']);
+        $this->assertSame(1, $Silian_result['pagination']['total']);
+        $this->assertSame('legacy_removed_task', $Silian_result['items'][0]['task_key']);
     }
 
     public function testCompletionAuditFailureDoesNotFlipSuccessfulRun(): void
     {
         $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());
 
-        $support = $this->createMock(SupportRoutingEngineService::class);
-        $support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
+        $Silian_support = $this->createMock(SupportRoutingEngineService::class);
+        $Silian_support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->method('logSystemEvent')->willReturnCallback(function (string $action) {
-            if ($action === 'cron_task_run_completed') {
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->method('logSystemEvent')->willReturnCallback(function (string $Silian_action) {
+            if ($Silian_action === 'cron_task_run_completed') {
                 throw new \RuntimeException('audit_failed');
             }
             return true;
         });
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->once())->method('warning');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->once())->method('warning');
 
-        $service = new CronSchedulerService(
+        $Silian_service = new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
-            $logger,
-            $audit,
+            $Silian_logger,
+            $Silian_audit,
             $this->createMock(ErrorLogService::class),
-            $support,
+            $Silian_support,
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-8']);
+        $Silian_result = $Silian_service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-8']);
 
-        $this->assertSame('success', $result['status']);
+        $this->assertSame('success', $Silian_result['status']);
         $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('last_status'));
         $this->assertSame('success', CronRun::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('status'));
     }
@@ -577,14 +577,14 @@ class CronSchedulerServiceTest extends TestCase
     {
         $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());
 
-        $support = $this->createMock(SupportRoutingEngineService::class);
-        $support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
+        $Silian_support = $this->createMock(SupportRoutingEngineService::class);
+        $Silian_support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->method('logSystemEvent')->willReturn(true);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->method('logSystemEvent')->willReturn(true);
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->once())->method('warning');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->once())->method('warning');
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail');
         self::$capsule->getConnection()->statement("
@@ -596,21 +596,21 @@ class CronSchedulerServiceTest extends TestCase
             END;
         ");
 
-        $service = new CronSchedulerService(
+        $Silian_service = new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
-            $logger,
-            $audit,
+            $Silian_logger,
+            $Silian_audit,
             $this->createMock(ErrorLogService::class),
-            $support,
+            $Silian_support,
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-9']);
+        $Silian_result = $Silian_service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-9']);
 
-        $this->assertSame('success', $result['status']);
-        $this->assertNull($result['run_id']);
+        $this->assertSame('success', $Silian_result['status']);
+        $this->assertNull($Silian_result['run_id']);
         $this->assertSame('success', CronTask::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('last_status'));
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail');
@@ -620,38 +620,38 @@ class CronSchedulerServiceTest extends TestCase
     {
         $this->seedTask(CronSchedulerService::TASK_BADGE_AUTO_AWARD, 'Badge Auto Award', 5, true, $this->now());
 
-        $badge = $this->createMock(BadgeService::class);
-        $badge->expects($this->once())->method('runAutoGrant')->willThrowException(new \RuntimeException('badge_failed'));
+        $Silian_badge = $this->createMock(BadgeService::class);
+        $Silian_badge->expects($this->once())->method('runAutoGrant')->willThrowException(new \RuntimeException('badge_failed'));
 
-        $errorLogService = $this->createMock(ErrorLogService::class);
-        $errorLogService->expects($this->once())->method('logException')->willThrowException(new \RuntimeException('error log failed'));
+        $Silian_errorLogService = $this->createMock(ErrorLogService::class);
+        $Silian_errorLogService->expects($this->once())->method('logException')->willThrowException(new \RuntimeException('error log failed'));
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->atLeastOnce())->method('warning');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->atLeastOnce())->method('warning');
 
-        $service = new CronSchedulerService(
+        $Silian_service = new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
-            $logger,
+            $Silian_logger,
             $this->createMock(AuditLogService::class),
-            $errorLogService,
+            $Silian_errorLogService,
             $this->createMock(SupportRoutingEngineService::class),
-            $badge,
+            $Silian_badge,
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-14']);
+        $Silian_result = $Silian_service->runDueTasks('cron_endpoint', ['request_id' => 'req-14']);
 
-        $this->assertCount(1, $result['failed']);
-        $this->assertSame('failed', $result['failed'][0]['status']);
+        $this->assertCount(1, $Silian_result['failed']);
+        $this->assertSame('failed', $Silian_result['failed'][0]['status']);
     }
 
     public function testFailedRunHistoryPersistenceFailureDoesNotAbortBatch(): void
     {
         $this->seedTask(CronSchedulerService::TASK_BADGE_AUTO_AWARD, 'Badge Auto Award', 5, true, $this->now());
 
-        $badge = $this->createMock(BadgeService::class);
-        $badge->expects($this->once())->method('runAutoGrant')->willThrowException(new \RuntimeException('badge_failed'));
+        $Silian_badge = $this->createMock(BadgeService::class);
+        $Silian_badge->expects($this->once())->method('runAutoGrant')->willThrowException(new \RuntimeException('badge_failed'));
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail_failed');
         self::$capsule->getConnection()->statement("
@@ -663,33 +663,33 @@ class CronSchedulerServiceTest extends TestCase
             END;
         ");
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->atLeastOnce())->method('warning');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->atLeastOnce())->method('warning');
 
-        $service = new CronSchedulerService(
+        $Silian_service = new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
-            $logger,
+            $Silian_logger,
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
             $this->createMock(SupportRoutingEngineService::class),
-            $badge,
+            $Silian_badge,
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-10']);
+        $Silian_result = $Silian_service->runDueTasks('cron_endpoint', ['request_id' => 'req-10']);
 
-        $this->assertCount(1, $result['failed']);
-        $this->assertNull($result['failed'][0]['run_id']);
+        $this->assertCount(1, $Silian_result['failed']);
+        $this->assertNull($Silian_result['failed'][0]['run_id']);
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail_failed');
     }
 
     public function testSkippedRunPersistenceFailureDoesNotAbortBatch(): void
     {
-        $now = $this->now();
-        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $now, [
+        $Silian_now = $this->now();
+        $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $Silian_now, [
             'lock_token' => 'existing-lock',
-            'locked_at' => $now,
+            'locked_at' => $Silian_now,
         ]);
 
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail_skipped');
@@ -702,12 +702,12 @@ class CronSchedulerServiceTest extends TestCase
             END;
         ");
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->atLeastOnce())->method('warning');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->atLeastOnce())->method('warning');
 
-        $service = new CronSchedulerService(
+        $Silian_service = new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
-            $logger,
+            $Silian_logger,
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
             $this->createMock(SupportRoutingEngineService::class),
@@ -716,10 +716,10 @@ class CronSchedulerServiceTest extends TestCase
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-11']);
+        $Silian_result = $Silian_service->runDueTasks('cron_endpoint', ['request_id' => 'req-11']);
 
-        $this->assertCount(1, $result['skipped']);
-        $this->assertNull($result['skipped'][0]['run_id']);
+        $this->assertCount(1, $Silian_result['skipped']);
+        $this->assertNull($Silian_result['skipped'][0]['run_id']);
         self::$capsule->getConnection()->statement('DROP TRIGGER IF EXISTS cron_run_insert_fail_skipped');
     }
 
@@ -727,42 +727,42 @@ class CronSchedulerServiceTest extends TestCase
     {
         $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());
 
-        $support = $this->createMock(SupportRoutingEngineService::class);
-        $support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
+        $Silian_support = $this->createMock(SupportRoutingEngineService::class);
+        $Silian_support->expects($this->once())->method('runSlaSweep')->willReturn(['processed' => 1, 'breached' => 0, 'rerouted' => 0]);
 
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->method('logSystemEvent')->willReturnCallback(function (string $action) {
-            if ($action === 'cron_scheduler_batch_completed') {
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->method('logSystemEvent')->willReturnCallback(function (string $Silian_action) {
+            if ($Silian_action === 'cron_scheduler_batch_completed') {
                 throw new \RuntimeException('batch_audit_failed');
             }
             return true;
         });
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->once())->method('warning');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->once())->method('warning');
 
-        $service = new CronSchedulerService(
+        $Silian_service = new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
-            $logger,
-            $audit,
+            $Silian_logger,
+            $Silian_audit,
             $this->createMock(ErrorLogService::class),
-            $support,
+            $Silian_support,
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runDueTasks('cron_endpoint', ['request_id' => 'req-12']);
+        $Silian_result = $Silian_service->runDueTasks('cron_endpoint', ['request_id' => 'req-12']);
 
-        $this->assertCount(1, $result['executed']);
+        $this->assertCount(1, $Silian_result['executed']);
     }
 
     public function testStaleCompletionIsRecordedAsFailureInsteadOfSuccess(): void
     {
         $this->seedTask(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'Support SLA Sweep', 1, true, $this->now());
 
-        $support = $this->createMock(SupportRoutingEngineService::class);
-        $support->expects($this->once())->method('runSlaSweep')->willReturnCallback(function (): array {
+        $Silian_support = $this->createMock(SupportRoutingEngineService::class);
+        $Silian_support->expects($this->once())->method('runSlaSweep')->willReturnCallback(function (): array {
             CronTask::query()
                 ->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)
                 ->update([
@@ -774,42 +774,42 @@ class CronSchedulerServiceTest extends TestCase
             return ['processed' => 1, 'breached' => 0, 'rerouted' => 0];
         });
 
-        $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects($this->atLeastOnce())->method('warning');
+        $Silian_logger = $this->createMock(LoggerInterface::class);
+        $Silian_logger->expects($this->atLeastOnce())->method('warning');
 
-        $service = new CronSchedulerService(
+        $Silian_service = new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
-            $logger,
+            $Silian_logger,
             $this->createMock(AuditLogService::class),
             $this->createMock(ErrorLogService::class),
-            $support,
+            $Silian_support,
             $this->createMock(BadgeService::class),
             $this->createMock(LeaderboardService::class),
             $this->createMock(StreakLeaderboardService::class)
         );
 
-        $result = $service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-stale-1']);
+        $Silian_result = $Silian_service->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'admin_manual', ['request_id' => 'req-stale-1']);
 
-        $this->assertSame('failed', $result['status']);
-        $this->assertSame('task_lock_lost', $result['error_message']);
+        $this->assertSame('failed', $Silian_result['status']);
+        $this->assertSame('task_lock_lost', $Silian_result['error_message']);
         $this->assertSame('failed', CronRun::query()->where('task_key', CronSchedulerService::TASK_SUPPORT_SLA_SWEEP)->value('status'));
     }
 
-    private function seedTask(string $taskKey, string $taskName, int $intervalMinutes, bool $enabled, ?string $nextRunAt, array $overrides = []): void
+    private function seedTask(string $Silian_taskKey, string $Silian_taskName, int $Silian_intervalMinutes, bool $Silian_enabled, ?string $Silian_nextRunAt, array $Silian_overrides = []): void
     {
         CronTask::query()->create(array_merge([
-            'task_key' => $taskKey,
-            'task_name' => $taskName,
-            'description' => $taskName,
-            'interval_minutes' => $intervalMinutes,
-            'enabled' => $enabled,
-            'next_run_at' => $nextRunAt,
+            'task_key' => $Silian_taskKey,
+            'task_name' => $Silian_taskName,
+            'description' => $Silian_taskName,
+            'interval_minutes' => $Silian_intervalMinutes,
+            'enabled' => $Silian_enabled,
+            'next_run_at' => $Silian_nextRunAt,
             'last_status' => 'idle',
             'consecutive_failures' => 0,
             'settings_json' => '{}',
             'created_at' => $this->now(),
             'updated_at' => $this->now(),
-        ], $overrides));
+        ], $Silian_overrides));
     }
 
     private function now(): string
@@ -818,23 +818,23 @@ class CronSchedulerServiceTest extends TestCase
     }
 
     private function makeService(
-        SupportRoutingEngineService $support,
-        BadgeService $badge,
-        LeaderboardService $leaderboard,
-        StreakLeaderboardService $streak
+        SupportRoutingEngineService $Silian_support,
+        BadgeService $Silian_badge,
+        LeaderboardService $Silian_leaderboard,
+        StreakLeaderboardService $Silian_streak
     ): CronSchedulerService {
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->method('logSystemEvent')->willReturn(true);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->method('logSystemEvent')->willReturn(true);
 
         return new CronSchedulerService(
             self::$capsule->getConnection()->getPdo(),
             $this->createMock(LoggerInterface::class),
-            $audit,
+            $Silian_audit,
             $this->createMock(ErrorLogService::class),
-            $support,
-            $badge,
-            $leaderboard,
-            $streak
+            $Silian_support,
+            $Silian_badge,
+            $Silian_leaderboard,
+            $Silian_streak
         );
     }
 }

@@ -15,9 +15,9 @@ class WebauthnChallenge
     /**
      * @param array<string, mixed> $record
      */
-    public function create(array $record): void
+    public function create(array $Silian_record): void
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'INSERT INTO webauthn_challenges (
                 challenge_id, user_uuid, flow_type, challenge, request_id, context_json, expires_at, consumed_at, created_at, updated_at
             ) VALUES (
@@ -25,85 +25,85 @@ class WebauthnChallenge
             )'
         );
 
-        $now = gmdate('Y-m-d H:i:s');
-        $stmt->execute([
-            'challenge_id' => (string) $record['challenge_id'],
-            'user_uuid' => isset($record['user_uuid']) && $record['user_uuid'] !== null
-                ? strtolower((string) $record['user_uuid'])
+        $Silian_now = gmdate('Y-m-d H:i:s');
+        $Silian_stmt->execute([
+            'challenge_id' => (string) $Silian_record['challenge_id'],
+            'user_uuid' => isset($Silian_record['user_uuid']) && $Silian_record['user_uuid'] !== null
+                ? strtolower((string) $Silian_record['user_uuid'])
                 : null,
-            'flow_type' => (string) $record['flow_type'],
-            'challenge' => (string) $record['challenge'],
-            'request_id' => $record['request_id'] ?? null,
-            'context_json' => $this->encodeJson($record['context'] ?? null),
-            'expires_at' => (string) $record['expires_at'],
-            'consumed_at' => $record['consumed_at'] ?? null,
-            'created_at' => $record['created_at'] ?? $now,
-            'updated_at' => $record['updated_at'] ?? $now,
+            'flow_type' => (string) $Silian_record['flow_type'],
+            'challenge' => (string) $Silian_record['challenge'],
+            'request_id' => $Silian_record['request_id'] ?? null,
+            'context_json' => $this->encodeJson($Silian_record['context'] ?? null),
+            'expires_at' => (string) $Silian_record['expires_at'],
+            'consumed_at' => $Silian_record['consumed_at'] ?? null,
+            'created_at' => $Silian_record['created_at'] ?? $Silian_now,
+            'updated_at' => $Silian_record['updated_at'] ?? $Silian_now,
         ]);
     }
 
     /**
      * @return array<string, mixed>|null
      */
-    public function findActive(string $challengeId, string $flowType, ?string $userUuid = null): ?array
+    public function findActive(string $Silian_challengeId, string $Silian_flowType, ?string $Silian_userUuid = null): ?array
     {
-        $sql = 'SELECT * FROM webauthn_challenges
+        $Silian_sql = 'SELECT * FROM webauthn_challenges
                 WHERE challenge_id = :challenge_id
                   AND flow_type = :flow_type
                   AND consumed_at IS NULL
                   AND expires_at > :current_time';
-        $params = [
-            'challenge_id' => $challengeId,
-            'flow_type' => $flowType,
+        $Silian_params = [
+            'challenge_id' => $Silian_challengeId,
+            'flow_type' => $Silian_flowType,
             'current_time' => $this->utcNow(),
         ];
 
-        if ($userUuid !== null) {
-            $sql .= ' AND user_uuid = :user_uuid';
-            $params['user_uuid'] = strtolower($userUuid);
+        if ($Silian_userUuid !== null) {
+            $Silian_sql .= ' AND user_uuid = :user_uuid';
+            $Silian_params['user_uuid'] = strtolower($Silian_userUuid);
         }
 
-        $sql .= ' ORDER BY id DESC LIMIT 1';
+        $Silian_sql .= ' ORDER BY id DESC LIMIT 1';
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_params);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$Silian_row) {
             return null;
         }
 
-        if (isset($row['user_uuid']) && $row['user_uuid'] !== null) {
-            $row['user_uuid'] = strtolower((string) $row['user_uuid']);
+        if (isset($Silian_row['user_uuid']) && $Silian_row['user_uuid'] !== null) {
+            $Silian_row['user_uuid'] = strtolower((string) $Silian_row['user_uuid']);
         }
-        $row['context'] = $this->decodeJsonObject($row['context_json'] ?? null);
-        return $row;
+        $Silian_row['context'] = $this->decodeJsonObject($Silian_row['context_json'] ?? null);
+        return $Silian_row;
     }
 
-    public function markConsumed(int $id): bool
+    public function markConsumed(int $Silian_id): bool
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'UPDATE webauthn_challenges
              SET consumed_at = :consumed_at, updated_at = :updated_at
              WHERE id = :id AND consumed_at IS NULL'
         );
 
-        $now = gmdate('Y-m-d H:i:s');
-        $stmt->execute([
-            'consumed_at' => $now,
-            'updated_at' => $now,
-            'id' => $id,
+        $Silian_now = gmdate('Y-m-d H:i:s');
+        $Silian_stmt->execute([
+            'consumed_at' => $Silian_now,
+            'updated_at' => $Silian_now,
+            'id' => $Silian_id,
         ]);
 
-        return $stmt->rowCount() > 0;
+        return $Silian_stmt->rowCount() > 0;
     }
 
     public function deleteExpired(): int
     {
-        $stmt = $this->db->prepare('DELETE FROM webauthn_challenges WHERE expires_at <= :current_time');
-        $stmt->execute([
+        $Silian_stmt = $this->db->prepare('DELETE FROM webauthn_challenges WHERE expires_at <= :current_time');
+        $Silian_stmt->execute([
             'current_time' => $this->utcNow(),
         ]);
-        return $stmt->rowCount();
+        return $Silian_stmt->rowCount();
     }
 
     private function utcNow(): string
@@ -114,26 +114,26 @@ class WebauthnChallenge
     /**
      * @param mixed $value
      */
-    private function encodeJson($value): ?string
+    private function encodeJson($Silian_value): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
 
-        $encoded = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        return $encoded === false ? null : $encoded;
+        $Silian_encoded = json_encode($Silian_value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return $Silian_encoded === false ? null : $Silian_encoded;
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function decodeJsonObject(?string $value): array
+    private function decodeJsonObject(?string $Silian_value): array
     {
-        if ($value === null || trim($value) === '') {
+        if ($Silian_value === null || trim($Silian_value) === '') {
             return [];
         }
 
-        $decoded = json_decode($value, true);
-        return is_array($decoded) ? $decoded : [];
+        $Silian_decoded = json_decode($Silian_value, true);
+        return is_array($Silian_decoded) ? $Silian_decoded : [];
     }
 }

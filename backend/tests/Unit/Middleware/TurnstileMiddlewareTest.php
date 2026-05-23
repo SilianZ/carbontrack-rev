@@ -18,37 +18,37 @@ class TurnstileMiddlewareTest extends TestCase
 
     public function testProtectedRouteMissingToken(): void
     {
-        $svc = $this->createMock(TurnstileService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $mw = new TurnstileMiddleware($svc, $audit);
+        $Silian_svc = $this->createMock(TurnstileService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_mw = new TurnstileMiddleware($Silian_svc, $Silian_audit);
 
-        $request = makeRequest('POST', '/api/v1/auth/login');
-        $handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
+        $Silian_request = makeRequest('POST', '/api/v1/auth/login');
+        $Silian_handler = $this->createMock(\Psr\Http\Server\RequestHandlerInterface::class);
         $_ENV['APP_ENV'] = 'production';
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(403, $resp->getStatusCode());
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(403, $Silian_resp->getStatusCode());
     }
 
     public function testProtectedRouteVerified(): void
     {
-        $svc = $this->createMock(TurnstileService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $mw = new TurnstileMiddleware($svc, $audit);
+        $Silian_svc = $this->createMock(TurnstileService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_mw = new TurnstileMiddleware($Silian_svc, $Silian_audit);
 
-        $svc->method('verify')->willReturn(['success' => true]);
+        $Silian_svc->method('verify')->willReturn(['success' => true]);
         $_ENV['APP_ENV'] = 'production';
 
-        $request = makeRequest('POST', '/api/v1/auth/login', ['cf_turnstile_response' => 'token']);
-        $handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
-            public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
-                $resp = new \Slim\Psr7\Response();
-                $resp->getBody()->write('ok');
-                return $resp;
+        $Silian_request = makeRequest('POST', '/api/v1/auth/login', ['cf_turnstile_response' => 'token']);
+        $Silian_handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
+            public function handle(\Psr\Http\Message\ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface {
+                $Silian_resp = new \Slim\Psr7\Response();
+                $Silian_resp->getBody()->write('ok');
+                return $Silian_resp;
             }
         };
 
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(200, $resp->getStatusCode());
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
     }
 }
 

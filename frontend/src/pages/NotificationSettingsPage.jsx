@@ -1,203 +1,203 @@
-import React, { useMemo, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { Loader2 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { useTranslation } from '../hooks/useTranslation';
-import { userAPI } from '../lib/api';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
-import { Switch } from '../components/ui/switch';
-import { Button } from '../components/ui/Button';
-import { Alert, AlertDescription } from '../components/ui/Alert';
+import Silian_React, { useMemo as Silian_useMemo, useState as Silian_useState } from 'react';
+import { useQuery as Silian_useQuery, useMutation as Silian_useMutation, useQueryClient as Silian_useQueryClient } from 'react-query';
+import { Loader2 as Silian_Loader2 } from 'lucide-react';
+import { toast as Silian_toast } from 'react-hot-toast';
+import { useTranslation as Silian_useTranslation } from '../hooks/useTranslation';
+import { userAPI as Silian_userAPI } from '../lib/api';
+import { Card as Silian_Card, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle, CardDescription as Silian_CardDescription, CardContent as Silian_CardContent } from '../components/ui/Card';
+import { Switch as Silian_Switch } from '../components/ui/switch';
+import { Button as Silian_Button } from '../components/ui/Button';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../components/ui/Alert';
 
-const NotificationSettingsPage = () => {
-  const { t } = useTranslation(['activities', 'common', 'settings']);
-  const queryClient = useQueryClient();
-  const [localPrefs, setLocalPrefs] = useState([]);
-  const [status, setStatus] = useState(null);
-  const [testStatus, setTestStatus] = useState(null);
-  const [sendingCategory, setSendingCategory] = useState(null);
+const Silian_NotificationSettingsPage = () => {
+  const { t: Silian_t } = Silian_useTranslation(['activities', 'common', 'settings']);
+  const Silian_queryClient = Silian_useQueryClient();
+  const [Silian_localPrefs, Silian_setLocalPrefs] = Silian_useState([]);
+  const [Silian_status, Silian_setStatus] = Silian_useState(null);
+  const [Silian_testStatus, Silian_setTestStatus] = Silian_useState(null);
+  const [Silian_sendingCategory, Silian_setSendingCategory] = Silian_useState(null);
 
-  const preferencesQuery = useQuery(
+  const Silian_preferencesQuery = Silian_useQuery(
     ['notification-preferences'],
     async () => {
-      const res = await userAPI.getNotificationPreferences();
-      return res.data?.data?.preferences ?? [];
+      const Silian_res = await Silian_userAPI.getNotificationPreferences();
+      return Silian_res.data?.data?.preferences ?? [];
     },
     {
-      onSuccess: (data) => {
-        setLocalPrefs(data);
+      onSuccess: (Silian_data) => {
+        Silian_setLocalPrefs(Silian_data);
       },
     }
   );
 
-  const mutation = useMutation(
-    async (prefs) => {
-      const res = await userAPI.updateNotificationPreferences({ preferences: prefs });
-      return res.data?.data?.preferences ?? [];
+  const Silian_mutation = Silian_useMutation(
+    async (Silian_prefs) => {
+      const Silian_res = await Silian_userAPI.updateNotificationPreferences({ preferences: Silian_prefs });
+      return Silian_res.data?.data?.preferences ?? [];
     },
     {
-      onSuccess: (data) => {
-        toast.success(t('settings.notifications.saveSuccess'));
-        setStatus({ variant: 'success', message: t('settings.notifications.saveSuccess') });
-        setLocalPrefs(data);
-        queryClient.setQueryData(['notification-preferences'], data);
+      onSuccess: (Silian_data) => {
+        Silian_toast.success(Silian_t('settings.notifications.saveSuccess'));
+        Silian_setStatus({ variant: 'success', message: Silian_t('settings.notifications.saveSuccess') });
+        Silian_setLocalPrefs(Silian_data);
+        Silian_queryClient.setQueryData(['notification-preferences'], Silian_data);
       },
-      onError: (err) => {
-        const message = err?.response?.data?.message || err?.message || t('settings.notifications.saveFailed');
-        toast.error(message);
-        setStatus({ variant: 'destructive', message });
+      onError: (Silian_err) => {
+        const Silian_message = Silian_err?.response?.data?.message || Silian_err?.message || Silian_t('settings.notifications.saveFailed');
+        Silian_toast.error(Silian_message);
+        Silian_setStatus({ variant: 'destructive', message: Silian_message });
       },
     }
   );
 
-  const testEmailMutation = useMutation(
-    async (category) => {
-      setSendingCategory(category);
-      const res = await userAPI.sendNotificationTestEmail(category);
-      return { category, payload: res.data };
+  const Silian_testEmailMutation = Silian_useMutation(
+    async (Silian_category) => {
+      Silian_setSendingCategory(Silian_category);
+      const Silian_res = await Silian_userAPI.sendNotificationTestEmail(Silian_category);
+      return { category: Silian_category, payload: Silian_res.data };
     },
     {
-      onSuccess: ({ category, payload }) => {
-        const message = payload?.message || t('settings.notifications.testEmail.success');
-        toast.success(message);
-        setTestStatus({ category, variant: 'success', message });
+      onSuccess: ({ category: Silian_category, payload: Silian_payload }) => {
+        const Silian_message = Silian_payload?.message || Silian_t('settings.notifications.testEmail.success');
+        Silian_toast.success(Silian_message);
+        Silian_setTestStatus({ category: Silian_category, variant: 'success', message: Silian_message });
       },
-      onError: (err, category) => {
-        const message = err?.response?.data?.message || err?.message || t('settings.notifications.testEmail.error');
-        toast.error(message);
-        setTestStatus({ category, variant: 'destructive', message });
+      onError: (Silian_err, Silian_category) => {
+        const Silian_message = Silian_err?.response?.data?.message || Silian_err?.message || Silian_t('settings.notifications.testEmail.error');
+        Silian_toast.error(Silian_message);
+        Silian_setTestStatus({ category: Silian_category, variant: 'destructive', message: Silian_message });
       },
       onSettled: () => {
-        setSendingCategory(null);
+        Silian_setSendingCategory(null);
       },
     }
   );
 
-  const loading = preferencesQuery.isLoading;
-  const saving = mutation.isLoading;
+  const Silian_loading = Silian_preferencesQuery.isLoading;
+  const Silian_saving = Silian_mutation.isLoading;
 
-  const hasChanges = useMemo(() => {
-    if (!preferencesQuery.data) return false;
-    return JSON.stringify(localPrefs) !== JSON.stringify(preferencesQuery.data);
-  }, [localPrefs, preferencesQuery.data]);
+  const Silian_hasChanges = Silian_useMemo(() => {
+    if (!Silian_preferencesQuery.data) return false;
+    return JSON.stringify(Silian_localPrefs) !== JSON.stringify(Silian_preferencesQuery.data);
+  }, [Silian_localPrefs, Silian_preferencesQuery.data]);
 
-  const handleToggle = (category, locked) => (checked) => {
-    if (locked) {
+  const Silian_handleToggle = (Silian_category, Silian_locked) => (Silian_checked) => {
+    if (Silian_locked) {
       return;
     }
-    setLocalPrefs((prev) =>
-      prev.map((item) =>
-        item.category === category ? { ...item, email_enabled: Boolean(checked) } : item
+    Silian_setLocalPrefs((Silian_prev) =>
+      Silian_prev.map((Silian_item) =>
+        Silian_item.category === Silian_category ? { ...Silian_item, email_enabled: Boolean(Silian_checked) } : Silian_item
       )
     );
-    setStatus(null);
-    setTestStatus(null);
+    Silian_setStatus(null);
+    Silian_setTestStatus(null);
   };
 
-  const handleReset = () => {
-    if (preferencesQuery.data) {
-      setLocalPrefs(preferencesQuery.data);
+  const Silian_handleReset = () => {
+    if (Silian_preferencesQuery.data) {
+      Silian_setLocalPrefs(Silian_preferencesQuery.data);
     }
-    setStatus(null);
-    setTestStatus(null);
+    Silian_setStatus(null);
+    Silian_setTestStatus(null);
   };
 
-  const handleSave = () => {
-    setTestStatus(null);
-    mutation.mutate(localPrefs.map(({ category, email_enabled }) => ({ category, email_enabled })));
+  const Silian_handleSave = () => {
+    Silian_setTestStatus(null);
+    Silian_mutation.mutate(Silian_localPrefs.map(({ category: Silian_category, email_enabled: Silian_email_enabled }) => ({ category: Silian_category, email_enabled: Silian_email_enabled })));
   };
 
-  const handleSendTestEmail = (category) => {
-    setTestStatus(null);
-    testEmailMutation.mutate(category);
+  const Silian_handleSendTestEmail = (Silian_category) => {
+    Silian_setTestStatus(null);
+    Silian_testEmailMutation.mutate(Silian_category);
   };
 
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-hidden">
       {/* Ambient Glow */}
       <div className="absolute top-0 right-1/3 -z-10 h-[500px] w-[500px] blur-[120px] bg-gradient-to-tr from-sky-50/50 via-slate-50/30 to-transparent opacity-50 dark:from-sky-900/20 dark:via-slate-900/10 dark:opacity-30 pointer-events-none" />
-      
+
       <div className="max-w-3xl mx-auto px-4 py-10 relative">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">
-            {t('settings.notifications.title')}
+            {Silian_t('settings.notifications.title')}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {t('settings.notifications.subtitle')}
+            {Silian_t('settings.notifications.subtitle')}
           </p>
         </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('settings.notifications.emailHeading')}</CardTitle>
-          <CardDescription>{t('settings.notifications.emailDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          {loading ? (
+      <Silian_Card>
+        <Silian_CardHeader>
+          <Silian_CardTitle>{Silian_t('settings.notifications.emailHeading')}</Silian_CardTitle>
+          <Silian_CardDescription>{Silian_t('settings.notifications.emailDescription')}</Silian_CardDescription>
+        </Silian_CardHeader>
+        <Silian_CardContent className="space-y-5">
+          {Silian_loading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t('common.loading')}
+              <Silian_Loader2 className="h-4 w-4 animate-spin" />
+              {Silian_t('common.loading')}
             </div>
           ) : (
             <>
-              {status?.message && (
-                <Alert variant={status.variant || 'info'}>
-                  <AlertDescription>{status.message}</AlertDescription>
-                </Alert>
+              {Silian_status?.message && (
+                <Silian_Alert variant={Silian_status.variant || 'info'}>
+                  <Silian_AlertDescription>{Silian_status.message}</Silian_AlertDescription>
+                </Silian_Alert>
               )}
 
               <div className="space-y-4">
-                {localPrefs.map((pref) => {
-                  const isSending = sendingCategory === pref.category;
-                  const prefTestStatus = testStatus && testStatus.category === pref.category ? testStatus : null;
+                {Silian_localPrefs.map((Silian_pref) => {
+                  const Silian_isSending = Silian_sendingCategory === Silian_pref.category;
+                  const Silian_prefTestStatus = Silian_testStatus && Silian_testStatus.category === Silian_pref.category ? Silian_testStatus : null;
 
                   return (
                     <div
-                      key={pref.category}
+                      key={Silian_pref.category}
                       className="rounded-lg border border-border bg-muted/40 px-4 py-3"
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-sm font-medium text-foreground">
-                            {t(`settings.notifications.categories.${pref.category}.label`)}
+                            {Silian_t(`settings.notifications.categories.${Silian_pref.category}.label`)}
                           </p>
                           <p className="mt-1 text-xs text-muted-foreground">
-                            {t(`settings.notifications.categories.${pref.category}.description`)}
+                            {Silian_t(`settings.notifications.categories.${Silian_pref.category}.description`)}
                           </p>
-                          {pref.locked && (
+                          {Silian_pref.locked && (
                             <p className="text-xs text-amber-600 mt-2">
-                              {t('settings.notifications.locked')}
+                              {Silian_t('settings.notifications.locked')}
                             </p>
                           )}
                         </div>
                         <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
-                          <Switch
-                            checked={pref.email_enabled}
-                            onCheckedChange={handleToggle(pref.category, pref.locked)}
-                            disabled={pref.locked || saving}
+                          <Silian_Switch
+                            checked={Silian_pref.email_enabled}
+                            onCheckedChange={Silian_handleToggle(Silian_pref.category, Silian_pref.locked)}
+                            disabled={Silian_pref.locked || Silian_saving}
                           />
-                          <Button
+                          <Silian_Button
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => handleSendTestEmail(pref.category)}
-                            disabled={saving || isSending}
+                            onClick={() => Silian_handleSendTestEmail(Silian_pref.category)}
+                            disabled={Silian_saving || Silian_isSending}
                           >
-                            {isSending ? (
+                            {Silian_isSending ? (
                               <span className="flex items-center gap-2">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                {t('settings.notifications.testEmail.sending')}
+                                <Silian_Loader2 className="h-4 w-4 animate-spin" />
+                                {Silian_t('settings.notifications.testEmail.sending')}
                               </span>
                             ) : (
-                              t('settings.notifications.testEmail.button')
+                              Silian_t('settings.notifications.testEmail.button')
                             )}
-                          </Button>
+                          </Silian_Button>
                         </div>
                       </div>
-                      {prefTestStatus && (
-                        <Alert variant={prefTestStatus.variant || 'info'} className="mt-3">
-                          <AlertDescription>{prefTestStatus.message}</AlertDescription>
-                        </Alert>
+                      {Silian_prefTestStatus && (
+                        <Silian_Alert variant={Silian_prefTestStatus.variant || 'info'} className="mt-3">
+                          <Silian_AlertDescription>{Silian_prefTestStatus.message}</Silian_AlertDescription>
+                        </Silian_Alert>
                       )}
                     </div>
                   );
@@ -205,37 +205,37 @@ const NotificationSettingsPage = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 pt-2">
-                <Button
+                <Silian_Button
                   type="button"
                   variant="outline"
-                  onClick={handleReset}
-                  disabled={!hasChanges || saving}
+                  onClick={Silian_handleReset}
+                  disabled={!Silian_hasChanges || Silian_saving}
                 >
-                  {t('settings.notifications.reset')}
-                </Button>
-                <Button
+                  {Silian_t('settings.notifications.reset')}
+                </Silian_Button>
+                <Silian_Button
                   type="button"
-                  onClick={handleSave}
-                  disabled={!hasChanges || saving}
+                  onClick={Silian_handleSave}
+                  disabled={!Silian_hasChanges || Silian_saving}
                 >
-                  {saving ? (
+                  {Silian_saving ? (
                     <span className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {t('settings.notifications.saving')}
+                      <Silian_Loader2 className="h-4 w-4 animate-spin" />
+                      {Silian_t('settings.notifications.saving')}
                     </span>
                   ) : (
-                    t('settings.notifications.save')
+                    Silian_t('settings.notifications.save')
                   )}
-                </Button>
+                </Silian_Button>
               </div>
 
             </>
           )}
-        </CardContent>
-      </Card>
+        </Silian_CardContent>
+      </Silian_Card>
     </div>
     </div>
   );
 };
 
-export default NotificationSettingsPage;
+export default Silian_NotificationSettingsPage;

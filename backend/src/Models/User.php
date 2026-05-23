@@ -14,7 +14,7 @@ class User extends Model
     use SoftDeletes;
 
     protected $table = 'users';
-    
+
     protected $fillable = [
         'id',
         'uuid',
@@ -59,14 +59,14 @@ class User extends Model
     /**
      * Create user from array data (for testing)
      */
-    public function __construct(array $attributes = [])
+    public function __construct(array $Silian_attributes = [])
     {
-        parent::__construct($attributes);
-        
+        parent::__construct($Silian_attributes);
+
         // Set attributes directly for testing
-        foreach ($attributes as $key => $value) {
-            if (in_array($key, $this->fillable)) {
-                $this->attributes[$key] = $value;
+        foreach ($Silian_attributes as $Silian_key => $Silian_value) {
+            if (in_array($Silian_key, $this->fillable)) {
+                $this->attributes[$Silian_key] = $Silian_value;
             }
         }
     }
@@ -131,11 +131,11 @@ class User extends Model
      */
     public function toArray(): array
     {
-        $array = parent::toArray();
-        unset($array['password']);
+        $Silian_array = parent::toArray();
+        unset($Silian_array['password']);
         // 安全隐藏已弃用或潜在敏感字段（数据库仍然可能存在列，但接口不暴露）
-        unset($array['real_name'], $array['class_name']);
-        return $array;
+        unset($Silian_array['real_name'], $Silian_array['class_name']);
+        return $Silian_array;
     }
 
     /**
@@ -162,28 +162,28 @@ class User extends Model
     /**
      * Check if user has sufficient points
      */
-    public function hasSufficientPoints(float $requiredPoints): bool
+    public function hasSufficientPoints(float $Silian_requiredPoints): bool
     {
-        return $this->getPoints() >= $requiredPoints;
+        return $this->getPoints() >= $Silian_requiredPoints;
     }
 
     /**
      * Add points to user
      */
-    public function addPoints(float $points): void
+    public function addPoints(float $Silian_points): void
     {
-        if ($points > 0) {
-            $this->points = $this->getPoints() + $points;
+        if ($Silian_points > 0) {
+            $this->points = $this->getPoints() + $Silian_points;
         }
     }
 
     /**
      * Subtract points from user
      */
-    public function subtractPoints(float $points): bool
+    public function subtractPoints(float $Silian_points): bool
     {
-        if ($this->hasSufficientPoints($points)) {
-            $this->points = $this->getPoints() - $points;
+        if ($this->hasSufficientPoints($Silian_points)) {
+            $this->points = $this->getPoints() - $Silian_points;
             return true;
         }
         return false;
@@ -210,29 +210,29 @@ class User extends Model
      */
     public function getValidationErrors(): array
     {
-        $errors = [];
+        $Silian_errors = [];
 
         if (empty($this->username)) {
-            $errors[] = 'Username is required';
+            $Silian_errors[] = 'Username is required';
         }
 
         if (empty($this->email)) {
-            $errors[] = 'Email is required';
+            $Silian_errors[] = 'Email is required';
         } elseif (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Invalid email format';
+            $Silian_errors[] = 'Invalid email format';
         }
 
-        $validRoles = ['user', 'support', 'admin'];
-        if (!in_array($this->getRole(), $validRoles)) {
-            $errors[] = 'Invalid role';
+        $Silian_validRoles = ['user', 'support', 'admin'];
+        if (!in_array($this->getRole(), $Silian_validRoles)) {
+            $Silian_errors[] = 'Invalid role';
         }
 
-        $validStatuses = ['active', 'inactive', 'suspended'];
-        if (!in_array($this->getStatus(), $validStatuses)) {
-            $errors[] = 'Invalid status';
+        $Silian_validStatuses = ['active', 'inactive', 'suspended'];
+        if (!in_array($this->getStatus(), $Silian_validStatuses)) {
+            $Silian_errors[] = 'Invalid status';
         }
 
-        return $errors;
+        return $Silian_errors;
     }
 
     /**
@@ -287,23 +287,23 @@ class User extends Model
     /**
      * Scope to get active users only
      */
-    public function scopeActive($query)
+    public function scopeActive($Silian_query)
     {
-        return $query->where('status', 'active');
+        return $Silian_query->where('status', 'active');
     }
 
     /**
      * Scope to get admin users only
      */
-    public function scopeAdmins($query)
+    public function scopeAdmins($Silian_query)
     {
-        return $query->where('is_admin', true);
+        return $Silian_query->where('is_admin', true);
     }
 
-    public function scopeSupport($query)
+    public function scopeSupport($Silian_query)
     {
-        return $query->where(function ($builder) {
-            $builder->where('is_admin', true)->orWhere('role', 'support');
+        return $Silian_query->where(function ($Silian_builder) {
+            $Silian_builder->where('is_admin', true)->orWhere('role', 'support');
         });
     }
 

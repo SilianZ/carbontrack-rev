@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class IdempotencyRecord extends Model
 {
     protected $table = 'idempotency_records';
-    
+
     protected $fillable = [
         'idempotency_key',
         'user_id',
@@ -41,25 +41,25 @@ class IdempotencyRecord extends Model
     /**
      * Scope to find records by idempotency key
      */
-    public function scopeByIdempotencyKey($query, string $key)
+    public function scopeByIdempotencyKey($Silian_query, string $Silian_key)
     {
-        return $query->where('idempotency_key', $key);
+        return $Silian_query->where('idempotency_key', $Silian_key);
     }
 
     /**
      * Scope to find recent records (within specified hours)
      */
-    public function scopeRecent($query, int $hours = 24)
+    public function scopeRecent($Silian_query, int $Silian_hours = 24)
     {
-        return $query->where('created_at', '>', \Illuminate\Support\Carbon::now()->subHours($hours));
+        return $Silian_query->where('created_at', '>', \Illuminate\Support\Carbon::now()->subHours($Silian_hours));
     }
 
     /**
      * Clean up old idempotency records
      */
-    public static function cleanup(int $daysToKeep = 7): int
+    public static function cleanup(int $Silian_daysToKeep = 7): int
     {
-        return static::where('created_at', '<', \Illuminate\Support\Carbon::now()->subDays($daysToKeep))->delete();
+        return static::where('created_at', '<', \Illuminate\Support\Carbon::now()->subDays($Silian_daysToKeep))->delete();
     }
 }
 

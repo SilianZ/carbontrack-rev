@@ -16,46 +16,46 @@ class AvatarControllerTest extends TestCase
 
     public function testGetAvatarsHidesInactiveForNonAdmin(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id'=>1,'is_admin'=>0]);
-        $avatarModel->method('getAvailableAvatars')->willReturn([
+        $Silian_auth->method('getCurrentUser')->willReturn(['id'=>1,'is_admin'=>0]);
+        $Silian_avatarModel->method('getAvailableAvatars')->willReturn([
             ['id'=>1,'name'=>'A','is_active'=>1]
         ]);
 
-    $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+    $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
     /** @var \CarbonTrack\Models\Avatar $avatarModel */
     /** @var \CarbonTrack\Services\AuthService $auth */
     /** @var \CarbonTrack\Services\AuditLogService $audit */
     /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
     /** @var \Monolog\Logger $logger */
     /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-    $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
-        $request = makeRequest('GET', '/avatars');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->getAvatars($request, $response);
-        $this->assertEquals(200, $resp->getStatusCode());
-        $json = json_decode((string)$resp->getBody(), true);
-        $this->assertTrue($json['success']);
-        $this->assertCount(1, $json['data']);
-        $this->assertEquals(1, $json['data'][0]['id']);
+    $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
+        $Silian_request = makeRequest('GET', '/avatars');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->getAvatars($Silian_request, $Silian_response);
+        $this->assertEquals(200, $Silian_resp->getStatusCode());
+        $Silian_json = json_decode((string)$Silian_resp->getBody(), true);
+        $this->assertTrue($Silian_json['success']);
+        $this->assertCount(1, $Silian_json['data']);
+        $this->assertEquals(1, $Silian_json['data'][0]['id']);
     }
 
     public function testGetAvatarsAllowsAdminToIncludeInactiveAndReturnsActivationState(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 9, 'is_admin' => 1]);
-        $avatarModel->expects($this->once())
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 9, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->once())
             ->method('getAvailableAvatars')
             ->with('animals', true)
             ->willReturn([
@@ -69,33 +69,33 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->getAvatars(
+        $Silian_response = $Silian_controller->getAvatars(
             makeRequest('GET', '/admin/avatars', null, ['category' => 'animals', 'include_inactive' => '1']),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertCount(2, $payload['data']);
-        $this->assertTrue($payload['data'][0]['is_active']);
-        $this->assertFalse($payload['data'][1]['is_active']);
-        $this->assertTrue($payload['data'][1]['is_default']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertCount(2, $Silian_payload['data']);
+        $this->assertTrue($Silian_payload['data'][0]['is_active']);
+        $this->assertFalse($Silian_payload['data'][1]['is_active']);
+        $this->assertTrue($Silian_payload['data'][1]['is_default']);
     }
 
     public function testGetAvatarsIncludesIconUrls(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(null);
-        $avatarModel->method('getAvailableAvatars')->willReturn([
+        $Silian_auth->method('getCurrentUser')->willReturn(null);
+        $Silian_avatarModel->method('getAvailableAvatars')->willReturn([
             [
                 'id' => 10,
                 'name' => 'Default Avatar',
@@ -105,7 +105,7 @@ class AvatarControllerTest extends TestCase
             ],
         ]);
 
-        $r2->expects($this->exactly(2))
+        $Silian_r2->expects($this->exactly(2))
             ->method('getPublicUrl')
             ->withConsecutive(
                 ['avatars/default/avatar.png'],
@@ -116,7 +116,7 @@ class AvatarControllerTest extends TestCase
                 'https://cdn.example/avatar-thumb.png'
             );
 
-        $r2->expects($this->once())
+        $Silian_r2->expects($this->once())
             ->method('generatePresignedUrl')
             ->with('avatars/default/avatar.png', 600)
             ->willReturn('https://signed.example/avatar.png');
@@ -127,80 +127,80 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->getAvatars(makeRequest('GET', '/avatars'), new \Slim\Psr7\Response());
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string)$response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertNotEmpty($payload['data']);
-        $avatar = $payload['data'][0];
-        $this->assertSame('avatars/default/avatar.png', $avatar['icon_path']);
-        $this->assertSame('https://cdn.example/avatar.png', $avatar['icon_url']);
-        $this->assertSame('https://signed.example/avatar.png', $avatar['icon_presigned_url']);
-        $this->assertSame('https://cdn.example/avatar.png', $avatar['image_url']);
-        $this->assertSame('https://cdn.example/avatar.png', $avatar['url']);
-        $this->assertSame('https://cdn.example/avatar-thumb.png', $avatar['thumbnail_url']);
+        $Silian_response = $Silian_controller->getAvatars(makeRequest('GET', '/avatars'), new \Slim\Psr7\Response());
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string)$Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertNotEmpty($Silian_payload['data']);
+        $Silian_avatar = $Silian_payload['data'][0];
+        $this->assertSame('avatars/default/avatar.png', $Silian_avatar['icon_path']);
+        $this->assertSame('https://cdn.example/avatar.png', $Silian_avatar['icon_url']);
+        $this->assertSame('https://signed.example/avatar.png', $Silian_avatar['icon_presigned_url']);
+        $this->assertSame('https://cdn.example/avatar.png', $Silian_avatar['image_url']);
+        $this->assertSame('https://cdn.example/avatar.png', $Silian_avatar['url']);
+        $this->assertSame('https://cdn.example/avatar-thumb.png', $Silian_avatar['thumbnail_url']);
     }
 
     public function testGetAvatarRequiresAdmin(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id'=>1,'is_admin'=>0]);
-    $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id'=>1,'is_admin'=>0]);
+    $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
     /** @var \CarbonTrack\Models\Avatar $avatarModel */
     /** @var \CarbonTrack\Services\AuthService $auth */
     /** @var \CarbonTrack\Services\AuditLogService $audit */
     /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
     /** @var \Monolog\Logger $logger */
     /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-    $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
-        $request = makeRequest('GET', '/avatars/1');
-        $response = new \Slim\Psr7\Response();
-        $resp = $controller->getAvatar($request, $response, ['id'=>1]);
-        $this->assertEquals(403, $resp->getStatusCode());
+    $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
+        $Silian_request = makeRequest('GET', '/avatars/1');
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_resp = $Silian_controller->getAvatar($Silian_request, $Silian_response, ['id'=>1]);
+        $this->assertEquals(403, $Silian_resp->getStatusCode());
     }
 
     public function testUpdateAvatarNormalizesEmptyStringDefaultFlag(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $audit->method('log')->willReturn(true);
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_audit->method('log')->willReturn(true);
 
-        $existingAvatar = [
+        $Silian_existingAvatar = [
             'id' => 5,
             'name' => 'Original Avatar',
             'file_path' => '/avatars/original.png',
             'is_default' => 1,
         ];
-        $updatedAvatar = [
+        $Silian_updatedAvatar = [
             'id' => 5,
             'name' => 'Original Avatar',
             'file_path' => '/avatars/original.png',
             'is_default' => 0,
         ];
 
-        $avatarModel->expects($this->exactly(2))
+        $Silian_avatarModel->expects($this->exactly(2))
             ->method('getAvatarById')
             ->with(5)
-            ->willReturnOnConsecutiveCalls($existingAvatar, $updatedAvatar);
-        $avatarModel->expects($this->never())->method('setDefaultAvatar');
-        $avatarModel->expects($this->once())
+            ->willReturnOnConsecutiveCalls($Silian_existingAvatar, $Silian_updatedAvatar);
+        $Silian_avatarModel->expects($this->never())->method('setDefaultAvatar');
+        $Silian_avatarModel->expects($this->once())
             ->method('updateAvatar')
-            ->with(5, $this->callback(function (array $data): bool {
-                $this->assertArrayHasKey('is_default', $data);
-                $this->assertFalse($data['is_default']);
+            ->with(5, $this->callback(function (array $Silian_data): bool {
+                $this->assertArrayHasKey('is_default', $Silian_data);
+                $this->assertFalse($Silian_data['is_default']);
                 return true;
             }))
             ->willReturn(true);
@@ -211,30 +211,30 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
 
-        $request = makeRequest('PUT', '/admin/avatars/5', [
+        $Silian_request = makeRequest('PUT', '/admin/avatars/5', [
             'is_default' => '',
         ]);
-        $response = $controller->updateAvatar($request, new \Slim\Psr7\Response(), ['id' => 5]);
+        $Silian_response = $Silian_controller->updateAvatar($Silian_request, new \Slim\Psr7\Response(), ['id' => 5]);
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertFalse($payload['data']['is_default']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertFalse($Silian_payload['data']['is_default']);
     }
 
     public function testUpdateAvatarRejectsInvalidSortOrderString(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $avatarModel->expects($this->never())->method('updateAvatar');
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->never())->method('updateAvatar');
 
         /** @var \CarbonTrack\Models\Avatar $avatarModel */
         /** @var \CarbonTrack\Services\AuthService $auth */
@@ -242,30 +242,30 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->updateAvatar(
+        $Silian_response = $Silian_controller->updateAvatar(
             makeRequest('PUT', '/admin/avatars/5', ['sort_order' => 'abc']),
             new \Slim\Psr7\Response(),
             ['id' => 5]
         );
 
-        $this->assertSame(400, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('VALIDATION_ERROR', $payload['code']);
+        $this->assertSame(400, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('VALIDATION_ERROR', $Silian_payload['code']);
     }
 
     public function testUpdateAvatarReturnsStorageUnavailableWhenR2PathCannotBeVerified(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $avatarModel->expects($this->once())
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->once())
             ->method('getAvatarById')
             ->with(5)
             ->willReturn([
@@ -275,8 +275,8 @@ class AvatarControllerTest extends TestCase
                 'is_default' => 0,
                 'is_active' => 1,
             ]);
-        $avatarModel->expects($this->never())->method('updateAvatar');
-        $logger->expects($this->once())
+        $Silian_avatarModel->expects($this->never())->method('updateAvatar');
+        $Silian_logger->expects($this->once())
             ->method('error')
             ->with('Avatar storage service is unavailable');
 
@@ -285,31 +285,31 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\AuditLogService $audit */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, null, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, null, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->updateAvatar(
+        $Silian_response = $Silian_controller->updateAvatar(
             makeRequest('PUT', '/admin/avatars/5', ['file_path' => '/avatars/default/new.png']),
             new \Slim\Psr7\Response(),
             ['id' => 5]
         );
 
-        $this->assertSame(503, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('AVATAR_STORAGE_UNAVAILABLE', $payload['code']);
+        $this->assertSame(503, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('AVATAR_STORAGE_UNAVAILABLE', $Silian_payload['code']);
     }
 
     public function testCreateAvatarRejectsNonObjectRequestBody(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $avatarModel->expects($this->never())->method('createAvatar');
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->never())->method('createAvatar');
 
         /** @var \CarbonTrack\Models\Avatar $avatarModel */
         /** @var \CarbonTrack\Services\AuthService $auth */
@@ -317,30 +317,30 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->createAvatar(
+        $Silian_response = $Silian_controller->createAvatar(
             makeRequest('POST', '/admin/avatars', null),
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(400, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('INVALID_REQUEST_BODY', $payload['code']);
+        $this->assertSame(400, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('INVALID_REQUEST_BODY', $Silian_payload['code']);
     }
 
     public function testCreateAvatarReturnsStorageUnavailableWhenR2PathCannotBeVerified(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $avatarModel->expects($this->never())->method('createAvatar');
-        $logger->expects($this->once())
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->never())->method('createAvatar');
+        $Silian_logger->expects($this->once())
             ->method('error')
             ->with('Avatar storage service is unavailable');
 
@@ -349,9 +349,9 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\AuditLogService $audit */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, null, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, null, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->createAvatar(
+        $Silian_response = $Silian_controller->createAvatar(
             makeRequest('POST', '/admin/avatars', [
                 'name' => 'Leaf',
                 'file_path' => '/avatars/default/leaf.png',
@@ -359,23 +359,23 @@ class AvatarControllerTest extends TestCase
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(503, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('AVATAR_STORAGE_UNAVAILABLE', $payload['code']);
+        $this->assertSame(503, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('AVATAR_STORAGE_UNAVAILABLE', $Silian_payload['code']);
     }
 
     public function testCreateAvatarRejectsInactiveDefaultAvatar(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $avatarModel->expects($this->never())->method('createAvatar');
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->never())->method('createAvatar');
 
         /** @var \CarbonTrack\Models\Avatar $avatarModel */
         /** @var \CarbonTrack\Services\AuthService $auth */
@@ -383,9 +383,9 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->createAvatar(
+        $Silian_response = $Silian_controller->createAvatar(
             makeRequest('POST', '/admin/avatars', [
                 'name' => 'Broken Default',
                 'file_path' => '/avatars/broken.png',
@@ -395,24 +395,24 @@ class AvatarControllerTest extends TestCase
             new \Slim\Psr7\Response()
         );
 
-        $this->assertSame(400, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('VALIDATION_ERROR', $payload['code']);
-        $this->assertSame('Default avatar must remain active', $payload['message']);
+        $this->assertSame(400, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('VALIDATION_ERROR', $Silian_payload['code']);
+        $this->assertSame('Default avatar must remain active', $Silian_payload['message']);
     }
 
     public function testUpdateAvatarRejectsDisablingDefaultAvatar(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $avatarModel->expects($this->once())
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->once())
             ->method('getAvatarById')
             ->with(5)
             ->willReturn([
@@ -422,7 +422,7 @@ class AvatarControllerTest extends TestCase
                 'is_default' => 1,
                 'is_active' => 1,
             ]);
-        $avatarModel->expects($this->never())->method('updateAvatar');
+        $Silian_avatarModel->expects($this->never())->method('updateAvatar');
 
         /** @var \CarbonTrack\Models\Avatar $avatarModel */
         /** @var \CarbonTrack\Services\AuthService $auth */
@@ -430,32 +430,32 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->updateAvatar(
+        $Silian_response = $Silian_controller->updateAvatar(
             makeRequest('PUT', '/admin/avatars/5', ['is_active' => false]),
             new \Slim\Psr7\Response(),
             ['id' => 5]
         );
 
-        $this->assertSame(400, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('VALIDATION_ERROR', $payload['code']);
-        $this->assertSame('Default avatar must remain active', $payload['message']);
+        $this->assertSame(400, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('VALIDATION_ERROR', $Silian_payload['code']);
+        $this->assertSame('Default avatar must remain active', $Silian_payload['message']);
     }
 
     public function testUpdateAvatarRejectsDisablingCurrentDefaultEvenWhenPayloadClearsDefault(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $avatarModel->expects($this->once())
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->once())
             ->method('getAvatarById')
             ->with(5)
             ->willReturn([
@@ -465,9 +465,9 @@ class AvatarControllerTest extends TestCase
                 'is_default' => 1,
                 'is_active' => 1,
             ]);
-        $avatarModel->expects($this->never())->method('getDefaultAvatar');
-        $avatarModel->expects($this->never())->method('updateAvatarAndReassignUsers');
-        $avatarModel->expects($this->never())->method('updateAvatar');
+        $Silian_avatarModel->expects($this->never())->method('getDefaultAvatar');
+        $Silian_avatarModel->expects($this->never())->method('updateAvatarAndReassignUsers');
+        $Silian_avatarModel->expects($this->never())->method('updateAvatar');
 
         /** @var \CarbonTrack\Models\Avatar $avatarModel */
         /** @var \CarbonTrack\Services\AuthService $auth */
@@ -475,28 +475,28 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->updateAvatar(
+        $Silian_response = $Silian_controller->updateAvatar(
             makeRequest('PUT', '/admin/avatars/5', ['is_default' => false, 'is_active' => false]),
             new \Slim\Psr7\Response(),
             ['id' => 5]
         );
 
-        $this->assertSame(400, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('VALIDATION_ERROR', $payload['code']);
-        $this->assertSame('Default avatar must remain active', $payload['message']);
+        $this->assertSame(400, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('VALIDATION_ERROR', $Silian_payload['code']);
+        $this->assertSame('Default avatar must remain active', $Silian_payload['message']);
     }
 
     public function testUpdateAvatarSucceedsWhenOptionalAuditAndLoggerAreMissing(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $avatarModel->expects($this->exactly(2))
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->exactly(2))
             ->method('getAvatarById')
             ->with(5)
             ->willReturnOnConsecutiveCalls(
@@ -515,40 +515,40 @@ class AvatarControllerTest extends TestCase
                     'is_active' => 1,
                 ]
             );
-        $avatarModel->expects($this->once())
+        $Silian_avatarModel->expects($this->once())
             ->method('updateAvatar')
             ->with(5, ['name' => 'Leaf Prime'])
             ->willReturn(true);
 
         /** @var \CarbonTrack\Models\Avatar $avatarModel */
         /** @var \CarbonTrack\Services\AuthService $auth */
-        $controller = new AvatarController($avatarModel, $auth);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth);
 
-        $response = $controller->updateAvatar(
+        $Silian_response = $Silian_controller->updateAvatar(
             makeRequest('PUT', '/admin/avatars/5', ['name' => 'Leaf Prime']),
             new \Slim\Psr7\Response(),
             ['id' => 5]
         );
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertSame('Leaf Prime', $payload['data']['name']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertSame('Leaf Prime', $Silian_payload['data']['name']);
     }
 
     public function testUpdateAvatarDisablesAvatarReassignsUsersAndSendsNotifications(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
-        $messageService = $this->createMock(\CarbonTrack\Services\MessageService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_messageService = $this->createMock(\CarbonTrack\Services\MessageService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 7, 'is_admin' => 1]);
-        $audit->method('log')->willReturn(true);
-        $avatarModel->expects($this->exactly(2))
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 7, 'is_admin' => 1]);
+        $Silian_audit->method('log')->willReturn(true);
+        $Silian_avatarModel->expects($this->exactly(2))
             ->method('getAvatarById')
             ->with(5)
             ->willReturnOnConsecutiveCalls(
@@ -567,7 +567,7 @@ class AvatarControllerTest extends TestCase
                     'is_active' => 0,
                 ]
             );
-        $avatarModel->expects($this->once())
+        $Silian_avatarModel->expects($this->once())
             ->method('updateAvatarAndReassignUsers')
             ->with(5, ['is_active' => false], null)
             ->willReturn([
@@ -583,9 +583,9 @@ class AvatarControllerTest extends TestCase
                     'is_default' => 1,
                 ],
             ]);
-        $avatarModel->expects($this->never())->method('updateAvatar');
+        $Silian_avatarModel->expects($this->never())->method('updateAvatar');
 
-        $messageService->expects($this->exactly(2))
+        $Silian_messageService->expects($this->exactly(2))
             ->method('sendSystemMessage')
             ->with(
                 $this->logicalOr($this->equalTo(101), $this->equalTo(202)),
@@ -605,31 +605,31 @@ class AvatarControllerTest extends TestCase
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
         /** @var \CarbonTrack\Services\MessageService $messageService */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog, $messageService);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog, $Silian_messageService);
 
-        $response = $controller->updateAvatar(
+        $Silian_response = $Silian_controller->updateAvatar(
             makeRequest('PUT', '/admin/avatars/5', ['is_active' => false]),
             new \Slim\Psr7\Response(),
             ['id' => 5]
         );
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertFalse($payload['data']['is_active']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertFalse($Silian_payload['data']['is_active']);
     }
 
     public function testUpdateAvatarRejectsDisablingAvatarWhenNoDefaultFallbackExists(): void
     {
-        $avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
-        $auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
-        $audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
-        $r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
+        $Silian_avatarModel = $this->createMock(\CarbonTrack\Models\Avatar::class);
+        $Silian_auth = $this->createMock(\CarbonTrack\Services\AuthService::class);
+        $Silian_audit = $this->createMock(\CarbonTrack\Services\AuditLogService::class);
+        $Silian_r2 = $this->createMock(\CarbonTrack\Services\CloudflareR2Service::class);
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_errorLog = $this->createMock(\CarbonTrack\Services\ErrorLogService::class);
 
-        $auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
-        $avatarModel->expects($this->once())
+        $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'is_admin' => 1]);
+        $Silian_avatarModel->expects($this->once())
             ->method('getAvatarById')
             ->with(5)
             ->willReturn([
@@ -639,11 +639,11 @@ class AvatarControllerTest extends TestCase
                 'is_default' => 0,
                 'is_active' => 1,
             ]);
-        $avatarModel->expects($this->once())
+        $Silian_avatarModel->expects($this->once())
             ->method('updateAvatarAndReassignUsers')
             ->with(5, ['is_active' => false], null)
             ->willThrowException(new \CarbonTrack\Models\AvatarFallbackUnavailableException());
-        $avatarModel->expects($this->never())->method('updateAvatar');
+        $Silian_avatarModel->expects($this->never())->method('updateAvatar');
 
         /** @var \CarbonTrack\Models\Avatar $avatarModel */
         /** @var \CarbonTrack\Services\AuthService $auth */
@@ -651,18 +651,18 @@ class AvatarControllerTest extends TestCase
         /** @var \CarbonTrack\Services\CloudflareR2Service $r2 */
         /** @var \Monolog\Logger $logger */
         /** @var \CarbonTrack\Services\ErrorLogService $errorLog */
-        $controller = new AvatarController($avatarModel, $auth, $audit, $r2, $logger, $errorLog);
+        $Silian_controller = new AvatarController($Silian_avatarModel, $Silian_auth, $Silian_audit, $Silian_r2, $Silian_logger, $Silian_errorLog);
 
-        $response = $controller->updateAvatar(
+        $Silian_response = $Silian_controller->updateAvatar(
             makeRequest('PUT', '/admin/avatars/5', ['is_active' => false]),
             new \Slim\Psr7\Response(),
             ['id' => 5]
         );
 
-        $this->assertSame(409, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
-        $this->assertSame('DEFAULT_AVATAR_REQUIRED', $payload['code']);
+        $this->assertSame(409, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
+        $this->assertSame('DEFAULT_AVATAR_REQUIRED', $Silian_payload['code']);
     }
 }
 

@@ -41,9 +41,9 @@ class UserBadge extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function scopeAwarded($query)
+    public function scopeAwarded($Silian_query)
     {
-        return $query->where('status', 'awarded');
+        return $Silian_query->where('status', 'awarded');
     }
 
     public function isAwarded(): bool

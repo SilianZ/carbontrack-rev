@@ -1,40 +1,40 @@
-import React from 'react';
-import { Search, Filter, X, CalendarDays, CheckCircle, Clock, XCircle } from 'lucide-react';
-import { useTranslation } from '../../hooks/useTranslation';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
+import Silian_React from 'react';
+import { Search as Silian_Search, Filter as Silian_Filter, X as Silian_X, CalendarDays as Silian_CalendarDays, CheckCircle as Silian_CheckCircle, Clock as Silian_Clock, XCircle as Silian_XCircle } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { Button as Silian_Button } from '../ui/Button';
+import { Input as Silian_Input } from '../ui/Input';
 
 export function ActivityFilters({
-  filters,
-  onFiltersChange,
-  categories = [],
-  isLoading = false
+  filters: Silian_filters,
+  onFiltersChange: Silian_onFiltersChange,
+  categories: Silian_categories = [],
+  isLoading: Silian_isLoading = false
 }) {
-  const { t } = useTranslation(['activities', 'common']);
+  const { t: Silian_t } = Silian_useTranslation(['activities', 'common']);
 
   // 将 categories 归一化为数组，兼容多种返回结构：
   // - 数组: 直接使用
   // - 对象映射: 使用对象键作为类别名 [{ category: key }]
   // - 字符串: 单值转为数组
-  const normalizedCategories = React.useMemo(() => {
-    if (Array.isArray(categories)) return categories;
-    if (categories && typeof categories === 'object') {
-      return Object.keys(categories).map((key) => ({ category: key }));
+  const Silian_normalizedCategories = Silian_React.useMemo(() => {
+    if (Array.isArray(Silian_categories)) return Silian_categories;
+    if (Silian_categories && typeof Silian_categories === 'object') {
+      return Object.keys(Silian_categories).map((Silian_key) => ({ category: Silian_key }));
     }
-    if (typeof categories === 'string') return [{ category: categories }];
+    if (typeof Silian_categories === 'string') return [{ category: Silian_categories }];
     return [];
-  }, [categories]);
+  }, [Silian_categories]);
 
-  const handleFilterChange = (key, value) => {
-    onFiltersChange({
-      ...filters,
-      [key]: value,
+  const Silian_handleFilterChange = (Silian_key, Silian_value) => {
+    Silian_onFiltersChange({
+      ...Silian_filters,
+      [Silian_key]: Silian_value,
       page: 1 // Reset to first page on filter change
     });
   };
 
-  const clearFilters = () => {
-    onFiltersChange({
+  const Silian_clearFilters = () => {
+    Silian_onFiltersChange({
       search: '',
       category: '',
       status: '',
@@ -45,38 +45,38 @@ export function ActivityFilters({
     });
   };
 
-  const hasActiveFilters = filters.search || filters.category || filters.status || filters.start_date || filters.end_date;
+  const Silian_hasActiveFilters = Silian_filters.search || Silian_filters.category || Silian_filters.status || Silian_filters.start_date || Silian_filters.end_date;
 
-  const statusOptions = [
-    { value: 'pending', label: t('activities.status.pending'), icon: <Clock className="h-4 w-4 text-blue-500" /> },
-    { value: 'approved', label: t('activities.status.approved'), icon: <CheckCircle className="h-4 w-4 text-green-500" /> },
-    { value: 'rejected', label: t('activities.status.rejected'), icon: <XCircle className="h-4 w-4 text-red-500" /> }
+  const Silian_statusOptions = [
+    { value: 'pending', label: Silian_t('activities.status.pending'), icon: <Silian_Clock className="h-4 w-4 text-blue-500" /> },
+    { value: 'approved', label: Silian_t('activities.status.approved'), icon: <Silian_CheckCircle className="h-4 w-4 text-green-500" /> },
+    { value: 'rejected', label: Silian_t('activities.status.rejected'), icon: <Silian_XCircle className="h-4 w-4 text-red-500" /> }
   ];
 
-  const sortOptions = [
-    { value: 'created_at_desc', label: t('common.sort.newest') },
-    { value: 'created_at_asc', label: t('common.sort.oldest') },
-    { value: 'points_desc', label: t('common.sort.pointsHighToLow') },
-    { value: 'points_asc', label: t('common.sort.pointsLowToHigh') }
+  const Silian_sortOptions = [
+    { value: 'created_at_desc', label: Silian_t('common.sort.newest') },
+    { value: 'created_at_asc', label: Silian_t('common.sort.oldest') },
+    { value: 'points_desc', label: Silian_t('common.sort.pointsHighToLow') },
+    { value: 'points_asc', label: Silian_t('common.sort.pointsLowToHigh') }
   ];
 
   return (
     <div className="mb-6 rounded-lg border border-border bg-card/95 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <Filter className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-lg font-semibold">{t('activities.filters.title')}</h3>
+          <Silian_Filter className="h-5 w-5 text-muted-foreground" />
+          <h3 className="text-lg font-semibold">{Silian_t('activities.filters.title')}</h3>
         </div>
-        {hasActiveFilters && (
-          <Button
+        {Silian_hasActiveFilters && (
+          <Silian_Button
             variant="ghost"
             size="sm"
-            onClick={clearFilters}
+            onClick={Silian_clearFilters}
             className="text-muted-foreground hover:text-foreground"
           >
-            <X className="h-4 w-4 mr-1" />
-            {t('common.clear')}
-          </Button>
+            <Silian_X className="h-4 w-4 mr-1" />
+            {Silian_t('common.clear')}
+          </Silian_Button>
         )}
       </div>
 
@@ -84,15 +84,15 @@ export function ActivityFilters({
         {/* 搜索框 */}
         <div className="lg:col-span-2">
           <label className="mb-2 block text-sm font-medium text-foreground">
-            {t('common.search')}
+            {Silian_t('common.search')}
           </label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-            <Input
+            <Silian_Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+            <Silian_Input
               type="text"
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              placeholder={t('activities.filters.searchPlaceholder')}
+              value={Silian_filters.search}
+              onChange={(Silian_e) => Silian_handleFilterChange('search', Silian_e.target.value)}
+              placeholder={Silian_t('activities.filters.searchPlaceholder')}
               className="pl-10"
             />
           </div>
@@ -101,18 +101,18 @@ export function ActivityFilters({
         {/* 分类筛选 */}
         <div>
           <label className="mb-2 block text-sm font-medium text-foreground">
-            {t('activities.filters.category')}
+            {Silian_t('activities.filters.category')}
           </label>
           <select
-            value={filters.category}
-            onChange={(e) => handleFilterChange('category', e.target.value)}
+            value={Silian_filters.category}
+            onChange={(Silian_e) => Silian_handleFilterChange('category', Silian_e.target.value)}
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-            disabled={isLoading}
+            disabled={Silian_isLoading}
           >
-            <option value="">{t('activities.filters.allCategories')}</option>
-            {normalizedCategories.map((category) => (
-              <option key={category.category} value={category.category}>
-                    {t(`activities.categories.${category.category}`, category.category)}
+            <option value="">{Silian_t('activities.filters.allCategories')}</option>
+            {Silian_normalizedCategories.map((Silian_category) => (
+              <option key={Silian_category.category} value={Silian_category.category}>
+                    {Silian_t(`activities.categories.${Silian_category.category}`, Silian_category.category)}
               </option>
             ))}
           </select>
@@ -121,18 +121,18 @@ export function ActivityFilters({
         {/* 状态筛选 */}
         <div>
           <label className="mb-2 block text-sm font-medium text-foreground">
-            {t('activities.filters.status')}
+            {Silian_t('activities.filters.status')}
           </label>
           <select
-            value={filters.status}
-            onChange={(e) => handleFilterChange('status', e.target.value)}
+            value={Silian_filters.status}
+            onChange={(Silian_e) => Silian_handleFilterChange('status', Silian_e.target.value)}
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-            disabled={isLoading}
+            disabled={Silian_isLoading}
           >
-            <option value="">{t('activities.filters.allStatus')}</option>
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            <option value="">{Silian_t('activities.filters.allStatus')}</option>
+            {Silian_statusOptions.map((Silian_option) => (
+              <option key={Silian_option.value} value={Silian_option.value}>
+                {Silian_option.label}
               </option>
             ))}
           </select>
@@ -143,25 +143,25 @@ export function ActivityFilters({
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="mb-2 block text-sm font-medium text-foreground">
-            <CalendarDays className="h-4 w-4 inline mr-1" />
-            {t('activities.filters.startDate')}
+            <Silian_CalendarDays className="h-4 w-4 inline mr-1" />
+            {Silian_t('activities.filters.startDate')}
           </label>
-          <Input
+          <Silian_Input
             type="date"
-            value={filters.start_date}
-            onChange={(e) => handleFilterChange('start_date', e.target.value)}
+            value={Silian_filters.start_date}
+            onChange={(Silian_e) => Silian_handleFilterChange('start_date', Silian_e.target.value)}
             className="w-full"
           />
         </div>
         <div>
           <label className="mb-2 block text-sm font-medium text-foreground">
-            <CalendarDays className="h-4 w-4 inline mr-1" />
-            {t('activities.filters.endDate')}
+            <Silian_CalendarDays className="h-4 w-4 inline mr-1" />
+            {Silian_t('activities.filters.endDate')}
           </label>
-          <Input
+          <Silian_Input
             type="date"
-            value={filters.end_date}
-            onChange={(e) => handleFilterChange('end_date', e.target.value)}
+            value={Silian_filters.end_date}
+            onChange={(Silian_e) => Silian_handleFilterChange('end_date', Silian_e.target.value)}
             className="w-full"
           />
         </div>
@@ -170,76 +170,76 @@ export function ActivityFilters({
       {/* 排序 */}
       <div className="mt-4">
         <label className="mb-2 block text-sm font-medium text-foreground">
-          {t('common.sort.sortBy')}
+          {Silian_t('common.sort.sortBy')}
         </label>
         <select
-          value={filters.sort}
-          onChange={(e) => handleFilterChange('sort', e.target.value)}
+          value={Silian_filters.sort}
+          onChange={(Silian_e) => Silian_handleFilterChange('sort', Silian_e.target.value)}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-          disabled={isLoading}
+          disabled={Silian_isLoading}
         >
-          {sortOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
+          {Silian_sortOptions.map((Silian_option) => (
+            <option key={Silian_option.value} value={Silian_option.value}>
+              {Silian_option.label}
             </option>
           ))}
         </select>
       </div>
 
       {/* 活动筛选结果提示 */}
-      {hasActiveFilters && (
+      {Silian_hasActiveFilters && (
         <div className="mt-4 rounded-lg bg-blue-500/10 p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-sm text-blue-500">
-              <Filter className="h-4 w-4" />
-              <span>{t('activities.filters.activeFilters')}:</span>
+              <Silian_Filter className="h-4 w-4" />
+              <span>{Silian_t('activities.filters.activeFilters')}:</span>
             </div>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {filters.search && (
+            {Silian_filters.search && (
               <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-1 text-xs text-blue-500">
-                {t('common.search')}: "{filters.search}"
+                {Silian_t('common.search')}: "{Silian_filters.search}"
                 <button
-                  onClick={() => handleFilterChange('search', '')}
+                  onClick={() => Silian_handleFilterChange('search', '')}
                   className="ml-1 hover:text-blue-600"
                 >
-                  <X className="h-3 w-3" />
+                  <Silian_X className="h-3 w-3" />
                 </button>
               </span>
             )}
-            {filters.category && (
+            {Silian_filters.category && (
               <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-1 text-xs text-blue-500">
-                {t(`activities.categories.${filters.category}`, filters.category)}
+                {Silian_t(`activities.categories.${Silian_filters.category}`, Silian_filters.category)}
                 <button
-                  onClick={() => handleFilterChange('category', '')}
+                  onClick={() => Silian_handleFilterChange('category', '')}
                   className="ml-1 hover:text-blue-600"
                 >
-                  <X className="h-3 w-3" />
+                  <Silian_X className="h-3 w-3" />
                 </button>
               </span>
             )}
-            {filters.status && (
+            {Silian_filters.status && (
               <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-1 text-xs text-blue-500">
-                {t(`activities.status.${filters.status}`)}
+                {Silian_t(`activities.status.${Silian_filters.status}`)}
                 <button
-                  onClick={() => handleFilterChange('status', '')}
+                  onClick={() => Silian_handleFilterChange('status', '')}
                   className="ml-1 hover:text-blue-600"
                 >
-                  <X className="h-3 w-3" />
+                  <Silian_X className="h-3 w-3" />
                 </button>
               </span>
             )}
-            {(filters.start_date || filters.end_date) && (
+            {(Silian_filters.start_date || Silian_filters.end_date) && (
               <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-1 text-xs text-blue-500">
-                {filters.start_date} - {filters.end_date}
+                {Silian_filters.start_date} - {Silian_filters.end_date}
                 <button
                   onClick={() => {
-                    handleFilterChange('start_date', '');
-                    handleFilterChange('end_date', '');
+                    Silian_handleFilterChange('start_date', '');
+                    Silian_handleFilterChange('end_date', '');
                   }}
                   className="ml-1 hover:text-blue-600"
                 >
-                  <X className="h-3 w-3" />
+                  <Silian_X className="h-3 w-3" />
                 </button>
               </span>
             )}

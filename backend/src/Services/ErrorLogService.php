@@ -15,221 +15,221 @@ class ErrorLogService
     private PDO $db;
     private LoggerInterface $logger;
 
-    public function __construct(PDO $db, LoggerInterface $logger)
+    public function __construct(PDO $Silian_db, LoggerInterface $Silian_logger)
     {
-        $this->db = $db;
-        $this->logger = $logger;
+        $this->db = $Silian_db;
+        $this->logger = $Silian_logger;
     }
 
     /**
      * Persist an exception and request context into error_logs table.
      */
-    public function logException(\Throwable $e, Request $request, array $extra = []): ?int
+    public function logException(\Throwable $Silian_e, Request $Silian_request, array $Silian_extra = []): ?int
     {
         if ($this->isWriteDisabled()) {
             return null;
         }
 
         return $this->insertLog([
-            'error_type' => get_class($e),
-            'error_message' => $e->getMessage(),
-            'error_file' => $e->getFile(),
-            'error_line' => $e->getLine(),
+            'error_type' => get_class($Silian_e),
+            'error_message' => $Silian_e->getMessage(),
+            'error_file' => $Silian_e->getFile(),
+            'error_line' => $Silian_e->getLine(),
             'error_time' => date(self::DATE_FMT),
-            'script_name' => $this->getScriptName($request),
-            'client_get' => $this->safeJson($request->getQueryParams()),
-            'client_post' => $this->safeJson($this->normalizeBody($request->getParsedBody())),
-            'client_files' => $this->safeJson($this->normalizeFiles($request)),
-            'client_cookie' => $this->safeJson($request->getCookieParams()),
+            'script_name' => $this->getScriptName($Silian_request),
+            'client_get' => $this->safeJson($Silian_request->getQueryParams()),
+            'client_post' => $this->safeJson($this->normalizeBody($Silian_request->getParsedBody())),
+            'client_files' => $this->safeJson($this->normalizeFiles($Silian_request)),
+            'client_cookie' => $this->safeJson($Silian_request->getCookieParams()),
             'client_session' => $this->safeJson($_SESSION ?? []),
-            'client_server' => $this->safeJson($this->filterServer($request->getServerParams(), $extra)),
-            'request_id' => $this->resolveRequestId($request, $extra),
+            'client_server' => $this->safeJson($this->filterServer($Silian_request->getServerParams(), $Silian_extra)),
+            'request_id' => $this->resolveRequestId($Silian_request, $Silian_extra),
         ]);
     }
 
     /**
      * Persist a non-exception error with a custom type/message and request context.
      */
-    public function logError(string $type, string $message, Request $request, array $context = []): ?int
+    public function logError(string $Silian_type, string $Silian_message, Request $Silian_request, array $Silian_context = []): ?int
     {
         if ($this->isWriteDisabled()) {
             return null;
         }
 
         return $this->insertLog([
-            'error_type' => $type,
-            'error_message' => $message,
-            'error_file' => $context['file'] ?? null,
-            'error_line' => isset($context['line']) ? (int)$context['line'] : null,
+            'error_type' => $Silian_type,
+            'error_message' => $Silian_message,
+            'error_file' => $Silian_context['file'] ?? null,
+            'error_line' => isset($Silian_context['line']) ? (int)$Silian_context['line'] : null,
             'error_time' => date(self::DATE_FMT),
-            'script_name' => $this->getScriptName($request),
-            'client_get' => $this->safeJson($request->getQueryParams()),
-            'client_post' => $this->safeJson($this->normalizeBody($request->getParsedBody())),
-            'client_files' => $this->safeJson($this->normalizeFiles($request)),
-            'client_cookie' => $this->safeJson($request->getCookieParams()),
+            'script_name' => $this->getScriptName($Silian_request),
+            'client_get' => $this->safeJson($Silian_request->getQueryParams()),
+            'client_post' => $this->safeJson($this->normalizeBody($Silian_request->getParsedBody())),
+            'client_files' => $this->safeJson($this->normalizeFiles($Silian_request)),
+            'client_cookie' => $this->safeJson($Silian_request->getCookieParams()),
             'client_session' => $this->safeJson($_SESSION ?? []),
-            'client_server' => $this->safeJson($this->filterServer($request->getServerParams(), $context)),
-            'request_id' => $this->resolveRequestId($request, $context),
+            'client_server' => $this->safeJson($this->filterServer($Silian_request->getServerParams(), $Silian_context)),
+            'request_id' => $this->resolveRequestId($Silian_request, $Silian_context),
         ]);
     }
 
-    private function insertLog(array $data): ?int
+    private function insertLog(array $Silian_data): ?int
     {
         try {
-            $sql = 'INSERT INTO error_logs (error_type, error_message, error_file, error_line, error_time, script_name, client_get, client_post, client_files, client_cookie, client_session, client_server, request_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([
-                $data['error_type'] ?? null,
-                $data['error_message'] ?? null,
-                $data['error_file'] ?? null,
-                $data['error_line'] ?? null,
-                $data['error_time'] ?? date(self::DATE_FMT),
-                $data['script_name'] ?? null,
-                $data['client_get'] ?? null,
-                $data['client_post'] ?? null,
-                $data['client_files'] ?? null,
-                $data['client_cookie'] ?? null,
-                $data['client_session'] ?? null,
-                $data['client_server'] ?? null,
-                $data['request_id'] ?? null,
+            $Silian_sql = 'INSERT INTO error_logs (error_type, error_message, error_file, error_line, error_time, script_name, client_get, client_post, client_files, client_cookie, client_session, client_server, request_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)';
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->execute([
+                $Silian_data['error_type'] ?? null,
+                $Silian_data['error_message'] ?? null,
+                $Silian_data['error_file'] ?? null,
+                $Silian_data['error_line'] ?? null,
+                $Silian_data['error_time'] ?? date(self::DATE_FMT),
+                $Silian_data['script_name'] ?? null,
+                $Silian_data['client_get'] ?? null,
+                $Silian_data['client_post'] ?? null,
+                $Silian_data['client_files'] ?? null,
+                $Silian_data['client_cookie'] ?? null,
+                $Silian_data['client_session'] ?? null,
+                $Silian_data['client_server'] ?? null,
+                $Silian_data['request_id'] ?? null,
             ]);
-            $id = (int) $this->db->lastInsertId();
-            return $id > 0 ? $id : null;
-        } catch (\Throwable $ex) {
+            $Silian_id = (int) $this->db->lastInsertId();
+            return $Silian_id > 0 ? $Silian_id : null;
+        } catch (\Throwable $Silian_ex) {
             // Fallback to application logger to avoid losing the error entirely
             try {
                 $this->logger->error('Failed to persist error log', [
-                    'message' => $ex->getMessage(),
+                    'message' => $Silian_ex->getMessage(),
                 ]);
-            } catch (\Throwable $ignored) {
+            } catch (\Throwable $Silian_ignored) {
                 // swallow
             }
             return null;
         }
     }
 
-    private function getScriptName(Request $request): string
+    private function getScriptName(Request $Silian_request): string
     {
-        $server = $request->getServerParams();
-        return $server['SCRIPT_NAME'] ?? $server['PHP_SELF'] ?? (string)$request->getUri()->getPath();
+        $Silian_server = $Silian_request->getServerParams();
+        return $Silian_server['SCRIPT_NAME'] ?? $Silian_server['PHP_SELF'] ?? (string)$Silian_request->getUri()->getPath();
     }
 
-    private function resolveRequestId(Request $request, array $extra = []): ?string
+    private function resolveRequestId(Request $Silian_request, array $Silian_extra = []): ?string
     {
-        $attribute = $request->getAttribute('request_id');
-        if (is_string($attribute)) {
-            $normalized = RequestIdNormalizer::normalize($attribute);
-            if ($normalized !== null) {
-                return $normalized;
+        $Silian_attribute = $Silian_request->getAttribute('request_id');
+        if (is_string($Silian_attribute)) {
+            $Silian_normalized = RequestIdNormalizer::normalize($Silian_attribute);
+            if ($Silian_normalized !== null) {
+                return $Silian_normalized;
             }
         }
 
-        $header = RequestIdNormalizer::normalize($request->getHeaderLine('X-Request-ID'));
-        if ($header !== null) {
-            return $header;
+        $Silian_header = RequestIdNormalizer::normalize($Silian_request->getHeaderLine('X-Request-ID'));
+        if ($Silian_header !== null) {
+            return $Silian_header;
         }
 
-        $server = $request->getServerParams();
-        $serverId = $server['HTTP_X_REQUEST_ID'] ?? $server['REQUEST_ID'] ?? $server['HTTP_REQUEST_ID'] ?? null;
-        if (is_string($serverId)) {
-            $normalized = RequestIdNormalizer::normalize($serverId);
-            if ($normalized !== null) {
-                return $normalized;
+        $Silian_server = $Silian_request->getServerParams();
+        $Silian_serverId = $Silian_server['HTTP_X_REQUEST_ID'] ?? $Silian_server['REQUEST_ID'] ?? $Silian_server['HTTP_REQUEST_ID'] ?? null;
+        if (is_string($Silian_serverId)) {
+            $Silian_normalized = RequestIdNormalizer::normalize($Silian_serverId);
+            if ($Silian_normalized !== null) {
+                return $Silian_normalized;
             }
         }
 
-        if (!empty($extra['request_id']) && is_string($extra['request_id'])) {
-            $normalized = RequestIdNormalizer::normalize($extra['request_id']);
-            if ($normalized !== null) {
-                return $normalized;
+        if (!empty($Silian_extra['request_id']) && is_string($Silian_extra['request_id'])) {
+            $Silian_normalized = RequestIdNormalizer::normalize($Silian_extra['request_id']);
+            if ($Silian_normalized !== null) {
+                return $Silian_normalized;
             }
         }
 
-        $global = $_SERVER['HTTP_X_REQUEST_ID'] ?? $_SERVER['REQUEST_ID'] ?? $_SERVER['HTTP_REQUEST_ID'] ?? null;
-        if (is_string($global)) {
-            $normalized = RequestIdNormalizer::normalize($global);
-            if ($normalized !== null) {
-                return $normalized;
+        $Silian_global = $_SERVER['HTTP_X_REQUEST_ID'] ?? $_SERVER['REQUEST_ID'] ?? $_SERVER['HTTP_REQUEST_ID'] ?? null;
+        if (is_string($Silian_global)) {
+            $Silian_normalized = RequestIdNormalizer::normalize($Silian_global);
+            if ($Silian_normalized !== null) {
+                return $Silian_normalized;
             }
         }
 
         return null;
     }
 
-    private function safeJson($data): string
+    private function safeJson($Silian_data): string
     {
         try {
-            $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            if ($json === false) {
-                $json = '{}';
+            $Silian_json = json_encode($Silian_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if ($Silian_json === false) {
+                $Silian_json = '{}';
             }
             // ensure TEXT column size safety (approx)
-            if (strlen($json) > 60000) {
-                $json = substr($json, 0, 60000);
+            if (strlen($Silian_json) > 60000) {
+                $Silian_json = substr($Silian_json, 0, 60000);
             }
-            return $json;
-        } catch (\Throwable $e) {
+            return $Silian_json;
+        } catch (\Throwable $Silian_e) {
             return '{}';
         }
     }
 
-    private function normalizeBody($body): array
+    private function normalizeBody($Silian_body): array
     {
-        if (is_array($body)) {
-            return $body;
+        if (is_array($Silian_body)) {
+            return $Silian_body;
         }
-        if (is_object($body)) {
-            return (array) $body;
+        if (is_object($Silian_body)) {
+            return (array) $Silian_body;
         }
-        return $body ? ['_raw' => $body] : [];
+        return $Silian_body ? ['_raw' => $Silian_body] : [];
     }
 
-    private function normalizeFiles(Request $request): array
+    private function normalizeFiles(Request $Silian_request): array
     {
-        $files = $request->getUploadedFiles();
-        $out = [];
-        foreach ($files as $key => $file) {
-            if (is_array($file)) {
-                $out[$key] = array_map([$this, 'fileInfo'], $file);
+        $Silian_files = $Silian_request->getUploadedFiles();
+        $Silian_out = [];
+        foreach ($Silian_files as $Silian_key => $Silian_file) {
+            if (is_array($Silian_file)) {
+                $Silian_out[$Silian_key] = array_map([$this, 'fileInfo'], $Silian_file);
             } else {
-                $out[$key] = $this->fileInfo($file);
+                $Silian_out[$Silian_key] = $this->fileInfo($Silian_file);
             }
         }
-        return $out;
+        return $Silian_out;
     }
 
-    private function fileInfo($uploadedFile): array
+    private function fileInfo($Silian_uploadedFile): array
     {
-        if (!$uploadedFile) {
+        if (!$Silian_uploadedFile) {
             return [];
         }
         // UploadedFileInterface methods
         try {
             return [
-                'clientFilename' => method_exists($uploadedFile, 'getClientFilename') ? $uploadedFile->getClientFilename() : null,
-                'size' => method_exists($uploadedFile, 'getSize') ? $uploadedFile->getSize() : null,
-                'error' => method_exists($uploadedFile, 'getError') ? $uploadedFile->getError() : null,
+                'clientFilename' => method_exists($Silian_uploadedFile, 'getClientFilename') ? $Silian_uploadedFile->getClientFilename() : null,
+                'size' => method_exists($Silian_uploadedFile, 'getSize') ? $Silian_uploadedFile->getSize() : null,
+                'error' => method_exists($Silian_uploadedFile, 'getError') ? $Silian_uploadedFile->getError() : null,
             ];
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             return [];
         }
     }
 
-    private function filterServer(array $server, array $extra = []): array
+    private function filterServer(array $Silian_server, array $Silian_extra = []): array
     {
         // Avoid logging sensitive data
-        $hidden = ['PHP_AUTH_PW'];
-        foreach ($hidden as $key) {
-            if (isset($server[$key])) {
-                $server[$key] = '***';
+        $Silian_hidden = ['PHP_AUTH_PW'];
+        foreach ($Silian_hidden as $Silian_key) {
+            if (isset($Silian_server[$Silian_key])) {
+                $Silian_server[$Silian_key] = '***';
             }
         }
         // Add a few request-line highlights
-        $server['_summary'] = [
-            'method' => $server['REQUEST_METHOD'] ?? null,
-            'uri' => $server['REQUEST_URI'] ?? null,
-        ] + $extra;
-        return $server;
+        $Silian_server['_summary'] = [
+            'method' => $Silian_server['REQUEST_METHOD'] ?? null,
+            'uri' => $Silian_server['REQUEST_URI'] ?? null,
+        ] + $Silian_extra;
+        return $Silian_server;
     }
 
     private function isWriteDisabled(): bool
@@ -238,17 +238,17 @@ class ErrorLogService
             return false;
         }
 
-        $raw = $_ENV['DISABLE_ERROR_LOG_WRITES'] ?? $_SERVER['DISABLE_ERROR_LOG_WRITES'] ?? null;
-        if (!is_string($raw) && !is_numeric($raw) && !is_bool($raw)) {
+        $Silian_raw = $_ENV['DISABLE_ERROR_LOG_WRITES'] ?? $_SERVER['DISABLE_ERROR_LOG_WRITES'] ?? null;
+        if (!is_string($Silian_raw) && !is_numeric($Silian_raw) && !is_bool($Silian_raw)) {
             return false;
         }
 
-        return filter_var($raw, FILTER_VALIDATE_BOOLEAN) === true;
+        return filter_var($Silian_raw, FILTER_VALIDATE_BOOLEAN) === true;
     }
 
     private function isProductionEnvironment(): bool
     {
-        $env = strtolower(trim((string) ($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? '')));
-        return $env === 'production';
+        $Silian_env = strtolower(trim((string) ($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? '')));
+        return $Silian_env === 'production';
     }
 }

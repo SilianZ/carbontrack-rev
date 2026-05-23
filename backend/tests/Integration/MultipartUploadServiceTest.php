@@ -32,39 +32,39 @@ class MultipartUploadServiceTest extends TestCase
 
     public function testRegisterAndClearUploadWriteAuditLogs(): void
     {
-        $actions = [];
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->exactly(2))
+        $Silian_actions = [];
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->exactly(2))
             ->method('log')
-            ->willReturnCallback(function (array $payload) use (&$actions): bool {
-                $actions[] = $payload['action'] ?? null;
+            ->willReturnCallback(function (array $Silian_payload) use (&$Silian_actions): bool {
+                $Silian_actions[] = $Silian_payload['action'] ?? null;
                 return true;
             });
 
-        $service = new MultipartUploadService(new Logger('multipart-test'), $audit, null);
+        $Silian_service = new MultipartUploadService(new Logger('multipart-test'), $Silian_audit, null);
 
-        $upload = $service->registerUpload('upload-123', '/tmp/file.bin', 42, null, 120);
-        $service->clearUpload('upload-123');
+        $Silian_upload = $Silian_service->registerUpload('upload-123', '/tmp/file.bin', 42, null, 120);
+        $Silian_service->clearUpload('upload-123');
 
-        $this->assertSame('upload-123', $upload->upload_id);
-        $this->assertContains('multipart_upload_registered', $actions);
-        $this->assertContains('multipart_upload_cleared', $actions);
+        $this->assertSame('upload-123', $Silian_upload->upload_id);
+        $this->assertContains('multipart_upload_registered', $Silian_actions);
+        $this->assertContains('multipart_upload_cleared', $Silian_actions);
         $this->assertSame(0, (int) $this->capsule->getConnection()->table('multipart_uploads')->count());
     }
 
     public function testRegisterUploadAcceptsLegacyFourthArgumentAsTtl(): void
     {
-        $service = new MultipartUploadService(new Logger('multipart-test'));
+        $Silian_service = new MultipartUploadService(new Logger('multipart-test'));
 
-        $before = time();
-        $upload = $service->registerUpload('upload-legacy', '/tmp/file.bin', 42, 120);
-        $after = time();
+        $Silian_before = time();
+        $Silian_upload = $Silian_service->registerUpload('upload-legacy', '/tmp/file.bin', 42, 120);
+        $Silian_after = time();
 
-        $expiresAt = strtotime((string) $upload->expires_at);
+        $Silian_expiresAt = strtotime((string) $Silian_upload->expires_at);
 
-        $this->assertNotFalse($expiresAt);
-        $this->assertGreaterThanOrEqual($before + 60, $expiresAt);
-        $this->assertLessThanOrEqual($after + 125, $expiresAt);
-        $this->assertNull($upload->sha256);
+        $this->assertNotFalse($Silian_expiresAt);
+        $this->assertGreaterThanOrEqual($Silian_before + 60, $Silian_expiresAt);
+        $this->assertLessThanOrEqual($Silian_after + 125, $Silian_expiresAt);
+        $this->assertNull($Silian_upload->sha256);
     }
 }

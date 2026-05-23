@@ -1,78 +1,78 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/Button';
+import { useState as Silian_useState } from 'react';
+import { useTranslation as Silian_useTranslation } from 'react-i18next';
+import { Button as Silian_Button } from '@/components/ui/Button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu as Silian_DropdownMenu,
+  DropdownMenuContent as Silian_DropdownMenuContent,
+  DropdownMenuItem as Silian_DropdownMenuItem,
+  DropdownMenuTrigger as Silian_DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Globe, Check } from 'lucide-react';
-import { supportedLanguages, changeLanguage, getCurrentLanguage } from '@/lib/i18n';
-import { cn } from '@/lib/utils';
+import { Globe as Silian_Globe, Check as Silian_Check } from 'lucide-react';
+import { supportedLanguages as Silian_supportedLanguages, changeLanguage as Silian_changeLanguage, getCurrentLanguage as Silian_getCurrentLanguage } from '@/lib/i18n';
+import { cn as Silian_cn } from '@/lib/utils';
 
-const LanguageSwitcher = ({ variant = 'default', size = 'default', showText = true, className }) => {
+const Silian_LanguageSwitcher = ({ variant: Silian_variant = 'default', size: Silian_size = 'default', showText: Silian_showText = true, className: Silian_className }) => {
   // i18n instance is initialized globally; we don't use t() here directly.
-  useTranslation(['common']);
-  const [isChanging, setIsChanging] = useState(false);
-  const currentLanguage = getCurrentLanguage();
+  Silian_useTranslation(['common']);
+  const [Silian_isChanging, Silian_setIsChanging] = Silian_useState(false);
+  const Silian_currentLanguage = Silian_getCurrentLanguage();
 
-  const handleLanguageChange = async (lng) => {
-    if (lng === currentLanguage || isChanging) return;
-    
-    setIsChanging(true);
+  const Silian_handleLanguageChange = async (Silian_lng) => {
+    if (Silian_lng === Silian_currentLanguage || Silian_isChanging) return;
+
+    Silian_setIsChanging(true);
     try {
-      await changeLanguage(lng);
-    } catch (error) {
-      console.error('Failed to change language:', error);
+      await Silian_changeLanguage(Silian_lng);
+    } catch (Silian_error) {
+      console.error('Failed to change language:', Silian_error);
     } finally {
-      setIsChanging(false);
+      Silian_setIsChanging(false);
     }
   };
 
-  const currentLangInfo = supportedLanguages[currentLanguage];
+  const Silian_currentLangInfo = Silian_supportedLanguages[Silian_currentLanguage];
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant={variant} 
-          size={size}
-          disabled={isChanging}
-          className={cn('gap-2', className)}
+    <Silian_DropdownMenu>
+      <Silian_DropdownMenuTrigger asChild>
+        <Silian_Button
+          variant={Silian_variant}
+          size={Silian_size}
+          disabled={Silian_isChanging}
+          className={Silian_cn('gap-2', Silian_className)}
         >
-          <Globe className="h-4 w-4" />
-          {showText && (
+          <Silian_Globe className="h-4 w-4" />
+          {Silian_showText && (
             <span className="hidden sm:inline">
-              {currentLangInfo?.nativeName || currentLanguage.toUpperCase()}
+              {Silian_currentLangInfo?.nativeName || Silian_currentLanguage.toUpperCase()}
             </span>
           )}
           <span className="sm:hidden">
-            {currentLangInfo?.flag || '🌐'}
+            {Silian_currentLangInfo?.flag || '🌐'}
           </span>
-        </Button>
-      </DropdownMenuTrigger>
-      
-      <DropdownMenuContent align="end" className="min-w-[150px]">
-        {Object.entries(supportedLanguages).map(([lng, info]) => (
-          <DropdownMenuItem
-            key={lng}
-            onClick={() => handleLanguageChange(lng)}
+        </Silian_Button>
+      </Silian_DropdownMenuTrigger>
+
+      <Silian_DropdownMenuContent align="end" className="min-w-[150px]">
+        {Object.entries(Silian_supportedLanguages).map(([Silian_lng, Silian_info]) => (
+          <Silian_DropdownMenuItem
+            key={Silian_lng}
+            onClick={() => Silian_handleLanguageChange(Silian_lng)}
             className="flex items-center justify-between cursor-pointer"
-            disabled={isChanging}
+            disabled={Silian_isChanging}
           >
             <div className="flex items-center gap-2">
-              <span className="text-lg">{info.flag}</span>
-              <span>{info.nativeName}</span>
+              <span className="text-lg">{Silian_info.flag}</span>
+              <span>{Silian_info.nativeName}</span>
             </div>
-            {lng === currentLanguage && (
-              <Check className="h-4 w-4 text-primary" />
+            {Silian_lng === Silian_currentLanguage && (
+              <Silian_Check className="h-4 w-4 text-primary" />
             )}
-          </DropdownMenuItem>
+          </Silian_DropdownMenuItem>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </Silian_DropdownMenuContent>
+    </Silian_DropdownMenu>
   );
 };
 
-export default LanguageSwitcher;
+export default Silian_LanguageSwitcher;

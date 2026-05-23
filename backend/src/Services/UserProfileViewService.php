@@ -14,11 +14,11 @@ class UserProfileViewService
      * @param array<string, mixed> $row
      * @return array<string, mixed>
      */
-    public function buildProfileFields(array $row): array
+    public function buildProfileFields(array $Silian_row): array
     {
         return array_merge(
-            $this->buildSchoolFields($row),
-            $this->buildRegionFields($row)
+            $this->buildSchoolFields($Silian_row),
+            $this->buildRegionFields($Silian_row)
         );
     }
 
@@ -27,17 +27,17 @@ class UserProfileViewService
      * @param array<string, mixed>|null $profileFields
      * @return array<string, mixed>
      */
-    public function buildLegacyDisplayFields(array $row, ?array $profileFields = null): array
+    public function buildLegacyDisplayFields(array $Silian_row, ?array $Silian_profileFields = null): array
     {
-        $profileFields ??= $this->buildProfileFields($row);
-        $legacySchool = $this->normalizeText($row['school'] ?? null);
-        $legacyLocation = $this->normalizeText($row['location'] ?? null);
+        $Silian_profileFields ??= $this->buildProfileFields($Silian_row);
+        $Silian_legacySchool = $this->normalizeText($Silian_row['school'] ?? null);
+        $Silian_legacyLocation = $this->normalizeText($Silian_row['location'] ?? null);
 
         return [
-            'school' => $profileFields['school_name'] ?? $legacySchool,
-            'location' => $profileFields['region_label']
-                ?? $profileFields['region_code']
-                ?? $legacyLocation,
+            'school' => $Silian_profileFields['school_name'] ?? $Silian_legacySchool,
+            'location' => $Silian_profileFields['region_label']
+                ?? $Silian_profileFields['region_code']
+                ?? $Silian_legacyLocation,
         ];
     }
 
@@ -45,17 +45,17 @@ class UserProfileViewService
      * @param array<string, mixed> $row
      * @return array<string, mixed>
      */
-    public function buildSchoolFields(array $row): array
+    public function buildSchoolFields(array $Silian_row): array
     {
-        $schoolId = $this->normalizeSchoolId($row['school_id'] ?? null);
-        $joinedSchoolName = $this->normalizeText($row['school_name'] ?? null);
-        $legacySchoolName = $this->normalizeText($row['school'] ?? null);
+        $Silian_schoolId = $this->normalizeSchoolId($Silian_row['school_id'] ?? null);
+        $Silian_joinedSchoolName = $this->normalizeText($Silian_row['school_name'] ?? null);
+        $Silian_legacySchoolName = $this->normalizeText($Silian_row['school'] ?? null);
 
-        $schoolName = $joinedSchoolName ?? $legacySchoolName;
+        $Silian_schoolName = $Silian_joinedSchoolName ?? $Silian_legacySchoolName;
 
         return [
-            'school_id' => $schoolId,
-            'school_name' => $schoolName,
+            'school_id' => $Silian_schoolId,
+            'school_name' => $Silian_schoolName,
         ];
     }
 
@@ -63,20 +63,20 @@ class UserProfileViewService
      * @param array<string, mixed> $row
      * @return array<string, mixed>
      */
-    public function buildRegionFields(array $row): array
+    public function buildRegionFields(array $Silian_row): array
     {
-        $storedRegionCode = $this->normalizeText($row['region_code'] ?? null);
-        $legacyLocation = $this->normalizeText($row['location'] ?? null);
+        $Silian_storedRegionCode = $this->normalizeText($Silian_row['region_code'] ?? null);
+        $Silian_legacyLocation = $this->normalizeText($Silian_row['location'] ?? null);
 
-        $resolved = $this->resolveCompatibleRegion($storedRegionCode)
-            ?? $this->resolveCompatibleRegion($legacyLocation);
+        $Silian_resolved = $this->resolveCompatibleRegion($Silian_storedRegionCode)
+            ?? $this->resolveCompatibleRegion($Silian_legacyLocation);
 
-        if ($resolved !== null) {
-            return $resolved;
+        if ($Silian_resolved !== null) {
+            return $Silian_resolved;
         }
 
         return [
-            'region_code' => $storedRegionCode ?? $legacyLocation,
+            'region_code' => $Silian_storedRegionCode ?? $Silian_legacyLocation,
             'region_label' => null,
             'country_code' => null,
             'state_code' => null,
@@ -88,32 +88,32 @@ class UserProfileViewService
     /**
      * @return array<string, mixed>|null
      */
-    private function resolveCompatibleRegion(?string $value): ?array
+    private function resolveCompatibleRegion(?string $Silian_value): ?array
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
 
-        return $this->regionService->getRegionContext($value);
+        return $this->regionService->getRegionContext($Silian_value);
     }
 
-    private function normalizeText(mixed $value): ?string
+    private function normalizeText(mixed $Silian_value): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
 
-        $text = trim((string) $value);
-        return $text === '' ? null : $text;
+        $Silian_text = trim((string) $Silian_value);
+        return $Silian_text === '' ? null : $Silian_text;
     }
 
-    private function normalizeSchoolId(mixed $value): ?int
+    private function normalizeSchoolId(mixed $Silian_value): ?int
     {
-        if (!is_numeric($value)) {
+        if (!is_numeric($Silian_value)) {
             return null;
         }
 
-        $schoolId = (int) $value;
-        return $schoolId > 0 ? $schoolId : null;
+        $Silian_schoolId = (int) $Silian_value;
+        return $Silian_schoolId > 0 ? $Silian_schoolId : null;
     }
 }

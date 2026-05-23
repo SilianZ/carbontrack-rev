@@ -1,11 +1,11 @@
-import * as React from "react"
-import PropTypes from 'prop-types';
-import { Slot } from "@radix-ui/react-slot"
-import { cva } from "class-variance-authority";
+import * as Silian_React from "react"
+import Silian_PropTypes from 'prop-types';
+import { Slot as Silian_Slot } from "@radix-ui/react-slot"
+import { cva as Silian_cva } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn as Silian_cn } from "@/lib/utils"
 
-const badgeVariants = cva(
+const Silian_badgeVariants = Silian_cva(
   "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
   {
     variants: {
@@ -35,26 +35,26 @@ const badgeVariants = cva(
   }
 )
 
-function Badge({
-  className,
-  variant,
-  asChild = false,
-  ...props
+function Silian_Badge({
+  className: Silian_className,
+  variant: Silian_variant,
+  asChild: Silian_asChild = false,
+  ...Silian_props
 }) {
-  const Comp = asChild ? Slot : "span"
+  const Silian_Comp = Silian_asChild ? Silian_Slot : "span"
 
   return (
-    <Comp
+    <Silian_Comp
       data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
-      {...props} />
+      className={Silian_cn(Silian_badgeVariants({ variant: Silian_variant }), Silian_className)}
+      {...Silian_props} />
   );
 }
 
-export { Badge }
+export { Silian_Badge as Badge }
 
-Badge.propTypes = {
-  className: PropTypes.string,
-  variant: PropTypes.string,
-  asChild: PropTypes.bool,
+Silian_Badge.propTypes = {
+  className: Silian_PropTypes.string,
+  variant: Silian_PropTypes.string,
+  asChild: Silian_PropTypes.bool,
 };

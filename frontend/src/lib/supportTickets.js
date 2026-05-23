@@ -21,82 +21,82 @@ export const TICKET_PRIORITY_OPTIONS = [
   { value: 'urgent', labelKey: 'support.priorities.urgent' },
 ];
 
-export function normalizeUploadedFiles(result) {
-  const payload = result?.data ?? result ?? {};
-  const entries = Array.isArray(payload?.results)
-    ? payload.results
-    : payload?.file_path
-      ? [payload]
+export function normalizeUploadedFiles(Silian_result) {
+  const Silian_payload = Silian_result?.data ?? Silian_result ?? {};
+  const Silian_entries = Array.isArray(Silian_payload?.results)
+    ? Silian_payload.results
+    : Silian_payload?.file_path
+      ? [Silian_payload]
       : [];
 
-  return entries
-    .map((entry) => ({
-      file_path: entry?.file_path ?? entry?.path ?? '',
-      original_name: entry?.original_name ?? entry?.originalName ?? entry?.file_path?.split('/').pop() ?? 'attachment',
-      mime_type: entry?.mime_type ?? entry?.mimeType ?? '',
-      size: Number(entry?.size ?? 0),
-      public_url: entry?.public_url ?? entry?.url ?? null,
-      sha256: entry?.sha256 ?? null,
+  return Silian_entries
+    .map((Silian_entry) => ({
+      file_path: Silian_entry?.file_path ?? Silian_entry?.path ?? '',
+      original_name: Silian_entry?.original_name ?? Silian_entry?.originalName ?? Silian_entry?.file_path?.split('/').pop() ?? 'attachment',
+      mime_type: Silian_entry?.mime_type ?? Silian_entry?.mimeType ?? '',
+      size: Number(Silian_entry?.size ?? 0),
+      public_url: Silian_entry?.public_url ?? Silian_entry?.url ?? null,
+      sha256: Silian_entry?.sha256 ?? null,
     }))
-    .filter((entry) => entry.file_path);
+    .filter((Silian_entry) => Silian_entry.file_path);
 }
 
-export function mergeUploadedFiles(existingFiles = [], result) {
-  const nextFiles = normalizeUploadedFiles(result);
-  const fileMap = new Map(existingFiles.map((file) => [file.file_path, file]));
+export function mergeUploadedFiles(Silian_existingFiles = [], Silian_result) {
+  const Silian_nextFiles = normalizeUploadedFiles(Silian_result);
+  const Silian_fileMap = new Map(Silian_existingFiles.map((Silian_file) => [Silian_file.file_path, Silian_file]));
 
-  nextFiles.forEach((file) => {
-    fileMap.set(file.file_path, file);
+  Silian_nextFiles.forEach((Silian_file) => {
+    Silian_fileMap.set(Silian_file.file_path, Silian_file);
   });
 
-  return Array.from(fileMap.values());
+  return Array.from(Silian_fileMap.values());
 }
 
-export function formatSupportDate(value, locale = 'zh-CN', fallback = '--') {
-  if (!value) {
-    return fallback;
+export function formatSupportDate(Silian_value, Silian_locale = 'zh-CN', Silian_fallback = '--') {
+  if (!Silian_value) {
+    return Silian_fallback;
   }
 
-  const normalizedValue = typeof value === 'string'
-    ? value.trim().replace(' ', 'T')
-    : value;
-  const date = new Date(normalizedValue);
-  if (Number.isNaN(date.getTime())) {
-    return fallback;
+  const Silian_normalizedValue = typeof Silian_value === 'string'
+    ? Silian_value.trim().replace(' ', 'T')
+    : Silian_value;
+  const Silian_date = new Date(Silian_normalizedValue);
+  if (Number.isNaN(Silian_date.getTime())) {
+    return Silian_fallback;
   }
 
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(Silian_locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(date);
+  }).format(Silian_date);
 }
 
-export function formatSlaDuration(minutes, locale = 'zh-CN') {
-  const absolute = Math.max(0, Math.abs(Math.trunc(minutes)));
-  const days = Math.floor(absolute / 1440);
-  const hours = Math.floor((absolute % 1440) / 60);
-  const mins = absolute % 60;
+export function formatSlaDuration(Silian_minutes, Silian_locale = 'zh-CN') {
+  const Silian_absolute = Math.max(0, Math.abs(Math.trunc(Silian_minutes)));
+  const Silian_days = Math.floor(Silian_absolute / 1440);
+  const Silian_hours = Math.floor((Silian_absolute % 1440) / 60);
+  const Silian_mins = Silian_absolute % 60;
 
-  if (locale.startsWith('zh')) {
-    const parts = [];
-    if (days > 0) parts.push(`${days}天`);
-    if (hours > 0) parts.push(`${hours}小时`);
-    if (mins > 0 || parts.length === 0) parts.push(`${mins}分钟`);
-    return parts.join('');
+  if (Silian_locale.startsWith('zh')) {
+    const Silian_parts = [];
+    if (Silian_days > 0) Silian_parts.push(`${Silian_days}天`);
+    if (Silian_hours > 0) Silian_parts.push(`${Silian_hours}小时`);
+    if (Silian_mins > 0 || Silian_parts.length === 0) Silian_parts.push(`${Silian_mins}分钟`);
+    return Silian_parts.join('');
   }
 
-  const parts = [];
-  if (days > 0) parts.push(`${days}d`);
-  if (hours > 0) parts.push(`${hours}h`);
-  if (mins > 0 || parts.length === 0) parts.push(`${mins}m`);
-  return parts.join(' ');
+  const Silian_parts = [];
+  if (Silian_days > 0) Silian_parts.push(`${Silian_days}d`);
+  if (Silian_hours > 0) Silian_parts.push(`${Silian_hours}h`);
+  if (Silian_mins > 0 || Silian_parts.length === 0) Silian_parts.push(`${Silian_mins}m`);
+  return Silian_parts.join(' ');
 }
 
-export function getSlaTone(state) {
-  switch (state) {
+export function getSlaTone(Silian_state) {
+  switch (Silian_state) {
     case 'due_soon':
       return 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200';
     case 'breached':
@@ -110,34 +110,34 @@ export function getSlaTone(state) {
   }
 }
 
-export function getSlaMeta(ticket, locale = 'zh-CN') {
-  const summary = ticket?.sla_summary;
-  const state = summary?.display_state || ticket?.sla_status || 'pending';
-  const dueAt = summary?.active_due_at || null;
-  const minutesDelta = typeof summary?.active_minutes_delta === 'number' ? summary.active_minutes_delta : null;
+export function getSlaMeta(Silian_ticket, Silian_locale = 'zh-CN') {
+  const Silian_summary = Silian_ticket?.sla_summary;
+  const Silian_state = Silian_summary?.display_state || Silian_ticket?.sla_status || 'pending';
+  const Silian_dueAt = Silian_summary?.active_due_at || null;
+  const Silian_minutesDelta = typeof Silian_summary?.active_minutes_delta === 'number' ? Silian_summary.active_minutes_delta : null;
 
-  let relativeLabel = '--';
-  if (state === 'resolved') {
-    relativeLabel = locale.startsWith('zh') ? '已完成' : 'Completed';
-  } else if (minutesDelta !== null) {
-    const duration = formatSlaDuration(minutesDelta, locale);
-    relativeLabel = minutesDelta < 0
-      ? (locale.startsWith('zh') ? `超时 ${duration}` : `Overdue ${duration}`)
-      : (locale.startsWith('zh') ? `剩余 ${duration}` : `${duration} remaining`);
+  let Silian_relativeLabel = '--';
+  if (Silian_state === 'resolved') {
+    Silian_relativeLabel = Silian_locale.startsWith('zh') ? '已完成' : 'Completed';
+  } else if (Silian_minutesDelta !== null) {
+    const Silian_duration = formatSlaDuration(Silian_minutesDelta, Silian_locale);
+    Silian_relativeLabel = Silian_minutesDelta < 0
+      ? (Silian_locale.startsWith('zh') ? `超时 ${Silian_duration}` : `Overdue ${Silian_duration}`)
+      : (Silian_locale.startsWith('zh') ? `剩余 ${Silian_duration}` : `${Silian_duration} remaining`);
   }
 
   return {
-    state,
-    dueAt,
-    dueAtLabel: formatSupportDate(dueAt, locale),
-    relativeLabel,
-    activeTarget: summary?.active_target || null,
+    state: Silian_state,
+    dueAt: Silian_dueAt,
+    dueAtLabel: formatSupportDate(Silian_dueAt, Silian_locale),
+    relativeLabel: Silian_relativeLabel,
+    activeTarget: Silian_summary?.active_target || null,
   };
 }
 
-export function getSlaMilestoneMeta(ticket, key, locale = 'zh-CN') {
-  const milestone = ticket?.sla_summary?.[key];
-  if (!milestone?.due_at) {
+export function getSlaMilestoneMeta(Silian_ticket, Silian_key, Silian_locale = 'zh-CN') {
+  const Silian_milestone = Silian_ticket?.sla_summary?.[Silian_key];
+  if (!Silian_milestone?.due_at) {
     return {
       dueAtLabel: '--',
       relativeLabel: '--',
@@ -145,31 +145,31 @@ export function getSlaMilestoneMeta(ticket, key, locale = 'zh-CN') {
     };
   }
 
-  let relativeLabel = '--';
-  if (milestone.state === 'met') {
-    relativeLabel = locale.startsWith('zh') ? '已完成' : 'Completed';
-  } else if (typeof milestone.minutes_delta === 'number') {
-    const duration = formatSlaDuration(milestone.minutes_delta, locale);
-    relativeLabel = milestone.minutes_delta < 0
-      ? (locale.startsWith('zh') ? `超时 ${duration}` : `Overdue ${duration}`)
-      : (locale.startsWith('zh') ? `剩余 ${duration}` : `${duration} remaining`);
+  let Silian_relativeLabel = '--';
+  if (Silian_milestone.state === 'met') {
+    Silian_relativeLabel = Silian_locale.startsWith('zh') ? '已完成' : 'Completed';
+  } else if (typeof Silian_milestone.minutes_delta === 'number') {
+    const Silian_duration = formatSlaDuration(Silian_milestone.minutes_delta, Silian_locale);
+    Silian_relativeLabel = Silian_milestone.minutes_delta < 0
+      ? (Silian_locale.startsWith('zh') ? `超时 ${Silian_duration}` : `Overdue ${Silian_duration}`)
+      : (Silian_locale.startsWith('zh') ? `剩余 ${Silian_duration}` : `${Silian_duration} remaining`);
   }
 
   return {
-    dueAtLabel: formatSupportDate(milestone.due_at, locale),
-    relativeLabel,
-    state: milestone.state || 'pending',
+    dueAtLabel: formatSupportDate(Silian_milestone.due_at, Silian_locale),
+    relativeLabel: Silian_relativeLabel,
+    state: Silian_milestone.state || 'pending',
   };
 }
 
-export function isImageAttachment(attachment) {
-  const mimeType = String(attachment?.mime_type ?? '');
-  const filePath = String(attachment?.file_path ?? '').toLowerCase();
-  return mimeType.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(filePath);
+export function isImageAttachment(Silian_attachment) {
+  const Silian_mimeType = String(Silian_attachment?.mime_type ?? '');
+  const Silian_filePath = String(Silian_attachment?.file_path ?? '').toLowerCase();
+  return Silian_mimeType.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(Silian_filePath);
 }
 
-export function getStatusTone(status) {
-  switch (status) {
+export function getStatusTone(Silian_status) {
+  switch (Silian_status) {
     case 'open':
       return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200';
     case 'in_progress':
@@ -185,8 +185,8 @@ export function getStatusTone(status) {
   }
 }
 
-export function getPriorityVariant(priority) {
-  switch (priority) {
+export function getPriorityVariant(Silian_priority) {
+  switch (Silian_priority) {
     case 'urgent':
       return 'urgent';
     case 'high':
@@ -198,8 +198,8 @@ export function getPriorityVariant(priority) {
   }
 }
 
-export function getTagTone(color) {
-  switch (color) {
+export function getTagTone(Silian_color) {
+  switch (Silian_color) {
     case 'rose':
       return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200';
     case 'sky':

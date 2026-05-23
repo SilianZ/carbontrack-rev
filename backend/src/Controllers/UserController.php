@@ -66,244 +66,244 @@ class UserController
     private ?StreakLeaderboardService $streakLeaderboardService;
     private UserProfileViewService $userProfileViewService;
     public function __construct(
-        AuthService $authService,
-        AuditLogService $auditLogService,
-        MessageService $messageService,
-        Avatar $avatarModel,
-        NotificationPreferenceService $notificationPreferenceService,
-        ?TurnstileService $turnstileService = null,
-        ?EmailService $emailService = null,
-        ?Logger $logger = null,
-        ?PDO $db = null,
-        ?ErrorLogService $errorLogService = null,
-        ?CloudflareR2Service $r2Service = null,
-        ?RegionService $regionService = null,
-        ?LeaderboardService $leaderboardService = null,
-        ?CheckinService $checkinService = null,
-        ?StreakLeaderboardService $streakLeaderboardService = null,
-        ?UserProfileViewService $userProfileViewService = null
+        AuthService $Silian_authService,
+        AuditLogService $Silian_auditLogService,
+        MessageService $Silian_messageService,
+        Avatar $Silian_avatarModel,
+        NotificationPreferenceService $Silian_notificationPreferenceService,
+        ?TurnstileService $Silian_turnstileService = null,
+        ?EmailService $Silian_emailService = null,
+        ?Logger $Silian_logger = null,
+        ?PDO $Silian_db = null,
+        ?ErrorLogService $Silian_errorLogService = null,
+        ?CloudflareR2Service $Silian_r2Service = null,
+        ?RegionService $Silian_regionService = null,
+        ?LeaderboardService $Silian_leaderboardService = null,
+        ?CheckinService $Silian_checkinService = null,
+        ?StreakLeaderboardService $Silian_streakLeaderboardService = null,
+        ?UserProfileViewService $Silian_userProfileViewService = null
     ) {
-        if ($logger === null) {
+        if ($Silian_logger === null) {
             throw new \InvalidArgumentException('UserController requires a logger instance.');
         }
-        if ($db === null) {
+        if ($Silian_db === null) {
             throw new \InvalidArgumentException('UserController requires a PDO instance.');
         }
-        if ($regionService === null) {
+        if ($Silian_regionService === null) {
             throw new \InvalidArgumentException('UserController requires a RegionService instance.');
         }
 
-        $this->authService = $authService;
-        $this->auditLogService = $auditLogService;
-        $this->messageService = $messageService;
-        $this->emailService = $emailService;
-        $this->avatarModel = $avatarModel;
-        $this->notificationPreferenceService = $notificationPreferenceService;
-        $this->turnstileService = $turnstileService;
-        $this->logger = $logger;
-        $this->db = $db;
-        $this->errorLogService = $errorLogService;
-        $this->r2Service = $r2Service;
-        $this->regionService = $regionService;
-        $this->leaderboardService = $leaderboardService;
-        $this->checkinService = $checkinService;
-        $this->streakLeaderboardService = $streakLeaderboardService;
-        $this->userProfileViewService = $userProfileViewService ?? new UserProfileViewService($regionService);
+        $this->authService = $Silian_authService;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->messageService = $Silian_messageService;
+        $this->emailService = $Silian_emailService;
+        $this->avatarModel = $Silian_avatarModel;
+        $this->notificationPreferenceService = $Silian_notificationPreferenceService;
+        $this->turnstileService = $Silian_turnstileService;
+        $this->logger = $Silian_logger;
+        $this->db = $Silian_db;
+        $this->errorLogService = $Silian_errorLogService;
+        $this->r2Service = $Silian_r2Service;
+        $this->regionService = $Silian_regionService;
+        $this->leaderboardService = $Silian_leaderboardService;
+        $this->checkinService = $Silian_checkinService;
+        $this->streakLeaderboardService = $Silian_streakLeaderboardService;
+        $this->userProfileViewService = $Silian_userProfileViewService ?? new UserProfileViewService($Silian_regionService);
     }
 
-    private function buildNotificationTestEmailJob(array $user, string $category, string $email, string $displayName): ?array
+    private function buildNotificationTestEmailJob(array $Silian_user, string $Silian_category, string $Silian_email, string $Silian_displayName): ?array
     {
-        $baseContext = [
-            'category' => $category,
+        $Silian_baseContext = [
+            'category' => $Silian_category,
         ];
 
-        switch ($category) {
+        switch ($Silian_category) {
             case NotificationPreferenceService::CATEGORY_ACTIVITY: {
-                $sample = $this->fetchLatestActivitySample((int)$user['id']);
-                $activityName = $sample['name'];
-                if ($sample['generated']) {
-                    $activityName .= ' (Test sample)';
+                $Silian_sample = $this->fetchLatestActivitySample((int)$Silian_user['id']);
+                $Silian_activityName = $Silian_sample['name'];
+                if ($Silian_sample['generated']) {
+                    $Silian_activityName .= ' (Test sample)';
                 }
-                $points = (float)($sample['points'] ?? 0);
+                $Silian_points = (float)($Silian_sample['points'] ?? 0);
 
                 return [
-                    'callback' => function (bool $async) use ($email, $displayName, $activityName, $points) {
+                    'callback' => function (bool $Silian_async) use ($Silian_email, $Silian_displayName, $Silian_activityName, $Silian_points) {
                         return $this->emailService->sendActivityApprovedNotification(
-                            $email,
-                            $displayName,
-                            $activityName,
-                            $points
+                            $Silian_email,
+                            $Silian_displayName,
+                            $Silian_activityName,
+                            $Silian_points
                         );
                     },
-                    'context' => array_merge($baseContext, ['sample' => $sample]),
-                    'generated' => $sample['generated'],
+                    'context' => array_merge($Silian_baseContext, ['sample' => $Silian_sample]),
+                    'generated' => $Silian_sample['generated'],
                 ];
             }
 
             case NotificationPreferenceService::CATEGORY_TRANSACTION: {
-                $sample = $this->fetchLatestExchangeSample((int)$user['id']);
-                $productName = $sample['product'];
-                if ($sample['generated']) {
-                    $productName .= ' (Test sample)';
+                $Silian_sample = $this->fetchLatestExchangeSample((int)$Silian_user['id']);
+                $Silian_productName = $Silian_sample['product'];
+                if ($Silian_sample['generated']) {
+                    $Silian_productName .= ' (Test sample)';
                 }
-                $quantity = (int)($sample['quantity'] ?? 1);
-                $points = (float)($sample['points'] ?? 0);
+                $Silian_quantity = (int)($Silian_sample['quantity'] ?? 1);
+                $Silian_points = (float)($Silian_sample['points'] ?? 0);
 
                 return [
-                    'callback' => function (bool $async) use ($email, $displayName, $productName, $quantity, $points) {
+                    'callback' => function (bool $Silian_async) use ($Silian_email, $Silian_displayName, $Silian_productName, $Silian_quantity, $Silian_points) {
                         return $this->emailService->sendExchangeConfirmation(
-                            $email,
-                            $displayName,
-                            $productName,
-                            $quantity,
-                            $points
+                            $Silian_email,
+                            $Silian_displayName,
+                            $Silian_productName,
+                            $Silian_quantity,
+                            $Silian_points
                         );
                     },
-                    'context' => array_merge($baseContext, ['sample' => $sample]),
-                    'generated' => $sample['generated'],
+                    'context' => array_merge($Silian_baseContext, ['sample' => $Silian_sample]),
+                    'generated' => $Silian_sample['generated'],
                 ];
             }
 
             case NotificationPreferenceService::CATEGORY_VERIFICATION: {
-                $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT) . ' (TEST)';
-                $token = bin2hex(random_bytes(16));
-                $link = $this->buildTestLink('auth/verify-email', [
-                    'token' => $token,
+                $Silian_code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT) . ' (TEST)';
+                $Silian_token = bin2hex(random_bytes(16));
+                $Silian_link = $this->buildTestLink('auth/verify-email', [
+                    'token' => $Silian_token,
                     'test' => 1,
                 ]);
-                $ttl = 30;
+                $Silian_ttl = 30;
 
                 return [
-                    'callback' => function (bool $async) use ($email, $displayName, $code, $ttl, $link) {
+                    'callback' => function (bool $Silian_async) use ($Silian_email, $Silian_displayName, $Silian_code, $Silian_ttl, $Silian_link) {
                         return $this->emailService->sendVerificationCode(
-                            $email,
-                            $displayName,
-                            $code,
-                            $ttl,
-                            $link
+                            $Silian_email,
+                            $Silian_displayName,
+                            $Silian_code,
+                            $Silian_ttl,
+                            $Silian_link
                         );
                     },
-                    'context' => array_merge($baseContext, [
-                        'code' => $code,
-                        'link' => $link,
+                    'context' => array_merge($Silian_baseContext, [
+                        'code' => $Silian_code,
+                        'link' => $Silian_link,
                     ]),
                     'generated' => true,
                 ];
             }
 
             case NotificationPreferenceService::CATEGORY_SECURITY: {
-                $link = $this->buildTestLink('auth/reset-password', [
+                $Silian_link = $this->buildTestLink('auth/reset-password', [
                     'token' => bin2hex(random_bytes(16)),
                     'test' => 1,
                 ]);
 
                 return [
-                    'callback' => function (bool $async) use ($email, $displayName, $link) {
+                    'callback' => function (bool $Silian_async) use ($Silian_email, $Silian_displayName, $Silian_link) {
                         return $this->emailService->sendPasswordResetLink(
-                            $email,
-                            $displayName . ' (Test preview)',
-                            $link
+                            $Silian_email,
+                            $Silian_displayName . ' (Test preview)',
+                            $Silian_link
                         );
                     },
-                    'context' => array_merge($baseContext, ['link' => $link]),
+                    'context' => array_merge($Silian_baseContext, ['link' => $Silian_link]),
                     'generated' => true,
                 ];
             }
 
             case NotificationPreferenceService::CATEGORY_SYSTEM: {
-                $appName = $this->emailService->getAppName();
-                $subject = sprintf('[Test] %s onboarding sample', $appName);
-                $body = sprintf(
+                $Silian_appName = $this->emailService->getAppName();
+                $Silian_subject = sprintf('[Test] %s onboarding sample', $Silian_appName);
+                $Silian_body = sprintf(
                     "Hello %s,\n\nThis is a sample onboarding message showcasing the tips and guidance emails from %s.\n"
                     . "Use this to verify deliverability and spam settings.\n\nThank you for helping us keep communications open!",
-                    $displayName,
-                    $appName
+                    $Silian_displayName,
+                    $Silian_appName
                 );
 
                 return [
-                    'callback' => function (bool $async) use ($email, $displayName, $subject, $body) {
+                    'callback' => function (bool $Silian_async) use ($Silian_email, $Silian_displayName, $Silian_subject, $Silian_body) {
                         return $this->emailService->sendMessageNotification(
-                            $email,
-                            $displayName,
-                            $subject,
-                            $body,
+                            $Silian_email,
+                            $Silian_displayName,
+                            $Silian_subject,
+                            $Silian_body,
                             NotificationPreferenceService::CATEGORY_SYSTEM,
                             Message::PRIORITY_LOW
                         );
                     },
-                    'context' => $baseContext,
+                    'context' => $Silian_baseContext,
                     'generated' => true,
                 ];
             }
 
             case NotificationPreferenceService::CATEGORY_ANNOUNCEMENT: {
-                $appName = $this->emailService->getAppName();
-                $subject = sprintf('[Test] %s announcement preview', $appName);
-                $body = sprintf(
+                $Silian_appName = $this->emailService->getAppName();
+                $Silian_subject = sprintf('[Test] %s announcement preview', $Silian_appName);
+                $Silian_body = sprintf(
                     "Hi %s,\n\nThis is how platform announcements will appear in your inbox. "
                     . "Announcements may include maintenance notices, feature rollouts, or community news.\n\n"
                     . "This message was generated for preview purposes only.",
-                    $displayName
+                    $Silian_displayName
                 );
 
                 return [
-                    'callback' => function (bool $async) use ($email, $displayName, $subject, $body) {
+                    'callback' => function (bool $Silian_async) use ($Silian_email, $Silian_displayName, $Silian_subject, $Silian_body) {
                         return $this->emailService->sendMessageNotification(
-                            $email,
-                            $displayName,
-                            $subject,
-                            $body,
+                            $Silian_email,
+                            $Silian_displayName,
+                            $Silian_subject,
+                            $Silian_body,
                             NotificationPreferenceService::CATEGORY_ANNOUNCEMENT,
                             Message::PRIORITY_LOW
                         );
                     },
-                    'context' => $baseContext,
+                    'context' => $Silian_baseContext,
                     'generated' => true,
                 ];
             }
 
             case NotificationPreferenceService::CATEGORY_MESSAGE: {
-                $sample = $this->fetchLatestMessageSample((int)$user['id']);
-                $subject = $sample['title'];
-                $body = $sample['content'];
+                $Silian_sample = $this->fetchLatestMessageSample((int)$Silian_user['id']);
+                $Silian_subject = $Silian_sample['title'];
+                $Silian_body = $Silian_sample['content'];
 
                 return [
-                    'callback' => function (bool $async) use ($email, $displayName, $subject, $body) {
+                    'callback' => function (bool $Silian_async) use ($Silian_email, $Silian_displayName, $Silian_subject, $Silian_body) {
                         return $this->emailService->sendMessageNotification(
-                            $email,
-                            $displayName,
-                            $subject,
-                            $body,
+                            $Silian_email,
+                            $Silian_displayName,
+                            $Silian_subject,
+                            $Silian_body,
                             NotificationPreferenceService::CATEGORY_MESSAGE,
                             Message::PRIORITY_LOW
                         );
                     },
-                    'context' => array_merge($baseContext, ['sample' => $sample]),
-                    'generated' => $sample['generated'],
+                    'context' => array_merge($Silian_baseContext, ['sample' => $Silian_sample]),
+                    'generated' => $Silian_sample['generated'],
                 ];
             }
 
             case NotificationPreferenceService::CATEGORY_SUPPORT: {
-                $subject = sprintf('[Test] %s support update', $this->emailService->getAppName());
-                $body = sprintf(
+                $Silian_subject = sprintf('[Test] %s support update', $this->emailService->getAppName());
+                $Silian_body = sprintf(
                     "Hello %s,\n\nThis is a sample support ticket update email. "
                     . "You will receive messages like this when a support agent changes ticket status, updates priority, or leaves an operational note.\n\n"
                     . "You can manage this category from Notification Settings at any time.",
-                    $displayName
+                    $Silian_displayName
                 );
 
                 return [
-                    'callback' => function (bool $async) use ($email, $displayName, $subject, $body) {
+                    'callback' => function (bool $Silian_async) use ($Silian_email, $Silian_displayName, $Silian_subject, $Silian_body) {
                         return $this->emailService->sendMessageNotification(
-                            $email,
-                            $displayName,
-                            $subject,
-                            $body,
+                            $Silian_email,
+                            $Silian_displayName,
+                            $Silian_subject,
+                            $Silian_body,
                             NotificationPreferenceService::CATEGORY_SUPPORT,
                             Message::PRIORITY_LOW
                         );
                     },
-                    'context' => $baseContext,
+                    'context' => $Silian_baseContext,
                     'generated' => true,
                 ];
             }
@@ -312,10 +312,10 @@ class UserController
         return null;
     }
 
-    private function fetchLatestActivitySample(int $userId): array
+    private function fetchLatestActivitySample(int $Silian_userId): array
     {
         try {
-            $stmt = $this->db->prepare("
+            $Silian_stmt = $this->db->prepare("
                 SELECT r.points_earned, r.created_at, a.name_en, a.name_zh, a.unit
                 FROM carbon_records r
                 LEFT JOIN carbon_activities a ON r.activity_id = a.id
@@ -323,29 +323,29 @@ class UserController
                 ORDER BY r.created_at DESC
                 LIMIT 1
             ");
-            $stmt->execute(['uid' => $userId]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_stmt->execute(['uid' => $Silian_userId]);
+            $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($row) {
-                $nameEn = trim((string)($row['name_en'] ?? ''));
-                $nameZh = trim((string)($row['name_zh'] ?? ''));
-                $name = $nameZh !== '' ? $nameZh : ($nameEn !== '' ? $nameEn : 'Your carbon-saving activity');
-                if ($nameZh !== '' && $nameEn !== '' && $nameZh !== $nameEn) {
-                    $name = $nameZh . ' / ' . $nameEn;
+            if ($Silian_row) {
+                $Silian_nameEn = trim((string)($Silian_row['name_en'] ?? ''));
+                $Silian_nameZh = trim((string)($Silian_row['name_zh'] ?? ''));
+                $Silian_name = $Silian_nameZh !== '' ? $Silian_nameZh : ($Silian_nameEn !== '' ? $Silian_nameEn : 'Your carbon-saving activity');
+                if ($Silian_nameZh !== '' && $Silian_nameEn !== '' && $Silian_nameZh !== $Silian_nameEn) {
+                    $Silian_name = $Silian_nameZh . ' / ' . $Silian_nameEn;
                 }
 
                 return [
-                    'name' => $name,
-                    'points' => (float)($row['points_earned'] ?? 0),
-                    'unit' => $row['unit'] ?? null,
-                    'recorded_at' => $row['created_at'] ?? null,
+                    'name' => $Silian_name,
+                    'points' => (float)($Silian_row['points_earned'] ?? 0),
+                    'unit' => $Silian_row['unit'] ?? null,
+                    'recorded_at' => $Silian_row['created_at'] ?? null,
                     'generated' => false,
                 ];
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->debug('Failed to fetch latest carbon record for test email', [
-                'error' => $e->getMessage(),
-                'user_id' => $userId,
+                'error' => $Silian_e->getMessage(),
+                'user_id' => $Silian_userId,
             ]);
         }
 
@@ -358,10 +358,10 @@ class UserController
         ];
     }
 
-    private function fetchLatestExchangeSample(int $userId): array
+    private function fetchLatestExchangeSample(int $Silian_userId): array
     {
         try {
-            $stmt = $this->db->prepare("
+            $Silian_stmt = $this->db->prepare("
                 SELECT e.quantity, e.points_used, e.created_at, e.product_name, p.name AS product_name_fallback
                 FROM point_exchanges e
                 LEFT JOIN products p ON e.product_id = p.id
@@ -369,30 +369,30 @@ class UserController
                 ORDER BY e.created_at DESC
                 LIMIT 1
             ");
-            $stmt->execute(['user_id' => $userId]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_stmt->execute(['user_id' => $Silian_userId]);
+            $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($row) {
-                $product = trim((string)($row['product_name'] ?? ''));
-                if ($product === '') {
-                    $product = trim((string)($row['product_name_fallback'] ?? ''));
+            if ($Silian_row) {
+                $Silian_product = trim((string)($Silian_row['product_name'] ?? ''));
+                if ($Silian_product === '') {
+                    $Silian_product = trim((string)($Silian_row['product_name_fallback'] ?? ''));
                 }
-                if ($product === '') {
-                    $product = 'Reward item';
+                if ($Silian_product === '') {
+                    $Silian_product = 'Reward item';
                 }
 
                 return [
-                    'product' => $product,
-                    'quantity' => (int)($row['quantity'] ?? 1),
-                    'points' => (float)($row['points_used'] ?? 0),
-                    'exchanged_at' => $row['created_at'] ?? null,
+                    'product' => $Silian_product,
+                    'quantity' => (int)($Silian_row['quantity'] ?? 1),
+                    'points' => (float)($Silian_row['points_used'] ?? 0),
+                    'exchanged_at' => $Silian_row['created_at'] ?? null,
                     'generated' => false,
                 ];
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->debug('Failed to fetch latest exchange for test email', [
-                'error' => $e->getMessage(),
-                'user_id' => $userId,
+                'error' => $Silian_e->getMessage(),
+                'user_id' => $Silian_userId,
             ]);
         }
 
@@ -405,31 +405,31 @@ class UserController
         ];
     }
 
-    private function fetchLatestMessageSample(int $userId): array
+    private function fetchLatestMessageSample(int $Silian_userId): array
     {
         try {
-            $stmt = $this->db->prepare("
+            $Silian_stmt = $this->db->prepare("
                 SELECT title, content, created_at
                 FROM messages
                 WHERE receiver_id = :uid AND deleted_at IS NULL
                 ORDER BY created_at DESC
                 LIMIT 1
             ");
-            $stmt->execute(['uid' => $userId]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_stmt->execute(['uid' => $Silian_userId]);
+            $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($row) {
+            if ($Silian_row) {
                 return [
-                    'title' => (string)$row['title'],
-                    'content' => (string)$row['content'],
-                    'created_at' => $row['created_at'] ?? null,
+                    'title' => (string)$Silian_row['title'],
+                    'content' => (string)$Silian_row['content'],
+                    'created_at' => $Silian_row['created_at'] ?? null,
                     'generated' => false,
                 ];
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->debug('Failed to fetch latest direct message for test email', [
-                'error' => $e->getMessage(),
-                'user_id' => $userId,
+                'error' => $Silian_e->getMessage(),
+                'user_id' => $Silian_userId,
             ]);
         }
 
@@ -441,97 +441,97 @@ class UserController
         ];
     }
 
-    private function buildTestLink(string $path, array $query = []): string
+    private function buildTestLink(string $Silian_path, array $Silian_query = []): string
     {
-        $base = $_ENV['EMAIL_VERIFICATION_URL']
+        $Silian_base = $_ENV['EMAIL_VERIFICATION_URL']
             ?? $_ENV['FRONTEND_URL']
             ?? $_ENV['APP_URL']
             ?? 'https://example.com';
 
-        $base = rtrim((string)$base, '/');
-        $path = '/' . ltrim($path, '/');
-        if (!empty($query)) {
-            $path .= '?' . http_build_query($query);
+        $Silian_base = rtrim((string)$Silian_base, '/');
+        $Silian_path = '/' . ltrim($Silian_path, '/');
+        if (!empty($Silian_query)) {
+            $Silian_path .= '?' . http_build_query($Silian_query);
         }
 
-        return $base . $path;
+        return $Silian_base . $Silian_path;
     }
 
     /**
      * 获取当前用户信息
      */
-    public function getCurrentUser(Request $request, Response $response): Response
+    public function getCurrentUser(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
                 ], 401);
             }
 
-            $stmt = $this->db->prepare("
+            $Silian_stmt = $this->db->prepare("
                 SELECT u.*, s.name as school_name, a.file_path as avatar_path
-                FROM users u 
-                LEFT JOIN schools s ON u.school_id = s.id 
+                FROM users u
+                LEFT JOIN schools s ON u.school_id = s.id
                 LEFT JOIN avatars a ON u.avatar_id = a.id
                 WHERE u.id = ? AND u.deleted_at IS NULL
             ");
-            $stmt->execute([$user['id']]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$row) {
-                return $this->jsonResponse($response, [
+            $Silian_stmt->execute([$Silian_user['id']]);
+            $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$Silian_row) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'User not found',
                     'code' => 'USER_NOT_FOUND'
                 ], 404);
             }
 
-            $avatar = $this->resolveAvatar($row['avatar_path'] ?? null);
-            $profileFields = $this->userProfileViewService->buildProfileFields($row);
-            $roleView = $this->authService->normalizeUserRoleView($row);
+            $Silian_avatar = $this->resolveAvatar($Silian_row['avatar_path'] ?? null);
+            $Silian_profileFields = $this->userProfileViewService->buildProfileFields($Silian_row);
+            $Silian_roleView = $this->authService->normalizeUserRoleView($Silian_row);
 
-                $userInfo = [
-                    'id' => $row['id'],
-                'uuid' => $row['uuid'] ?? null,
-                'username' => $row['username'],
-                'email' => $row['email'],
-                'school_id' => $profileFields['school_id'],
-                'school_name' => $profileFields['school_name'],
-                'points' => (int)$row['points'],
-                    'role' => $roleView['role'] ?? 'user',
-                    'is_admin' => (bool) ($roleView['is_admin'] ?? false),
-                    'is_support' => (bool) ($roleView['is_support'] ?? false),
-                    'email_verified_at' => $row['email_verified_at'] ?? null,
-                'avatar_id' => $row['avatar_id'],
-                'avatar_path' => $avatar['avatar_path'],
-                'avatar_url' => $avatar['avatar_url'],
-                'lastlgn' => $row['lastlgn'] ?? null,
-                'updated_at' => $row['updated_at'] ?? null,
-                'region_code' => $profileFields['region_code'],
-                'region_label' => $profileFields['region_label'],
-                'country_code' => $profileFields['country_code'],
-                'state_code' => $profileFields['state_code'],
-                'country_name' => $profileFields['country_name'],
-                'state_name' => $profileFields['state_name'],
+                $Silian_userInfo = [
+                    'id' => $Silian_row['id'],
+                'uuid' => $Silian_row['uuid'] ?? null,
+                'username' => $Silian_row['username'],
+                'email' => $Silian_row['email'],
+                'school_id' => $Silian_profileFields['school_id'],
+                'school_name' => $Silian_profileFields['school_name'],
+                'points' => (int)$Silian_row['points'],
+                    'role' => $Silian_roleView['role'] ?? 'user',
+                    'is_admin' => (bool) ($Silian_roleView['is_admin'] ?? false),
+                    'is_support' => (bool) ($Silian_roleView['is_support'] ?? false),
+                    'email_verified_at' => $Silian_row['email_verified_at'] ?? null,
+                'avatar_id' => $Silian_row['avatar_id'],
+                'avatar_path' => $Silian_avatar['avatar_path'],
+                'avatar_url' => $Silian_avatar['avatar_url'],
+                'lastlgn' => $Silian_row['lastlgn'] ?? null,
+                'updated_at' => $Silian_row['updated_at'] ?? null,
+                'region_code' => $Silian_profileFields['region_code'],
+                'region_label' => $Silian_profileFields['region_label'],
+                'country_code' => $Silian_profileFields['country_code'],
+                'state_code' => $Silian_profileFields['state_code'],
+                'country_name' => $Silian_profileFields['country_name'],
+                'state_name' => $Silian_profileFields['state_name'],
             ];
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $userInfo
+                'data' => $Silian_userInfo
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             $this->logger->error('Get current user failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'user_id' => $Silian_user['id'] ?? null
             ]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get current user'
             ], 500);
@@ -541,78 +541,78 @@ class UserController
     /**
      * 更新当前用户（兼容旧接口，转到 updateProfile）
      */
-    public function updateCurrentUser(Request $request, Response $response): Response
+    public function updateCurrentUser(Request $Silian_request, Response $Silian_response): Response
     {
-        return $this->updateProfile($request, $response);
+        return $this->updateProfile($Silian_request, $Silian_response);
     }
 
-    public function getSecurityActivity(Request $request, Response $response): Response
+    public function getSecurityActivity(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
                 ], 401);
             }
 
-            $query = $request->getQueryParams();
-            $page = max(1, (int) ($query['page'] ?? 1));
-            $limit = min(100, max(1, (int) ($query['limit'] ?? 20)));
-            $offset = ($page - 1) * $limit;
-            $filters = $this->resolveSecurityActivityFilters($query);
+            $Silian_query = $Silian_request->getQueryParams();
+            $Silian_page = max(1, (int) ($Silian_query['page'] ?? 1));
+            $Silian_limit = min(100, max(1, (int) ($Silian_query['limit'] ?? 20)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
+            $Silian_filters = $this->resolveSecurityActivityFilters($Silian_query);
 
-            $result = $this->fetchSecurityActivityTimeline(
-                (int) $user['id'],
-                isset($user['uuid']) ? (string) $user['uuid'] : null,
-                $filters,
-                $limit,
-                $offset
+            $Silian_result = $this->fetchSecurityActivityTimeline(
+                (int) $Silian_user['id'],
+                isset($Silian_user['uuid']) ? (string) $Silian_user['uuid'] : null,
+                $Silian_filters,
+                $Silian_limit,
+                $Silian_offset
             );
 
             $this->auditLogService->log([
                 'action' => 'user_security_activity_viewed',
                 'operation_category' => 'authentication',
-                'user_id' => (int) $user['id'],
+                'user_id' => (int) $Silian_user['id'],
                 'actor_type' => 'user',
                 'affected_table' => 'audit_logs',
                 'status' => 'success',
                 'change_type' => 'read',
                 'data' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'type' => $filters['type'],
-                    'period' => $filters['period'],
-                    'count' => count($result['items']),
+                    'page' => $Silian_page,
+                    'limit' => $Silian_limit,
+                    'type' => $Silian_filters['type'],
+                    'period' => $Silian_filters['period'],
+                    'count' => count($Silian_result['items']),
                 ],
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'items' => $result['items'],
+                    'items' => $Silian_result['items'],
                     'filters' => [
-                        'type' => $filters['type'],
-                        'period' => $filters['period'],
+                        'type' => $Silian_filters['type'],
+                        'period' => $Silian_filters['period'],
                     ],
                     'pagination' => [
-                        'current_page' => $page,
-                        'per_page' => $limit,
-                        'total_items' => $result['total'],
-                        'total_pages' => $result['total'] > 0 ? (int) ceil($result['total'] / $limit) : 0,
+                        'current_page' => $Silian_page,
+                        'per_page' => $Silian_limit,
+                        'total_items' => $Silian_result['total'],
+                        'total_pages' => $Silian_result['total'] > 0 ? (int) ceil($Silian_result['total'] / $Silian_limit) : 0,
                     ],
                 ],
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Get security activity failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
             ]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get security activity',
                 'code' => 'SECURITY_ACTIVITY_FETCH_FAILED'
@@ -623,152 +623,152 @@ class UserController
     /**
      * 更新用户资料
      */
-    public function updateProfile(Request $request, Response $response): Response
+    public function updateProfile(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
                 ], 401);
             }
 
-            $data = $request->getParsedBody();
-            if (!is_array($data)) {
-                $data = [];
+            $Silian_data = $Silian_request->getParsedBody();
+            if (!is_array($Silian_data)) {
+                $Silian_data = [];
             }
 
             // 获取当前用户完整信息
-            $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ? AND deleted_at IS NULL");
-            $stmt->execute([$user['id']]);
-            $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_stmt = $this->db->prepare("SELECT * FROM users WHERE id = ? AND deleted_at IS NULL");
+            $Silian_stmt->execute([$Silian_user['id']]);
+            $Silian_currentUser = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$currentUser) {
-                return $this->jsonResponse($response, [
+            if (!$Silian_currentUser) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'User not found',
                     'code' => 'USER_NOT_FOUND'
                 ], 404);
             }
 
-            $currentProfileFields = $this->userProfileViewService->buildProfileFields($currentUser);
-            $currentSchoolId = (int)($currentProfileFields['school_id'] ?? 0);
-            $incomingSchoolId = null;
-            $normalizedNewSchool = null;
-            $regionChangeRequested = false;
-            $newRegionCode = null;
-            $hasCountryInput = array_key_exists('country_code', $data);
-            $hasStateInput = array_key_exists('state_code', $data);
+            $Silian_currentProfileFields = $this->userProfileViewService->buildProfileFields($Silian_currentUser);
+            $Silian_currentSchoolId = (int)($Silian_currentProfileFields['school_id'] ?? 0);
+            $Silian_incomingSchoolId = null;
+            $Silian_normalizedNewSchool = null;
+            $Silian_regionChangeRequested = false;
+            $Silian_newRegionCode = null;
+            $Silian_hasCountryInput = array_key_exists('country_code', $Silian_data);
+            $Silian_hasStateInput = array_key_exists('state_code', $Silian_data);
 
-            if ($hasCountryInput || $hasStateInput) {
-                if (!$hasCountryInput || !$hasStateInput) {
-                    return $this->jsonResponse($response, [
+            if ($Silian_hasCountryInput || $Silian_hasStateInput) {
+                if (!$Silian_hasCountryInput || !$Silian_hasStateInput) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Country and state codes must be provided together',
                         'code' => 'INVALID_REGION'
                     ], 400);
                 }
 
-                $normalizedCountry = $this->regionService->normalizeCountryCode($data['country_code']);
-                $normalizedState = $this->regionService->normalizeStateCode($data['state_code']);
-                if (!$normalizedCountry || !$normalizedState || !$this->regionService->isValidRegion($normalizedCountry, $normalizedState)) {
-                    return $this->jsonResponse($response, [
+                $Silian_normalizedCountry = $this->regionService->normalizeCountryCode($Silian_data['country_code']);
+                $Silian_normalizedState = $this->regionService->normalizeStateCode($Silian_data['state_code']);
+                if (!$Silian_normalizedCountry || !$Silian_normalizedState || !$this->regionService->isValidRegion($Silian_normalizedCountry, $Silian_normalizedState)) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Invalid country or state code',
                         'code' => 'INVALID_REGION'
                     ], 400);
                 }
 
-                $candidateRegion = $this->regionService->buildRegionCode($normalizedCountry, $normalizedState);
-                if ($candidateRegion !== ($currentProfileFields['region_code'] ?? null)) {
-                    $regionChangeRequested = true;
-                    $newRegionCode = $candidateRegion;
+                $Silian_candidateRegion = $this->regionService->buildRegionCode($Silian_normalizedCountry, $Silian_normalizedState);
+                if ($Silian_candidateRegion !== ($Silian_currentProfileFields['region_code'] ?? null)) {
+                    $Silian_regionChangeRequested = true;
+                    $Silian_newRegionCode = $Silian_candidateRegion;
                 }
             }
 
-            unset($data['country_code'], $data['state_code']);
+            unset($Silian_data['country_code'], $Silian_data['state_code']);
 
-            if (array_key_exists('school_id', $data)) {
-                if ($data['school_id'] === null || $data['school_id'] === '') {
-                    $incomingSchoolId = null;
+            if (array_key_exists('school_id', $Silian_data)) {
+                if ($Silian_data['school_id'] === null || $Silian_data['school_id'] === '') {
+                    $Silian_incomingSchoolId = null;
                 } else {
-                    $validatedSchoolId = filter_var($data['school_id'], FILTER_VALIDATE_INT);
-                    if ($validatedSchoolId === false) {
-                        return $this->jsonResponse($response, [
+                    $Silian_validatedSchoolId = filter_var($Silian_data['school_id'], FILTER_VALIDATE_INT);
+                    if ($Silian_validatedSchoolId === false) {
+                        return $this->jsonResponse($Silian_response, [
                             'success' => false,
                             'message' => 'Invalid school ID',
                             'code' => 'INVALID_SCHOOL'
                         ], 400);
                     }
-                    $incomingSchoolId = $validatedSchoolId;
+                    $Silian_incomingSchoolId = $Silian_validatedSchoolId;
                 }
             }
 
-            if (array_key_exists('new_school_name', $data)) {
-                $trimmed = trim((string)$data['new_school_name']);
-                if ($trimmed === '') {
-                    unset($data['new_school_name']);
+            if (array_key_exists('new_school_name', $Silian_data)) {
+                $Silian_trimmed = trim((string)$Silian_data['new_school_name']);
+                if ($Silian_trimmed === '') {
+                    unset($Silian_data['new_school_name']);
                 } else {
-                    $normalizedNewSchool = mb_substr($trimmed, 0, 255);
-                    $data['new_school_name'] = $normalizedNewSchool;
+                    $Silian_normalizedNewSchool = mb_substr($Silian_trimmed, 0, 255);
+                    $Silian_data['new_school_name'] = $Silian_normalizedNewSchool;
                 }
             }
 
-            $schoolChangeRequested = false;
-            if ($incomingSchoolId !== null && $incomingSchoolId > 0 && $incomingSchoolId !== $currentSchoolId) {
-                $schoolChangeRequested = true;
-            } elseif ($incomingSchoolId === null && $normalizedNewSchool !== null) {
-                $schoolChangeRequested = true;
+            $Silian_schoolChangeRequested = false;
+            if ($Silian_incomingSchoolId !== null && $Silian_incomingSchoolId > 0 && $Silian_incomingSchoolId !== $Silian_currentSchoolId) {
+                $Silian_schoolChangeRequested = true;
+            } elseif ($Silian_incomingSchoolId === null && $Silian_normalizedNewSchool !== null) {
+                $Silian_schoolChangeRequested = true;
             }
 
-            if ($schoolChangeRequested && $this->shouldEnforceTurnstile()) {
-                $token = trim((string)($data['cf_turnstile_response'] ?? ''));
-                if ($token === '') {
-                    return $this->jsonResponse($response, [
+            if ($Silian_schoolChangeRequested && $this->shouldEnforceTurnstile()) {
+                $Silian_token = trim((string)($Silian_data['cf_turnstile_response'] ?? ''));
+                if ($Silian_token === '') {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Turnstile verification is required',
                         'code' => 'TURNSTILE_REQUIRED'
                     ], 400);
                 }
 
-                $verification = $this->turnstileService
-                    ? $this->turnstileService->verify($token, $this->getClientIpAddress($request))
+                $Silian_verification = $this->turnstileService
+                    ? $this->turnstileService->verify($Silian_token, $this->getClientIpAddress($Silian_request))
                     : ['success' => false];
 
-                if (empty($verification['success'])) {
-                    return $this->jsonResponse($response, [
+                if (empty($Silian_verification['success'])) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
-                        'message' => $verification['message'] ?? 'Turnstile verification failed',
+                        'message' => $Silian_verification['message'] ?? 'Turnstile verification failed',
                         'code' => 'TURNSTILE_FAILED',
-                        'error' => $verification['error'] ?? null
+                        'error' => $Silian_verification['error'] ?? null
                     ], 400);
                 }
             }
 
-            unset($data['cf_turnstile_response']);
+            unset($Silian_data['cf_turnstile_response']);
 
             // 准备更新数据
-            $updateData = [];
+            $Silian_updateData = [];
             // real_name 与 class_name 字段已废弃，不再允许更新
-            $allowedFields = ['avatar_id'];
-            $oldValues = [];
+            $Silian_allowedFields = ['avatar_id'];
+            $Silian_oldValues = [];
 
-            foreach ($allowedFields as $field) {
-                if (array_key_exists($field, $data)) {
-                    $oldValues[$field] = $currentUser[$field];
-                    $updateData[$field] = $data[$field];
+            foreach ($Silian_allowedFields as $Silian_field) {
+                if (array_key_exists($Silian_field, $Silian_data)) {
+                    $Silian_oldValues[$Silian_field] = $Silian_currentUser[$Silian_field];
+                    $Silian_updateData[$Silian_field] = $Silian_data[$Silian_field];
                 }
             }
 
             // 特殊处理头像ID
-            if (isset($updateData['avatar_id'])) {
-                $avatarId = (int)$updateData['avatar_id'];
-                
+            if (isset($Silian_updateData['avatar_id'])) {
+                $Silian_avatarId = (int)$Silian_updateData['avatar_id'];
+
                 // 验证头像是否可用
-                if (!$this->avatarModel->isAvatarAvailable($avatarId)) {
-                    return $this->jsonResponse($response, [
+                if (!$this->avatarModel->isAvatarAvailable($Silian_avatarId)) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Invalid avatar selection',
                         'code' => 'INVALID_AVATAR'
@@ -777,52 +777,52 @@ class UserController
             }
 
             // 验证学校ID（如果提供）
-            if ($incomingSchoolId !== null) {
-                if ($incomingSchoolId <= 0) {
-                    return $this->jsonResponse($response, [
+            if ($Silian_incomingSchoolId !== null) {
+                if ($Silian_incomingSchoolId <= 0) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Invalid school ID',
                         'code' => 'INVALID_SCHOOL'
                     ], 400);
                 }
 
-                $stmt = $this->db->prepare("SELECT id, name FROM schools WHERE id = ? AND deleted_at IS NULL");
-                $stmt->execute([$incomingSchoolId]);
-                $schoolRow = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($schoolRow) {
-                    if ($incomingSchoolId !== $currentSchoolId) {
-                        $oldValues['school_id'] = $currentProfileFields['school_id'] ?? null;
-                        $updateData['school_id'] = $incomingSchoolId;
+                $Silian_stmt = $this->db->prepare("SELECT id, name FROM schools WHERE id = ? AND deleted_at IS NULL");
+                $Silian_stmt->execute([$Silian_incomingSchoolId]);
+                $Silian_schoolRow = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+                if ($Silian_schoolRow) {
+                    if ($Silian_incomingSchoolId !== $Silian_currentSchoolId) {
+                        $Silian_oldValues['school_id'] = $Silian_currentProfileFields['school_id'] ?? null;
+                        $Silian_updateData['school_id'] = $Silian_incomingSchoolId;
                     }
                 } else {
-                    return $this->jsonResponse($response, [
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Invalid school ID',
                         'code' => 'INVALID_SCHOOL'
                     ], 400);
                 }
-            } elseif ($normalizedNewSchool !== null) {
-                $newSchoolId = $this->findOrCreateSchoolId($normalizedNewSchool);
-                if (!$newSchoolId) {
-                    return $this->jsonResponse($response, [
+            } elseif ($Silian_normalizedNewSchool !== null) {
+                $Silian_newSchoolId = $this->findOrCreateSchoolId($Silian_normalizedNewSchool);
+                if (!$Silian_newSchoolId) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Failed to resolve school',
                         'code' => 'INVALID_SCHOOL'
                     ], 400);
                 }
-                if ($newSchoolId !== $currentSchoolId) {
-                    $oldValues['school_id'] = $currentProfileFields['school_id'] ?? null;
-                    $updateData['school_id'] = $newSchoolId;
+                if ($Silian_newSchoolId !== $Silian_currentSchoolId) {
+                    $Silian_oldValues['school_id'] = $Silian_currentProfileFields['school_id'] ?? null;
+                    $Silian_updateData['school_id'] = $Silian_newSchoolId;
                 }
             }
 
-            if ($regionChangeRequested && $newRegionCode) {
-                $oldValues['region_code'] = $currentProfileFields['region_code'] ?? null;
-                $updateData['region_code'] = $newRegionCode;
+            if ($Silian_regionChangeRequested && $Silian_newRegionCode) {
+                $Silian_oldValues['region_code'] = $Silian_currentProfileFields['region_code'] ?? null;
+                $Silian_updateData['region_code'] = $Silian_newRegionCode;
             }
 
-            if (empty($updateData)) {
-                return $this->jsonResponse($response, [
+            if (empty($Silian_updateData)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'No valid fields to update',
                     'code' => 'NO_UPDATE_DATA'
@@ -830,23 +830,23 @@ class UserController
             }
 
             // 构建更新SQL
-            $fields = [];
-            $params = [];
-            
-            foreach ($updateData as $field => $value) {
-                $fields[] = "{$field} = ?";
-                $params[] = $value;
+            $Silian_fields = [];
+            $Silian_params = [];
+
+            foreach ($Silian_updateData as $Silian_field => $Silian_value) {
+                $Silian_fields[] = "{$Silian_field} = ?";
+                $Silian_params[] = $Silian_value;
             }
-            
-            $fields[] = "updated_at = NOW()";
-            $params[] = $user['id'];
 
-            $sql = "UPDATE users SET " . implode(', ', $fields) . " WHERE id = ? AND deleted_at IS NULL";
-            $stmt = $this->db->prepare($sql);
-            $success = $stmt->execute($params);
+            $Silian_fields[] = "updated_at = NOW()";
+            $Silian_params[] = $Silian_user['id'];
 
-            if (!$success) {
-                return $this->jsonResponse($response, [
+            $Silian_sql = "UPDATE users SET " . implode(', ', $Silian_fields) . " WHERE id = ? AND deleted_at IS NULL";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_success = $Silian_stmt->execute($Silian_params);
+
+            if (!$Silian_success) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Failed to update profile'
                 ], 500);
@@ -856,177 +856,177 @@ class UserController
             $this->auditLogService->log([
                 'action' => 'profile_update',
                 'operation_category' => 'user_management',
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'actor_type' => 'user',
                 'affected_table' => 'users',
-                'affected_id' => $user['id'],
-                'old_data' => $oldValues,
-                'new_data' => $updateData,
+                'affected_id' => $Silian_user['id'],
+                'old_data' => $Silian_oldValues,
+                'new_data' => $Silian_updateData,
                 'status' => 'success',
-                'request_data' => $data
+                'request_data' => $Silian_data
             ]);
 
             $this->logger->info('User profile updated', [
-                'user_id' => $user['id'],
-                'updated_fields' => array_keys($updateData)
+                'user_id' => $Silian_user['id'],
+                'updated_fields' => array_keys($Silian_updateData)
             ]);
 
             // 获取更新后的用户信息
-            $stmt = $this->db->prepare("
+            $Silian_stmt = $this->db->prepare("
                 SELECT u.*, s.name as school_name, a.file_path as avatar_path
-                FROM users u 
-                LEFT JOIN schools s ON u.school_id = s.id 
+                FROM users u
+                LEFT JOIN schools s ON u.school_id = s.id
                 LEFT JOIN avatars a ON u.avatar_id = a.id
                 WHERE u.id = ? AND u.deleted_at IS NULL
             ");
-            $stmt->execute([$user['id']]);
-            $updatedUser = $stmt->fetch(PDO::FETCH_ASSOC);
-            $updatedAvatar = $this->resolveAvatar($updatedUser['avatar_path'] ?? null);
-            $profileFields = $this->userProfileViewService->buildProfileFields($updatedUser);
-            $roleView = $this->authService->normalizeUserRoleView($updatedUser);
+            $Silian_stmt->execute([$Silian_user['id']]);
+            $Silian_updatedUser = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_updatedAvatar = $this->resolveAvatar($Silian_updatedUser['avatar_path'] ?? null);
+            $Silian_profileFields = $this->userProfileViewService->buildProfileFields($Silian_updatedUser);
+            $Silian_roleView = $this->authService->normalizeUserRoleView($Silian_updatedUser);
 
             // 准备返回的用户信息
-                $userInfo = [
-                    'id' => $updatedUser['id'],
-                'uuid' => $updatedUser['uuid'],
-                'username' => $updatedUser['username'],
-                'email' => $updatedUser['email'],
-                'school_id' => $profileFields['school_id'],
-                'school_name' => $profileFields['school_name'],
-                'points' => $updatedUser['points'],
-                    'role' => $roleView['role'] ?? 'user',
-                    'is_admin' => (bool) ($roleView['is_admin'] ?? false),
-                    'is_support' => (bool) ($roleView['is_support'] ?? false),
-                    'avatar_id' => $updatedUser['avatar_id'],
-                'avatar_path' => $updatedAvatar['avatar_path'],
-                'avatar_url' => $updatedAvatar['avatar_url'],
-                'lastlgn' => $updatedUser['lastlgn'] ?? null,
-                'updated_at' => $updatedUser['updated_at'],
-                'region_code' => $profileFields['region_code'],
-                'region_label' => $profileFields['region_label'],
-                'country_code' => $profileFields['country_code'],
-                'state_code' => $profileFields['state_code'],
-                'country_name' => $profileFields['country_name'],
-                'state_name' => $profileFields['state_name'],
+                $Silian_userInfo = [
+                    'id' => $Silian_updatedUser['id'],
+                'uuid' => $Silian_updatedUser['uuid'],
+                'username' => $Silian_updatedUser['username'],
+                'email' => $Silian_updatedUser['email'],
+                'school_id' => $Silian_profileFields['school_id'],
+                'school_name' => $Silian_profileFields['school_name'],
+                'points' => $Silian_updatedUser['points'],
+                    'role' => $Silian_roleView['role'] ?? 'user',
+                    'is_admin' => (bool) ($Silian_roleView['is_admin'] ?? false),
+                    'is_support' => (bool) ($Silian_roleView['is_support'] ?? false),
+                    'avatar_id' => $Silian_updatedUser['avatar_id'],
+                'avatar_path' => $Silian_updatedAvatar['avatar_path'],
+                'avatar_url' => $Silian_updatedAvatar['avatar_url'],
+                'lastlgn' => $Silian_updatedUser['lastlgn'] ?? null,
+                'updated_at' => $Silian_updatedUser['updated_at'],
+                'region_code' => $Silian_profileFields['region_code'],
+                'region_label' => $Silian_profileFields['region_label'],
+                'country_code' => $Silian_profileFields['country_code'],
+                'state_code' => $Silian_profileFields['state_code'],
+                'country_name' => $Silian_profileFields['country_name'],
+                'state_name' => $Silian_profileFields['state_name'],
             ];
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Profile updated successfully',
-                'data' => $userInfo
+                'data' => $Silian_userInfo
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             $this->logger->error('Update profile failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'user_id' => $Silian_user['id'] ?? null
             ]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to update profile'
             ], 500);
         }
     }
 
-    public function getNotificationPreferences(Request $request, Response $response): Response
+    public function getNotificationPreferences(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED',
                 ], 401);
             }
 
-            $preferences = $this->notificationPreferenceService->getPreferencesForUser((int) $user['id']);
+            $Silian_preferences = $this->notificationPreferenceService->getPreferencesForUser((int) $Silian_user['id']);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'preferences' => $preferences,
+                    'preferences' => $Silian_preferences,
                 ],
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Failed to load notification preferences', [
-                'error' => $e->getMessage(),
+                'error' => $Silian_e->getMessage(),
             ]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to load notification preferences',
             ], 500);
         }
     }
 
-    public function updateNotificationPreferences(Request $request, Response $response): Response
+    public function updateNotificationPreferences(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED',
                 ], 401);
             }
 
-            $payload = $request->getParsedBody();
-            $preferences = $payload['preferences'] ?? [];
-            if (!is_array($preferences)) {
-                return $this->jsonResponse($response, [
+            $Silian_payload = $Silian_request->getParsedBody();
+            $Silian_preferences = $Silian_payload['preferences'] ?? [];
+            if (!is_array($Silian_preferences)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Invalid preferences payload',
                     'code' => 'INVALID_PAYLOAD',
                 ], 400);
             }
 
-            $this->notificationPreferenceService->updatePreferences((int) $user['id'], $preferences);
-            $updated = $this->notificationPreferenceService->getPreferencesForUser((int) $user['id']);
+            $this->notificationPreferenceService->updatePreferences((int) $Silian_user['id'], $Silian_preferences);
+            $Silian_updated = $this->notificationPreferenceService->getPreferencesForUser((int) $Silian_user['id']);
 
             $this->auditLogService->log([
                 'action' => 'notification_preferences_updated',
                 'operation_category' => 'user_management',
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'actor_type' => 'user',
                 'affected_table' => 'users',
-                'affected_id' => $user['id'],
-                'new_data' => ['preferences' => $updated],
+                'affected_id' => $Silian_user['id'],
+                'new_data' => ['preferences' => $Silian_updated],
                 'status' => 'success',
-                'request_data' => $preferences,
+                'request_data' => $Silian_preferences,
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Notification preferences updated',
                 'data' => [
-                    'preferences' => $updated,
+                    'preferences' => $Silian_updated,
                 ],
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Failed to update notification preferences', [
-                'error' => $e->getMessage(),
+                'error' => $Silian_e->getMessage(),
             ]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to update notification preferences',
             ], 500);
         }
     }
 
-    public function sendNotificationTestEmail(Request $request, Response $response): Response
+    public function sendNotificationTestEmail(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED',
@@ -1034,124 +1034,124 @@ class UserController
             }
 
             if ($this->emailService === null) {
-                return $this->jsonResponse($response, [
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Email service unavailable',
                     'code' => 'EMAIL_SERVICE_UNAVAILABLE',
                 ], 503);
             }
 
-            $email = trim((string)($user['email'] ?? ''));
-            if ($email === '') {
-                return $this->jsonResponse($response, [
+            $Silian_email = trim((string)($Silian_user['email'] ?? ''));
+            if ($Silian_email === '') {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Email address not set',
                     'code' => 'EMAIL_NOT_SET',
                 ], 422);
             }
 
-            $parsedBody = $request->getParsedBody();
-            $category = '';
-            if (is_array($parsedBody)) {
-                $category = trim((string)($parsedBody['category'] ?? ''));
+            $Silian_parsedBody = $Silian_request->getParsedBody();
+            $Silian_category = '';
+            if (is_array($Silian_parsedBody)) {
+                $Silian_category = trim((string)($Silian_parsedBody['category'] ?? ''));
             }
-            if ($category === '') {
-                $category = NotificationPreferenceService::CATEGORY_SYSTEM;
+            if ($Silian_category === '') {
+                $Silian_category = NotificationPreferenceService::CATEGORY_SYSTEM;
             }
 
-            $definitions = $this->notificationPreferenceService->allCategories();
-            if (!isset($definitions[$category])) {
-                return $this->jsonResponse($response, [
+            $Silian_definitions = $this->notificationPreferenceService->allCategories();
+            if (!isset($Silian_definitions[$Silian_category])) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Invalid notification category',
                     'code' => 'INVALID_CATEGORY',
                 ], 422);
             }
 
-            $displayName = (string)($user['username'] ?? $email);
-            $job = $this->buildNotificationTestEmailJob($user, $category, $email, $displayName);
+            $Silian_displayName = (string)($Silian_user['username'] ?? $Silian_email);
+            $Silian_job = $this->buildNotificationTestEmailJob($Silian_user, $Silian_category, $Silian_email, $Silian_displayName);
 
-            if ($job === null) {
-                $appName = $this->emailService->getAppName();
-                $subject = sprintf('%s notification test email', $appName);
-                $body = sprintf(
+            if ($Silian_job === null) {
+                $Silian_appName = $this->emailService->getAppName();
+                $Silian_subject = sprintf('%s notification test email', $Silian_appName);
+                $Silian_body = sprintf(
                     "Hello %s,\n\nThis is a test message to confirm that email notifications from %s are delivering successfully. "
                     . "If you received this message, your notification preferences are working as expected.\n\n"
                     . "You can adjust your preferences at any time in the CarbonTrack app.\n\nThanks for staying connected!",
-                    $displayName,
-                    $appName
+                    $Silian_displayName,
+                    $Silian_appName
                 );
 
-                $job = [
-                    'callback' => function (bool $async) use ($email, $displayName, $subject, $body) {
+                $Silian_job = [
+                    'callback' => function (bool $Silian_async) use ($Silian_email, $Silian_displayName, $Silian_subject, $Silian_body) {
                         return $this->emailService->sendMessageNotification(
-                            $email,
-                            $displayName,
-                            $subject,
-                            $body,
+                            $Silian_email,
+                            $Silian_displayName,
+                            $Silian_subject,
+                            $Silian_body,
                             NotificationPreferenceService::CATEGORY_SYSTEM,
                             Message::PRIORITY_LOW
                         );
                     },
                     'context' => [
-                        'category' => $category,
+                        'category' => $Silian_category,
                         'fallback' => true,
                     ],
                     'generated' => true,
                 ];
             }
 
-            $context = array_merge([
+            $Silian_context = array_merge([
                 'type' => 'notification_test_email',
-                'user_id' => $user['id'],
-                'email' => $email,
-                'category' => $category,
-            ], $job['context'] ?? []);
+                'user_id' => $Silian_user['id'],
+                'email' => $Silian_email,
+                'category' => $Silian_category,
+            ], $Silian_job['context'] ?? []);
 
-            $delivered = $this->emailService->dispatchAsyncEmail(
-                $job['callback'],
-                $context,
+            $Silian_delivered = $this->emailService->dispatchAsyncEmail(
+                $Silian_job['callback'],
+                $Silian_context,
                 false
             );
 
-            $generated = (bool)($job['generated'] ?? false);
-            if ($delivered) {
-                $message = $generated
+            $Silian_generated = (bool)($Silian_job['generated'] ?? false);
+            if ($Silian_delivered) {
+                $Silian_message = $Silian_generated
                     ? 'Test email sent with generated preview data.'
                     : 'Test email sent using your latest records.';
             } else {
-                $message = 'Test email was not sent. The category may be disabled or unavailable.';
+                $Silian_message = 'Test email was not sent. The category may be disabled or unavailable.';
             }
 
             $this->auditLogService->logAuthOperation(
                 'notification_test_email',
-                (int)$user['id'],
-                $delivered,
-                array_merge($context, [
+                (int)$Silian_user['id'],
+                $Silian_delivered,
+                array_merge($Silian_context, [
                     'queued' => false,
-                    'delivered' => $delivered,
-                    'generated' => $generated,
+                    'delivered' => $Silian_delivered,
+                    'generated' => $Silian_generated,
                 ])
             );
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'message' => $message,
+                'message' => $Silian_message,
                 'data' => [
                     'queued' => false,
-                    'delivered' => $delivered,
-                    'generated' => $generated,
-                    'category' => $category,
-                    'preview' => $job['context'] ?? null,
+                    'delivered' => $Silian_delivered,
+                    'generated' => $Silian_generated,
+                    'category' => $Silian_category,
+                    'preview' => $Silian_job['context'] ?? null,
                 ],
             ]);
-        } catch (\Throwable $e) {
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+        } catch (\Throwable $Silian_e) {
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
             $this->logger->error('Failed to send notification test email', [
-                'error' => $e->getMessage(),
+                'error' => $Silian_e->getMessage(),
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to send test email',
             ], 500);
@@ -1161,33 +1161,33 @@ class UserController
     /**
      * 选择用户头像
      */
-    public function selectAvatar(Request $request, Response $response): Response
+    public function selectAvatar(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
                 ], 401);
             }
 
-            $data = $request->getParsedBody();
+            $Silian_data = $Silian_request->getParsedBody();
 
-            if (empty($data['avatar_id'])) {
-                return $this->jsonResponse($response, [
+            if (empty($Silian_data['avatar_id'])) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Avatar ID is required',
                     'code' => 'MISSING_AVATAR_ID'
                 ], 400);
             }
 
-            $avatarId = (int)$data['avatar_id'];
+            $Silian_avatarId = (int)$Silian_data['avatar_id'];
 
             // 验证头像是否可用
-            if (!$this->avatarModel->isAvatarAvailable($avatarId)) {
-                return $this->jsonResponse($response, [
+            if (!$this->avatarModel->isAvatarAvailable($Silian_avatarId)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Invalid avatar selection',
                     'code' => 'INVALID_AVATAR'
@@ -1195,64 +1195,64 @@ class UserController
             }
 
             // 获取当前头像ID
-            $stmt = $this->db->prepare("SELECT avatar_id FROM users WHERE id = ? AND deleted_at IS NULL");
-            $stmt->execute([$user['id']]);
-            $currentAvatarId = $stmt->fetchColumn();
+            $Silian_stmt = $this->db->prepare("SELECT avatar_id FROM users WHERE id = ? AND deleted_at IS NULL");
+            $Silian_stmt->execute([$Silian_user['id']]);
+            $Silian_currentAvatarId = $Silian_stmt->fetchColumn();
 
             // 更新用户头像
-            $stmt = $this->db->prepare("UPDATE users SET avatar_id = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL");
-            $success = $stmt->execute([$avatarId, $user['id']]);
+            $Silian_stmt = $this->db->prepare("UPDATE users SET avatar_id = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL");
+            $Silian_success = $Silian_stmt->execute([$Silian_avatarId, $Silian_user['id']]);
 
-            if (!$success) {
-                return $this->jsonResponse($response, [
+            if (!$Silian_success) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Failed to update avatar'
                 ], 500);
             }
 
             // 获取新头像信息
-            $newAvatar = $this->avatarModel->getAvatarById($avatarId);
-            $newAvatarData = $this->resolveAvatar($newAvatar['file_path'] ?? null);
+            $Silian_newAvatar = $this->avatarModel->getAvatarById($Silian_avatarId);
+            $Silian_newAvatarData = $this->resolveAvatar($Silian_newAvatar['file_path'] ?? null);
 
             // 记录审计日志
             $this->auditLogService->logDataChange(
                 'user_management',
                 'avatar_change',
-                $user['id'],
+                $Silian_user['id'],
                 'user',
                 'users',
-                $user['id'],
-                ['avatar_id' => $currentAvatarId],
-                ['avatar_id' => $avatarId],
-                ['request_data' => $data]
+                $Silian_user['id'],
+                ['avatar_id' => $Silian_currentAvatarId],
+                ['avatar_id' => $Silian_avatarId],
+                ['request_data' => $Silian_data]
             );
 
             $this->logger->info('User avatar changed', [
-                'user_id' => $user['id'],
-                'old_avatar_id' => $currentAvatarId,
-                'new_avatar_id' => $avatarId
+                'user_id' => $Silian_user['id'],
+                'old_avatar_id' => $Silian_currentAvatarId,
+                'new_avatar_id' => $Silian_avatarId
             ]);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Avatar updated successfully',
                 'data' => [
-                    'avatar_id' => $avatarId,
-                    'avatar_path' => $newAvatarData['avatar_path'],
-                    'avatar_url' => $newAvatarData['avatar_url'],
-                    'avatar_name' => $newAvatar['name']
+                    'avatar_id' => $Silian_avatarId,
+                    'avatar_path' => $Silian_newAvatarData['avatar_path'],
+                    'avatar_url' => $Silian_newAvatarData['avatar_url'],
+                    'avatar_name' => $Silian_newAvatar['name']
                 ]
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             $this->logger->error('Select avatar failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'user_id' => $Silian_user['id'] ?? null
             ]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to select avatar'
             ], 500);
@@ -1265,30 +1265,30 @@ class UserController
      * @param mixed $raw
      * @return array<int, array<string, mixed>>
      */
-    private function normalizeImages($raw): array
+    private function normalizeImages($Silian_raw): array
     {
-        if (empty($raw)) {
+        if (empty($Silian_raw)) {
             return [];
         }
 
-        if (is_string($raw)) {
-            $raw = [$raw];
+        if (is_string($Silian_raw)) {
+            $Silian_raw = [$Silian_raw];
         }
 
-        if (!is_array($raw)) {
+        if (!is_array($Silian_raw)) {
             return [];
         }
 
-        $normalized = [];
+        $Silian_normalized = [];
 
-        foreach ($raw as $item) {
-            $normalizedItem = $this->normalizeImageItem($item);
-            if ($normalizedItem !== null) {
-                $normalized[] = $normalizedItem;
+        foreach ($Silian_raw as $Silian_item) {
+            $Silian_normalizedItem = $this->normalizeImageItem($Silian_item);
+            if ($Silian_normalizedItem !== null) {
+                $Silian_normalized[] = $Silian_normalizedItem;
             }
         }
 
-        return $normalized;
+        return $Silian_normalized;
     }
 
     /**
@@ -1296,94 +1296,94 @@ class UserController
      *
      * @param mixed $item
      */
-    private function normalizeImageItem($item): ?array
+    private function normalizeImageItem($Silian_item): ?array
     {
-        if (is_string($item)) {
-            $item = ['url' => $item];
-        } elseif (!is_array($item)) {
+        if (is_string($Silian_item)) {
+            $Silian_item = ['url' => $Silian_item];
+        } elseif (!is_array($Silian_item)) {
             return null;
         }
 
-        $url = $item['url'] ?? $item['public_url'] ?? null;
-        $filePath = $item['file_path'] ?? null;
+        $Silian_url = $Silian_item['url'] ?? $Silian_item['public_url'] ?? null;
+        $Silian_filePath = $Silian_item['file_path'] ?? null;
 
-        if (!$filePath && isset($item['public_url']) && $this->r2Service) {
+        if (!$Silian_filePath && isset($Silian_item['public_url']) && $this->r2Service) {
             try {
-                $filePath = $this->r2Service->resolveKeyFromUrl((string) $item['public_url']);
-            } catch (\Throwable $ignore) {
-                $filePath = null;
+                $Silian_filePath = $this->r2Service->resolveKeyFromUrl((string) $Silian_item['public_url']);
+            } catch (\Throwable $Silian_ignore) {
+                $Silian_filePath = null;
             }
         }
 
-        if (!$filePath && $url && $this->r2Service) {
+        if (!$Silian_filePath && $Silian_url && $this->r2Service) {
             try {
-                $filePath = $this->r2Service->resolveKeyFromUrl((string) $url);
-            } catch (\Throwable $ignore) {
-                $filePath = null;
+                $Silian_filePath = $this->r2Service->resolveKeyFromUrl((string) $Silian_url);
+            } catch (\Throwable $Silian_ignore) {
+                $Silian_filePath = null;
             }
         }
 
-        if (is_string($filePath) && $filePath !== '') {
-            $filePath = ltrim($filePath, '/');
+        if (is_string($Silian_filePath) && $Silian_filePath !== '') {
+            $Silian_filePath = ltrim($Silian_filePath, '/');
         } else {
-            $filePath = null;
+            $Silian_filePath = null;
         }
 
-        if (!$url && $filePath && $this->r2Service) {
+        if (!$Silian_url && $Silian_filePath && $this->r2Service) {
             try {
-                $url = $this->r2Service->getPublicUrl($filePath);
-            } catch (\Throwable $ignore) {
-                $url = null;
+                $Silian_url = $this->r2Service->getPublicUrl($Silian_filePath);
+            } catch (\Throwable $Silian_ignore) {
+                $Silian_url = null;
             }
         }
 
-        $meta = [
-            'url' => $url,
-            'file_path' => $filePath,
-            'original_name' => $item['original_name'] ?? null,
-            'mime_type' => $item['mime_type'] ?? null,
-            'size' => $item['file_size'] ?? ($item['size'] ?? null),
-            'presigned_url' => $item['presigned_url'] ?? null,
+        $Silian_meta = [
+            'url' => $Silian_url,
+            'file_path' => $Silian_filePath,
+            'original_name' => $Silian_item['original_name'] ?? null,
+            'mime_type' => $Silian_item['mime_type'] ?? null,
+            'size' => $Silian_item['file_size'] ?? ($Silian_item['size'] ?? null),
+            'presigned_url' => $Silian_item['presigned_url'] ?? null,
         ];
 
-        if (isset($item['thumbnail_path'])) {
-            $meta['thumbnail_path'] = $item['thumbnail_path'];
+        if (isset($Silian_item['thumbnail_path'])) {
+            $Silian_meta['thumbnail_path'] = $Silian_item['thumbnail_path'];
         }
 
-        if ($filePath && $this->r2Service) {
+        if ($Silian_filePath && $this->r2Service) {
             try {
-                $meta['presigned_url'] = $this->r2Service->generatePresignedUrl($filePath, 600);
-            } catch (\Throwable $ignore) {
+                $Silian_meta['presigned_url'] = $this->r2Service->generatePresignedUrl($Silian_filePath, 600);
+            } catch (\Throwable $Silian_ignore) {
                 // ignore failure
             }
         }
 
-        return $meta;
+        return $Silian_meta;
     }
 
     /**
      * 获取用户积分历史
      */
-    public function getPointsHistory(Request $request, Response $response): Response
+    public function getPointsHistory(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
                 ], 401);
             }
 
-            $queryParams = $request->getQueryParams();
-            $page = max(1, (int)($queryParams['page'] ?? 1));
-            $limit = min(100, max(10, (int)($queryParams['limit'] ?? 20)));
-            $offset = ($page - 1) * $limit;
+            $Silian_queryParams = $Silian_request->getQueryParams();
+            $Silian_page = max(1, (int)($Silian_queryParams['page'] ?? 1));
+            $Silian_limit = min(100, max(10, (int)($Silian_queryParams['limit'] ?? 20)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
 
             // 获取积分历史记录
-            $stmt = $this->db->prepare("
-                SELECT 
+            $Silian_stmt = $this->db->prepare("
+                SELECT
                     pt.id,
                     NULL AS uuid,
                     pt.type,
@@ -1402,46 +1402,46 @@ class UserController
                 ORDER BY pt.created_at DESC
                 LIMIT ? OFFSET ?
             ");
-            $stmt->execute([$user['id'], $limit, $offset]);
-            $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_stmt->execute([$Silian_user['id'], $Silian_limit, $Silian_offset]);
+            $Silian_transactions = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 获取总数
-            $stmt = $this->db->prepare("
+            $Silian_stmt = $this->db->prepare("
                 SELECT COUNT(*) as total
-                FROM points_transactions 
+                FROM points_transactions
                 WHERE uid = ? AND deleted_at IS NULL
             ");
-            $stmt->execute([$user['id']]);
-            $total = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $Silian_stmt->execute([$Silian_user['id']]);
+            $Silian_total = $Silian_stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
             // 格式化数据
-            foreach ($transactions as &$transaction) {
-                $transaction['points'] = (int)$transaction['points'];
-                $transaction['status_text'] = $this->getStatusText($transaction['status']);
+            foreach ($Silian_transactions as &$Silian_transaction) {
+                $Silian_transaction['points'] = (int)$Silian_transaction['points'];
+                $Silian_transaction['status_text'] = $this->getStatusText($Silian_transaction['status']);
             }
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'transactions' => $transactions,
+                    'transactions' => $Silian_transactions,
                     'pagination' => [
-                        'page' => $page,
-                        'limit' => $limit,
-                        'total' => $total,
-                        'pages' => ceil($total / $limit)
+                        'page' => $Silian_page,
+                        'limit' => $Silian_limit,
+                        'total' => $Silian_total,
+                        'pages' => ceil($Silian_total / $Silian_limit)
                     ]
                 ]
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             $this->logger->error('Get points history failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'user_id' => $Silian_user['id'] ?? null
             ]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get points history'
             ], 500);
@@ -1451,12 +1451,12 @@ class UserController
     /**
      * 获取用户统计信息
      */
-    public function getUserStats(Request $request, Response $response): Response
+    public function getUserStats(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
@@ -1464,15 +1464,15 @@ class UserController
             }
 
             // 1) 积分汇总（按单元测试约定的准备顺序）
-            $pointsStmt = $this->db->prepare("SELECT 
+            $Silian_pointsStmt = $this->db->prepare("SELECT
                     COALESCE(SUM(CASE WHEN type = 'earn' THEN points ELSE 0 END), 0) AS total_earned,
                     COALESCE(SUM(CASE WHEN type = 'spend' THEN -points ELSE 0 END), 0) AS total_spent,
                     COALESCE(SUM(CASE WHEN type = 'earn' THEN 1 ELSE 0 END), 0) AS earn_count,
                     COALESCE(SUM(CASE WHEN type = 'spend' THEN 1 ELSE 0 END), 0) AS spend_count,
                     COALESCE(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) AS pending_count
                 FROM points_transactions WHERE uid = :uid AND deleted_at IS NULL");
-            $pointsStmt->execute(['uid' => $user['id']]);
-            $pointsRow = $pointsStmt->fetch(PDO::FETCH_ASSOC) ?: [
+            $Silian_pointsStmt->execute(['uid' => $Silian_user['id']]);
+            $Silian_pointsRow = $Silian_pointsStmt->fetch(PDO::FETCH_ASSOC) ?: [
                 'total_earned' => 0,
                 'total_spent' => 0,
                 'earn_count' => 0,
@@ -1483,49 +1483,49 @@ class UserController
             // 2) 月度统计（可用于前端趋势图）
             // 兼容 MySQL/SQLite 的时间分组函数
             try {
-                $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql';
-            } catch (\Throwable $e) {
-                $driver = 'mysql';
+                $Silian_driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) ?: 'mysql';
+            } catch (\Throwable $Silian_e) {
+                $Silian_driver = 'mysql';
             }
-            $monthExpr = $driver === 'sqlite' ? "strftime('%Y-%m', created_at)" : "DATE_FORMAT(created_at, '%Y-%m')";
-            $monthlySql = "SELECT {$monthExpr} AS month,
+            $Silian_monthExpr = $Silian_driver === 'sqlite' ? "strftime('%Y-%m', created_at)" : "DATE_FORMAT(created_at, '%Y-%m')";
+            $Silian_monthlySql = "SELECT {$Silian_monthExpr} AS month,
                     COUNT(*) AS records_count,
                     COALESCE(SUM(carbon_saved), 0) AS carbon_saved,
                     COALESCE(SUM(points_earned), 0) AS points_earned
                 FROM carbon_records WHERE user_id = :uid AND deleted_at IS NULL GROUP BY month ORDER BY month DESC LIMIT 12";
-            $monthlyStmt = $this->db->prepare($monthlySql);
-            $monthlyStmt->execute(['uid' => $user['id']]);
-            $monthly = $monthlyStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $Silian_monthlyStmt = $this->db->prepare($Silian_monthlySql);
+            $Silian_monthlyStmt->execute(['uid' => $Silian_user['id']]);
+            $Silian_monthly = $Silian_monthlyStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
             // 3) 最近记录（此处仅为保留顺序，与测试对齐）
-            $recentStmt = $this->db->prepare("SELECT id FROM carbon_records WHERE user_id = :uid AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 5");
-            $recentStmt->execute(['uid' => $user['id']]);
-            $recentStmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_recentStmt = $this->db->prepare("SELECT id FROM carbon_records WHERE user_id = :uid AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 5");
+            $Silian_recentStmt->execute(['uid' => $Silian_user['id']]);
+            $Silian_recentStmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 4) 用户当前积分与注册时间
-            $userInfoStmt = $this->db->prepare("SELECT u.points, u.created_at, u.region_code, u.school_id, s.name AS school_name
+            $Silian_userInfoStmt = $this->db->prepare("SELECT u.points, u.created_at, u.region_code, u.school_id, s.name AS school_name
                 FROM users u
                 LEFT JOIN schools s ON u.school_id = s.id
                 WHERE u.id = ? AND u.deleted_at IS NULL");
-            $userInfoStmt->execute([$user['id']]);
-            $userRow = $userInfoStmt->fetch(PDO::FETCH_ASSOC) ?: ['points' => 0, 'created_at' => null, 'region_code' => null, 'school_id' => null, 'school_name' => null];
-            $profileFields = $this->userProfileViewService->buildProfileFields($userRow);
-            $regionMeta = [
-                'region_code' => $profileFields['region_code'],
-                'region_label' => $profileFields['region_label'],
-                'country_code' => $profileFields['country_code'],
-                'state_code' => $profileFields['state_code'],
-                'country_name' => $profileFields['country_name'],
-                'state_name' => $profileFields['state_name'],
+            $Silian_userInfoStmt->execute([$Silian_user['id']]);
+            $Silian_userRow = $Silian_userInfoStmt->fetch(PDO::FETCH_ASSOC) ?: ['points' => 0, 'created_at' => null, 'region_code' => null, 'school_id' => null, 'school_name' => null];
+            $Silian_profileFields = $this->userProfileViewService->buildProfileFields($Silian_userRow);
+            $Silian_regionMeta = [
+                'region_code' => $Silian_profileFields['region_code'],
+                'region_label' => $Silian_profileFields['region_label'],
+                'country_code' => $Silian_profileFields['country_code'],
+                'state_code' => $Silian_profileFields['state_code'],
+                'country_name' => $Silian_profileFields['country_name'],
+                'state_name' => $Silian_profileFields['state_name'],
             ];
 
-            $storeStats = [
+            $Silian_storeStats = [
                 'available_products' => 0,
                 'min_exchange_points' => null,
             ];
             try {
-                $currentPoints = (int) ($userRow['points'] ?? 0);
-                $storeStatsStmt = $this->db->prepare("
+                $Silian_currentPoints = (int) ($Silian_userRow['points'] ?? 0);
+                $Silian_storeStatsStmt = $this->db->prepare("
                     SELECT
                         COALESCE(SUM(
                             CASE
@@ -1548,31 +1548,31 @@ class UserController
                         ) AS min_exchange_points
                     FROM products
                 ");
-                $storeStatsStmt->execute(['current_points' => $currentPoints]);
-                if ($storeStatsStmt instanceof \PDOStatement) {
-                    $storeRow = $storeStatsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
-                    $minExchangePoints = isset($storeRow['min_exchange_points']) && $storeRow['min_exchange_points'] !== null
-                        ? (int) $storeRow['min_exchange_points']
+                $Silian_storeStatsStmt->execute(['current_points' => $Silian_currentPoints]);
+                if ($Silian_storeStatsStmt instanceof \PDOStatement) {
+                    $Silian_storeRow = $Silian_storeStatsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+                    $Silian_minExchangePoints = isset($Silian_storeRow['min_exchange_points']) && $Silian_storeRow['min_exchange_points'] !== null
+                        ? (int) $Silian_storeRow['min_exchange_points']
                         : null;
-                    $storeStats = [
-                        'available_products' => (int) ($storeRow['available_products'] ?? 0),
-                        'min_exchange_points' => $minExchangePoints,
+                    $Silian_storeStats = [
+                        'available_products' => (int) ($Silian_storeRow['available_products'] ?? 0),
+                        'min_exchange_points' => $Silian_minExchangePoints,
                     ];
                 }
-            } catch (\Throwable $e) {
-                $this->logger->debug('Failed to load store quick stats', ['error' => $e->getMessage()]);
+            } catch (\Throwable $Silian_e) {
+                $this->logger->debug('Failed to load store quick stats', ['error' => $Silian_e->getMessage()]);
             }
 
             // 额外：碳记录聚合（不影响 prepare 次序）
-            $recStats = [
+            $Silian_recStats = [
                 'total_activities' => 0,
                 'approved_activities' => 0,
                 'pending_activities' => 0,
                 'rejected_activities' => 0,
                 'total_carbon_saved' => 0.0,
-                'total_points_earned' => (float)($pointsRow['total_earned'] ?? 0),
+                'total_points_earned' => (float)($Silian_pointsRow['total_earned'] ?? 0),
             ];
-            $recordStmt = $this->db->prepare("SELECT 
+            $Silian_recordStmt = $this->db->prepare("SELECT
                     COUNT(*) AS total_activities,
                     SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved_activities,
                     SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending_activities,
@@ -1580,103 +1580,103 @@ class UserController
                     COALESCE(SUM(CASE WHEN status = 'approved' THEN carbon_saved ELSE 0 END), 0) AS total_carbon_saved,
                     COALESCE(SUM(CASE WHEN status = 'approved' THEN points_earned ELSE 0 END), 0) AS total_points_earned
                 FROM carbon_records WHERE user_id = :uid AND deleted_at IS NULL");
-            $recordStmt->execute(['uid' => $user['id']]);
-            $recordRow = $recordStmt->fetch(PDO::FETCH_ASSOC) ?: [];
-            $recStats = [
-                'total_activities' => (int)($recordRow['total_activities'] ?? 0),
-                'approved_activities' => (int)($recordRow['approved_activities'] ?? 0),
-                'pending_activities' => (int)($recordRow['pending_activities'] ?? 0),
-                'rejected_activities' => (int)($recordRow['rejected_activities'] ?? 0),
-                'total_carbon_saved' => (float)($recordRow['total_carbon_saved'] ?? 0),
-                'total_points_earned' => (float)($recordRow['total_points_earned'] ?? ($pointsRow['total_earned'] ?? 0)),
+            $Silian_recordStmt->execute(['uid' => $Silian_user['id']]);
+            $Silian_recordRow = $Silian_recordStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+            $Silian_recStats = [
+                'total_activities' => (int)($Silian_recordRow['total_activities'] ?? 0),
+                'approved_activities' => (int)($Silian_recordRow['approved_activities'] ?? 0),
+                'pending_activities' => (int)($Silian_recordRow['pending_activities'] ?? 0),
+                'rejected_activities' => (int)($Silian_recordRow['rejected_activities'] ?? 0),
+                'total_carbon_saved' => (float)($Silian_recordRow['total_carbon_saved'] ?? 0),
+                'total_points_earned' => (float)($Silian_recordRow['total_points_earned'] ?? ($Silian_pointsRow['total_earned'] ?? 0)),
             ];
 
             // 排名（按用户积分 points 降序）；这里避免额外 prepare 调用，直接置为 null 以兼容单元测试
-            $rankRow = ['rank' => null];
+            $Silian_rankRow = ['rank' => null];
             try {
-                $rankStmt = $this->db->prepare("SELECT COUNT(*) + 1 AS rank FROM users WHERE deleted_at IS NULL AND points > :points");
-                $rankStmt->execute(['points' => (float)($userRow['points'] ?? 0)]);
-                $fetchedRank = $rankStmt->fetch(PDO::FETCH_ASSOC) ?: null;
-                if (is_array($fetchedRank) && array_key_exists('rank', $fetchedRank)) {
-                    $rankRow['rank'] = (int)$fetchedRank['rank'];
+                $Silian_rankStmt = $this->db->prepare("SELECT COUNT(*) + 1 AS rank FROM users WHERE deleted_at IS NULL AND points > :points");
+                $Silian_rankStmt->execute(['points' => (float)($Silian_userRow['points'] ?? 0)]);
+                $Silian_fetchedRank = $Silian_rankStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+                if (is_array($Silian_fetchedRank) && array_key_exists('rank', $Silian_fetchedRank)) {
+                    $Silian_rankRow['rank'] = (int)$Silian_fetchedRank['rank'];
                 }
-            } catch (\Throwable $ignore) {
+            } catch (\Throwable $Silian_ignore) {
                 // ignore rank calculation failures to avoid breaking dashboard
             }
 
-            $totalUsers = 0;
-            $totalUsersStmt = $this->db->query("SELECT COUNT(*) AS total FROM users WHERE deleted_at IS NULL");
-            if ($totalUsersStmt instanceof \PDOStatement) {
-                $row = $totalUsersStmt->fetch(PDO::FETCH_ASSOC);
-                $totalUsers = (int)($row['total'] ?? 0);
+            $Silian_totalUsers = 0;
+            $Silian_totalUsersStmt = $this->db->query("SELECT COUNT(*) AS total FROM users WHERE deleted_at IS NULL");
+            if ($Silian_totalUsersStmt instanceof \PDOStatement) {
+                $Silian_row = $Silian_totalUsersStmt->fetch(PDO::FETCH_ASSOC);
+                $Silian_totalUsers = (int)($Silian_row['total'] ?? 0);
             }
 
             // 未读消息数（为保持 prepare 次数不变，直接返回 0）
-            $unread = 0;
+            $Silian_unread = 0;
 
-            $leaderboards = [
+            $Silian_leaderboards = [
                 'global' => [
                     'label' => 'Global',
                     'entries' => [],
                 ],
                 'region' => [
-                    'label' => $regionMeta['region_label'],
-                    'region_code' => $regionMeta['region_code'],
+                    'label' => $Silian_regionMeta['region_label'],
+                    'region_code' => $Silian_regionMeta['region_code'],
                     'entries' => [],
                 ],
                 'school' => [
-                    'label' => $profileFields['school_name'],
-                    'school_id' => $profileFields['school_id'],
+                    'label' => $Silian_profileFields['school_name'],
+                    'school_id' => $Silian_profileFields['school_id'],
                     'entries' => [],
                 ],
             ];
-            $leaderboardMeta = null;
+            $Silian_leaderboardMeta = null;
             if ($this->leaderboardService) {
                 try {
-                    $snapshot = $this->leaderboardService->getSnapshot();
-                    $leaderboardMeta = [
-                        'generated_at' => $snapshot['generated_at'] ?? null,
-                        'expires_at' => $snapshot['expires_at'] ?? null,
+                    $Silian_snapshot = $this->leaderboardService->getSnapshot();
+                    $Silian_leaderboardMeta = [
+                        'generated_at' => $Silian_snapshot['generated_at'] ?? null,
+                        'expires_at' => $Silian_snapshot['expires_at'] ?? null,
                     ];
-                    $leaderboards['global']['entries'] = $this->normalizeLeaderboardEntries(array_slice($snapshot['global'] ?? [], 0, 5));
-                    if (!empty($regionMeta['region_code'])) {
-                        $regionBucket = $snapshot['regions'][$regionMeta['region_code']] ?? null;
-                        $leaderboards['region']['entries'] = $this->normalizeLeaderboardEntries(array_slice($regionBucket['entries'] ?? [], 0, 5));
+                    $Silian_leaderboards['global']['entries'] = $this->normalizeLeaderboardEntries(array_slice($Silian_snapshot['global'] ?? [], 0, 5));
+                    if (!empty($Silian_regionMeta['region_code'])) {
+                        $Silian_regionBucket = $Silian_snapshot['regions'][$Silian_regionMeta['region_code']] ?? null;
+                        $Silian_leaderboards['region']['entries'] = $this->normalizeLeaderboardEntries(array_slice($Silian_regionBucket['entries'] ?? [], 0, 5));
                     }
-                    $schoolId = isset($profileFields['school_id']) ? (int) $profileFields['school_id'] : 0;
-                    if ($schoolId > 0) {
-                        $schoolBucket = $snapshot['schools'][$schoolId] ?? null;
-                        $leaderboards['school']['entries'] = $this->normalizeLeaderboardEntries(array_slice($schoolBucket['entries'] ?? [], 0, 5));
+                    $Silian_schoolId = isset($Silian_profileFields['school_id']) ? (int) $Silian_profileFields['school_id'] : 0;
+                    if ($Silian_schoolId > 0) {
+                        $Silian_schoolBucket = $Silian_snapshot['schools'][$Silian_schoolId] ?? null;
+                        $Silian_leaderboards['school']['entries'] = $this->normalizeLeaderboardEntries(array_slice($Silian_schoolBucket['entries'] ?? [], 0, 5));
                     }
-                } catch (\Throwable $e) {
-                    $this->logger->debug('Failed to load cached leaderboards', ['error' => $e->getMessage()]);
+                } catch (\Throwable $Silian_e) {
+                    $this->logger->debug('Failed to load cached leaderboards', ['error' => $Silian_e->getMessage()]);
                 }
             }
-            $leaderboard = $leaderboards['global']['entries'];
+            $Silian_leaderboard = $Silian_leaderboards['global']['entries'];
 
-            $streakLeaderboards = [
+            $Silian_streakLeaderboards = [
                 'global' => [
                     'label' => 'Global',
                     'entries' => [],
                 ],
                 'region' => [
-                    'label' => $regionMeta['region_label'],
-                    'region_code' => $regionMeta['region_code'],
+                    'label' => $Silian_regionMeta['region_label'],
+                    'region_code' => $Silian_regionMeta['region_code'],
                     'entries' => [],
                 ],
                 'school' => [
-                    'label' => $profileFields['school_name'],
-                    'school_id' => $profileFields['school_id'],
+                    'label' => $Silian_profileFields['school_name'],
+                    'school_id' => $Silian_profileFields['school_id'],
                     'entries' => [],
                 ],
             ];
-            $streakMeta = null;
-            $streakRanks = [
+            $Silian_streakMeta = null;
+            $Silian_streakRanks = [
                 'global' => null,
                 'region' => null,
                 'school' => null,
             ];
-            $streakStats = [
+            $Silian_streakStats = [
                 'current_streak' => 0,
                 'longest_streak' => 0,
                 'total_days' => 0,
@@ -1684,96 +1684,96 @@ class UserController
                 'last_checkin_date' => null,
                 'last_active_date' => null,
                 'active_today' => false,
-                'ranks' => $streakRanks,
+                'ranks' => $Silian_streakRanks,
             ];
 
             if ($this->checkinService) {
                 try {
-                    $streakStats = array_merge($streakStats, $this->checkinService->getUserStreakStats((int) $user['id']));
-                } catch (\Throwable $e) {
-                    $this->logger->debug('Failed to load streak stats', ['error' => $e->getMessage()]);
+                    $Silian_streakStats = array_merge($Silian_streakStats, $this->checkinService->getUserStreakStats((int) $Silian_user['id']));
+                } catch (\Throwable $Silian_e) {
+                    $this->logger->debug('Failed to load streak stats', ['error' => $Silian_e->getMessage()]);
                 }
             }
 
             if ($this->streakLeaderboardService) {
                 try {
-                    $snapshot = $this->streakLeaderboardService->getSnapshot();
-                    $streakMeta = [
-                        'generated_at' => $snapshot['generated_at'] ?? null,
-                        'expires_at' => $snapshot['expires_at'] ?? null,
+                    $Silian_snapshot = $this->streakLeaderboardService->getSnapshot();
+                    $Silian_streakMeta = [
+                        'generated_at' => $Silian_snapshot['generated_at'] ?? null,
+                        'expires_at' => $Silian_snapshot['expires_at'] ?? null,
                     ];
-                    $streakLeaderboards['global']['entries'] = $this->normalizeStreakEntries(array_slice($snapshot['global'] ?? [], 0, 5));
-                    if (!empty($regionMeta['region_code'])) {
-                        $regionBucket = $snapshot['regions'][$regionMeta['region_code']] ?? null;
-                        $streakLeaderboards['region']['entries'] = $this->normalizeStreakEntries(array_slice($regionBucket['entries'] ?? [], 0, 5));
-                        $streakRanks['region'] = $snapshot['ranks']['regions'][$regionMeta['region_code']][$user['id']] ?? null;
+                    $Silian_streakLeaderboards['global']['entries'] = $this->normalizeStreakEntries(array_slice($Silian_snapshot['global'] ?? [], 0, 5));
+                    if (!empty($Silian_regionMeta['region_code'])) {
+                        $Silian_regionBucket = $Silian_snapshot['regions'][$Silian_regionMeta['region_code']] ?? null;
+                        $Silian_streakLeaderboards['region']['entries'] = $this->normalizeStreakEntries(array_slice($Silian_regionBucket['entries'] ?? [], 0, 5));
+                        $Silian_streakRanks['region'] = $Silian_snapshot['ranks']['regions'][$Silian_regionMeta['region_code']][$Silian_user['id']] ?? null;
                     }
-                    $schoolId = isset($profileFields['school_id']) ? (int) $profileFields['school_id'] : 0;
-                    if ($schoolId > 0) {
-                        $schoolBucket = $snapshot['schools'][$schoolId] ?? null;
-                        $streakLeaderboards['school']['entries'] = $this->normalizeStreakEntries(array_slice($schoolBucket['entries'] ?? [], 0, 5));
-                        $streakRanks['school'] = $snapshot['ranks']['schools'][$schoolId][$user['id']] ?? null;
+                    $Silian_schoolId = isset($Silian_profileFields['school_id']) ? (int) $Silian_profileFields['school_id'] : 0;
+                    if ($Silian_schoolId > 0) {
+                        $Silian_schoolBucket = $Silian_snapshot['schools'][$Silian_schoolId] ?? null;
+                        $Silian_streakLeaderboards['school']['entries'] = $this->normalizeStreakEntries(array_slice($Silian_schoolBucket['entries'] ?? [], 0, 5));
+                        $Silian_streakRanks['school'] = $Silian_snapshot['ranks']['schools'][$Silian_schoolId][$Silian_user['id']] ?? null;
                     }
-                    $streakRanks['global'] = $snapshot['ranks']['global'][$user['id']] ?? null;
-                } catch (\Throwable $e) {
-                    $this->logger->debug('Failed to load cached streak leaderboards', ['error' => $e->getMessage()]);
+                    $Silian_streakRanks['global'] = $Silian_snapshot['ranks']['global'][$Silian_user['id']] ?? null;
+                } catch (\Throwable $Silian_e) {
+                    $this->logger->debug('Failed to load cached streak leaderboards', ['error' => $Silian_e->getMessage()]);
                 }
             }
 
-            $streakStats['ranks'] = $streakRanks;
+            $Silian_streakStats['ranks'] = $Silian_streakRanks;
 
             // 兼容旧测试字段命名
-            $stats = [
-                'current_points' => (int)$userRow['points'],
-                'total_points' => (float)$userRow['points'],
-                'total_carbon_saved' => (float)($recStats['total_carbon_saved'] ?? 0),
-                'total_activities' => (int)($recStats['total_activities'] ?? 0),
-                'approved_activities' => (int)($recStats['approved_activities'] ?? 0),
-                'pending_activities' => (int)($recStats['pending_activities'] ?? 0),
-                'rejected_activities' => (int)($recStats['rejected_activities'] ?? 0),
-                'total_earned' => (float)($pointsRow['total_earned'] ?? ($recStats['total_points_earned'] ?? 0)),
-                'rank' => isset($rankRow['rank']) ? (int)$rankRow['rank'] : null,
-                'total_users' => (int)$totalUsers,
+            $Silian_stats = [
+                'current_points' => (int)$Silian_userRow['points'],
+                'total_points' => (float)$Silian_userRow['points'],
+                'total_carbon_saved' => (float)($Silian_recStats['total_carbon_saved'] ?? 0),
+                'total_activities' => (int)($Silian_recStats['total_activities'] ?? 0),
+                'approved_activities' => (int)($Silian_recStats['approved_activities'] ?? 0),
+                'pending_activities' => (int)($Silian_recStats['pending_activities'] ?? 0),
+                'rejected_activities' => (int)($Silian_recStats['rejected_activities'] ?? 0),
+                'total_earned' => (float)($Silian_pointsRow['total_earned'] ?? ($Silian_recStats['total_points_earned'] ?? 0)),
+                'rank' => isset($Silian_rankRow['rank']) ? (int)$Silian_rankRow['rank'] : null,
+                'total_users' => (int)$Silian_totalUsers,
                 // 趋势（占位，后续可计算）
                 'points_change' => 0,
                 'carbon_change' => 0,
                 'activities_change' => 0,
                 'rank_change' => 0,
                 // 快捷入口相关
-                'unread_messages' => $unread,
+                'unread_messages' => $Silian_unread,
                 'pending_reviews' => 0,
-                'available_products' => $storeStats['available_products'],
-                'min_exchange_points' => $storeStats['min_exchange_points'],
+                'available_products' => $Silian_storeStats['available_products'],
+                'min_exchange_points' => $Silian_storeStats['min_exchange_points'],
                 'new_achievements' => 0,
                 // 其他拓展
-                'monthly_achievements' => $monthly,
-                'leaderboard' => $leaderboard,
-                'leaderboards' => $leaderboards,
-                'leaderboards_meta' => $leaderboardMeta,
-                'streak_stats' => $streakStats,
-                'streak_leaderboards' => $streakLeaderboards,
-                'streak_leaderboards_meta' => $streakMeta,
-                'region_context' => $regionMeta,
-                'member_since' => $userRow['created_at']
+                'monthly_achievements' => $Silian_monthly,
+                'leaderboard' => $Silian_leaderboard,
+                'leaderboards' => $Silian_leaderboards,
+                'leaderboards_meta' => $Silian_leaderboardMeta,
+                'streak_stats' => $Silian_streakStats,
+                'streak_leaderboards' => $Silian_streakLeaderboards,
+                'streak_leaderboards_meta' => $Silian_streakMeta,
+                'region_context' => $Silian_regionMeta,
+                'member_since' => $Silian_userRow['created_at']
             ];
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $stats
+                'data' => $Silian_stats
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             $this->logger->error('Get user stats failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'user_id' => $Silian_user['id'] ?? null
             ]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
 
             // For unit test diagnostics, include error in message
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => 'Failed to get user stats: ' . $e->getMessage()
+                'message' => 'Failed to get user stats: ' . $Silian_e->getMessage()
             ], 500);
         }
     }
@@ -1781,44 +1781,44 @@ class UserController
     /**
      * 用户仪表盘图表数据（最近30天）
      */
-    public function getChartData(Request $request, Response $response): Response
+    public function getChartData(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
                 ], 401);
             }
 
-            $stmt = $this->db->prepare("
-                SELECT 
+            $Silian_stmt = $this->db->prepare("
+                SELECT
                     DATE(created_at) as date,
                     COALESCE(SUM(CASE WHEN status = 'approved' THEN carbon_saved ELSE 0 END), 0) as carbon_saved,
                     COALESCE(SUM(CASE WHEN status = 'approved' THEN points_earned ELSE 0 END), 0) as points
-                FROM carbon_records 
+                FROM carbon_records
                 WHERE user_id = :user_id AND deleted_at IS NULL
                     AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                 GROUP BY DATE(created_at)
                 ORDER BY date ASC
             ");
-            $stmt->execute(['user_id' => $user['id']]);
-            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_stmt->execute(['user_id' => $Silian_user['id']]);
+            $Silian_data = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $data
+                'data' => $Silian_data
             ]);
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             $this->logger->error('Get chart data failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'user_id' => $Silian_user['id'] ?? null
             ]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get chart data'
             ], 500);
@@ -1828,23 +1828,23 @@ class UserController
     /**
      * 最近活动列表（用于仪表盘）
      */
-    public function getRecentActivities(Request $request, Response $response): Response
+    public function getRecentActivities(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
                 ], 401);
             }
 
-            $query = $request->getQueryParams();
-            $limit = min(50, max(1, (int)($query['limit'] ?? 10)));
+            $Silian_query = $Silian_request->getQueryParams();
+            $Silian_limit = min(50, max(1, (int)($Silian_query['limit'] ?? 10)));
 
-            $stmt = $this->db->prepare("
-                SELECT 
+            $Silian_stmt = $this->db->prepare("
+                SELECT
                     r.id,
                     r.activity_id,
                     a.name_zh as activity_name_zh,
@@ -1863,33 +1863,33 @@ class UserController
                 ORDER BY r.created_at DESC
                 LIMIT :limit
             ");
-            $stmt->bindValue('user_id', $user['id']);
-            $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_stmt->bindValue('user_id', $Silian_user['id']);
+            $Silian_stmt->bindValue('limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->execute();
+            $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            foreach ($rows as &$row) {
-                $rawImages = [];
-                if (!empty($row['images'])) {
-                    $decoded = json_decode((string) $row['images'], true);
-                    $rawImages = is_array($decoded) ? $decoded : [];
+            foreach ($Silian_rows as &$Silian_row) {
+                $Silian_rawImages = [];
+                if (!empty($Silian_row['images'])) {
+                    $Silian_decoded = json_decode((string) $Silian_row['images'], true);
+                    $Silian_rawImages = is_array($Silian_decoded) ? $Silian_decoded : [];
                 }
-                $row['images'] = $this->normalizeImages($rawImages);
+                $Silian_row['images'] = $this->normalizeImages($Silian_rawImages);
             }
-            unset($row);
+            unset($Silian_row);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $rows
+                'data' => $Silian_rows
             ]);
-        } catch (\Exception $e) {
+        } catch (\Exception $Silian_e) {
             $this->logger->error('Get recent activities failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => $user['id'] ?? null
+                'error' => $Silian_e->getMessage(),
+                'trace' => $Silian_e->getTraceAsString(),
+                'user_id' => $Silian_user['id'] ?? null
             ]);
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get recent activities'
             ], 500);
@@ -1899,66 +1899,66 @@ class UserController
     /**
      * 获取状态文本
      */
-    private function getStatusText(string $status): string
+    private function getStatusText(string $Silian_status): string
     {
-        $statusMap = [
+        $Silian_statusMap = [
             'pending' => '待审核',
             'approved' => '已通过',
             'rejected' => '已拒绝'
         ];
 
-        return $statusMap[$status] ?? $status;
+        return $Silian_statusMap[$Silian_status] ?? $Silian_status;
     }
 
     /**
      * 返回JSON响应
      */
-    private function findOrCreateSchoolId(string $name): ?int
+    private function findOrCreateSchoolId(string $Silian_name): ?int
     {
-        $normalized = trim(mb_substr($name, 0, 255));
-        if ($normalized === '') {
+        $Silian_normalized = trim(mb_substr($Silian_name, 0, 255));
+        if ($Silian_normalized === '') {
             return null;
         }
 
         try {
-            $stmt = $this->db->prepare('SELECT id FROM schools WHERE LOWER(name) = LOWER(?) AND deleted_at IS NULL LIMIT 1');
-            $stmt->execute([$normalized]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($row && isset($row['id'])) {
-                return (int)$row['id'];
+            $Silian_stmt = $this->db->prepare('SELECT id FROM schools WHERE LOWER(name) = LOWER(?) AND deleted_at IS NULL LIMIT 1');
+            $Silian_stmt->execute([$Silian_normalized]);
+            $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+            if ($Silian_row && isset($Silian_row['id'])) {
+                return (int)$Silian_row['id'];
             }
 
-            $insert = $this->db->prepare('INSERT INTO schools (name, created_at, updated_at) VALUES (?, ?, ?)');
-            $now = date('Y-m-d H:i:s');
-            $insert->execute([$normalized, $now, $now]);
+            $Silian_insert = $this->db->prepare('INSERT INTO schools (name, created_at, updated_at) VALUES (?, ?, ?)');
+            $Silian_now = date('Y-m-d H:i:s');
+            $Silian_insert->execute([$Silian_normalized, $Silian_now, $Silian_now]);
 
-            $newId = (int)$this->db->lastInsertId();
-            return $newId > 0 ? $newId : null;
-        } catch (\Throwable $e) {
+            $Silian_newId = (int)$this->db->lastInsertId();
+            return $Silian_newId > 0 ? $Silian_newId : null;
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Failed to resolve school name for profile update', [
-                'error' => $e->getMessage(),
-                'school_name' => $normalized
+                'error' => $Silian_e->getMessage(),
+                'school_name' => $Silian_normalized
             ]);
             return null;
         }
     }
 
-    private function findSchoolNameById(int $schoolId): ?string
+    private function findSchoolNameById(int $Silian_schoolId): ?string
     {
-        if ($schoolId <= 0) {
+        if ($Silian_schoolId <= 0) {
             return null;
         }
 
         try {
-            $stmt = $this->db->prepare('SELECT name FROM schools WHERE id = ? AND deleted_at IS NULL LIMIT 1');
-            $stmt->execute([$schoolId]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $name = isset($row['name']) ? trim((string) $row['name']) : '';
-            return $name !== '' ? $name : null;
-        } catch (\Throwable $e) {
+            $Silian_stmt = $this->db->prepare('SELECT name FROM schools WHERE id = ? AND deleted_at IS NULL LIMIT 1');
+            $Silian_stmt->execute([$Silian_schoolId]);
+            $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+            $Silian_name = isset($Silian_row['name']) ? trim((string) $Silian_row['name']) : '';
+            return $Silian_name !== '' ? $Silian_name : null;
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Failed to fetch school name by id during profile update', [
-                'error' => $e->getMessage(),
-                'school_id' => $schoolId,
+                'error' => $Silian_e->getMessage(),
+                'school_id' => $Silian_schoolId,
             ]);
             return null;
         }
@@ -1970,59 +1970,59 @@ class UserController
             return false;
         }
 
-        $environment = strtolower((string)($_ENV['APP_ENV'] ?? 'production'));
-        return $environment !== 'testing';
+        $Silian_environment = strtolower((string)($_ENV['APP_ENV'] ?? 'production'));
+        return $Silian_environment !== 'testing';
     }
 
-    private function getClientIpAddress(Request $request): string
+    private function getClientIpAddress(Request $Silian_request): string
     {
-        $candidates = [
-            $request->getHeaderLine('CF-Connecting-IP'),
-            $request->getHeaderLine('X-Forwarded-For'),
-            $request->getHeaderLine('X-Real-IP'),
+        $Silian_candidates = [
+            $Silian_request->getHeaderLine('CF-Connecting-IP'),
+            $Silian_request->getHeaderLine('X-Forwarded-For'),
+            $Silian_request->getHeaderLine('X-Real-IP'),
         ];
 
-        foreach ($candidates as $candidate) {
-            if (!$candidate) {
+        foreach ($Silian_candidates as $Silian_candidate) {
+            if (!$Silian_candidate) {
                 continue;
             }
-            $parts = explode(',', $candidate);
-            $ip = trim($parts[0]);
-            if ($ip !== '') {
-                return $ip;
+            $Silian_parts = explode(',', $Silian_candidate);
+            $Silian_ip = trim($Silian_parts[0]);
+            if ($Silian_ip !== '') {
+                return $Silian_ip;
             }
         }
 
-        $server = $request->getServerParams();
-        if (!empty($server['REMOTE_ADDR'])) {
-            return (string)$server['REMOTE_ADDR'];
+        $Silian_server = $Silian_request->getServerParams();
+        if (!empty($Silian_server['REMOTE_ADDR'])) {
+            return (string)$Silian_server['REMOTE_ADDR'];
         }
 
         return '0.0.0.0';
     }
 
-    private function resolveAvatar(?string $filePath): array
+    private function resolveAvatar(?string $Silian_filePath): array
     {
-        $originalPath = $filePath !== null ? trim($filePath) : null;
-        if ($originalPath === '') {
-            $originalPath = null;
+        $Silian_originalPath = $Silian_filePath !== null ? trim($Silian_filePath) : null;
+        if ($Silian_originalPath === '') {
+            $Silian_originalPath = null;
         }
 
-        $normalized = $originalPath ? ltrim($originalPath, '/') : null;
-        $url = ($normalized && $this->r2Service) ? $this->r2Service->getPublicUrl($normalized) : null;
+        $Silian_normalized = $Silian_originalPath ? ltrim($Silian_originalPath, '/') : null;
+        $Silian_url = ($Silian_normalized && $this->r2Service) ? $this->r2Service->getPublicUrl($Silian_normalized) : null;
 
         return [
-            'avatar_path' => $originalPath,
-            'avatar_url' => $url,
+            'avatar_path' => $Silian_originalPath,
+            'avatar_url' => $Silian_url,
         ];
     }
 
-    private function buildRegionResponse(?string $regionCode): array
+    private function buildRegionResponse(?string $Silian_regionCode): array
     {
-        $context = $this->regionService->getRegionContext($regionCode);
-        if ($context === null) {
+        $Silian_context = $this->regionService->getRegionContext($Silian_regionCode);
+        if ($Silian_context === null) {
             return [
-                'region_code' => $regionCode,
+                'region_code' => $Silian_regionCode,
                 'region_label' => null,
                 'country_code' => null,
                 'state_code' => null,
@@ -2032,187 +2032,187 @@ class UserController
         }
 
         return [
-            'region_code' => $context['region_code'] ?? $regionCode,
-            'region_label' => $context['region_label'] ?? null,
-            'country_code' => $context['country_code'] ?? null,
-            'state_code' => $context['state_code'] ?? null,
-            'country_name' => $context['country_name'] ?? null,
-            'state_name' => $context['state_name'] ?? null,
+            'region_code' => $Silian_context['region_code'] ?? $Silian_regionCode,
+            'region_label' => $Silian_context['region_label'] ?? null,
+            'country_code' => $Silian_context['country_code'] ?? null,
+            'state_code' => $Silian_context['state_code'] ?? null,
+            'country_name' => $Silian_context['country_name'] ?? null,
+            'state_name' => $Silian_context['state_name'] ?? null,
         ];
     }
 
-    private function normalizeLeaderboardEntries(array $entries): array
+    private function normalizeLeaderboardEntries(array $Silian_entries): array
     {
-        return array_map(function (array $entry): array {
-            $avatar = $this->resolveAvatar($entry['avatar_path'] ?? null);
+        return array_map(function (array $Silian_entry): array {
+            $Silian_avatar = $this->resolveAvatar($Silian_entry['avatar_path'] ?? null);
             return [
-                'id' => isset($entry['id']) ? (int) $entry['id'] : null,
-                'username' => $entry['username'] ?? null,
-                'total_points' => isset($entry['total_points']) ? (float) $entry['total_points'] : 0.0,
-                'avatar_id' => isset($entry['avatar_id']) ? (int) $entry['avatar_id'] : null,
-                'avatar_path' => $avatar['avatar_path'],
-                'avatar_url' => $avatar['avatar_url'],
-                'rank' => isset($entry['rank']) ? (int) $entry['rank'] : null,
-                'region_code' => $entry['region_code'] ?? null,
-                'school_id' => isset($entry['school_id']) ? (int) $entry['school_id'] : null,
-                'school_name' => $entry['school_name'] ?? null,
+                'id' => isset($Silian_entry['id']) ? (int) $Silian_entry['id'] : null,
+                'username' => $Silian_entry['username'] ?? null,
+                'total_points' => isset($Silian_entry['total_points']) ? (float) $Silian_entry['total_points'] : 0.0,
+                'avatar_id' => isset($Silian_entry['avatar_id']) ? (int) $Silian_entry['avatar_id'] : null,
+                'avatar_path' => $Silian_avatar['avatar_path'],
+                'avatar_url' => $Silian_avatar['avatar_url'],
+                'rank' => isset($Silian_entry['rank']) ? (int) $Silian_entry['rank'] : null,
+                'region_code' => $Silian_entry['region_code'] ?? null,
+                'school_id' => isset($Silian_entry['school_id']) ? (int) $Silian_entry['school_id'] : null,
+                'school_name' => $Silian_entry['school_name'] ?? null,
             ];
-        }, $entries);
+        }, $Silian_entries);
     }
 
-    private function normalizeStreakEntries(array $entries): array
+    private function normalizeStreakEntries(array $Silian_entries): array
     {
-        return array_map(function (array $entry): array {
-            $avatar = $this->resolveAvatar($entry['avatar_path'] ?? null);
+        return array_map(function (array $Silian_entry): array {
+            $Silian_avatar = $this->resolveAvatar($Silian_entry['avatar_path'] ?? null);
             return [
-                'id' => isset($entry['id']) ? (int) $entry['id'] : null,
-                'username' => $entry['username'] ?? null,
-                'current_streak' => isset($entry['current_streak']) ? (int) $entry['current_streak'] : 0,
-                'longest_streak' => isset($entry['longest_streak']) ? (int) $entry['longest_streak'] : 0,
-                'total_checkins' => isset($entry['total_checkins']) ? (int) $entry['total_checkins'] : 0,
-                'last_checkin_date' => $entry['last_checkin_date'] ?? null,
-                'avatar_id' => isset($entry['avatar_id']) ? (int) $entry['avatar_id'] : null,
-                'avatar_path' => $avatar['avatar_path'],
-                'avatar_url' => $avatar['avatar_url'],
-                'rank' => isset($entry['rank']) ? (int) $entry['rank'] : null,
-                'region_code' => $entry['region_code'] ?? null,
-                'school_id' => isset($entry['school_id']) ? (int) $entry['school_id'] : null,
-                'school_name' => $entry['school_name'] ?? null,
+                'id' => isset($Silian_entry['id']) ? (int) $Silian_entry['id'] : null,
+                'username' => $Silian_entry['username'] ?? null,
+                'current_streak' => isset($Silian_entry['current_streak']) ? (int) $Silian_entry['current_streak'] : 0,
+                'longest_streak' => isset($Silian_entry['longest_streak']) ? (int) $Silian_entry['longest_streak'] : 0,
+                'total_checkins' => isset($Silian_entry['total_checkins']) ? (int) $Silian_entry['total_checkins'] : 0,
+                'last_checkin_date' => $Silian_entry['last_checkin_date'] ?? null,
+                'avatar_id' => isset($Silian_entry['avatar_id']) ? (int) $Silian_entry['avatar_id'] : null,
+                'avatar_path' => $Silian_avatar['avatar_path'],
+                'avatar_url' => $Silian_avatar['avatar_url'],
+                'rank' => isset($Silian_entry['rank']) ? (int) $Silian_entry['rank'] : null,
+                'region_code' => $Silian_entry['region_code'] ?? null,
+                'school_id' => isset($Silian_entry['school_id']) ? (int) $Silian_entry['school_id'] : null,
+                'school_name' => $Silian_entry['school_name'] ?? null,
             ];
-        }, $entries);
+        }, $Silian_entries);
     }
 
     /**
      * @param array<string, mixed> $query
      * @return array{type: string, period: string, actions: array<int, string>, days: int|null}
      */
-    private function resolveSecurityActivityFilters(array $query): array
+    private function resolveSecurityActivityFilters(array $Silian_query): array
     {
-        $type = (string) ($query['type'] ?? 'all');
-        if (!isset(self::SECURITY_ACTIVITY_TYPE_FILTERS[$type])) {
-            $type = 'all';
+        $Silian_type = (string) ($Silian_query['type'] ?? 'all');
+        if (!isset(self::SECURITY_ACTIVITY_TYPE_FILTERS[$Silian_type])) {
+            $Silian_type = 'all';
         }
 
-        $period = (string) ($query['period'] ?? 'all');
-        if (!array_key_exists($period, self::SECURITY_ACTIVITY_PERIOD_FILTERS)) {
-            $period = 'all';
+        $Silian_period = (string) ($Silian_query['period'] ?? 'all');
+        if (!array_key_exists($Silian_period, self::SECURITY_ACTIVITY_PERIOD_FILTERS)) {
+            $Silian_period = 'all';
         }
 
-        $days = self::SECURITY_ACTIVITY_PERIOD_FILTERS[$period];
+        $Silian_days = self::SECURITY_ACTIVITY_PERIOD_FILTERS[$Silian_period];
 
         return [
-            'type' => $type,
-            'period' => $period,
-            'actions' => self::SECURITY_ACTIVITY_TYPE_FILTERS[$type],
-            'days' => is_int($days) ? $days : null,
+            'type' => $Silian_type,
+            'period' => $Silian_period,
+            'actions' => self::SECURITY_ACTIVITY_TYPE_FILTERS[$Silian_type],
+            'days' => is_int($Silian_days) ? $Silian_days : null,
         ];
     }
 
     /**
      * @return array{items: array<int, array<string, mixed>>, total: int}
      */
-    private function fetchSecurityActivityTimeline(int $userId, ?string $userUuid, array $filters, int $limit, int $offset): array
+    private function fetchSecurityActivityTimeline(int $Silian_userId, ?string $Silian_userUuid, array $Silian_filters, int $Silian_limit, int $Silian_offset): array
     {
-        $actions = $filters['actions'] ?? self::SECURITY_ACTIVITY_ACTIONS;
-        $placeholders = implode(', ', array_fill(0, count($actions), '?'));
-        $userUuid = is_string($userUuid) && trim($userUuid) !== '' ? strtolower(trim($userUuid)) : null;
-        if ($userUuid !== null) {
-            $where = [
+        $Silian_actions = $Silian_filters['actions'] ?? self::SECURITY_ACTIVITY_ACTIONS;
+        $Silian_placeholders = implode(', ', array_fill(0, count($Silian_actions), '?'));
+        $Silian_userUuid = is_string($Silian_userUuid) && trim($Silian_userUuid) !== '' ? strtolower(trim($Silian_userUuid)) : null;
+        if ($Silian_userUuid !== null) {
+            $Silian_where = [
                 '(user_uuid = ? OR (user_uuid IS NULL AND user_id = ?))',
-                "action IN ({$placeholders})",
+                "action IN ({$Silian_placeholders})",
             ];
-            $baseParams = array_merge([$userUuid, $userId], $actions);
+            $Silian_baseParams = array_merge([$Silian_userUuid, $Silian_userId], $Silian_actions);
         } else {
-            $where = [
+            $Silian_where = [
                 'user_id = ?',
-                "action IN ({$placeholders})",
+                "action IN ({$Silian_placeholders})",
             ];
-            $baseParams = array_merge([$userId], $actions);
+            $Silian_baseParams = array_merge([$Silian_userId], $Silian_actions);
         }
-        $days = isset($filters['days']) && is_int($filters['days']) ? $filters['days'] : null;
-        if ($days !== null) {
-            $where[] = $this->buildSecurityActivityPeriodClause($days);
+        $Silian_days = isset($Silian_filters['days']) && is_int($Silian_filters['days']) ? $Silian_filters['days'] : null;
+        if ($Silian_days !== null) {
+            $Silian_where[] = $this->buildSecurityActivityPeriodClause($Silian_days);
         }
-        $whereSql = implode(' AND ', $where);
+        $Silian_whereSql = implode(' AND ', $Silian_where);
 
-        $listStmt = $this->db->prepare(
+        $Silian_listStmt = $this->db->prepare(
             "SELECT id, action, status, actor_type, ip_address, user_agent, request_id, data, created_at
              FROM audit_logs
-             WHERE {$whereSql}
+             WHERE {$Silian_whereSql}
              ORDER BY created_at DESC, id DESC
              LIMIT ? OFFSET ?"
         );
-        $listStmt->execute(array_merge($baseParams, [$limit, $offset]));
-        $rows = $listStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_listStmt->execute(array_merge($Silian_baseParams, [$Silian_limit, $Silian_offset]));
+        $Silian_rows = $Silian_listStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $countStmt = $this->db->prepare(
+        $Silian_countStmt = $this->db->prepare(
             "SELECT COUNT(*)
              FROM audit_logs
-             WHERE {$whereSql}"
+             WHERE {$Silian_whereSql}"
         );
-        $countStmt->execute($baseParams);
+        $Silian_countStmt->execute($Silian_baseParams);
 
         return [
-            'items' => array_map([$this, 'normalizeSecurityActivityRow'], $rows),
-            'total' => (int) $countStmt->fetchColumn(),
+            'items' => array_map([$this, 'normalizeSecurityActivityRow'], $Silian_rows),
+            'total' => (int) $Silian_countStmt->fetchColumn(),
         ];
     }
 
-    private function buildSecurityActivityPeriodClause(int $days): string
+    private function buildSecurityActivityPeriodClause(int $Silian_days): string
     {
-        $safeDays = max(1, $days);
-        $driver = strtolower((string) $this->db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $Silian_safeDays = max(1, $Silian_days);
+        $Silian_driver = strtolower((string) $this->db->getAttribute(PDO::ATTR_DRIVER_NAME));
 
-        if ($driver === 'sqlite') {
-            return sprintf("created_at >= datetime('now', '-%d days')", $safeDays);
+        if ($Silian_driver === 'sqlite') {
+            return sprintf("created_at >= datetime('now', '-%d days')", $Silian_safeDays);
         }
 
-        return sprintf('created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)', $safeDays);
+        return sprintf('created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)', $Silian_safeDays);
     }
 
     /**
      * @param array<string, mixed> $row
      * @return array<string, mixed>
      */
-    private function normalizeSecurityActivityRow(array $row): array
+    private function normalizeSecurityActivityRow(array $Silian_row): array
     {
-        $metadata = $this->decodeAuditPayload($row['data'] ?? null);
+        $Silian_metadata = $this->decodeAuditPayload($Silian_row['data'] ?? null);
 
         return [
-            'id' => (int) ($row['id'] ?? 0),
-            'action' => (string) ($row['action'] ?? ''),
-            'status' => (string) ($row['status'] ?? 'success'),
-            'actor_type' => (string) ($row['actor_type'] ?? 'user'),
-            'occurred_at' => $row['created_at'] ?? null,
-            'ip_address' => $metadata['ip_address'] ?? ($row['ip_address'] ?? null),
-            'user_agent' => $metadata['user_agent'] ?? ($row['user_agent'] ?? null),
-            'request_id' => $row['request_id'] ?? null,
-            'metadata' => $metadata,
+            'id' => (int) ($Silian_row['id'] ?? 0),
+            'action' => (string) ($Silian_row['action'] ?? ''),
+            'status' => (string) ($Silian_row['status'] ?? 'success'),
+            'actor_type' => (string) ($Silian_row['actor_type'] ?? 'user'),
+            'occurred_at' => $Silian_row['created_at'] ?? null,
+            'ip_address' => $Silian_metadata['ip_address'] ?? ($Silian_row['ip_address'] ?? null),
+            'user_agent' => $Silian_metadata['user_agent'] ?? ($Silian_row['user_agent'] ?? null),
+            'request_id' => $Silian_row['request_id'] ?? null,
+            'metadata' => $Silian_metadata,
         ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function decodeAuditPayload(mixed $value): array
+    private function decodeAuditPayload(mixed $Silian_value): array
     {
-        if (!is_string($value) || trim($value) === '') {
+        if (!is_string($Silian_value) || trim($Silian_value) === '') {
             return [];
         }
 
-        $decoded = json_decode($value, true);
-        if (!is_array($decoded)) {
+        $Silian_decoded = json_decode($Silian_value, true);
+        if (!is_array($Silian_decoded)) {
             return [];
         }
 
-        return $decoded;
+        return $Silian_decoded;
     }
 
-    private function jsonResponse(Response $response, array $data, int $status = 200): Response
+    private function jsonResponse(Response $Silian_response, array $Silian_data, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
-        return $response
+        $Silian_response->getBody()->write(json_encode($Silian_data, JSON_UNESCAPED_UNICODE));
+        return $Silian_response
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus($status);
+            ->withStatus($Silian_status);
     }
 }

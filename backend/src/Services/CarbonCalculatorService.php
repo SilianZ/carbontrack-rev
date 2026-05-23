@@ -14,77 +14,77 @@ class CarbonCalculatorService
     private ?AuditLogService $auditLogService;
     private ?ErrorLogService $errorLogService;
 
-    public function __construct(?Logger $logger = null, ?AuditLogService $auditLogService = null, ?ErrorLogService $errorLogService = null)
+    public function __construct(?Logger $Silian_logger = null, ?AuditLogService $Silian_auditLogService = null, ?ErrorLogService $Silian_errorLogService = null)
     {
-        $this->logger = $logger;
-        $this->auditLogService = $auditLogService;
-        $this->errorLogService = $errorLogService;
+        $this->logger = $Silian_logger;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->errorLogService = $Silian_errorLogService;
     }
 
     /**
      * Calculate carbon reduction (for testing)
      */
-    public function calculateCarbonReduction(array $activity, float $amount): float
+    public function calculateCarbonReduction(array $Silian_activity, float $Silian_amount): float
     {
-        if ($amount < 0) {
+        if ($Silian_amount < 0) {
             return 0.0;
         }
-        
-        $carbonFactor = $activity['carbon_factor'] ?? 0;
-        return $carbonFactor * $amount;
+
+        $Silian_carbonFactor = $Silian_activity['carbon_factor'] ?? 0;
+        return $Silian_carbonFactor * $Silian_amount;
     }
 
     /**
      * Calculate points from carbon amount
      */
-    public function calculatePoints(float $carbonAmount, int $pointsPerKg = 10): int
+    public function calculatePoints(float $Silian_carbonAmount, int $Silian_pointsPerKg = 10): int
     {
-        return (int) ($carbonAmount * $pointsPerKg);
+        return (int) ($Silian_carbonAmount * $Silian_pointsPerKg);
     }
 
     /**
      * Validate activity data for create/update flows.
      */
-    public function validateActivityData(array $activity, bool $isUpdate = false): bool
+    public function validateActivityData(array $Silian_activity, bool $Silian_isUpdate = false): bool
     {
-        $required = ['name_zh', 'name_en', 'carbon_factor', 'unit', 'category'];
-        $allowed = array_merge($required, ['description_zh', 'description_en', 'icon', 'is_active', 'sort_order']);
+        $Silian_required = ['name_zh', 'name_en', 'carbon_factor', 'unit', 'category'];
+        $Silian_allowed = array_merge($Silian_required, ['description_zh', 'description_en', 'icon', 'is_active', 'sort_order']);
 
         // Ensure at least one recognised field is present for updates
-        if ($isUpdate) {
-            $presentKeys = array_intersect(array_keys($activity), $allowed);
-            if (empty($presentKeys)) {
+        if ($Silian_isUpdate) {
+            $Silian_presentKeys = array_intersect(array_keys($Silian_activity), $Silian_allowed);
+            if (empty($Silian_presentKeys)) {
                 return false;
             }
         }
 
-        foreach ($required as $field) {
-            if ($isUpdate && !array_key_exists($field, $activity)) {
+        foreach ($Silian_required as $Silian_field) {
+            if ($Silian_isUpdate && !array_key_exists($Silian_field, $Silian_activity)) {
                 continue;
             }
 
-            if ($this->isBlank($activity[$field] ?? null)) {
+            if ($this->isBlank($Silian_activity[$Silian_field] ?? null)) {
                 return false;
             }
         }
 
-        if (array_key_exists('carbon_factor', $activity)) {
-            if (!is_numeric($activity['carbon_factor'])) {
+        if (array_key_exists('carbon_factor', $Silian_activity)) {
+            if (!is_numeric($Silian_activity['carbon_factor'])) {
                 return false;
             }
 
-            if ((float) $activity['carbon_factor'] < 0) {
+            if ((float) $Silian_activity['carbon_factor'] < 0) {
                 return false;
             }
         }
 
-        if (array_key_exists('sort_order', $activity) && !is_numeric($activity['sort_order'])) {
+        if (array_key_exists('sort_order', $Silian_activity) && !is_numeric($Silian_activity['sort_order'])) {
             return false;
         }
 
-        if (array_key_exists('is_active', $activity)) {
-            $value = $activity['is_active'];
-            if (!is_bool($value) && !in_array($value, [0, 1, '0', '1', 'true', 'false', 'on', 'off', 'yes', 'no'], true)) {
+        if (array_key_exists('is_active', $Silian_activity)) {
+            $Silian_value = $Silian_activity['is_active'];
+            if (!is_bool($Silian_value) && !in_array($Silian_value, [0, 1, '0', '1', 'true', 'false', 'on', 'off', 'yes', 'no'], true)) {
                 return false;
             }
         }
@@ -95,9 +95,9 @@ class CarbonCalculatorService
     /**
      * Validate amount
      */
-    public function validateAmount(float $amount): bool
+    public function validateAmount(float $Silian_amount): bool
     {
-        return $amount >= 0;
+        return $Silian_amount >= 0;
     }
 
     /**
@@ -111,9 +111,9 @@ class CarbonCalculatorService
     /**
      * Get carbon factor by category
      */
-    public function getCarbonFactorByCategory(string $category): array
+    public function getCarbonFactorByCategory(string $Silian_category): array
     {
-        $factors = [
+        $Silian_factors = [
             'transport' => [
                 'car' => 2.3,
                 'bus' => 0.8,
@@ -125,37 +125,37 @@ class CarbonCalculatorService
                 'gas' => 2.0
             ]
         ];
-        
-        return $factors[$category] ?? [];
+
+        return $Silian_factors[$Silian_category] ?? [];
     }
 
     /**
      * Convert units
      */
-    public function convertUnits(float $value, string $fromUnit, string $toUnit): float
+    public function convertUnits(float $Silian_value, string $Silian_fromUnit, string $Silian_toUnit): float
     {
-        $conversions = [
+        $Silian_conversions = [
             'km' => ['m' => 1000],
             'kg' => ['g' => 1000],
         ];
-        
-        if ($fromUnit === $toUnit) {
-            return $value;
+
+        if ($Silian_fromUnit === $Silian_toUnit) {
+            return $Silian_value;
         }
-        
-        if (isset($conversions[$fromUnit][$toUnit])) {
-            return $value * $conversions[$fromUnit][$toUnit];
+
+        if (isset($Silian_conversions[$Silian_fromUnit][$Silian_toUnit])) {
+            return $Silian_value * $Silian_conversions[$Silian_fromUnit][$Silian_toUnit];
         }
-        
-        return $value; // Return original if conversion not supported
+
+        return $Silian_value; // Return original if conversion not supported
     }
 
     /**
      * Calculate monthly stats
      */
-    public function calculateMonthlyStats(array $activities): array
+    public function calculateMonthlyStats(array $Silian_activities): array
     {
-        if (empty($activities)) {
+        if (empty($Silian_activities)) {
             return [
                 'total_carbon_saved' => 0.0,
                 'total_points_earned' => 0,
@@ -163,16 +163,16 @@ class CarbonCalculatorService
                 'average_carbon_per_activity' => 0.0
             ];
         }
-        
-        $totalCarbon = array_sum(array_column($activities, 'carbon_amount'));
-        $totalPoints = array_sum(array_column($activities, 'points'));
-        $totalCount = count($activities);
-        
+
+        $Silian_totalCarbon = array_sum(array_column($Silian_activities, 'carbon_amount'));
+        $Silian_totalPoints = array_sum(array_column($Silian_activities, 'points'));
+        $Silian_totalCount = count($Silian_activities);
+
         return [
-            'total_carbon_saved' => $totalCarbon,
-            'total_points_earned' => $totalPoints,
-            'total_activities' => $totalCount,
-            'average_carbon_per_activity' => $totalCount > 0 ? $totalCarbon / $totalCount : 0.0
+            'total_carbon_saved' => $Silian_totalCarbon,
+            'total_points_earned' => $Silian_totalPoints,
+            'total_activities' => $Silian_totalCount,
+            'average_carbon_per_activity' => $Silian_totalCount > 0 ? $Silian_totalCarbon / $Silian_totalCount : 0.0
         ];
     }
 
@@ -184,81 +184,81 @@ class CarbonCalculatorService
      * @return array Result with carbon savings and activity details
      * @throws \InvalidArgumentException If activity not found or invalid
      */
-    public function calculateCarbonSavings(string $activityId, float $dataInput, ?array $activity = null): array
+    public function calculateCarbonSavings(string $Silian_activityId, float $Silian_dataInput, ?array $Silian_activity = null): array
     {
-        if ($dataInput < 0) {
+        if ($Silian_dataInput < 0) {
             throw new \InvalidArgumentException('Data input cannot be negative');
         }
 
-        $resolvedActivity = $activity ?? $this->resolveActivity($activityId);
+        $Silian_resolvedActivity = $Silian_activity ?? $this->resolveActivity($Silian_activityId);
 
-        if (!$resolvedActivity) {
+        if (!$Silian_resolvedActivity) {
             throw new \InvalidArgumentException('Activity not found');
         }
 
-        $carbonFactor = $this->extractCarbonFactor($resolvedActivity);
-        $unit = $resolvedActivity['unit'] ?? null;
-        $nameZh = $resolvedActivity['name_zh'] ?? null;
-        $nameEn = $resolvedActivity['name_en'] ?? null;
-        $combinedName = trim(($nameZh ?? '') . ' ' . ($nameEn ?? ''));
-        if ($combinedName === '') {
-            $combinedName = $nameZh ?? $nameEn ?? '';
+        $Silian_carbonFactor = $this->extractCarbonFactor($Silian_resolvedActivity);
+        $Silian_unit = $Silian_resolvedActivity['unit'] ?? null;
+        $Silian_nameZh = $Silian_resolvedActivity['name_zh'] ?? null;
+        $Silian_nameEn = $Silian_resolvedActivity['name_en'] ?? null;
+        $Silian_combinedName = trim(($Silian_nameZh ?? '') . ' ' . ($Silian_nameEn ?? ''));
+        if ($Silian_combinedName === '') {
+            $Silian_combinedName = $Silian_nameZh ?? $Silian_nameEn ?? '';
         }
 
-        $carbonSavings = $carbonFactor * $dataInput;
-        $pointsEarned = (int) round($carbonSavings * 10);
+        $Silian_carbonSavings = $Silian_carbonFactor * $Silian_dataInput;
+        $Silian_pointsEarned = (int) round($Silian_carbonSavings * 10);
 
         return [
-            'activity_id' => $activityId,
-            'activity_name_zh' => $nameZh,
-            'activity_name_en' => $nameEn,
-            'activity_combined_name' => $combinedName,
-            'category' => $resolvedActivity['category'] ?? null,
-            'carbon_factor' => $carbonFactor,
-            'unit' => $unit,
-            'data_input' => $dataInput,
-            'carbon_savings' => $carbonSavings,
-            'points_earned' => $pointsEarned,
+            'activity_id' => $Silian_activityId,
+            'activity_name_zh' => $Silian_nameZh,
+            'activity_name_en' => $Silian_nameEn,
+            'activity_combined_name' => $Silian_combinedName,
+            'category' => $Silian_resolvedActivity['category'] ?? null,
+            'carbon_factor' => $Silian_carbonFactor,
+            'unit' => $Silian_unit,
+            'data_input' => $Silian_dataInput,
+            'carbon_savings' => $Silian_carbonSavings,
+            'points_earned' => $Silian_pointsEarned,
         ];
     }
 
-    private function resolveActivity(string $activityId): ?array
+    private function resolveActivity(string $Silian_activityId): ?array
     {
         try {
-            $model = CarbonActivity::find($activityId);
-        } catch (\Throwable $e) {
-            $this->logFailure('carbon_activity_resolve_failed', $e, ['activity_id' => $activityId], '/internal/carbon-activities/resolve');
+            $Silian_model = CarbonActivity::find($Silian_activityId);
+        } catch (\Throwable $Silian_e) {
+            $this->logFailure('carbon_activity_resolve_failed', $Silian_e, ['activity_id' => $Silian_activityId], '/internal/carbon-activities/resolve');
             if ($this->logger) {
                 $this->logger->warning('Failed to resolve carbon activity', [
-                    'activity_id' => $activityId,
-                    'error' => $e->getMessage(),
+                    'activity_id' => $Silian_activityId,
+                    'error' => $Silian_e->getMessage(),
                 ]);
             }
-            $model = null;
+            $Silian_model = null;
         }
 
-        if (!$model) {
+        if (!$Silian_model) {
             return null;
         }
 
         return [
-            'id' => $model->id,
-            'name_zh' => $model->name_zh,
-            'name_en' => $model->name_en,
-            'category' => $model->category,
-            'carbon_factor' => (float) $model->carbon_factor,
-            'unit' => $model->unit,
+            'id' => $Silian_model->id,
+            'name_zh' => $Silian_model->name_zh,
+            'name_en' => $Silian_model->name_en,
+            'category' => $Silian_model->category,
+            'carbon_factor' => (float) $Silian_model->carbon_factor,
+            'unit' => $Silian_model->unit,
         ];
     }
 
-    private function extractCarbonFactor(array $activity): float
+    private function extractCarbonFactor(array $Silian_activity): float
     {
-        $factor = $activity['carbon_factor'] ?? $activity['factor'] ?? 0;
-        if (!is_numeric($factor)) {
+        $Silian_factor = $Silian_activity['carbon_factor'] ?? $Silian_activity['factor'] ?? 0;
+        if (!is_numeric($Silian_factor)) {
             return 0.0;
         }
 
-        return (float) $factor;
+        return (float) $Silian_factor;
     }
 
     /**
@@ -269,64 +269,64 @@ class CarbonCalculatorService
      * @return array List of activities
      */
     public function getAvailableActivities(
-        ?string $category = null,
-        ?string $search = null,
-        bool $includeInactive = false,
-        bool $includeDeleted = false
+        ?string $Silian_category = null,
+        ?string $Silian_search = null,
+        bool $Silian_includeInactive = false,
+        bool $Silian_includeDeleted = false
     ): array {
         try {
-            $query = $includeDeleted ? CarbonActivity::withTrashed() : CarbonActivity::query();
+            $Silian_query = $Silian_includeDeleted ? CarbonActivity::withTrashed() : CarbonActivity::query();
 
-            if (!$includeInactive) {
-                $query->where('is_active', true);
+            if (!$Silian_includeInactive) {
+                $Silian_query->where('is_active', true);
             }
 
-            if ($category) {
-                $query->where('category', $category);
+            if ($Silian_category) {
+                $Silian_query->where('category', $Silian_category);
             }
 
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $like = '%' . $search . '%';
-                    $q->where('name_zh', 'LIKE', $like)
-                        ->orWhere('name_en', 'LIKE', $like)
-                        ->orWhere('description_zh', 'LIKE', $like)
-                        ->orWhere('description_en', 'LIKE', $like);
+            if ($Silian_search) {
+                $Silian_query->where(function ($Silian_q) use ($Silian_search) {
+                    $Silian_like = '%' . $Silian_search . '%';
+                    $Silian_q->where('name_zh', 'LIKE', $Silian_like)
+                        ->orWhere('name_en', 'LIKE', $Silian_like)
+                        ->orWhere('description_zh', 'LIKE', $Silian_like)
+                        ->orWhere('description_en', 'LIKE', $Silian_like);
                 });
             }
 
-            return $query->orderBy('category')
+            return $Silian_query->orderBy('category')
                 ->orderBy('sort_order')
                 ->orderBy('created_at')
                 ->get()
-                ->map(function (CarbonActivity $activity) use ($includeDeleted) {
+                ->map(function (CarbonActivity $Silian_activity) use ($Silian_includeDeleted) {
                     return [
-                        'id' => $activity->id,
-                        'name_zh' => $activity->name_zh,
-                        'name_en' => $activity->name_en,
-                        'combined_name' => $activity->getCombinedName(),
-                        'category' => $activity->category,
-                        'carbon_factor' => (float) $activity->carbon_factor,
-                        'unit' => $activity->unit,
-                        'description_zh' => $activity->description_zh,
-                        'description_en' => $activity->description_en,
-                        'icon' => $activity->icon,
-                        'is_active' => (bool) $activity->is_active,
-                        'sort_order' => (int) $activity->sort_order,
-                        'created_at' => $activity->created_at,
-                        'updated_at' => $activity->updated_at,
+                        'id' => $Silian_activity->id,
+                        'name_zh' => $Silian_activity->name_zh,
+                        'name_en' => $Silian_activity->name_en,
+                        'combined_name' => $Silian_activity->getCombinedName(),
+                        'category' => $Silian_activity->category,
+                        'carbon_factor' => (float) $Silian_activity->carbon_factor,
+                        'unit' => $Silian_activity->unit,
+                        'description_zh' => $Silian_activity->description_zh,
+                        'description_en' => $Silian_activity->description_en,
+                        'icon' => $Silian_activity->icon,
+                        'is_active' => (bool) $Silian_activity->is_active,
+                        'sort_order' => (int) $Silian_activity->sort_order,
+                        'created_at' => $Silian_activity->created_at,
+                        'updated_at' => $Silian_activity->updated_at,
                         'statistics' => null,
-                        'deleted_at' => $includeDeleted ? $activity->deleted_at : null,
+                        'deleted_at' => $Silian_includeDeleted ? $Silian_activity->deleted_at : null,
                     ];
                 })
                 ->toArray();
-        } catch (\Exception $e) {
-            $this->logFailure('carbon_activities_query_failed', $e, [
-                'category' => $category,
-                'search' => $search,
+        } catch (\Exception $Silian_e) {
+            $this->logFailure('carbon_activities_query_failed', $Silian_e, [
+                'category' => $Silian_category,
+                'search' => $Silian_search,
             ], '/internal/carbon-activities/list');
             if ($this->logger) {
-                $this->logger->error('Failed to get activities from database', ['error' => $e->getMessage()]);
+                $this->logger->error('Failed to get activities from database', ['error' => $Silian_e->getMessage()]);
             }
 
             return [];
@@ -338,27 +338,27 @@ class CarbonCalculatorService
      *
      * @return array Activities grouped by category
      */
-    public function getActivitiesGroupedByCategory(bool $includeInactive = false, bool $includeDeleted = false): array
+    public function getActivitiesGroupedByCategory(bool $Silian_includeInactive = false, bool $Silian_includeDeleted = false): array
     {
-        $activities = $this->getAvailableActivities(null, null, $includeInactive, $includeDeleted);
+        $Silian_activities = $this->getAvailableActivities(null, null, $Silian_includeInactive, $Silian_includeDeleted);
 
-        $grouped = [];
-        foreach ($activities as $activity) {
-            $category = $activity['category'] ?? 'uncategorized';
+        $Silian_grouped = [];
+        foreach ($Silian_activities as $Silian_activity) {
+            $Silian_category = $Silian_activity['category'] ?? 'uncategorized';
 
-            if (!isset($grouped[$category])) {
-                $grouped[$category] = [
-                    'category' => $category,
+            if (!isset($Silian_grouped[$Silian_category])) {
+                $Silian_grouped[$Silian_category] = [
+                    'category' => $Silian_category,
                     'count' => 0,
                     'activities' => [],
                 ];
             }
 
-            $grouped[$category]['activities'][] = $activity;
-            $grouped[$category]['count']++;
+            $Silian_grouped[$Silian_category]['activities'][] = $Silian_activity;
+            $Silian_grouped[$Silian_category]['count']++;
         }
 
-        return array_values($grouped);
+        return array_values($Silian_grouped);
     }
 
     /**
@@ -366,39 +366,39 @@ class CarbonCalculatorService
      *
      * @return array List of categories
      */
-    public function getCategories(bool $includeInactive = false, bool $includeDeleted = false): array
+    public function getCategories(bool $Silian_includeInactive = false, bool $Silian_includeDeleted = false): array
     {
         try {
-            $query = $includeDeleted ? CarbonActivity::withTrashed() : CarbonActivity::query();
+            $Silian_query = $Silian_includeDeleted ? CarbonActivity::withTrashed() : CarbonActivity::query();
 
-            if (!$includeInactive) {
-                $query->where('is_active', true);
+            if (!$Silian_includeInactive) {
+                $Silian_query->where('is_active', true);
             }
 
-            return $query->whereNotNull('category')
+            return $Silian_query->whereNotNull('category')
                 ->distinct()
                 ->orderBy('category')
                 ->pluck('category')
                 ->filter()
                 ->values()
                 ->toArray();
-        } catch (\Exception $e) {
-            $this->logFailure('carbon_categories_query_failed', $e, [], '/internal/carbon-activities/categories');
+        } catch (\Exception $Silian_e) {
+            $this->logFailure('carbon_categories_query_failed', $Silian_e, [], '/internal/carbon-activities/categories');
             if ($this->logger) {
-                $this->logger->error('Failed to get categories from database', ['error' => $e->getMessage()]);
+                $this->logger->error('Failed to get categories from database', ['error' => $Silian_e->getMessage()]);
             }
 
             return [];
         }
     }
 
-    private function isBlank($value): bool
+    private function isBlank($Silian_value): bool
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return true;
         }
 
-        if (is_string($value) && trim($value) === '') {
+        if (is_string($Silian_value) && trim($Silian_value) === '') {
             return true;
         }
 
@@ -408,7 +408,7 @@ class CarbonCalculatorService
     /**
      * Get activity statistics (stub for tests)
      */
-    public function getActivityStatistics(?string $activityId = null): array
+    public function getActivityStatistics(?string $Silian_activityId = null): array
     {
         // Provide a simple stub; tests can mock this method
         return [
@@ -419,18 +419,18 @@ class CarbonCalculatorService
         ];
     }
 
-    private function logFailure(string $action, \Throwable $e, array $context, string $path): void
+    private function logFailure(string $Silian_action, \Throwable $Silian_e, array $Silian_context, string $Silian_path): void
     {
         if ($this->auditLogService !== null) {
             try {
                 $this->auditLogService->log([
-                    'action' => $action,
+                    'action' => $Silian_action,
                     'operation_category' => 'carbon_management',
                     'actor_type' => 'system',
                     'status' => 'failed',
-                    'data' => $context,
+                    'data' => $Silian_context,
                 ]);
-            } catch (\Throwable $ignore) {
+            } catch (\Throwable $Silian_ignore) {
                 // ignore audit failures in calculator service
             }
         }
@@ -440,9 +440,9 @@ class CarbonCalculatorService
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext($path, 'GET', null, $context);
-            $this->errorLogService->logException($e, $request, ['context_message' => $action] + $context);
-        } catch (\Throwable $ignore) {
+            $Silian_request = SyntheticRequestFactory::fromContext($Silian_path, 'GET', null, $Silian_context);
+            $this->errorLogService->logException($Silian_e, $Silian_request, ['context_message' => $Silian_action] + $Silian_context);
+        } catch (\Throwable $Silian_ignore) {
             // ignore error log failures in calculator service
         }
     }

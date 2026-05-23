@@ -29,394 +29,394 @@ class SupportTicketController
     ) {
     }
 
-    public function runSlaSweep(Request $request, Response $response): Response
+    public function runSlaSweep(Request $Silian_request, Response $Silian_response): Response
     {
-        $providedKey = $this->resolveInvocationKey($request, 'X-SLA-Sweep-Key');
-        $configuredKey = trim((string) ($_ENV['SUPPORT_SLA_SWEEP_KEY'] ?? getenv('SUPPORT_SLA_SWEEP_KEY') ?: ''));
+        $Silian_providedKey = $this->resolveInvocationKey($Silian_request, 'X-SLA-Sweep-Key');
+        $Silian_configuredKey = trim((string) ($_ENV['SUPPORT_SLA_SWEEP_KEY'] ?? getenv('SUPPORT_SLA_SWEEP_KEY') ?: ''));
 
-        if ($configuredKey === '') {
+        if ($Silian_configuredKey === '') {
             $this->auditLogService?->logSystemEvent('support_sla_sweep_endpoint_unconfigured', 'support_sla_sweep', [
                 'status' => 'failed',
                 'request_method' => 'POST',
-                'endpoint' => (string) $request->getUri()->getPath(),
-                'request_id' => $request->getAttribute('request_id'),
-                'request_data' => ['remote_addr' => $this->clientIp($request)],
+                'endpoint' => (string) $Silian_request->getUri()->getPath(),
+                'request_id' => $Silian_request->getAttribute('request_id'),
+                'request_data' => ['remote_addr' => $this->clientIp($Silian_request)],
             ]);
 
-            return $this->scheduledJson($response, ['success' => false, 'message' => 'SLA sweep key is not configured', 'code' => 'SLA_SWEEP_UNAVAILABLE'], 503);
+            return $this->scheduledJson($Silian_response, ['success' => false, 'message' => 'SLA sweep key is not configured', 'code' => 'SLA_SWEEP_UNAVAILABLE'], 503);
         }
 
-        if ($providedKey === '' || !hash_equals($configuredKey, $providedKey)) {
+        if ($Silian_providedKey === '' || !hash_equals($Silian_configuredKey, $Silian_providedKey)) {
             $this->auditLogService?->logSystemEvent('support_sla_sweep_endpoint_denied', 'support_sla_sweep', [
                 'status' => 'failed',
                 'request_method' => 'POST',
-                'endpoint' => (string) $request->getUri()->getPath(),
-                'request_id' => $request->getAttribute('request_id'),
-                'request_data' => ['remote_addr' => $this->clientIp($request)],
+                'endpoint' => (string) $Silian_request->getUri()->getPath(),
+                'request_id' => $Silian_request->getAttribute('request_id'),
+                'request_data' => ['remote_addr' => $this->clientIp($Silian_request)],
             ]);
 
-            return $this->scheduledJson($response, ['success' => false, 'message' => 'Invalid SLA sweep key', 'code' => 'FORBIDDEN'], 403);
+            return $this->scheduledJson($Silian_response, ['success' => false, 'message' => 'Invalid SLA sweep key', 'code' => 'FORBIDDEN'], 403);
         }
 
         if ($this->cronSchedulerService === null && $this->supportRoutingEngineService === null) {
-            return $this->scheduledJson($response, ['success' => false, 'message' => 'SLA sweep engine unavailable', 'code' => 'SLA_SWEEP_UNAVAILABLE'], 503);
+            return $this->scheduledJson($Silian_response, ['success' => false, 'message' => 'SLA sweep engine unavailable', 'code' => 'SLA_SWEEP_UNAVAILABLE'], 503);
         }
 
         try {
             if ($this->cronSchedulerService !== null) {
-                $taskRun = $this->cronSchedulerService->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'legacy_endpoint', [
-                    'request_id' => $request->getAttribute('request_id'),
-                    'remote_addr' => $this->clientIp($request),
+                $Silian_taskRun = $this->cronSchedulerService->runTaskNow(CronSchedulerService::TASK_SUPPORT_SLA_SWEEP, 'legacy_endpoint', [
+                    'request_id' => $Silian_request->getAttribute('request_id'),
+                    'remote_addr' => $this->clientIp($Silian_request),
                 ]);
-                if (($taskRun['status'] ?? null) !== 'success') {
-                    $status = ($taskRun['status'] ?? null) === 'skipped' ? 409 : 503;
-                    $message = $taskRun['error_message'] ?? 'SLA sweep did not complete successfully';
+                if (($Silian_taskRun['status'] ?? null) !== 'success') {
+                    $Silian_status = ($Silian_taskRun['status'] ?? null) === 'skipped' ? 409 : 503;
+                    $Silian_message = $Silian_taskRun['error_message'] ?? 'SLA sweep did not complete successfully';
                     $this->auditLogService?->logSystemEvent('support_sla_sweep_endpoint_triggered', 'support_sla_sweep', [
                         'status' => 'failed',
                         'request_method' => 'POST',
-                        'endpoint' => (string) $request->getUri()->getPath(),
-                        'request_id' => $request->getAttribute('request_id'),
-                        'request_data' => ['remote_addr' => $this->clientIp($request)],
-                        'new_data' => $taskRun,
+                        'endpoint' => (string) $Silian_request->getUri()->getPath(),
+                        'request_id' => $Silian_request->getAttribute('request_id'),
+                        'request_data' => ['remote_addr' => $this->clientIp($Silian_request)],
+                        'new_data' => $Silian_taskRun,
                     ]);
 
-                    return $this->scheduledJson($response, [
+                    return $this->scheduledJson($Silian_response, [
                         'success' => false,
-                        'message' => $message,
+                        'message' => $Silian_message,
                         'code' => 'SLA_SWEEP_FAILED',
-                        'data' => $taskRun,
-                    ], $status);
+                        'data' => $Silian_taskRun,
+                    ], $Silian_status);
                 }
-                $result = $taskRun['result'] ?? [];
+                $Silian_result = $Silian_taskRun['result'] ?? [];
             } else {
-                $result = $this->supportRoutingEngineService->runSlaSweep();
+                $Silian_result = $this->supportRoutingEngineService->runSlaSweep();
             }
             $this->auditLogService?->logSystemEvent('support_sla_sweep_endpoint_triggered', 'support_sla_sweep', [
                 'status' => 'success',
                 'request_method' => 'POST',
-                'endpoint' => (string) $request->getUri()->getPath(),
-                'request_id' => $request->getAttribute('request_id'),
-                'request_data' => $result + ['remote_addr' => $this->clientIp($request)],
+                'endpoint' => (string) $Silian_request->getUri()->getPath(),
+                'request_id' => $Silian_request->getAttribute('request_id'),
+                'request_data' => $Silian_result + ['remote_addr' => $this->clientIp($Silian_request)],
             ]);
 
-            return $this->scheduledJson($response, ['success' => true, 'data' => $result]);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to run SLA sweep');
+            return $this->scheduledJson($Silian_response, ['success' => true, 'data' => $Silian_result]);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to run SLA sweep');
         }
     }
 
-    private function resolveInvocationKey(Request $request, string $headerName): string
+    private function resolveInvocationKey(Request $Silian_request, string $Silian_headerName): string
     {
-        $headerValue = trim($request->getHeaderLine($headerName));
-        if ($headerValue !== '') {
-            return $headerValue;
+        $Silian_headerValue = trim($Silian_request->getHeaderLine($Silian_headerName));
+        if ($Silian_headerValue !== '') {
+            return $Silian_headerValue;
         }
 
-        $body = $request->getParsedBody();
-        if (is_array($body) && is_string($body['key'] ?? null)) {
-            return trim((string) $body['key']);
+        $Silian_body = $Silian_request->getParsedBody();
+        if (is_array($Silian_body) && is_string($Silian_body['key'] ?? null)) {
+            return trim((string) $Silian_body['key']);
         }
 
         return '';
     }
 
-    private function scheduledJson(Response $response, array $payload, int $status = 200): Response
+    private function scheduledJson(Response $Silian_response, array $Silian_payload, int $Silian_status = 200): Response
     {
-        return $this->json($response, $payload, $status)
+        return $this->json($Silian_response, $Silian_payload, $Silian_status)
             ->withHeader('Cache-Control', 'no-store, no-cache, max-age=0, must-revalidate')
             ->withHeader('Pragma', 'no-cache')
             ->withHeader('X-Robots-Tag', 'noindex, nofollow');
     }
 
-    public function createTicket(Request $request, Response $response): Response
+    public function createTicket(Request $Silian_request, Response $Silian_response): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
-        $payload = $this->body($request);
-        if (!$this->turnstilePassed($payload['cf_turnstile_response'] ?? null, $request)) {
-            return $this->json($response, ['success' => false, 'message' => 'Turnstile verification failed', 'code' => 'TURNSTILE_FAILED'], 403);
+        $Silian_payload = $this->body($Silian_request);
+        if (!$this->turnstilePassed($Silian_payload['cf_turnstile_response'] ?? null, $Silian_request)) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Turnstile verification failed', 'code' => 'TURNSTILE_FAILED'], 403);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->createTicket($actor, $payload)], 201);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to create support ticket');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->createTicket($Silian_actor, $Silian_payload)], 201);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to create support ticket');
         }
     }
 
-    public function listMyTickets(Request $request, Response $response): Response
+    public function listMyTickets(Request $Silian_request, Response $Silian_response): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->listUserTickets((int) $actor['id'], $request->getQueryParams())]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to list support tickets');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->listUserTickets((int) $Silian_actor['id'], $Silian_request->getQueryParams())]);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to list support tickets');
         }
     }
 
-    public function getMyTicket(Request $request, Response $response, array $args): Response
+    public function getMyTicket(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->getTicketDetailForUser((int) $actor['id'], $this->ticketId($args))]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\RuntimeException $e) {
-            return $this->json($response, ['success' => false, 'message' => 'Ticket not found', 'code' => 'TICKET_NOT_FOUND'], 404);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support ticket');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->getTicketDetailForUser((int) $Silian_actor['id'], $this->ticketId($Silian_args))]);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\RuntimeException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Ticket not found', 'code' => 'TICKET_NOT_FOUND'], 404);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support ticket');
         }
     }
 
-    public function addMyTicketMessage(Request $request, Response $response, array $args): Response
+    public function addMyTicketMessage(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
-        $payload = $this->body($request);
-        if (!$this->turnstilePassed($payload['cf_turnstile_response'] ?? null, $request)) {
-            return $this->json($response, ['success' => false, 'message' => 'Turnstile verification failed', 'code' => 'TURNSTILE_FAILED'], 403);
+        $Silian_payload = $this->body($Silian_request);
+        if (!$this->turnstilePassed($Silian_payload['cf_turnstile_response'] ?? null, $Silian_request)) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Turnstile verification failed', 'code' => 'TURNSTILE_FAILED'], 403);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->addUserMessage($actor, $this->ticketId($args), $payload)], 201);
-        } catch (\RuntimeException $e) {
-            $status = $e->getMessage() === 'Ticket not found' ? 404 : 422;
-            $code = $status === 404 ? 'TICKET_NOT_FOUND' : 'INVALID_TICKET_STATE';
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => $code], $status);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to add support reply');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->addUserMessage($Silian_actor, $this->ticketId($Silian_args), $Silian_payload)], 201);
+        } catch (\RuntimeException $Silian_e) {
+            $Silian_status = $Silian_e->getMessage() === 'Ticket not found' ? 404 : 422;
+            $Silian_code = $Silian_status === 404 ? 'TICKET_NOT_FOUND' : 'INVALID_TICKET_STATE';
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => $Silian_code], $Silian_status);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to add support reply');
         }
     }
 
-    public function submitMyTicketFeedback(Request $request, Response $response, array $args): Response
+    public function submitMyTicketFeedback(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->submitTicketFeedback($actor, $this->ticketId($args), $this->body($request))]);
-        } catch (\RuntimeException $e) {
-            $status = $e->getMessage() === 'Ticket not found' ? 404 : 422;
-            $code = $status === 404 ? 'TICKET_NOT_FOUND' : 'INVALID_TICKET_STATE';
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => $code], $status);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to submit support ticket feedback');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->submitTicketFeedback($Silian_actor, $this->ticketId($Silian_args), $this->body($Silian_request))]);
+        } catch (\RuntimeException $Silian_e) {
+            $Silian_status = $Silian_e->getMessage() === 'Ticket not found' ? 404 : 422;
+            $Silian_code = $Silian_status === 404 ? 'TICKET_NOT_FOUND' : 'INVALID_TICKET_STATE';
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => $Silian_code], $Silian_status);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to submit support ticket feedback');
         }
     }
 
-    public function listSupportTickets(Request $request, Response $response): Response
+    public function listSupportTickets(Request $Silian_request, Response $Silian_response): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->listSupportTickets($actor, $request->getQueryParams())]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to list support queue');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->listSupportTickets($Silian_actor, $Silian_request->getQueryParams())]);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to list support queue');
         }
     }
 
-    public function listSupportAssignees(Request $request, Response $response): Response
+    public function listSupportAssignees(Request $Silian_request, Response $Silian_response): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->listSupportAssignees($actor)]);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support assignees');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->listSupportAssignees($Silian_actor)]);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support assignees');
         }
     }
 
-    public function getSupportTicket(Request $request, Response $response, array $args): Response
+    public function getSupportTicket(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->getTicketDetailForSupport($actor, $this->ticketId($args))]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\RuntimeException $e) {
-            return $this->json($response, ['success' => false, 'message' => 'Ticket not found', 'code' => 'TICKET_NOT_FOUND'], 404);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to load support queue ticket');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->getTicketDetailForSupport($Silian_actor, $this->ticketId($Silian_args))]);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\RuntimeException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Ticket not found', 'code' => 'TICKET_NOT_FOUND'], 404);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to load support queue ticket');
         }
     }
 
-    public function addSupportTicketMessage(Request $request, Response $response, array $args): Response
+    public function addSupportTicketMessage(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->addSupportMessage($actor, $this->ticketId($args), $this->body($request))], 201);
-        } catch (\RuntimeException $e) {
-            $status = $e->getMessage() === 'Ticket not found' ? 404 : 422;
-            $code = $status === 404 ? 'TICKET_NOT_FOUND' : 'INVALID_TICKET_STATE';
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => $code], $status);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to add support staff reply');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->addSupportMessage($Silian_actor, $this->ticketId($Silian_args), $this->body($Silian_request))], 201);
+        } catch (\RuntimeException $Silian_e) {
+            $Silian_status = $Silian_e->getMessage() === 'Ticket not found' ? 404 : 422;
+            $Silian_code = $Silian_status === 404 ? 'TICKET_NOT_FOUND' : 'INVALID_TICKET_STATE';
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => $Silian_code], $Silian_status);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to add support staff reply');
         }
     }
 
-    public function updateSupportTicket(Request $request, Response $response, array $args): Response
+    public function updateSupportTicket(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->updateTicketFromSupport($actor, $this->ticketId($args), $this->body($request))]);
-        } catch (\DomainException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'FORBIDDEN'], 403);
-        } catch (\RuntimeException $e) {
-            $status = $e->getMessage() === 'Ticket not found' ? 404 : 422;
-            $code = $status === 404 ? 'TICKET_NOT_FOUND' : 'INVALID_TICKET_STATE';
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => $code], $status);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to update support ticket');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->updateTicketFromSupport($Silian_actor, $this->ticketId($Silian_args), $this->body($Silian_request))]);
+        } catch (\DomainException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'FORBIDDEN'], 403);
+        } catch (\RuntimeException $Silian_e) {
+            $Silian_status = $Silian_e->getMessage() === 'Ticket not found' ? 404 : 422;
+            $Silian_code = $Silian_status === 404 ? 'TICKET_NOT_FOUND' : 'INVALID_TICKET_STATE';
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => $Silian_code], $Silian_status);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to update support ticket');
         }
     }
 
-    public function createTransferRequest(Request $request, Response $response, array $args): Response
+    public function createTransferRequest(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->createTransferRequest($actor, $this->ticketId($args), $this->body($request))], 201);
-        } catch (\DomainException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'FORBIDDEN'], 403);
-        } catch (\RuntimeException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'TICKET_NOT_FOUND'], 404);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to create support transfer request');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->createTransferRequest($Silian_actor, $this->ticketId($Silian_args), $this->body($Silian_request))], 201);
+        } catch (\DomainException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'FORBIDDEN'], 403);
+        } catch (\RuntimeException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'TICKET_NOT_FOUND'], 404);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to create support transfer request');
         }
     }
 
-    public function reviewTransferRequest(Request $request, Response $response, array $args): Response
+    public function reviewTransferRequest(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
-        $actor = $this->currentUser($request);
-        if ($actor === null) {
-            return $this->json($response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
+        $Silian_actor = $this->currentUser($Silian_request);
+        if ($Silian_actor === null) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Unauthorized', 'code' => 'UNAUTHORIZED'], 401);
         }
 
-        $requestId = isset($args['requestId']) ? (int) $args['requestId'] : 0;
-        if ($requestId <= 0) {
-            return $this->json($response, ['success' => false, 'message' => 'Invalid request id', 'code' => 'VALIDATION_ERROR'], 422);
+        $Silian_requestId = isset($Silian_args['requestId']) ? (int) $Silian_args['requestId'] : 0;
+        if ($Silian_requestId <= 0) {
+            return $this->json($Silian_response, ['success' => false, 'message' => 'Invalid request id', 'code' => 'VALIDATION_ERROR'], 422);
         }
 
         try {
-            return $this->json($response, ['success' => true, 'data' => $this->supportTicketService->reviewTransferRequest($actor, $requestId, $this->body($request))]);
-        } catch (\DomainException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'FORBIDDEN'], 403);
-        } catch (\RuntimeException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'TRANSFER_REQUEST_NOT_FOUND'], 404);
-        } catch (\InvalidArgumentException $e) {
-            return $this->json($response, ['success' => false, 'message' => $e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
-        } catch (\Throwable $e) {
-            return $this->error($request, $response, $e, 'Failed to review support transfer request');
+            return $this->json($Silian_response, ['success' => true, 'data' => $this->supportTicketService->reviewTransferRequest($Silian_actor, $Silian_requestId, $this->body($Silian_request))]);
+        } catch (\DomainException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'FORBIDDEN'], 403);
+        } catch (\RuntimeException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'TRANSFER_REQUEST_NOT_FOUND'], 404);
+        } catch (\InvalidArgumentException $Silian_e) {
+            return $this->json($Silian_response, ['success' => false, 'message' => $Silian_e->getMessage(), 'code' => 'VALIDATION_ERROR'], 422);
+        } catch (\Throwable $Silian_e) {
+            return $this->error($Silian_request, $Silian_response, $Silian_e, 'Failed to review support transfer request');
         }
     }
 
-    private function currentUser(Request $request): ?array
+    private function currentUser(Request $Silian_request): ?array
     {
-        $user = $this->authService->getCurrentUser($request);
-        return is_array($user) ? $user : null;
+        $Silian_user = $this->authService->getCurrentUser($Silian_request);
+        return is_array($Silian_user) ? $Silian_user : null;
     }
 
-    private function body(Request $request): array
+    private function body(Request $Silian_request): array
     {
-        $body = $request->getParsedBody();
-        return is_array($body) ? $body : [];
+        $Silian_body = $Silian_request->getParsedBody();
+        return is_array($Silian_body) ? $Silian_body : [];
     }
 
-    private function ticketId(array $args): int
+    private function ticketId(array $Silian_args): int
     {
-        $ticketId = isset($args['ticketId']) ? (int) $args['ticketId'] : 0;
-        if ($ticketId <= 0) {
+        $Silian_ticketId = isset($Silian_args['ticketId']) ? (int) $Silian_args['ticketId'] : 0;
+        if ($Silian_ticketId <= 0) {
             throw new \InvalidArgumentException('Invalid ticket id');
         }
-        return $ticketId;
+        return $Silian_ticketId;
     }
 
-    private function turnstilePassed(mixed $token, Request $request): bool
+    private function turnstilePassed(mixed $Silian_token, Request $Silian_request): bool
     {
-        $result = $this->turnstileService->verify(is_string($token) ? trim($token) : '', $this->clientIp($request));
-        return (bool) ($result['success'] ?? false);
+        $Silian_result = $this->turnstileService->verify(is_string($Silian_token) ? trim($Silian_token) : '', $this->clientIp($Silian_request));
+        return (bool) ($Silian_result['success'] ?? false);
     }
 
-    private function clientIp(Request $request): ?string
+    private function clientIp(Request $Silian_request): ?string
     {
-        $serverParams = $request->getServerParams();
-        foreach (['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'REMOTE_ADDR'] as $key) {
-            $value = $serverParams[$key] ?? null;
-            if (!is_string($value) || trim($value) === '') {
+        $Silian_serverParams = $Silian_request->getServerParams();
+        foreach (['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'REMOTE_ADDR'] as $Silian_key) {
+            $Silian_value = $Silian_serverParams[$Silian_key] ?? null;
+            if (!is_string($Silian_value) || trim($Silian_value) === '') {
                 continue;
             }
-            return str_contains($value, ',') ? trim(explode(',', $value)[0]) : trim($value);
+            return str_contains($Silian_value, ',') ? trim(explode(',', $Silian_value)[0]) : trim($Silian_value);
         }
         return null;
     }
 
-    private function error(Request $request, Response $response, \Throwable $e, string $message): Response
+    private function error(Request $Silian_request, Response $Silian_response, \Throwable $Silian_e, string $Silian_message): Response
     {
-        $this->logger->error($message, ['error' => $e->getMessage()]);
+        $this->logger->error($Silian_message, ['error' => $Silian_e->getMessage()]);
         try {
-            $this->errorLogService->logException($e, $request, ['context_message' => $message]);
-        } catch (\Throwable $loggingError) {
-            $this->logger->error('Support ticket error logging failed', ['error' => $loggingError->getMessage()]);
+            $this->errorLogService->logException($Silian_e, $Silian_request, ['context_message' => $Silian_message]);
+        } catch (\Throwable $Silian_loggingError) {
+            $this->logger->error('Support ticket error logging failed', ['error' => $Silian_loggingError->getMessage()]);
         }
-        return $this->json($response, ['success' => false, 'message' => $message, 'code' => 'INTERNAL_ERROR'], 500);
+        return $this->json($Silian_response, ['success' => false, 'message' => $Silian_message, 'code' => 'INTERNAL_ERROR'], 500);
     }
 
-    private function json(Response $response, array $payload, int $status = 200): Response
+    private function json(Response $Silian_response, array $Silian_payload, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($payload));
-        return $response->withStatus($status)->withHeader('Content-Type', 'application/json');
+        $Silian_response->getBody()->write(json_encode($Silian_payload));
+        return $Silian_response->withStatus($Silian_status)->withHeader('Content-Type', 'application/json');
     }
 }

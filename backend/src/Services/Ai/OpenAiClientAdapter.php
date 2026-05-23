@@ -26,76 +26,76 @@ class OpenAiClientAdapter implements LlmClientInterface
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    public function createChatCompletion(array $payload): array
+    public function createChatCompletion(array $Silian_payload): array
     {
         try {
-            $response = $this->client->chat()->create($payload);
+            $Silian_response = $this->client->chat()->create($Silian_payload);
 
-            return $response->toArray();
-        } catch (\TypeError $exception) {
-            if (!$this->shouldFallbackToRawHttp($exception)) {
-                throw $exception;
+            return $Silian_response->toArray();
+        } catch (\TypeError $Silian_exception) {
+            if (!$this->shouldFallbackToRawHttp($Silian_exception)) {
+                throw $Silian_exception;
             }
 
-            return $this->createChatCompletionViaHttp($payload);
+            return $this->createChatCompletionViaHttp($Silian_payload);
         }
     }
 
     /**
      * Some OpenAI-compatible gateways omit x-request-id, which breaks openai-php response hydration.
      */
-    private function shouldFallbackToRawHttp(\TypeError $exception): bool
+    private function shouldFallbackToRawHttp(\TypeError $Silian_exception): bool
     {
-        return str_contains($exception->getMessage(), 'MetaInformation::__construct()')
-            || str_contains($exception->getMessage(), 'MetaInformation::from()');
+        return str_contains($Silian_exception->getMessage(), 'MetaInformation::__construct()')
+            || str_contains($Silian_exception->getMessage(), 'MetaInformation::from()');
     }
 
     /**
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    private function createChatCompletionViaHttp(array $payload): array
+    private function createChatCompletionViaHttp(array $Silian_payload): array
     {
         if ($this->httpClient === null || !is_string($this->apiKey) || trim($this->apiKey) === '') {
             throw new \RuntimeException('LLM raw HTTP fallback is not configured.');
         }
 
-        $body = json_encode($payload, JSON_THROW_ON_ERROR);
-        $request = new Request(
+        $Silian_body = json_encode($Silian_payload, JSON_THROW_ON_ERROR);
+        $Silian_request = new Request(
             'POST',
             $this->buildChatCompletionUri(),
             $this->buildHeaders(),
-            $body
+            $Silian_body
         );
 
-        $response = $this->httpClient->sendRequest($request);
-        $contents = (string) $response->getBody();
-        $decoded = json_decode($contents, true);
+        $Silian_response = $this->httpClient->sendRequest($Silian_request);
+        $Silian_contents = (string) $Silian_response->getBody();
+        $Silian_decoded = json_decode($Silian_contents, true);
 
-        if ($response->getStatusCode() >= 400) {
-            $message = $this->extractErrorMessage($decoded, $response);
-            throw new \RuntimeException($message);
+        if ($Silian_response->getStatusCode() >= 400) {
+            $Silian_message = $this->extractErrorMessage($Silian_decoded, $Silian_response);
+            throw new \RuntimeException($Silian_message);
         }
 
-        if (!is_array($decoded)) {
+        if (!is_array($Silian_decoded)) {
             throw new \RuntimeException('LLM returned an invalid JSON response.');
         }
 
-        return $this->normalizeRawResponseMetadata($decoded, $response);
+        return $this->normalizeRawResponseMetadata($Silian_decoded, $Silian_response);
     }
 
     private function buildChatCompletionUri(): string
     {
-        $baseUri = trim($this->baseUri);
-        if ($baseUri === '') {
-            $baseUri = 'https://api.openai.com/v1';
+        $Silian_baseUri = trim($this->baseUri);
+        if ($Silian_baseUri === '') {
+            $Silian_baseUri = 'https://api.openai.com/v1';
         }
 
-        if (!preg_match('#^https?://#i', $baseUri)) {
-            $baseUri = 'https://' . ltrim($baseUri, '/');
+        if (!preg_match('#^https?://#i', $Silian_baseUri)) {
+            $Silian_baseUri = 'https://' . ltrim($Silian_baseUri, '/');
         }
 
-        return rtrim($baseUri, '/') . '/chat/completions';
+        return rtrim($Silian_baseUri, '/') . '/chat/completions';
     }
 
     /**
@@ -103,71 +103,71 @@ class OpenAiClientAdapter implements LlmClientInterface
      */
     private function buildHeaders(): array
     {
-        $headers = [
+        $Silian_headers = [
             'Authorization' => 'Bearer ' . trim((string) $this->apiKey),
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ];
 
-        $organization = trim((string) $this->organization);
-        if ($organization !== '') {
-            $headers['OpenAI-Organization'] = $organization;
+        $Silian_organization = trim((string) $this->organization);
+        if ($Silian_organization !== '') {
+            $Silian_headers['OpenAI-Organization'] = $Silian_organization;
         }
 
-        return $headers;
+        return $Silian_headers;
     }
 
     /**
      * @param mixed $decoded
      */
-    private function extractErrorMessage(mixed $decoded, ResponseInterface $response): string
+    private function extractErrorMessage(mixed $Silian_decoded, ResponseInterface $Silian_response): string
     {
-        if (is_array($decoded)) {
-            $error = $decoded['error'] ?? null;
-            if (is_string($error) && trim($error) !== '') {
-                return trim($error);
+        if (is_array($Silian_decoded)) {
+            $Silian_error = $Silian_decoded['error'] ?? null;
+            if (is_string($Silian_error) && trim($Silian_error) !== '') {
+                return trim($Silian_error);
             }
 
-            if (is_array($error)) {
-                $message = $error['message'] ?? null;
-                if (is_string($message) && trim($message) !== '') {
-                    return trim($message);
+            if (is_array($Silian_error)) {
+                $Silian_message = $Silian_error['message'] ?? null;
+                if (is_string($Silian_message) && trim($Silian_message) !== '') {
+                    return trim($Silian_message);
                 }
             }
         }
 
-        return sprintf('LLM request failed with status %d.', $response->getStatusCode());
+        return sprintf('LLM request failed with status %d.', $Silian_response->getStatusCode());
     }
 
     /**
      * @param array<string,mixed> $decoded
      * @return array<string,mixed>
      */
-    private function normalizeRawResponseMetadata(array $decoded, ResponseInterface $response): array
+    private function normalizeRawResponseMetadata(array $Silian_decoded, ResponseInterface $Silian_response): array
     {
-        $requestId = trim($response->getHeaderLine('x-request-id'));
-        if ($requestId === '') {
-            $requestId = isset($decoded['metadata']['request_id']) && is_string($decoded['metadata']['request_id'])
-                ? trim($decoded['metadata']['request_id'])
+        $Silian_requestId = trim($Silian_response->getHeaderLine('x-request-id'));
+        if ($Silian_requestId === '') {
+            $Silian_requestId = isset($Silian_decoded['metadata']['request_id']) && is_string($Silian_decoded['metadata']['request_id'])
+                ? trim($Silian_decoded['metadata']['request_id'])
                 : '';
         }
-        if ($requestId === '' && isset($decoded['id']) && is_string($decoded['id'])) {
-            $requestId = trim($decoded['id']);
+        if ($Silian_requestId === '' && isset($Silian_decoded['id']) && is_string($Silian_decoded['id'])) {
+            $Silian_requestId = trim($Silian_decoded['id']);
         }
-        if ($requestId === '') {
-            $requestId = $this->generateRequestId();
-        }
-
-        if (!isset($decoded['metadata']) || !is_array($decoded['metadata'])) {
-            $decoded['metadata'] = [];
+        if ($Silian_requestId === '') {
+            $Silian_requestId = $this->generateRequestId();
         }
 
-        $decoded['metadata']['request_id'] = $requestId;
-        if (!isset($decoded['id']) || !is_string($decoded['id']) || trim($decoded['id']) === '') {
-            $decoded['id'] = $requestId;
+        if (!isset($Silian_decoded['metadata']) || !is_array($Silian_decoded['metadata'])) {
+            $Silian_decoded['metadata'] = [];
         }
 
-        return $decoded;
+        $Silian_decoded['metadata']['request_id'] = $Silian_requestId;
+        if (!isset($Silian_decoded['id']) || !is_string($Silian_decoded['id']) || trim($Silian_decoded['id']) === '') {
+            $Silian_decoded['id'] = $Silian_requestId;
+        }
+
+        return $Silian_decoded;
     }
 
     private function generateRequestId(): string

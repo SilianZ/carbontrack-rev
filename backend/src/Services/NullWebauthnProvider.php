@@ -28,23 +28,23 @@ class NullWebauthnProvider implements WebauthnProviderInterface
     }
 
     public function verifyRegistrationResponse(
-        array $credential,
-        array $challengeRecord,
-        array $user,
-        PasskeyConfig $config
+        array $Silian_credential,
+        array $Silian_challengeRecord,
+        array $Silian_user,
+        PasskeyConfig $Silian_config
     ): array {
-        unset($credential, $challengeRecord, $user, $config);
+        unset($Silian_credential, $Silian_challengeRecord, $Silian_user, $Silian_config);
 
         throw new PasskeyIntegrationUnavailableException($this->config->getPreferredLibraryPackage());
     }
 
     public function verifyAuthenticationResponse(
-        array $credential,
-        array $challengeRecord,
-        array $passkey,
-        PasskeyConfig $config
+        array $Silian_credential,
+        array $Silian_challengeRecord,
+        array $Silian_passkey,
+        PasskeyConfig $Silian_config
     ): array {
-        unset($credential, $challengeRecord, $passkey, $config);
+        unset($Silian_credential, $Silian_challengeRecord, $Silian_passkey, $Silian_config);
 
         throw new PasskeyIntegrationUnavailableException($this->config->getPreferredLibraryPackage());
     }

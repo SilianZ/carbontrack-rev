@@ -64,139 +64,139 @@ class PasskeyServiceTest extends TestCase
     {
         $this->insertExistingPasskey();
 
-        $result = $this->service->beginRegistration($this->userFixture(), [
+        $Silian_result = $this->service->beginRegistration($this->userFixture(), [
             'label' => 'MacBook Pro',
         ]);
 
-        $this->assertNotEmpty($result['challenge_id']);
-        $this->assertSame('app.example.test', $result['public_key']['rp']['id']);
-        $this->assertSame('CarbonTrack Test', $result['public_key']['rp']['name']);
-        $this->assertCount(1, $result['public_key']['excludeCredentials']);
-        $this->assertSame('existing-credential', $result['public_key']['excludeCredentials'][0]['id']);
-        $this->assertTrue($result['integration']['available']);
-        $this->assertSame('native', $result['integration']['implementation']);
+        $this->assertNotEmpty($Silian_result['challenge_id']);
+        $this->assertSame('app.example.test', $Silian_result['public_key']['rp']['id']);
+        $this->assertSame('CarbonTrack Test', $Silian_result['public_key']['rp']['name']);
+        $this->assertCount(1, $Silian_result['public_key']['excludeCredentials']);
+        $this->assertSame('existing-credential', $Silian_result['public_key']['excludeCredentials'][0]['id']);
+        $this->assertTrue($Silian_result['integration']['available']);
+        $this->assertSame('native', $Silian_result['integration']['implementation']);
 
-        $challengeStmt = $this->pdo->prepare('SELECT * FROM webauthn_challenges WHERE challenge_id = :challenge_id');
-        $challengeStmt->execute(['challenge_id' => $result['challenge_id']]);
-        $stored = $challengeStmt->fetch(PDO::FETCH_ASSOC);
+        $Silian_challengeStmt = $this->pdo->prepare('SELECT * FROM webauthn_challenges WHERE challenge_id = :challenge_id');
+        $Silian_challengeStmt->execute(['challenge_id' => $Silian_result['challenge_id']]);
+        $Silian_stored = $Silian_challengeStmt->fetch(PDO::FETCH_ASSOC);
 
-        $this->assertNotFalse($stored);
-        $this->assertSame('registration', $stored['flow_type']);
-        $this->assertSame('550e8400-e29b-41d4-a716-4466554400aa', $stored['user_uuid']);
-        $this->assertNotEmpty($stored['challenge']);
+        $this->assertNotFalse($Silian_stored);
+        $this->assertSame('registration', $Silian_stored['flow_type']);
+        $this->assertSame('550e8400-e29b-41d4-a716-4466554400aa', $Silian_stored['user_uuid']);
+        $this->assertNotEmpty($Silian_stored['challenge']);
     }
 
     public function testCompleteRegistrationValidatesAndPersistsPasskey(): void
     {
-        $registration = $this->service->beginRegistration($this->userFixture(), [
+        $Silian_registration = $this->service->beginRegistration($this->userFixture(), [
             'label' => 'Desk Key',
         ]);
-        $keyPair = $this->generateEcKeyPair();
-        $credential = $this->buildRegistrationCredential(
-            $registration['public_key']['challenge'],
+        $Silian_keyPair = $this->generateEcKeyPair();
+        $Silian_credential = $this->buildRegistrationCredential(
+            $Silian_registration['public_key']['challenge'],
             'https://app.example.test',
-            $keyPair['x'],
-            $keyPair['y'],
+            $Silian_keyPair['x'],
+            $Silian_keyPair['y'],
             'credential-registration-1'
         );
 
-        $result = $this->service->completeRegistration($this->userFixture(), [
-            'challenge_id' => $registration['challenge_id'],
-            'credential' => $credential,
+        $Silian_result = $this->service->completeRegistration($this->userFixture(), [
+            'challenge_id' => $Silian_registration['challenge_id'],
+            'credential' => $Silian_credential,
         ]);
 
-        $expectedCredentialId = $this->base64UrlEncode('credential-registration-1');
-        $this->assertSame('Desk Key', $result['label']);
-        $this->assertSame($expectedCredentialId, $result['credential_id']);
-        $this->assertSame(0, $result['sign_count']);
+        $Silian_expectedCredentialId = $this->base64UrlEncode('credential-registration-1');
+        $this->assertSame('Desk Key', $Silian_result['label']);
+        $this->assertSame($Silian_expectedCredentialId, $Silian_result['credential_id']);
+        $this->assertSame(0, $Silian_result['sign_count']);
 
-        $stored = $this->pdo->query('SELECT * FROM user_passkeys WHERE credential_id = "' . $expectedCredentialId . '"')->fetch(PDO::FETCH_ASSOC);
-        $this->assertIsArray($stored);
-        $publicKey = json_decode((string) $stored['public_key'], true);
-        $this->assertSame('EC2', $publicKey['kty']);
-        $this->assertSame(-7, $publicKey['alg']);
-        $this->assertSame('internal', json_decode((string) $stored['transports'], true)[0]);
+        $Silian_stored = $this->pdo->query('SELECT * FROM user_passkeys WHERE credential_id = "' . $Silian_expectedCredentialId . '"')->fetch(PDO::FETCH_ASSOC);
+        $this->assertIsArray($Silian_stored);
+        $Silian_publicKey = json_decode((string) $Silian_stored['public_key'], true);
+        $this->assertSame('EC2', $Silian_publicKey['kty']);
+        $this->assertSame(-7, $Silian_publicKey['alg']);
+        $this->assertSame('internal', json_decode((string) $Silian_stored['transports'], true)[0]);
     }
 
     public function testCompleteRegistrationParsesCredentialPublicKeyWhenExtensionsFollow(): void
     {
-        $registration = $this->service->beginRegistration($this->userFixture(), [
+        $Silian_registration = $this->service->beginRegistration($this->userFixture(), [
             'label' => 'Desk Key With Extensions',
         ]);
-        $keyPair = $this->generateEcKeyPair();
-        $credentialIdBytes = 'credential-registration-ext-1';
+        $Silian_keyPair = $this->generateEcKeyPair();
+        $Silian_credentialIdBytes = 'credential-registration-ext-1';
 
-        $result = $this->service->completeRegistration($this->userFixture(), [
-            'challenge_id' => $registration['challenge_id'],
+        $Silian_result = $this->service->completeRegistration($this->userFixture(), [
+            'challenge_id' => $Silian_registration['challenge_id'],
             'credential' => $this->buildRegistrationCredential(
-                $registration['public_key']['challenge'],
+                $Silian_registration['public_key']['challenge'],
                 'https://app.example.test',
-                $keyPair['x'],
-                $keyPair['y'],
-                $credentialIdBytes,
+                $Silian_keyPair['x'],
+                $Silian_keyPair['y'],
+                $Silian_credentialIdBytes,
                 $this->cborMap([
                     'credProtect' => 1,
                 ])
             ),
         ]);
 
-        $expectedCredentialId = $this->base64UrlEncode($credentialIdBytes);
-        $this->assertSame($expectedCredentialId, $result['credential_id']);
+        $Silian_expectedCredentialId = $this->base64UrlEncode($Silian_credentialIdBytes);
+        $this->assertSame($Silian_expectedCredentialId, $Silian_result['credential_id']);
 
-        $stored = $this->pdo->query('SELECT public_key FROM user_passkeys WHERE credential_id = "' . $expectedCredentialId . '"')->fetch(PDO::FETCH_ASSOC);
-        $this->assertIsArray($stored);
-        $publicKey = json_decode((string) $stored['public_key'], true);
-        $this->assertSame('EC2', $publicKey['kty']);
-        $this->assertSame(-7, $publicKey['alg']);
+        $Silian_stored = $this->pdo->query('SELECT public_key FROM user_passkeys WHERE credential_id = "' . $Silian_expectedCredentialId . '"')->fetch(PDO::FETCH_ASSOC);
+        $this->assertIsArray($Silian_stored);
+        $Silian_publicKey = json_decode((string) $Silian_stored['public_key'], true);
+        $this->assertSame('EC2', $Silian_publicKey['kty']);
+        $this->assertSame(-7, $Silian_publicKey['alg']);
     }
 
     public function testCompleteAuthenticationVerifiesAssertionAndUpdatesCounter(): void
     {
-        $registration = $this->service->beginRegistration($this->userFixture(), [
+        $Silian_registration = $this->service->beginRegistration($this->userFixture(), [
             'label' => 'Phone',
         ]);
-        $keyPair = $this->generateEcKeyPair();
-        $credentialIdBytes = 'credential-auth-1';
-        $credentialId = $this->base64UrlEncode($credentialIdBytes);
+        $Silian_keyPair = $this->generateEcKeyPair();
+        $Silian_credentialIdBytes = 'credential-auth-1';
+        $Silian_credentialId = $this->base64UrlEncode($Silian_credentialIdBytes);
 
         $this->service->completeRegistration($this->userFixture(), [
-            'challenge_id' => $registration['challenge_id'],
+            'challenge_id' => $Silian_registration['challenge_id'],
             'credential' => $this->buildRegistrationCredential(
-                $registration['public_key']['challenge'],
+                $Silian_registration['public_key']['challenge'],
                 'https://app.example.test',
-                $keyPair['x'],
-                $keyPair['y'],
-                $credentialIdBytes
+                $Silian_keyPair['x'],
+                $Silian_keyPair['y'],
+                $Silian_credentialIdBytes
             ),
         ]);
 
-        $authentication = $this->service->beginAuthentication([
+        $Silian_authentication = $this->service->beginAuthentication([
             'identifier' => 'admin@testdomain.com',
         ]);
 
-        $this->assertCount(1, $authentication['public_key']['allowCredentials']);
-        $this->assertSame($credentialId, $authentication['public_key']['allowCredentials'][0]['id']);
+        $this->assertCount(1, $Silian_authentication['public_key']['allowCredentials']);
+        $this->assertSame($Silian_credentialId, $Silian_authentication['public_key']['allowCredentials'][0]['id']);
 
-        $result = $this->service->completeAuthentication([
-            'challenge_id' => $authentication['challenge_id'],
+        $Silian_result = $this->service->completeAuthentication([
+            'challenge_id' => $Silian_authentication['challenge_id'],
             'credential' => $this->buildAuthenticationCredential(
-                $authentication['public_key']['challenge'],
+                $Silian_authentication['public_key']['challenge'],
                 'https://app.example.test',
-                $credentialId,
-                $keyPair['private_key'],
+                $Silian_credentialId,
+                $Silian_keyPair['private_key'],
                 'NTUwZTg0MDAtZTI5Yi00MWQ0LWE3MTYtNDQ2NjU1NDQwMGFh',
                 2
             ),
         ]);
 
-        $this->assertSame('admin_user', $result['user']['username']);
-        $this->assertSame($credentialId, $result['passkey']['credential_id']);
-        $this->assertSame(2, $result['passkey']['sign_count']);
-        $this->assertNotEmpty($result['passkey']['last_used_at']);
+        $this->assertSame('admin_user', $Silian_result['user']['username']);
+        $this->assertSame($Silian_credentialId, $Silian_result['passkey']['credential_id']);
+        $this->assertSame(2, $Silian_result['passkey']['sign_count']);
+        $this->assertNotEmpty($Silian_result['passkey']['last_used_at']);
 
-        $stored = $this->pdo->query('SELECT sign_count, last_used_at FROM user_passkeys WHERE credential_id = "' . $credentialId . '"')->fetch(PDO::FETCH_ASSOC);
-        $this->assertSame('2', (string) $stored['sign_count']);
-        $this->assertNotEmpty($stored['last_used_at']);
+        $Silian_stored = $this->pdo->query('SELECT sign_count, last_used_at FROM user_passkeys WHERE credential_id = "' . $Silian_credentialId . '"')->fetch(PDO::FETCH_ASSOC);
+        $this->assertSame('2', (string) $Silian_stored['sign_count']);
+        $this->assertNotEmpty($Silian_stored['last_used_at']);
     }
 
     public function testBeginRegistrationRequiresPersistedUserUuid(): void
@@ -209,166 +209,166 @@ class PasskeyServiceTest extends TestCase
                 'email' => 'admin@testdomain.com',
             ]);
             $this->fail('Expected PasskeyOperationException was not thrown.');
-        } catch (PasskeyOperationException $exception) {
-            $this->assertSame('USER_UUID_REQUIRED', $exception->getErrorCode());
-            $this->assertSame(409, $exception->getHttpStatus());
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->assertSame('USER_UUID_REQUIRED', $Silian_exception->getErrorCode());
+            $this->assertSame(409, $Silian_exception->getHttpStatus());
         }
     }
 
     public function testBeginAuthenticationReturnsGenericOptionsForUnknownIdentifier(): void
     {
-        $result = $this->service->beginAuthentication([
+        $Silian_result = $this->service->beginAuthentication([
             'identifier' => 'missing@testdomain.com',
         ]);
 
-        $this->assertNotEmpty($result['challenge_id']);
-        $this->assertArrayNotHasKey('allowCredentials', $result['public_key']);
+        $this->assertNotEmpty($Silian_result['challenge_id']);
+        $this->assertArrayNotHasKey('allowCredentials', $Silian_result['public_key']);
     }
 
     public function testBeginAuthenticationAllowsOmittingIdentifier(): void
     {
-        $result = $this->service->beginAuthentication();
+        $Silian_result = $this->service->beginAuthentication();
 
-        $this->assertNotEmpty($result['challenge_id']);
-        $this->assertArrayNotHasKey('allowCredentials', $result['public_key']);
+        $this->assertNotEmpty($Silian_result['challenge_id']);
+        $this->assertArrayNotHasKey('allowCredentials', $Silian_result['public_key']);
     }
 
     public function testBeginAuthenticationReturnsGenericOptionsWhenAccountHasNoPasskeys(): void
     {
-        $result = $this->service->beginAuthentication([
+        $Silian_result = $this->service->beginAuthentication([
             'identifier' => 'admin@testdomain.com',
         ]);
 
-        $this->assertNotEmpty($result['challenge_id']);
-        $this->assertArrayNotHasKey('allowCredentials', $result['public_key']);
+        $this->assertNotEmpty($Silian_result['challenge_id']);
+        $this->assertArrayNotHasKey('allowCredentials', $Silian_result['public_key']);
     }
 
     public function testCompleteAuthenticationRejectsCredentialWhenIdentifierDoesNotMatch(): void
     {
-        $credentialId = 'credential-auth-mismatch';
-        $mockProvider = $this->createMock(WebauthnProviderInterface::class);
-        $mockProvider->method('isAvailable')->willReturn(true);
-        $mockProvider->method('getMetadata')->willReturn([
+        $Silian_credentialId = 'credential-auth-mismatch';
+        $Silian_mockProvider = $this->createMock(WebauthnProviderInterface::class);
+        $Silian_mockProvider->method('isAvailable')->willReturn(true);
+        $Silian_mockProvider->method('getMetadata')->willReturn([
             'available' => true,
             'implementation' => 'mock',
         ]);
-        $mockProvider->expects($this->once())
+        $Silian_mockProvider->expects($this->once())
             ->method('verifyAuthenticationResponse')
             ->with(
-                $this->callback(static fn (array $credential): bool => ($credential['id'] ?? null) === $credentialId),
+                $this->callback(static fn (array $Silian_credential): bool => ($Silian_credential['id'] ?? null) === $Silian_credentialId),
                 $this->isType('array'),
-                $this->callback(static fn (array $passkey): bool => ($passkey['credential_id'] ?? null) === $credentialId),
+                $this->callback(static fn (array $Silian_passkey): bool => ($Silian_passkey['credential_id'] ?? null) === $Silian_credentialId),
                 $this->isInstanceOf(PasskeyConfig::class)
             )
             ->willReturn([
-                'credential_id' => $credentialId,
+                'credential_id' => $Silian_credentialId,
                 'sign_count' => 2,
                 'backup_state' => false,
                 'last_used_at' => gmdate('Y-m-d H:i:s'),
             ]);
-        $mockProvider->expects($this->never())->method('verifyRegistrationResponse');
+        $Silian_mockProvider->expects($this->never())->method('verifyRegistrationResponse');
 
-        $service = $this->createService($mockProvider);
-        $this->insertPasskeyForUser(1, $credentialId, 'Phone', 1);
+        $Silian_service = $this->createService($Silian_mockProvider);
+        $this->insertPasskeyForUser(1, $Silian_credentialId, 'Phone', 1);
 
-        $authentication = $service->beginAuthentication([
+        $Silian_authentication = $Silian_service->beginAuthentication([
             'identifier' => 'missing@testdomain.com',
         ]);
 
         try {
-            $service->completeAuthentication([
-                'challenge_id' => $authentication['challenge_id'],
+            $Silian_service->completeAuthentication([
+                'challenge_id' => $Silian_authentication['challenge_id'],
                 'credential' => [
-                    'id' => $credentialId,
-                    'rawId' => $credentialId,
+                    'id' => $Silian_credentialId,
+                    'rawId' => $Silian_credentialId,
                     'type' => 'public-key',
                     'response' => [],
                 ],
             ]);
             $this->fail('Expected PasskeyOperationException was not thrown.');
-        } catch (PasskeyOperationException $exception) {
-            $this->assertSame('PASSKEY_ACCOUNT_MISMATCH', $exception->getErrorCode());
-            $this->assertSame(401, $exception->getHttpStatus());
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->assertSame('PASSKEY_ACCOUNT_MISMATCH', $Silian_exception->getErrorCode());
+            $this->assertSame(401, $Silian_exception->getHttpStatus());
         }
     }
 
     public function testCompleteAuthenticationReturnsNotFoundForUnknownCredential(): void
     {
-        $authentication = $this->service->beginAuthentication();
+        $Silian_authentication = $this->service->beginAuthentication();
 
         try {
             $this->service->completeAuthentication([
-                'challenge_id' => $authentication['challenge_id'],
+                'challenge_id' => $Silian_authentication['challenge_id'],
                 'credential' => [
                     'id' => 'missing-credential',
                 ],
             ]);
             $this->fail('Expected PasskeyOperationException was not thrown.');
-        } catch (PasskeyOperationException $exception) {
-            $this->assertSame('PASSKEY_NOT_FOUND', $exception->getErrorCode());
-            $this->assertSame(404, $exception->getHttpStatus());
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->assertSame('PASSKEY_NOT_FOUND', $Silian_exception->getErrorCode());
+            $this->assertSame(404, $Silian_exception->getHttpStatus());
         }
     }
 
     public function testUpdateLabelForUserTrimsValueAndWritesAuditEvent(): void
     {
         $this->insertExistingPasskey();
-        $passkeyId = (int) $this->pdo
+        $Silian_passkeyId = (int) $this->pdo
             ->query("SELECT id FROM user_passkeys WHERE credential_id = 'existing-credential'")
             ->fetchColumn();
 
-        $expectedLabel = str_repeat('A', 100);
+        $Silian_expectedLabel = str_repeat('A', 100);
         $this->auditLogService->expects($this->once())
             ->method('log')
-            ->with($this->callback(function (array $payload) use ($passkeyId, $expectedLabel): bool {
-                $this->assertSame('passkey_label_updated', $payload['action']);
-                $this->assertSame(1, $payload['user_id']);
-                $this->assertSame('success', $payload['status']);
-                $this->assertSame($passkeyId, $payload['data']['passkey_id']);
-                $this->assertSame($expectedLabel, $payload['data']['new_label']);
+            ->with($this->callback(function (array $Silian_payload) use ($Silian_passkeyId, $Silian_expectedLabel): bool {
+                $this->assertSame('passkey_label_updated', $Silian_payload['action']);
+                $this->assertSame(1, $Silian_payload['user_id']);
+                $this->assertSame('success', $Silian_payload['status']);
+                $this->assertSame($Silian_passkeyId, $Silian_payload['data']['passkey_id']);
+                $this->assertSame($Silian_expectedLabel, $Silian_payload['data']['new_label']);
                 return true;
             }))
             ->willReturn(true);
 
-        $updated = $this->service->updateLabelForUser($this->userFixture(), $passkeyId, str_repeat('A', 120));
+        $Silian_updated = $this->service->updateLabelForUser($this->userFixture(), $Silian_passkeyId, str_repeat('A', 120));
 
-        $this->assertSame($expectedLabel, $updated['label']);
-        $storedLabel = $this->pdo
-            ->query("SELECT label FROM user_passkeys WHERE id = {$passkeyId}")
+        $this->assertSame($Silian_expectedLabel, $Silian_updated['label']);
+        $Silian_storedLabel = $this->pdo
+            ->query("SELECT label FROM user_passkeys WHERE id = {$Silian_passkeyId}")
             ->fetchColumn();
-        $this->assertSame($expectedLabel, $storedLabel);
+        $this->assertSame($Silian_expectedLabel, $Silian_storedLabel);
     }
 
     public function testUpdateLabelForUserSkipsNoOpUpdates(): void
     {
         $this->insertExistingPasskey();
-        $passkeyId = (int) $this->pdo
+        $Silian_passkeyId = (int) $this->pdo
             ->query("SELECT id FROM user_passkeys WHERE credential_id = 'existing-credential'")
             ->fetchColumn();
-        $originalUpdatedAt = (string) $this->pdo
-            ->query("SELECT updated_at FROM user_passkeys WHERE id = {$passkeyId}")
+        $Silian_originalUpdatedAt = (string) $this->pdo
+            ->query("SELECT updated_at FROM user_passkeys WHERE id = {$Silian_passkeyId}")
             ->fetchColumn();
 
         $this->auditLogService->expects($this->never())->method('log');
 
-        $updated = $this->service->updateLabelForUser($this->userFixture(), $passkeyId, '  Existing laptop  ');
+        $Silian_updated = $this->service->updateLabelForUser($this->userFixture(), $Silian_passkeyId, '  Existing laptop  ');
 
-        $this->assertSame('Existing laptop', $updated['label']);
-        $storedUpdatedAt = (string) $this->pdo
-            ->query("SELECT updated_at FROM user_passkeys WHERE id = {$passkeyId}")
+        $this->assertSame('Existing laptop', $Silian_updated['label']);
+        $Silian_storedUpdatedAt = (string) $this->pdo
+            ->query("SELECT updated_at FROM user_passkeys WHERE id = {$Silian_passkeyId}")
             ->fetchColumn();
-        $this->assertSame($originalUpdatedAt, $storedUpdatedAt);
+        $this->assertSame($Silian_originalUpdatedAt, $Silian_storedUpdatedAt);
     }
 
     public function testListForAdminReturnsFilteredSortedPasskeys(): void
     {
         $this->insertPasskeyForUser(1, 'admin-credential', 'Admin Laptop', 2, '2026-03-10 08:00:00');
 
-        $stmt = $this->pdo->prepare(
+        $Silian_stmt = $this->pdo->prepare(
             "INSERT INTO users (username, email, password, school_id, status, points, is_admin, uuid)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt->execute([
+        $Silian_stmt->execute([
             'bob',
             'bob@example.com',
             password_hash('password123', PASSWORD_BCRYPT),
@@ -378,23 +378,23 @@ class PasskeyServiceTest extends TestCase
             0,
             '550e8400-e29b-41d4-a716-4466554400bb',
         ]);
-        $bobId = (int) $this->pdo->lastInsertId();
-        $this->insertPasskeyForUser($bobId, 'bob-credential', 'Bob Phone', 9, '2026-03-10 09:00:00', true);
+        $Silian_bobId = (int) $this->pdo->lastInsertId();
+        $this->insertPasskeyForUser($Silian_bobId, 'bob-credential', 'Bob Phone', 9, '2026-03-10 09:00:00', true);
 
-        $result = $this->service->listForAdmin(1, [
+        $Silian_result = $this->service->listForAdmin(1, [
             'q' => 'bob',
             'sort' => 'sign_count_desc',
             'page' => 1,
             'limit' => 10,
         ]);
 
-        $this->assertSame(1, $result['pagination']['total_items']);
-        $this->assertCount(1, $result['passkeys']);
-        $this->assertSame('bob', $result['passkeys'][0]['username']);
-        $this->assertSame('bob@example.com', $result['passkeys'][0]['email']);
-        $this->assertSame('Bob Phone', $result['passkeys'][0]['label']);
-        $this->assertSame(9, $result['passkeys'][0]['sign_count']);
-        $this->assertTrue($result['passkeys'][0]['backup_state']);
+        $this->assertSame(1, $Silian_result['pagination']['total_items']);
+        $this->assertCount(1, $Silian_result['passkeys']);
+        $this->assertSame('bob', $Silian_result['passkeys'][0]['username']);
+        $this->assertSame('bob@example.com', $Silian_result['passkeys'][0]['email']);
+        $this->assertSame('Bob Phone', $Silian_result['passkeys'][0]['label']);
+        $this->assertSame(9, $Silian_result['passkeys'][0]['sign_count']);
+        $this->assertTrue($Silian_result['passkeys'][0]['backup_state']);
     }
 
     public function testGetAdminStatsCountsActivePasskeysAndRecentPasskeyLogins(): void
@@ -402,11 +402,11 @@ class PasskeyServiceTest extends TestCase
         $this->insertPasskeyForUser(1, 'admin-credential', 'Admin Laptop', 2, gmdate('Y-m-d H:i:s', strtotime('-2 days')));
         $this->insertPasskeyForUser(1, 'admin-credential-2', 'Admin Phone', 4, gmdate('Y-m-d H:i:s', strtotime('-18 days')));
 
-        $stmt = $this->pdo->prepare(
+        $Silian_stmt = $this->pdo->prepare(
             "INSERT INTO users (username, email, password, school_id, status, points, is_admin, uuid)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt->execute([
+        $Silian_stmt->execute([
             'retired-user',
             'retired@example.com',
             password_hash('password123', PASSWORD_BCRYPT),
@@ -416,26 +416,26 @@ class PasskeyServiceTest extends TestCase
             0,
             '550e8400-e29b-41d4-a716-4466554400bc',
         ]);
-        $deletedUserId = (int) $this->pdo->lastInsertId();
+        $Silian_deletedUserId = (int) $this->pdo->lastInsertId();
         $this->pdo->prepare('UPDATE users SET deleted_at = ? WHERE id = ?')
-            ->execute([gmdate('Y-m-d H:i:s', strtotime('-1 day')), $deletedUserId]);
-        $this->insertPasskeyForUser($deletedUserId, 'deleted-user-credential', 'Old Device', 8, gmdate('Y-m-d H:i:s', strtotime('-3 days')));
+            ->execute([gmdate('Y-m-d H:i:s', strtotime('-1 day')), $Silian_deletedUserId]);
+        $this->insertPasskeyForUser($Silian_deletedUserId, 'deleted-user-credential', 'Old Device', 8, gmdate('Y-m-d H:i:s', strtotime('-3 days')));
 
-        $stmt = $this->pdo->prepare(
+        $Silian_stmt = $this->pdo->prepare(
             "INSERT INTO audit_logs (user_id, actor_type, action, status, operation_category, created_at)
              VALUES (?, ?, ?, ?, ?, ?)"
         );
-        $stmt->execute([1, 'user', 'passkey_login', 'success', 'authentication', gmdate('Y-m-d H:i:s', strtotime('-2 days'))]);
-        $stmt->execute([1, 'user', 'passkey_login', 'success', 'authentication', gmdate('Y-m-d H:i:s', strtotime('-10 days'))]);
-        $stmt->execute([1, 'user', 'passkey_login', 'success', 'authentication', gmdate('Y-m-d H:i:s', strtotime('-40 days'))]);
+        $Silian_stmt->execute([1, 'user', 'passkey_login', 'success', 'authentication', gmdate('Y-m-d H:i:s', strtotime('-2 days'))]);
+        $Silian_stmt->execute([1, 'user', 'passkey_login', 'success', 'authentication', gmdate('Y-m-d H:i:s', strtotime('-10 days'))]);
+        $Silian_stmt->execute([1, 'user', 'passkey_login', 'success', 'authentication', gmdate('Y-m-d H:i:s', strtotime('-40 days'))]);
 
-        $stats = $this->service->getAdminStats(1);
+        $Silian_stats = $this->service->getAdminStats(1);
 
-        $this->assertSame(1, $stats['users_with_passkeys']);
-        $this->assertSame(2, $stats['total_active_passkeys']);
-        $this->assertSame(2, $stats['new_passkeys_30d']);
-        $this->assertSame(1, $stats['passkey_logins_7d']);
-        $this->assertSame(2, $stats['passkey_logins_30d']);
+        $this->assertSame(1, $Silian_stats['users_with_passkeys']);
+        $this->assertSame(2, $Silian_stats['total_active_passkeys']);
+        $this->assertSame(2, $Silian_stats['new_passkeys_30d']);
+        $this->assertSame(1, $Silian_stats['passkey_logins_7d']);
+        $this->assertSame(2, $Silian_stats['passkey_logins_30d']);
     }
 
     private function userFixture(): array
@@ -450,13 +450,13 @@ class PasskeyServiceTest extends TestCase
         ];
     }
 
-    private function createService(WebauthnProviderInterface $webauthnProvider): PasskeyService
+    private function createService(WebauthnProviderInterface $Silian_webauthnProvider): PasskeyService
     {
         return new PasskeyService(
             $this->config,
             new UserPasskey($this->pdo),
             new WebauthnChallenge($this->pdo),
-            $webauthnProvider,
+            $Silian_webauthnProvider,
             $this->auditLogService,
             $this->pdo,
             $this->regionService,
@@ -473,14 +473,14 @@ class PasskeyServiceTest extends TestCase
     }
 
     private function insertPasskeyForUser(
-        int $userId,
-        string $credentialId,
-        string $label,
-        int $signCount,
-        ?string $createdAt = null,
-        bool $backupState = false
+        int $Silian_userId,
+        string $Silian_credentialId,
+        string $Silian_label,
+        int $Silian_signCount,
+        ?string $Silian_createdAt = null,
+        bool $Silian_backupState = false
     ): void {
-        $stmt = $this->pdo->prepare(
+        $Silian_stmt = $this->pdo->prepare(
             'INSERT INTO user_passkeys (
                 user_uuid, credential_id, credential_id_hash, credential_type, label, public_key, rp_id, user_handle,
                 transports, aaguid, sign_count, attestation_format, backup_eligible, backup_state, meta_json,
@@ -491,38 +491,38 @@ class PasskeyServiceTest extends TestCase
                 :last_used_at, :attested_at, :created_at, :updated_at
             )'
         );
-        $timestamp = $createdAt ?? gmdate('Y-m-d H:i:s');
-        $stmt->execute([
-            'user_uuid' => $this->userUuidForId($userId),
-            'credential_id' => $credentialId,
-            'credential_id_hash' => hash('sha256', $credentialId),
+        $Silian_timestamp = $Silian_createdAt ?? gmdate('Y-m-d H:i:s');
+        $Silian_stmt->execute([
+            'user_uuid' => $this->userUuidForId($Silian_userId),
+            'credential_id' => $Silian_credentialId,
+            'credential_id_hash' => hash('sha256', $Silian_credentialId),
             'credential_type' => 'public-key',
-            'label' => $label,
+            'label' => $Silian_label,
             'public_key' => json_encode(['pem' => 'placeholder', 'alg' => -7]),
             'rp_id' => 'app.example.test',
             'user_handle' => 'dGVzdC11c2Vy',
             'transports' => json_encode(['internal']),
             'aaguid' => null,
-            'sign_count' => $signCount,
+            'sign_count' => $Silian_signCount,
             'attestation_format' => null,
             'backup_eligible' => 0,
-            'backup_state' => $backupState ? 1 : 0,
+            'backup_state' => $Silian_backupState ? 1 : 0,
             'meta_json' => null,
-            'last_used_at' => $timestamp,
-            'attested_at' => $timestamp,
-            'created_at' => $timestamp,
-            'updated_at' => $timestamp,
+            'last_used_at' => $Silian_timestamp,
+            'attested_at' => $Silian_timestamp,
+            'created_at' => $Silian_timestamp,
+            'updated_at' => $Silian_timestamp,
         ]);
     }
 
-    private function userUuidForId(int $userId): string
+    private function userUuidForId(int $Silian_userId): string
     {
-        $stmt = $this->pdo->prepare('SELECT uuid FROM users WHERE id = ? LIMIT 1');
-        $stmt->execute([$userId]);
-        $uuid = $stmt->fetchColumn();
-        $this->assertNotFalse($uuid);
+        $Silian_stmt = $this->pdo->prepare('SELECT uuid FROM users WHERE id = ? LIMIT 1');
+        $Silian_stmt->execute([$Silian_userId]);
+        $Silian_uuid = $Silian_stmt->fetchColumn();
+        $this->assertNotFalse($Silian_uuid);
 
-        return strtolower((string) $uuid);
+        return strtolower((string) $Silian_uuid);
     }
 
     /**
@@ -530,22 +530,22 @@ class PasskeyServiceTest extends TestCase
      */
     private function generateEcKeyPair(): array
     {
-        $privateKey = openssl_pkey_new([
+        $Silian_privateKey = openssl_pkey_new([
             'private_key_type' => OPENSSL_KEYTYPE_EC,
             'curve_name' => 'prime256v1',
         ]);
-        if ($privateKey === false) {
+        if ($Silian_privateKey === false) {
             $this->markTestSkipped('OpenSSL EC key generation is not available in this environment.');
         }
-        $details = openssl_pkey_get_details($privateKey);
-        if (!is_array($details) || !isset($details['ec']['x'], $details['ec']['y'])) {
+        $Silian_details = openssl_pkey_get_details($Silian_privateKey);
+        if (!is_array($Silian_details) || !isset($Silian_details['ec']['x'], $Silian_details['ec']['y'])) {
             $this->markTestSkipped('OpenSSL EC key details are not available in this environment.');
         }
 
         return [
-            'private_key' => $privateKey,
-            'x' => $details['ec']['x'],
-            'y' => $details['ec']['y'],
+            'private_key' => $Silian_privateKey,
+            'x' => $Silian_details['ec']['x'],
+            'y' => $Silian_details['ec']['y'],
         ];
     }
 
@@ -553,59 +553,59 @@ class PasskeyServiceTest extends TestCase
      * @return array<string, mixed>
      */
     private function buildRegistrationCredential(
-        string $challenge,
-        string $origin,
-        string $x,
-        string $y,
-        string $credentialIdBytes,
-        ?array $extensions = null
+        string $Silian_challenge,
+        string $Silian_origin,
+        string $Silian_x,
+        string $Silian_y,
+        string $Silian_credentialIdBytes,
+        ?array $Silian_extensions = null
     ): array {
-        $clientDataJson = json_encode([
+        $Silian_clientDataJson = json_encode([
             'type' => 'webauthn.create',
-            'challenge' => $challenge,
-            'origin' => $origin,
+            'challenge' => $Silian_challenge,
+            'origin' => $Silian_origin,
             'crossOrigin' => false,
         ], JSON_UNESCAPED_SLASHES);
 
-        $credentialPublicKey = $this->cborEncode($this->cborMap([
+        $Silian_credentialPublicKey = $this->cborEncode($this->cborMap([
             1 => 2,
             3 => -7,
             -1 => 1,
-            -2 => $this->cborBytes($x),
-            -3 => $this->cborBytes($y),
+            -2 => $this->cborBytes($Silian_x),
+            -3 => $this->cborBytes($Silian_y),
         ]));
 
-        $flags = 0x45;
-        $extensionData = '';
-        if ($extensions !== null) {
-            $flags |= 0x80;
-            $extensionData = $this->cborEncode($extensions);
+        $Silian_flags = 0x45;
+        $Silian_extensionData = '';
+        if ($Silian_extensions !== null) {
+            $Silian_flags |= 0x80;
+            $Silian_extensionData = $this->cborEncode($Silian_extensions);
         }
 
-        $authenticatorData = hash('sha256', 'app.example.test', true)
-            . chr($flags)
+        $Silian_authenticatorData = hash('sha256', 'app.example.test', true)
+            . chr($Silian_flags)
             . pack('N', 0)
             . str_repeat("\x00", 16)
-            . pack('n', strlen($credentialIdBytes))
-            . $credentialIdBytes
-            . $credentialPublicKey
-            . $extensionData;
+            . pack('n', strlen($Silian_credentialIdBytes))
+            . $Silian_credentialIdBytes
+            . $Silian_credentialPublicKey
+            . $Silian_extensionData;
 
-        $attestationObject = $this->cborEncode($this->cborMap([
+        $Silian_attestationObject = $this->cborEncode($this->cborMap([
             'fmt' => 'none',
             'attStmt' => $this->cborMap([]),
-            'authData' => $this->cborBytes($authenticatorData),
+            'authData' => $this->cborBytes($Silian_authenticatorData),
         ]));
 
-        $credentialId = $this->base64UrlEncode($credentialIdBytes);
+        $Silian_credentialId = $this->base64UrlEncode($Silian_credentialIdBytes);
 
         return [
-            'id' => $credentialId,
-            'rawId' => $credentialId,
+            'id' => $Silian_credentialId,
+            'rawId' => $Silian_credentialId,
             'type' => 'public-key',
             'response' => [
-                'clientDataJSON' => $this->base64UrlEncode($clientDataJson),
-                'attestationObject' => $this->base64UrlEncode($attestationObject),
+                'clientDataJSON' => $this->base64UrlEncode($Silian_clientDataJson),
+                'attestationObject' => $this->base64UrlEncode($Silian_attestationObject),
             ],
             'authenticatorAttachment' => 'platform',
         ];
@@ -616,35 +616,35 @@ class PasskeyServiceTest extends TestCase
      * @return array<string, mixed>
      */
     private function buildAuthenticationCredential(
-        string $challenge,
-        string $origin,
-        string $credentialId,
-        $privateKey,
-        string $userHandle,
-        int $signCount
+        string $Silian_challenge,
+        string $Silian_origin,
+        string $Silian_credentialId,
+        $Silian_privateKey,
+        string $Silian_userHandle,
+        int $Silian_signCount
     ): array {
-        $clientDataJson = json_encode([
+        $Silian_clientDataJson = json_encode([
             'type' => 'webauthn.get',
-            'challenge' => $challenge,
-            'origin' => $origin,
+            'challenge' => $Silian_challenge,
+            'origin' => $Silian_origin,
             'crossOrigin' => false,
         ], JSON_UNESCAPED_SLASHES);
 
-        $authenticatorData = hash('sha256', 'app.example.test', true)
+        $Silian_authenticatorData = hash('sha256', 'app.example.test', true)
             . chr(0x05)
-            . pack('N', $signCount);
-        $signaturePayload = $authenticatorData . hash('sha256', $clientDataJson, true);
-        openssl_sign($signaturePayload, $signature, $privateKey, OPENSSL_ALGO_SHA256);
+            . pack('N', $Silian_signCount);
+        $Silian_signaturePayload = $Silian_authenticatorData . hash('sha256', $Silian_clientDataJson, true);
+        openssl_sign($Silian_signaturePayload, $Silian_signature, $Silian_privateKey, OPENSSL_ALGO_SHA256);
 
         return [
-            'id' => $credentialId,
-            'rawId' => $credentialId,
+            'id' => $Silian_credentialId,
+            'rawId' => $Silian_credentialId,
             'type' => 'public-key',
             'response' => [
-                'authenticatorData' => $this->base64UrlEncode($authenticatorData),
-                'clientDataJSON' => $this->base64UrlEncode($clientDataJson),
-                'signature' => $this->base64UrlEncode($signature),
-                'userHandle' => $userHandle,
+                'authenticatorData' => $this->base64UrlEncode($Silian_authenticatorData),
+                'clientDataJSON' => $this->base64UrlEncode($Silian_clientDataJson),
+                'signature' => $this->base64UrlEncode($Silian_signature),
+                'userHandle' => $Silian_userHandle,
             ],
         ];
     }
@@ -652,37 +652,37 @@ class PasskeyServiceTest extends TestCase
     /**
      * @param mixed $value
      */
-    private function cborEncode($value): string
+    private function cborEncode($Silian_value): string
     {
-        if (is_array($value) && array_key_exists('__bytes', $value)) {
-            return $this->encodeCborItem(2, (string) $value['__bytes']);
+        if (is_array($Silian_value) && array_key_exists('__bytes', $Silian_value)) {
+            return $this->encodeCborItem(2, (string) $Silian_value['__bytes']);
         }
 
-        if (is_array($value) && array_key_exists('__map', $value)) {
-            $encoded = '';
-            foreach ($value['__map'] as $key => $item) {
-                $encoded .= $this->cborEncode($key) . $this->cborEncode($item);
+        if (is_array($Silian_value) && array_key_exists('__map', $Silian_value)) {
+            $Silian_encoded = '';
+            foreach ($Silian_value['__map'] as $Silian_key => $Silian_item) {
+                $Silian_encoded .= $this->cborEncode($Silian_key) . $this->cborEncode($Silian_item);
             }
-            return $this->encodeCborHeader(5, count($value['__map'])) . $encoded;
+            return $this->encodeCborHeader(5, count($Silian_value['__map'])) . $Silian_encoded;
         }
 
-        if (is_string($value)) {
-            return $this->encodeCborItem(3, $value);
+        if (is_string($Silian_value)) {
+            return $this->encodeCborItem(3, $Silian_value);
         }
 
-        if (is_int($value)) {
-            if ($value >= 0) {
-                return $this->encodeCborHeader(0, $value);
+        if (is_int($Silian_value)) {
+            if ($Silian_value >= 0) {
+                return $this->encodeCborHeader(0, $Silian_value);
             }
 
-            return $this->encodeCborHeader(1, (-1 - $value));
+            return $this->encodeCborHeader(1, (-1 - $Silian_value));
         }
 
-        if (is_bool($value)) {
-            return $value ? "\xf5" : "\xf4";
+        if (is_bool($Silian_value)) {
+            return $Silian_value ? "\xf5" : "\xf4";
         }
 
-        if ($value === null) {
+        if ($Silian_value === null) {
             return "\xf6";
         }
 
@@ -692,43 +692,43 @@ class PasskeyServiceTest extends TestCase
     /**
      * @return array{__bytes:string}
      */
-    private function cborBytes(string $value): array
+    private function cborBytes(string $Silian_value): array
     {
-        return ['__bytes' => $value];
+        return ['__bytes' => $Silian_value];
     }
 
     /**
      * @return array{__map:array<mixed,mixed>}
      */
-    private function cborMap(array $value): array
+    private function cborMap(array $Silian_value): array
     {
-        return ['__map' => $value];
+        return ['__map' => $Silian_value];
     }
 
-    private function encodeCborItem(int $majorType, string $payload): string
+    private function encodeCborItem(int $Silian_majorType, string $Silian_payload): string
     {
-        return $this->encodeCborHeader($majorType, strlen($payload)) . $payload;
+        return $this->encodeCborHeader($Silian_majorType, strlen($Silian_payload)) . $Silian_payload;
     }
 
-    private function encodeCborHeader(int $majorType, int $value): string
+    private function encodeCborHeader(int $Silian_majorType, int $Silian_value): string
     {
-        if ($value < 24) {
-            return chr(($majorType << 5) | $value);
+        if ($Silian_value < 24) {
+            return chr(($Silian_majorType << 5) | $Silian_value);
         }
 
-        if ($value < 256) {
-            return chr(($majorType << 5) | 24) . chr($value);
+        if ($Silian_value < 256) {
+            return chr(($Silian_majorType << 5) | 24) . chr($Silian_value);
         }
 
-        if ($value < 65536) {
-            return chr(($majorType << 5) | 25) . pack('n', $value);
+        if ($Silian_value < 65536) {
+            return chr(($Silian_majorType << 5) | 25) . pack('n', $Silian_value);
         }
 
-        return chr(($majorType << 5) | 26) . pack('N', $value);
+        return chr(($Silian_majorType << 5) | 26) . pack('N', $Silian_value);
     }
 
-    private function base64UrlEncode(string $value): string
+    private function base64UrlEncode(string $Silian_value): string
     {
-        return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
+        return rtrim(strtr(base64_encode($Silian_value), '+/', '-_'), '=');
     }
 }

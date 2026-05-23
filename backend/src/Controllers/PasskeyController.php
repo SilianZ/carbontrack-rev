@@ -22,34 +22,34 @@ class PasskeyController
     ) {
     }
 
-    public function list(Request $request, Response $response): Response
+    public function list(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED',
                 ], 401);
             }
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'passkeys' => $this->passkeyService->listForUser($user),
+                    'passkeys' => $this->passkeyService->listForUser($Silian_user),
                 ],
             ]);
-        } catch (PasskeyOperationException $exception) {
-            $this->logException($exception, $request, 'Passkey list operation failed');
-            return $this->jsonResponse($response, [
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Passkey list operation failed');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => $exception->getMessage(),
-                'code' => $exception->getErrorCode(),
-            ], $exception->getHttpStatus());
-        } catch (\Throwable $exception) {
-            $this->logException($exception, $request, 'Failed to list passkeys');
-            return $this->jsonResponse($response, [
+                'message' => $Silian_exception->getMessage(),
+                'code' => $Silian_exception->getErrorCode(),
+            ], $Silian_exception->getHttpStatus());
+        } catch (\Throwable $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Failed to list passkeys');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to list passkeys',
                 'code' => 'PASSKEY_LIST_FAILED',
@@ -57,35 +57,35 @@ class PasskeyController
         }
     }
 
-    public function beginRegistration(Request $request, Response $response): Response
+    public function beginRegistration(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED',
                 ], 401);
             }
 
-            $body = $request->getParsedBody();
-            $payload = is_array($body) ? $body : [];
+            $Silian_body = $Silian_request->getParsedBody();
+            $Silian_payload = is_array($Silian_body) ? $Silian_body : [];
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $this->passkeyService->beginRegistration($user, $payload),
+                'data' => $this->passkeyService->beginRegistration($Silian_user, $Silian_payload),
             ]);
-        } catch (PasskeyOperationException $exception) {
-            $this->logException($exception, $request, 'Passkey registration options operation failed');
-            return $this->jsonResponse($response, [
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Passkey registration options operation failed');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => $exception->getMessage(),
-                'code' => $exception->getErrorCode(),
-            ], $exception->getHttpStatus());
-        } catch (\Throwable $exception) {
-            $this->logException($exception, $request, 'Failed to create passkey registration options');
-            return $this->jsonResponse($response, [
+                'message' => $Silian_exception->getMessage(),
+                'code' => $Silian_exception->getErrorCode(),
+            ], $Silian_exception->getHttpStatus());
+        } catch (\Throwable $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Failed to create passkey registration options');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to create passkey registration options',
                 'code' => 'PASSKEY_REGISTRATION_OPTIONS_FAILED',
@@ -93,37 +93,37 @@ class PasskeyController
         }
     }
 
-    public function completeRegistration(Request $request, Response $response): Response
+    public function completeRegistration(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED',
                 ], 401);
             }
 
-            $body = $request->getParsedBody();
-            $payload = is_array($body) ? $body : [];
+            $Silian_body = $Silian_request->getParsedBody();
+            $Silian_payload = is_array($Silian_body) ? $Silian_body : [];
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'passkey' => $this->passkeyService->completeRegistration($user, $payload),
+                    'passkey' => $this->passkeyService->completeRegistration($Silian_user, $Silian_payload),
                 ],
             ], 201);
-        } catch (PasskeyOperationException $exception) {
-            $this->logException($exception, $request, 'Passkey registration verification operation failed');
-            return $this->jsonResponse($response, [
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Passkey registration verification operation failed');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => $exception->getMessage(),
-                'code' => $exception->getErrorCode(),
-            ], $exception->getHttpStatus());
-        } catch (\Throwable $exception) {
-            $this->logException($exception, $request, 'Failed to complete passkey registration');
-            return $this->jsonResponse($response, [
+                'message' => $Silian_exception->getMessage(),
+                'code' => $Silian_exception->getErrorCode(),
+            ], $Silian_exception->getHttpStatus());
+        } catch (\Throwable $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Failed to complete passkey registration');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to complete passkey registration',
                 'code' => 'PASSKEY_REGISTRATION_FAILED',
@@ -131,26 +131,26 @@ class PasskeyController
         }
     }
 
-    public function beginAuthentication(Request $request, Response $response): Response
+    public function beginAuthentication(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $body = $request->getParsedBody();
-            $payload = is_array($body) ? $body : [];
+            $Silian_body = $Silian_request->getParsedBody();
+            $Silian_payload = is_array($Silian_body) ? $Silian_body : [];
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $this->passkeyService->beginAuthentication($payload),
+                'data' => $this->passkeyService->beginAuthentication($Silian_payload),
             ]);
-        } catch (PasskeyOperationException $exception) {
-            $this->logException($exception, $request, 'Passkey authentication options operation failed');
-            return $this->jsonResponse($response, [
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Passkey authentication options operation failed');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => $exception->getMessage(),
-                'code' => $exception->getErrorCode(),
-            ], $exception->getHttpStatus());
-        } catch (\Throwable $exception) {
-            $this->logException($exception, $request, 'Failed to create passkey authentication options');
-            return $this->jsonResponse($response, [
+                'message' => $Silian_exception->getMessage(),
+                'code' => $Silian_exception->getErrorCode(),
+            ], $Silian_exception->getHttpStatus());
+        } catch (\Throwable $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Failed to create passkey authentication options');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to create passkey authentication options',
                 'code' => 'PASSKEY_AUTHENTICATION_OPTIONS_FAILED',
@@ -158,32 +158,32 @@ class PasskeyController
         }
     }
 
-    public function completeAuthentication(Request $request, Response $response): Response
+    public function completeAuthentication(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $body = $request->getParsedBody();
-            $payload = is_array($body) ? $body : [];
-            $result = $this->passkeyService->completeAuthentication($payload);
+            $Silian_body = $Silian_request->getParsedBody();
+            $Silian_payload = is_array($Silian_body) ? $Silian_body : [];
+            $Silian_result = $this->passkeyService->completeAuthentication($Silian_payload);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Login successful',
                 'data' => [
-                    'token' => $this->authService->generateToken($result['user']),
-                    'user' => $result['user'],
-                    'passkey' => $result['passkey'],
+                    'token' => $this->authService->generateToken($Silian_result['user']),
+                    'user' => $Silian_result['user'],
+                    'passkey' => $Silian_result['passkey'],
                 ],
             ]);
-        } catch (PasskeyOperationException $exception) {
-            $this->logException($exception, $request, 'Passkey authentication verification operation failed');
-            return $this->jsonResponse($response, [
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Passkey authentication verification operation failed');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => $exception->getMessage(),
-                'code' => $exception->getErrorCode(),
-            ], $exception->getHttpStatus());
-        } catch (\Throwable $exception) {
-            $this->logException($exception, $request, 'Failed to complete passkey authentication');
-            return $this->jsonResponse($response, [
+                'message' => $Silian_exception->getMessage(),
+                'code' => $Silian_exception->getErrorCode(),
+            ], $Silian_exception->getHttpStatus());
+        } catch (\Throwable $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Failed to complete passkey authentication');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to complete passkey authentication',
                 'code' => 'PASSKEY_AUTHENTICATION_FAILED',
@@ -191,43 +191,43 @@ class PasskeyController
         }
     }
 
-    public function delete(Request $request, Response $response, array $args): Response
+    public function delete(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED',
                 ], 401);
             }
 
-            $passkeyId = isset($args['id']) ? (int) $args['id'] : 0;
-            if ($passkeyId <= 0) {
-                return $this->jsonResponse($response, [
+            $Silian_passkeyId = isset($Silian_args['id']) ? (int) $Silian_args['id'] : 0;
+            if ($Silian_passkeyId <= 0) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Invalid passkey id',
                     'code' => 'INVALID_PASSKEY_ID',
                 ], 400);
             }
 
-            $this->passkeyService->deleteForUser($user, $passkeyId);
+            $this->passkeyService->deleteForUser($Silian_user, $Silian_passkeyId);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Passkey deleted successfully',
             ]);
-        } catch (PasskeyOperationException $exception) {
-            $this->logException($exception, $request, 'Passkey delete operation failed');
-            return $this->jsonResponse($response, [
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Passkey delete operation failed');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => $exception->getMessage(),
-                'code' => $exception->getErrorCode(),
-            ], $exception->getHttpStatus());
-        } catch (\Throwable $exception) {
-            $this->logException($exception, $request, 'Failed to delete passkey');
-            return $this->jsonResponse($response, [
+                'message' => $Silian_exception->getMessage(),
+                'code' => $Silian_exception->getErrorCode(),
+            ], $Silian_exception->getHttpStatus());
+        } catch (\Throwable $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Failed to delete passkey');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to delete passkey',
                 'code' => 'PASSKEY_DELETE_FAILED',
@@ -235,51 +235,51 @@ class PasskeyController
         }
     }
 
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED',
                 ], 401);
             }
 
-            $passkeyId = isset($args['id']) ? (int) $args['id'] : 0;
-            if ($passkeyId <= 0) {
-                return $this->jsonResponse($response, [
+            $Silian_passkeyId = isset($Silian_args['id']) ? (int) $Silian_args['id'] : 0;
+            if ($Silian_passkeyId <= 0) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Invalid passkey id',
                     'code' => 'INVALID_PASSKEY_ID',
                 ], 400);
             }
 
-            $body = $request->getParsedBody();
-            $payload = is_array($body) ? $body : [];
-            $passkey = $this->passkeyService->updateLabelForUser(
-                $user,
-                $passkeyId,
-                isset($payload['label']) ? (string) $payload['label'] : null
+            $Silian_body = $Silian_request->getParsedBody();
+            $Silian_payload = is_array($Silian_body) ? $Silian_body : [];
+            $Silian_passkey = $this->passkeyService->updateLabelForUser(
+                $Silian_user,
+                $Silian_passkeyId,
+                isset($Silian_payload['label']) ? (string) $Silian_payload['label'] : null
             );
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'passkey' => $passkey,
+                    'passkey' => $Silian_passkey,
                 ],
             ]);
-        } catch (PasskeyOperationException $exception) {
-            $this->logException($exception, $request, 'Passkey update operation failed');
-            return $this->jsonResponse($response, [
+        } catch (PasskeyOperationException $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Passkey update operation failed');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
-                'message' => $exception->getMessage(),
-                'code' => $exception->getErrorCode(),
-            ], $exception->getHttpStatus());
-        } catch (\Throwable $exception) {
-            $this->logException($exception, $request, 'Failed to update passkey');
-            return $this->jsonResponse($response, [
+                'message' => $Silian_exception->getMessage(),
+                'code' => $Silian_exception->getErrorCode(),
+            ], $Silian_exception->getHttpStatus());
+        } catch (\Throwable $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Failed to update passkey');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to update passkey',
                 'code' => 'PASSKEY_UPDATE_FAILED',
@@ -287,27 +287,27 @@ class PasskeyController
         }
     }
 
-    public function adminList(Request $request, Response $response): Response
+    public function adminList(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Access denied',
                     'code' => 'ACCESS_DENIED',
                 ], 403);
             }
 
-            $payload = $this->passkeyService->listForAdmin((int) $user['id'], $request->getQueryParams());
+            $Silian_payload = $this->passkeyService->listForAdmin((int) $Silian_user['id'], $Silian_request->getQueryParams());
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $payload,
+                'data' => $Silian_payload,
             ]);
-        } catch (\Throwable $exception) {
-            $this->logException($exception, $request, 'Failed to list admin passkeys');
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Failed to list admin passkeys');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to list admin passkeys',
                 'code' => 'ADMIN_PASSKEY_LIST_FAILED',
@@ -315,27 +315,27 @@ class PasskeyController
         }
     }
 
-    public function adminStats(Request $request, Response $response): Response
+    public function adminStats(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Access denied',
                     'code' => 'ACCESS_DENIED',
                 ], 403);
             }
 
-            $stats = $this->passkeyService->getAdminStats((int) $user['id']);
+            $Silian_stats = $this->passkeyService->getAdminStats((int) $Silian_user['id']);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $stats,
+                'data' => $Silian_stats,
             ]);
-        } catch (\Throwable $exception) {
-            $this->logException($exception, $request, 'Failed to fetch admin passkey stats');
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_exception) {
+            $this->logException($Silian_exception, $Silian_request, 'Failed to fetch admin passkey stats');
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to fetch admin passkey stats',
                 'code' => 'ADMIN_PASSKEY_STATS_FAILED',
@@ -343,27 +343,27 @@ class PasskeyController
         }
     }
 
-    private function logException(\Throwable $exception, Request $request, string $message): void
+    private function logException(\Throwable $Silian_exception, Request $Silian_request, string $Silian_message): void
     {
-        $this->logger->error($message, [
-            'error' => $exception->getMessage(),
-            'exception' => get_class($exception),
+        $this->logger->error($Silian_message, [
+            'error' => $Silian_exception->getMessage(),
+            'exception' => get_class($Silian_exception),
         ]);
 
         try {
             if ($this->errorLogService !== null) {
-                $this->errorLogService->logException($exception, $request);
+                $this->errorLogService->logException($Silian_exception, $Silian_request);
             }
-        } catch (\Throwable $ignored) {
+        } catch (\Throwable $Silian_ignored) {
             $this->logger->error('PasskeyController failed to persist error log', [
-                'error' => $ignored->getMessage(),
+                'error' => $Silian_ignored->getMessage(),
             ]);
         }
     }
 
-    private function jsonResponse(Response $response, array $data, int $status = 200): Response
+    private function jsonResponse(Response $Silian_response, array $Silian_data, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus($status);
+        $Silian_response->getBody()->write(json_encode($Silian_data, JSON_UNESCAPED_UNICODE));
+        return $Silian_response->withHeader('Content-Type', 'application/json')->withStatus($Silian_status);
     }
 }

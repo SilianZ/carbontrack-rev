@@ -17,145 +17,145 @@ class ProductExchangeQueryTest extends TestCase
 {
     public function testUserCanViewExchangeHistoryAndDetail(): void
     {
-        $pdo = $this->createConnection();
-        $this->createSchema($pdo);
-        $this->seedUsers($pdo);
-        $this->seedProducts($pdo);
-        $this->seedUserExchanges($pdo);
+        $Silian_pdo = $this->createConnection();
+        $this->createSchema($Silian_pdo);
+        $this->seedUsers($Silian_pdo);
+        $this->seedProducts($Silian_pdo);
+        $this->seedUserExchanges($Silian_pdo);
 
-        $messageService = $this->createMock(MessageService::class);
-        $auditLog = $this->createMock(AuditLogService::class);
-        $authService = $this->makeUserAuthService(10);
+        $Silian_messageService = $this->createMock(MessageService::class);
+        $Silian_auditLog = $this->createMock(AuditLogService::class);
+        $Silian_authService = $this->makeUserAuthService(10);
 
-        $controller = new ProductController($pdo, $messageService, $auditLog, $authService);
+        $Silian_controller = new ProductController($Silian_pdo, $Silian_messageService, $Silian_auditLog, $Silian_authService);
 
-        $listRequest = makeRequest('GET', '/me/exchanges', null, ['limit' => 10]);
-        $listResponse = new Response();
-        $listResult = $controller->getExchangeTransactions($listRequest, $listResponse);
+        $Silian_listRequest = makeRequest('GET', '/me/exchanges', null, ['limit' => 10]);
+        $Silian_listResponse = new Response();
+        $Silian_listResult = $Silian_controller->getExchangeTransactions($Silian_listRequest, $Silian_listResponse);
 
-        $this->assertSame(200, $listResult->getStatusCode(), (string)$listResult->getBody());
-        $payload = json_decode((string)$listResult->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertTrue($payload['success']);
-        $this->assertSame(2, $payload['pagination']['total']);
-        $this->assertCount(2, $payload['data']);
+        $this->assertSame(200, $Silian_listResult->getStatusCode(), (string)$Silian_listResult->getBody());
+        $Silian_payload = json_decode((string)$Silian_listResult->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertSame(2, $Silian_payload['pagination']['total']);
+        $this->assertCount(2, $Silian_payload['data']);
 
-        $ids = array_column($payload['data'], 'id');
-        $this->assertSame(['ex-user-1', 'ex-user-2'], $ids);
+        $Silian_ids = array_column($Silian_payload['data'], 'id');
+        $this->assertSame(['ex-user-1', 'ex-user-2'], $Silian_ids);
 
-        $byId = [];
-        foreach ($payload['data'] as $row) {
-            $byId[$row['id']] = $row;
+        $Silian_byId = [];
+        foreach ($Silian_payload['data'] as $Silian_row) {
+            $Silian_byId[$Silian_row['id']] = $Silian_row;
         }
-        $this->assertSame('pending', $byId['ex-user-1']['status']);
-        $this->assertSame('completed', $byId['ex-user-2']['status']);
-        $this->assertSame(2, (int)$byId['ex-user-2']['quantity']);
+        $this->assertSame('pending', $Silian_byId['ex-user-1']['status']);
+        $this->assertSame('completed', $Silian_byId['ex-user-2']['status']);
+        $this->assertSame(2, (int)$Silian_byId['ex-user-2']['quantity']);
 
-        $detailRequest = makeRequest('GET', '/me/exchanges/ex-user-1');
-        $detailResponse = new Response();
-        $detailResult = $controller->getExchangeTransaction($detailRequest, $detailResponse, ['id' => 'ex-user-1']);
+        $Silian_detailRequest = makeRequest('GET', '/me/exchanges/ex-user-1');
+        $Silian_detailResponse = new Response();
+        $Silian_detailResult = $Silian_controller->getExchangeTransaction($Silian_detailRequest, $Silian_detailResponse, ['id' => 'ex-user-1']);
 
-        $this->assertSame(200, $detailResult->getStatusCode(), (string)$detailResult->getBody());
-        $detailPayload = json_decode((string)$detailResult->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertTrue($detailPayload['success']);
-        $this->assertSame('pending', $detailPayload['data']['status']);
-        $this->assertSame(150, (int)$detailPayload['data']['points_used']);
+        $this->assertSame(200, $Silian_detailResult->getStatusCode(), (string)$Silian_detailResult->getBody());
+        $Silian_detailPayload = json_decode((string)$Silian_detailResult->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($Silian_detailPayload['success']);
+        $this->assertSame('pending', $Silian_detailPayload['data']['status']);
+        $this->assertSame(150, (int)$Silian_detailPayload['data']['points_used']);
 
-        $otherRequest = makeRequest('GET', '/me/exchanges/ex-other');
-        $otherResponse = new Response();
-        $otherResult = $controller->getExchangeTransaction($otherRequest, $otherResponse, ['id' => 'ex-other']);
-        $this->assertSame(404, $otherResult->getStatusCode());
+        $Silian_otherRequest = makeRequest('GET', '/me/exchanges/ex-other');
+        $Silian_otherResponse = new Response();
+        $Silian_otherResult = $Silian_controller->getExchangeTransaction($Silian_otherRequest, $Silian_otherResponse, ['id' => 'ex-other']);
+        $this->assertSame(404, $Silian_otherResult->getStatusCode());
     }
 
     public function testUserExchangeHistorySupportsSearchStatusAndSort(): void
     {
-        $pdo = $this->createConnection();
-        $this->createSchema($pdo);
-        $this->seedUsers($pdo);
-        $this->seedProducts($pdo);
-        $this->seedUserExchanges($pdo);
+        $Silian_pdo = $this->createConnection();
+        $this->createSchema($Silian_pdo);
+        $this->seedUsers($Silian_pdo);
+        $this->seedProducts($Silian_pdo);
+        $this->seedUserExchanges($Silian_pdo);
 
-        $messageService = $this->createMock(MessageService::class);
-        $auditLog = $this->createMock(AuditLogService::class);
-        $authService = $this->makeUserAuthService(10);
+        $Silian_messageService = $this->createMock(MessageService::class);
+        $Silian_auditLog = $this->createMock(AuditLogService::class);
+        $Silian_authService = $this->makeUserAuthService(10);
 
-        $controller = new ProductController($pdo, $messageService, $auditLog, $authService);
+        $Silian_controller = new ProductController($Silian_pdo, $Silian_messageService, $Silian_auditLog, $Silian_authService);
 
-        $filteredRequest = makeRequest('GET', '/me/exchanges', null, [
+        $Silian_filteredRequest = makeRequest('GET', '/me/exchanges', null, [
             'status' => 'completed',
             'search' => 'solar',
             'sort' => 'points_desc',
             'limit' => 10,
         ]);
-        $filteredResponse = new Response();
-        $filteredResult = $controller->getExchangeTransactions($filteredRequest, $filteredResponse);
+        $Silian_filteredResponse = new Response();
+        $Silian_filteredResult = $Silian_controller->getExchangeTransactions($Silian_filteredRequest, $Silian_filteredResponse);
 
-        $this->assertSame(200, $filteredResult->getStatusCode(), (string) $filteredResult->getBody());
-        $filteredPayload = json_decode((string) $filteredResult->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertTrue($filteredPayload['success']);
-        $this->assertSame(1, $filteredPayload['pagination']['total']);
-        $this->assertSame(['ex-user-2'], array_column($filteredPayload['data'], 'id'));
+        $this->assertSame(200, $Silian_filteredResult->getStatusCode(), (string) $Silian_filteredResult->getBody());
+        $Silian_filteredPayload = json_decode((string) $Silian_filteredResult->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($Silian_filteredPayload['success']);
+        $this->assertSame(1, $Silian_filteredPayload['pagination']['total']);
+        $this->assertSame(['ex-user-2'], array_column($Silian_filteredPayload['data'], 'id'));
 
-        $sortedRequest = makeRequest('GET', '/me/exchanges', null, [
+        $Silian_sortedRequest = makeRequest('GET', '/me/exchanges', null, [
             'sort' => 'points_asc',
             'limit' => 10,
         ]);
-        $sortedResponse = new Response();
-        $sortedResult = $controller->getExchangeTransactions($sortedRequest, $sortedResponse);
+        $Silian_sortedResponse = new Response();
+        $Silian_sortedResult = $Silian_controller->getExchangeTransactions($Silian_sortedRequest, $Silian_sortedResponse);
 
-        $this->assertSame(200, $sortedResult->getStatusCode(), (string) $sortedResult->getBody());
-        $sortedPayload = json_decode((string) $sortedResult->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame(['ex-user-1', 'ex-user-2'], array_column($sortedPayload['data'], 'id'));
+        $this->assertSame(200, $Silian_sortedResult->getStatusCode(), (string) $Silian_sortedResult->getBody());
+        $Silian_sortedPayload = json_decode((string) $Silian_sortedResult->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(['ex-user-1', 'ex-user-2'], array_column($Silian_sortedPayload['data'], 'id'));
     }
 
     public function testAdminCanViewExchangeRecordDetail(): void
     {
-        $pdo = $this->createConnection();
-        $this->createSchema($pdo);
-        $this->seedUsers($pdo);
-        $this->seedProducts($pdo);
-        $this->seedAdminExchange($pdo);
+        $Silian_pdo = $this->createConnection();
+        $this->createSchema($Silian_pdo);
+        $this->seedUsers($Silian_pdo);
+        $this->seedProducts($Silian_pdo);
+        $this->seedAdminExchange($Silian_pdo);
 
-        $messageService = $this->createMock(MessageService::class);
-        $auditLog = $this->createMock(AuditLogService::class);
-        $authService = $this->makeAdminAuthService();
+        $Silian_messageService = $this->createMock(MessageService::class);
+        $Silian_auditLog = $this->createMock(AuditLogService::class);
+        $Silian_authService = $this->makeAdminAuthService();
 
-        $controller = new ProductController($pdo, $messageService, $auditLog, $authService);
+        $Silian_controller = new ProductController($Silian_pdo, $Silian_messageService, $Silian_auditLog, $Silian_authService);
 
-        $detailRequest = makeRequest('GET', '/admin/exchanges/ex-admin-1');
-        $detailResponse = new Response();
+        $Silian_detailRequest = makeRequest('GET', '/admin/exchanges/ex-admin-1');
+        $Silian_detailResponse = new Response();
 
-        $result = $controller->getExchangeRecordDetail($detailRequest, $detailResponse, ['id' => 'ex-admin-1']);
+        $Silian_result = $Silian_controller->getExchangeRecordDetail($Silian_detailRequest, $Silian_detailResponse, ['id' => 'ex-admin-1']);
 
-        $this->assertSame(200, $result->getStatusCode(), (string)$result->getBody());
-        $payload = json_decode((string)$result->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertTrue($payload['success']);
+        $this->assertSame(200, $Silian_result->getStatusCode(), (string)$Silian_result->getBody());
+        $Silian_payload = json_decode((string)$Silian_result->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($Silian_payload['success']);
 
-        $data = $payload['data'];
-        $this->assertSame('shipped', $data['status']);
-        $this->assertSame('admin_user', $data['username']);
-        $this->assertSame('admin@example.com', $data['email']);
-        $this->assertSame('Eco Bottle', $data['product_name']);
-        $this->assertSame('eco-bottle-img', $data['current_product_image_path']);
-        $this->assertSame('Warehouse A', $data['delivery_address']);
-        $this->assertSame('TRACK-ADMIN', $data['tracking_number']);
-        $this->assertSame('Warehouse A', $data['shipping_address']);
-        $this->assertSame('admin_user', $data['user_username']);
-        $this->assertSame('admin@example.com', $data['user_email']);
+        $Silian_data = $Silian_payload['data'];
+        $this->assertSame('shipped', $Silian_data['status']);
+        $this->assertSame('admin_user', $Silian_data['username']);
+        $this->assertSame('admin@example.com', $Silian_data['email']);
+        $this->assertSame('Eco Bottle', $Silian_data['product_name']);
+        $this->assertSame('eco-bottle-img', $Silian_data['current_product_image_path']);
+        $this->assertSame('Warehouse A', $Silian_data['delivery_address']);
+        $this->assertSame('TRACK-ADMIN', $Silian_data['tracking_number']);
+        $this->assertSame('Warehouse A', $Silian_data['shipping_address']);
+        $this->assertSame('admin_user', $Silian_data['user_username']);
+        $this->assertSame('admin@example.com', $Silian_data['user_email']);
     }
 
     private function createConnection(): PDO
     {
-        $pdo = new PDO('sqlite::memory:');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        if (method_exists($pdo, 'sqliteCreateFunction')) {
-            $pdo->sqliteCreateFunction('NOW', static fn() => date('Y-m-d H:i:s'));
+        $Silian_pdo = new PDO('sqlite::memory:');
+        $Silian_pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        if (method_exists($Silian_pdo, 'sqliteCreateFunction')) {
+            $Silian_pdo->sqliteCreateFunction('NOW', static fn() => date('Y-m-d H:i:s'));
         }
-        return $pdo;
+        return $Silian_pdo;
     }
 
-    private function createSchema(PDO $pdo): void
+    private function createSchema(PDO $Silian_pdo): void
     {
-        $pdo->exec('CREATE TABLE users (
+        $Silian_pdo->exec('CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             username TEXT,
             email TEXT,
@@ -167,7 +167,7 @@ class ProductExchangeQueryTest extends TestCase
             notification_email_mask INTEGER DEFAULT 0
         )');
 
-        $pdo->exec('CREATE TABLE products (
+        $Silian_pdo->exec('CREATE TABLE products (
             id INTEGER PRIMARY KEY,
             name TEXT,
             images TEXT,
@@ -175,7 +175,7 @@ class ProductExchangeQueryTest extends TestCase
             created_at TEXT
         )');
 
-        $pdo->exec('CREATE TABLE point_exchanges (
+        $Silian_pdo->exec('CREATE TABLE point_exchanges (
             id TEXT PRIMARY KEY,
             user_id INTEGER,
             product_id INTEGER,
@@ -195,77 +195,77 @@ class ProductExchangeQueryTest extends TestCase
         )');
     }
 
-    private function seedUsers(PDO $pdo): void
+    private function seedUsers(PDO $Silian_pdo): void
     {
-        $now = date('Y-m-d H:i:s');
-        $pdo->exec("INSERT INTO users (id, username, email, points, is_admin, status, created_at) VALUES
-            (1, 'admin_user', 'admin@example.com', 1000, 1, 'active', '$now'),
-            (10, 'user_a', 'user_a@example.com', 300, 0, 'active', '$now'),
-            (11, 'user_b', 'user_b@example.com', 120, 0, 'active', '$now')
+        $Silian_now = date('Y-m-d H:i:s');
+        $Silian_pdo->exec("INSERT INTO users (id, username, email, points, is_admin, status, created_at) VALUES
+            (1, 'admin_user', 'admin@example.com', 1000, 1, 'active', '$Silian_now'),
+            (10, 'user_a', 'user_a@example.com', 300, 0, 'active', '$Silian_now'),
+            (11, 'user_b', 'user_b@example.com', 120, 0, 'active', '$Silian_now')
         ");
     }
 
-    private function seedProducts(PDO $pdo): void
+    private function seedProducts(PDO $Silian_pdo): void
     {
-        $now = date('Y-m-d H:i:s');
-        $pdo->exec("INSERT INTO products (id, name, images, image_path, created_at) VALUES
-            (100, 'Eco Bottle', '[\"eco-bottle-img\"]', 'eco-bottle-img', '$now'),
-            (101, 'Solar Charger', '[\"solar-img\"]', 'solar-img', '$now')
+        $Silian_now = date('Y-m-d H:i:s');
+        $Silian_pdo->exec("INSERT INTO products (id, name, images, image_path, created_at) VALUES
+            (100, 'Eco Bottle', '[\"eco-bottle-img\"]', 'eco-bottle-img', '$Silian_now'),
+            (101, 'Solar Charger', '[\"solar-img\"]', 'solar-img', '$Silian_now')
         ");
     }
 
-    private function seedUserExchanges(PDO $pdo): void
+    private function seedUserExchanges(PDO $Silian_pdo): void
     {
-        $now = date('Y-m-d H:i:s');
-        $pdo->exec("INSERT INTO point_exchanges (
+        $Silian_now = date('Y-m-d H:i:s');
+        $Silian_pdo->exec("INSERT INTO point_exchanges (
             id, user_id, product_id, quantity, points_used, product_name, product_price,
             status, tracking_number, notes, created_at
         ) VALUES
-            ('ex-user-1', 10, 100, 1, 150, 'Eco Bottle', 150, 'pending', 'TRACK-USER-1', 'Awaiting dispatch', '$now'),
-            ('ex-user-2', 10, 101, 2, 400, 'Solar Charger', 200, 'completed', 'TRACK-SOLAR', 'Delivered to dorm', datetime('$now','-1 day')),
-            ('ex-other', 11, 100, 1, 150, 'Eco Bottle', 150, 'pending', 'TRACK-OTHER', 'Other user order', datetime('$now','-2 day'))
+            ('ex-user-1', 10, 100, 1, 150, 'Eco Bottle', 150, 'pending', 'TRACK-USER-1', 'Awaiting dispatch', '$Silian_now'),
+            ('ex-user-2', 10, 101, 2, 400, 'Solar Charger', 200, 'completed', 'TRACK-SOLAR', 'Delivered to dorm', datetime('$Silian_now','-1 day')),
+            ('ex-other', 11, 100, 1, 150, 'Eco Bottle', 150, 'pending', 'TRACK-OTHER', 'Other user order', datetime('$Silian_now','-2 day'))
         ");
     }
 
-    private function seedAdminExchange(PDO $pdo): void
+    private function seedAdminExchange(PDO $Silian_pdo): void
     {
-        $now = date('Y-m-d H:i:s');
-        $pdo->exec("INSERT INTO point_exchanges (
+        $Silian_now = date('Y-m-d H:i:s');
+        $Silian_pdo->exec("INSERT INTO point_exchanges (
             id, user_id, product_id, quantity, points_used, product_name, product_price,
             delivery_address, contact_area_code, contact_phone, notes,
             status, tracking_number, created_at, updated_at
         ) VALUES (
             'ex-admin-1', 1, 100, 1, 150, 'Eco Bottle', 150,
             'Warehouse A', '021', '12345678', 'Handle with care',
-            'shipped', 'TRACK-ADMIN', '$now', '$now'
+            'shipped', 'TRACK-ADMIN', '$Silian_now', '$Silian_now'
         )");
     }
 
-    private function makeUserAuthService(int $userId): AuthService
+    private function makeUserAuthService(int $Silian_userId): AuthService
     {
-        $userRow = [
-            'id' => $userId,
-            'username' => $userId === 10 ? 'user_a' : 'user_b',
-            'email' => $userId === 10 ? 'user_a@example.com' : 'user_b@example.com',
+        $Silian_userRow = [
+            'id' => $Silian_userId,
+            'username' => $Silian_userId === 10 ? 'user_a' : 'user_b',
+            'email' => $Silian_userId === 10 ? 'user_a@example.com' : 'user_b@example.com',
             'points' => 300,
             'is_admin' => false
         ];
 
-        return new class('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', 'HS256', 3600, $userRow) extends AuthService {
+        return new class('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', 'HS256', 3600, $Silian_userRow) extends AuthService {
             private array $user;
 
-            public function __construct(string $secret, string $alg, int $exp, array $user)
+            public function __construct(string $Silian_secret, string $Silian_alg, int $Silian_exp, array $Silian_user)
             {
-                parent::__construct($secret, $alg, $exp);
-                $this->user = $user;
+                parent::__construct($Silian_secret, $Silian_alg, $Silian_exp);
+                $this->user = $Silian_user;
             }
 
-            public function getCurrentUser(ServerRequestInterface $request): ?array
+            public function getCurrentUser(ServerRequestInterface $Silian_request): ?array
             {
                 return $this->user;
             }
 
-            public function isAdminUser($user): bool
+            public function isAdminUser($Silian_user): bool
             {
                 return false;
             }
@@ -274,7 +274,7 @@ class ProductExchangeQueryTest extends TestCase
 
     private function makeAdminAuthService(): AuthService
     {
-        $adminUser = [
+        $Silian_adminUser = [
             'id' => 1,
             'username' => 'admin_user',
             'email' => 'admin@example.com',
@@ -282,21 +282,21 @@ class ProductExchangeQueryTest extends TestCase
             'is_admin' => true
         ];
 
-        return new class('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', 'HS256', 3600, $adminUser) extends AuthService {
+        return new class('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', 'HS256', 3600, $Silian_adminUser) extends AuthService {
             private array $user;
 
-            public function __construct(string $secret, string $alg, int $exp, array $user)
+            public function __construct(string $Silian_secret, string $Silian_alg, int $Silian_exp, array $Silian_user)
             {
-                parent::__construct($secret, $alg, $exp);
-                $this->user = $user;
+                parent::__construct($Silian_secret, $Silian_alg, $Silian_exp);
+                $this->user = $Silian_user;
             }
 
-            public function getCurrentUser(ServerRequestInterface $request): ?array
+            public function getCurrentUser(ServerRequestInterface $Silian_request): ?array
             {
                 return $this->user;
             }
 
-            public function isAdminUser($user): bool
+            public function isAdminUser($Silian_user): bool
             {
                 return true;
             }

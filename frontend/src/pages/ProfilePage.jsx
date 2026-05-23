@@ -1,72 +1,72 @@
-import React from 'react';
-import { useQuery, useQueryClient } from 'react-query';
-import { useTranslation } from '../hooks/useTranslation';
-import { userAPI } from '../lib/api';
-import { ProfileForm } from '../components/profile/ProfileForm';
-import { AvatarSelector } from '../components/profile/AvatarSelector';
-import R2Image from '../components/common/R2Image';
-import { buildAvatarDisplayProps } from '../lib/avatarUtils';
-import { PasswordChangeForm } from '../components/profile/PasswordChangeForm';
-import { PasskeyManagement } from '../components/profile/PasskeyManagement';
-import { SecurityActivityCard } from '../components/profile/SecurityActivityCard';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import { Alert, AlertDescription, AlertTitle } from '../components/ui/Alert';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import Silian_React from 'react';
+import { useQuery as Silian_useQuery, useQueryClient as Silian_useQueryClient } from 'react-query';
+import { useTranslation as Silian_useTranslation } from '../hooks/useTranslation';
+import { userAPI as Silian_userAPI } from '../lib/api';
+import { ProfileForm as Silian_ProfileForm } from '../components/profile/ProfileForm';
+import { AvatarSelector as Silian_AvatarSelector } from '../components/profile/AvatarSelector';
+import Silian_R2Image from '../components/common/R2Image';
+import { buildAvatarDisplayProps as Silian_buildAvatarDisplayProps } from '../lib/avatarUtils';
+import { PasswordChangeForm as Silian_PasswordChangeForm } from '../components/profile/PasswordChangeForm';
+import { PasskeyManagement as Silian_PasskeyManagement } from '../components/profile/PasskeyManagement';
+import { SecurityActivityCard as Silian_SecurityActivityCard } from '../components/profile/SecurityActivityCard';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../components/ui/Card';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription, AlertTitle as Silian_AlertTitle } from '../components/ui/Alert';
+import { AlertCircle as Silian_AlertCircle, Loader2 as Silian_Loader2 } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { t } = useTranslation(['common', 'profile']);
-  const queryClient = useQueryClient();
+  const { t: Silian_t } = Silian_useTranslation(['common', 'profile']);
+  const Silian_queryClient = Silian_useQueryClient();
 
-  const { data: userData, isLoading, error } = useQuery(
+  const { data: Silian_userData, isLoading: Silian_isLoading, error: Silian_error } = Silian_useQuery(
     'currentUser',
-    () => userAPI.getCurrentUser(),
+    () => Silian_userAPI.getCurrentUser(),
     { staleTime: Infinity } // User data is relatively static, can be cached longer
   );
 
-  const responsePayload = userData?.data ?? null;
-  const user = responsePayload?.data ?? responsePayload ?? null;
+  const Silian_responsePayload = Silian_userData?.data ?? null;
+  const Silian_user = Silian_responsePayload?.data ?? Silian_responsePayload ?? null;
 
-  const handleAvatarChange = () => {
+  const Silian_handleAvatarChange = () => {
     // Optionally update local state or re-fetch user data if needed
-    queryClient.invalidateQueries('currentUser');
+    Silian_queryClient.invalidateQueries('currentUser');
   };
 
-  const avatarDisplay = React.useMemo(() => {
-    if (!user) return { src: '', filePath: '', alt: '', fallbackInitial: '' };
-    return buildAvatarDisplayProps({
-      ...user,
-      name: user.username,
+  const Silian_avatarDisplay = Silian_React.useMemo(() => {
+    if (!Silian_user) return { src: '', filePath: '', alt: '', fallbackInitial: '' };
+    return Silian_buildAvatarDisplayProps({
+      ...Silian_user,
+      name: Silian_user.username,
     });
-  }, [user]);
+  }, [Silian_user]);
 
-  if (isLoading) {
+  if (Silian_isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+        <Silian_Loader2 className="h-8 w-8 animate-spin text-green-500" />
       </div>
     );
   }
 
-  if (error) {
+  if (Silian_error) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{t('common.error')}</AlertTitle>
-          <AlertDescription>{t('profile.loadError')}</AlertDescription>
-        </Alert>
+        <Silian_Alert variant="destructive">
+          <Silian_AlertCircle className="h-4 w-4" />
+          <Silian_AlertTitle>{Silian_t('common.error')}</Silian_AlertTitle>
+          <Silian_AlertDescription>{Silian_t('profile.loadError')}</Silian_AlertDescription>
+        </Silian_Alert>
       </div>
     );
   }
 
-  if (!user) {
+  if (!Silian_user) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <Alert variant="warning">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{t('common.notice')}</AlertTitle>
-          <AlertDescription>{t('profile.noUserData')}</AlertDescription>
-        </Alert>
+        <Silian_Alert variant="warning">
+          <Silian_AlertCircle className="h-4 w-4" />
+          <Silian_AlertTitle>{Silian_t('common.notice')}</Silian_AlertTitle>
+          <Silian_AlertDescription>{Silian_t('profile.noUserData')}</Silian_AlertDescription>
+        </Silian_Alert>
       </div>
     );
   }
@@ -81,62 +81,62 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             <div className="relative">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-muted text-3xl font-semibold text-muted-foreground ring-4 ring-background shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-none dark:ring-white/10">
-                {avatarDisplay.src || avatarDisplay.filePath ? (
-                  <R2Image
-                    src={avatarDisplay.src || undefined}
-                    filePath={!avatarDisplay.src && avatarDisplay.filePath ? avatarDisplay.filePath : undefined}
-                    alt={avatarDisplay.alt || user.username}
+                {Silian_avatarDisplay.src || Silian_avatarDisplay.filePath ? (
+                  <Silian_R2Image
+                    src={Silian_avatarDisplay.src || undefined}
+                    filePath={!Silian_avatarDisplay.src && Silian_avatarDisplay.filePath ? Silian_avatarDisplay.filePath : undefined}
+                    alt={Silian_avatarDisplay.alt || Silian_user.username}
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span>{avatarDisplay.fallbackInitial || (user.username ? user.username.charAt(0).toUpperCase() : 'U')}</span>
+                  <span>{Silian_avatarDisplay.fallbackInitial || (Silian_user.username ? Silian_user.username.charAt(0).toUpperCase() : 'U')}</span>
                 )}
               </div>
             </div>
             <div className="space-y-1">
-              <h2 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">{user.username}</h2>
-              {user.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
+              <h2 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-white/60">{Silian_user.username}</h2>
+              {Silian_user.email && <p className="text-sm text-muted-foreground">{Silian_user.email}</p>}
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-2">
-                <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30">{t('profile.points')}: {user.points ?? 0}</span>
-                {user.school_name && <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20"><span className="h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-green-400" />{user.school_name}</span>}
+                <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30">{Silian_t('profile.points')}: {Silian_user.points ?? 0}</span>
+                {Silian_user.school_name && <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/20"><span className="h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-green-400" />{Silian_user.school_name}</span>}
               </div>
             </div>
           </div>
         </div>
 
-        <h1 className="text-2xl font-semibold mb-6">{t('profile.title')}</h1>
+        <h1 className="text-2xl font-semibold mb-6">{Silian_t('profile.title')}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('profile.basicInfo')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ProfileForm user={user} />
-            </CardContent>
-          </Card>
+          <Silian_Card>
+            <Silian_CardHeader>
+              <Silian_CardTitle>{Silian_t('profile.basicInfo')}</Silian_CardTitle>
+            </Silian_CardHeader>
+            <Silian_CardContent>
+              <Silian_ProfileForm user={Silian_user} />
+            </Silian_CardContent>
+          </Silian_Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('profile.avatar')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AvatarSelector currentAvatarId={user?.avatar_id} onAvatarChange={handleAvatarChange} />
-          </CardContent>
-        </Card>
+        <Silian_Card>
+          <Silian_CardHeader>
+            <Silian_CardTitle>{Silian_t('profile.avatar')}</Silian_CardTitle>
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            <Silian_AvatarSelector currentAvatarId={Silian_user?.avatar_id} onAvatarChange={Silian_handleAvatarChange} />
+          </Silian_CardContent>
+        </Silian_Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>{t('profile.changePassword')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PasswordChangeForm />
-          </CardContent>
-        </Card>
+        <Silian_Card className="lg:col-span-2">
+          <Silian_CardHeader>
+            <Silian_CardTitle>{Silian_t('profile.changePassword')}</Silian_CardTitle>
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            <Silian_PasswordChangeForm />
+          </Silian_CardContent>
+        </Silian_Card>
 
         <div className="grid gap-8 lg:col-span-2 xl:grid-cols-2">
-          <PasskeyManagement />
-          <SecurityActivityCard />
+          <Silian_PasskeyManagement />
+          <Silian_SecurityActivityCard />
         </div>
       </div>
     </div>

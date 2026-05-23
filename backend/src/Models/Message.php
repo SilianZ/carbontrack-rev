@@ -70,59 +70,59 @@ class Message extends Model
     /**
      * Scope to get unread messages
      */
-    public function scopeUnread($query)
+    public function scopeUnread($Silian_query)
     {
-        return $query->where('is_read', false);
+        return $Silian_query->where('is_read', false);
     }
 
     /**
      * Scope to get read messages
      */
-    public function scopeRead($query)
+    public function scopeRead($Silian_query)
     {
-        return $query->where('is_read', true);
+        return $Silian_query->where('is_read', true);
     }
 
     /**
      * Scope to get messages by type
      */
-    public function scopeByType($query, string $type)
+    public function scopeByType($Silian_query, string $Silian_type)
     {
         // 'type' column not available in provided schema; no-op filter for compatibility
-        return $query;
+        return $Silian_query;
     }
 
     /**
      * Scope to get messages by priority
      */
-    public function scopeByPriority($query, string $priority)
+    public function scopeByPriority($Silian_query, string $Silian_priority)
     {
-        return $query->where('priority', $priority);
+        return $Silian_query->where('priority', $Silian_priority);
     }
 
     /**
      * Scope to get messages for a specific user (received)
      */
-    public function scopeForUser($query, int $userId)
+    public function scopeForUser($Silian_query, int $Silian_userId)
     {
-        return $query->where('receiver_id', $userId);
+        return $Silian_query->where('receiver_id', $Silian_userId);
     }
 
     /**
      * Scope to get messages sent by a specific user
      */
-    public function scopeFromUser($query, int $userId)
+    public function scopeFromUser($Silian_query, int $Silian_userId)
     {
-        return $query->where('sender_id', $userId);
+        return $Silian_query->where('sender_id', $Silian_userId);
     }
 
     /**
      * Scope to get recent messages (within specified days)
      */
-    public function scopeRecent($query, int $days = 30)
+    public function scopeRecent($Silian_query, int $Silian_days = 30)
     {
-        $threshold = (new DateTimeImmutable("now"))->modify("-{$days} days")->format('Y-m-d H:i:s');
-        return $query->where('created_at', '>', $threshold);
+        $Silian_threshold = (new DateTimeImmutable("now"))->modify("-{$Silian_days} days")->format('Y-m-d H:i:s');
+        return $Silian_query->where('created_at', '>', $Silian_threshold);
     }
 
     /**
@@ -158,12 +158,12 @@ class Message extends Model
             return false;
         }
 
-        $value = $this->getAttribute('priority');
-        if ($value === null) {
+        $Silian_value = $this->getAttribute('priority');
+        if ($Silian_value === null) {
             return false;
         }
 
-        return in_array($value, [self::PRIORITY_HIGH, self::PRIORITY_URGENT], true);
+        return in_array($Silian_value, [self::PRIORITY_HIGH, self::PRIORITY_URGENT], true);
     }
 
     /**
@@ -196,31 +196,31 @@ class Message extends Model
      * Create a system message
      */
     public static function createSystemMessage(
-        int $receiverId,
-        string $title,
-        string $content,
-        string $type = self::TYPE_SYSTEM,
-        string $priority = self::PRIORITY_NORMAL,
-        ?string $relatedEntityType = null,
-        ?int $relatedEntityId = null
+        int $Silian_receiverId,
+        string $Silian_title,
+        string $Silian_content,
+        string $Silian_type = self::TYPE_SYSTEM,
+        string $Silian_priority = self::PRIORITY_NORMAL,
+        ?string $Silian_relatedEntityType = null,
+        ?int $Silian_relatedEntityId = null
     ): self {
         // The provided DB schema (localhost.sql) does not include 'type', 'priority', 'related_entity_*', or 'read_at'.
         // We store a minimal message compatible with that schema.
-        $data = [
+        $Silian_data = [
             'sender_id' => null, // System message
-            'receiver_id' => $receiverId,
-            'title' => $title,
-            'content' => $content,
+            'receiver_id' => $Silian_receiverId,
+            'title' => $Silian_title,
+            'content' => $Silian_content,
             'is_read' => false
         ];
 
         if (static::priorityColumnExistsStatic()) {
-            $data['priority'] = in_array($priority, self::getValidPriorities(), true)
-                ? $priority
+            $Silian_data['priority'] = in_array($Silian_priority, self::getValidPriorities(), true)
+                ? $Silian_priority
                 : self::PRIORITY_NORMAL;
         }
 
-        return static::create($data);
+        return static::create($Silian_data);
     }
 
     /**
@@ -243,21 +243,21 @@ class Message extends Model
      * Create a notification message
      */
     public static function createNotification(
-        int $receiverId,
-        string $title,
-        string $content,
-        string $priority = self::PRIORITY_NORMAL,
-        ?string $relatedEntityType = null,
-        ?int $relatedEntityId = null
+        int $Silian_receiverId,
+        string $Silian_title,
+        string $Silian_content,
+        string $Silian_priority = self::PRIORITY_NORMAL,
+        ?string $Silian_relatedEntityType = null,
+        ?int $Silian_relatedEntityId = null
     ): self {
         return static::createSystemMessage(
-            $receiverId,
-            $title,
-            $content,
+            $Silian_receiverId,
+            $Silian_title,
+            $Silian_content,
             self::TYPE_NOTIFICATION,
-            $priority,
-            $relatedEntityType,
-            $relatedEntityId
+            $Silian_priority,
+            $Silian_relatedEntityType,
+            $Silian_relatedEntityId
         );
     }
 
@@ -265,20 +265,20 @@ class Message extends Model
      * Create an approval notification
      */
     public static function createApprovalNotification(
-        int $receiverId,
-        string $title,
-        string $content,
-        ?string $relatedEntityType = null,
-        ?int $relatedEntityId = null
+        int $Silian_receiverId,
+        string $Silian_title,
+        string $Silian_content,
+        ?string $Silian_relatedEntityType = null,
+        ?int $Silian_relatedEntityId = null
     ): self {
         return static::createSystemMessage(
-            $receiverId,
-            $title,
-            $content,
+            $Silian_receiverId,
+            $Silian_title,
+            $Silian_content,
             self::TYPE_APPROVAL,
             self::PRIORITY_HIGH,
-            $relatedEntityType,
-            $relatedEntityId
+            $Silian_relatedEntityType,
+            $Silian_relatedEntityId
         );
     }
 
@@ -286,20 +286,20 @@ class Message extends Model
      * Create a rejection notification
      */
     public static function createRejectionNotification(
-        int $receiverId,
-        string $title,
-        string $content,
-        ?string $relatedEntityType = null,
-        ?int $relatedEntityId = null
+        int $Silian_receiverId,
+        string $Silian_title,
+        string $Silian_content,
+        ?string $Silian_relatedEntityType = null,
+        ?int $Silian_relatedEntityId = null
     ): self {
         return static::createSystemMessage(
-            $receiverId,
-            $title,
-            $content,
+            $Silian_receiverId,
+            $Silian_title,
+            $Silian_content,
             self::TYPE_REJECTION,
             self::PRIORITY_HIGH,
-            $relatedEntityType,
-            $relatedEntityId
+            $Silian_relatedEntityType,
+            $Silian_relatedEntityId
         );
     }
 
@@ -307,30 +307,30 @@ class Message extends Model
      * Create an exchange notification
      */
     public static function createExchangeNotification(
-        int $receiverId,
-        string $title,
-        string $content,
-        ?string $relatedEntityType = null,
-        ?int $relatedEntityId = null
+        int $Silian_receiverId,
+        string $Silian_title,
+        string $Silian_content,
+        ?string $Silian_relatedEntityType = null,
+        ?int $Silian_relatedEntityId = null
     ): self {
         return static::createSystemMessage(
-            $receiverId,
-            $title,
-            $content,
+            $Silian_receiverId,
+            $Silian_title,
+            $Silian_content,
             self::TYPE_EXCHANGE,
             self::PRIORITY_NORMAL,
-            $relatedEntityType,
-            $relatedEntityId
+            $Silian_relatedEntityType,
+            $Silian_relatedEntityId
         );
     }
 
     /**
      * Create a welcome message
      */
-    public static function createWelcomeMessage(int $receiverId): self
+    public static function createWelcomeMessage(int $Silian_receiverId): self
     {
-        $title = '欢迎加入CarbonTrack! / Welcome to CarbonTrack!';
-        $content = "亲爱的用户，欢迎加入CarbonTrack碳减排追踪平台！\n\n" .
+        $Silian_title = '欢迎加入CarbonTrack! / Welcome to CarbonTrack!';
+        $Silian_content = "亲爱的用户，欢迎加入CarbonTrack碳减排追踪平台！\n\n" .
                   "在这里，您可以：\n" .
                   "• 记录您的碳减排活动\n" .
                   "• 获得碳减排积分\n" .
@@ -346,9 +346,9 @@ class Message extends Model
                   "Let's work together for a greener planet!";
 
         return static::createSystemMessage(
-            $receiverId,
-            $title,
-            $content,
+            $Silian_receiverId,
+            $Silian_title,
+            $Silian_content,
             self::TYPE_WELCOME,
             self::PRIORITY_NORMAL
         );
@@ -357,16 +357,16 @@ class Message extends Model
     /**
      * Get message statistics for a user
      */
-    public static function getStatisticsForUser(int $userId): array
+    public static function getStatisticsForUser(int $Silian_userId): array
     {
-        $total = static::forUser($userId)->count();
-        $unread = static::forUser($userId)->unread()->count();
-        $read = static::forUser($userId)->read()->count();
+        $Silian_total = static::forUser($Silian_userId)->count();
+        $Silian_unread = static::forUser($Silian_userId)->unread()->count();
+        $Silian_read = static::forUser($Silian_userId)->read()->count();
 
         return [
-            'total' => $total,
-            'unread' => $unread,
-            'read' => $read,
+            'total' => $Silian_total,
+            'unread' => $Silian_unread,
+            'read' => $Silian_read,
             'by_type' => [],
             'by_priority' => []
         ];
@@ -375,11 +375,11 @@ class Message extends Model
     /**
      * Clean up old read messages
      */
-    public static function cleanupOldMessages(int $daysToKeep = 90): int
+    public static function cleanupOldMessages(int $Silian_daysToKeep = 90): int
     {
-        $threshold = (new DateTimeImmutable("now"))->modify("-{$daysToKeep} days")->format('Y-m-d H:i:s');
+        $Silian_threshold = (new DateTimeImmutable("now"))->modify("-{$Silian_daysToKeep} days")->format('Y-m-d H:i:s');
         return (int) static::where('is_read', true)
-            ->where('created_at', '<', $threshold)
+            ->where('created_at', '<', $Silian_threshold)
             ->delete();
     }
 

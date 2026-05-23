@@ -1,15 +1,15 @@
-import { cn } from "@/lib/utils"
+import { cn as Silian_cn } from "@/lib/utils"
 
-function Skeleton({
-  className,
-  ...props
+function Silian_Skeleton({
+  className: Silian_className,
+  ...Silian_props
 }) {
   return (
     <div
       data-slot="skeleton"
-      className={cn("bg-accent animate-pulse rounded-md", className)}
-      {...props} />
+      className={Silian_cn("bg-accent animate-pulse rounded-md", Silian_className)}
+      {...Silian_props} />
   );
 }
 
-export { Skeleton }
+export { Silian_Skeleton as Skeleton }

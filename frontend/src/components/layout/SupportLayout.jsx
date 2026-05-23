@@ -1,40 +1,40 @@
-import React, { useMemo } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Inbox, LayoutDashboard } from 'lucide-react';
-import { motion as Motion } from 'framer-motion';
+import Silian_React, { useMemo as Silian_useMemo } from 'react';
+import { NavLink as Silian_NavLink, Outlet as Silian_Outlet, useLocation as Silian_useLocation } from 'react-router-dom';
+import { Inbox as Silian_Inbox, LayoutDashboard as Silian_LayoutDashboard } from 'lucide-react';
+import { motion as Silian_Motion } from 'framer-motion';
 
-import { Navbar } from './Navbar';
-import { useTranslation } from '../../hooks/useTranslation';
-import { cn } from '../../lib/utils';
+import { Navbar as Silian_Navbar } from './Navbar';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { cn as Silian_cn } from '../../lib/utils';
 
-const NAV_LINKS = [
+const Silian_NAV_LINKS = [
   {
     key: 'workbench',
     to: '/support',
-    icon: LayoutDashboard,
+    icon: Silian_LayoutDashboard,
   },
   {
     key: 'queue',
     to: '/support/tickets',
-    icon: Inbox,
+    icon: Silian_Inbox,
   },
 ];
 
 export default function SupportLayout() {
-  const { t } = useTranslation(['nav', 'support']);
-  const location = useLocation();
+  const { t: Silian_t } = Silian_useTranslation(['nav', 'support']);
+  const Silian_location = Silian_useLocation();
 
-  const translatedLinks = useMemo(() => NAV_LINKS.map((link) => ({
-    ...link,
-    label: t(`support.portal.nav.${link.key}`),
-    description: t(`support.portal.nav.${link.key}Description`),
-  })), [t]);
+  const Silian_translatedLinks = Silian_useMemo(() => Silian_NAV_LINKS.map((Silian_link) => ({
+    ...Silian_link,
+    label: Silian_t(`support.portal.nav.${Silian_link.key}`),
+    description: Silian_t(`support.portal.nav.${Silian_link.key}Description`),
+  })), [Silian_t]);
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f7fafc_0%,#eef5f7_100%)] text-slate-950 dark:bg-[linear-gradient(180deg,#020617_0%,#0f172a_100%)] dark:text-slate-100">
-      <Navbar />
+      <Silian_Navbar />
       <div className="mx-auto max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
-        <Motion.div
+        <Silian_Motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
@@ -44,49 +44,49 @@ export default function SupportLayout() {
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.32em] text-sky-600/80 dark:text-sky-300/80">
-                  {t('support.portal.badge')}
+                  {Silian_t('support.portal.badge')}
                 </p>
                 <h1 className="mt-3 text-3xl font-semibold tracking-tight">
-                  {t('support.portal.title')}
+                  {Silian_t('support.portal.title')}
                 </h1>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  {t('support.portal.subtitle')}
+                  {Silian_t('support.portal.subtitle')}
                 </p>
               </div>
 
               <nav className="flex flex-wrap gap-2">
-                {translatedLinks.map((link) => {
-                  const Icon = link.icon;
-                  const isActive = link.to === '/support'
-                    ? location.pathname === '/support' || location.pathname === '/support/'
-                    : location.pathname.startsWith(link.to);
+                {Silian_translatedLinks.map((Silian_link) => {
+                  const Silian_Icon = Silian_link.icon;
+                  const Silian_isActive = Silian_link.to === '/support'
+                    ? Silian_location.pathname === '/support' || Silian_location.pathname === '/support/'
+                    : Silian_location.pathname.startsWith(Silian_link.to);
 
                   return (
-                    <NavLink
-                      key={link.to}
-                      to={link.to}
-                      className={cn(
+                    <Silian_NavLink
+                      key={Silian_link.to}
+                      to={Silian_link.to}
+                      className={Silian_cn(
                         'flex min-w-[180px] items-start gap-3 rounded-2xl border px-4 py-3 transition',
-                        isActive
+                        Silian_isActive
                           ? 'border-sky-300 bg-sky-50 text-slate-950 shadow-sm dark:border-sky-400/40 dark:bg-sky-500/10 dark:text-white'
                           : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-sky-200 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:border-sky-400/30 dark:hover:bg-white/10'
                       )}
                     >
-                      <span className={cn(
+                      <span className={Silian_cn(
                         'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl',
-                        isActive
+                        Silian_isActive
                           ? 'bg-sky-100 text-sky-700 dark:bg-sky-400/20 dark:text-sky-200'
                           : 'bg-white text-slate-600 dark:bg-slate-900 dark:text-slate-300'
                       )}>
-                        <Icon className="h-4 w-4" />
+                        <Silian_Icon className="h-4 w-4" />
                       </span>
                       <span className="min-w-0">
-                        <span className="block text-sm font-semibold">{link.label}</span>
+                        <span className="block text-sm font-semibold">{Silian_link.label}</span>
                         <span className="mt-1 block text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                          {link.description}
+                          {Silian_link.description}
                         </span>
                       </span>
-                    </NavLink>
+                    </Silian_NavLink>
                   );
                 })}
               </nav>
@@ -94,9 +94,9 @@ export default function SupportLayout() {
           </header>
 
           <main className="min-w-0 px-5 py-5 sm:px-6">
-            <Outlet />
+            <Silian_Outlet />
           </main>
-        </Motion.div>
+        </Silian_Motion.div>
       </div>
     </div>
   );

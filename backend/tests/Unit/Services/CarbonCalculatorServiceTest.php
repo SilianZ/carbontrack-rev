@@ -16,84 +16,84 @@ class CarbonCalculatorServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create mock logger for testing
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $this->carbonCalculator = new CarbonCalculatorService($mockLogger);
+        $Silian_mockLogger = $this->createMock(\Monolog\Logger::class);
+        $this->carbonCalculator = new CarbonCalculatorService($Silian_mockLogger);
     }
 
     public function testCalculateCarbonReduction(): void
     {
         // Test basic calculation
-        $activity = [
+        $Silian_activity = [
             'carbon_factor' => 2.5, // kg CO2 per unit
             'unit' => 'km'
         ];
-        $amount = 10.0; // 10 km
+        $Silian_amount = 10.0; // 10 km
 
-        $result = $this->carbonCalculator->calculateCarbonReduction($activity, $amount);
-        
-        $this->assertEquals(25.0, $result); // 2.5 * 10 = 25 kg CO2
+        $Silian_result = $this->carbonCalculator->calculateCarbonReduction($Silian_activity, $Silian_amount);
+
+        $this->assertEquals(25.0, $Silian_result); // 2.5 * 10 = 25 kg CO2
     }
 
     public function testCalculateCarbonReductionWithZeroAmount(): void
     {
-        $activity = [
+        $Silian_activity = [
             'carbon_factor' => 2.5,
             'unit' => 'km'
         ];
-        $amount = 0.0;
+        $Silian_amount = 0.0;
 
-        $result = $this->carbonCalculator->calculateCarbonReduction($activity, $amount);
-        
-        $this->assertEquals(0.0, $result);
+        $Silian_result = $this->carbonCalculator->calculateCarbonReduction($Silian_activity, $Silian_amount);
+
+        $this->assertEquals(0.0, $Silian_result);
     }
 
     public function testCalculateCarbonReductionWithNegativeAmount(): void
     {
-        $activity = [
+        $Silian_activity = [
             'carbon_factor' => 2.5,
             'unit' => 'km'
         ];
-        $amount = -5.0;
+        $Silian_amount = -5.0;
 
-        $result = $this->carbonCalculator->calculateCarbonReduction($activity, $amount);
-        
-        $this->assertEquals(0.0, $result); // Should not allow negative values
+        $Silian_result = $this->carbonCalculator->calculateCarbonReduction($Silian_activity, $Silian_amount);
+
+        $this->assertEquals(0.0, $Silian_result); // Should not allow negative values
     }
 
     public function testCalculatePoints(): void
     {
-        $carbonAmount = 25.0; // kg CO2
-        $pointsPerKg = 10; // 10 points per kg CO2
+        $Silian_carbonAmount = 25.0; // kg CO2
+        $Silian_pointsPerKg = 10; // 10 points per kg CO2
 
-        $result = $this->carbonCalculator->calculatePoints($carbonAmount, $pointsPerKg);
-        
-        $this->assertEquals(250, $result); // 25 * 10 = 250 points
+        $Silian_result = $this->carbonCalculator->calculatePoints($Silian_carbonAmount, $Silian_pointsPerKg);
+
+        $this->assertEquals(250, $Silian_result); // 25 * 10 = 250 points
     }
 
     public function testCalculatePointsWithDefaultRate(): void
     {
-        $carbonAmount = 10.0; // kg CO2
+        $Silian_carbonAmount = 10.0; // kg CO2
 
-        $result = $this->carbonCalculator->calculatePoints($carbonAmount);
-        
-        $this->assertEquals(100, $result); // Default rate is 10 points per kg
+        $Silian_result = $this->carbonCalculator->calculatePoints($Silian_carbonAmount);
+
+        $this->assertEquals(100, $Silian_result); // Default rate is 10 points per kg
     }
 
     public function testCalculatePointsWithZeroCarbonAmount(): void
     {
-        $carbonAmount = 0.0;
+        $Silian_carbonAmount = 0.0;
 
-        $result = $this->carbonCalculator->calculatePoints($carbonAmount);
-        
-        $this->assertEquals(0, $result);
+        $Silian_result = $this->carbonCalculator->calculatePoints($Silian_carbonAmount);
+
+        $this->assertEquals(0, $Silian_result);
     }
 
     public function testValidateActivityData(): void
     {
         // Valid activity data
-        $validActivity = [
+        $Silian_validActivity = [
             'id' => 'uuid-123',
             'name_zh' => '步行',
             'name_en' => 'Walking',
@@ -102,19 +102,19 @@ class CarbonCalculatorServiceTest extends TestCase
             'category' => 'transport'
         ];
 
-        $this->assertTrue($this->carbonCalculator->validateActivityData($validActivity));
+        $this->assertTrue($this->carbonCalculator->validateActivityData($Silian_validActivity));
 
         // Invalid activity data - missing required fields
-        $invalidActivity1 = [
+        $Silian_invalidActivity1 = [
             'id' => 'uuid-123',
             'name_zh' => '步行'
             // Missing other required fields
         ];
 
-        $this->assertFalse($this->carbonCalculator->validateActivityData($invalidActivity1));
+        $this->assertFalse($this->carbonCalculator->validateActivityData($Silian_invalidActivity1));
 
         // Invalid activity data - invalid carbon factor
-        $invalidActivity2 = [
+        $Silian_invalidActivity2 = [
             'id' => 'uuid-123',
             'name_zh' => '步行',
             'name_en' => 'Walking',
@@ -123,14 +123,14 @@ class CarbonCalculatorServiceTest extends TestCase
             'category' => 'transport'
         ];
 
-        $this->assertFalse($this->carbonCalculator->validateActivityData($invalidActivity2));
+        $this->assertFalse($this->carbonCalculator->validateActivityData($Silian_invalidActivity2));
 
         // Update payload: allow partial fields as long as recognised field present
-        $updatePayload = ['is_active' => false];
-        $this->assertTrue($this->carbonCalculator->validateActivityData($updatePayload, true));
+        $Silian_updatePayload = ['is_active' => false];
+        $this->assertTrue($this->carbonCalculator->validateActivityData($Silian_updatePayload, true));
 
-        $invalidUpdate = ['name_en' => ''];
-        $this->assertFalse($this->carbonCalculator->validateActivityData($invalidUpdate, true));
+        $Silian_invalidUpdate = ['name_en' => ''];
+        $this->assertFalse($this->carbonCalculator->validateActivityData($Silian_invalidUpdate, true));
 
         $this->assertFalse($this->carbonCalculator->validateActivityData([], true));
     }
@@ -147,83 +147,83 @@ class CarbonCalculatorServiceTest extends TestCase
 
     public function testGetSupportedUnits(): void
     {
-        $units = $this->carbonCalculator->getSupportedUnits();
+        $Silian_units = $this->carbonCalculator->getSupportedUnits();
 
-        $this->assertIsArray($units);
-        $this->assertContains('km', $units);
-        $this->assertContains('kg', $units);
-        $this->assertContains('hours', $units);
-        $this->assertContains('times', $units);
-        $this->assertContains('kWh', $units);
+        $this->assertIsArray($Silian_units);
+        $this->assertContains('km', $Silian_units);
+        $this->assertContains('kg', $Silian_units);
+        $this->assertContains('hours', $Silian_units);
+        $this->assertContains('times', $Silian_units);
+        $this->assertContains('kWh', $Silian_units);
     }
 
     public function testGetCarbonFactorByCategory(): void
     {
         // Test getting carbon factors for transport category
-        $transportFactors = $this->carbonCalculator->getCarbonFactorByCategory('transport');
-        
-        $this->assertIsArray($transportFactors);
-        $this->assertArrayHasKey('car', $transportFactors);
-        $this->assertArrayHasKey('bus', $transportFactors);
-        $this->assertArrayHasKey('bicycle', $transportFactors);
+        $Silian_transportFactors = $this->carbonCalculator->getCarbonFactorByCategory('transport');
+
+        $this->assertIsArray($Silian_transportFactors);
+        $this->assertArrayHasKey('car', $Silian_transportFactors);
+        $this->assertArrayHasKey('bus', $Silian_transportFactors);
+        $this->assertArrayHasKey('bicycle', $Silian_transportFactors);
 
         // Test invalid category
-        $invalidFactors = $this->carbonCalculator->getCarbonFactorByCategory('invalid_category');
-        $this->assertEmpty($invalidFactors);
+        $Silian_invalidFactors = $this->carbonCalculator->getCarbonFactorByCategory('invalid_category');
+        $this->assertEmpty($Silian_invalidFactors);
     }
 
     public function testConvertUnits(): void
     {
         // Test km to m conversion
-        $result = $this->carbonCalculator->convertUnits(5.0, 'km', 'm');
-        $this->assertEquals(5000.0, $result);
+        $Silian_result = $this->carbonCalculator->convertUnits(5.0, 'km', 'm');
+        $this->assertEquals(5000.0, $Silian_result);
 
         // Test kg to g conversion
-        $result = $this->carbonCalculator->convertUnits(2.5, 'kg', 'g');
-        $this->assertEquals(2500.0, $result);
+        $Silian_result = $this->carbonCalculator->convertUnits(2.5, 'kg', 'g');
+        $this->assertEquals(2500.0, $Silian_result);
 
         // Test same unit conversion
-        $result = $this->carbonCalculator->convertUnits(10.0, 'km', 'km');
-        $this->assertEquals(10.0, $result);
+        $Silian_result = $this->carbonCalculator->convertUnits(10.0, 'km', 'km');
+        $this->assertEquals(10.0, $Silian_result);
 
         // Test unsupported conversion
-        $result = $this->carbonCalculator->convertUnits(10.0, 'km', 'invalid_unit');
-        $this->assertEquals(10.0, $result); // Should return original value
+        $Silian_result = $this->carbonCalculator->convertUnits(10.0, 'km', 'invalid_unit');
+        $this->assertEquals(10.0, $Silian_result); // Should return original value
     }
 
     public function testCalculateMonthlyStats(): void
     {
-        $activities = [
+        $Silian_activities = [
             ['carbon_amount' => 10.0, 'points' => 100, 'created_at' => '2025-01-15'],
             ['carbon_amount' => 15.0, 'points' => 150, 'created_at' => '2025-01-20'],
             ['carbon_amount' => 5.0, 'points' => 50, 'created_at' => '2025-01-25'],
         ];
 
-        $stats = $this->carbonCalculator->calculateMonthlyStats($activities);
+        $Silian_stats = $this->carbonCalculator->calculateMonthlyStats($Silian_activities);
 
-        $this->assertIsArray($stats);
-        $this->assertEquals(30.0, $stats['total_carbon_saved']);
-        $this->assertEquals(300, $stats['total_points_earned']);
-        $this->assertEquals(3, $stats['total_activities']);
-        $this->assertEquals(10.0, $stats['average_carbon_per_activity']);
+        $this->assertIsArray($Silian_stats);
+        $this->assertEquals(30.0, $Silian_stats['total_carbon_saved']);
+        $this->assertEquals(300, $Silian_stats['total_points_earned']);
+        $this->assertEquals(3, $Silian_stats['total_activities']);
+        $this->assertEquals(10.0, $Silian_stats['average_carbon_per_activity']);
     }
 
     public function testCalculateMonthlyStatsWithEmptyData(): void
     {
-        $activities = [];
+        $Silian_activities = [];
 
-        $stats = $this->carbonCalculator->calculateMonthlyStats($activities);
+        $Silian_stats = $this->carbonCalculator->calculateMonthlyStats($Silian_activities);
 
-        $this->assertIsArray($stats);
-        $this->assertEquals(0.0, $stats['total_carbon_saved']);
-        $this->assertEquals(0, $stats['total_points_earned']);
-        $this->assertEquals(0, $stats['total_activities']);
-        $this->assertEquals(0.0, $stats['average_carbon_per_activity']);
+        $this->assertIsArray($Silian_stats);
+        $this->assertEquals(0.0, $Silian_stats['total_carbon_saved']);
+        $this->assertEquals(0, $Silian_stats['total_points_earned']);
+        $this->assertEquals(0, $Silian_stats['total_activities']);
+        $this->assertEquals(0.0, $Silian_stats['average_carbon_per_activity']);
     }
 
     public function testCalculateCarbonSavingsWithProvidedActivity(): void
     {
-        $activity = [
+        $Silian_activity = [
             'id' => 'activity-123',
             'name_zh' => '骑行',
             'name_en' => 'Cycling',
@@ -232,15 +232,15 @@ class CarbonCalculatorServiceTest extends TestCase
             'unit' => 'km',
         ];
 
-        $result = $this->carbonCalculator->calculateCarbonSavings($activity['id'], 4.0, $activity);
+        $Silian_result = $this->carbonCalculator->calculateCarbonSavings($Silian_activity['id'], 4.0, $Silian_activity);
 
-        $this->assertEqualsWithDelta(6.0, $result['carbon_savings'], 0.0001);
-        $this->assertSame(60, $result['points_earned']);
-        $this->assertSame(1.5, $result['carbon_factor']);
-        $this->assertSame('km', $result['unit']);
-        $this->assertSame('activity-123', $result['activity_id']);
-        $this->assertSame('骑行', $result['activity_name_zh']);
-        $this->assertSame('Cycling', $result['activity_name_en']);
+        $this->assertEqualsWithDelta(6.0, $Silian_result['carbon_savings'], 0.0001);
+        $this->assertSame(60, $Silian_result['points_earned']);
+        $this->assertSame(1.5, $Silian_result['carbon_factor']);
+        $this->assertSame('km', $Silian_result['unit']);
+        $this->assertSame('activity-123', $Silian_result['activity_id']);
+        $this->assertSame('骑行', $Silian_result['activity_name_zh']);
+        $this->assertSame('Cycling', $Silian_result['activity_name_en']);
     }
 
     public function testCalculateCarbonSavingsRejectsNegativeInput(): void
@@ -254,18 +254,18 @@ class CarbonCalculatorServiceTest extends TestCase
 
     public function testCalculateCarbonSavingsLogsWhenActivityResolveFails(): void
     {
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())
             ->method('log')
-            ->with($this->callback(function (array $payload): bool {
-                return ($payload['action'] ?? null) === 'carbon_activity_resolve_failed'
-                    && ($payload['operation_category'] ?? null) === 'carbon_management';
+            ->with($this->callback(function (array $Silian_payload): bool {
+                return ($Silian_payload['action'] ?? null) === 'carbon_activity_resolve_failed'
+                    && ($Silian_payload['operation_category'] ?? null) === 'carbon_management';
             }))
             ->willReturn(true);
 
-        $error = $this->createMock(ErrorLogService::class);
-        $error->expects($this->once())
+        $Silian_error = $this->createMock(ErrorLogService::class);
+        $Silian_error->expects($this->once())
             ->method('logException')
             ->with(
                 $this->isInstanceOf(\Throwable::class),
@@ -274,10 +274,10 @@ class CarbonCalculatorServiceTest extends TestCase
             )
             ->willReturn(1);
 
-        $service = new CarbonCalculatorService($logger, $audit, $error);
+        $Silian_service = new CarbonCalculatorService($Silian_logger, $Silian_audit, $Silian_error);
 
         $this->expectException(\InvalidArgumentException::class);
-        $service->calculateCarbonSavings('missing-activity', 1.0);
+        $Silian_service->calculateCarbonSavings('missing-activity', 1.0);
     }
 }
 

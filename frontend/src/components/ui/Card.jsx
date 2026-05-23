@@ -1,61 +1,61 @@
-import React from 'react';
-import { cn } from '../../lib/utils';
+import Silian_React from 'react';
+import { cn as Silian_cn } from '../../lib/utils';
 
-const Card = React.forwardRef(({ className, ...props }, ref) => (
+const Silian_Card = Silian_React.forwardRef(({ className: Silian_className, ...Silian_props }, Silian_ref) => (
   <div
-    ref={ref}
-    className={cn(
+    ref={Silian_ref}
+    className={Silian_cn(
       "rounded-2xl border border-black/5 bg-card text-card-foreground shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:bg-white/5 dark:border-white/10 dark:shadow-none dark:hover:bg-white/10 dark:backdrop-blur-md",
-      className
+      Silian_className
     )}
-    {...props}
+    {...Silian_props}
   />
 ));
-Card.displayName = "Card";
+Silian_Card.displayName = "Card";
 
-const CardHeader = React.forwardRef(({ className, ...props }, ref) => (
+const Silian_CardHeader = Silian_React.forwardRef(({ className: Silian_className, ...Silian_props }, Silian_ref) => (
   <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props}
+    ref={Silian_ref}
+    className={Silian_cn("flex flex-col space-y-1.5 p-6", Silian_className)}
+    {...Silian_props}
   />
 ));
-CardHeader.displayName = "CardHeader";
+Silian_CardHeader.displayName = "CardHeader";
 
-const CardTitle = React.forwardRef(({ className, ...props }, ref) => (
+const Silian_CardTitle = Silian_React.forwardRef(({ className: Silian_className, ...Silian_props }, Silian_ref) => (
   <h3
-    ref={ref}
-    className={cn(
+    ref={Silian_ref}
+    className={Silian_cn(
       "text-2xl font-semibold leading-none tracking-tight",
-      className
+      Silian_className
     )}
-    {...props}
+    {...Silian_props}
   />
 ));
-CardTitle.displayName = "CardTitle";
+Silian_CardTitle.displayName = "CardTitle";
 
-const CardDescription = React.forwardRef(({ className, ...props }, ref) => (
+const Silian_CardDescription = Silian_React.forwardRef(({ className: Silian_className, ...Silian_props }, Silian_ref) => (
   <p
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
+    ref={Silian_ref}
+    className={Silian_cn("text-sm text-muted-foreground", Silian_className)}
+    {...Silian_props}
   />
 ));
-CardDescription.displayName = "CardDescription";
+Silian_CardDescription.displayName = "CardDescription";
 
-const CardContent = React.forwardRef(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+const Silian_CardContent = Silian_React.forwardRef(({ className: Silian_className, ...Silian_props }, Silian_ref) => (
+  <div ref={Silian_ref} className={Silian_cn("p-6 pt-0", Silian_className)} {...Silian_props} />
 ));
-CardContent.displayName = "CardContent";
+Silian_CardContent.displayName = "CardContent";
 
-const CardFooter = React.forwardRef(({ className, ...props }, ref) => (
+const Silian_CardFooter = Silian_React.forwardRef(({ className: Silian_className, ...Silian_props }, Silian_ref) => (
   <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props}
+    ref={Silian_ref}
+    className={Silian_cn("flex items-center p-6 pt-0", Silian_className)}
+    {...Silian_props}
   />
 ));
-CardFooter.displayName = "CardFooter";
+Silian_CardFooter.displayName = "CardFooter";
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+export { Silian_Card as Card, Silian_CardHeader as CardHeader, Silian_CardFooter as CardFooter, Silian_CardTitle as CardTitle, Silian_CardDescription as CardDescription, Silian_CardContent as CardContent };
 

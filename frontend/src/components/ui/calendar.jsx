@@ -1,28 +1,28 @@
-import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import * as Silian_React from "react"
+import { ChevronLeft as Silian_ChevronLeft, ChevronRight as Silian_ChevronRight } from "lucide-react"
+import { DayPicker as Silian_DayPicker } from "react-day-picker"
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button-variants"
+import { cn as Silian_cn } from "@/lib/utils"
+import { buttonVariants as Silian_buttonVariants } from "@/components/ui/button-variants"
 
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  ...props
+function Silian_Calendar({
+  className: Silian_className,
+  classNames: Silian_classNames,
+  showOutsideDays: Silian_showOutsideDays = true,
+  ...Silian_props
 }) {
   return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+    <Silian_DayPicker
+      showOutsideDays={Silian_showOutsideDays}
+      className={Silian_cn("p-3", Silian_className)}
       classNames={{
         months: "flex flex-col sm:flex-row gap-2",
         month: "flex flex-col gap-4",
         caption: "flex justify-center pt-1 relative items-center w-full",
         caption_label: "text-sm font-medium",
         nav: "flex items-center gap-1",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
+        nav_button: Silian_cn(
+          Silian_buttonVariants({ variant: "outline" }),
           "size-7 bg-transparent p-0 opacity-50 hover:opacity-100"
         ),
         nav_button_previous: "absolute left-1",
@@ -32,14 +32,14 @@ function Calendar({
         head_cell:
           "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
-        cell: cn(
+        cell: Silian_cn(
           "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-range-end)]:rounded-r-md",
-          props.mode === "range"
+          Silian_props.mode === "range"
             ? "[&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
             : "[&:has([aria-selected])]:rounded-md"
         ),
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
+        day: Silian_cn(
+          Silian_buttonVariants({ variant: "ghost" }),
           "size-8 p-0 font-normal aria-selected:opacity-100"
         ),
         day_range_start:
@@ -55,18 +55,18 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
-        ...classNames,
+        ...Silian_classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("size-4", className)} {...props} />
+        IconLeft: ({ className: Silian_className, ...Silian_props }) => (
+          <Silian_ChevronLeft className={Silian_cn("size-4", Silian_className)} {...Silian_props} />
         ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("size-4", className)} {...props} />
+        IconRight: ({ className: Silian_className, ...Silian_props }) => (
+          <Silian_ChevronRight className={Silian_cn("size-4", Silian_className)} {...Silian_props} />
         ),
       }}
-      {...props} />
+      {...Silian_props} />
   );
 }
 
-export { Calendar }
+export { Silian_Calendar as Calendar }

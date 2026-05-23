@@ -1,195 +1,195 @@
 "use client";
-import * as React from "react"
-import useEmblaCarousel from "embla-carousel-react";
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import * as Silian_React from "react"
+import Silian_useEmblaCarousel from "embla-carousel-react";
+import { ArrowLeft as Silian_ArrowLeft, ArrowRight as Silian_ArrowRight } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/Button"
+import { cn as Silian_cn } from "@/lib/utils"
+import { Button as Silian_Button } from "@/components/ui/Button"
 
-const CarouselContext = React.createContext(null)
+const Silian_CarouselContext = Silian_React.createContext(null)
 
-function useCarousel() {
-  const context = React.useContext(CarouselContext)
+function Silian_useCarousel() {
+  const Silian_context = Silian_React.useContext(Silian_CarouselContext)
 
-  if (!context) {
+  if (!Silian_context) {
     throw new Error("useCarousel must be used within a <Carousel />")
   }
 
-  return context
+  return Silian_context
 }
 
-function Carousel({
-  orientation = "horizontal",
-  opts,
-  setApi,
-  plugins,
-  className,
-  children,
-  ...props
+function Silian_Carousel({
+  orientation: Silian_orientation = "horizontal",
+  opts: Silian_opts,
+  setApi: Silian_setApi,
+  plugins: Silian_plugins,
+  className: Silian_className,
+  children: Silian_children,
+  ...Silian_props
 }) {
-  const [carouselRef, api] = useEmblaCarousel({
-    ...opts,
-    axis: orientation === "horizontal" ? "x" : "y",
-  }, plugins)
-  const [canScrollPrev, setCanScrollPrev] = React.useState(false)
-  const [canScrollNext, setCanScrollNext] = React.useState(false)
+  const [Silian_carouselRef, Silian_api] = Silian_useEmblaCarousel({
+    ...Silian_opts,
+    axis: Silian_orientation === "horizontal" ? "x" : "y",
+  }, Silian_plugins)
+  const [Silian_canScrollPrev, Silian_setCanScrollPrev] = Silian_React.useState(false)
+  const [Silian_canScrollNext, Silian_setCanScrollNext] = Silian_React.useState(false)
 
-  const onSelect = React.useCallback((api) => {
-    if (!api) return
-    setCanScrollPrev(api.canScrollPrev())
-    setCanScrollNext(api.canScrollNext())
+  const Silian_onSelect = Silian_React.useCallback((Silian_api) => {
+    if (!Silian_api) return
+    Silian_setCanScrollPrev(Silian_api.canScrollPrev())
+    Silian_setCanScrollNext(Silian_api.canScrollNext())
   }, [])
 
-  const scrollPrev = React.useCallback(() => {
-    api?.scrollPrev()
-  }, [api])
+  const Silian_scrollPrev = Silian_React.useCallback(() => {
+    Silian_api?.scrollPrev()
+  }, [Silian_api])
 
-  const scrollNext = React.useCallback(() => {
-    api?.scrollNext()
-  }, [api])
+  const Silian_scrollNext = Silian_React.useCallback(() => {
+    Silian_api?.scrollNext()
+  }, [Silian_api])
 
-  const handleKeyDown = React.useCallback((event) => {
-    if (event.key === "ArrowLeft") {
-      event.preventDefault()
-      scrollPrev()
-    } else if (event.key === "ArrowRight") {
-      event.preventDefault()
-      scrollNext()
+  const Silian_handleKeyDown = Silian_React.useCallback((Silian_event) => {
+    if (Silian_event.key === "ArrowLeft") {
+      Silian_event.preventDefault()
+      Silian_scrollPrev()
+    } else if (Silian_event.key === "ArrowRight") {
+      Silian_event.preventDefault()
+      Silian_scrollNext()
     }
-  }, [scrollPrev, scrollNext])
+  }, [Silian_scrollPrev, Silian_scrollNext])
 
-  React.useEffect(() => {
-    if (!api || !setApi) return
-    setApi(api)
-  }, [api, setApi])
+  Silian_React.useEffect(() => {
+    if (!Silian_api || !Silian_setApi) return
+    Silian_setApi(Silian_api)
+  }, [Silian_api, Silian_setApi])
 
-  React.useEffect(() => {
-    if (!api) return
-    onSelect(api)
-    api.on("reInit", onSelect)
-    api.on("select", onSelect)
+  Silian_React.useEffect(() => {
+    if (!Silian_api) return
+    Silian_onSelect(Silian_api)
+    Silian_api.on("reInit", Silian_onSelect)
+    Silian_api.on("select", Silian_onSelect)
 
     return () => {
-      api?.off("select", onSelect)
+      Silian_api?.off("select", Silian_onSelect)
     };
-  }, [api, onSelect])
+  }, [Silian_api, Silian_onSelect])
 
   return (
-    <CarouselContext.Provider
+    <Silian_CarouselContext.Provider
       value={{
-        carouselRef,
-        api: api,
-        opts,
+        carouselRef: Silian_carouselRef,
+        api: Silian_api,
+        opts: Silian_opts,
         orientation:
-          orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
-        scrollPrev,
-        scrollNext,
-        canScrollPrev,
-        canScrollNext,
+          Silian_orientation || (Silian_opts?.axis === "y" ? "vertical" : "horizontal"),
+        scrollPrev: Silian_scrollPrev,
+        scrollNext: Silian_scrollNext,
+        canScrollPrev: Silian_canScrollPrev,
+        canScrollNext: Silian_canScrollNext,
       }}>
       <div
-        onKeyDownCapture={handleKeyDown}
-        className={cn("relative", className)}
+        onKeyDownCapture={Silian_handleKeyDown}
+        className={Silian_cn("relative", Silian_className)}
         role="region"
         aria-roledescription="carousel"
         data-slot="carousel"
-        {...props}>
-        {children}
+        {...Silian_props}>
+        {Silian_children}
       </div>
-    </CarouselContext.Provider>
+    </Silian_CarouselContext.Provider>
   );
 }
 
-function CarouselContent({
-  className,
-  ...props
+function Silian_CarouselContent({
+  className: Silian_className,
+  ...Silian_props
 }) {
-  const { carouselRef, orientation } = useCarousel()
+  const { carouselRef: Silian_carouselRef, orientation: Silian_orientation } = Silian_useCarousel()
 
   return (
     <div
-      ref={carouselRef}
+      ref={Silian_carouselRef}
       className="overflow-hidden"
       data-slot="carousel-content">
       <div
-        className={cn(
+        className={Silian_cn(
           "flex",
-          orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
-          className
+          Silian_orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+          Silian_className
         )}
-        {...props} />
+        {...Silian_props} />
     </div>
   );
 }
 
-function CarouselItem({
-  className,
-  ...props
+function Silian_CarouselItem({
+  className: Silian_className,
+  ...Silian_props
 }) {
-  const { orientation } = useCarousel()
+  const { orientation: Silian_orientation } = Silian_useCarousel()
 
   return (
     <div
       role="group"
       aria-roledescription="slide"
       data-slot="carousel-item"
-      className={cn(
+      className={Silian_cn(
         "min-w-0 shrink-0 grow-0 basis-full",
-        orientation === "horizontal" ? "pl-4" : "pt-4",
-        className
+        Silian_orientation === "horizontal" ? "pl-4" : "pt-4",
+        Silian_className
       )}
-      {...props} />
+      {...Silian_props} />
   );
 }
 
-function CarouselPrevious({
-  className,
-  variant = "outline",
-  size = "icon",
-  ...props
+function Silian_CarouselPrevious({
+  className: Silian_className,
+  variant: Silian_variant = "outline",
+  size: Silian_size = "icon",
+  ...Silian_props
 }) {
-  const { orientation, scrollPrev, canScrollPrev } = useCarousel()
+  const { orientation: Silian_orientation, scrollPrev: Silian_scrollPrev, canScrollPrev: Silian_canScrollPrev } = Silian_useCarousel()
 
   return (
-    <Button
+    <Silian_Button
       data-slot="carousel-previous"
-      variant={variant}
-      size={size}
-      className={cn("absolute size-8 rounded-full", orientation === "horizontal"
+      variant={Silian_variant}
+      size={Silian_size}
+      className={Silian_cn("absolute size-8 rounded-full", Silian_orientation === "horizontal"
         ? "top-1/2 -left-12 -translate-y-1/2"
-        : "-top-12 left-1/2 -translate-x-1/2 rotate-90", className)}
-      disabled={!canScrollPrev}
-      onClick={scrollPrev}
-      {...props}>
-      <ArrowLeft />
+        : "-top-12 left-1/2 -translate-x-1/2 rotate-90", Silian_className)}
+      disabled={!Silian_canScrollPrev}
+      onClick={Silian_scrollPrev}
+      {...Silian_props}>
+      <Silian_ArrowLeft />
       <span className="sr-only">Previous slide</span>
-    </Button>
+    </Silian_Button>
   );
 }
 
-function CarouselNext({
-  className,
-  variant = "outline",
-  size = "icon",
-  ...props
+function Silian_CarouselNext({
+  className: Silian_className,
+  variant: Silian_variant = "outline",
+  size: Silian_size = "icon",
+  ...Silian_props
 }) {
-  const { orientation, scrollNext, canScrollNext } = useCarousel()
+  const { orientation: Silian_orientation, scrollNext: Silian_scrollNext, canScrollNext: Silian_canScrollNext } = Silian_useCarousel()
 
   return (
-    <Button
+    <Silian_Button
       data-slot="carousel-next"
-      variant={variant}
-      size={size}
-      className={cn("absolute size-8 rounded-full", orientation === "horizontal"
+      variant={Silian_variant}
+      size={Silian_size}
+      className={Silian_cn("absolute size-8 rounded-full", Silian_orientation === "horizontal"
         ? "top-1/2 -right-12 -translate-y-1/2"
-        : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90", className)}
-      disabled={!canScrollNext}
-      onClick={scrollNext}
-      {...props}>
-      <ArrowRight />
+        : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90", Silian_className)}
+      disabled={!Silian_canScrollNext}
+      onClick={Silian_scrollNext}
+      {...Silian_props}>
+      <Silian_ArrowRight />
       <span className="sr-only">Next slide</span>
-    </Button>
+    </Silian_Button>
   );
 }
 
-export { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext };
+export { Silian_Carousel as Carousel, Silian_CarouselContent as CarouselContent, Silian_CarouselItem as CarouselItem, Silian_CarouselPrevious as CarouselPrevious, Silian_CarouselNext as CarouselNext };

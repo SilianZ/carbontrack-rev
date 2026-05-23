@@ -12,18 +12,18 @@ use PDO;
  */
 class TestSchemaBuilder
 {
-    public static function init(PDO $pdo): void
+    public static function init(PDO $Silian_pdo): void
     {
         // Enable foreign keys (safe even if not used extensively)
-        try { $pdo->exec('PRAGMA foreign_keys = ON'); } catch (\Throwable $e) {}
+        try { $Silian_pdo->exec('PRAGMA foreign_keys = ON'); } catch (\Throwable $Silian_e) {}
         // Provide MySQL NOW() compatibility for SQLite
         try {
-            if (method_exists($pdo, 'sqliteCreateFunction')) {
-                $pdo->sqliteCreateFunction('NOW', function() { return date('Y-m-d H:i:s'); });
+            if (method_exists($Silian_pdo, 'sqliteCreateFunction')) {
+                $Silian_pdo->sqliteCreateFunction('NOW', function() { return date('Y-m-d H:i:s'); });
             }
-        } catch (\Throwable $e) { /* ignore */ }
+        } catch (\Throwable $Silian_e) { /* ignore */ }
 
-        $tables = [
+        $Silian_tables = [
             // Users
 "CREATE TABLE IF NOT EXISTS users (\n                id INTEGER PRIMARY KEY AUTOINCREMENT,\n                username TEXT UNIQUE,\n                email TEXT UNIQUE,\n                password TEXT,\n                uuid TEXT,\n                school_id INTEGER,\n                group_id INTEGER,\n                region_code TEXT,\n                quota_override TEXT,\n                admin_notes TEXT,\n                status TEXT,\n                points INTEGER DEFAULT 0,\n                is_admin INTEGER DEFAULT 0,\n                role TEXT DEFAULT 'user',\n                avatar_id INTEGER,\n                image_path TEXT,\n                lastlgn TEXT,\n                reset_token TEXT,\n                reset_token_expires_at TEXT,\n                email_verified_at TEXT,\n                verification_code TEXT,\n                verification_token TEXT,\n                verification_code_expires_at TEXT,\n                verification_attempts INTEGER DEFAULT 0,\n                verification_send_count INTEGER DEFAULT 0,\n                verification_last_sent_at TEXT,\n                notification_email_mask INTEGER DEFAULT 0,\n                deleted_at TEXT,\n                created_at TEXT DEFAULT CURRENT_TIMESTAMP,\n                updated_at TEXT DEFAULT CURRENT_TIMESTAMP\n            )",
             "CREATE TABLE IF NOT EXISTS user_groups (\n                id INTEGER PRIMARY KEY AUTOINCREMENT,\n                name TEXT,\n                code TEXT UNIQUE,\n                config TEXT,\n                is_default INTEGER DEFAULT 0,\n                notes TEXT,\n                created_at TEXT DEFAULT CURRENT_TIMESTAMP,\n                updated_at TEXT DEFAULT CURRENT_TIMESTAMP\n            )",
@@ -112,12 +112,12 @@ class TestSchemaBuilder
             "CREATE TABLE IF NOT EXISTS user_usage_stats (\n                user_id INTEGER,\n                resource_key TEXT,\n                counter REAL,\n                last_updated_at TEXT,\n                reset_at TEXT,\n                PRIMARY KEY (user_id, resource_key)\n            )"
         ];
 
-        foreach ($tables as $sql) {
-            try { $pdo->exec($sql); } catch (\Throwable $e) { /* ignore */ }
+        foreach ($Silian_tables as $Silian_sql) {
+            try { $Silian_pdo->exec($Silian_sql); } catch (\Throwable $Silian_e) { /* ignore */ }
         }
 
         // Perform lightweight schema upgrades for existing SQLite file (idempotent)
-        self::ensureColumns($pdo, 'users', [
+        self::ensureColumns($Silian_pdo, 'users', [
             'avatar_id INTEGER',
             'group_id INTEGER',
             'region_code TEXT',
@@ -134,29 +134,29 @@ class TestSchemaBuilder
             'verification_send_count INTEGER DEFAULT 0',
             'verification_last_sent_at TEXT'
         ]);
-        self::ensureColumns($pdo, 'products', ['category_slug TEXT']);
-        self::ensureColumns($pdo, 'user_passkeys', ['user_uuid TEXT']);
-        self::ensureColumns($pdo, 'webauthn_challenges', ['user_uuid TEXT']);
-        self::ensureColumns($pdo, 'audit_logs', [
+        self::ensureColumns($Silian_pdo, 'products', ['category_slug TEXT']);
+        self::ensureColumns($Silian_pdo, 'user_passkeys', ['user_uuid TEXT']);
+        self::ensureColumns($Silian_pdo, 'webauthn_challenges', ['user_uuid TEXT']);
+        self::ensureColumns($Silian_pdo, 'audit_logs', [
             'user_uuid TEXT', 'conversation_id TEXT', 'actor_type TEXT', 'data TEXT', 'request_method TEXT', 'endpoint TEXT', 'old_data TEXT', 'new_data TEXT',
             'affected_table TEXT', 'affected_id INTEGER', 'status TEXT', 'response_code INTEGER', 'session_id TEXT', 'request_id TEXT',
             'referrer TEXT', 'operation_category TEXT', 'operation_subtype TEXT', 'change_type TEXT'
         ]);
-        self::ensureColumns($pdo, 'admin_ai_conversations', [
+        self::ensureColumns($Silian_pdo, 'admin_ai_conversations', [
             'admin_id INTEGER', 'title TEXT', 'last_message_preview TEXT', 'started_at TEXT', 'last_activity_at TEXT', 'created_at TEXT', 'updated_at TEXT'
         ]);
-        self::ensureColumns($pdo, 'admin_ai_messages', [
+        self::ensureColumns($Silian_pdo, 'admin_ai_messages', [
             'kind TEXT', 'role TEXT', 'action TEXT', 'status TEXT', 'content TEXT', 'request_id TEXT', 'response_code INTEGER', 'meta_json TEXT', 'created_at TEXT', 'updated_at TEXT'
         ]);
-        self::ensureColumns($pdo, 'system_logs', ['user_uuid TEXT', 'server_meta TEXT']);
-        self::ensureColumns($pdo, 'error_logs', ['request_id TEXT']);
-        self::ensureColumns($pdo, 'llm_logs', ['conversation_id TEXT', 'turn_no INTEGER', 'context_json TEXT']);
-        self::ensureColumns($pdo, 'points_transactions', [
+        self::ensureColumns($Silian_pdo, 'system_logs', ['user_uuid TEXT', 'server_meta TEXT']);
+        self::ensureColumns($Silian_pdo, 'error_logs', ['request_id TEXT']);
+        self::ensureColumns($Silian_pdo, 'llm_logs', ['conversation_id TEXT', 'turn_no INTEGER', 'context_json TEXT']);
+        self::ensureColumns($Silian_pdo, 'points_transactions', [
             'uid INTEGER', 'raw REAL', 'act TEXT', 'description TEXT', 'status TEXT', 'img TEXT', 'notes TEXT', 'activity_id TEXT',
             'approved_by INTEGER', 'approved_at TEXT', 'updated_at TEXT', 'deleted_at TEXT', 'activity_date TEXT',
             'auth TEXT'
         ]);
-        self::ensureColumns($pdo, 'support_tickets', [
+        self::ensureColumns($Silian_pdo, 'support_tickets', [
             'assigned_to INTEGER',
             'last_replied_at TEXT',
             'last_reply_by_role TEXT',
@@ -165,7 +165,7 @@ class TestSchemaBuilder
             'created_at TEXT',
             'updated_at TEXT'
         ]);
-        self::ensureColumns($pdo, 'support_ticket_messages', [
+        self::ensureColumns($Silian_pdo, 'support_ticket_messages', [
             'sender_id INTEGER',
             'sender_role TEXT',
             'sender_name TEXT',
@@ -173,7 +173,7 @@ class TestSchemaBuilder
             'created_at TEXT',
             'updated_at TEXT'
         ]);
-        self::ensureColumns($pdo, 'support_ticket_attachments', [
+        self::ensureColumns($Silian_pdo, 'support_ticket_attachments', [
             'file_id INTEGER',
             'original_name TEXT',
             'mime_type TEXT',
@@ -181,7 +181,7 @@ class TestSchemaBuilder
             "entity_type TEXT DEFAULT 'support_ticket_message'",
             'created_at TEXT'
         ]);
-        self::ensureColumns($pdo, 'support_ticket_feedback', [
+        self::ensureColumns($Silian_pdo, 'support_ticket_feedback', [
             'ticket_id INTEGER',
             'user_id INTEGER',
             'rated_user_id INTEGER',
@@ -192,47 +192,47 @@ class TestSchemaBuilder
         ]);
 
         try {
-            $pdo->exec("
+            $Silian_pdo->exec("
                 UPDATE user_passkeys
                 SET user_uuid = LOWER((
                     SELECT uuid FROM users WHERE users.id = user_passkeys.user_id
                 ))
                 WHERE (user_uuid IS NULL OR TRIM(user_uuid) = '')
             ");
-        } catch (\Throwable $e) { /* ignore */ }
+        } catch (\Throwable $Silian_e) { /* ignore */ }
 
         try {
-            $pdo->exec("
+            $Silian_pdo->exec("
                 UPDATE webauthn_challenges
                 SET user_uuid = LOWER((
                     SELECT uuid FROM users WHERE users.id = webauthn_challenges.user_id
                 ))
                 WHERE (user_uuid IS NULL OR TRIM(user_uuid) = '')
             ");
-        } catch (\Throwable $e) { /* ignore */ }
+        } catch (\Throwable $Silian_e) { /* ignore */ }
 
         try {
-            $pdo->exec("
+            $Silian_pdo->exec("
                 UPDATE audit_logs
                 SET user_uuid = LOWER((
                     SELECT uuid FROM users WHERE users.id = audit_logs.user_id
                 ))
                 WHERE (user_uuid IS NULL OR TRIM(user_uuid) = '')
             ");
-        } catch (\Throwable $e) { /* ignore */ }
+        } catch (\Throwable $Silian_e) { /* ignore */ }
 
         try {
-            $pdo->exec("
+            $Silian_pdo->exec("
                 UPDATE system_logs
                 SET user_uuid = LOWER((
                     SELECT uuid FROM users WHERE users.id = system_logs.user_id
                 ))
                 WHERE (user_uuid IS NULL OR TRIM(user_uuid) = '')
             ");
-        } catch (\Throwable $e) { /* ignore */ }
+        } catch (\Throwable $Silian_e) { /* ignore */ }
 
         try {
-            $pdo->exec("
+            $Silian_pdo->exec("
                 UPDATE users
                 SET role = CASE
                     WHEN is_admin = 1 THEN 'admin'
@@ -240,64 +240,64 @@ class TestSchemaBuilder
                     ELSE role
                 END
             ");
-        } catch (\Throwable $e) { /* ignore */ }
+        } catch (\Throwable $Silian_e) { /* ignore */ }
 
         // Seed minimal reference data if absent
-        self::seed($pdo);
+        self::seed($Silian_pdo);
     }
 
-    private static function ensureColumns(PDO $pdo, string $table, array $definitions): void
+    private static function ensureColumns(PDO $Silian_pdo, string $Silian_table, array $Silian_definitions): void
     {
         try {
-            $existing = [];
-            $res = $pdo->query("PRAGMA table_info($table)");
-            if ($res) {
-                foreach ($res->fetchAll(PDO::FETCH_ASSOC) as $col) {
-                    $existing[strtolower($col['name'])] = true;
+            $Silian_existing = [];
+            $Silian_res = $Silian_pdo->query("PRAGMA table_info($Silian_table)");
+            if ($Silian_res) {
+                foreach ($Silian_res->fetchAll(PDO::FETCH_ASSOC) as $Silian_col) {
+                    $Silian_existing[strtolower($Silian_col['name'])] = true;
                 }
             }
-            foreach ($definitions as $def) {
-                [$name] = explode(' ', $def, 2);
-                if (!isset($existing[strtolower($name)])) {
-                    try { $pdo->exec("ALTER TABLE $table ADD COLUMN $def"); } catch (\Throwable $e) { /* ignore */ }
+            foreach ($Silian_definitions as $Silian_def) {
+                [$Silian_name] = explode(' ', $Silian_def, 2);
+                if (!isset($Silian_existing[strtolower($Silian_name)])) {
+                    try { $Silian_pdo->exec("ALTER TABLE $Silian_table ADD COLUMN $Silian_def"); } catch (\Throwable $Silian_e) { /* ignore */ }
                 }
             }
-        } catch (\Throwable $e) { /* ignore */ }
+        } catch (\Throwable $Silian_e) { /* ignore */ }
     }
 
-    private static function seed(PDO $pdo): void
+    private static function seed(PDO $Silian_pdo): void
     {
         // Carbon activities (ensure at least one)
-        $count = (int)$pdo->query("SELECT COUNT(*) FROM carbon_activities")->fetchColumn();
-        if ($count === 0) {
-            $pdo->exec("INSERT INTO carbon_activities (id,name_zh,name_en,category,carbon_factor,unit,is_active) VALUES \n                ('550e8400-e29b-41d4-a716-446655440001','购物时自带袋子','Bring your own bag when shopping','daily',0.019,'times',1),\n                ('550e8400-e29b-41d4-a716-446655440002','步行 / 骑行代替开车','Walk or cycle instead of driving','transport',0.27,'km',1)");
+        $Silian_count = (int)$Silian_pdo->query("SELECT COUNT(*) FROM carbon_activities")->fetchColumn();
+        if ($Silian_count === 0) {
+            $Silian_pdo->exec("INSERT INTO carbon_activities (id,name_zh,name_en,category,carbon_factor,unit,is_active) VALUES \n                ('550e8400-e29b-41d4-a716-446655440001','购物时自带袋子','Bring your own bag when shopping','daily',0.019,'times',1),\n                ('550e8400-e29b-41d4-a716-446655440002','步行 / 骑行代替开车','Walk or cycle instead of driving','transport',0.27,'km',1)");
         }
         // Avatars
-        $ac = (int)$pdo->query("SELECT COUNT(*) FROM avatars")->fetchColumn();
-        if ($ac === 0) {
-            $pdo->exec("INSERT INTO avatars (uuid,name,file_path,category,is_active) VALUES \n                ('550e8400-e29b-41d4-a716-446655440001','默认头像1','/avatars/default/avatar_01.png','default',1)");
+        $Silian_ac = (int)$Silian_pdo->query("SELECT COUNT(*) FROM avatars")->fetchColumn();
+        if ($Silian_ac === 0) {
+            $Silian_pdo->exec("INSERT INTO avatars (uuid,name,file_path,category,is_active) VALUES \n                ('550e8400-e29b-41d4-a716-446655440001','默认头像1','/avatars/default/avatar_01.png','default',1)");
         }
         // Schools
-        $sc = (int)$pdo->query("SELECT COUNT(*) FROM schools")->fetchColumn();
-        if ($sc === 0) {
-            $pdo->exec("INSERT INTO schools (id,name,status) VALUES (1,'示例学校', 'active')");
+        $Silian_sc = (int)$Silian_pdo->query("SELECT COUNT(*) FROM schools")->fetchColumn();
+        if ($Silian_sc === 0) {
+            $Silian_pdo->exec("INSERT INTO schools (id,name,status) VALUES (1,'示例学校', 'active')");
         }
         // Product categories
-        $cat = (int)$pdo->query("SELECT COUNT(*) FROM product_categories")->fetchColumn();
-        if ($cat === 0) {
-            $pdo->exec("INSERT INTO product_categories (name, slug) VALUES \n                ('每日用品','daily'),\n                ('绿色出行','transport')");
+        $Silian_cat = (int)$Silian_pdo->query("SELECT COUNT(*) FROM product_categories")->fetchColumn();
+        if ($Silian_cat === 0) {
+            $Silian_pdo->exec("INSERT INTO product_categories (name, slug) VALUES \n                ('每日用品','daily'),\n                ('绿色出行','transport')");
         }
 
         // Products
-        $pc = (int)$pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
-        if ($pc === 0) {
-            $pdo->exec("INSERT INTO products (name,description,category,category_slug,images,image_path,stock,points_required,status,sort_order) VALUES \n                ('可重复使用水杯','环保材质500ml水杯','daily','daily','[\"/images/products/eco_bottle_1.jpg\"]','/images/products/eco_bottle_1.jpg',100,100,'active',1),\n                ('竹制餐具套装','可降解竹制餐具三件套','daily','daily','[\"/images/products/bamboo_utensils.jpg\"]','/images/products/bamboo_utensils.jpg',50,150,'active',2)");
+        $Silian_pc = (int)$Silian_pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
+        if ($Silian_pc === 0) {
+            $Silian_pdo->exec("INSERT INTO products (name,description,category,category_slug,images,image_path,stock,points_required,status,sort_order) VALUES \n                ('可重复使用水杯','环保材质500ml水杯','daily','daily','[\"/images/products/eco_bottle_1.jpg\"]','/images/products/eco_bottle_1.jpg',100,100,'active',1),\n                ('竹制餐具套装','可降解竹制餐具三件套','daily','daily','[\"/images/products/bamboo_utensils.jpg\"]','/images/products/bamboo_utensils.jpg',50,150,'active',2)");
         }
         // Admin user (optional convenience)
-        $uc = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
-        if ($uc === 0) {
-            $password = password_hash('password123', PASSWORD_BCRYPT);
-            $pdo->exec("INSERT INTO users (username,email,password,school_id,status,points,is_admin,role,uuid) VALUES \n                ('admin_user','admin@testdomain.com','{$password}',1,'active',1000,1,'admin','550e8400-e29b-41d4-a716-4466554400aa')");
+        $Silian_uc = (int)$Silian_pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+        if ($Silian_uc === 0) {
+            $Silian_password = password_hash('password123', PASSWORD_BCRYPT);
+            $Silian_pdo->exec("INSERT INTO users (username,email,password,school_id,status,points,is_admin,role,uuid) VALUES \n                ('admin_user','admin@testdomain.com','{$Silian_password}',1,'active',1000,1,'admin','550e8400-e29b-41d4-a716-4466554400aa')");
         }
     }
 }

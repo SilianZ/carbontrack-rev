@@ -10,15 +10,15 @@ final class Uuid
 
     public static function generateV4(): string
     {
-        $bytes = random_bytes(16);
-        $bytes[6] = chr((ord($bytes[6]) & 0x0f) | 0x40);
-        $bytes[8] = chr((ord($bytes[8]) & 0x3f) | 0x80);
+        $Silian_bytes = random_bytes(16);
+        $Silian_bytes[6] = chr((ord($Silian_bytes[6]) & 0x0f) | 0x40);
+        $Silian_bytes[8] = chr((ord($Silian_bytes[8]) & 0x3f) | 0x80);
 
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($bytes), 4));
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($Silian_bytes), 4));
     }
 
-    public static function isValid(string $uuid): bool
+    public static function isValid(string $Silian_uuid): bool
     {
-        return preg_match(self::V4_PATTERN, $uuid) === 1;
+        return preg_match(self::V4_PATTERN, $Silian_uuid) === 1;
     }
 }

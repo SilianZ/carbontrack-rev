@@ -20,8 +20,8 @@ class LeaderboardControllerTest extends TestCase
     {
         $_ENV['LEADERBOARD_TRIGGER_KEY'] = 'secret-key';
 
-        $leaderboardService = $this->createMock(LeaderboardService::class);
-        $leaderboardService->expects($this->once())
+        $Silian_leaderboardService = $this->createMock(LeaderboardService::class);
+        $Silian_leaderboardService->expects($this->once())
             ->method('rebuildCache')
             ->with('manual-trigger')
             ->willReturn([
@@ -32,35 +32,35 @@ class LeaderboardControllerTest extends TestCase
                 'schools' => [1, 2, 3],
             ]);
 
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $auditLogService->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_auditLogService->expects($this->once())->method('logSystemEvent')->willReturn(true);
 
-        $logger = new Logger('test');
-        $logger->pushHandler(new NullHandler());
+        $Silian_logger = new Logger('test');
+        $Silian_logger->pushHandler(new NullHandler());
 
-        $controller = new LeaderboardController(
-            $leaderboardService,
-            $logger,
-            $auditLogService,
+        $Silian_controller = new LeaderboardController(
+            $Silian_leaderboardService,
+            $Silian_logger,
+            $Silian_auditLogService,
             $this->createMock(ErrorLogService::class)
         );
 
-        $request = makeRequest('GET', '/leaderboard/trigger', null, ['key' => 'secret-key'])
+        $Silian_request = makeRequest('GET', '/leaderboard/trigger', null, ['key' => 'secret-key'])
             ->withAttribute('request_id', 'req-1');
-        $response = $controller->triggerRefresh($request, new Response());
+        $Silian_response = $Silian_controller->triggerRefresh($Silian_request, new Response());
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertSame(2, $payload['data']['global_count']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertSame(2, $Silian_payload['data']['global_count']);
     }
 
     public function testTriggerRefreshUsesSchedulerWhenAvailable(): void
     {
         $_ENV['LEADERBOARD_TRIGGER_KEY'] = 'secret-key';
 
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('runTaskNow')
             ->with(CronSchedulerService::TASK_LEADERBOARD_REFRESH, 'legacy_endpoint', $this->arrayHasKey('request_id'))
             ->willReturn([
@@ -75,35 +75,35 @@ class LeaderboardControllerTest extends TestCase
                 ],
             ]);
 
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $auditLogService->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_auditLogService->expects($this->once())->method('logSystemEvent')->willReturn(true);
 
-        $logger = new Logger('test');
-        $logger->pushHandler(new NullHandler());
+        $Silian_logger = new Logger('test');
+        $Silian_logger->pushHandler(new NullHandler());
 
-        $controller = new LeaderboardController(
+        $Silian_controller = new LeaderboardController(
             $this->createMock(LeaderboardService::class),
-            $logger,
-            $auditLogService,
+            $Silian_logger,
+            $Silian_auditLogService,
             $this->createMock(ErrorLogService::class),
-            $scheduler
+            $Silian_scheduler
         );
 
-        $request = makeRequest('GET', '/leaderboard/trigger', null, ['key' => 'secret-key'])
+        $Silian_request = makeRequest('GET', '/leaderboard/trigger', null, ['key' => 'secret-key'])
             ->withAttribute('request_id', 'req-2');
-        $response = $controller->triggerRefresh($request, new Response());
+        $Silian_response = $Silian_controller->triggerRefresh($Silian_request, new Response());
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertSame(4, $payload['data']['global_count']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertSame(4, $Silian_payload['data']['global_count']);
     }
 
     public function testTriggerRefreshReturnsFailureWhenSchedulerRunFails(): void
     {
         $_ENV['LEADERBOARD_TRIGGER_KEY'] = 'secret-key';
 
-        $scheduler = $this->createMock(CronSchedulerService::class);
-        $scheduler->expects($this->once())
+        $Silian_scheduler = $this->createMock(CronSchedulerService::class);
+        $Silian_scheduler->expects($this->once())
             ->method('runTaskNow')
             ->willReturn([
                 'task_key' => CronSchedulerService::TASK_LEADERBOARD_REFRESH,
@@ -112,26 +112,26 @@ class LeaderboardControllerTest extends TestCase
                 'result' => [],
             ]);
 
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $auditLogService->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_auditLogService->expects($this->once())->method('logSystemEvent')->willReturn(true);
 
-        $logger = new Logger('test');
-        $logger->pushHandler(new NullHandler());
+        $Silian_logger = new Logger('test');
+        $Silian_logger->pushHandler(new NullHandler());
 
-        $controller = new LeaderboardController(
+        $Silian_controller = new LeaderboardController(
             $this->createMock(LeaderboardService::class),
-            $logger,
-            $auditLogService,
+            $Silian_logger,
+            $Silian_auditLogService,
             $this->createMock(ErrorLogService::class),
-            $scheduler
+            $Silian_scheduler
         );
 
-        $request = makeRequest('GET', '/leaderboard/trigger', null, ['key' => 'secret-key'])
+        $Silian_request = makeRequest('GET', '/leaderboard/trigger', null, ['key' => 'secret-key'])
             ->withAttribute('request_id', 'req-3');
-        $response = $controller->triggerRefresh($request, new Response());
+        $Silian_response = $Silian_controller->triggerRefresh($Silian_request, new Response());
 
-        $this->assertSame(503, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertFalse($payload['success']);
+        $this->assertSame(503, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertFalse($Silian_payload['success']);
     }
 }

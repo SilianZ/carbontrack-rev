@@ -27,16 +27,16 @@ class NotificationPreferenceServiceTest extends TestCase
         self::$capsule->setAsGlobal();
         self::$capsule->bootEloquent();
 
-        self::$capsule->schema()->create('users', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->string('username')->nullable();
-            $table->string('email')->nullable();
-            $table->string('password')->nullable();
-            $table->string('status')->nullable();
-            $table->integer('notification_email_mask')->default(0);
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
-            $table->timestamp('deleted_at')->nullable();
+        self::$capsule->schema()->create('users', function (Blueprint $Silian_table): void {
+            $Silian_table->increments('id');
+            $Silian_table->string('username')->nullable();
+            $Silian_table->string('email')->nullable();
+            $Silian_table->string('password')->nullable();
+            $Silian_table->string('status')->nullable();
+            $Silian_table->integer('notification_email_mask')->default(0);
+            $Silian_table->timestamp('created_at')->nullable();
+            $Silian_table->timestamp('updated_at')->nullable();
+            $Silian_table->timestamp('deleted_at')->nullable();
         });
     }
 
@@ -53,15 +53,15 @@ class NotificationPreferenceServiceTest extends TestCase
 
     private function makeService(): NotificationPreferenceService
     {
-        $logger = new Logger('notification-preference-test');
-        $logger->pushHandler(new NullHandler());
+        $Silian_logger = new Logger('notification-preference-test');
+        $Silian_logger->pushHandler(new NullHandler());
 
-        return new NotificationPreferenceService($logger);
+        return new NotificationPreferenceService($Silian_logger);
     }
 
     public function testGetPreferencesForUserDefaultsToEnabled(): void
     {
-        $user = User::create([
+        $Silian_user = User::create([
             'username' => 'pref-default',
             'email' => 'default@example.com',
             'password' => 'secret',
@@ -69,25 +69,25 @@ class NotificationPreferenceServiceTest extends TestCase
             'notification_email_mask' => 0,
         ]);
 
-        $service = $this->makeService();
-        $preferences = $service->getPreferencesForUser((int) $user->id);
+        $Silian_service = $this->makeService();
+        $Silian_preferences = $Silian_service->getPreferencesForUser((int) $Silian_user->id);
 
-        $byCategory = [];
-        foreach ($preferences as $row) {
-            $byCategory[$row['category']] = $row;
+        $Silian_byCategory = [];
+        foreach ($Silian_preferences as $Silian_row) {
+            $Silian_byCategory[$Silian_row['category']] = $Silian_row;
         }
 
-        $this->assertTrue($byCategory[NotificationPreferenceService::CATEGORY_SYSTEM]['email_enabled']);
-        $this->assertTrue($byCategory[NotificationPreferenceService::CATEGORY_TRANSACTION]['email_enabled']);
-        $this->assertTrue($byCategory[NotificationPreferenceService::CATEGORY_ACTIVITY]['email_enabled']);
-        $this->assertTrue($byCategory[NotificationPreferenceService::CATEGORY_ANNOUNCEMENT]['email_enabled']);
-        $this->assertTrue($byCategory[NotificationPreferenceService::CATEGORY_SUPPORT]['email_enabled']);
-        $this->assertTrue($byCategory[NotificationPreferenceService::CATEGORY_VERIFICATION]['email_enabled'], 'Locked categories must remain enabled.');
+        $this->assertTrue($Silian_byCategory[NotificationPreferenceService::CATEGORY_SYSTEM]['email_enabled']);
+        $this->assertTrue($Silian_byCategory[NotificationPreferenceService::CATEGORY_TRANSACTION]['email_enabled']);
+        $this->assertTrue($Silian_byCategory[NotificationPreferenceService::CATEGORY_ACTIVITY]['email_enabled']);
+        $this->assertTrue($Silian_byCategory[NotificationPreferenceService::CATEGORY_ANNOUNCEMENT]['email_enabled']);
+        $this->assertTrue($Silian_byCategory[NotificationPreferenceService::CATEGORY_SUPPORT]['email_enabled']);
+        $this->assertTrue($Silian_byCategory[NotificationPreferenceService::CATEGORY_VERIFICATION]['email_enabled'], 'Locked categories must remain enabled.');
     }
 
     public function testUpdatePreferencesPersistsBitmaskAndEnforcesChecks(): void
     {
-        $user = User::create([
+        $Silian_user = User::create([
             'username' => 'pref-toggle',
             'email' => 'toggle@example.com',
             'password' => 'secret',
@@ -95,8 +95,8 @@ class NotificationPreferenceServiceTest extends TestCase
             'notification_email_mask' => 0,
         ]);
 
-        $service = $this->makeService();
-        $service->updatePreferences((int) $user->id, [
+        $Silian_service = $this->makeService();
+        $Silian_service->updatePreferences((int) $Silian_user->id, [
             [
                 'category' => NotificationPreferenceService::CATEGORY_SYSTEM,
                 'email_enabled' => false,
@@ -111,25 +111,25 @@ class NotificationPreferenceServiceTest extends TestCase
             ],
         ]);
 
-        $user->refresh();
-        $this->assertSame(25, $user->notification_email_mask, 'System (bit0), announcement (bit3), and support (bit4) should be disabled.');
-        $this->assertFalse($service->shouldSendEmail((int) $user->id, NotificationPreferenceService::CATEGORY_SYSTEM));
-        $this->assertFalse($service->shouldSendEmailByEmail($user->email, NotificationPreferenceService::CATEGORY_ANNOUNCEMENT));
-        $this->assertFalse($service->shouldSendEmail((int) $user->id, NotificationPreferenceService::CATEGORY_SUPPORT));
-        $this->assertTrue($service->shouldSendEmail((int) $user->id, NotificationPreferenceService::CATEGORY_TRANSACTION));
-        $this->assertTrue($service->shouldSendEmailByEmail($user->email, NotificationPreferenceService::CATEGORY_VERIFICATION), 'Locked verification category should ignore mask.');
+        $Silian_user->refresh();
+        $this->assertSame(25, $Silian_user->notification_email_mask, 'System (bit0), announcement (bit3), and support (bit4) should be disabled.');
+        $this->assertFalse($Silian_service->shouldSendEmail((int) $Silian_user->id, NotificationPreferenceService::CATEGORY_SYSTEM));
+        $this->assertFalse($Silian_service->shouldSendEmailByEmail($Silian_user->email, NotificationPreferenceService::CATEGORY_ANNOUNCEMENT));
+        $this->assertFalse($Silian_service->shouldSendEmail((int) $Silian_user->id, NotificationPreferenceService::CATEGORY_SUPPORT));
+        $this->assertTrue($Silian_service->shouldSendEmail((int) $Silian_user->id, NotificationPreferenceService::CATEGORY_TRANSACTION));
+        $this->assertTrue($Silian_service->shouldSendEmailByEmail($Silian_user->email, NotificationPreferenceService::CATEGORY_VERIFICATION), 'Locked verification category should ignore mask.');
 
-        $service->updatePreferences((int) $user->id, [
+        $Silian_service->updatePreferences((int) $Silian_user->id, [
             [
                 'category' => NotificationPreferenceService::CATEGORY_SYSTEM,
                 'email_enabled' => true,
             ],
         ]);
 
-        $user->refresh();
-        $this->assertSame(24, $user->notification_email_mask, 'Announcement (bit3) and support (bit4) should remain disabled.');
-        $this->assertTrue($service->shouldSendEmail((int) $user->id, NotificationPreferenceService::CATEGORY_SYSTEM));
-        $this->assertFalse($service->shouldSendEmail((int) $user->id, NotificationPreferenceService::CATEGORY_ANNOUNCEMENT));
-        $this->assertFalse($service->shouldSendEmail((int) $user->id, NotificationPreferenceService::CATEGORY_SUPPORT));
+        $Silian_user->refresh();
+        $this->assertSame(24, $Silian_user->notification_email_mask, 'Announcement (bit3) and support (bit4) should remain disabled.');
+        $this->assertTrue($Silian_service->shouldSendEmail((int) $Silian_user->id, NotificationPreferenceService::CATEGORY_SYSTEM));
+        $this->assertFalse($Silian_service->shouldSendEmail((int) $Silian_user->id, NotificationPreferenceService::CATEGORY_ANNOUNCEMENT));
+        $this->assertFalse($Silian_service->shouldSendEmail((int) $Silian_user->id, NotificationPreferenceService::CATEGORY_SUPPORT));
     }
 }

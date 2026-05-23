@@ -24,33 +24,33 @@ class PasskeyConfig
 
     public function getRpId(): string
     {
-        $frontendHost = $this->resolveHostFromUrl((string) ($this->env['FRONTEND_URL'] ?? ''));
-        $allowedOriginHosts = $this->getAllowedOriginHosts();
+        $Silian_frontendHost = $this->resolveHostFromUrl((string) ($this->env['FRONTEND_URL'] ?? ''));
+        $Silian_allowedOriginHosts = $this->getAllowedOriginHosts();
 
-        $value = trim((string) ($this->env['PASSKEYS_RP_ID'] ?? ''));
-        if ($value !== '') {
-            $rpId = strtolower($value);
+        $Silian_value = trim((string) ($this->env['PASSKEYS_RP_ID'] ?? ''));
+        if ($Silian_value !== '') {
+            $Silian_rpId = strtolower($Silian_value);
 
-            if ($frontendHost !== null) {
-                if ($this->isRpIdCompatibleWithHost($rpId, $frontendHost)) {
-                    return $rpId;
+            if ($Silian_frontendHost !== null) {
+                if ($this->isRpIdCompatibleWithHost($Silian_rpId, $Silian_frontendHost)) {
+                    return $Silian_rpId;
                 }
-            } elseif ($allowedOriginHosts === [] || $this->isRpIdCompatibleWithAnyHost($rpId, $allowedOriginHosts)) {
-                return $rpId;
+            } elseif ($Silian_allowedOriginHosts === [] || $this->isRpIdCompatibleWithAnyHost($Silian_rpId, $Silian_allowedOriginHosts)) {
+                return $Silian_rpId;
             }
         }
 
-        if ($frontendHost !== null) {
-            return $frontendHost;
+        if ($Silian_frontendHost !== null) {
+            return $Silian_frontendHost;
         }
 
-        if ($allowedOriginHosts !== []) {
-            return $allowedOriginHosts[0];
+        if ($Silian_allowedOriginHosts !== []) {
+            return $Silian_allowedOriginHosts[0];
         }
 
-        $appUrlHost = $this->resolveHostFromUrl((string) ($this->env['APP_URL'] ?? ''));
-        if ($appUrlHost !== null) {
-            return $appUrlHost;
+        $Silian_appUrlHost = $this->resolveHostFromUrl((string) ($this->env['APP_URL'] ?? ''));
+        if ($Silian_appUrlHost !== null) {
+            return $Silian_appUrlHost;
         }
 
         return 'localhost';
@@ -58,13 +58,13 @@ class PasskeyConfig
 
     public function getRpName(): string
     {
-        $value = trim((string) ($this->env['PASSKEYS_RP_NAME'] ?? ''));
-        if ($value !== '') {
-            return $value;
+        $Silian_value = trim((string) ($this->env['PASSKEYS_RP_NAME'] ?? ''));
+        if ($Silian_value !== '') {
+            return $Silian_value;
         }
 
-        $appName = trim((string) ($this->env['APP_NAME'] ?? ''));
-        return $appName !== '' ? $appName : 'CarbonTrack';
+        $Silian_appName = trim((string) ($this->env['APP_NAME'] ?? ''));
+        return $Silian_appName !== '' ? $Silian_appName : 'CarbonTrack';
     }
 
     /**
@@ -72,20 +72,20 @@ class PasskeyConfig
      */
     public function getAllowedOrigins(): array
     {
-        $origins = $this->normalizeOrigins($this->splitCsv((string) ($this->env['PASSKEYS_ORIGINS'] ?? '')));
-        $frontendOrigin = $this->resolveOriginFromUrl((string) ($this->env['FRONTEND_URL'] ?? ''));
+        $Silian_origins = $this->normalizeOrigins($this->splitCsv((string) ($this->env['PASSKEYS_ORIGINS'] ?? '')));
+        $Silian_frontendOrigin = $this->resolveOriginFromUrl((string) ($this->env['FRONTEND_URL'] ?? ''));
 
-        if ($frontendOrigin !== null) {
-            $origins[] = $frontendOrigin;
+        if ($Silian_frontendOrigin !== null) {
+            $Silian_origins[] = $Silian_frontendOrigin;
         }
 
-        $origins = array_values(array_unique($origins));
-        if ($origins !== []) {
-            return $origins;
+        $Silian_origins = array_values(array_unique($Silian_origins));
+        if ($Silian_origins !== []) {
+            return $Silian_origins;
         }
 
-        $appOrigin = $this->resolveOriginFromUrl((string) ($this->env['APP_URL'] ?? ''));
-        return $appOrigin !== null ? [$appOrigin] : [];
+        $Silian_appOrigin = $this->resolveOriginFromUrl((string) ($this->env['APP_URL'] ?? ''));
+        return $Silian_appOrigin !== null ? [$Silian_appOrigin] : [];
     }
 
     public function getChallengeTtlSeconds(): int
@@ -105,26 +105,26 @@ class PasskeyConfig
 
     public function getAttestationPreference(): string
     {
-        $value = trim((string) ($this->env['PASSKEYS_ATTESTATION'] ?? 'none'));
-        return $value !== '' ? $value : 'none';
+        $Silian_value = trim((string) ($this->env['PASSKEYS_ATTESTATION'] ?? 'none'));
+        return $Silian_value !== '' ? $Silian_value : 'none';
     }
 
     public function getResidentKeyPreference(): string
     {
-        $value = trim((string) ($this->env['PASSKEYS_RESIDENT_KEY'] ?? 'preferred'));
-        return $value !== '' ? $value : 'preferred';
+        $Silian_value = trim((string) ($this->env['PASSKEYS_RESIDENT_KEY'] ?? 'preferred'));
+        return $Silian_value !== '' ? $Silian_value : 'preferred';
     }
 
     public function getUserVerificationPreference(): string
     {
-        $value = trim((string) ($this->env['PASSKEYS_USER_VERIFICATION'] ?? 'preferred'));
-        return $value !== '' ? $value : 'preferred';
+        $Silian_value = trim((string) ($this->env['PASSKEYS_USER_VERIFICATION'] ?? 'preferred'));
+        return $Silian_value !== '' ? $Silian_value : 'preferred';
     }
 
     public function getAuthenticatorAttachment(): ?string
     {
-        $value = trim((string) ($this->env['PASSKEYS_AUTHENTICATOR_ATTACHMENT'] ?? ''));
-        return $value !== '' ? $value : null;
+        $Silian_value = trim((string) ($this->env['PASSKEYS_AUTHENTICATOR_ATTACHMENT'] ?? ''));
+        return $Silian_value !== '' ? $Silian_value : null;
     }
 
     /**
@@ -132,19 +132,19 @@ class PasskeyConfig
      */
     public function getAllowedAlgorithms(): array
     {
-        $values = $this->splitCsv((string) ($this->env['PASSKEYS_ALLOWED_ALGORITHMS'] ?? ''));
-        if ($values === []) {
+        $Silian_values = $this->splitCsv((string) ($this->env['PASSKEYS_ALLOWED_ALGORITHMS'] ?? ''));
+        if ($Silian_values === []) {
             return self::DEFAULT_ALLOWED_ALGORITHMS;
         }
 
-        $algorithms = [];
-        foreach ($values as $value) {
-            if (is_numeric($value)) {
-                $algorithms[] = (int) $value;
+        $Silian_algorithms = [];
+        foreach ($Silian_values as $Silian_value) {
+            if (is_numeric($Silian_value)) {
+                $Silian_algorithms[] = (int) $Silian_value;
             }
         }
 
-        return $algorithms !== [] ? array_values(array_unique($algorithms)) : self::DEFAULT_ALLOWED_ALGORITHMS;
+        return $Silian_algorithms !== [] ? array_values(array_unique($Silian_algorithms)) : self::DEFAULT_ALLOWED_ALGORITHMS;
     }
 
     /**
@@ -152,8 +152,8 @@ class PasskeyConfig
      */
     public function getDefaultTransports(): array
     {
-        $values = $this->splitCsv((string) ($this->env['PASSKEYS_DEFAULT_TRANSPORTS'] ?? ''));
-        return $values !== [] ? $values : self::DEFAULT_TRANSPORTS;
+        $Silian_values = $this->splitCsv((string) ($this->env['PASSKEYS_DEFAULT_TRANSPORTS'] ?? ''));
+        return $Silian_values !== [] ? $Silian_values : self::DEFAULT_TRANSPORTS;
     }
 
     public function getPreferredLibraryPackage(): string
@@ -161,50 +161,50 @@ class PasskeyConfig
         return 'web-auth/webauthn-lib';
     }
 
-    private function getBool(string $key, bool $default): bool
+    private function getBool(string $Silian_key, bool $Silian_default): bool
     {
-        if (!array_key_exists($key, $this->env)) {
-            return $default;
+        if (!array_key_exists($Silian_key, $this->env)) {
+            return $Silian_default;
         }
 
-        $value = filter_var($this->env[$key], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        return $value ?? $default;
+        $Silian_value = filter_var($this->env[$Silian_key], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        return $Silian_value ?? $Silian_default;
     }
 
-    private function getInt(string $key, int $default): int
+    private function getInt(string $Silian_key, int $Silian_default): int
     {
-        if (!array_key_exists($key, $this->env)) {
-            return $default;
+        if (!array_key_exists($Silian_key, $this->env)) {
+            return $Silian_default;
         }
 
-        $value = filter_var($this->env[$key], FILTER_VALIDATE_INT);
-        return $value === false ? $default : (int) $value;
+        $Silian_value = filter_var($this->env[$Silian_key], FILTER_VALIDATE_INT);
+        return $Silian_value === false ? $Silian_default : (int) $Silian_value;
     }
 
     /**
      * @return string[]
      */
-    private function splitCsv(string $value): array
+    private function splitCsv(string $Silian_value): array
     {
-        $parts = array_map('trim', explode(',', $value));
-        $parts = array_filter($parts, static fn (string $item): bool => $item !== '');
-        return array_values(array_unique($parts));
+        $Silian_parts = array_map('trim', explode(',', $Silian_value));
+        $Silian_parts = array_filter($Silian_parts, static fn (string $Silian_item): bool => $Silian_item !== '');
+        return array_values(array_unique($Silian_parts));
     }
 
     /**
      * @param string[] $origins
      * @return string[]
      */
-    private function normalizeOrigins(array $origins): array
+    private function normalizeOrigins(array $Silian_origins): array
     {
-        $normalized = [];
+        $Silian_normalized = [];
 
-        foreach ($origins as $origin) {
-            $normalizedOrigin = $this->resolveOriginFromUrl($origin);
-            $normalized[] = $normalizedOrigin ?? trim($origin);
+        foreach ($Silian_origins as $Silian_origin) {
+            $Silian_normalizedOrigin = $this->resolveOriginFromUrl($Silian_origin);
+            $Silian_normalized[] = $Silian_normalizedOrigin ?? trim($Silian_origin);
         }
 
-        return array_values(array_unique(array_filter($normalized, static fn (string $origin): bool => $origin !== '')));
+        return array_values(array_unique(array_filter($Silian_normalized, static fn (string $Silian_origin): bool => $Silian_origin !== '')));
     }
 
     /**
@@ -212,22 +212,22 @@ class PasskeyConfig
      */
     private function getAllowedOriginHosts(): array
     {
-        $hosts = [];
+        $Silian_hosts = [];
 
-        foreach ($this->getAllowedOrigins() as $origin) {
-            $host = $this->resolveHostFromUrl($origin);
-            if ($host !== null) {
-                $hosts[] = $host;
+        foreach ($this->getAllowedOrigins() as $Silian_origin) {
+            $Silian_host = $this->resolveHostFromUrl($Silian_origin);
+            if ($Silian_host !== null) {
+                $Silian_hosts[] = $Silian_host;
             }
         }
 
-        return array_values(array_unique($hosts));
+        return array_values(array_unique($Silian_hosts));
     }
 
-    private function isRpIdCompatibleWithAnyHost(string $rpId, array $hosts): bool
+    private function isRpIdCompatibleWithAnyHost(string $Silian_rpId, array $Silian_hosts): bool
     {
-        foreach ($hosts as $host) {
-            if ($this->isRpIdCompatibleWithHost($rpId, $host)) {
+        foreach ($Silian_hosts as $Silian_host) {
+            if ($this->isRpIdCompatibleWithHost($Silian_rpId, $Silian_host)) {
                 return true;
             }
         }
@@ -235,57 +235,57 @@ class PasskeyConfig
         return false;
     }
 
-    private function isRpIdCompatibleWithHost(string $rpId, string $host): bool
+    private function isRpIdCompatibleWithHost(string $Silian_rpId, string $Silian_host): bool
     {
-        $rpId = strtolower(trim($rpId));
-        $host = strtolower(trim($host));
+        $Silian_rpId = strtolower(trim($Silian_rpId));
+        $Silian_host = strtolower(trim($Silian_host));
 
-        if ($rpId === '' || $host === '') {
+        if ($Silian_rpId === '' || $Silian_host === '') {
             return false;
         }
 
-        return $host === $rpId || str_ends_with($host, '.' . $rpId);
+        return $Silian_host === $Silian_rpId || str_ends_with($Silian_host, '.' . $Silian_rpId);
     }
 
-    private function resolveOriginFromUrl(string $url): ?string
+    private function resolveOriginFromUrl(string $Silian_url): ?string
     {
-        $url = trim($url);
-        if ($url === '') {
+        $Silian_url = trim($Silian_url);
+        if ($Silian_url === '') {
             return null;
         }
 
-        $parts = parse_url($url);
-        if (!is_array($parts)) {
+        $Silian_parts = parse_url($Silian_url);
+        if (!is_array($Silian_parts)) {
             return null;
         }
 
-        $scheme = isset($parts['scheme']) && is_string($parts['scheme']) ? strtolower($parts['scheme']) : '';
-        $host = isset($parts['host']) && is_string($parts['host']) ? strtolower($parts['host']) : '';
+        $Silian_scheme = isset($Silian_parts['scheme']) && is_string($Silian_parts['scheme']) ? strtolower($Silian_parts['scheme']) : '';
+        $Silian_host = isset($Silian_parts['host']) && is_string($Silian_parts['host']) ? strtolower($Silian_parts['host']) : '';
 
-        if ($scheme === '' || $host === '') {
+        if ($Silian_scheme === '' || $Silian_host === '') {
             return null;
         }
 
-        $origin = $scheme . '://' . $host;
-        if (isset($parts['port']) && is_int($parts['port'])) {
-            $origin .= ':' . $parts['port'];
+        $Silian_origin = $Silian_scheme . '://' . $Silian_host;
+        if (isset($Silian_parts['port']) && is_int($Silian_parts['port'])) {
+            $Silian_origin .= ':' . $Silian_parts['port'];
         }
 
-        return $origin;
+        return $Silian_origin;
     }
 
-    private function resolveHostFromUrl(string $url): ?string
+    private function resolveHostFromUrl(string $Silian_url): ?string
     {
-        $origin = $this->resolveOriginFromUrl($url);
-        if ($origin === null) {
+        $Silian_origin = $this->resolveOriginFromUrl($Silian_url);
+        if ($Silian_origin === null) {
             return null;
         }
 
-        $host = parse_url($origin, PHP_URL_HOST);
-        if (!is_string($host) || $host === '') {
+        $Silian_host = parse_url($Silian_origin, PHP_URL_HOST);
+        if (!is_string($Silian_host) || $Silian_host === '') {
             return null;
         }
 
-        return strtolower($host);
+        return strtolower($Silian_host);
     }
 }

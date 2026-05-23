@@ -1,7 +1,7 @@
-import home from './home.json';
-import nav from './nav.json';
+import Silian_home from './home.json';
+import Silian_nav from './nav.json';
 
 export default {
-  home,
-  nav,
+  home: Silian_home,
+  nav: Silian_nav,
 };

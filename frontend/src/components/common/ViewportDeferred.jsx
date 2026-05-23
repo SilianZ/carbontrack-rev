@@ -1,56 +1,56 @@
-import React from 'react';
+import Silian_React from 'react';
 
 export default function ViewportDeferred({
-  children,
-  fallback = null,
-  rootMargin = '300px 0px',
-  className = '',
+  children: Silian_children,
+  fallback: Silian_fallback = null,
+  rootMargin: Silian_rootMargin = '300px 0px',
+  className: Silian_className = '',
 }) {
-  const containerRef = React.useRef(null);
-  const [shouldRender, setShouldRender] = React.useState(false);
+  const Silian_containerRef = Silian_React.useRef(null);
+  const [Silian_shouldRender, Silian_setShouldRender] = Silian_React.useState(false);
 
-  React.useEffect(() => {
-    if (shouldRender) {
+  Silian_React.useEffect(() => {
+    if (Silian_shouldRender) {
       return undefined;
     }
 
-    const node = containerRef.current;
-    if (!node) {
+    const Silian_node = Silian_containerRef.current;
+    if (!Silian_node) {
       return undefined;
     }
 
-    const activate = () => {
-      if (typeof React.startTransition === 'function') {
-        React.startTransition(() => setShouldRender(true));
+    const Silian_activate = () => {
+      if (typeof Silian_React.startTransition === 'function') {
+        Silian_React.startTransition(() => Silian_setShouldRender(true));
         return;
       }
 
-      setShouldRender(true);
+      Silian_setShouldRender(true);
     };
 
     if (typeof window === 'undefined' || typeof window.IntersectionObserver !== 'function') {
-      activate();
+      Silian_activate();
       return undefined;
     }
 
-    const observer = new window.IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          activate();
-          observer.disconnect();
+    const Silian_observer = new window.IntersectionObserver(
+      (Silian_entries) => {
+        if (Silian_entries.some((Silian_entry) => Silian_entry.isIntersecting)) {
+          Silian_activate();
+          Silian_observer.disconnect();
         }
       },
-      { rootMargin }
+      { rootMargin: Silian_rootMargin }
     );
 
-    observer.observe(node);
+    Silian_observer.observe(Silian_node);
 
-    return () => observer.disconnect();
-  }, [rootMargin, shouldRender]);
+    return () => Silian_observer.disconnect();
+  }, [Silian_rootMargin, Silian_shouldRender]);
 
   return (
-    <div ref={containerRef} className={className}>
-      {shouldRender ? children : fallback}
+    <div ref={Silian_containerRef} className={Silian_className}>
+      {Silian_shouldRender ? Silian_children : Silian_fallback}
     </div>
   );
 }

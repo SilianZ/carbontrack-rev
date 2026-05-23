@@ -13,42 +13,42 @@ class UserGroupServiceTest extends TestCase
 {
     public function testPreparePayloadNormalizesDefaultFlagFromStringInputs(): void
     {
-        $service = new UserGroupService(new QuotaConfigService());
-        $method = new \ReflectionMethod($service, 'preparePayload');
-        $method->setAccessible(true);
+        $Silian_service = new UserGroupService(new QuotaConfigService());
+        $Silian_method = new \ReflectionMethod($Silian_service, 'preparePayload');
+        $Silian_method->setAccessible(true);
 
-        $normalizedFalse = $method->invoke($service, [
+        $Silian_normalizedFalse = $Silian_method->invoke($Silian_service, [
             'name' => 'Standard',
             'code' => 'standard',
             'is_default' => '',
         ], null);
-        $normalizedTrue = $method->invoke($service, [
+        $Silian_normalizedTrue = $Silian_method->invoke($Silian_service, [
             'name' => 'VIP',
             'code' => 'vip',
             'is_default' => '1',
         ], null);
-        $normalizedIndeterminate = $method->invoke($service, [
+        $Silian_normalizedIndeterminate = $Silian_method->invoke($Silian_service, [
             'name' => 'Draft',
             'code' => 'draft',
             'is_default' => 'indeterminate',
         ], null);
 
-        $this->assertArrayHasKey('is_default', $normalizedFalse);
-        $this->assertFalse($normalizedFalse['is_default']);
-        $this->assertTrue($normalizedTrue['is_default']);
-        $this->assertFalse($normalizedIndeterminate['is_default']);
+        $this->assertArrayHasKey('is_default', $Silian_normalizedFalse);
+        $this->assertFalse($Silian_normalizedFalse['is_default']);
+        $this->assertTrue($Silian_normalizedTrue['is_default']);
+        $this->assertFalse($Silian_normalizedIndeterminate['is_default']);
     }
 
     public function testPreparePayloadRejectsInvalidDefaultFlag(): void
     {
-        $service = new UserGroupService(new QuotaConfigService());
-        $method = new \ReflectionMethod($service, 'preparePayload');
-        $method->setAccessible(true);
+        $Silian_service = new UserGroupService(new QuotaConfigService());
+        $Silian_method = new \ReflectionMethod($Silian_service, 'preparePayload');
+        $Silian_method->setAccessible(true);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('is_default must be a boolean');
 
-        $method->invoke($service, [
+        $Silian_method->invoke($Silian_service, [
             'name' => 'Broken',
             'code' => 'broken',
             'is_default' => 'maybe',
@@ -57,11 +57,11 @@ class UserGroupServiceTest extends TestCase
 
     public function testPreparePayloadMergesSupportRoutingIntoConfigAndClampsValues(): void
     {
-        $service = new UserGroupService(new QuotaConfigService());
-        $method = new \ReflectionMethod($service, 'preparePayload');
-        $method->setAccessible(true);
+        $Silian_service = new UserGroupService(new QuotaConfigService());
+        $Silian_method = new \ReflectionMethod($Silian_service, 'preparePayload');
+        $Silian_method->setAccessible(true);
 
-        $payload = $method->invoke($service, [
+        $Silian_payload = $Silian_method->invoke($Silian_service, [
             'name' => 'Support',
             'code' => 'support',
             'support_routing' => [
@@ -76,7 +76,7 @@ class UserGroupServiceTest extends TestCase
             'quotas' => ['daily' => 5],
         ]);
 
-        $this->assertSame(['daily' => 5], $payload['config']['quotas']);
+        $this->assertSame(['daily' => 5], $Silian_payload['config']['quotas']);
         $this->assertSame([
             'first_response_minutes' => 1,
             'resolution_minutes' => 2880,
@@ -84,16 +84,16 @@ class UserGroupServiceTest extends TestCase
             'min_agent_level' => 5,
             'overdue_boost' => 0.0,
             'tier_label' => 'escalated',
-        ], $payload['config']['support_routing']);
+        ], $Silian_payload['config']['support_routing']);
     }
 
     public function testPreparePayloadFallsBackToDefaultsForInvalidSupportRoutingTypes(): void
     {
-        $service = new UserGroupService(new QuotaConfigService());
-        $method = new \ReflectionMethod($service, 'preparePayload');
-        $method->setAccessible(true);
+        $Silian_service = new UserGroupService(new QuotaConfigService());
+        $Silian_method = new \ReflectionMethod($Silian_service, 'preparePayload');
+        $Silian_method->setAccessible(true);
 
-        $payload = $method->invoke($service, [
+        $Silian_payload = $Silian_method->invoke($Silian_service, [
             'name' => 'Fallback',
             'code' => 'fallback',
             'support_routing' => [
@@ -113,26 +113,26 @@ class UserGroupServiceTest extends TestCase
             'min_agent_level' => 1,
             'overdue_boost' => 1.0,
             'tier_label' => 'standard',
-        ], $payload['config']['support_routing']);
+        ], $Silian_payload['config']['support_routing']);
     }
 
     public function testFormatGroupHandlesMissingConfigWithoutNullOffset(): void
     {
-        $service = new UserGroupService(new QuotaConfigService());
-        $method = new \ReflectionMethod($service, 'formatGroup');
-        $method->setAccessible(true);
+        $Silian_service = new UserGroupService(new QuotaConfigService());
+        $Silian_method = new \ReflectionMethod($Silian_service, 'formatGroup');
+        $Silian_method->setAccessible(true);
 
-        $group = new UserGroup([
+        $Silian_group = new UserGroup([
             'id' => 1,
             'name' => 'Default',
             'code' => 'default',
             'config' => null,
         ]);
 
-        $formatted = $method->invoke($service, $group);
+        $Silian_formatted = $Silian_method->invoke($Silian_service, $Silian_group);
 
-        $this->assertNull($formatted['config']);
-        $this->assertIsArray($formatted['quota_flat']);
+        $this->assertNull($Silian_formatted['config']);
+        $this->assertIsArray($Silian_formatted['quota_flat']);
         $this->assertSame([
             'first_response_minutes' => 240,
             'resolution_minutes' => 1440,
@@ -140,6 +140,6 @@ class UserGroupServiceTest extends TestCase
             'min_agent_level' => 1,
             'overdue_boost' => 1.0,
             'tier_label' => 'standard',
-        ], $formatted['support_routing']);
+        ], $Silian_formatted['support_routing']);
     }
 }

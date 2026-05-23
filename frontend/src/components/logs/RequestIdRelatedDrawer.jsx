@@ -1,105 +1,105 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { Loader2 } from 'lucide-react';
-import { useTranslation } from '../../hooks/useTranslation';
-import JsonTreeViewer from './JsonTreeViewer';
-import AuditDiffViewer from './AuditDiffViewer';
-import { fetchSystemLogDetail } from '../../lib/api/systemLogs';
-import { adminAPI } from '../../lib/api';
+import Silian_React, { useCallback as Silian_useCallback, useEffect as Silian_useEffect, useState as Silian_useState } from 'react';
+import Silian_PropTypes from 'prop-types';
+import { Loader2 as Silian_Loader2 } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import Silian_JsonTreeViewer from './JsonTreeViewer';
+import Silian_AuditDiffViewer from './AuditDiffViewer';
+import { fetchSystemLogDetail as Silian_fetchSystemLogDetail } from '../../lib/api/systemLogs';
+import { adminAPI as Silian_adminAPI } from '../../lib/api';
 
 export function RequestIdRelatedDrawer({
-  open,
-  onClose,
-  requestId,
-  data,
-  loading,
-  onRefresh,
-  system,
-  audit,
-  error,
-  llm
+  open: Silian_open,
+  onClose: Silian_onClose,
+  requestId: Silian_requestId,
+  data: Silian_data,
+  loading: Silian_loading,
+  onRefresh: Silian_onRefresh,
+  system: Silian_system,
+  audit: Silian_audit,
+  error: Silian_error,
+  llm: Silian_llm
 }) {
-  const { t } = useTranslation(['admin', 'common', 'errors']);
-  const [systemDetails, setSystemDetails] = useState({});
-  const [llmDetails, setLlmDetails] = useState({});
-  const [detailLoading, setDetailLoading] = useState({ system: {}, llm: {} });
-  const [detailErrors, setDetailErrors] = useState({ system: {}, llm: {} });
+  const { t: Silian_t } = Silian_useTranslation(['admin', 'common', 'errors']);
+  const [Silian_systemDetails, Silian_setSystemDetails] = Silian_useState({});
+  const [Silian_llmDetails, Silian_setLlmDetails] = Silian_useState({});
+  const [Silian_detailLoading, Silian_setDetailLoading] = Silian_useState({ system: {}, llm: {} });
+  const [Silian_detailErrors, Silian_setDetailErrors] = Silian_useState({ system: {}, llm: {} });
 
-  useEffect(() => {
-    setSystemDetails({});
-    setLlmDetails({});
-    setDetailLoading({ system: {}, llm: {} });
-    setDetailErrors({ system: {}, llm: {} });
-  }, [requestId]);
+  Silian_useEffect(() => {
+    Silian_setSystemDetails({});
+    Silian_setLlmDetails({});
+    Silian_setDetailLoading({ system: {}, llm: {} });
+    Silian_setDetailErrors({ system: {}, llm: {} });
+  }, [Silian_requestId]);
 
-  const setLoadingFlag = useCallback((type, id, value) => {
-    setDetailLoading((prev) => {
-      const nextType = { ...prev[type] };
-      if (value) {
-        nextType[id] = true;
+  const Silian_setLoadingFlag = Silian_useCallback((Silian_type, Silian_id, Silian_value) => {
+    Silian_setDetailLoading((Silian_prev) => {
+      const Silian_nextType = { ...Silian_prev[Silian_type] };
+      if (Silian_value) {
+        Silian_nextType[Silian_id] = true;
       } else {
-        delete nextType[id];
+        delete Silian_nextType[Silian_id];
       }
-      return { ...prev, [type]: nextType };
+      return { ...Silian_prev, [Silian_type]: Silian_nextType };
     });
   }, []);
 
-  const setErrorFlag = useCallback((type, id, message) => {
-    setDetailErrors((prev) => {
-      const nextType = { ...prev[type] };
-      if (message) {
-        nextType[id] = message;
+  const Silian_setErrorFlag = Silian_useCallback((Silian_type, Silian_id, Silian_message) => {
+    Silian_setDetailErrors((Silian_prev) => {
+      const Silian_nextType = { ...Silian_prev[Silian_type] };
+      if (Silian_message) {
+        Silian_nextType[Silian_id] = Silian_message;
       } else {
-        delete nextType[id];
+        delete Silian_nextType[Silian_id];
       }
-      return { ...prev, [type]: nextType };
+      return { ...Silian_prev, [Silian_type]: Silian_nextType };
     });
   }, []);
 
-  const loadSystemDetail = useCallback(async (id) => {
-    if (!id || systemDetails[id] || detailLoading.system[id]) return;
-    setLoadingFlag('system', id, true);
-    setErrorFlag('system', id, null);
+  const Silian_loadSystemDetail = Silian_useCallback(async (Silian_id) => {
+    if (!Silian_id || Silian_systemDetails[Silian_id] || Silian_detailLoading.system[Silian_id]) return;
+    Silian_setLoadingFlag('system', Silian_id, true);
+    Silian_setErrorFlag('system', Silian_id, null);
     try {
-      const response = await fetchSystemLogDetail(id);
-      const payload = response?.data || response;
-      const detail = payload?.data || payload;
-      setSystemDetails((prev) => ({ ...prev, [id]: detail }));
-    } catch (err) {
-      setErrorFlag('system', id, err?.message || t('errors.loadFailed'));
+      const Silian_response = await Silian_fetchSystemLogDetail(Silian_id);
+      const Silian_payload = Silian_response?.data || Silian_response;
+      const Silian_detail = Silian_payload?.data || Silian_payload;
+      Silian_setSystemDetails((Silian_prev) => ({ ...Silian_prev, [Silian_id]: Silian_detail }));
+    } catch (Silian_err) {
+      Silian_setErrorFlag('system', Silian_id, Silian_err?.message || Silian_t('errors.loadFailed'));
     } finally {
-      setLoadingFlag('system', id, false);
+      Silian_setLoadingFlag('system', Silian_id, false);
     }
-  }, [detailLoading.system, setErrorFlag, setLoadingFlag, systemDetails, t]);
+  }, [Silian_detailLoading.system, Silian_setErrorFlag, Silian_setLoadingFlag, Silian_systemDetails, Silian_t]);
 
-  const loadLlmDetail = useCallback(async (id) => {
-    if (!id || llmDetails[id] || detailLoading.llm[id]) return;
-    setLoadingFlag('llm', id, true);
-    setErrorFlag('llm', id, null);
+  const Silian_loadLlmDetail = Silian_useCallback(async (Silian_id) => {
+    if (!Silian_id || Silian_llmDetails[Silian_id] || Silian_detailLoading.llm[Silian_id]) return;
+    Silian_setLoadingFlag('llm', Silian_id, true);
+    Silian_setErrorFlag('llm', Silian_id, null);
     try {
-      const response = await adminAPI.getLlmLogDetail(id);
-      const payload = response?.data || response;
-      const detail = payload?.data || payload;
-      setLlmDetails((prev) => ({ ...prev, [id]: detail }));
-    } catch (err) {
-      setErrorFlag('llm', id, err?.message || t('errors.loadFailed'));
+      const Silian_response = await Silian_adminAPI.getLlmLogDetail(Silian_id);
+      const Silian_payload = Silian_response?.data || Silian_response;
+      const Silian_detail = Silian_payload?.data || Silian_payload;
+      Silian_setLlmDetails((Silian_prev) => ({ ...Silian_prev, [Silian_id]: Silian_detail }));
+    } catch (Silian_err) {
+      Silian_setErrorFlag('llm', Silian_id, Silian_err?.message || Silian_t('errors.loadFailed'));
     } finally {
-      setLoadingFlag('llm', id, false);
+      Silian_setLoadingFlag('llm', Silian_id, false);
     }
-  }, [detailLoading.llm, llmDetails, setErrorFlag, setLoadingFlag, t]);
+  }, [Silian_detailLoading.llm, Silian_llmDetails, Silian_setErrorFlag, Silian_setLoadingFlag, Silian_t]);
 
-  if (!open) return null;
+  if (!Silian_open) return null;
 
-  const resolved = data ?? { system, audit, error, llm };
-  const systemLogs = resolved?.system || [];
-  const auditLogs = resolved?.audit || [];
-  const errorLogs = resolved?.error || [];
-  const llmLogs = resolved?.llm || [];
+  const Silian_resolved = Silian_data ?? { system: Silian_system, audit: Silian_audit, error: Silian_error, llm: Silian_llm };
+  const Silian_systemLogs = Silian_resolved?.system || [];
+  const Silian_auditLogs = Silian_resolved?.audit || [];
+  const Silian_errorLogs = Silian_resolved?.error || [];
+  const Silian_llmLogs = Silian_resolved?.llm || [];
 
-  const columnLabel = (key) => t(`admin.systemLogs.columns.${key}`, { defaultValue: key });
+  const Silian_columnLabel = (Silian_key) => Silian_t(`admin.systemLogs.columns.${Silian_key}`, { defaultValue: Silian_key });
 
-  const renderEmpty = () => (
-    <div className="text-xs text-muted-foreground">{t('common.none')}</div>
+  const Silian_renderEmpty = () => (
+    <div className="text-xs text-muted-foreground">{Silian_t('common.none')}</div>
   );
 
   return (
@@ -107,85 +107,85 @@ export function RequestIdRelatedDrawer({
       <button
         type="button"
         className="flex-1 bg-black/40"
-        onClick={onClose}
-        aria-label={t('common.close')}
+        onClick={Silian_onClose}
+        aria-label={Silian_t('common.close')}
       />
       <div className="flex h-full w-full max-w-3xl flex-col border-l border-border bg-background text-foreground shadow-xl">
         <div className="flex items-center justify-between border-b border-border bg-background/95 p-4 backdrop-blur">
           <h2 className="text-lg font-semibold">
-            {t('admin.systemLogs.drawer.title', { id: requestId })}
+            {Silian_t('admin.systemLogs.drawer.title', { id: Silian_requestId })}
           </h2>
           <div className="flex items-center gap-2">
-            <button type="button" className="text-sm text-primary transition-colors hover:text-primary/80" onClick={onRefresh}>
-              {t('admin.systemLogs.drawer.refresh')}
+            <button type="button" className="text-sm text-primary transition-colors hover:text-primary/80" onClick={Silian_onRefresh}>
+              {Silian_t('admin.systemLogs.drawer.refresh')}
             </button>
             <button
               type="button"
               className="text-lg leading-none text-muted-foreground transition-colors hover:text-foreground"
-              onClick={onClose}
-              aria-label={t('common.close')}
+              onClick={Silian_onClose}
+              aria-label={Silian_t('common.close')}
             >
               &times;
             </button>
           </div>
         </div>
         <div className="flex-1 space-y-6 overflow-auto p-4 text-sm">
-          {loading && <div className="text-muted-foreground">{t('admin.systemLogs.drawer.loading')}</div>}
-          {!loading && (
+          {Silian_loading && <div className="text-muted-foreground">{Silian_t('admin.systemLogs.drawer.loading')}</div>}
+          {!Silian_loading && (
             <>
-              <Section title={t('admin.systemLogs.drawer.systemTitle', { count: systemLogs.length })}>
-                {systemLogs.length === 0 && renderEmpty()}
-                {systemLogs.map((log) => {
-                  const detail = systemDetails[log.id];
-                  const isLoading = detailLoading.system[log.id];
-                  const errorMessage = detailErrors.system[log.id];
-                  const detailData = detail || log;
+              <Silian_Section title={Silian_t('admin.systemLogs.drawer.systemTitle', { count: Silian_systemLogs.length })}>
+                {Silian_systemLogs.length === 0 && Silian_renderEmpty()}
+                {Silian_systemLogs.map((Silian_log) => {
+                  const Silian_detail = Silian_systemDetails[Silian_log.id];
+                  const Silian_isLoading = Silian_detailLoading.system[Silian_log.id];
+                  const Silian_errorMessage = Silian_detailErrors.system[Silian_log.id];
+                  const Silian_detailData = Silian_detail || Silian_log;
                   return (
-                    <ExpandableItem
-                      key={`system-${log.id}`}
+                    <Silian_ExpandableItem
+                      key={`system-${Silian_log.id}`}
                       toneClass="border-border bg-muted/40"
                       summary={(
                         <>
-                          <KeyValueItem label={columnLabel('id')} value={log.id} />
-                          <KeyValueItem label={columnLabel('method')} value={log.method} />
-                          <KeyValueItem label={columnLabel('path')} value={log.path} />
-                          <KeyValueItem label={columnLabel('status_code')} value={log.status_code} />
-                          <KeyValueItem label={columnLabel('duration_ms')} value={log.duration_ms} />
-                          <KeyValueItem label={columnLabel('created_at')} value={log.created_at} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('id')} value={Silian_log.id} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('method')} value={Silian_log.method} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('path')} value={Silian_log.path} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('status_code')} value={Silian_log.status_code} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('duration_ms')} value={Silian_log.duration_ms} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('created_at')} value={Silian_log.created_at} />
                         </>
                       )}
-                      onOpen={() => loadSystemDetail(log.id)}
-                      openLabel={t('admin.systemLogs.actions.expand')}
-                      closeLabel={t('admin.systemLogs.actions.collapse')}
+                      onOpen={() => Silian_loadSystemDetail(Silian_log.id)}
+                      openLabel={Silian_t('admin.systemLogs.actions.expand')}
+                      closeLabel={Silian_t('admin.systemLogs.actions.collapse')}
                       detail={(
                         <div className="space-y-3 text-xs">
-                          <DetailGrid
+                          <Silian_DetailGrid
                             items={[
-                              { label: columnLabel('request_id'), value: detailData.request_id || requestId },
-                              { label: columnLabel('method'), value: detailData.method },
-                              { label: columnLabel('path'), value: detailData.path, span: true },
-                              { label: columnLabel('status_code'), value: detailData.status_code },
-                              { label: columnLabel('user_id'), value: detailData.user_id ?? '-' },
-                              { label: columnLabel('duration_ms'), value: detailData.duration_ms ?? '-' },
-                              { label: columnLabel('ip_address'), value: detailData.ip_address ?? '-' },
-                              { label: columnLabel('created_at'), value: detailData.created_at ?? '-' },
-                              { label: columnLabel('user_agent'), value: detailData.user_agent ?? '-', span: true }
+                              { label: Silian_columnLabel('request_id'), value: Silian_detailData.request_id || Silian_requestId },
+                              { label: Silian_columnLabel('method'), value: Silian_detailData.method },
+                              { label: Silian_columnLabel('path'), value: Silian_detailData.path, span: true },
+                              { label: Silian_columnLabel('status_code'), value: Silian_detailData.status_code },
+                              { label: Silian_columnLabel('user_id'), value: Silian_detailData.user_id ?? '-' },
+                              { label: Silian_columnLabel('duration_ms'), value: Silian_detailData.duration_ms ?? '-' },
+                              { label: Silian_columnLabel('ip_address'), value: Silian_detailData.ip_address ?? '-' },
+                              { label: Silian_columnLabel('created_at'), value: Silian_detailData.created_at ?? '-' },
+                              { label: Silian_columnLabel('user_agent'), value: Silian_detailData.user_agent ?? '-', span: true }
                             ]}
                           />
-                          {isLoading && (
+                          {Silian_isLoading && (
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              {t('common.loading')}
+                              <Silian_Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              {Silian_t('common.loading')}
                             </div>
                           )}
-                          {errorMessage && (
-                            <div className="text-xs text-rose-600">{errorMessage}</div>
+                          {Silian_errorMessage && (
+                            <div className="text-xs text-rose-600">{Silian_errorMessage}</div>
                           )}
-                          {detail && (
+                          {Silian_detail && (
                             <>
-                              <DetailValueBlock title={t('admin.systemLogs.requestBody')} value={detail.request_body} />
-                              <DetailValueBlock title={t('admin.systemLogs.responseBody')} value={detail.response_body} />
-                              <DetailValueBlock title={t('admin.systemLogs.serverMeta')} value={detail.server_meta} />
+                              <Silian_DetailValueBlock title={Silian_t('admin.systemLogs.requestBody')} value={Silian_detail.request_body} />
+                              <Silian_DetailValueBlock title={Silian_t('admin.systemLogs.responseBody')} value={Silian_detail.response_body} />
+                              <Silian_DetailValueBlock title={Silian_t('admin.systemLogs.serverMeta')} value={Silian_detail.server_meta} />
                             </>
                           )}
                         </div>
@@ -193,84 +193,84 @@ export function RequestIdRelatedDrawer({
                     />
                   );
                 })}
-              </Section>
+              </Silian_Section>
 
-              <Section title={t('admin.systemLogs.drawer.auditTitle', { count: auditLogs.length })}>
-                {auditLogs.length === 0 && renderEmpty()}
-                {auditLogs.map((log) => (
-                  <ExpandableItem
-                    key={`audit-${log.id}`}
+              <Silian_Section title={Silian_t('admin.systemLogs.drawer.auditTitle', { count: Silian_auditLogs.length })}>
+                {Silian_auditLogs.length === 0 && Silian_renderEmpty()}
+                {Silian_auditLogs.map((Silian_log) => (
+                  <Silian_ExpandableItem
+                    key={`audit-${Silian_log.id}`}
                     toneClass="border-border bg-muted/40"
                     summary={(
                       <>
-                        <KeyValueItem label={columnLabel('id')} value={log.id} />
-                        <KeyValueItem label={columnLabel('action')} value={log.action} />
-                        <KeyValueItem label={columnLabel('operation_category')} value={log.operation_category} />
-                        <KeyValueItem label={columnLabel('actor_type')} value={log.actor_type} />
-                        <KeyValueItem label={columnLabel('status')} value={log.status} />
-                        <KeyValueItem label={columnLabel('created_at')} value={log.created_at} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('id')} value={Silian_log.id} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('action')} value={Silian_log.action} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('operation_category')} value={Silian_log.operation_category} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('actor_type')} value={Silian_log.actor_type} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('status')} value={Silian_log.status} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('created_at')} value={Silian_log.created_at} />
                       </>
                     )}
-                    openLabel={t('admin.systemLogs.actions.expand')}
-                    closeLabel={t('admin.systemLogs.actions.collapse')}
+                    openLabel={Silian_t('admin.systemLogs.actions.expand')}
+                    closeLabel={Silian_t('admin.systemLogs.actions.collapse')}
                     detail={(
                       <div className="space-y-3 text-xs">
-                        <DetailGrid
+                        <Silian_DetailGrid
                           items={[
-                            { label: columnLabel('id'), value: log.id },
-                            { label: columnLabel('action'), value: log.action },
-                            { label: columnLabel('operation_category'), value: log.operation_category || '-' },
-                            { label: columnLabel('actor_type'), value: log.actor_type },
-                            { label: columnLabel('status'), value: log.status },
-                            { label: columnLabel('user_id'), value: log.user_id ?? '-' },
-                            { label: columnLabel('ip_address'), value: log.ip_address ?? '-' },
-                            { label: columnLabel('created_at'), value: log.created_at }
+                            { label: Silian_columnLabel('id'), value: Silian_log.id },
+                            { label: Silian_columnLabel('action'), value: Silian_log.action },
+                            { label: Silian_columnLabel('operation_category'), value: Silian_log.operation_category || '-' },
+                            { label: Silian_columnLabel('actor_type'), value: Silian_log.actor_type },
+                            { label: Silian_columnLabel('status'), value: Silian_log.status },
+                            { label: Silian_columnLabel('user_id'), value: Silian_log.user_id ?? '-' },
+                            { label: Silian_columnLabel('ip_address'), value: Silian_log.ip_address ?? '-' },
+                            { label: Silian_columnLabel('created_at'), value: Silian_log.created_at }
                           ]}
                         />
-                        {(log.old_data || log.new_data) && (
-                          <AuditDiffViewer oldData={log.old_data} newData={log.new_data} />
+                        {(Silian_log.old_data || Silian_log.new_data) && (
+                          <Silian_AuditDiffViewer oldData={Silian_log.old_data} newData={Silian_log.new_data} />
                         )}
-                        {log.data && (
-                          <DetailValueBlock title={t('admin.audit.requestData')} value={log.data} />
+                        {Silian_log.data && (
+                          <Silian_DetailValueBlock title={Silian_t('admin.audit.requestData')} value={Silian_log.data} />
                         )}
                       </div>
                     )}
                   />
                 ))}
-              </Section>
+              </Silian_Section>
 
-              <Section title={t('admin.systemLogs.drawer.errorsTitle', { count: errorLogs.length })}>
-                {errorLogs.length === 0 && renderEmpty()}
-                {errorLogs.map((log) => (
-                  <ExpandableItem
-                    key={`error-${log.id}`}
+              <Silian_Section title={Silian_t('admin.systemLogs.drawer.errorsTitle', { count: Silian_errorLogs.length })}>
+                {Silian_errorLogs.length === 0 && Silian_renderEmpty()}
+                {Silian_errorLogs.map((Silian_log) => (
+                  <Silian_ExpandableItem
+                    key={`error-${Silian_log.id}`}
                     toneClass="border-rose-500/20 bg-rose-500/10"
                     summary={(
                       <>
-                        <KeyValueItem label={columnLabel('request_id')} value={log.request_id || requestId} />
-                        <KeyValueItem label={columnLabel('error_type')} value={log.error_type} />
-                        <KeyValueItem label={columnLabel('error_file')} value={log.error_file} />
-                        <KeyValueItem label={columnLabel('error_line')} value={log.error_line} />
-                        <KeyValueItem label={columnLabel('error_time')} value={log.error_time} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('request_id')} value={Silian_log.request_id || Silian_requestId} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('error_type')} value={Silian_log.error_type} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('error_file')} value={Silian_log.error_file} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('error_line')} value={Silian_log.error_line} />
+                        <Silian_KeyValueItem label={Silian_columnLabel('error_time')} value={Silian_log.error_time} />
                       </>
                     )}
-                    openLabel={t('admin.systemLogs.actions.expand')}
-                    closeLabel={t('admin.systemLogs.actions.collapse')}
+                    openLabel={Silian_t('admin.systemLogs.actions.expand')}
+                    closeLabel={Silian_t('admin.systemLogs.actions.collapse')}
                     detail={(
                       <div className="space-y-3 text-xs">
-                        <DetailGrid
+                        <Silian_DetailGrid
                           items={[
-                            { label: columnLabel('request_id'), value: log.request_id || requestId },
-                            { label: columnLabel('error_type'), value: log.error_type },
-                            { label: columnLabel('error_file'), value: log.error_file },
-                            { label: columnLabel('error_line'), value: log.error_line },
-                            { label: columnLabel('error_time'), value: log.error_time }
+                            { label: Silian_columnLabel('request_id'), value: Silian_log.request_id || Silian_requestId },
+                            { label: Silian_columnLabel('error_type'), value: Silian_log.error_type },
+                            { label: Silian_columnLabel('error_file'), value: Silian_log.error_file },
+                            { label: Silian_columnLabel('error_line'), value: Silian_log.error_line },
+                            { label: Silian_columnLabel('error_time'), value: Silian_log.error_time }
                           ]}
                         />
-                        {log.error_message && (
-                          <DetailTextBlock
-                            title={columnLabel('error_message')}
-                            value={log.error_message}
+                        {Silian_log.error_message && (
+                          <Silian_DetailTextBlock
+                            title={Silian_columnLabel('error_message')}
+                            value={Silian_log.error_message}
                             toneClass="border border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-300"
                           />
                         )}
@@ -278,87 +278,87 @@ export function RequestIdRelatedDrawer({
                     )}
                   />
                 ))}
-              </Section>
+              </Silian_Section>
 
-              <Section title={t('admin.systemLogs.drawer.llmTitle', { count: llmLogs.length })}>
-                {llmLogs.length === 0 && renderEmpty()}
-                {llmLogs.map((log) => {
-                  const detail = llmDetails[log.id];
-                  const isLoading = detailLoading.llm[log.id];
-                  const errorMessage = detailErrors.llm[log.id];
-                  const detailData = detail || log;
+              <Silian_Section title={Silian_t('admin.systemLogs.drawer.llmTitle', { count: Silian_llmLogs.length })}>
+                {Silian_llmLogs.length === 0 && Silian_renderEmpty()}
+                {Silian_llmLogs.map((Silian_log) => {
+                  const Silian_detail = Silian_llmDetails[Silian_log.id];
+                  const Silian_isLoading = Silian_detailLoading.llm[Silian_log.id];
+                  const Silian_errorMessage = Silian_detailErrors.llm[Silian_log.id];
+                  const Silian_detailData = Silian_detail || Silian_log;
                   return (
-                    <ExpandableItem
-                      key={`llm-${log.id}`}
+                    <Silian_ExpandableItem
+                      key={`llm-${Silian_log.id}`}
                       toneClass="border-indigo-500/20 bg-indigo-500/10"
                       summary={(
                         <>
-                          <KeyValueItem label={columnLabel('actor_type')} value={log.actor_type} />
-                          <KeyValueItem label={columnLabel('actor_id')} value={log.actor_id} />
-                          <KeyValueItem label={columnLabel('model')} value={log.model} />
-                          <KeyValueItem label={columnLabel('llm_status')} value={log.status} />
-                          <KeyValueItem label={columnLabel('total_tokens')} value={log.total_tokens} />
-                          <KeyValueItem label={columnLabel('latency_ms')} value={log.latency_ms} />
-                          <KeyValueItem label={columnLabel('created_at')} value={log.created_at} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('actor_type')} value={Silian_log.actor_type} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('actor_id')} value={Silian_log.actor_id} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('model')} value={Silian_log.model} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('llm_status')} value={Silian_log.status} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('total_tokens')} value={Silian_log.total_tokens} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('latency_ms')} value={Silian_log.latency_ms} />
+                          <Silian_KeyValueItem label={Silian_columnLabel('created_at')} value={Silian_log.created_at} />
                         </>
                       )}
-                      onOpen={() => loadLlmDetail(log.id)}
-                      openLabel={t('admin.systemLogs.actions.expand')}
-                      closeLabel={t('admin.systemLogs.actions.collapse')}
+                      onOpen={() => Silian_loadLlmDetail(Silian_log.id)}
+                      openLabel={Silian_t('admin.systemLogs.actions.expand')}
+                      closeLabel={Silian_t('admin.systemLogs.actions.collapse')}
                       detail={(
                         <div className="space-y-3 text-xs">
-                          <DetailGrid
+                          <Silian_DetailGrid
                             items={[
-                              { label: columnLabel('request_id'), value: detailData.request_id || requestId },
-                              { label: columnLabel('actor_type'), value: detailData.actor_type },
-                              { label: columnLabel('actor_id'), value: detailData.actor_id ?? '-' },
-                              { label: columnLabel('source'), value: detailData.source || '-' },
-                              { label: columnLabel('model'), value: detailData.model || '-' },
-                              { label: columnLabel('llm_status'), value: detailData.status || '-' },
-                              { label: columnLabel('response_id'), value: detailData.response_id || '-' },
-                              { label: columnLabel('total_tokens'), value: detailData.total_tokens ?? '-' },
-                              { label: columnLabel('latency_ms'), value: detailData.latency_ms ?? '-' },
-                              { label: columnLabel('created_at'), value: detailData.created_at ?? '-' }
+                              { label: Silian_columnLabel('request_id'), value: Silian_detailData.request_id || Silian_requestId },
+                              { label: Silian_columnLabel('actor_type'), value: Silian_detailData.actor_type },
+                              { label: Silian_columnLabel('actor_id'), value: Silian_detailData.actor_id ?? '-' },
+                              { label: Silian_columnLabel('source'), value: Silian_detailData.source || '-' },
+                              { label: Silian_columnLabel('model'), value: Silian_detailData.model || '-' },
+                              { label: Silian_columnLabel('llm_status'), value: Silian_detailData.status || '-' },
+                              { label: Silian_columnLabel('response_id'), value: Silian_detailData.response_id || '-' },
+                              { label: Silian_columnLabel('total_tokens'), value: Silian_detailData.total_tokens ?? '-' },
+                              { label: Silian_columnLabel('latency_ms'), value: Silian_detailData.latency_ms ?? '-' },
+                              { label: Silian_columnLabel('created_at'), value: Silian_detailData.created_at ?? '-' }
                             ]}
                           />
-                          {isLoading && (
+                          {Silian_isLoading && (
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              {t('common.loading')}
+                              <Silian_Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              {Silian_t('common.loading')}
                             </div>
                           )}
-                          {errorMessage && (
-                            <div className="text-xs text-rose-600">{errorMessage}</div>
+                          {Silian_errorMessage && (
+                            <div className="text-xs text-rose-600">{Silian_errorMessage}</div>
                           )}
-                          <DetailValueBlock
-                            title={t('admin.llmUsage.logs.prompt')}
-                            value={detail?.prompt ?? log.prompt}
+                          <Silian_DetailValueBlock
+                            title={Silian_t('admin.llmUsage.logs.prompt')}
+                            value={Silian_detail?.prompt ?? Silian_log.prompt}
                           />
-                          {detail?.response_raw && (
-                            <DetailValueBlock
-                              title={t('admin.llmUsage.logs.response')}
-                              value={detail.response_raw}
+                          {Silian_detail?.response_raw && (
+                            <Silian_DetailValueBlock
+                              title={Silian_t('admin.llmUsage.logs.response')}
+                              value={Silian_detail.response_raw}
                             />
                           )}
-                          {(detail?.error_message || log.error_message) && (
-                            <DetailTextBlock
-                              title={t('admin.llmUsage.logs.error')}
-                              value={detail?.error_message || log.error_message}
+                          {(Silian_detail?.error_message || Silian_log.error_message) && (
+                            <Silian_DetailTextBlock
+                              title={Silian_t('admin.llmUsage.logs.error')}
+                              value={Silian_detail?.error_message || Silian_log.error_message}
                               toneClass="border border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-300"
                             />
                           )}
-                          {detail?.usage && (
-                            <DetailValueBlock title="usage" value={detail.usage} />
+                          {Silian_detail?.usage && (
+                            <Silian_DetailValueBlock title="usage" value={Silian_detail.usage} />
                           )}
-                          {detail?.context && (
-                            <DetailValueBlock title="context" value={detail.context} />
+                          {Silian_detail?.context && (
+                            <Silian_DetailValueBlock title="context" value={Silian_detail.context} />
                           )}
                         </div>
                       )}
                     />
                   );
                 })}
-              </Section>
+              </Silian_Section>
             </>
           )}
         </div>
@@ -367,181 +367,181 @@ export function RequestIdRelatedDrawer({
   );
 }
 
-function Section({ title, children }) {
+function Silian_Section({ title: Silian_title, children: Silian_children }) {
   return (
     <div>
-      <h3 className="mb-2 font-semibold">{title}</h3>
-      {children}
+      <h3 className="mb-2 font-semibold">{Silian_title}</h3>
+      {Silian_children}
     </div>
   );
 }
 
-function ExpandableItem({ summary, detail, openLabel, closeLabel, onOpen, toneClass }) {
-  const [open, setOpen] = useState(false);
-  const toggleOpen = () => {
-    setOpen((prev) => {
-      const next = !prev;
-      if (next) onOpen?.();
-      return next;
+function Silian_ExpandableItem({ summary: Silian_summary, detail: Silian_detail, openLabel: Silian_openLabel, closeLabel: Silian_closeLabel, onOpen: Silian_onOpen, toneClass: Silian_toneClass }) {
+  const [Silian_open, Silian_setOpen] = Silian_useState(false);
+  const Silian_toggleOpen = () => {
+    Silian_setOpen((Silian_prev) => {
+      const Silian_next = !Silian_prev;
+      if (Silian_next) Silian_onOpen?.();
+      return Silian_next;
     });
   };
 
   return (
-    <div className={`mb-2 rounded-lg border p-3 ${toneClass}`}>
+    <div className={`mb-2 rounded-lg border p-3 ${Silian_toneClass}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">{summary}</div>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">{Silian_summary}</div>
         <button
           type="button"
           className="text-[11px] text-primary transition-colors hover:text-primary/80"
-          onClick={toggleOpen}
-          aria-expanded={open}
+          onClick={Silian_toggleOpen}
+          aria-expanded={Silian_open}
         >
-          {open ? closeLabel : openLabel}
+          {Silian_open ? Silian_closeLabel : Silian_openLabel}
         </button>
       </div>
-      {open && (
+      {Silian_open && (
         <div className="mt-3 border-t border-border pt-3">
-          {detail}
+          {Silian_detail}
         </div>
       )}
     </div>
   );
 }
 
-function KeyValueItem({ label, value }) {
+function Silian_KeyValueItem({ label: Silian_label, value: Silian_value }) {
   return (
     <div>
-      <span className="mr-1 text-muted-foreground">{label}:</span>
-      <span className="font-mono">{String(value ?? '-')}</span>
+      <span className="mr-1 text-muted-foreground">{Silian_label}:</span>
+      <span className="font-mono">{String(Silian_value ?? '-')}</span>
     </div>
   );
 }
 
-function DetailGrid({ items }) {
+function Silian_DetailGrid({ items: Silian_items }) {
   return (
     <div className="grid gap-2 text-[11px] md:grid-cols-2">
-      {items.map((item, index) => (
-        <div key={`${item.label}-${index}`} className={item.span ? 'md:col-span-2' : ''}>
-          <KeyValueItem label={item.label} value={item.value} />
+      {Silian_items.map((Silian_item, Silian_index) => (
+        <div key={`${Silian_item.label}-${Silian_index}`} className={Silian_item.span ? 'md:col-span-2' : ''}>
+          <Silian_KeyValueItem label={Silian_item.label} value={Silian_item.value} />
         </div>
       ))}
     </div>
   );
 }
 
-function DetailBlock({ title, children }) {
+function Silian_DetailBlock({ title: Silian_title, children: Silian_children }) {
   return (
     <div className="space-y-2">
       <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-        {title}
+        {Silian_title}
       </div>
-      {children}
+      {Silian_children}
     </div>
   );
 }
 
-function DetailValueBlock({ title, value }) {
-  if (value == null || value === '') return null;
+function Silian_DetailValueBlock({ title: Silian_title, value: Silian_value }) {
+  if (Silian_value == null || Silian_value === '') return null;
   return (
-    <DetailBlock title={title}>
-      <DetailValue value={value} />
-    </DetailBlock>
+    <Silian_DetailBlock title={Silian_title}>
+      <Silian_DetailValue value={Silian_value} />
+    </Silian_DetailBlock>
   );
 }
 
-function DetailTextBlock({ title, value, toneClass }) {
-  if (value == null || value === '') return null;
+function Silian_DetailTextBlock({ title: Silian_title, value: Silian_value, toneClass: Silian_toneClass }) {
+  if (Silian_value == null || Silian_value === '') return null;
   return (
-    <DetailBlock title={title}>
-      <pre className={`max-h-64 overflow-auto whitespace-pre-wrap rounded p-3 text-[11px] ${toneClass}`}>
-        {String(value)}
+    <Silian_DetailBlock title={Silian_title}>
+      <pre className={`max-h-64 overflow-auto whitespace-pre-wrap rounded p-3 text-[11px] ${Silian_toneClass}`}>
+        {String(Silian_value)}
       </pre>
-    </DetailBlock>
+    </Silian_DetailBlock>
   );
 }
 
-function DetailValue({ value }) {
-  if (value == null || value === '') return null;
-  const parsed = parseMaybeJson(value);
-  if (typeof parsed === 'string') {
+function Silian_DetailValue({ value: Silian_value }) {
+  if (Silian_value == null || Silian_value === '') return null;
+  const Silian_parsed = Silian_parseMaybeJson(Silian_value);
+  if (typeof Silian_parsed === 'string') {
     return (
       <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded border border-border bg-slate-950 p-3 text-[11px] text-slate-100">
-        {parsed}
+        {Silian_parsed}
       </pre>
     );
   }
-  return <JsonTreeViewer value={parsed} collapsed maxHeight="18rem" />;
+  return <Silian_JsonTreeViewer value={Silian_parsed} collapsed maxHeight="18rem" />;
 }
 
-function parseMaybeJson(value) {
-  if (value == null) return null;
-  if (typeof value === 'object') return value;
-  if (typeof value !== 'string') return value;
+function Silian_parseMaybeJson(Silian_value) {
+  if (Silian_value == null) return null;
+  if (typeof Silian_value === 'object') return Silian_value;
+  if (typeof Silian_value !== 'string') return Silian_value;
   try {
-    return JSON.parse(value);
+    return JSON.parse(Silian_value);
   } catch {
-    return value;
+    return Silian_value;
   }
 }
 
 RequestIdRelatedDrawer.propTypes = {
-  open: PropTypes.bool,
-  onClose: PropTypes.func,
-  requestId: PropTypes.string,
-  data: PropTypes.object,
-  loading: PropTypes.bool,
-  onRefresh: PropTypes.func,
-  system: PropTypes.array,
-  audit: PropTypes.array,
-  error: PropTypes.array,
-  llm: PropTypes.array
+  open: Silian_PropTypes.bool,
+  onClose: Silian_PropTypes.func,
+  requestId: Silian_PropTypes.string,
+  data: Silian_PropTypes.object,
+  loading: Silian_PropTypes.bool,
+  onRefresh: Silian_PropTypes.func,
+  system: Silian_PropTypes.array,
+  audit: Silian_PropTypes.array,
+  error: Silian_PropTypes.array,
+  llm: Silian_PropTypes.array
 };
 
-Section.propTypes = {
-  title: PropTypes.node,
-  children: PropTypes.node
+Silian_Section.propTypes = {
+  title: Silian_PropTypes.node,
+  children: Silian_PropTypes.node
 };
 
-ExpandableItem.propTypes = {
-  summary: PropTypes.node,
-  detail: PropTypes.node,
-  openLabel: PropTypes.node,
-  closeLabel: PropTypes.node,
-  onOpen: PropTypes.func,
-  toneClass: PropTypes.string
+Silian_ExpandableItem.propTypes = {
+  summary: Silian_PropTypes.node,
+  detail: Silian_PropTypes.node,
+  openLabel: Silian_PropTypes.node,
+  closeLabel: Silian_PropTypes.node,
+  onOpen: Silian_PropTypes.func,
+  toneClass: Silian_PropTypes.string
 };
 
-KeyValueItem.propTypes = {
-  label: PropTypes.node,
-  value: PropTypes.any
+Silian_KeyValueItem.propTypes = {
+  label: Silian_PropTypes.node,
+  value: Silian_PropTypes.any
 };
 
-DetailGrid.propTypes = {
-  items: PropTypes.arrayOf(PropTypes.shape({
-    label: PropTypes.node,
-    value: PropTypes.any,
-    span: PropTypes.bool
+Silian_DetailGrid.propTypes = {
+  items: Silian_PropTypes.arrayOf(Silian_PropTypes.shape({
+    label: Silian_PropTypes.node,
+    value: Silian_PropTypes.any,
+    span: Silian_PropTypes.bool
   }))
 };
 
-DetailBlock.propTypes = {
-  title: PropTypes.node,
-  children: PropTypes.node
+Silian_DetailBlock.propTypes = {
+  title: Silian_PropTypes.node,
+  children: Silian_PropTypes.node
 };
 
-DetailValueBlock.propTypes = {
-  title: PropTypes.node,
-  value: PropTypes.any
+Silian_DetailValueBlock.propTypes = {
+  title: Silian_PropTypes.node,
+  value: Silian_PropTypes.any
 };
 
-DetailTextBlock.propTypes = {
-  title: PropTypes.node,
-  value: PropTypes.any,
-  toneClass: PropTypes.string
+Silian_DetailTextBlock.propTypes = {
+  title: Silian_PropTypes.node,
+  value: Silian_PropTypes.any,
+  toneClass: Silian_PropTypes.string
 };
 
-DetailValue.propTypes = {
-  value: PropTypes.any
+Silian_DetailValue.propTypes = {
+  value: Silian_PropTypes.any
 };
 
 export default RequestIdRelatedDrawer;

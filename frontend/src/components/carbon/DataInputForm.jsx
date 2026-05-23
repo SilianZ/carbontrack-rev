@@ -1,51 +1,51 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Calculator, Calendar, FileText, Upload, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
-import { batchUpload } from '../../lib/r2Upload';
-import { useTranslation } from '../../hooks/useTranslation';
-import { cn } from '../../lib/utils';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
-import { Alert, AlertDescription } from '../ui/Alert';
+import Silian_React, { useCallback as Silian_useCallback, useEffect as Silian_useEffect, useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { useForm as Silian_useForm } from 'react-hook-form';
+import { Calculator as Silian_Calculator, Calendar as Silian_Calendar, FileText as Silian_FileText, Upload as Silian_Upload, AlertCircle as Silian_AlertCircle, Image as Silian_ImageIcon, X as Silian_X } from 'lucide-react';
+import { batchUpload as Silian_batchUpload } from '../../lib/r2Upload';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { cn as Silian_cn } from '../../lib/utils';
+import { Button as Silian_Button } from '../ui/Button';
+import { Input as Silian_Input } from '../ui/Input';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../ui/Card';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '../ui/Alert';
 // 移除即时上传组件，改为提交时统一上传
 
-const MAX_UPLOAD_FILES = 5;
-const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
-const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-const SUPPORTED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+const Silian_MAX_UPLOAD_FILES = 5;
+const Silian_MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
+const Silian_SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+const Silian_SUPPORTED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
 export default function DataInputForm({
-  activity,
-  onCalculate,
-  onSubmit,
-  calculationResult,
-  isSubmitting,
-  initialData,
-  checkinDate
+  activity: Silian_activity,
+  onCalculate: Silian_onCalculate,
+  onSubmit: Silian_onSubmit,
+  calculationResult: Silian_calculationResult,
+  isSubmitting: Silian_isSubmitting,
+  initialData: Silian_initialData,
+  checkinDate: Silian_checkinDate
 }) {
-  const { t, currentLanguage, tFileSize } = useTranslation(['activities', 'common', 'date', 'errors', 'units', 'validation']);
+  const { t: Silian_t, currentLanguage: Silian_currentLanguage, tFileSize: Silian_tFileSize } = Silian_useTranslation(['activities', 'common', 'date', 'errors', 'units', 'validation']);
   // 选中的本地文件（未立即上传）
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [uploadError, setUploadError] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadedMeta, setUploadedMeta] = useState([]); // 成功上传后的元数据
-  const [previewUrls, setPreviewUrls] = useState([]);
-  const [progress, setProgress] = useState({ done: 0, total: 0 });
-  const [showCalculation, setShowCalculation] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef(null);
-  const getSafePreviewUrl = useCallback((previewUrl) => (
-    typeof previewUrl === 'string' && previewUrl.startsWith('blob:') ? previewUrl : ''
+  const [Silian_selectedFiles, Silian_setSelectedFiles] = Silian_useState([]);
+  const [Silian_uploadError, Silian_setUploadError] = Silian_useState(null);
+  const [Silian_uploading, Silian_setUploading] = Silian_useState(false);
+  const [Silian_uploadedMeta, Silian_setUploadedMeta] = Silian_useState([]); // 成功上传后的元数据
+  const [Silian_previewUrls, Silian_setPreviewUrls] = Silian_useState([]);
+  const [Silian_progress, Silian_setProgress] = Silian_useState({ done: 0, total: 0 });
+  const [Silian_showCalculation, Silian_setShowCalculation] = Silian_useState(false);
+  const [Silian_isDragging, Silian_setIsDragging] = Silian_useState(false);
+  const Silian_fileInputRef = Silian_useRef(null);
+  const Silian_getSafePreviewUrl = Silian_useCallback((Silian_previewUrl) => (
+    typeof Silian_previewUrl === 'string' && Silian_previewUrl.startsWith('blob:') ? Silian_previewUrl : ''
   ), []);
 
   const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors }
-  } = useForm({
+    register: Silian_register,
+    handleSubmit: Silian_handleSubmit,
+    watch: Silian_watch,
+    setValue: Silian_setValue,
+    formState: { errors: Silian_errors }
+  } = Silian_useForm({
     defaultValues: {
       activity_date: new Date().toISOString().split('T')[0],
       description: ''
@@ -53,419 +53,419 @@ export default function DataInputForm({
   });
 
   // Handle initial data from Smart Add
-  useEffect(() => {
-    if (initialData && initialData.amount) {
-      setValue('data', initialData.amount);
-      if (initialData.description) {
-        setValue('description', initialData.description);
+  Silian_useEffect(() => {
+    if (Silian_initialData && Silian_initialData.amount) {
+      Silian_setValue('data', Silian_initialData.amount);
+      if (Silian_initialData.description) {
+        Silian_setValue('description', Silian_initialData.description);
       }
-      if (initialData.activity_date) {
-        setValue('activity_date', initialData.activity_date);
+      if (Silian_initialData.activity_date) {
+        Silian_setValue('activity_date', Silian_initialData.activity_date);
       }
       // Trigger calculation if needed, but the existing useEffect watches 'watchedData' which will update when we setValue
     }
-  }, [initialData, setValue]);
+  }, [Silian_initialData, Silian_setValue]);
 
-  const watchedData = watch('data');
+  const Silian_watchedData = Silian_watch('data');
 
   // 避免在开发模式 StrictMode 下的双调用，以及快速输入引发的请求风暴：
   // - 使用 debounce（300ms）
   // - 使用 lastCalcKeyRef 记录上次计算的 key（activityId+data），相同时不重复调用
-  const lastCalcKeyRef = useRef('');
-  const debounceTimerRef = useRef(null);
+  const Silian_lastCalcKeyRef = Silian_useRef('');
+  const Silian_debounceTimerRef = Silian_useRef(null);
 
-  useEffect(() => {
-    const activityId = activity?.id || activity?.uuid || '';
-    const val = watchedData;
+  Silian_useEffect(() => {
+    const Silian_activityId = Silian_activity?.id || Silian_activity?.uuid || '';
+    const Silian_val = Silian_watchedData;
 
     // 清理上一次的定时器
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
+    if (Silian_debounceTimerRef.current) {
+      clearTimeout(Silian_debounceTimerRef.current);
+      Silian_debounceTimerRef.current = null;
     }
 
     // 输入为空或非正数时隐藏计算结果
-    const parsed = parseFloat(val);
-    if (!activityId || !val || isNaN(parsed) || parsed <= 0) {
-      setShowCalculation(false);
+    const Silian_parsed = parseFloat(Silian_val);
+    if (!Silian_activityId || !Silian_val || isNaN(Silian_parsed) || Silian_parsed <= 0) {
+      Silian_setShowCalculation(false);
       return;
     }
 
     // 设置防抖
-    debounceTimerRef.current = setTimeout(() => {
-      const key = `${activityId}::${parsed}`;
-      if (lastCalcKeyRef.current === key) {
+    Silian_debounceTimerRef.current = setTimeout(() => {
+      const Silian_key = `${Silian_activityId}::${Silian_parsed}`;
+      if (Silian_lastCalcKeyRef.current === Silian_key) {
         // 与上次相同参数，避免重复调用
-        setShowCalculation(true);
+        Silian_setShowCalculation(true);
         return;
       }
-      lastCalcKeyRef.current = key;
-      onCalculate(parsed);
-      setShowCalculation(true);
+      Silian_lastCalcKeyRef.current = Silian_key;
+      Silian_onCalculate(Silian_parsed);
+      Silian_setShowCalculation(true);
     }, 300);
 
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
+      if (Silian_debounceTimerRef.current) {
+        clearTimeout(Silian_debounceTimerRef.current);
+        Silian_debounceTimerRef.current = null;
       }
     };
-  }, [activity, watchedData, onCalculate]);
+  }, [Silian_activity, Silian_watchedData, Silian_onCalculate]);
 
-  const setDetailedUploadError = (summary, details = []) => {
-    setUploadError({
-      summary,
-      details: details.filter(Boolean),
+  const Silian_setDetailedUploadError = (Silian_summary, Silian_details = []) => {
+    Silian_setUploadError({
+      summary: Silian_summary,
+      details: Silian_details.filter(Boolean),
     });
   };
 
-  const buildUploadErrorFromException = (error) => {
-    const rawMessage = String(error?.rawMessage || error?.message || '').trim();
-    const normalizedMessage = rawMessage.toLowerCase();
-    const status = error?.status ?? null;
-    const requestId = error?.requestId || error?.request_id || null;
-    const fileName = error?.fileName || error?.file_name || null;
-    const step = error?.step || null;
-    const details = [];
-    const supportedFormats = SUPPORTED_IMAGE_EXTENSIONS.map((item) => item.toUpperCase()).join(', ');
+  const Silian_buildUploadErrorFromException = (Silian_error) => {
+    const Silian_rawMessage = String(Silian_error?.rawMessage || Silian_error?.message || '').trim();
+    const Silian_normalizedMessage = Silian_rawMessage.toLowerCase();
+    const Silian_status = Silian_error?.status ?? null;
+    const Silian_requestId = Silian_error?.requestId || Silian_error?.request_id || null;
+    const Silian_fileName = Silian_error?.fileName || Silian_error?.file_name || null;
+    const Silian_step = Silian_error?.step || null;
+    const Silian_details = [];
+    const Silian_supportedFormats = Silian_SUPPORTED_IMAGE_EXTENSIONS.map((Silian_item) => Silian_item.toUpperCase()).join(', ');
 
-    if (fileName) {
-      details.push(t('activities.form.uploadErrors.details.file', { name: fileName }));
+    if (Silian_fileName) {
+      Silian_details.push(Silian_t('activities.form.uploadErrors.details.file', { name: Silian_fileName }));
     }
 
-    if (requestId) {
-      details.push(t('activities.form.uploadErrors.details.requestId', { id: requestId }));
+    if (Silian_requestId) {
+      Silian_details.push(Silian_t('activities.form.uploadErrors.details.requestId', { id: Silian_requestId }));
     }
 
-    if (status === 401 || normalizedMessage === 'unauthorized') {
+    if (Silian_status === 401 || Silian_normalizedMessage === 'unauthorized') {
       return {
-        summary: t('activities.form.uploadErrors.expiredSessionSummary'),
-        details,
+        summary: Silian_t('activities.form.uploadErrors.expiredSessionSummary'),
+        details: Silian_details,
       };
     }
 
-    if (rawMessage === 'MIME type not allowed' || rawMessage === 'File extension not allowed') {
+    if (Silian_rawMessage === 'MIME type not allowed' || Silian_rawMessage === 'File extension not allowed') {
       return {
-        summary: t('activities.form.uploadErrors.unsupportedFormatSummary'),
+        summary: Silian_t('activities.form.uploadErrors.unsupportedFormatSummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.details.supportedFormats', { formats: supportedFormats }),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.details.supportedFormats', { formats: Silian_supportedFormats }),
         ],
       };
     }
 
-    if (rawMessage === 'File size exceeds limit') {
+    if (Silian_rawMessage === 'File size exceeds limit') {
       return {
-        summary: t('activities.form.uploadErrors.fileTooLargeSummary'),
+        summary: Silian_t('activities.form.uploadErrors.fileTooLargeSummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.details.maxSize', { size: tFileSize(MAX_UPLOAD_SIZE) }),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.details.maxSize', { size: Silian_tFileSize(Silian_MAX_UPLOAD_SIZE) }),
         ],
       };
     }
 
-    if (rawMessage === 'File not found in storage') {
+    if (Silian_rawMessage === 'File not found in storage') {
       return {
-        summary: t('activities.form.uploadErrors.storageDelaySummary'),
+        summary: Silian_t('activities.form.uploadErrors.storageDelaySummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.storageDelayDetail'),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.storageDelayDetail'),
         ],
       };
     }
 
-    if (rawMessage === 'File ownership conflict detected' || error?.code === 'FILE_OWNERSHIP_CONFLICT') {
+    if (Silian_rawMessage === 'File ownership conflict detected' || Silian_error?.code === 'FILE_OWNERSHIP_CONFLICT') {
       return {
-        summary: t('activities.form.uploadErrors.ownershipConflictSummary'),
+        summary: Silian_t('activities.form.uploadErrors.ownershipConflictSummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.ownershipConflictDetail'),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.ownershipConflictDetail'),
         ],
       };
     }
 
-    if (rawMessage === 'Invalid directory name') {
+    if (Silian_rawMessage === 'Invalid directory name') {
       return {
-        summary: t('activities.form.uploadErrors.invalidConfigSummary'),
+        summary: Silian_t('activities.form.uploadErrors.invalidConfigSummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.invalidConfigDetail'),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.invalidConfigDetail'),
         ],
       };
     }
 
     if (
-      normalizedMessage.includes('network error') ||
-      normalizedMessage.includes('failed to fetch') ||
-      error?.code === 'ERR_NETWORK'
+      Silian_normalizedMessage.includes('network error') ||
+      Silian_normalizedMessage.includes('failed to fetch') ||
+      Silian_error?.code === 'ERR_NETWORK'
     ) {
       return {
-        summary: t('activities.form.uploadErrors.networkSummary'),
+        summary: Silian_t('activities.form.uploadErrors.networkSummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.networkDetail'),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.networkDetail'),
         ],
       };
     }
 
-    if (normalizedMessage.includes('timeout') || error?.code === 'ECONNABORTED') {
+    if (Silian_normalizedMessage.includes('timeout') || Silian_error?.code === 'ECONNABORTED') {
       return {
-        summary: t('activities.form.uploadErrors.timeoutSummary'),
+        summary: Silian_t('activities.form.uploadErrors.timeoutSummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.timeoutDetail'),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.timeoutDetail'),
         ],
       };
     }
 
-    if (step === 'put') {
+    if (Silian_step === 'put') {
       return {
-        summary: t('activities.form.uploadErrors.putSummary'),
+        summary: Silian_t('activities.form.uploadErrors.putSummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.putDetail'),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.putDetail'),
         ],
       };
     }
 
-    if (step === 'presign') {
+    if (Silian_step === 'presign') {
       return {
-        summary: t('activities.form.uploadErrors.presignSummary'),
+        summary: Silian_t('activities.form.uploadErrors.presignSummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.presignDetail'),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.presignDetail'),
         ],
       };
     }
 
-    if (step === 'confirm') {
+    if (Silian_step === 'confirm') {
       return {
-        summary: t('activities.form.uploadErrors.confirmSummary'),
+        summary: Silian_t('activities.form.uploadErrors.confirmSummary'),
         details: [
-          ...details,
-          t('activities.form.uploadErrors.confirmDetail'),
+          ...Silian_details,
+          Silian_t('activities.form.uploadErrors.confirmDetail'),
         ],
       };
     }
 
     return {
-      summary: t('activities.form.uploadErrors.genericSummary'),
+      summary: Silian_t('activities.form.uploadErrors.genericSummary'),
       details: [
-        ...details,
-        rawMessage
-          ? t('activities.form.uploadErrors.details.serverMessage', { message: rawMessage })
-          : t('activities.form.uploadErrors.genericDetail'),
+        ...Silian_details,
+        Silian_rawMessage
+          ? Silian_t('activities.form.uploadErrors.details.serverMessage', { message: Silian_rawMessage })
+          : Silian_t('activities.form.uploadErrors.genericDetail'),
       ],
     };
   };
 
-  const isSupportedImageFile = (file) => {
-    const ext = (file?.name?.split('.').pop() || '').toLowerCase();
-    if (file?.type && SUPPORTED_IMAGE_MIME_TYPES.includes(file.type)) {
+  const Silian_isSupportedImageFile = (Silian_file) => {
+    const Silian_ext = (Silian_file?.name?.split('.').pop() || '').toLowerCase();
+    if (Silian_file?.type && Silian_SUPPORTED_IMAGE_MIME_TYPES.includes(Silian_file.type)) {
       return true;
     }
-    return SUPPORTED_IMAGE_EXTENSIONS.includes(ext);
+    return Silian_SUPPORTED_IMAGE_EXTENSIONS.includes(Silian_ext);
   };
 
-  const onFormSubmit = async (data) => {
-    setUploadError(null);
+  const Silian_onFormSubmit = async (Silian_data) => {
+    Silian_setUploadError(null);
     // 校验至少一张图片
-    if (!selectedFiles.length && !uploadedMeta.length) {
-      setDetailedUploadError(
-        t('activities.form.imageRequired'),
+    if (!Silian_selectedFiles.length && !Silian_uploadedMeta.length) {
+      Silian_setDetailedUploadError(
+        Silian_t('activities.form.imageRequired'),
         [
-          t('activities.form.uploadErrors.proofImageRequiredDetail'),
+          Silian_t('activities.form.uploadErrors.proofImageRequiredDetail'),
         ]
       );
       return;
     }
     // 若还未上传（正常情况）则先上传
-    let finalImages = uploadedMeta;
-    if (!uploadedMeta.length && selectedFiles.length) {
+    let Silian_finalImages = Silian_uploadedMeta;
+    if (!Silian_uploadedMeta.length && Silian_selectedFiles.length) {
       try {
-        setUploading(true);
-        const total = selectedFiles.length;
-        setProgress({ done: 0, total });
-        const results = await batchUpload(selectedFiles, { directory: 'activities', entityType: 'carbon_record' }, (idx, len) => {
-          setProgress({ done: idx, total: len });
+        Silian_setUploading(true);
+        const Silian_total = Silian_selectedFiles.length;
+        Silian_setProgress({ done: 0, total: Silian_total });
+        const Silian_results = await Silian_batchUpload(Silian_selectedFiles, { directory: 'activities', entityType: 'carbon_record' }, (Silian_idx, Silian_len) => {
+          Silian_setProgress({ done: Silian_idx, total: Silian_len });
         });
-        finalImages = results.map(r => ({
-          url: r.url,
-          file_path: r.file_path,
-          original_name: r.original_name,
-          mime_type: r.mime_type,
-          size: r.size
+        Silian_finalImages = Silian_results.map(Silian_r => ({
+          url: Silian_r.url,
+          file_path: Silian_r.file_path,
+          original_name: Silian_r.original_name,
+          mime_type: Silian_r.mime_type,
+          size: Silian_r.size
         }));
-        setUploadedMeta(finalImages);
-      } catch (e) {
-        const readableError = buildUploadErrorFromException(e);
-        setDetailedUploadError(readableError.summary, readableError.details);
-        setUploading(false);
+        Silian_setUploadedMeta(Silian_finalImages);
+      } catch (Silian_e) {
+        const Silian_readableError = Silian_buildUploadErrorFromException(Silian_e);
+        Silian_setDetailedUploadError(Silian_readableError.summary, Silian_readableError.details);
+        Silian_setUploading(false);
         return;
       }
-      setUploading(false);
+      Silian_setUploading(false);
     }
 
-    const payload = {
-      activity_id: activity.id || activity.uuid,
-      amount: parseFloat(data.data),
-      date: data.activity_date,
-      description: data.description,
-      images: (finalImages || []).map(i => ({ url: i.url, file_path: i.file_path, original_name: i.original_name, mime_type: i.mime_type, size: i.size }))
+    const Silian_payload = {
+      activity_id: Silian_activity.id || Silian_activity.uuid,
+      amount: parseFloat(Silian_data.data),
+      date: Silian_data.activity_date,
+      description: Silian_data.description,
+      images: (Silian_finalImages || []).map(Silian_i => ({ url: Silian_i.url, file_path: Silian_i.file_path, original_name: Silian_i.original_name, mime_type: Silian_i.mime_type, size: Silian_i.size }))
     };
-    if (checkinDate) {
-      payload.checkin_date = checkinDate;
+    if (Silian_checkinDate) {
+      Silian_payload.checkin_date = Silian_checkinDate;
     }
-    onSubmit(payload);
+    Silian_onSubmit(Silian_payload);
   };
 
-  const processFiles = (files) => {
-    setUploadError(null);
+  const Silian_processFiles = (Silian_files) => {
+    Silian_setUploadError(null);
 
-    const currentFiles = [...selectedFiles];
-    const currentPreviews = [...previewUrls];
+    const Silian_currentFiles = [...Silian_selectedFiles];
+    const Silian_currentPreviews = [...Silian_previewUrls];
 
-    if (currentFiles.length + files.length > MAX_UPLOAD_FILES) {
-      setDetailedUploadError(
-        t('activities.form.maxFilesReached'),
+    if (Silian_currentFiles.length + Silian_files.length > Silian_MAX_UPLOAD_FILES) {
+      Silian_setDetailedUploadError(
+        Silian_t('activities.form.maxFilesReached'),
         [
-          t('activities.form.uploadErrors.maxFilesDetail', { current: currentFiles.length, incoming: files.length }),
+          Silian_t('activities.form.uploadErrors.maxFilesDetail', { current: Silian_currentFiles.length, incoming: Silian_files.length }),
         ]
       );
       return;
     }
 
-    const newFiles = [];
-    const newPreviews = [];
+    const Silian_newFiles = [];
+    const Silian_newPreviews = [];
 
-    for (const f of files) {
-      if (!isSupportedImageFile(f)) {
-        setDetailedUploadError(
-          t('activities.form.uploadErrors.unsupportedFormatSummary'),
+    for (const Silian_f of Silian_files) {
+      if (!Silian_isSupportedImageFile(Silian_f)) {
+        Silian_setDetailedUploadError(
+          Silian_t('activities.form.uploadErrors.unsupportedFormatSummary'),
           [
-            t('activities.form.uploadErrors.details.file', { name: f.name }),
-            t('activities.form.uploadErrors.details.supportedFormats', {
-              formats: SUPPORTED_IMAGE_EXTENSIONS.map((item) => item.toUpperCase()).join(', '),
+            Silian_t('activities.form.uploadErrors.details.file', { name: Silian_f.name }),
+            Silian_t('activities.form.uploadErrors.details.supportedFormats', {
+              formats: Silian_SUPPORTED_IMAGE_EXTENSIONS.map((Silian_item) => Silian_item.toUpperCase()).join(', '),
             }),
           ]
         );
         continue;
       }
-      if (f.size > MAX_UPLOAD_SIZE) {
-        setDetailedUploadError(
-          t('activities.form.fileTooLarge'),
+      if (Silian_f.size > Silian_MAX_UPLOAD_SIZE) {
+        Silian_setDetailedUploadError(
+          Silian_t('activities.form.fileTooLarge'),
           [
-            t('activities.form.uploadErrors.details.file', { name: f.name }),
-            t('activities.form.uploadErrors.details.currentSize', { size: tFileSize(f.size) }),
-            t('activities.form.uploadErrors.details.maxSize', { size: tFileSize(MAX_UPLOAD_SIZE) }),
+            Silian_t('activities.form.uploadErrors.details.file', { name: Silian_f.name }),
+            Silian_t('activities.form.uploadErrors.details.currentSize', { size: Silian_tFileSize(Silian_f.size) }),
+            Silian_t('activities.form.uploadErrors.details.maxSize', { size: Silian_tFileSize(Silian_MAX_UPLOAD_SIZE) }),
           ]
         );
         continue;
       }
       // 简单去重：同名同大小
-      if (currentFiles.some(existing => existing.name === f.name && existing.size === f.size)) {
+      if (Silian_currentFiles.some(Silian_existing => Silian_existing.name === Silian_f.name && Silian_existing.size === Silian_f.size)) {
         continue;
       }
-      newFiles.push(f);
-      newPreviews.push(URL.createObjectURL(f));
+      Silian_newFiles.push(Silian_f);
+      Silian_newPreviews.push(URL.createObjectURL(Silian_f));
     }
 
-    setSelectedFiles([...currentFiles, ...newFiles]);
-    setPreviewUrls([...currentPreviews, ...newPreviews]);
+    Silian_setSelectedFiles([...Silian_currentFiles, ...Silian_newFiles]);
+    Silian_setPreviewUrls([...Silian_currentPreviews, ...Silian_newPreviews]);
   };
 
-  const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files || []);
-    processFiles(files);
-    e.target.value = null; // 重置 input，允许重复选择同一文件
+  const Silian_handleFileSelect = (Silian_e) => {
+    const Silian_files = Array.from(Silian_e.target.files || []);
+    Silian_processFiles(Silian_files);
+    Silian_e.target.value = null; // 重置 input，允许重复选择同一文件
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
+  const Silian_handleDragOver = (Silian_e) => {
+    Silian_e.preventDefault();
+    Silian_e.stopPropagation();
+    Silian_setIsDragging(true);
   };
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
+  const Silian_handleDragLeave = (Silian_e) => {
+    Silian_e.preventDefault();
+    Silian_e.stopPropagation();
+    Silian_setIsDragging(false);
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files || []);
-    processFiles(files);
+  const Silian_handleDrop = (Silian_e) => {
+    Silian_e.preventDefault();
+    Silian_e.stopPropagation();
+    Silian_setIsDragging(false);
+    const Silian_files = Array.from(Silian_e.dataTransfer.files || []);
+    Silian_processFiles(Silian_files);
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
+  const Silian_triggerFileInput = () => {
+    Silian_fileInputRef.current?.click();
   };
 
-  const removeFile = (idx) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== idx));
-    setPreviewUrls(prev => {
-      const newUrls = prev.filter((_, i) => i !== idx);
+  const Silian_removeFile = (Silian_idx) => {
+    Silian_setSelectedFiles(Silian_prev => Silian_prev.filter((Silian__, Silian_i) => Silian_i !== Silian_idx));
+    Silian_setPreviewUrls(Silian_prev => {
+      const Silian_newUrls = Silian_prev.filter((Silian__, Silian_i) => Silian_i !== Silian_idx);
       // 释放被删除的 URL 对象
-      if (prev[idx]) URL.revokeObjectURL(prev[idx]);
-      return newUrls;
+      if (Silian_prev[Silian_idx]) URL.revokeObjectURL(Silian_prev[Silian_idx]);
+      return Silian_newUrls;
     });
   };
 
-  if (!activity) {
+  if (!Silian_activity) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <AlertCircle className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-          <p className="text-muted-foreground">{t('activities.selectActivityFirst')}</p>
-        </CardContent>
-      </Card>
+      <Silian_Card>
+        <Silian_CardContent className="py-12 text-center">
+          <Silian_AlertCircle className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+          <p className="text-muted-foreground">{Silian_t('activities.selectActivityFirst')}</p>
+        </Silian_CardContent>
+      </Silian_Card>
     );
   }
 
-  const getActivityName = (activity) => {
-    const isEn = (currentLanguage || '').toLowerCase().startsWith('en');
-    return isEn
-      ? (activity.name_en || activity.name_zh || activity.name)
-      : (activity.name_zh || activity.name_en || activity.name);
+  const Silian_getActivityName = (Silian_activity) => {
+    const Silian_isEn = (Silian_currentLanguage || '').toLowerCase().startsWith('en');
+    return Silian_isEn
+      ? (Silian_activity.name_en || Silian_activity.name_zh || Silian_activity.name)
+      : (Silian_activity.name_zh || Silian_activity.name_en || Silian_activity.name);
   };
 
-  const getActivityDescription = (activity) => {
-    const isEn = (currentLanguage || '').toLowerCase().startsWith('en');
-    return isEn
-      ? (activity.description_en || activity.description_zh || activity.description)
-      : (activity.description_zh || activity.description_en || activity.description);
+  const Silian_getActivityDescription = (Silian_activity) => {
+    const Silian_isEn = (Silian_currentLanguage || '').toLowerCase().startsWith('en');
+    return Silian_isEn
+      ? (Silian_activity.description_en || Silian_activity.description_zh || Silian_activity.description)
+      : (Silian_activity.description_zh || Silian_activity.description_en || Silian_activity.description);
   };
 
-  const calculationCard = (showCalculation && calculationResult) ? (
-    <Card className="border-green-500/20 bg-green-500/10 shadow-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-green-500">
-          {t('activities.form.calculationResult')}
-        </CardTitle>
-        <CardDescription className="text-xs">
-          {t('activities.form.previewAutoUpdate')}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-0">
+  const Silian_calculationCard = (Silian_showCalculation && Silian_calculationResult) ? (
+    <Silian_Card className="border-green-500/20 bg-green-500/10 shadow-sm">
+      <Silian_CardHeader className="pb-3">
+        <Silian_CardTitle className="text-sm font-medium text-green-500">
+          {Silian_t('activities.form.calculationResult')}
+        </Silian_CardTitle>
+        <Silian_CardDescription className="text-xs">
+          {Silian_t('activities.form.previewAutoUpdate')}
+        </Silian_CardDescription>
+      </Silian_CardHeader>
+      <Silian_CardContent className="pt-0">
         <div className="space-y-4">
           <div className="rounded-lg border border-border bg-card p-3">
-            <div className="mb-1 text-xs text-muted-foreground">{t('activities.form.carbonSavedMetric')}</div>
+            <div className="mb-1 text-xs text-muted-foreground">{Silian_t('activities.form.carbonSavedMetric')}</div>
             <div className="text-2xl font-bold text-green-600 leading-none">
-              {(() => { const v = calculationResult.carbon_saved; const num = typeof v === 'number' ? v : Number(v); return Number.isFinite(num) ? num.toFixed(2) : '0.00'; })()}
+              {(() => { const Silian_v = Silian_calculationResult.carbon_saved; const Silian_num = typeof Silian_v === 'number' ? Silian_v : Number(Silian_v); return Number.isFinite(Silian_num) ? Silian_num.toFixed(2) : '0.00'; })()}
             </div>
           </div>
           <div className="rounded-lg border border-border bg-card p-3">
-            <div className="mb-1 text-xs text-muted-foreground">{t('activities.form.expectedPoints')}</div>
+            <div className="mb-1 text-xs text-muted-foreground">{Silian_t('activities.form.expectedPoints')}</div>
             <div className="text-2xl font-bold text-blue-600 leading-none">
-              {calculationResult.points_earned ?? 0}
+              {Silian_calculationResult.points_earned ?? 0}
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </Silian_CardContent>
+    </Silian_Card>
   ) : null;
 
   return (
@@ -473,80 +473,80 @@ export default function DataInputForm({
       {/* 主列 */}
       <div className="md:col-span-8 space-y-6">
         {/* 选中的活动信息 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calculator className="h-5 w-5 text-green-600" />
-              {getActivityName(activity)}
-            </CardTitle>
-            <CardDescription>
-              {getActivityDescription(activity)}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Silian_Card>
+          <Silian_CardHeader>
+            <Silian_CardTitle className="flex items-center gap-2">
+              <Silian_Calculator className="h-5 w-5 text-green-600" />
+              {Silian_getActivityName(Silian_activity)}
+            </Silian_CardTitle>
+            <Silian_CardDescription>
+              {Silian_getActivityDescription(Silian_activity)}
+            </Silian_CardDescription>
+          </Silian_CardHeader>
+          <Silian_CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <span className="text-muted-foreground">{t('activities.category')}:</span>
+                <span className="text-muted-foreground">{Silian_t('activities.category')}:</span>
                 <div className="font-medium">
-                  {t(`activities.categories.${activity.category}`)}
+                  {Silian_t(`activities.categories.${Silian_activity.category}`)}
                 </div>
               </div>
               <div>
-                <span className="text-muted-foreground">{t('activities.unit')}:</span>
-                    <div className="font-medium">{t(`units.${activity.unit}`, activity.unit)}</div>
+                <span className="text-muted-foreground">{Silian_t('activities.unit')}:</span>
+                    <div className="font-medium">{Silian_t(`units.${Silian_activity.unit}`, Silian_activity.unit)}</div>
               </div>
               <div>
-                <span className="text-muted-foreground">{t('activities.carbonFactor')}:</span>
+                <span className="text-muted-foreground">{Silian_t('activities.carbonFactor')}:</span>
                 <div className="font-medium text-green-600">
-                  {activity.carbon_factor}
+                  {Silian_activity.carbon_factor}
                 </div>
               </div>
-              {activity.points_per_unit && (
+              {Silian_activity.points_per_unit && (
                 <div>
-                  <span className="text-muted-foreground">{t('activities.pointsPerUnit')}:</span>
+                  <span className="text-muted-foreground">{Silian_t('activities.pointsPerUnit')}:</span>
                   <div className="font-medium text-blue-600">
-                    {activity.points_per_unit}
+                    {Silian_activity.points_per_unit}
                   </div>
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </Silian_CardContent>
+        </Silian_Card>
 
         {/* 移动端显示预览（在表单上方） */}
         <div className="md:hidden">
-          {calculationCard}
+          {Silian_calculationCard}
         </div>
 
         {/* 数据输入表单 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('activities.form.dataInput')}</CardTitle>
-            <CardDescription>
-              {t('activities.form.inputDescription')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+        <Silian_Card>
+          <Silian_CardHeader>
+            <Silian_CardTitle>{Silian_t('activities.form.dataInput')}</Silian_CardTitle>
+            <Silian_CardDescription>
+              {Silian_t('activities.form.inputDescription')}
+            </Silian_CardDescription>
+          </Silian_CardHeader>
+          <Silian_CardContent>
+            <form onSubmit={Silian_handleSubmit(Silian_onFormSubmit)} className="space-y-6">
               {/* 数据输入 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  {t('activities.form.dataValue')} ({t(`units.${activity.unit}`, activity.unit)})
+                  {Silian_t('activities.form.dataValue')} ({Silian_t(`units.${Silian_activity.unit}`, Silian_activity.unit)})
                 </label>
-                <Input
+                <Silian_Input
                   type="number"
                   step="0.01"
                   min="0"
-                  placeholder={t('activities.form.dataPlaceholder')}
-                  error={errors.data}
-                  {...register('data', {
-                    required: t('activities.form.dataRequired'),
-                    min: { value: 0.01, message: t('activities.form.dataMinimum') }
+                  placeholder={Silian_t('activities.form.dataPlaceholder')}
+                  error={Silian_errors.data}
+                  {...Silian_register('data', {
+                    required: Silian_t('activities.form.dataRequired'),
+                    min: { value: 0.01, message: Silian_t('activities.form.dataMinimum') }
                   })}
                 />
-                {errors.data && (
+                {Silian_errors.data && (
                   <p className="mt-1 text-sm text-red-600">
-                    {errors.data.message}
+                    {Silian_errors.data.message}
                   </p>
                 )}
               </div>
@@ -554,25 +554,25 @@ export default function DataInputForm({
               {/* 活动日期 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  <Calendar className="inline h-4 w-4 mr-1" />
-                  {t('activities.form.activityDate')}
+                  <Silian_Calendar className="inline h-4 w-4 mr-1" />
+                  {Silian_t('activities.form.activityDate')}
                 </label>
-                <Input
+                <Silian_Input
                   type="date"
                   max={new Date().toISOString().split('T')[0]}
-                  error={errors.activity_date}
-                  {...register('activity_date', {
-                    required: t('activities.form.dateRequired')
+                  error={Silian_errors.activity_date}
+                  {...Silian_register('activity_date', {
+                    required: Silian_t('activities.form.dateRequired')
                   })}
                 />
-                {errors.activity_date && (
+                {Silian_errors.activity_date && (
                   <p className="mt-1 text-sm text-red-600">
-                    {errors.activity_date.message}
+                    {Silian_errors.activity_date.message}
                   </p>
                 )}
-                {checkinDate && (
+                {Silian_checkinDate && (
                   <p className="mt-2 text-xs text-emerald-600">
-                    {t('activities.checkin.makeupHelper',  { date: checkinDate })}
+                    {Silian_t('activities.checkin.makeupHelper',  { date: Silian_checkinDate })}
                   </p>
                 )}
               </div>
@@ -580,86 +580,86 @@ export default function DataInputForm({
               {/* 备注/描述 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  <FileText className="inline h-4 w-4 mr-1" />
-                  {t('activities.form.notes')}
+                  <Silian_FileText className="inline h-4 w-4 mr-1" />
+                  {Silian_t('activities.form.notes')}
                 </label>
                 <textarea
                   rows={4}
-                  placeholder={t('activities.form.notesPlaceholder')}
-                  className={`flex w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.description ? 'border-red-500 focus-visible:ring-red-500' : 'border-input ring-offset-background'}`}
-                  {...register('description', {
-                    maxLength: { value: 500, message: t('validation.maxLength', { max: 500 }) }
+                  placeholder={Silian_t('activities.form.notesPlaceholder')}
+                  className={`flex w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${Silian_errors.description ? 'border-red-500 focus-visible:ring-red-500' : 'border-input ring-offset-background'}`}
+                  {...Silian_register('description', {
+                    maxLength: { value: 500, message: Silian_t('validation.maxLength', { max: 500 }) }
                   })}
                 />
-                {errors.description && (
+                {Silian_errors.description && (
                   <p className="mt-1 text-sm text-red-600">
-                    {errors.description.message}
+                    {Silian_errors.description.message}
                   </p>
                 )}
               </div>
               {/* 延迟上传：选择文件 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  <Upload className="inline h-4 w-4 mr-1" />
-                  {t('activities.form.uploadImage')}
+                  <Silian_Upload className="inline h-4 w-4 mr-1" />
+                  {Silian_t('activities.form.uploadImage')}
                 </label>
 
                 <div
-                  className={cn(
+                  className={Silian_cn(
                     "border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-3 transition-all duration-200 cursor-pointer",
-                    isDragging ? "scale-[1.02] border-green-500 bg-green-500/10" : "border-border hover:border-green-500/60 hover:bg-muted/60",
-                    uploadError ? "border-red-500/40 bg-red-500/10" : ""
+                    Silian_isDragging ? "scale-[1.02] border-green-500 bg-green-500/10" : "border-border hover:border-green-500/60 hover:bg-muted/60",
+                    Silian_uploadError ? "border-red-500/40 bg-red-500/10" : ""
                   )}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={triggerFileInput}
+                  onDragOver={Silian_handleDragOver}
+                  onDragLeave={Silian_handleDragLeave}
+                  onDrop={Silian_handleDrop}
+                  onClick={Silian_triggerFileInput}
                 >
                   <input
-                    ref={fileInputRef}
+                    ref={Silian_fileInputRef}
                     type="file"
                     accept="image/*"
                     multiple
-                    onChange={handleFileSelect}
+                    onChange={Silian_handleFileSelect}
                     className="hidden"
                   />
 
-                  <div className={cn("rounded-full p-3 transition-colors", isDragging ? "bg-green-500/15" : "bg-muted")}>
-                    <Upload className={cn("h-6 w-6", isDragging ? "text-green-500" : "text-muted-foreground")} />
+                  <div className={Silian_cn("rounded-full p-3 transition-colors", Silian_isDragging ? "bg-green-500/15" : "bg-muted")}>
+                    <Silian_Upload className={Silian_cn("h-6 w-6", Silian_isDragging ? "text-green-500" : "text-muted-foreground")} />
                   </div>
 
                   <div className="text-center">
                     <p className="text-sm font-medium text-foreground">
-                      {isDragging ? t('activities.form.dropHere') : t('activities.form.clickOrDrag')}
+                      {Silian_isDragging ? Silian_t('activities.form.dropHere') : Silian_t('activities.form.clickOrDrag')}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {t('activities.form.uploadHint')}
+                      {Silian_t('activities.form.uploadHint')}
                     </p>
                   </div>
                 </div>
 
                 {/* File List & Status */}
                 <div className="mt-4 space-y-3">
-                  {selectedFiles.length > 0 && (
+                  {Silian_selectedFiles.length > 0 && (
                     <ul className="space-y-2 text-sm">
-                      {selectedFiles.map((f, i) => {
-                        const safePreviewUrl = getSafePreviewUrl(previewUrls[i]);
+                      {Silian_selectedFiles.map((Silian_f, Silian_i) => {
+                        const Silian_safePreviewUrl = Silian_getSafePreviewUrl(Silian_previewUrls[Silian_i]);
 
                         return (
-                          <li key={i} className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 transition-colors hover:border-border/80">
+                          <li key={Silian_i} className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 transition-colors hover:border-border/80">
                             <div className="flex items-center gap-3 min-w-0">
-                              {safePreviewUrl && <img src={safePreviewUrl} alt={t('activities.form.imagePreviewAlt', { name: f.name })} className="h-10 w-10 rounded border border-border object-cover" />}
+                              {Silian_safePreviewUrl && <img src={Silian_safePreviewUrl} alt={Silian_t('activities.form.imagePreviewAlt', { name: Silian_f.name })} className="h-10 w-10 rounded border border-border object-cover" />}
                               <div className="flex flex-col min-w-0">
-                                <span className="truncate font-medium text-foreground">{f.name}</span>
-                                <span className="text-xs text-muted-foreground">{t('activities.form.fileSizeLabel', { size: tFileSize(f.size) })}</span>
+                                <span className="truncate font-medium text-foreground">{Silian_f.name}</span>
+                                <span className="text-xs text-muted-foreground">{Silian_t('activities.form.fileSizeLabel', { size: Silian_tFileSize(Silian_f.size) })}</span>
                               </div>
                             </div>
                             <button
                               type="button"
-                              onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                              onClick={(Silian_e) => { Silian_e.stopPropagation(); Silian_removeFile(Silian_i); }}
                               className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
                             >
-                              <X className="h-4 w-4" />
+                              <Silian_X className="h-4 w-4" />
                             </button>
                           </li>
                         );
@@ -667,27 +667,27 @@ export default function DataInputForm({
                     </ul>
                   )}
 
-                  {uploading && (
+                  {Silian_uploading && (
                     <div className="text-xs text-blue-600 flex items-center gap-2">
                       <div className="animate-spin rounded-full h-3 w-3 border-2 border-blue-600 border-t-transparent"></div>
-                      {t('common.uploading')} {progress.total > 0 ? `${progress.done}/${progress.total}` : ''}
+                      {Silian_t('common.uploading')} {Silian_progress.total > 0 ? `${Silian_progress.done}/${Silian_progress.total}` : ''}
                     </div>
                   )}
 
-                  {uploadError && (
-                    <Alert variant="destructive" className="py-3">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription className="space-y-2">
-                        <p className="text-sm font-medium">{uploadError.summary}</p>
-                        {Array.isArray(uploadError.details) && uploadError.details.length > 0 && (
+                  {Silian_uploadError && (
+                    <Silian_Alert variant="destructive" className="py-3">
+                      <Silian_AlertCircle className="h-4 w-4" />
+                      <Silian_AlertDescription className="space-y-2">
+                        <p className="text-sm font-medium">{Silian_uploadError.summary}</p>
+                        {Array.isArray(Silian_uploadError.details) && Silian_uploadError.details.length > 0 && (
                           <ul className="list-disc space-y-1 pl-5 text-xs">
-                            {uploadError.details.map((item) => (
-                              <li key={item}>{item}</li>
+                            {Silian_uploadError.details.map((Silian_item) => (
+                              <li key={Silian_item}>{Silian_item}</li>
                             ))}
                           </ul>
                         )}
-                      </AlertDescription>
-                    </Alert>
+                      </Silian_AlertDescription>
+                    </Silian_Alert>
                   )}
                 </div>
               </div>
@@ -695,53 +695,53 @@ export default function DataInputForm({
 
               {/* 提交按钮 */}
               <div className="flex gap-4">
-                <Button
+                <Silian_Button
                   type="submit"
                   className="flex-1"
-                  loading={isSubmitting || uploading}
-                  disabled={isSubmitting || uploading || !showCalculation}
+                  loading={Silian_isSubmitting || Silian_uploading}
+                  disabled={Silian_isSubmitting || Silian_uploading || !Silian_showCalculation}
                 >
-                  {(isSubmitting || uploading) ? t('activities.form.submitting') : t('activities.form.submit')}
-                </Button>
+                  {(Silian_isSubmitting || Silian_uploading) ? Silian_t('activities.form.submitting') : Silian_t('activities.form.submit')}
+                </Silian_Button>
 
-                <Button
+                <Silian_Button
                   type="button"
                   variant="outline"
                   onClick={() => window.location.reload()}
                 >
-                  {t('common.reset')}
-                </Button>
+                  {Silian_t('common.reset')}
+                </Silian_Button>
               </div>
 
               {/* 提示信息 */}
-              <Alert variant="info">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  {t('activities.form.submitHint')}
-                </AlertDescription>
-              </Alert>
+              <Silian_Alert variant="info">
+                <Silian_AlertCircle className="h-4 w-4" />
+                <Silian_AlertDescription>
+                  {Silian_t('activities.form.submitHint')}
+                </Silian_AlertDescription>
+              </Silian_Alert>
             </form>
-          </CardContent>
-        </Card>
+          </Silian_CardContent>
+        </Silian_Card>
       </div>{/* END 主列 */}
 
       {/* 侧栏：桌面端悬浮计算结果 */}
       <div className="hidden md:block md:col-span-4">
         <div className="sticky top-20 space-y-4">
-          {calculationCard || (
-            <Card className="border-dashed">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm text-muted-foreground">
-                  {t('activities.form.calculationResult')}
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  {t('activities.form.enterDataToPreview')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-xs text-muted-foreground">
-                {t('activities.form.previewPlaceholder')}
-              </CardContent>
-            </Card>
+          {Silian_calculationCard || (
+            <Silian_Card className="border-dashed">
+              <Silian_CardHeader className="pb-3">
+                <Silian_CardTitle className="text-sm text-muted-foreground">
+                  {Silian_t('activities.form.calculationResult')}
+                </Silian_CardTitle>
+                <Silian_CardDescription className="text-xs">
+                  {Silian_t('activities.form.enterDataToPreview')}
+                </Silian_CardDescription>
+              </Silian_CardHeader>
+              <Silian_CardContent className="text-xs text-muted-foreground">
+                {Silian_t('activities.form.previewPlaceholder')}
+              </Silian_CardContent>
+            </Silian_Card>
           )}
         </div>
       </div>

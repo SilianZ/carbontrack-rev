@@ -1,6 +1,6 @@
-import React from 'react';
-import { ProductManagement } from '../../components/admin/ProductManagement';
+import Silian_React from 'react';
+import { ProductManagement as Silian_ProductManagement } from '../../components/admin/ProductManagement';
 
 export default function AdminProductsPage() {
-  return <ProductManagement />;
+  return <Silian_ProductManagement />;
 }

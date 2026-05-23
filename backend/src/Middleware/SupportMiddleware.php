@@ -21,104 +21,104 @@ class SupportMiddleware implements MiddlewareInterface
     ) {
     }
 
-    public function process(Request $request, RequestHandler $handler): Response
+    public function process(Request $Silian_request, RequestHandler $Silian_handler): Response
     {
         try {
-            $user = $request->getAttribute('authenticated_user');
-            if (!is_array($user)) {
-                $user = $this->authService->getCurrentUser($request);
+            $Silian_user = $Silian_request->getAttribute('authenticated_user');
+            if (!is_array($Silian_user)) {
+                $Silian_user = $this->authService->getCurrentUser($Silian_request);
             }
 
-            if (!$user) {
-                return $this->jsonError($request, 401, 'Authentication required', 'AUTH_REQUIRED');
+            if (!$Silian_user) {
+                return $this->jsonError($Silian_request, 401, 'Authentication required', 'AUTH_REQUIRED');
             }
 
-            if (!$this->authService->isSupportUser($user)) {
-                return $this->jsonError($request, 403, 'Support access required', 'SUPPORT_REQUIRED');
+            if (!$this->authService->isSupportUser($Silian_user)) {
+                return $this->jsonError($Silian_request, 403, 'Support access required', 'SUPPORT_REQUIRED');
             }
 
-            return $handler->handle($request->withAttribute('user', $user));
-        } catch (\Throwable $e) {
-            $this->logExceptionWithFallback($e, $request, 'SupportMiddleware error: ' . $e->getMessage());
-            return $this->jsonError($request, 500, 'Internal server error', 'INTERNAL_ERROR');
+            return $Silian_handler->handle($Silian_request->withAttribute('user', $Silian_user));
+        } catch (\Throwable $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'SupportMiddleware error: ' . $Silian_e->getMessage());
+            return $this->jsonError($Silian_request, 500, 'Internal server error', 'INTERNAL_ERROR');
         }
     }
 
-    private function jsonError(Request $request, int $status, string $message, string $code): Response
+    private function jsonError(Request $Silian_request, int $Silian_status, string $Silian_message, string $Silian_code): Response
     {
-        $response = new \Slim\Psr7\Response();
-        $payload = [
+        $Silian_response = new \Slim\Psr7\Response();
+        $Silian_payload = [
             'success' => false,
-            'message' => $message,
-            'error' => $message,
-            'code' => $code,
+            'message' => $Silian_message,
+            'error' => $Silian_message,
+            'code' => $Silian_code,
         ];
 
-        $requestId = $this->resolveRequestId($request);
-        if (is_string($requestId) && $requestId !== '') {
-            $payload['request_id'] = $requestId;
+        $Silian_requestId = $this->resolveRequestId($Silian_request);
+        if (is_string($Silian_requestId) && $Silian_requestId !== '') {
+            $Silian_payload['request_id'] = $Silian_requestId;
         }
 
-        $json = json_encode($payload);
-        if ($json === false) {
-            $fallbackPayload = [
+        $Silian_json = json_encode($Silian_payload);
+        if ($Silian_json === false) {
+            $Silian_fallbackPayload = [
                 'success' => false,
                 'message' => 'Internal server error',
                 'error' => 'Internal server error',
                 'code' => 'JSON_ENCODE_ERROR',
             ];
-            if (isset($payload['request_id'])) {
-                $fallbackPayload['request_id'] = $payload['request_id'];
+            if (isset($Silian_payload['request_id'])) {
+                $Silian_fallbackPayload['request_id'] = $Silian_payload['request_id'];
             }
-            $json = json_encode($fallbackPayload);
-            if ($json === false) {
-                $json = '{"success":false,"message":"Internal server error","error":"Internal server error","code":"JSON_ENCODE_ERROR"}';
+            $Silian_json = json_encode($Silian_fallbackPayload);
+            if ($Silian_json === false) {
+                $Silian_json = '{"success":false,"message":"Internal server error","error":"Internal server error","code":"JSON_ENCODE_ERROR"}';
             }
         }
 
-        $response->getBody()->write($json);
+        $Silian_response->getBody()->write($Silian_json);
 
-        return $response->withStatus($status)->withHeader('Content-Type', 'application/json');
+        return $Silian_response->withStatus($Silian_status)->withHeader('Content-Type', 'application/json');
     }
 
-    private function logExceptionWithFallback(\Throwable $exception, Request $request, string $contextMessage): void
+    private function logExceptionWithFallback(\Throwable $Silian_exception, Request $Silian_request, string $Silian_contextMessage): void
     {
         if ($this->errorLogService) {
             try {
-                $this->errorLogService->logException($exception, $request, ['context_message' => $contextMessage]);
+                $this->errorLogService->logException($Silian_exception, $Silian_request, ['context_message' => $Silian_contextMessage]);
                 return;
-            } catch (\Throwable $loggingError) {
+            } catch (\Throwable $Silian_loggingError) {
                 $this->logWithFallback('error', 'ErrorLogService logging failed for support middleware', [
-                    'context_message' => $contextMessage,
-                    'request_id' => $this->resolveRequestId($request),
-                    'path' => (string) $request->getUri()->getPath(),
-                    'method' => $request->getMethod(),
-                    'exception_type' => get_class($exception),
-                    'logging_exception_type' => get_class($loggingError),
-                    'logging_error_message' => $loggingError->getMessage(),
+                    'context_message' => $Silian_contextMessage,
+                    'request_id' => $this->resolveRequestId($Silian_request),
+                    'path' => (string) $Silian_request->getUri()->getPath(),
+                    'method' => $Silian_request->getMethod(),
+                    'exception_type' => get_class($Silian_exception),
+                    'logging_exception_type' => get_class($Silian_loggingError),
+                    'logging_error_message' => $Silian_loggingError->getMessage(),
                 ]);
             }
         }
 
-        $this->logWithFallback('warning', $contextMessage, [
-            'request_id' => $this->resolveRequestId($request),
-            'path' => (string) $request->getUri()->getPath(),
-            'method' => $request->getMethod(),
-            'exception_type' => get_class($exception),
-            'exception_message' => $exception->getMessage(),
+        $this->logWithFallback('warning', $Silian_contextMessage, [
+            'request_id' => $this->resolveRequestId($Silian_request),
+            'path' => (string) $Silian_request->getUri()->getPath(),
+            'method' => $Silian_request->getMethod(),
+            'exception_type' => get_class($Silian_exception),
+            'exception_message' => $Silian_exception->getMessage(),
         ]);
     }
 
-    private function resolveRequestId(Request $request): ?string
+    private function resolveRequestId(Request $Silian_request): ?string
     {
-        $attribute = $request->getAttribute('request_id');
-        if (is_string($attribute) && trim($attribute) !== '') {
-            return trim($attribute);
+        $Silian_attribute = $Silian_request->getAttribute('request_id');
+        if (is_string($Silian_attribute) && trim($Silian_attribute) !== '') {
+            return trim($Silian_attribute);
         }
 
-        $header = trim($request->getHeaderLine('X-Request-ID'));
-        if ($header !== '') {
-            return $header;
+        $Silian_header = trim($Silian_request->getHeaderLine('X-Request-ID'));
+        if ($Silian_header !== '') {
+            return $Silian_header;
         }
 
         return null;
@@ -127,15 +127,15 @@ class SupportMiddleware implements MiddlewareInterface
     /**
      * @param array<string,mixed> $context
      */
-    private function logWithFallback(string $level, string $message, array $context): void
+    private function logWithFallback(string $Silian_level, string $Silian_message, array $Silian_context): void
     {
         try {
-            if ($level === 'error') {
-                $this->logger->error($message, $context);
+            if ($Silian_level === 'error') {
+                $this->logger->error($Silian_message, $Silian_context);
                 return;
             }
 
-            $this->logger->warning($message, $context);
+            $this->logger->warning($Silian_message, $Silian_context);
         } catch (\Throwable) {
             // Swallow logger failures to preserve the original 500 response path.
         }

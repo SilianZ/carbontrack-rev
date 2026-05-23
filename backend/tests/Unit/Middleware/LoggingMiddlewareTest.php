@@ -16,36 +16,36 @@ class LoggingMiddlewareTest extends TestCase
 
     public function testLogsRequestAndResponse(): void
     {
-        $logger = $this->createMock(\Psr\Log\LoggerInterface::class);
-        $logger->expects($this->atLeastOnce())->method('info');
-        $mw = new LoggingMiddleware($logger);
+        $Silian_logger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        $Silian_logger->expects($this->atLeastOnce())->method('info');
+        $Silian_mw = new LoggingMiddleware($Silian_logger);
 
-        $request = makeRequest('GET', '/health');
-        $handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
-            public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+        $Silian_request = makeRequest('GET', '/health');
+        $Silian_handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
+            public function handle(\Psr\Http\Message\ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface {
                 return new \Slim\Psr7\Response(204);
             }
         };
 
-        $resp = $mw->process($request, $handler);
-        $this->assertEquals(204, $resp->getStatusCode());
+        $Silian_resp = $Silian_mw->process($Silian_request, $Silian_handler);
+        $this->assertEquals(204, $Silian_resp->getStatusCode());
     }
 
     public function testLogsErrorWhenHandlerThrows(): void
     {
-        $logger = $this->createMock(\Psr\Log\LoggerInterface::class);
-        $logger->expects($this->atLeastOnce())->method('error');
-        $mw = new LoggingMiddleware($logger);
+        $Silian_logger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        $Silian_logger->expects($this->atLeastOnce())->method('error');
+        $Silian_mw = new LoggingMiddleware($Silian_logger);
 
-        $request = makeRequest('GET', '/boom');
-        $handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
-            public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+        $Silian_request = makeRequest('GET', '/boom');
+        $Silian_handler = new class implements \Psr\Http\Server\RequestHandlerInterface {
+            public function handle(\Psr\Http\Message\ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface {
                 throw new \RuntimeException('fail');
             }
         };
 
         $this->expectException(\RuntimeException::class);
-        $mw->process($request, $handler);
+        $Silian_mw->process($Silian_request, $Silian_handler);
     }
 }
 

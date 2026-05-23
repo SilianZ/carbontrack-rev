@@ -18,35 +18,35 @@ class TurnstileServiceTest extends TestCase
 
     public function testVerifyWithEmptyToken(): void
     {
-        $previousAppEnv = $_ENV['APP_ENV'] ?? null;
-        $previousBypass = $_ENV['TURNSTILE_BYPASS'] ?? null;
+        $Silian_previousAppEnv = $_ENV['APP_ENV'] ?? null;
+        $Silian_previousBypass = $_ENV['TURNSTILE_BYPASS'] ?? null;
         $_ENV['APP_ENV'] = 'production';
         $_ENV['TURNSTILE_BYPASS'] = 'false';
 
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())
             ->method('log')
-            ->with($this->callback(function (array $payload): bool {
-                return ($payload['action'] ?? null) === 'turnstile_verification_missing_token'
-                    && ($payload['operation_category'] ?? null) === 'security';
+            ->with($this->callback(function (array $Silian_payload): bool {
+                return ($Silian_payload['action'] ?? null) === 'turnstile_verification_missing_token'
+                    && ($Silian_payload['operation_category'] ?? null) === 'security';
             }))
             ->willReturn(true);
 
         try {
-            $svc = new TurnstileService('secret', $logger, $audit, $this->createMock(ErrorLogService::class));
-            $res = $svc->verify('');
-            $this->assertFalse($res['success']);
-            $this->assertEquals('missing-input-response', $res['error']);
+            $Silian_svc = new TurnstileService('secret', $Silian_logger, $Silian_audit, $this->createMock(ErrorLogService::class));
+            $Silian_res = $Silian_svc->verify('');
+            $this->assertFalse($Silian_res['success']);
+            $this->assertEquals('missing-input-response', $Silian_res['error']);
         } finally {
-            if ($previousAppEnv !== null) {
-                $_ENV['APP_ENV'] = $previousAppEnv;
+            if ($Silian_previousAppEnv !== null) {
+                $_ENV['APP_ENV'] = $Silian_previousAppEnv;
             } else {
                 unset($_ENV['APP_ENV']);
             }
 
-            if ($previousBypass !== null) {
-                $_ENV['TURNSTILE_BYPASS'] = $previousBypass;
+            if ($Silian_previousBypass !== null) {
+                $_ENV['TURNSTILE_BYPASS'] = $Silian_previousBypass;
             } else {
                 unset($_ENV['TURNSTILE_BYPASS']);
             }
@@ -55,26 +55,26 @@ class TurnstileServiceTest extends TestCase
 
     public function testApplyCertificateOptionsAddsConfiguredCaBundleAndNativeStore(): void
     {
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $service = new TurnstileService(
+        $Silian_logger = $this->createMock(\Monolog\Logger::class);
+        $Silian_service = new TurnstileService(
             'secret',
-            $logger,
+            $Silian_logger,
             null,
             null,
             'C:\\certs\\cacert.pem',
             true
         );
 
-        $method = new \ReflectionMethod(TurnstileService::class, 'applyCertificateOptions');
-        $method->setAccessible(true);
+        $Silian_method = new \ReflectionMethod(TurnstileService::class, 'applyCertificateOptions');
+        $Silian_method->setAccessible(true);
 
-        $options = [];
-        $method->invokeArgs($service, [&$options]);
+        $Silian_options = [];
+        $Silian_method->invokeArgs($Silian_service, [&$Silian_options]);
 
-        $this->assertSame('C:\\certs\\cacert.pem', $options[CURLOPT_CAINFO]);
+        $this->assertSame('C:\\certs\\cacert.pem', $Silian_options[CURLOPT_CAINFO]);
 
         if (\defined('CURLOPT_SSL_OPTIONS') && \defined('CURLSSLOPT_NATIVE_CA')) {
-            $this->assertSame(CURLSSLOPT_NATIVE_CA, $options[CURLOPT_SSL_OPTIONS]);
+            $this->assertSame(CURLSSLOPT_NATIVE_CA, $Silian_options[CURLOPT_SSL_OPTIONS]);
         }
     }
 }

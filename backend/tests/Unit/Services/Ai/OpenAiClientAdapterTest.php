@@ -19,29 +19,29 @@ class OpenAiClientAdapterTest extends TestCase
 {
     public function testCreateChatCompletionFallsBackToRawHttpWhenMetaInformationIsMissing(): void
     {
-        $transporter = new class implements TransporterContract {
-            public function requestObject(Payload $payload): TransporterResponse
+        $Silian_transporter = new class implements TransporterContract {
+            public function requestObject(Payload $Silian_payload): TransporterResponse
             {
                 throw new \TypeError('OpenAI\Responses\Meta\MetaInformation::__construct(): Argument #1 ($requestId) must be of type string, null given');
             }
 
-            public function requestContent(Payload $payload): string
+            public function requestContent(Payload $Silian_payload): string
             {
                 throw new \LogicException('Not used in this test.');
             }
 
-            public function requestStream(Payload $payload): ResponseInterface
+            public function requestStream(Payload $Silian_payload): ResponseInterface
             {
                 throw new \LogicException('Not used in this test.');
             }
         };
 
-        $httpClient = new class implements HttpClientInterface {
+        $Silian_httpClient = new class implements HttpClientInterface {
             public ?RequestInterface $request = null;
 
-            public function sendRequest(RequestInterface $request): ResponseInterface
+            public function sendRequest(RequestInterface $Silian_request): ResponseInterface
             {
-                $this->request = $request;
+                $this->request = $Silian_request;
 
                 return new Psr7Response(
                     200,
@@ -64,59 +64,59 @@ class OpenAiClientAdapterTest extends TestCase
             }
         };
 
-        $payload = [
+        $Silian_payload = [
             'model' => 'gemini-3.1-flash-lite-preview',
             'messages' => [
                 ['role' => 'user', 'content' => 'I have finished foods on 3 plates'],
             ],
         ];
 
-        $adapter = new OpenAiClientAdapter(
-            new Client($transporter),
-            $httpClient,
+        $Silian_adapter = new OpenAiClientAdapter(
+            new Client($Silian_transporter),
+            $Silian_httpClient,
             'https://example.test/v1',
             'secret-api-key',
             'org-demo'
         );
 
-        $result = $adapter->createChatCompletion($payload);
+        $Silian_result = $Silian_adapter->createChatCompletion($Silian_payload);
 
-        $this->assertSame('https://example.test/v1/chat/completions', (string) $httpClient->request?->getUri());
-        $this->assertSame('Bearer secret-api-key', $httpClient->request?->getHeaderLine('Authorization'));
-        $this->assertSame('org-demo', $httpClient->request?->getHeaderLine('OpenAI-Organization'));
-        $this->assertSame($payload, json_decode((string) $httpClient->request?->getBody(), true));
-        $this->assertSame('gemini-3.1-flash-lite-preview', $result['model']);
-        $this->assertArrayHasKey('metadata', $result);
-        $this->assertIsString($result['metadata']['request_id'] ?? null);
-        $this->assertNotSame('', $result['metadata']['request_id']);
-        $this->assertSame($result['metadata']['request_id'], $result['id']);
+        $this->assertSame('https://example.test/v1/chat/completions', (string) $Silian_httpClient->request?->getUri());
+        $this->assertSame('Bearer secret-api-key', $Silian_httpClient->request?->getHeaderLine('Authorization'));
+        $this->assertSame('org-demo', $Silian_httpClient->request?->getHeaderLine('OpenAI-Organization'));
+        $this->assertSame($Silian_payload, json_decode((string) $Silian_httpClient->request?->getBody(), true));
+        $this->assertSame('gemini-3.1-flash-lite-preview', $Silian_result['model']);
+        $this->assertArrayHasKey('metadata', $Silian_result);
+        $this->assertIsString($Silian_result['metadata']['request_id'] ?? null);
+        $this->assertNotSame('', $Silian_result['metadata']['request_id']);
+        $this->assertSame($Silian_result['metadata']['request_id'], $Silian_result['id']);
     }
 
     public function testCreateChatCompletionRethrowsUnrelatedTypeErrors(): void
     {
-        $transporter = new class implements TransporterContract {
-            public function requestObject(Payload $payload): TransporterResponse
+        $Silian_transporter = new class implements TransporterContract {
+            public function requestObject(Payload $Silian_payload): TransporterResponse
             {
                 throw new \TypeError('Unrelated type mismatch.');
             }
 
-            public function requestContent(Payload $payload): string
+            public function requestContent(Payload $Silian_payload): string
             {
                 throw new \LogicException('Not used in this test.');
             }
 
-            public function requestStream(Payload $payload): ResponseInterface
+            public function requestStream(Payload $Silian_payload): ResponseInterface
             {
                 throw new \LogicException('Not used in this test.');
             }
         };
 
-        $adapter = new OpenAiClientAdapter(new Client($transporter));
+        $Silian_adapter = new OpenAiClientAdapter(new Client($Silian_transporter));
 
         $this->expectException(\TypeError::class);
         $this->expectExceptionMessage('Unrelated type mismatch.');
 
-        $adapter->createChatCompletion([
+        $Silian_adapter->createChatCompletion([
             'model' => 'test-model',
             'messages' => [
                 ['role' => 'user', 'content' => 'hello'],

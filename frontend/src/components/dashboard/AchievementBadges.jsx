@@ -1,30 +1,30 @@
-import React from 'react';
-import { Award, Lock, RefreshCw } from 'lucide-react';
-import { useTranslation } from '../../hooks/useTranslation';
-import R2Image from '../common/R2Image';
-import { Button } from '../ui/Button';
-import { resolveR2ImageSource } from '../../lib/r2Image';
+import Silian_React from 'react';
+import { Award as Silian_Award, Lock as Silian_Lock, RefreshCw as Silian_RefreshCw } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import Silian_R2Image from '../common/R2Image';
+import { Button as Silian_Button } from '../ui/Button';
+import { resolveR2ImageSource as Silian_resolveR2ImageSource } from '../../lib/r2Image';
 
-export function AchievementBadges({ badges = [], userBadges = [], loading = false, onTriggerAuto, isAdmin = false }) {
-  const { t, currentLanguage } = useTranslation(['dashboard']);
-  const isChineseLocale = currentLanguage?.toLowerCase().startsWith('zh');
-  const ownedMap = new Map();
-  userBadges.forEach((entry) => {
-    const record = entry?.user_badge || {};
-    if (record.badge_id) {
-      ownedMap.set(record.badge_id, record);
+export function AchievementBadges({ badges: Silian_badges = [], userBadges: Silian_userBadges = [], loading: Silian_loading = false, onTriggerAuto: Silian_onTriggerAuto, isAdmin: Silian_isAdmin = false }) {
+  const { t: Silian_t, currentLanguage: Silian_currentLanguage } = Silian_useTranslation(['dashboard']);
+  const Silian_isChineseLocale = Silian_currentLanguage?.toLowerCase().startsWith('zh');
+  const Silian_ownedMap = new Map();
+  Silian_userBadges.forEach((Silian_entry) => {
+    const Silian_record = Silian_entry?.user_badge || {};
+    if (Silian_record.badge_id) {
+      Silian_ownedMap.set(Silian_record.badge_id, Silian_record);
     }
   });
 
-  const ownedCount = ownedMap.size;
-  const totalCount = badges.length;
-  const completion = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
-  const topBadges = badges.slice(0, 8);
-  const getBadgeName = (badge) => {
-    if (isChineseLocale) {
-      return badge.name_zh || badge.name_en || t('dashboard.leaderboardUnknownName');
+  const Silian_ownedCount = Silian_ownedMap.size;
+  const Silian_totalCount = Silian_badges.length;
+  const Silian_completion = Silian_totalCount > 0 ? Math.round((Silian_ownedCount / Silian_totalCount) * 100) : 0;
+  const Silian_topBadges = Silian_badges.slice(0, 8);
+  const Silian_getBadgeName = (Silian_badge) => {
+    if (Silian_isChineseLocale) {
+      return Silian_badge.name_zh || Silian_badge.name_en || Silian_t('dashboard.leaderboardUnknownName');
     }
-    return badge.name_en || badge.name_zh || t('dashboard.leaderboardUnknownName');
+    return Silian_badge.name_en || Silian_badge.name_zh || Silian_t('dashboard.leaderboardUnknownName');
   };
 
   return (
@@ -32,100 +32,100 @@ export function AchievementBadges({ badges = [], userBadges = [], loading = fals
       <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Award className="h-5 w-5 text-yellow-500" />
-            {t('dashboard.achievementBadges')}
+            <Silian_Award className="h-5 w-5 text-yellow-500" />
+            {Silian_t('dashboard.achievementBadges')}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {totalCount > 0
-              ? t('dashboard.badgeProgress',  { owned: ownedCount, total: totalCount })
-              : t('dashboard.noBadgesAvailable')}
+            {Silian_totalCount > 0
+              ? Silian_t('dashboard.badgeProgress',  { owned: Silian_ownedCount, total: Silian_totalCount })
+              : Silian_t('dashboard.noBadgesAvailable')}
           </p>
         </div>
-        {isAdmin && (
-          <Button
+        {Silian_isAdmin && (
+          <Silian_Button
             variant="outline"
             size="sm"
-            onClick={onTriggerAuto}
-            disabled={loading}
+            onClick={Silian_onTriggerAuto}
+            disabled={Silian_loading}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            {t('dashboard.triggerBadgeAuto')}
-          </Button>
+            <Silian_RefreshCw className={`h-4 w-4 ${Silian_loading ? 'animate-spin' : ''}`} />
+            {Silian_t('dashboard.triggerBadgeAuto')}
+          </Silian_Button>
         )}
       </div>
 
-      {loading ? (
+      {Silian_loading ? (
         <div className="grid grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, idx) => (
-            <div key={idx} className="aspect-square animate-pulse rounded-lg bg-muted" />
+          {Array.from({ length: 8 }).map((Silian__, Silian_idx) => (
+            <div key={Silian_idx} className="aspect-square animate-pulse rounded-lg bg-muted" />
           ))}
         </div>
-      ) : totalCount === 0 ? (
+      ) : Silian_totalCount === 0 ? (
         <div className="rounded-md bg-muted/60 p-4 text-center text-sm text-muted-foreground">
-          {t('dashboard.noBadgesHint')}
+          {Silian_t('dashboard.noBadgesHint')}
         </div>
       ) : (
         <div className="space-y-4">
           <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400"
-              style={{ width: `${completion}%` }}
+              style={{ width: `${Silian_completion}%` }}
             ></div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {topBadges.map((badge) => {
-              const owned = ownedMap.has(badge.id);
-              const userBadge = ownedMap.get(badge.id);
-              const badgeImage = resolveR2ImageSource({
-                urlCandidates: [badge.icon_url, badge.icon_presigned_url],
-                pathCandidates: [badge.icon_path],
+            {Silian_topBadges.map((Silian_badge) => {
+              const Silian_owned = Silian_ownedMap.has(Silian_badge.id);
+              const Silian_userBadge = Silian_ownedMap.get(Silian_badge.id);
+              const Silian_badgeImage = Silian_resolveR2ImageSource({
+                urlCandidates: [Silian_badge.icon_url, Silian_badge.icon_presigned_url],
+                pathCandidates: [Silian_badge.icon_path],
               });
               return (
                 <div
-                  key={badge.id}
+                  key={Silian_badge.id}
                   className={`relative flex flex-col items-center gap-3 rounded-lg border p-3 transition ${
-                    owned ? 'border-green-500/70 bg-green-500/5 shadow-md' : 'border-border bg-background/50 hover:border-border/80'
+                    Silian_owned ? 'border-green-500/70 bg-green-500/5 shadow-md' : 'border-border bg-background/50 hover:border-border/80'
                   }`}
                 >
                   <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-border bg-muted/50">
-                    {badgeImage.src || badgeImage.filePath ? (
-                      <R2Image
-                        src={badgeImage.src || undefined}
-                        filePath={badgeImage.filePath || undefined}
-                        alt={getBadgeName(badge) || t('dashboard.badgeImageAlt')}
+                    {Silian_badgeImage.src || Silian_badgeImage.filePath ? (
+                      <Silian_R2Image
+                        src={Silian_badgeImage.src || undefined}
+                        filePath={Silian_badgeImage.filePath || undefined}
+                        alt={Silian_getBadgeName(Silian_badge) || Silian_t('dashboard.badgeImageAlt')}
                         className="w-full h-full object-cover"
-                        fallback={<div className="text-xs text-muted-foreground">{t('dashboard.imageFallback')}</div>}
+                        fallback={<div className="text-xs text-muted-foreground">{Silian_t('dashboard.imageFallback')}</div>}
                       />
                     ) : (
-                      <Award className="h-8 w-8 text-muted-foreground/60" />
+                      <Silian_Award className="h-8 w-8 text-muted-foreground/60" />
                     )}
                   </div>
                   <div className="text-center space-y-1">
-                    <p className="text-sm font-semibold text-foreground">{getBadgeName(badge)}</p>
-                    {badge.name_zh && badge.name_en && badge.name_zh !== badge.name_en && (
+                    <p className="text-sm font-semibold text-foreground">{Silian_getBadgeName(Silian_badge)}</p>
+                    {Silian_badge.name_zh && Silian_badge.name_en && Silian_badge.name_zh !== Silian_badge.name_en && (
                       <p className="text-xs text-muted-foreground">
-                        {isChineseLocale ? badge.name_en : badge.name_zh}
+                        {Silian_isChineseLocale ? Silian_badge.name_en : Silian_badge.name_zh}
                       </p>
                     )}
                   </div>
                   <div className="w-full text-center">
-                    {owned ? (
+                    {Silian_owned ? (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600">
-                        <Award className="h-3 w-3" />
-                        {t('dashboard.badgeUnlocked')}
+                        <Silian_Award className="h-3 w-3" />
+                        {Silian_t('dashboard.badgeUnlocked')}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                        <Lock className="h-3 w-3" />
-                        {t('dashboard.badgeLocked')}
+                        <Silian_Lock className="h-3 w-3" />
+                        {Silian_t('dashboard.badgeLocked')}
                       </span>
                     )}
                   </div>
-                  {owned && userBadge?.awarded_at && (
+                  {Silian_owned && Silian_userBadge?.awarded_at && (
                     <p className="text-[11px] text-muted-foreground">
-                      {t('dashboard.badgeAwardedAtValue', {
-                        date: new Intl.DateTimeFormat(currentLanguage).format(new Date(userBadge.awarded_at)),
+                      {Silian_t('dashboard.badgeAwardedAtValue', {
+                        date: new Intl.DateTimeFormat(Silian_currentLanguage).format(new Date(Silian_userBadge.awarded_at)),
                       })}
                     </p>
                   )}

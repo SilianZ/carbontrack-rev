@@ -26,20 +26,20 @@ class RequestIdNormalizerTest extends TestCase
 
     public function testNormalizeLowercasesUuid(): void
     {
-        $value = '550E8400-E29B-41D4-A716-446655440001';
-        $this->assertSame('550e8400-e29b-41d4-a716-446655440001', RequestIdNormalizer::normalize($value));
+        $Silian_value = '550E8400-E29B-41D4-A716-446655440001';
+        $this->assertSame('550e8400-e29b-41d4-a716-446655440001', RequestIdNormalizer::normalize($Silian_value));
     }
 
     public function testNormalizePreservesNonUuid(): void
     {
-        $value = 'Req-ABC-123';
-        $this->assertSame($value, RequestIdNormalizer::normalize($value));
+        $Silian_value = 'Req-ABC-123';
+        $this->assertSame($Silian_value, RequestIdNormalizer::normalize($Silian_value));
     }
 
     public function testNormalizePreservesInvalidUuidVersion(): void
     {
-        $value = '550E8400-E29B-61D4-A716-446655440001';
-        $this->assertSame($value, RequestIdNormalizer::normalize($value));
+        $Silian_value = '550E8400-E29B-61D4-A716-446655440001';
+        $this->assertSame($Silian_value, RequestIdNormalizer::normalize($Silian_value));
     }
 
     public function testNormalizeAllowsEmptyStringWhenConfigured(): void

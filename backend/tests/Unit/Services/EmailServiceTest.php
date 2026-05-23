@@ -21,7 +21,7 @@ class EmailServiceTest extends TestCase
 
     public function testSendEmailWithoutMailerSimulatesDelivery(): void
     {
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -33,32 +33,32 @@ class EmailServiceTest extends TestCase
             'force_simulation' => true,
         ];
 
-        $handler = new TestHandler();
-        $logger = new Logger('email-service-test');
-        $logger->pushHandler($handler);
+        $Silian_handler = new TestHandler();
+        $Silian_logger = new Logger('email-service-test');
+        $Silian_logger->pushHandler($Silian_handler);
 
-        $service = new EmailService($config, $logger, null);
+        $Silian_service = new EmailService($Silian_config, $Silian_logger, null);
 
-        $result = $service->sendEmail('to@example.com', 'To', 'Subj', '<b>body</b>', 'body');
+        $Silian_result = $Silian_service->sendEmail('to@example.com', 'To', 'Subj', '<b>body</b>', 'body');
 
-        $this->assertTrue($result);
+        $this->assertTrue($Silian_result);
         $this->assertTrue(
-            $handler->hasInfoThatContains('Simulated email send'),
+            $Silian_handler->hasInfoThatContains('Simulated email send'),
             'Expected simulated email log when EmailService runs in simulation mode.'
         );
 
-        $simulationRecords = array_values(array_filter(
-            $handler->getRecords(),
-            static fn(array $record): bool => $record['message'] === 'Simulated email send'
+        $Silian_simulationRecords = array_values(array_filter(
+            $Silian_handler->getRecords(),
+            static fn(array $Silian_record): bool => $Silian_record['message'] === 'Simulated email send'
         ));
-        $this->assertNotEmpty($simulationRecords, 'Expected simulation log record to be captured.');
-        $record = $simulationRecords[0];
-        $this->assertSame('force_simulation', $record['context']['reason'] ?? null);
+        $this->assertNotEmpty($Silian_simulationRecords, 'Expected simulation log record to be captured.');
+        $Silian_record = $Silian_simulationRecords[0];
+        $this->assertSame('force_simulation', $Silian_record['context']['reason'] ?? null);
     }
 
     public function testSendMessageNotificationRespectsPreferences(): void
     {
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -72,27 +72,27 @@ class EmailServiceTest extends TestCase
             'frontend_url' => 'https://app.example.com',
         ];
 
-        $handlerAllow = new TestHandler();
-        $loggerAllow = new Logger('email-service-allow');
-        $loggerAllow->pushHandler($handlerAllow);
+        $Silian_handlerAllow = new TestHandler();
+        $Silian_loggerAllow = new Logger('email-service-allow');
+        $Silian_loggerAllow->pushHandler($Silian_handlerAllow);
 
-        $preferenceAllow = new class(true, $loggerAllow) extends NotificationPreferenceService {
+        $Silian_preferenceAllow = new class(true, $Silian_loggerAllow) extends NotificationPreferenceService {
             private bool $result;
 
-            public function __construct(bool $result, Logger $logger)
+            public function __construct(bool $Silian_result, Logger $Silian_logger)
             {
-                parent::__construct($logger);
-                $this->result = $result;
+                parent::__construct($Silian_logger);
+                $this->result = $Silian_result;
             }
 
-            public function shouldSendEmailByEmail(string $email, string $category): bool
+            public function shouldSendEmailByEmail(string $Silian_email, string $Silian_category): bool
             {
                 return $this->result;
             }
         };
 
-        $serviceAllow = new EmailService($config, $loggerAllow, $preferenceAllow);
-        $this->assertTrue($serviceAllow->sendMessageNotification(
+        $Silian_serviceAllow = new EmailService($Silian_config, $Silian_loggerAllow, $Silian_preferenceAllow);
+        $this->assertTrue($Silian_serviceAllow->sendMessageNotification(
             'to@example.com',
             'User',
             'A subject',
@@ -101,31 +101,31 @@ class EmailServiceTest extends TestCase
             'high'
         ));
         $this->assertTrue(
-            $handlerAllow->hasInfoThatContains('Simulated email send'),
+            $Silian_handlerAllow->hasInfoThatContains('Simulated email send'),
             'Expected simulated send when preferences allow email delivery.'
         );
 
-        $handlerBlock = new TestHandler();
-        $loggerBlock = new Logger('email-service-block');
-        $loggerBlock->pushHandler($handlerBlock);
+        $Silian_handlerBlock = new TestHandler();
+        $Silian_loggerBlock = new Logger('email-service-block');
+        $Silian_loggerBlock->pushHandler($Silian_handlerBlock);
 
-        $preferenceBlock = new class(false, $loggerBlock) extends NotificationPreferenceService {
+        $Silian_preferenceBlock = new class(false, $Silian_loggerBlock) extends NotificationPreferenceService {
             private bool $result;
 
-            public function __construct(bool $result, Logger $logger)
+            public function __construct(bool $Silian_result, Logger $Silian_logger)
             {
-                parent::__construct($logger);
-                $this->result = $result;
+                parent::__construct($Silian_logger);
+                $this->result = $Silian_result;
             }
 
-            public function shouldSendEmailByEmail(string $email, string $category): bool
+            public function shouldSendEmailByEmail(string $Silian_email, string $Silian_category): bool
             {
                 return $this->result;
             }
         };
 
-        $serviceBlock = new EmailService($config, $loggerBlock, $preferenceBlock);
-        $this->assertFalse($serviceBlock->sendMessageNotification(
+        $Silian_serviceBlock = new EmailService($Silian_config, $Silian_loggerBlock, $Silian_preferenceBlock);
+        $this->assertFalse($Silian_serviceBlock->sendMessageNotification(
             'to@example.com',
             'User',
             'Blocked subject',
@@ -134,14 +134,14 @@ class EmailServiceTest extends TestCase
             'normal'
         ));
         $this->assertFalse(
-            $handlerBlock->hasInfoThatContains('Simulated email send'),
+            $Silian_handlerBlock->hasInfoThatContains('Simulated email send'),
             'Expected no send when preferences block email delivery.'
         );
     }
 
     public function testSendSupportTicketNotificationRendersStructuredHtml(): void
     {
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -155,26 +155,26 @@ class EmailServiceTest extends TestCase
             'frontend_url' => 'https://app.example.com',
         ];
 
-        $logger = new Logger('email-service-support-ticket');
-        $logger->pushHandler(new TestHandler());
-        $service = new class($config, $logger, null) extends EmailService {
+        $Silian_logger = new Logger('email-service-support-ticket');
+        $Silian_logger->pushHandler(new TestHandler());
+        $Silian_service = new class($Silian_config, $Silian_logger, null) extends EmailService {
             public ?array $capturedEmail = null;
 
-            public function sendEmail(string $toEmail, string $toName, string $subject, string $bodyHtml, string $bodyText = ''): bool
+            public function sendEmail(string $Silian_toEmail, string $Silian_toName, string $Silian_subject, string $Silian_bodyHtml, string $Silian_bodyText = ''): bool
             {
                 $this->capturedEmail = [
-                    'to' => $toEmail,
-                    'name' => $toName,
-                    'subject' => $subject,
-                    'bodyHtml' => $bodyHtml,
-                    'bodyText' => $bodyText,
+                    'to' => $Silian_toEmail,
+                    'name' => $Silian_toName,
+                    'subject' => $Silian_subject,
+                    'bodyHtml' => $Silian_bodyHtml,
+                    'bodyText' => $Silian_bodyText,
                 ];
 
                 return true;
             }
         };
 
-        $result = $service->sendSupportTicketNotification(
+        $Silian_result = $Silian_service->sendSupportTicketNotification(
             'owner@example.com',
             'Owner',
             'Support ticket #42 updated',
@@ -206,21 +206,21 @@ class EmailServiceTest extends TestCase
             'high'
         );
 
-        $this->assertTrue($result);
-        $this->assertNotNull($service->capturedEmail);
-        $this->assertStringContainsString('Billing mismatch on April export', $service->capturedEmail['bodyHtml']);
-        $this->assertStringContainsString('What changed', $service->capturedEmail['bodyHtml']);
-        $this->assertStringContainsString('Latest update', $service->capturedEmail['bodyHtml']);
-        $this->assertStringContainsString('/tickets/42', $service->capturedEmail['bodyHtml']);
-        $this->assertStringContainsString('Status:', $service->capturedEmail['bodyText']);
-        $this->assertStringContainsString('In progress', $service->capturedEmail['bodyText']);
-        $this->assertStringContainsString('Review ticket:', $service->capturedEmail['bodyText']);
-        $this->assertStringContainsString('/tickets/42', $service->capturedEmail['bodyText']);
+        $this->assertTrue($Silian_result);
+        $this->assertNotNull($Silian_service->capturedEmail);
+        $this->assertStringContainsString('Billing mismatch on April export', $Silian_service->capturedEmail['bodyHtml']);
+        $this->assertStringContainsString('What changed', $Silian_service->capturedEmail['bodyHtml']);
+        $this->assertStringContainsString('Latest update', $Silian_service->capturedEmail['bodyHtml']);
+        $this->assertStringContainsString('/tickets/42', $Silian_service->capturedEmail['bodyHtml']);
+        $this->assertStringContainsString('Status:', $Silian_service->capturedEmail['bodyText']);
+        $this->assertStringContainsString('In progress', $Silian_service->capturedEmail['bodyText']);
+        $this->assertStringContainsString('Review ticket:', $Silian_service->capturedEmail['bodyText']);
+        $this->assertStringContainsString('/tickets/42', $Silian_service->capturedEmail['bodyText']);
     }
 
     public function testSendMessageNotificationToManyUsesBroadcastAndPreferences(): void
     {
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -233,28 +233,28 @@ class EmailServiceTest extends TestCase
             'frontend_url' => 'https://app.example.com',
         ];
 
-        $handler = new TestHandler();
-        $logger = new Logger('email-service-bulk');
-        $logger->pushHandler($handler);
+        $Silian_handler = new TestHandler();
+        $Silian_logger = new Logger('email-service-bulk');
+        $Silian_logger->pushHandler($Silian_handler);
 
-        $preference = new class(['admin1@example.com'], $logger) extends NotificationPreferenceService {
+        $Silian_preference = new class(['admin1@example.com'], $Silian_logger) extends NotificationPreferenceService {
             private array $allowed;
 
-            public function __construct(array $allowed, Logger $logger)
+            public function __construct(array $Silian_allowed, Logger $Silian_logger)
             {
-                parent::__construct($logger);
-                $this->allowed = array_map('strtolower', $allowed);
+                parent::__construct($Silian_logger);
+                $this->allowed = array_map('strtolower', $Silian_allowed);
             }
 
-            public function shouldSendEmailByEmail(string $email, string $category): bool
+            public function shouldSendEmailByEmail(string $Silian_email, string $Silian_category): bool
             {
-                return in_array(strtolower($email), $this->allowed, true);
+                return in_array(strtolower($Silian_email), $this->allowed, true);
             }
         };
 
-        $service = new EmailService($config, $logger, $preference);
+        $Silian_service = new EmailService($Silian_config, $Silian_logger, $Silian_preference);
 
-        $result = $service->sendMessageNotificationToMany(
+        $Silian_result = $Silian_service->sendMessageNotificationToMany(
             [
                 ['email' => 'admin1@example.com', 'name' => 'Admin A'],
                 ['email' => 'blocked@example.com', 'name' => 'Admin B'],
@@ -265,20 +265,20 @@ class EmailServiceTest extends TestCase
             'high'
         );
 
-        $this->assertTrue($result, 'Expected broadcast send when at least one recipient allows email.');
-        $records = array_values(array_filter(
-            $handler->getRecords(),
-            static fn(array $record): bool => $record['message'] === 'Simulated broadcast email send'
+        $this->assertTrue($Silian_result, 'Expected broadcast send when at least one recipient allows email.');
+        $Silian_records = array_values(array_filter(
+            $Silian_handler->getRecords(),
+            static fn(array $Silian_record): bool => $Silian_record['message'] === 'Simulated broadcast email send'
         ));
-        $this->assertNotEmpty($records, 'Simulated broadcast log expected.');
-        $context = $records[0]['context'] ?? [];
-        $this->assertSame(1, $context['recipient_count'] ?? null, 'Only allowed recipients should be counted.');
-        $this->assertSame('system', $context['category'] ?? null);
+        $this->assertNotEmpty($Silian_records, 'Simulated broadcast log expected.');
+        $Silian_context = $Silian_records[0]['context'] ?? [];
+        $this->assertSame(1, $Silian_context['recipient_count'] ?? null, 'Only allowed recipients should be counted.');
+        $this->assertSame('system', $Silian_context['category'] ?? null);
     }
 
     public function testSendMessageNotificationToManySkipsWhenNoEligibleRecipients(): void
     {
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -290,25 +290,25 @@ class EmailServiceTest extends TestCase
             'frontend_url' => 'https://app.example.com',
         ];
 
-        $handler = new TestHandler();
-        $logger = new Logger('email-service-bulk-skip');
-        $logger->pushHandler($handler);
+        $Silian_handler = new TestHandler();
+        $Silian_logger = new Logger('email-service-bulk-skip');
+        $Silian_logger->pushHandler($Silian_handler);
 
-        $preference = new class($logger) extends NotificationPreferenceService {
-            public function __construct(Logger $logger)
+        $Silian_preference = new class($Silian_logger) extends NotificationPreferenceService {
+            public function __construct(Logger $Silian_logger)
             {
-                parent::__construct($logger);
+                parent::__construct($Silian_logger);
             }
 
-            public function shouldSendEmailByEmail(string $email, string $category): bool
+            public function shouldSendEmailByEmail(string $Silian_email, string $Silian_category): bool
             {
                 return false;
             }
         };
 
-        $service = new EmailService($config, $logger, $preference);
+        $Silian_service = new EmailService($Silian_config, $Silian_logger, $Silian_preference);
 
-        $result = $service->sendMessageNotificationToMany(
+        $Silian_result = $Silian_service->sendMessageNotificationToMany(
             [
                 ['email' => 'blocked@example.com', 'name' => 'Admin'],
             ],
@@ -318,20 +318,20 @@ class EmailServiceTest extends TestCase
             'normal'
         );
 
-        $this->assertFalse($result, 'Expected failure when no recipients are eligible.');
+        $this->assertFalse($Silian_result, 'Expected failure when no recipients are eligible.');
         $this->assertSame(
             'No deliverable email recipients provided',
-            $service->getLastError()
+            $Silian_service->getLastError()
         );
         $this->assertFalse(
-            $handler->hasInfoThatContains('Simulated broadcast email send'),
+            $Silian_handler->hasInfoThatContains('Simulated broadcast email send'),
             'No broadcast send should occur when every recipient is filtered out.'
         );
     }
 
     public function testSendAnnouncementBroadcastRespectsTemplatesAndPreferences(): void
     {
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -343,25 +343,25 @@ class EmailServiceTest extends TestCase
             'frontend_url' => 'https://app.example.com',
         ];
 
-        $handler = new TestHandler();
-        $logger = new Logger('email-service-announcement');
-        $logger->pushHandler($handler);
+        $Silian_handler = new TestHandler();
+        $Silian_logger = new Logger('email-service-announcement');
+        $Silian_logger->pushHandler($Silian_handler);
 
-        $preference = new class($logger) extends NotificationPreferenceService {
-            public function __construct(Logger $logger)
+        $Silian_preference = new class($Silian_logger) extends NotificationPreferenceService {
+            public function __construct(Logger $Silian_logger)
             {
-                parent::__construct($logger);
+                parent::__construct($Silian_logger);
             }
 
-            public function shouldSendEmailByEmail(string $email, string $category): bool
+            public function shouldSendEmailByEmail(string $Silian_email, string $Silian_category): bool
             {
-                return strtolower($email) === 'allowed@example.com';
+                return strtolower($Silian_email) === 'allowed@example.com';
             }
         };
 
-        $service = new EmailService($config, $logger, $preference);
+        $Silian_service = new EmailService($Silian_config, $Silian_logger, $Silian_preference);
 
-        $result = $service->sendAnnouncementBroadcast(
+        $Silian_result = $Silian_service->sendAnnouncementBroadcast(
             [
                 ['email' => 'allowed@example.com', 'name' => 'Allowed User'],
                 ['email' => 'blocked@example.com', 'name' => 'Blocked User'],
@@ -371,24 +371,24 @@ class EmailServiceTest extends TestCase
             'high'
         );
 
-        $this->assertTrue($result, 'Expected queued send when at least one recipient allows announcement emails.');
-        $records = array_values(array_filter(
-            $handler->getRecords(),
-            static fn(array $record): bool => $record['message'] === 'Simulated broadcast email send'
+        $this->assertTrue($Silian_result, 'Expected queued send when at least one recipient allows announcement emails.');
+        $Silian_records = array_values(array_filter(
+            $Silian_handler->getRecords(),
+            static fn(array $Silian_record): bool => $Silian_record['message'] === 'Simulated broadcast email send'
         ));
-        $this->assertNotEmpty($records, 'Expected simulation log for announcement broadcast.');
-        $context = $records[0]['context'] ?? [];
-        $this->assertSame(1, $context['recipient_count'] ?? null, 'Only allowed recipients should be included.');
+        $this->assertNotEmpty($Silian_records, 'Expected simulation log for announcement broadcast.');
+        $Silian_context = $Silian_records[0]['context'] ?? [];
+        $this->assertSame(1, $Silian_context['recipient_count'] ?? null, 'Only allowed recipients should be included.');
         $this->assertSame(
             NotificationPreferenceService::CATEGORY_ANNOUNCEMENT,
-            $context['category'] ?? null,
+            $Silian_context['category'] ?? null,
             'Announcement emails should be tagged with the announcement category.'
         );
     }
 
     public function testSendAnnouncementBroadcastDoesNotExposeInternalMetadataInVisibleCopy(): void
     {
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -400,28 +400,28 @@ class EmailServiceTest extends TestCase
             'frontend_url' => 'https://app.example.com',
         ];
 
-        $handler = new TestHandler();
-        $logger = new Logger('email-service-announcement-visible-copy');
-        $logger->pushHandler($handler);
+        $Silian_handler = new TestHandler();
+        $Silian_logger = new Logger('email-service-announcement-visible-copy');
+        $Silian_logger->pushHandler($Silian_handler);
 
-        $service = new class($config, $logger, null) extends EmailService {
+        $Silian_service = new class($Silian_config, $Silian_logger, null) extends EmailService {
             public ?array $capturedBroadcast = null;
 
-            public function sendBroadcastEmail(array $recipients, string $subject, string $bodyHtml, string $bodyText = '', ?string $category = null): bool
+            public function sendBroadcastEmail(array $Silian_recipients, string $Silian_subject, string $Silian_bodyHtml, string $Silian_bodyText = '', ?string $Silian_category = null): bool
             {
                 $this->capturedBroadcast = [
-                    'recipients' => $recipients,
-                    'subject' => $subject,
-                    'bodyHtml' => $bodyHtml,
-                    'bodyText' => $bodyText,
-                    'category' => $category,
+                    'recipients' => $Silian_recipients,
+                    'subject' => $Silian_subject,
+                    'bodyHtml' => $Silian_bodyHtml,
+                    'bodyText' => $Silian_bodyText,
+                    'category' => $Silian_category,
                 ];
 
                 return true;
             }
         };
 
-        $result = $service->sendAnnouncementBroadcast(
+        $Silian_result = $Silian_service->sendAnnouncementBroadcast(
             [['email' => 'allowed@example.com', 'name' => 'Allowed User']],
             'Planned maintenance',
             '<p>Systems will undergo maintenance tonight.</p>',
@@ -432,34 +432,34 @@ class EmailServiceTest extends TestCase
             'admin_broadcast'
         );
 
-        $this->assertTrue($result);
-        $this->assertNotNull($service->capturedBroadcast);
-        $this->assertStringContainsString('has published a new announcement', $service->capturedBroadcast['bodyHtml']);
-        $this->assertStringNotContainsString('admin_broadcast', $service->capturedBroadcast['bodyHtml']);
-        $this->assertStringNotContainsString('render v1', $service->capturedBroadcast['bodyHtml']);
-        $this->assertStringNotContainsString('admin_broadcast', $service->capturedBroadcast['bodyText']);
-        $this->assertStringNotContainsString('render v1', $service->capturedBroadcast['bodyText']);
+        $this->assertTrue($Silian_result);
+        $this->assertNotNull($Silian_service->capturedBroadcast);
+        $this->assertStringContainsString('has published a new announcement', $Silian_service->capturedBroadcast['bodyHtml']);
+        $this->assertStringNotContainsString('admin_broadcast', $Silian_service->capturedBroadcast['bodyHtml']);
+        $this->assertStringNotContainsString('render v1', $Silian_service->capturedBroadcast['bodyHtml']);
+        $this->assertStringNotContainsString('admin_broadcast', $Silian_service->capturedBroadcast['bodyText']);
+        $this->assertStringNotContainsString('render v1', $Silian_service->capturedBroadcast['bodyText']);
     }
 
     public function testTemplateWrappersReturnSuccess(): void
     {
-        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ct_email_tpl_' . uniqid();
-        mkdir($dir);
-        $make = function (string $name, string $contentHtml) use ($dir): void {
-            file_put_contents($dir . DIRECTORY_SEPARATOR . $name . '.html', $contentHtml);
+        $Silian_dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ct_email_tpl_' . uniqid();
+        mkdir($Silian_dir);
+        $Silian_make = function (string $Silian_name, string $Silian_contentHtml) use ($Silian_dir): void {
+            file_put_contents($Silian_dir . DIRECTORY_SEPARATOR . $Silian_name . '.html', $Silian_contentHtml);
         };
         file_put_contents(
-            $dir . DIRECTORY_SEPARATOR . 'layout.html',
+            $Silian_dir . DIRECTORY_SEPARATOR . 'layout.html',
             '<html><head><title>{{email_title}}</title></head><body><h1>{{email_title}}</h1>{{content}}{{buttons}}<footer>{{app_name}}</footer></body></html>'
         );
-        $make('verification_code', 'Code: {{code}}');
-        $make('password_reset', 'Link: {{link}}');
-        $make('activity_approved', 'Activity: {{activity_name}} {{points_earned}}');
-        $make('activity_rejected', 'Activity: {{activity_name}} {{reason}}');
-        $make('exchange_confirmation', 'Product: {{product_name}} x{{quantity}} = {{total_points}}');
-        $make('exchange_status_update', 'Product: {{product_name}} {{status}} {{admin_notes}}');
+        $Silian_make('verification_code', 'Code: {{code}}');
+        $Silian_make('password_reset', 'Link: {{link}}');
+        $Silian_make('activity_approved', 'Activity: {{activity_name}} {{points_earned}}');
+        $Silian_make('activity_rejected', 'Activity: {{activity_name}} {{reason}}');
+        $Silian_make('exchange_confirmation', 'Product: {{product_name}} x{{quantity}} = {{total_points}}');
+        $Silian_make('exchange_status_update', 'Product: {{product_name}} {{status}} {{admin_notes}}');
 
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -467,7 +467,7 @@ class EmailServiceTest extends TestCase
             'port' => 465,
             'from_email' => 'noreply@example.com',
             'from_name' => 'No Reply',
-            'templates_path' => $dir . DIRECTORY_SEPARATOR,
+            'templates_path' => $Silian_dir . DIRECTORY_SEPARATOR,
             'subjects' => [
                 'verification_code' => 'VC',
                 'password_reset' => 'PR',
@@ -483,39 +483,39 @@ class EmailServiceTest extends TestCase
             'reset_link_base' => 'https://app.example.com',
         ];
 
-        $handler = new TestHandler();
-        $logger = new Logger('email-service-test');
-        $logger->pushHandler($handler);
+        $Silian_handler = new TestHandler();
+        $Silian_logger = new Logger('email-service-test');
+        $Silian_logger->pushHandler($Silian_handler);
 
-        $svc = new EmailService($config, $logger, null);
+        $Silian_svc = new EmailService($Silian_config, $Silian_logger, null);
 
-        $this->assertTrue($svc->sendVerificationCode('to@example.com', 'User', '123456'));
-        $this->assertTrue($svc->sendPasswordResetLink('to@example.com', 'User', 'https://reset'));
-        $this->assertTrue($svc->sendActivityApprovedNotification('to@example.com', 'User', 'Act', 10));
-        $this->assertTrue($svc->sendActivityRejectedNotification('to@example.com', 'User', 'Act', 'Bad'));
-        $this->assertTrue($svc->sendExchangeConfirmation('to@example.com', 'User', 'Prod', 2, 100));
-        $this->assertTrue($svc->sendExchangeStatusUpdate('to@example.com', 'User', 'Prod', 'shipped', 'soon'));
+        $this->assertTrue($Silian_svc->sendVerificationCode('to@example.com', 'User', '123456'));
+        $this->assertTrue($Silian_svc->sendPasswordResetLink('to@example.com', 'User', 'https://reset'));
+        $this->assertTrue($Silian_svc->sendActivityApprovedNotification('to@example.com', 'User', 'Act', 10));
+        $this->assertTrue($Silian_svc->sendActivityRejectedNotification('to@example.com', 'User', 'Act', 'Bad'));
+        $this->assertTrue($Silian_svc->sendExchangeConfirmation('to@example.com', 'User', 'Prod', 2, 100));
+        $this->assertTrue($Silian_svc->sendExchangeStatusUpdate('to@example.com', 'User', 'Prod', 'shipped', 'soon'));
 
-        $this->assertTrue($handler->hasInfoThatContains('Simulated email send'), 'Expected info logs for simulated email sends.');
+        $this->assertTrue($Silian_handler->hasInfoThatContains('Simulated email send'), 'Expected info logs for simulated email sends.');
 
         foreach (array_filter(
-            $handler->getRecords(),
-            static fn(array $record): bool => $record['message'] === 'Simulated email send'
-        ) as $record) {
-            $this->assertSame('force_simulation', $record['context']['reason'] ?? null);
+            $Silian_handler->getRecords(),
+            static fn(array $Silian_record): bool => $Silian_record['message'] === 'Simulated email send'
+        ) as $Silian_record) {
+            $this->assertSame('force_simulation', $Silian_record['context']['reason'] ?? null);
         }
 
-        $this->assertNull($svc->getLastError(), 'Expected EmailService not to record any error during helper sends.');
+        $this->assertNull($Silian_svc->getLastError(), 'Expected EmailService not to record any error during helper sends.');
 
-        foreach (glob($dir . DIRECTORY_SEPARATOR . '*') as $f) {
-            @unlink($f);
+        foreach (glob($Silian_dir . DIRECTORY_SEPARATOR . '*') as $Silian_f) {
+            @unlink($Silian_f);
         }
-        @rmdir($dir);
+        @rmdir($Silian_dir);
     }
 
     public function testSendEmailSimulationWritesAuditLog(): void
     {
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -526,25 +526,25 @@ class EmailServiceTest extends TestCase
             'force_simulation' => true,
         ];
 
-        $logger = new Logger('email-service-audit');
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->once())
+        $Silian_logger = new Logger('email-service-audit');
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->once())
             ->method('log')
-            ->with($this->callback(function (array $payload): bool {
-                return ($payload['action'] ?? null) === 'email_simulated'
-                    && ($payload['operation_category'] ?? null) === 'notification'
-                    && ($payload['data']['to'] ?? null) === 'audit@example.com';
+            ->with($this->callback(function (array $Silian_payload): bool {
+                return ($Silian_payload['action'] ?? null) === 'email_simulated'
+                    && ($Silian_payload['operation_category'] ?? null) === 'notification'
+                    && ($Silian_payload['data']['to'] ?? null) === 'audit@example.com';
             }))
             ->willReturn(true);
 
-        $service = new EmailService($config, $logger, null, $audit, null);
+        $Silian_service = new EmailService($Silian_config, $Silian_logger, null, $Silian_audit, null);
 
-        $this->assertTrue($service->sendEmail('audit@example.com', 'Audit', 'Audit Subject', '<p>Body</p>', 'Body'));
+        $this->assertTrue($Silian_service->sendEmail('audit@example.com', 'Audit', 'Audit Subject', '<p>Body</p>', 'Body'));
     }
 
     public function testPreferenceLookupFailureWritesAuditAndErrorLog(): void
     {
-        $config = [
+        $Silian_config = [
             'debug' => false,
             'host' => 'smtp.example.com',
             'username' => 'user',
@@ -557,30 +557,30 @@ class EmailServiceTest extends TestCase
             'frontend_url' => 'https://app.example.com',
         ];
 
-        $logger = new Logger('email-service-pref-failure');
-        $preference = new class($logger) extends NotificationPreferenceService {
-            public function __construct(Logger $logger)
+        $Silian_logger = new Logger('email-service-pref-failure');
+        $Silian_preference = new class($Silian_logger) extends NotificationPreferenceService {
+            public function __construct(Logger $Silian_logger)
             {
-                parent::__construct($logger);
+                parent::__construct($Silian_logger);
             }
 
-            public function shouldSendEmailByEmail(string $email, string $category): bool
+            public function shouldSendEmailByEmail(string $Silian_email, string $Silian_category): bool
             {
                 throw new \RuntimeException('preference lookup failed');
             }
         };
 
-        $actions = [];
-        $audit = $this->createMock(AuditLogService::class);
-        $audit->expects($this->exactly(2))
+        $Silian_actions = [];
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_audit->expects($this->exactly(2))
             ->method('log')
-            ->willReturnCallback(function (array $payload) use (&$actions): bool {
-                $actions[] = $payload['action'] ?? null;
+            ->willReturnCallback(function (array $Silian_payload) use (&$Silian_actions): bool {
+                $Silian_actions[] = $Silian_payload['action'] ?? null;
                 return true;
             });
 
-        $error = $this->createMock(ErrorLogService::class);
-        $error->expects($this->once())
+        $Silian_error = $this->createMock(ErrorLogService::class);
+        $Silian_error->expects($this->once())
             ->method('logException')
             ->with(
                 $this->isInstanceOf(\Throwable::class),
@@ -589,9 +589,9 @@ class EmailServiceTest extends TestCase
             )
             ->willReturn(1);
 
-        $service = new EmailService($config, $logger, $preference, $audit, $error);
+        $Silian_service = new EmailService($Silian_config, $Silian_logger, $Silian_preference, $Silian_audit, $Silian_error);
 
-        $this->assertTrue($service->sendMessageNotification(
+        $this->assertTrue($Silian_service->sendMessageNotification(
             'fallback@example.com',
             'Fallback',
             'Subject',
@@ -599,7 +599,7 @@ class EmailServiceTest extends TestCase
             'system'
         ));
 
-        $this->assertContains('email_preference_lookup_failed', $actions);
-        $this->assertContains('email_simulated', $actions);
+        $this->assertContains('email_preference_lookup_failed', $Silian_actions);
+        $this->assertContains('email_simulated', $Silian_actions);
     }
 }

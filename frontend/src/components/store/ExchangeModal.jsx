@@ -1,186 +1,186 @@
-import React, { useState, useEffect } from 'react';
-import { X, ShoppingCart, Package, MapPin, Phone, MessageSquare } from 'lucide-react';
-import { useTranslation } from '../../hooks/useTranslation';
-import { formatNumber } from '../../lib/utils';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
-import R2Image from '../common/R2Image';
+import Silian_React, { useState as Silian_useState, useEffect as Silian_useEffect } from 'react';
+import { X as Silian_X, ShoppingCart as Silian_ShoppingCart, Package as Silian_Package, MapPin as Silian_MapPin, Phone as Silian_Phone, MessageSquare as Silian_MessageSquare } from 'lucide-react';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { formatNumber as Silian_formatNumber } from '../../lib/utils';
+import { Button as Silian_Button } from '../ui/Button';
+import { Input as Silian_Input } from '../ui/Input';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../ui/Card';
+import Silian_R2Image from '../common/R2Image';
 
-export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose, onConfirm, isLoading }) {
-  const { t } = useTranslation(['common', 'date', 'errors', 'images', 'store']);
-  const isHttpUrl = (value) => typeof value === 'string' && /^https?:\/\//.test(value);
+export function ExchangeModal({ product: Silian_product, userPoints: Silian_userPoints, userEmail: Silian_userEmail, isOpen: Silian_isOpen, onClose: Silian_onClose, onConfirm: Silian_onConfirm, isLoading: Silian_isLoading }) {
+  const { t: Silian_t } = Silian_useTranslation(['common', 'date', 'errors', 'images', 'store']);
+  const Silian_isHttpUrl = (Silian_value) => typeof Silian_value === 'string' && /^https?:\/\//.test(Silian_value);
 
-  const resolveImageCandidate = (candidate) => {
-    if (!candidate) {
+  const Silian_resolveImageCandidate = (Silian_candidate) => {
+    if (!Silian_candidate) {
       return { src: null, path: null };
     }
-    if (typeof candidate === 'string') {
-      return isHttpUrl(candidate)
-        ? { src: candidate, path: null }
-        : { src: null, path: candidate };
+    if (typeof Silian_candidate === 'string') {
+      return Silian_isHttpUrl(Silian_candidate)
+        ? { src: Silian_candidate, path: null }
+        : { src: null, path: Silian_candidate };
     }
-    if (Array.isArray(candidate) && candidate.length) {
-      return resolveImageCandidate(candidate[0]);
+    if (Array.isArray(Silian_candidate) && Silian_candidate.length) {
+      return Silian_resolveImageCandidate(Silian_candidate[0]);
     }
-    if (typeof candidate === 'object') {
-      const rawUrl = typeof candidate.public_url === 'string' && candidate.public_url
-        ? candidate.public_url
-        : (typeof candidate.url === 'string' && candidate.url ? candidate.url : null);
-      const presigned = typeof candidate.presigned_url === 'string' && candidate.presigned_url ? candidate.presigned_url : null;
-      let src = (rawUrl && isHttpUrl(rawUrl) ? rawUrl : null) || presigned;
-      let path = typeof candidate.file_path === 'string' && candidate.file_path !== '' ? candidate.file_path : null;
-      if (!path && rawUrl && !isHttpUrl(rawUrl)) {
-        path = rawUrl;
+    if (typeof Silian_candidate === 'object') {
+      const Silian_rawUrl = typeof Silian_candidate.public_url === 'string' && Silian_candidate.public_url
+        ? Silian_candidate.public_url
+        : (typeof Silian_candidate.url === 'string' && Silian_candidate.url ? Silian_candidate.url : null);
+      const Silian_presigned = typeof Silian_candidate.presigned_url === 'string' && Silian_candidate.presigned_url ? Silian_candidate.presigned_url : null;
+      let Silian_src = (Silian_rawUrl && Silian_isHttpUrl(Silian_rawUrl) ? Silian_rawUrl : null) || Silian_presigned;
+      let Silian_path = typeof Silian_candidate.file_path === 'string' && Silian_candidate.file_path !== '' ? Silian_candidate.file_path : null;
+      if (!Silian_path && Silian_rawUrl && !Silian_isHttpUrl(Silian_rawUrl)) {
+        Silian_path = Silian_rawUrl;
       }
-      if (!path && typeof candidate.path === 'string' && candidate.path !== '') {
-        path = candidate.path;
+      if (!Silian_path && typeof Silian_candidate.path === 'string' && Silian_candidate.path !== '') {
+        Silian_path = Silian_candidate.path;
       }
-      return { src, path };
+      return { src: Silian_src, path: Silian_path };
     }
     return { src: null, path: null };
   };
 
-  const [quantity, setQuantity] = useState(1);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [contactAreaCode, setContactAreaCode] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  const [notes, setNotes] = useState('');
-  const [errors, setErrors] = useState({});
+  const [Silian_quantity, Silian_setQuantity] = Silian_useState(1);
+  const [Silian_deliveryAddress, Silian_setDeliveryAddress] = Silian_useState('');
+  const [Silian_contactAreaCode, Silian_setContactAreaCode] = Silian_useState('');
+  const [Silian_contactPhone, Silian_setContactPhone] = Silian_useState('');
+  const [Silian_notes, Silian_setNotes] = Silian_useState('');
+  const [Silian_errors, Silian_setErrors] = Silian_useState({});
 
-  useEffect(() => {
-    if (!isOpen) {
+  Silian_useEffect(() => {
+    if (!Silian_isOpen) {
       return;
     }
 
-    setQuantity(1);
-    setDeliveryAddress(userEmail || '');
-    setContactAreaCode('');
-    setContactPhone('');
-    setNotes('');
-    setErrors({});
-  }, [isOpen, product?.id, userEmail]);
+    Silian_setQuantity(1);
+    Silian_setDeliveryAddress(Silian_userEmail || '');
+    Silian_setContactAreaCode('');
+    Silian_setContactPhone('');
+    Silian_setNotes('');
+    Silian_setErrors({});
+  }, [Silian_isOpen, Silian_product?.id, Silian_userEmail]);
 
-  if (!isOpen || !product) return null;
+  if (!Silian_isOpen || !Silian_product) return null;
 
-  const primaryImageCandidate = Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : product.images;
-  const candidateMeta = resolveImageCandidate(primaryImageCandidate);
-  const fallbackMeta = resolveImageCandidate(product.image_url || product.image_presigned_url || product.image_path);
-  const imageSrc = candidateMeta.src || fallbackMeta.src;
-  const imagePath = candidateMeta.path || fallbackMeta.path;
-  const hasImage = Boolean(imageSrc || imagePath);
+  const Silian_primaryImageCandidate = Array.isArray(Silian_product.images) && Silian_product.images.length > 0 ? Silian_product.images[0] : Silian_product.images;
+  const Silian_candidateMeta = Silian_resolveImageCandidate(Silian_primaryImageCandidate);
+  const Silian_fallbackMeta = Silian_resolveImageCandidate(Silian_product.image_url || Silian_product.image_presigned_url || Silian_product.image_path);
+  const Silian_imageSrc = Silian_candidateMeta.src || Silian_fallbackMeta.src;
+  const Silian_imagePath = Silian_candidateMeta.path || Silian_fallbackMeta.path;
+  const Silian_hasImage = Boolean(Silian_imageSrc || Silian_imagePath);
 
-  const totalPoints = product.points_required * quantity;
-  const canAfford = userPoints >= totalPoints;
-  const maxQuantity = product.stock === -1 ? 10 : Math.min(product.stock, Math.floor(userPoints / product.points_required));
+  const Silian_totalPoints = Silian_product.points_required * Silian_quantity;
+  const Silian_canAfford = Silian_userPoints >= Silian_totalPoints;
+  const Silian_maxQuantity = Silian_product.stock === -1 ? 10 : Math.min(Silian_product.stock, Math.floor(Silian_userPoints / Silian_product.points_required));
 
-  const validateForm = () => {
-    const newErrors = {};
+  const Silian_validateForm = () => {
+    const Silian_newErrors = {};
 
-    if (quantity < 1 || quantity > maxQuantity) {
-      newErrors.quantity = t('store.exchange.invalidQuantity');
+    if (Silian_quantity < 1 || Silian_quantity > Silian_maxQuantity) {
+      Silian_newErrors.quantity = Silian_t('store.exchange.invalidQuantity');
     }
 
-    const trimmedAddress = deliveryAddress.trim();
-    const trimmedAreaCode = contactAreaCode.trim();
-    const trimmedPhone = contactPhone.trim();
+    const Silian_trimmedAddress = Silian_deliveryAddress.trim();
+    const Silian_trimmedAreaCode = Silian_contactAreaCode.trim();
+    const Silian_trimmedPhone = Silian_contactPhone.trim();
 
-    if (!trimmedAddress) {
-      newErrors.deliveryAddress = t('store.exchange.addressRequired');
+    if (!Silian_trimmedAddress) {
+      Silian_newErrors.deliveryAddress = Silian_t('store.exchange.addressRequired');
     }
 
-    if (trimmedPhone) {
-      if (!trimmedAreaCode) {
-        newErrors.contactAreaCode = t('store.exchange.areaCodeRequired');
-      } else if (!/^\+?\d{1,5}$/.test(trimmedAreaCode)) {
-        newErrors.contactAreaCode = t('store.exchange.invalidAreaCode');
+    if (Silian_trimmedPhone) {
+      if (!Silian_trimmedAreaCode) {
+        Silian_newErrors.contactAreaCode = Silian_t('store.exchange.areaCodeRequired');
+      } else if (!/^\+?\d{1,5}$/.test(Silian_trimmedAreaCode)) {
+        Silian_newErrors.contactAreaCode = Silian_t('store.exchange.invalidAreaCode');
       }
 
-      if (!/^[0-9\-\s]{5,20}$/.test(trimmedPhone)) {
-        newErrors.contactPhone = t('store.exchange.invalidPhone');
+      if (!/^[0-9\-\s]{5,20}$/.test(Silian_trimmedPhone)) {
+        Silian_newErrors.contactPhone = Silian_t('store.exchange.invalidPhone');
       }
-    } else if (trimmedAreaCode) {
-      newErrors.contactPhone = t('store.exchange.phoneRequiredWhenAreaCode');
+    } else if (Silian_trimmedAreaCode) {
+      Silian_newErrors.contactPhone = Silian_t('store.exchange.phoneRequiredWhenAreaCode');
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    Silian_setErrors(Silian_newErrors);
+    return Object.keys(Silian_newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const Silian_handleSubmit = (Silian_e) => {
+    Silian_e.preventDefault();
+    if (!Silian_validateForm()) return;
 
-    const trimmedAddress = deliveryAddress.trim();
-    const trimmedAreaCode = contactAreaCode.trim();
-    const trimmedPhone = contactPhone.trim();
-    const trimmedNotes = notes.trim();
+    const Silian_trimmedAddress = Silian_deliveryAddress.trim();
+    const Silian_trimmedAreaCode = Silian_contactAreaCode.trim();
+    const Silian_trimmedPhone = Silian_contactPhone.trim();
+    const Silian_trimmedNotes = Silian_notes.trim();
 
-    onConfirm({
-      product_id: product.id,
-      quantity,
-      delivery_address: trimmedAddress,
-      contact_area_code: trimmedAreaCode || undefined,
-      contact_phone: trimmedPhone || undefined,
-      notes: trimmedNotes || undefined
+    Silian_onConfirm({
+      product_id: Silian_product.id,
+      quantity: Silian_quantity,
+      delivery_address: Silian_trimmedAddress,
+      contact_area_code: Silian_trimmedAreaCode || undefined,
+      contact_phone: Silian_trimmedPhone || undefined,
+      notes: Silian_trimmedNotes || undefined
     });
   };
 
-  const handleQuantityChange = (newQuantity) => {
-    const qty = Math.max(1, Math.min(maxQuantity, parseInt(newQuantity) || 1));
-    setQuantity(qty);
-    if (errors.quantity) {
-      setErrors(prev => ({ ...prev, quantity: null }));
+  const Silian_handleQuantityChange = (Silian_newQuantity) => {
+    const Silian_qty = Math.max(1, Math.min(Silian_maxQuantity, parseInt(Silian_newQuantity) || 1));
+    Silian_setQuantity(Silian_qty);
+    if (Silian_errors.quantity) {
+      Silian_setErrors(Silian_prev => ({ ...Silian_prev, quantity: null }));
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-border bg-card">
-        <Card className="border-0 shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <Silian_Card className="border-0 shadow-none">
+          <Silian_CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <div>
-              <CardTitle className="text-xl">{t('store.exchange.title')}</CardTitle>
-              <CardDescription>{t('store.exchange.subtitle')}</CardDescription>
+              <Silian_CardTitle className="text-xl">{Silian_t('store.exchange.title')}</Silian_CardTitle>
+              <Silian_CardDescription>{Silian_t('store.exchange.subtitle')}</Silian_CardDescription>
             </div>
-            <Button
+            <Silian_Button
               variant="ghost"
               size="sm"
-              onClick={onClose}
+              onClick={Silian_onClose}
               className="h-8 w-8 p-0"
             >
-              <X className="h-4 w-4" />
-            </Button>
-          </CardHeader>
+              <Silian_X className="h-4 w-4" />
+            </Silian_Button>
+          </Silian_CardHeader>
 
-          <CardContent className="space-y-6">
+          <Silian_CardContent className="space-y-6">
             {/* 商品信息 */}
             <div className="rounded-lg bg-muted/50 p-4">
               <div className="flex items-start space-x-4">
-                {hasImage && (
-                  <R2Image
-                    src={imageSrc || undefined}
-                    filePath={imagePath || undefined}
-                    alt={product.name}
+                {Silian_hasImage && (
+                  <Silian_R2Image
+                    src={Silian_imageSrc || undefined}
+                    filePath={Silian_imagePath || undefined}
+                    alt={Silian_product.name}
                     className="w-20 h-20 object-cover rounded-lg"
                   />
                 )}
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg">{product.name}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{product.description}</p>
+                  <h3 className="font-semibold text-lg">{Silian_product.name}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{Silian_product.description}</p>
                   <div className="flex items-center space-x-4 mt-2">
                     <div className="flex items-center space-x-1">
                       <span className="text-lg font-bold text-green-600">
-                        {formatNumber(product.points_required)}
+                        {Silian_formatNumber(Silian_product.points_required)}
                       </span>
-                      <span className="text-sm text-muted-foreground">{t('common.points')}</span>
+                      <span className="text-sm text-muted-foreground">{Silian_t('common.points')}</span>
                     </div>
                     <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                      <Package className="h-4 w-4" />
+                      <Silian_Package className="h-4 w-4" />
                       <span>
-                        {product.stock === -1 
-                          ? t('store.unlimited') 
-                          : t('store.stock', { count: product.stock })
+                        {Silian_product.stock === -1
+                          ? Silian_t('store.unlimited')
+                          : Silian_t('store.stock', { count: Silian_product.stock })
                         }
                       </span>
                     </div>
@@ -189,132 +189,132 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={Silian_handleSubmit} className="space-y-4">
               {/* 数量选择 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  {t('store.exchange.quantity')}
+                  {Silian_t('store.exchange.quantity')}
                 </label>
                 <div className="flex items-center space-x-3">
-                  <Button
+                  <Silian_Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => handleQuantityChange(quantity - 1)}
-                    disabled={quantity <= 1}
+                    onClick={() => Silian_handleQuantityChange(Silian_quantity - 1)}
+                    disabled={Silian_quantity <= 1}
                   >
                     -
-                  </Button>
-                  <Input
+                  </Silian_Button>
+                  <Silian_Input
                     type="number"
                     min="1"
-                    max={maxQuantity}
-                    value={quantity}
-                    onChange={(e) => handleQuantityChange(e.target.value)}
+                    max={Silian_maxQuantity}
+                    value={Silian_quantity}
+                    onChange={(Silian_e) => Silian_handleQuantityChange(Silian_e.target.value)}
                     className="w-20 text-center"
                   />
-                  <Button
+                  <Silian_Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => handleQuantityChange(quantity + 1)}
-                    disabled={quantity >= maxQuantity}
+                    onClick={() => Silian_handleQuantityChange(Silian_quantity + 1)}
+                    disabled={Silian_quantity >= Silian_maxQuantity}
                   >
                     +
-                  </Button>
+                  </Silian_Button>
                   <span className="text-sm text-muted-foreground">
-                    {t('store.exchange.maxQuantity', { max: maxQuantity })}
+                    {Silian_t('store.exchange.maxQuantity', { max: Silian_maxQuantity })}
                   </span>
                 </div>
-                {errors.quantity && (
-                  <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>
+                {Silian_errors.quantity && (
+                  <p className="text-red-500 text-sm mt-1">{Silian_errors.quantity}</p>
                 )}
               </div>
 
               {/* 收货地址 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  <MapPin className="h-4 w-4 inline mr-1" />
-                  {t('store.exchange.deliveryAddress')}
+                  <Silian_MapPin className="h-4 w-4 inline mr-1" />
+                  {Silian_t('store.exchange.deliveryAddress')}
                 </label>
-                <Input
+                <Silian_Input
                   type="text"
-                  value={deliveryAddress}
-                  onChange={(e) => {
-                    setDeliveryAddress(e.target.value);
-                    if (errors.deliveryAddress) {
-                      setErrors(prev => ({ ...prev, deliveryAddress: null }));
+                  value={Silian_deliveryAddress}
+                  onChange={(Silian_e) => {
+                    Silian_setDeliveryAddress(Silian_e.target.value);
+                    if (Silian_errors.deliveryAddress) {
+                      Silian_setErrors(Silian_prev => ({ ...Silian_prev, deliveryAddress: null }));
                     }
                   }}
-                  placeholder={t('store.exchange.addressPlaceholder')}
-                  className={errors.deliveryAddress ? 'border-red-500' : ''}
+                  placeholder={Silian_t('store.exchange.addressPlaceholder')}
+                  className={Silian_errors.deliveryAddress ? 'border-red-500' : ''}
                 />
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {t('store.exchange.addressHint')}
+                  {Silian_t('store.exchange.addressHint')}
                 </p>
-                {errors.deliveryAddress && (
-                  <p className="text-red-500 text-sm mt-1">{errors.deliveryAddress}</p>
+                {Silian_errors.deliveryAddress && (
+                  <p className="text-red-500 text-sm mt-1">{Silian_errors.deliveryAddress}</p>
                 )}
               </div>
 
               {/* 联系方式 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  <Phone className="h-4 w-4 inline mr-1" />
-                  {t('store.exchange.contactPhone')} ({t('common.optional')})
+                  <Silian_Phone className="h-4 w-4 inline mr-1" />
+                  {Silian_t('store.exchange.contactPhone')} ({Silian_t('common.optional')})
                 </label>
                 <div className="flex flex-col md:flex-row gap-3">
                   <div className="md:w-32">
-                    <Input
+                    <Silian_Input
                       type="text"
-                      value={contactAreaCode}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setContactAreaCode(value);
-                        if (errors.contactAreaCode) {
-                          setErrors(prev => ({ ...prev, contactAreaCode: null }));
+                      value={Silian_contactAreaCode}
+                      onChange={(Silian_e) => {
+                        const Silian_value = Silian_e.target.value;
+                        Silian_setContactAreaCode(Silian_value);
+                        if (Silian_errors.contactAreaCode) {
+                          Silian_setErrors(Silian_prev => ({ ...Silian_prev, contactAreaCode: null }));
                         }
                       }}
-                      placeholder={t('store.exchange.areaCodePlaceholder')}
-                      className={errors.contactAreaCode ? 'border-red-500' : ''}
+                      placeholder={Silian_t('store.exchange.areaCodePlaceholder')}
+                      className={Silian_errors.contactAreaCode ? 'border-red-500' : ''}
                     />
-                    {errors.contactAreaCode && (
-                      <p className="text-red-500 text-sm mt-1">{errors.contactAreaCode}</p>
+                    {Silian_errors.contactAreaCode && (
+                      <p className="text-red-500 text-sm mt-1">{Silian_errors.contactAreaCode}</p>
                     )}
                   </div>
                   <div className="flex-1">
-                    <Input
+                    <Silian_Input
                       type="tel"
-                      value={contactPhone}
-                      onChange={(e) => {
-                        setContactPhone(e.target.value);
-                        setErrors(prev => ({
-                          ...prev,
+                      value={Silian_contactPhone}
+                      onChange={(Silian_e) => {
+                        Silian_setContactPhone(Silian_e.target.value);
+                        Silian_setErrors(Silian_prev => ({
+                          ...Silian_prev,
                           contactPhone: null,
                           contactAreaCode: null
                         }));
                       }}
-                      placeholder={t('store.exchange.phonePlaceholder')}
-                      className={errors.contactPhone ? 'border-red-500' : ''}
+                      placeholder={Silian_t('store.exchange.phonePlaceholder')}
+                      className={Silian_errors.contactPhone ? 'border-red-500' : ''}
                     />
-                    {errors.contactPhone && (
-                      <p className="text-red-500 text-sm mt-1">{errors.contactPhone}</p>
+                    {Silian_errors.contactPhone && (
+                      <p className="text-red-500 text-sm mt-1">{Silian_errors.contactPhone}</p>
                     )}
                   </div>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">{t('store.exchange.phoneOptionalHint')}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{Silian_t('store.exchange.phoneOptionalHint')}</p>
               </div>
 
               {/* 备注 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  <MessageSquare className="h-4 w-4 inline mr-1" />
-                  {t('store.exchange.notes')} ({t('common.optional')})
+                  <Silian_MessageSquare className="h-4 w-4 inline mr-1" />
+                  {Silian_t('store.exchange.notes')} ({Silian_t('common.optional')})
                 </label>
                 <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder={t('store.exchange.notesPlaceholder')}
+                  value={Silian_notes}
+                  onChange={(Silian_e) => Silian_setNotes(Silian_e.target.value)}
+                  placeholder={Silian_t('store.exchange.notesPlaceholder')}
                   rows={3}
                   className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
@@ -324,28 +324,28 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
               <div className="rounded-lg bg-blue-500/10 p-4">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span>{t('store.exchange.unitPrice')}:</span>
-                    <span>{formatNumber(product.points_required)} {t('common.points')}</span>
+                    <span>{Silian_t('store.exchange.unitPrice')}:</span>
+                    <span>{Silian_formatNumber(Silian_product.points_required)} {Silian_t('common.points')}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>{t('store.exchange.quantity')}:</span>
-                    <span>{quantity}</span>
+                    <span>{Silian_t('store.exchange.quantity')}:</span>
+                    <span>{Silian_quantity}</span>
                   </div>
                   <hr className="border-border" />
                   <div className="flex justify-between items-center font-semibold text-lg">
-                    <span>{t('store.exchange.totalCost')}:</span>
+                    <span>{Silian_t('store.exchange.totalCost')}:</span>
                     <span className="text-green-600">
-                      {formatNumber(totalPoints)} {t('common.points')}
+                      {Silian_formatNumber(Silian_totalPoints)} {Silian_t('common.points')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{t('store.exchange.currentPoints')}:</span>
-                    <span>{formatNumber(userPoints)} {t('common.points')}</span>
+                    <span>{Silian_t('store.exchange.currentPoints')}:</span>
+                    <span>{Silian_formatNumber(Silian_userPoints)} {Silian_t('common.points')}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span>{t('store.exchange.afterExchange')}:</span>
-                    <span className={canAfford ? 'text-green-600' : 'text-red-600'}>
-                      {formatNumber(userPoints - totalPoints)} {t('common.points')}
+                    <span>{Silian_t('store.exchange.afterExchange')}:</span>
+                    <span className={Silian_canAfford ? 'text-green-600' : 'text-red-600'}>
+                      {Silian_formatNumber(Silian_userPoints - Silian_totalPoints)} {Silian_t('common.points')}
                     </span>
                   </div>
                 </div>
@@ -353,36 +353,36 @@ export function ExchangeModal({ product, userPoints, userEmail, isOpen, onClose,
 
               {/* 提交按钮 */}
               <div className="flex space-x-3 pt-4">
-                <Button
+                <Silian_Button
                   type="button"
                   variant="outline"
-                  onClick={onClose}
+                  onClick={Silian_onClose}
                   className="flex-1"
-                  disabled={isLoading}
+                  disabled={Silian_isLoading}
                 >
-                  {t('common.cancel')}
-                </Button>
-                <Button
+                  {Silian_t('common.cancel')}
+                </Silian_Button>
+                <Silian_Button
                   type="submit"
-                  disabled={!canAfford || isLoading}
+                  disabled={!Silian_canAfford || Silian_isLoading}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                 >
-                  {isLoading ? (
+                  {Silian_isLoading ? (
                     <div className="flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>{t('store.exchange.processing')}</span>
+                      <span>{Silian_t('store.exchange.processing')}</span>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">
-                      <ShoppingCart className="h-4 w-4" />
-                      <span>{t('store.exchange.confirm')}</span>
+                      <Silian_ShoppingCart className="h-4 w-4" />
+                      <span>{Silian_t('store.exchange.confirm')}</span>
                     </div>
                   )}
-                </Button>
+                </Silian_Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </Silian_CardContent>
+        </Silian_Card>
       </div>
     </div>
   );

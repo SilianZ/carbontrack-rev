@@ -22,16 +22,16 @@ class AdminAnnouncementAiServiceTest extends TestCase
 
     public function testServiceReportsDisabledWithoutClient(): void
     {
-        $service = new AdminAnnouncementAiService(null, new NullLogger());
+        $Silian_service = new AdminAnnouncementAiService(null, new NullLogger());
 
-        $this->assertFalse($service->isEnabled());
+        $this->assertFalse($Silian_service->isEnabled());
         $this->expectException(AdminAnnouncementAiException::class);
-        $service->generateDraft(['title' => 'Hello']);
+        $Silian_service->generateDraft(['title' => 'Hello']);
     }
 
     public function testGenerateDraftParsesJsonPayload(): void
     {
-        $response = [
+        $Silian_response = [
             'id' => 'chatcmpl-test',
             'model' => 'test-model',
             'choices' => [[
@@ -46,12 +46,12 @@ class AdminAnnouncementAiServiceTest extends TestCase
             'usage' => ['total_tokens' => 42],
         ];
 
-        $client = new AdminAnnouncementAiFakeLlmClient($response);
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
-        $service = new AdminAnnouncementAiService($client, new NullLogger(), ['model' => 'test-model'], null, $auditLogService, $this->createMock(ErrorLogService::class));
+        $Silian_client = new AdminAnnouncementAiFakeLlmClient($Silian_response);
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
+        $Silian_service = new AdminAnnouncementAiService($Silian_client, new NullLogger(), ['model' => 'test-model'], null, $Silian_auditLogService, $this->createMock(ErrorLogService::class));
 
-        $result = $service->generateDraft([
+        $Silian_result = $Silian_service->generateDraft([
             'action' => 'generate',
             'title' => 'Maintenance',
             'content' => 'Need a brief announcement',
@@ -60,18 +60,18 @@ class AdminAnnouncementAiServiceTest extends TestCase
             'content_format' => 'html',
         ]);
 
-        $this->assertTrue($result['success']);
-        $this->assertSame('System Maintenance Notice', $result['result']['title']);
-        $this->assertStringContainsString('<h2>Maintenance</h2>', $result['result']['content']);
-        $this->assertSame('html', $result['result']['content_format']);
-        $this->assertSame('test-model', $result['metadata']['model']);
-        $this->assertNotNull($client->lastPayload);
-        $this->assertSame('json_object', $client->lastPayload['response_format']['type']);
+        $this->assertTrue($Silian_result['success']);
+        $this->assertSame('System Maintenance Notice', $Silian_result['result']['title']);
+        $this->assertStringContainsString('<h2>Maintenance</h2>', $Silian_result['result']['content']);
+        $this->assertSame('html', $Silian_result['result']['content_format']);
+        $this->assertSame('test-model', $Silian_result['metadata']['model']);
+        $this->assertNotNull($Silian_client->lastPayload);
+        $this->assertSame('json_object', $Silian_client->lastPayload['response_format']['type']);
     }
 
     public function testGenerateDraftHandlesMarkdownWrappedJson(): void
     {
-        $response = [
+        $Silian_response = [
             'choices' => [[
                 'message' => [
                     'content' => "```json\n" . json_encode([
@@ -83,19 +83,19 @@ class AdminAnnouncementAiServiceTest extends TestCase
             ]],
         ];
 
-        $service = new AdminAnnouncementAiService(new AdminAnnouncementAiFakeLlmClient($response), new NullLogger());
-        $result = $service->generateDraft([
+        $Silian_service = new AdminAnnouncementAiService(new AdminAnnouncementAiFakeLlmClient($Silian_response), new NullLogger());
+        $Silian_result = $Silian_service->generateDraft([
             'title' => 'FAQ',
             'content' => 'Add update',
         ]);
 
-        $this->assertTrue($result['success']);
-        $this->assertSame('FAQ Update', $result['result']['title']);
+        $this->assertTrue($Silian_result['success']);
+        $this->assertSame('FAQ Update', $Silian_result['result']['title']);
     }
 
     public function testGenerateDraftFallsBackToHtmlContent(): void
     {
-        $response = [
+        $Silian_response = [
             'choices' => [[
                 'message' => [
                     'content' => '<h3>Reminder</h3><p>Please complete your profile.</p>',
@@ -104,33 +104,33 @@ class AdminAnnouncementAiServiceTest extends TestCase
             ]],
         ];
 
-        $service = new AdminAnnouncementAiService(new AdminAnnouncementAiFakeLlmClient($response), new NullLogger());
-        $result = $service->generateDraft([
+        $Silian_service = new AdminAnnouncementAiService(new AdminAnnouncementAiFakeLlmClient($Silian_response), new NullLogger());
+        $Silian_result = $Silian_service->generateDraft([
             'title' => 'Profile reminder',
         ]);
 
-        $this->assertTrue($result['success']);
-        $this->assertSame('Profile reminder', $result['result']['title']);
-        $this->assertStringContainsString('<h3>Reminder</h3>', $result['result']['content']);
+        $this->assertTrue($Silian_result['success']);
+        $this->assertSame('Profile reminder', $Silian_result['result']['title']);
+        $this->assertStringContainsString('<h3>Reminder</h3>', $Silian_result['result']['content']);
     }
 
     public function testGenerateDraftWrapsClientFailureAsUnavailableException(): void
     {
-        $client = new class implements LlmClientInterface {
-            public function createChatCompletion(array $payload): array
+        $Silian_client = new class implements LlmClientInterface {
+            public function createChatCompletion(array $Silian_payload): array
             {
                 throw new AdminAnnouncementAiTestProviderException('provider down');
             }
         };
 
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
-        $errorLogService = $this->createMock(ErrorLogService::class);
-        $errorLogService->expects($this->once())->method('logException');
-        $service = new AdminAnnouncementAiService($client, new NullLogger(), [], null, $auditLogService, $errorLogService);
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_auditLogService->expects($this->once())->method('logAdminOperation')->willReturn(true);
+        $Silian_errorLogService = $this->createMock(ErrorLogService::class);
+        $Silian_errorLogService->expects($this->once())->method('logException');
+        $Silian_service = new AdminAnnouncementAiService($Silian_client, new NullLogger(), [], null, $Silian_auditLogService, $Silian_errorLogService);
 
         $this->expectException(AdminAnnouncementAiUnavailableException::class);
-        $service->generateDraft([
+        $Silian_service->generateDraft([
             'title' => 'Maintenance',
             'content' => 'Need a draft',
         ]);
@@ -153,9 +153,9 @@ class AdminAnnouncementAiFakeLlmClient implements LlmClientInterface
      * @param array<string,mixed> $payload
      * @return array<string,mixed>
      */
-    public function createChatCompletion(array $payload): array
+    public function createChatCompletion(array $Silian_payload): array
     {
-        $this->lastPayload = $payload;
+        $this->lastPayload = $Silian_payload;
         return $this->response;
     }
 }

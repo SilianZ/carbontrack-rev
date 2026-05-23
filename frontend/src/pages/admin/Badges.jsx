@@ -1,6 +1,6 @@
-import React from 'react';
-import BadgeManagement from '../../components/admin/BadgeManagement';
+import Silian_React from 'react';
+import Silian_BadgeManagement from '../../components/admin/BadgeManagement';
 
 export default function AdminBadgesPage() {
-  return <BadgeManagement />;
+  return <Silian_BadgeManagement />;
 }

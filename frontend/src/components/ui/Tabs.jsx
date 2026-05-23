@@ -1,59 +1,59 @@
-import React, { useState } from 'react';
+import Silian_React, { useState as Silian_useState } from 'react';
 
-export function Tabs({ children, value, onValueChange, className = '' }) {
-  const [internal, setInternal] = useState(value || '');
-  const active = value !== undefined ? value : internal;
-  const setActive = (v) => {
-    if (onValueChange) onValueChange(v);
-    if (value === undefined) setInternal(v);
+export function Tabs({ children: Silian_children, value: Silian_value, onValueChange: Silian_onValueChange, className: Silian_className = '' }) {
+  const [Silian_internal, Silian_setInternal] = Silian_useState(Silian_value || '');
+  const Silian_active = Silian_value !== undefined ? Silian_value : Silian_internal;
+  const Silian_setActive = (Silian_v) => {
+    if (Silian_onValueChange) Silian_onValueChange(Silian_v);
+    if (Silian_value === undefined) Silian_setInternal(Silian_v);
   };
 
   return (
-    <div className={className} data-tabs>
-      {React.Children.map(children, (child) => {
-        if (!React.isValidElement(child)) return child;
-        if (child.type === TabsList) {
-          return React.cloneElement(child, { active, setActive });
+    <div className={Silian_className} data-tabs>
+      {Silian_React.Children.map(Silian_children, (Silian_child) => {
+        if (!Silian_React.isValidElement(Silian_child)) return Silian_child;
+        if (Silian_child.type === TabsList) {
+          return Silian_React.cloneElement(Silian_child, { active: Silian_active, setActive: Silian_setActive });
         }
-        if (child.type === TabsContent) {
-          return React.cloneElement(child, { active });
+        if (Silian_child.type === TabsContent) {
+          return Silian_React.cloneElement(Silian_child, { active: Silian_active });
         }
-        return child;
+        return Silian_child;
       })}
     </div>
   );
 }
 
-export function TabsList({ children, active, setActive, className = '' }) {
+export function TabsList({ children: Silian_children, active: Silian_active, setActive: Silian_setActive, className: Silian_className = '' }) {
   return (
-    <div className={`inline-flex rounded-md border border-border bg-card ${className}`} role="tablist">
-      {React.Children.map(children, (child) => {
-        if (!React.isValidElement(child)) return child;
-        return React.cloneElement(child, { active, setActive });
+    <div className={`inline-flex rounded-md border border-border bg-card ${Silian_className}`} role="tablist">
+      {Silian_React.Children.map(Silian_children, (Silian_child) => {
+        if (!Silian_React.isValidElement(Silian_child)) return Silian_child;
+        return Silian_React.cloneElement(Silian_child, { active: Silian_active, setActive: Silian_setActive });
       })}
     </div>
   );
 }
 
-export function TabsTrigger({ value, children, active, setActive, className = '' }) {
-  const isActive = active === value;
+export function TabsTrigger({ value: Silian_value, children: Silian_children, active: Silian_active, setActive: Silian_setActive, className: Silian_className = '' }) {
+  const Silian_isActive = Silian_active === Silian_value;
   return (
     <button
       role="tab"
-      aria-selected={isActive}
-      onClick={() => setActive(value)}
-      className={`border-r border-border px-3 py-2 text-sm text-foreground last:border-r-0 ${isActive ? 'bg-muted font-semibold' : 'hover:bg-muted/60'} ${className}`}
+      aria-selected={Silian_isActive}
+      onClick={() => Silian_setActive(Silian_value)}
+      className={`border-r border-border px-3 py-2 text-sm text-foreground last:border-r-0 ${Silian_isActive ? 'bg-muted font-semibold' : 'hover:bg-muted/60'} ${Silian_className}`}
     >
-      {children}
+      {Silian_children}
     </button>
   );
 }
 
-export function TabsContent({ value, active, children, className = '' }) {
-  if (active !== value) return null;
+export function TabsContent({ value: Silian_value, active: Silian_active, children: Silian_children, className: Silian_className = '' }) {
+  if (Silian_active !== Silian_value) return null;
   return (
-    <div role="tabpanel" className={className}>
-      {children}
+    <div role="tabpanel" className={Silian_className}>
+      {Silian_children}
     </div>
   );
 }

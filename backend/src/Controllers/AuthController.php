@@ -40,192 +40,192 @@ class AuthController
     private const VERIFICATION_MAX_ATTEMPTS = 5;
 
     public function __construct(
-        AuthService $authService,
-        EmailService $emailService,
-        TurnstileService $turnstileService,
-        AuditLogService $auditLogService,
-        MessageService $messageService,
-        CloudflareR2Service $r2Service = null,
-        Logger $logger,
-        PDO $db,
-        ErrorLogService $errorLogService = null,
-        RegionService $regionService,
-        ?CheckinService $checkinService = null,
-        ?UserProfileViewService $userProfileViewService = null
+        AuthService $Silian_authService,
+        EmailService $Silian_emailService,
+        TurnstileService $Silian_turnstileService,
+        AuditLogService $Silian_auditLogService,
+        MessageService $Silian_messageService,
+        CloudflareR2Service $Silian_r2Service = null,
+        Logger $Silian_logger,
+        PDO $Silian_db,
+        ErrorLogService $Silian_errorLogService = null,
+        RegionService $Silian_regionService,
+        ?CheckinService $Silian_checkinService = null,
+        ?UserProfileViewService $Silian_userProfileViewService = null
     ) {
-        $this->authService = $authService;
-        $this->emailService = $emailService;
-        $this->turnstileService = $turnstileService;
-        $this->auditLogService = $auditLogService;
-        $this->messageService = $messageService;
-        $this->r2Service = $r2Service;
-        $this->logger = $logger;
-        $this->db = $db;
-        $this->errorLogService = $errorLogService;
-        $this->regionService = $regionService;
-        $this->checkinService = $checkinService;
-        $this->userProfileViewService = $userProfileViewService ?? new UserProfileViewService($regionService);
+        $this->authService = $Silian_authService;
+        $this->emailService = $Silian_emailService;
+        $this->turnstileService = $Silian_turnstileService;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->messageService = $Silian_messageService;
+        $this->r2Service = $Silian_r2Service;
+        $this->logger = $Silian_logger;
+        $this->db = $Silian_db;
+        $this->errorLogService = $Silian_errorLogService;
+        $this->regionService = $Silian_regionService;
+        $this->checkinService = $Silian_checkinService;
+        $this->userProfileViewService = $Silian_userProfileViewService ?? new UserProfileViewService($Silian_regionService);
     }
 
-    public function register(Request $request, Response $response): Response
+    public function register(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $data = $request->getParsedBody();
-            $required = ['username', 'email', 'password', 'confirm_password'];
-            foreach ($required as $field) {
-                if (empty($data[$field])) {
-                    return $this->jsonResponse($response, [
+            $Silian_data = $Silian_request->getParsedBody();
+            $Silian_required = ['username', 'email', 'password', 'confirm_password'];
+            foreach ($Silian_required as $Silian_field) {
+                if (empty($Silian_data[$Silian_field])) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
-                        'message' => "Missing required field: {$field}",
+                        'message' => "Missing required field: {$Silian_field}",
                         'code' => 'MISSING_FIELD'
                     ], 400);
                 }
             }
-            if ($data['password'] !== $data['confirm_password']) {
-                return $this->jsonResponse($response, [
+            if ($Silian_data['password'] !== $Silian_data['confirm_password']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Password confirmation does not match',
                     'code' => 'PASSWORD_MISMATCH'
                 ], 400);
             }
-            if (!$this->isTurnstileVerificationSuccessful($data['cf_turnstile_response'] ?? null)) {
-                return $this->jsonResponse($response, [
+            if (!$this->isTurnstileVerificationSuccessful($Silian_data['cf_turnstile_response'] ?? null)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Turnstile verification failed',
                     'code' => 'TURNSTILE_FAILED'
                 ], 400);
             }
-            $stmt = $this->db->prepare('SELECT id FROM users WHERE username = ? AND deleted_at IS NULL');
-            $stmt->execute([$data['username']]);
-            if ($stmt->fetch()) {
-                return $this->jsonResponse($response, [
+            $Silian_stmt = $this->db->prepare('SELECT id FROM users WHERE username = ? AND deleted_at IS NULL');
+            $Silian_stmt->execute([$Silian_data['username']]);
+            if ($Silian_stmt->fetch()) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Username already exists',
                     'code' => 'USERNAME_EXISTS'
                 ], 409);
             }
-            $stmt = $this->db->prepare('SELECT id FROM users WHERE email = ? AND deleted_at IS NULL');
-            $stmt->execute([$data['email']]);
-            if ($stmt->fetch()) {
-                return $this->jsonResponse($response, [
+            $Silian_stmt = $this->db->prepare('SELECT id FROM users WHERE email = ? AND deleted_at IS NULL');
+            $Silian_stmt->execute([$Silian_data['email']]);
+            if ($Silian_stmt->fetch()) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Email already exists',
                     'code' => 'EMAIL_EXISTS'
                 ], 409);
             }
-            $countryCode = $this->regionService->normalizeCountryCode($data['country_code'] ?? null);
-            $stateCode = $this->regionService->normalizeStateCode($data['state_code'] ?? null);
-            if (!$countryCode || !$stateCode || !$this->regionService->isValidRegion($countryCode, $stateCode)) {
-                return $this->jsonResponse($response, [
+            $Silian_countryCode = $this->regionService->normalizeCountryCode($Silian_data['country_code'] ?? null);
+            $Silian_stateCode = $this->regionService->normalizeStateCode($Silian_data['state_code'] ?? null);
+            if (!$Silian_countryCode || !$Silian_stateCode || !$this->regionService->isValidRegion($Silian_countryCode, $Silian_stateCode)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'A valid country and state code are required',
                     'code' => 'INVALID_REGION'
                 ], 400);
             }
-            $regionCode = $this->regionService->buildRegionCode($countryCode, $stateCode);
+            $Silian_regionCode = $this->regionService->buildRegionCode($Silian_countryCode, $Silian_stateCode);
 
             // 允许在注册时通过 new_school_name 创建新学校（防滥用：仅此处自动创建）
-            $schoolId = $data['school_id'] ?? null;
-            if (!empty($data['new_school_name']) && empty($schoolId)) {
-                $name = trim((string)$data['new_school_name']);
-                if ($name !== '') {
+            $Silian_schoolId = $Silian_data['school_id'] ?? null;
+            if (!empty($Silian_data['new_school_name']) && empty($Silian_schoolId)) {
+                $Silian_name = trim((string)$Silian_data['new_school_name']);
+                if ($Silian_name !== '') {
                     // 先尝试查重（忽略大小写）
-                    $stmt = $this->db->prepare('SELECT id FROM schools WHERE LOWER(name) = LOWER(?) AND deleted_at IS NULL LIMIT 1');
-                    $stmt->execute([$name]);
-                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if ($row) {
-                        $schoolId = (int)$row['id'];
+                    $Silian_stmt = $this->db->prepare('SELECT id FROM schools WHERE LOWER(name) = LOWER(?) AND deleted_at IS NULL LIMIT 1');
+                    $Silian_stmt->execute([$Silian_name]);
+                    $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($Silian_row) {
+                        $Silian_schoolId = (int)$Silian_row['id'];
                     } else {
-                        $ins = $this->db->prepare('INSERT INTO schools (name, created_at, updated_at) VALUES (?, ?, ?)');
-                        $now = date('Y-m-d H:i:s');
-                        $ins->execute([$name, $now, $now]);
-                        $schoolId = (int)$this->db->lastInsertId();
+                        $Silian_ins = $this->db->prepare('INSERT INTO schools (name, created_at, updated_at) VALUES (?, ?, ?)');
+                        $Silian_now = date('Y-m-d H:i:s');
+                        $Silian_ins->execute([$Silian_name, $Silian_now, $Silian_now]);
+                        $Silian_schoolId = (int)$this->db->lastInsertId();
                     }
                 }
-            } elseif (!empty($schoolId)) {
-                $stmt = $this->db->prepare('SELECT id FROM schools WHERE id = ? AND deleted_at IS NULL');
-                $stmt->execute([$schoolId]);
-                if (!$stmt->fetch()) {
-                    return $this->jsonResponse($response, [
+            } elseif (!empty($Silian_schoolId)) {
+                $Silian_stmt = $this->db->prepare('SELECT id FROM schools WHERE id = ? AND deleted_at IS NULL');
+                $Silian_stmt->execute([$Silian_schoolId]);
+                if (!$Silian_stmt->fetch()) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Invalid school ID',
                         'code' => 'INVALID_SCHOOL'
                     ], 400);
                 }
             }
-            $hashed = password_hash((string)$data['password'], PASSWORD_DEFAULT);
+            $Silian_hashed = password_hash((string)$Silian_data['password'], PASSWORD_DEFAULT);
             // 为兼容旧库，这里优先写入 password 列
             // 不再接受/存储 real_name 或 class_name，保持向后兼容：如果客户端仍发送则忽略
-            $userUuid = Uuid::generateV4();
-            $now = date('Y-m-d H:i:s');
-            $stmt = $this->db->prepare('INSERT INTO users (uuid, username, email, password, school_id, region_code, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-            $stmt->execute([
-                $userUuid,
-                $data['username'],
-                $data['email'],
-                $hashed,
-                $schoolId,
-                $regionCode,
+            $Silian_userUuid = Uuid::generateV4();
+            $Silian_now = date('Y-m-d H:i:s');
+            $Silian_stmt = $this->db->prepare('INSERT INTO users (uuid, username, email, password, school_id, region_code, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $Silian_stmt->execute([
+                $Silian_userUuid,
+                $Silian_data['username'],
+                $Silian_data['email'],
+                $Silian_hashed,
+                $Silian_schoolId,
+                $Silian_regionCode,
                 'user',
-                $now,
-                $now
+                $Silian_now,
+                $Silian_now
             ]);
-            $userId = (int)$this->db->lastInsertId();
-            $this->auditLogService->logAuthOperation('register', $userId, true, [
+            $Silian_userId = (int)$this->db->lastInsertId();
+            $this->auditLogService->logAuthOperation('register', $Silian_userId, true, [
                 'request_data' => [
-                    'username' => $data['username'],
-                    'email' => $data['email'],
-                    'school_id' => $schoolId,
-                    'new_school_name' => $data['new_school_name'] ?? null,
-                    'region_code' => $regionCode
+                    'username' => $Silian_data['username'],
+                    'email' => $Silian_data['email'],
+                    'school_id' => $Silian_schoolId,
+                    'new_school_name' => $Silian_data['new_school_name'] ?? null,
+                    'region_code' => $Silian_regionCode
                 ]
             ]);
-            try { $this->emailService->sendWelcomeEmail((string)$data['email'], (string)$data['username']); } catch (\Throwable $e) { $this->logger->warning('Failed to send welcome email', ['error' => $e->getMessage()]); }
-            $verificationMeta = null;
+            try { $this->emailService->sendWelcomeEmail((string)$Silian_data['email'], (string)$Silian_data['username']); } catch (\Throwable $Silian_e) { $this->logger->warning('Failed to send welcome email', ['error' => $Silian_e->getMessage()]); }
+            $Silian_verificationMeta = null;
             try {
-                $verificationMeta = $this->dispatchEmailVerification($userId, (string)$data['email'], (string)$data['username'], 1);
-            } catch (\Throwable $e) {
-                $this->logger->warning('Failed to dispatch verification email', ['error' => $e->getMessage()]);
+                $Silian_verificationMeta = $this->dispatchEmailVerification($Silian_userId, (string)$Silian_data['email'], (string)$Silian_data['username'], 1);
+            } catch (\Throwable $Silian_e) {
+                $this->logger->warning('Failed to dispatch verification email', ['error' => $Silian_e->getMessage()]);
             }
             // 发送站内欢迎消息暂时跳过（测试最小 schema 可能缺少完整列 / 触发 Eloquent timestamps 逻辑），以保持测试稳定
             // 生成登录 token 以符合测试对返回结构的期望
-            $token = $this->authService->generateToken([
-                'id' => $userId,
-                'username' => $data['username'],
-                'email' => $data['email'],
+            $Silian_token = $this->authService->generateToken([
+                'id' => $Silian_userId,
+                'username' => $Silian_data['username'],
+                'email' => $Silian_data['email'],
                 'is_admin' => false,
-                'uuid' => $userUuid
+                'uuid' => $Silian_userUuid
             ]);
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'User registered successfully',
                 'data' => [
                         'user' => [
-                            'id' => $userId,
-                            'uuid' => $userUuid,
-                            'username' => $data['username'],
-                            'email' => $data['email'],
+                            'id' => $Silian_userId,
+                            'uuid' => $Silian_userUuid,
+                            'username' => $Silian_data['username'],
+                            'email' => $Silian_data['email'],
                             'points' => 0,
                             'role' => 'user',
                             'is_admin' => false,
                             'is_support' => false,
                             'email_verified_at' => null,
-                            'region_code' => $regionCode,
-                            'region_label' => $this->regionService->getRegionLabel($regionCode),
-                            'country_code' => $countryCode,
-                        'state_code' => $stateCode,
+                            'region_code' => $Silian_regionCode,
+                            'region_label' => $this->regionService->getRegionLabel($Silian_regionCode),
+                            'country_code' => $Silian_countryCode,
+                        'state_code' => $Silian_stateCode,
                     ],
-                    'token' => $token,
+                    'token' => $Silian_token,
                     'email_verification_required' => true,
-                    'email_verification_sent' => (bool)($verificationMeta['dispatched'] ?? false),
-                    'verification_expires_at' => $verificationMeta['expires_at'] ?? null,
-                    'verification_resend_available_at' => $verificationMeta['resend_available_at'] ?? null
+                    'email_verification_sent' => (bool)($Silian_verificationMeta['dispatched'] ?? false),
+                    'verification_expires_at' => $Silian_verificationMeta['expires_at'] ?? null,
+                    'verification_resend_available_at' => $Silian_verificationMeta['resend_available_at'] ?? null
                 ]
             ], 201);
-        } catch (\Throwable $e) {
-            $this->logger->error('User registration failed', ['error' => $e->getMessage()]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('User registration failed', ['error' => $Silian_e->getMessage()]);
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Registration failed',
                 'code' => 'REGISTRATION_FAILED'
@@ -233,117 +233,117 @@ class AuthController
         }
     }
 
-    public function login(Request $request, Response $response): Response
+    public function login(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $data = $request->getParsedBody();
+            $Silian_data = $Silian_request->getParsedBody();
             // 兼容 identifier / username / email 三种输入
-            $identifier = $data['identifier'] ?? ($data['username'] ?? ($data['email'] ?? null));
-            if (empty($identifier) || empty($data['password'])) {
-                return $this->jsonResponse($response, [
+            $Silian_identifier = $Silian_data['identifier'] ?? ($Silian_data['username'] ?? ($Silian_data['email'] ?? null));
+            if (empty($Silian_identifier) || empty($Silian_data['password'])) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Identifier and password are required',
                     'code' => 'MISSING_CREDENTIALS'
                 ], 400);
             }
-            if (!empty($data['cf_turnstile_response'])) {
-                if (!$this->isTurnstileVerificationSuccessful($data['cf_turnstile_response'])) {
-                    return $this->jsonResponse($response, [
+            if (!empty($Silian_data['cf_turnstile_response'])) {
+                if (!$this->isTurnstileVerificationSuccessful($Silian_data['cf_turnstile_response'])) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Turnstile verification failed',
                         'code' => 'TURNSTILE_FAILED'
                     ], 400);
                 }
             }
-            $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL) !== false;
-            $field = $isEmail ? 'u.email' : 'u.username';
-            $stmt = $this->db->prepare("SELECT u.*, s.name as school_name, a.file_path as avatar_path FROM users u LEFT JOIN schools s ON u.school_id = s.id LEFT JOIN avatars a ON u.avatar_id = a.id WHERE {$field} = ? AND u.deleted_at IS NULL");
-            $stmt->execute([$identifier]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-            $passwordField = null;
-            if ($user) {
-                if (!empty($user['password_hash'])) {
-                    $passwordField = 'password_hash';
-                } elseif (!empty($user['password'])) {
-                    $passwordField = 'password';
+            $Silian_isEmail = filter_var($Silian_identifier, FILTER_VALIDATE_EMAIL) !== false;
+            $Silian_field = $Silian_isEmail ? 'u.email' : 'u.username';
+            $Silian_stmt = $this->db->prepare("SELECT u.*, s.name as school_name, a.file_path as avatar_path FROM users u LEFT JOIN schools s ON u.school_id = s.id LEFT JOIN avatars a ON u.avatar_id = a.id WHERE {$Silian_field} = ? AND u.deleted_at IS NULL");
+            $Silian_stmt->execute([$Silian_identifier]);
+            $Silian_user = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            $Silian_passwordField = null;
+            if ($Silian_user) {
+                if (!empty($Silian_user['password_hash'])) {
+                    $Silian_passwordField = 'password_hash';
+                } elseif (!empty($Silian_user['password'])) {
+                    $Silian_passwordField = 'password';
                 }
             }
-            if (!$user || !$passwordField || !password_verify((string)$data['password'], (string)$user[$passwordField])) {
+            if (!$Silian_user || !$Silian_passwordField || !password_verify((string)$Silian_data['password'], (string)$Silian_user[$Silian_passwordField])) {
                 $this->auditLogService->logAuthOperation('login', null, false, [
-                    'identifier' => $identifier,
-                    'ip_address' => $this->getClientIP($request),
-                    'user_agent' => $request->getHeaderLine('User-Agent')
+                    'identifier' => $Silian_identifier,
+                    'ip_address' => $this->getClientIP($Silian_request),
+                    'user_agent' => $Silian_request->getHeaderLine('User-Agent')
                 ]);
-                return $this->jsonResponse($response, [
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Invalid credentials',
                     'code' => 'INVALID_CREDENTIALS'
                 ], 401);
             }
             try {
-                $upd = $this->db->prepare('UPDATE users SET lastlgn = NOW() WHERE id = ?');
-                $upd->execute([$user['id']]);
-            } catch (\Throwable $e) {
+                $Silian_upd = $this->db->prepare('UPDATE users SET lastlgn = NOW() WHERE id = ?');
+                $Silian_upd->execute([$Silian_user['id']]);
+            } catch (\Throwable $Silian_e) {
                 try {
-                    $upd = $this->db->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?');
-                    $upd->execute([$user['id']]);
-                } catch (\Throwable $e2) {
+                    $Silian_upd = $this->db->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?');
+                    $Silian_upd->execute([$Silian_user['id']]);
+                } catch (\Throwable $Silian_e2) {
                     // ignore
                 }
             }
             if ($this->checkinService) {
                 try {
-                    $this->checkinService->syncUserCheckinsFromRecords((int) $user['id']);
-                } catch (\Throwable $e) {
+                    $this->checkinService->syncUserCheckinsFromRecords((int) $Silian_user['id']);
+                } catch (\Throwable $Silian_e) {
                     $this->logger->debug('Failed to sync user checkins on login', [
-                        'error' => $e->getMessage(),
-                        'user_id' => $user['id'],
+                        'error' => $Silian_e->getMessage(),
+                        'user_id' => $Silian_user['id'],
                     ]);
                 }
             }
-            $token = $this->authService->generateToken($user);
+            $Silian_token = $this->authService->generateToken($Silian_user);
             // Use legacy log() for backward compatibility with existing tests expecting log() instead of logAuthOperation()
             $this->auditLogService->log([
                 'action' => 'login',
                 'operation_category' => 'authentication',
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'actor_type' => 'user',
                 'status' => 'success',
                 'data' => [
-                    'ip_address' => $this->getClientIP($request),
-                    'user_agent' => $request->getHeaderLine('User-Agent')
+                    'ip_address' => $this->getClientIP($Silian_request),
+                    'user_agent' => $Silian_request->getHeaderLine('User-Agent')
                 ]
             ]);
-            $userInfo = $this->formatUserPayload($user);
-            $verificationMeta = null;
-            if (empty($user['email_verified_at'])) {
-                $verificationMeta = $this->handlePendingEmailVerification($user);
+            $Silian_userInfo = $this->formatUserPayload($Silian_user);
+            $Silian_verificationMeta = null;
+            if (empty($Silian_user['email_verified_at'])) {
+                $Silian_verificationMeta = $this->handlePendingEmailVerification($Silian_user);
             }
 
-            $responsePayload = [
-                'token' => $token,
-                'user' => $userInfo
+            $Silian_responsePayload = [
+                'token' => $Silian_token,
+                'user' => $Silian_userInfo
             ];
 
-            if ($verificationMeta !== null) {
-                $responsePayload['email_verification_required'] = $verificationMeta['required'];
-                $responsePayload['email_verification_sent'] = $verificationMeta['sent'];
-                $responsePayload['verification_expires_at'] = $verificationMeta['expires_at'];
-                $responsePayload['verification_resend_available_at'] = $verificationMeta['resend_available_at'];
-                if (isset($verificationMeta['rate_limited'])) {
-                    $responsePayload['email_verification_rate_limited'] = $verificationMeta['rate_limited'];
+            if ($Silian_verificationMeta !== null) {
+                $Silian_responsePayload['email_verification_required'] = $Silian_verificationMeta['required'];
+                $Silian_responsePayload['email_verification_sent'] = $Silian_verificationMeta['sent'];
+                $Silian_responsePayload['verification_expires_at'] = $Silian_verificationMeta['expires_at'];
+                $Silian_responsePayload['verification_resend_available_at'] = $Silian_verificationMeta['resend_available_at'];
+                if (isset($Silian_verificationMeta['rate_limited'])) {
+                    $Silian_responsePayload['email_verification_rate_limited'] = $Silian_verificationMeta['rate_limited'];
                 }
             }
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Login successful',
-                'data' => $responsePayload
+                'data' => $Silian_responsePayload
             ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('User login failed', ['error' => $e->getMessage()]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('User login failed', ['error' => $Silian_e->getMessage()]);
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Login failed',
                 'code' => 'LOGIN_FAILED'
@@ -351,65 +351,65 @@ class AuthController
         }
     }
 
-    public function logout(Request $request, Response $response): Response
+    public function logout(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if ($user) {
-                $this->auditLogService->logAuthOperation('logout', $user['id'], true, [
-                    'ip_address' => $this->getClientIP($request),
-                    'user_agent' => $request->getHeaderLine('User-Agent')
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if ($Silian_user) {
+                $this->auditLogService->logAuthOperation('logout', $Silian_user['id'], true, [
+                    'ip_address' => $this->getClientIP($Silian_request),
+                    'user_agent' => $Silian_request->getHeaderLine('User-Agent')
                 ]);
             }
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Logout successful'
             ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('User logout failed', ['error' => $e->getMessage()]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('User logout failed', ['error' => $Silian_e->getMessage()]);
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Logout failed'
             ], 500);
         }
     }
 
-    public function sendVerificationCode(Request $request, Response $response): Response
+    public function sendVerificationCode(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $data = $request->getParsedBody() ?? [];
-            $emailRaw = isset($data['email']) ? trim((string)$data['email']) : '';
+            $Silian_data = $Silian_request->getParsedBody() ?? [];
+            $Silian_emailRaw = isset($Silian_data['email']) ? trim((string)$Silian_data['email']) : '';
 
-            if ($emailRaw === '' || !filter_var($emailRaw, FILTER_VALIDATE_EMAIL)) {
-                return $this->jsonResponse($response, [
+            if ($Silian_emailRaw === '' || !filter_var($Silian_emailRaw, FILTER_VALIDATE_EMAIL)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'A valid email address is required',
                     'code' => 'INVALID_EMAIL'
                 ], 400);
             }
 
-            if (!$this->isTurnstileVerificationSuccessful($data['cf_turnstile_response'] ?? null)) {
-                return $this->jsonResponse($response, [
+            if (!$this->isTurnstileVerificationSuccessful($Silian_data['cf_turnstile_response'] ?? null)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Turnstile verification failed',
                     'code' => 'TURNSTILE_FAILED'
                 ], 400);
             }
 
-            $stmt = $this->db->prepare('SELECT id, username, email, email_verified_at, verification_last_sent_at, verification_send_count FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1');
-            $stmt->execute([$emailRaw]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            $Silian_stmt = $this->db->prepare('SELECT id, username, email, email_verified_at, verification_last_sent_at, verification_send_count FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1');
+            $Silian_stmt->execute([$Silian_emailRaw]);
+            $Silian_user = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => true,
                     'message' => 'If the account exists, a verification email has been sent'
                 ], 200);
             }
 
-            if (!empty($user['email_verified_at'])) {
-                return $this->jsonResponse($response, [
+            if (!empty($Silian_user['email_verified_at'])) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => true,
                     'message' => 'Email already verified',
                     'data' => [
@@ -418,102 +418,102 @@ class AuthController
                 ]);
             }
 
-            $throttle = $this->calculateVerificationThrottle($user);
-            if ($throttle['blocked']) {
-                return $this->jsonResponse($response, [
+            $Silian_throttle = $this->calculateVerificationThrottle($Silian_user);
+            if ($Silian_throttle['blocked']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Verification code rate limit reached. Please try again later.',
                     'code' => 'VERIFICATION_RATE_LIMIT',
-                    'retry_after' => $throttle['retry_after']
+                    'retry_after' => $Silian_throttle['retry_after']
                 ], 429);
             }
 
-            $challenge = $this->dispatchEmailVerification(
-                (int)$user['id'],
-                (string)$user['email'],
-                (string)($user['username'] ?? ''),
-                $throttle['send_count'],
-                $throttle['retry_after']
+            $Silian_challenge = $this->dispatchEmailVerification(
+                (int)$Silian_user['id'],
+                (string)$Silian_user['email'],
+                (string)($Silian_user['username'] ?? ''),
+                $Silian_throttle['send_count'],
+                $Silian_throttle['retry_after']
             );
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Verification email dispatched',
                 'data' => [
-                    'verification_expires_at' => $challenge['expires_at'] ?? null,
-                    'verification_resend_available_at' => $challenge['resend_available_at'] ?? null
+                    'verification_expires_at' => $Silian_challenge['expires_at'] ?? null,
+                    'verification_resend_available_at' => $Silian_challenge['resend_available_at'] ?? null
                 ]
             ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('Send verification code failed', ['error' => $e->getMessage()]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Send verification code failed', ['error' => $Silian_e->getMessage()]);
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to send verification code'
             ], 500);
         }
     }
 
-    public function verifyEmail(Request $request, Response $response): Response
+    public function verifyEmail(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $data = $request->getParsedBody() ?? [];
-            $token = trim((string)($data['token'] ?? ''));
-            $code = trim((string)($data['code'] ?? ''));
-            $emailInput = isset($data['email']) ? trim((string)$data['email']) : '';
+            $Silian_data = $Silian_request->getParsedBody() ?? [];
+            $Silian_token = trim((string)($Silian_data['token'] ?? ''));
+            $Silian_code = trim((string)($Silian_data['code'] ?? ''));
+            $Silian_emailInput = isset($Silian_data['email']) ? trim((string)$Silian_data['email']) : '';
 
-            if ($token === '' && ($emailInput === '' || $code === '')) {
-                return $this->jsonResponse($response, [
+            if ($Silian_token === '' && ($Silian_emailInput === '' || $Silian_code === '')) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Verification token or email/code is required',
                     'code' => 'MISSING_TOKEN'
                 ], 400);
             }
 
-            $mode = $token !== '' ? 'token' : 'code';
-            if ($mode === 'code' && !filter_var($emailInput, FILTER_VALIDATE_EMAIL)) {
-                return $this->jsonResponse($response, [
+            $Silian_mode = $Silian_token !== '' ? 'token' : 'code';
+            if ($Silian_mode === 'code' && !filter_var($Silian_emailInput, FILTER_VALIDATE_EMAIL)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'A valid email address is required',
                     'code' => 'INVALID_EMAIL'
                 ], 400);
             }
 
-            if ($mode === 'token') {
-                $stmt = $this->db->prepare('SELECT id, username, email, email_verified_at, verification_code_expires_at FROM users WHERE verification_token = ? AND deleted_at IS NULL LIMIT 1');
-                $stmt->execute([$token]);
+            if ($Silian_mode === 'token') {
+                $Silian_stmt = $this->db->prepare('SELECT id, username, email, email_verified_at, verification_code_expires_at FROM users WHERE verification_token = ? AND deleted_at IS NULL LIMIT 1');
+                $Silian_stmt->execute([$Silian_token]);
             } else {
-                if (!$this->isTurnstileVerificationSuccessful($data['cf_turnstile_response'] ?? null)) {
-                    return $this->jsonResponse($response, [
+                if (!$this->isTurnstileVerificationSuccessful($Silian_data['cf_turnstile_response'] ?? null)) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Turnstile verification failed',
                         'code' => 'TURNSTILE_FAILED'
                     ], 400);
                 }
 
-                $stmt = $this->db->prepare('SELECT id, username, email, email_verified_at, verification_code, verification_code_expires_at, verification_attempts FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1');
-                $stmt->execute([$emailInput]);
+                $Silian_stmt = $this->db->prepare('SELECT id, username, email, email_verified_at, verification_code, verification_code_expires_at, verification_attempts FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1');
+                $Silian_stmt->execute([$Silian_emailInput]);
             }
 
-            $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Invalid or expired verification token',
                     'code' => 'INVALID_TOKEN'
                 ], 400);
             }
 
-            if (!empty($user['email_verified_at'])) {
-                return $this->jsonResponse($response, [
+            if (!empty($Silian_user['email_verified_at'])) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => true,
                     'message' => 'Email already verified'
                 ]);
             }
 
-            $expiresAt = $user['verification_code_expires_at'] ?? null;
-            if (!$expiresAt) {
-                return $this->jsonResponse($response, [
+            $Silian_expiresAt = $Silian_user['verification_code_expires_at'] ?? null;
+            if (!$Silian_expiresAt) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Verification token expired',
                     'code' => 'TOKEN_EXPIRED'
@@ -521,31 +521,31 @@ class AuthController
             }
 
             try {
-                $expiry = new \DateTimeImmutable($expiresAt);
-            } catch (\Throwable $e) {
-                $expiry = null;
+                $Silian_expiry = new \DateTimeImmutable($Silian_expiresAt);
+            } catch (\Throwable $Silian_e) {
+                $Silian_expiry = null;
             }
 
-            if (!$expiry || $expiry <= new \DateTimeImmutable('now')) {
-                return $this->jsonResponse($response, [
+            if (!$Silian_expiry || $Silian_expiry <= new \DateTimeImmutable('now')) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Verification token expired',
                     'code' => 'TOKEN_EXPIRED'
                 ], 400);
             }
 
-            if ($mode === 'code') {
-                $attempts = (int)($user['verification_attempts'] ?? 0);
-                if ($attempts >= self::VERIFICATION_MAX_ATTEMPTS) {
-                    return $this->jsonResponse($response, [
+            if ($Silian_mode === 'code') {
+                $Silian_attempts = (int)($Silian_user['verification_attempts'] ?? 0);
+                if ($Silian_attempts >= self::VERIFICATION_MAX_ATTEMPTS) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Too many invalid verification attempts. Please request a new code.',
                         'code' => 'VERIFICATION_ATTEMPTS_EXCEEDED'
                     ], 429);
                 }
-                if (!hash_equals((string)($user['verification_code'] ?? ''), $code)) {
-                    $this->updateVerificationAttempts((int)$user['id'], $attempts + 1);
-                    return $this->jsonResponse($response, [
+                if (!hash_equals((string)($Silian_user['verification_code'] ?? ''), $Silian_code)) {
+                    $this->updateVerificationAttempts((int)$Silian_user['id'], $Silian_attempts + 1);
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
                         'message' => 'Verification code is invalid',
                         'code' => 'INVALID_CODE'
@@ -553,282 +553,282 @@ class AuthController
                 }
             }
 
-            $this->markEmailVerified((int)$user['id']);
-            $this->auditLogService->logAuthOperation('email_verified', (int)$user['id'], true, [
-                'ip_address' => $this->getClientIP($request),
-                'user_agent' => $request->getHeaderLine('User-Agent'),
-                'method' => $mode
+            $this->markEmailVerified((int)$Silian_user['id']);
+            $this->auditLogService->logAuthOperation('email_verified', (int)$Silian_user['id'], true, [
+                'ip_address' => $this->getClientIP($Silian_request),
+                'user_agent' => $Silian_request->getHeaderLine('User-Agent'),
+                'method' => $Silian_mode
             ]);
 
-            $userDetail = $this->findUserDetailed((int)$user['id']);
-            if ($userDetail === null) {
-                return $this->jsonResponse($response, [
+            $Silian_userDetail = $this->findUserDetailed((int)$Silian_user['id']);
+            if ($Silian_userDetail === null) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'User not found after verification',
                     'code' => 'USER_NOT_FOUND'
                 ], 500);
             }
 
-            $token = $this->authService->generateToken($userDetail);
-            $formattedUser = $this->formatUserPayload($userDetail);
+            $Silian_token = $this->authService->generateToken($Silian_userDetail);
+            $Silian_formattedUser = $this->formatUserPayload($Silian_userDetail);
 
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Email verified successfully',
                 'data' => [
-                    'token' => $token,
-                    'user' => $formattedUser
+                    'token' => $Silian_token,
+                    'user' => $Silian_formattedUser
                 ]
             ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('Verify email failed', ['error' => $e->getMessage()]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Verify email failed', ['error' => $Silian_e->getMessage()]);
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to verify email'
             ], 500);
         }
     }
 
-    public function me(Request $request, Response $response): Response
+    public function me(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
                 ], 401);
             }
-            $stmt = $this->db->prepare('SELECT u.*, s.name as school_name, a.file_path as avatar_path FROM users u LEFT JOIN schools s ON u.school_id = s.id LEFT JOIN avatars a ON u.avatar_id = a.id WHERE u.id = ? AND u.deleted_at IS NULL');
-            $stmt->execute([$user['id']]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$row) {
-                return $this->jsonResponse($response, [
+            $Silian_stmt = $this->db->prepare('SELECT u.*, s.name as school_name, a.file_path as avatar_path FROM users u LEFT JOIN schools s ON u.school_id = s.id LEFT JOIN avatars a ON u.avatar_id = a.id WHERE u.id = ? AND u.deleted_at IS NULL');
+            $Silian_stmt->execute([$Silian_user['id']]);
+            $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$Silian_row) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'User not found',
                     'code' => 'USER_NOT_FOUND'
                 ], 404);
             }
             // Align with messages schema: receiver_id holds the recipient user ID
-            $stmt = $this->db->prepare('SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND is_read = 0 AND deleted_at IS NULL');
-            $stmt->execute([$user['id']]);
-            $unread = (int)$stmt->fetchColumn();
-            $userData = $this->formatUserPayload($row);
-            $userData['unread_messages'] = $unread;
-            return $this->jsonResponse($response, [
+            $Silian_stmt = $this->db->prepare('SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND is_read = 0 AND deleted_at IS NULL');
+            $Silian_stmt->execute([$Silian_user['id']]);
+            $Silian_unread = (int)$Silian_stmt->fetchColumn();
+            $Silian_userData = $this->formatUserPayload($Silian_row);
+            $Silian_userData['unread_messages'] = $Silian_unread;
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
-                'data' => $userData
+                'data' => $Silian_userData
             ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('Get current user failed', ['error' => $e->getMessage()]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Get current user failed', ['error' => $Silian_e->getMessage()]);
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to get user info'
             ], 500);
         }
     }
 
-    public function forgotPassword(Request $request, Response $response): Response
+    public function forgotPassword(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $data = $request->getParsedBody() ?? [];
-            if (empty($data['email'])) {
-                return $this->jsonResponse($response, [
+            $Silian_data = $Silian_request->getParsedBody() ?? [];
+            if (empty($Silian_data['email'])) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Email is required',
                     'code' => 'MISSING_EMAIL'
                 ], 400);
             }
-            if (!$this->isTurnstileVerificationSuccessful($data['cf_turnstile_response'] ?? null)) {
-                return $this->jsonResponse($response, [
+            if (!$this->isTurnstileVerificationSuccessful($Silian_data['cf_turnstile_response'] ?? null)) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Turnstile verification failed',
                     'code' => 'TURNSTILE_FAILED'
                 ], 400);
             }
-            $stmt = $this->db->prepare('SELECT * FROM users WHERE email = ? AND deleted_at IS NULL');
-            $stmt->execute([$data['email']]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-            if ($user) {
-                $resetToken = bin2hex(random_bytes(32));
-                $expiresAt = date('Y-m-d H:i:s', time() + 3600);
-                $upd = $this->db->prepare('UPDATE users SET reset_token = ?, reset_token_expires_at = ?, updated_at = NOW() WHERE id = ?');
-                $upd->execute([$resetToken, $expiresAt, $user['id']]);
+            $Silian_stmt = $this->db->prepare('SELECT * FROM users WHERE email = ? AND deleted_at IS NULL');
+            $Silian_stmt->execute([$Silian_data['email']]);
+            $Silian_user = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            if ($Silian_user) {
+                $Silian_resetToken = bin2hex(random_bytes(32));
+                $Silian_expiresAt = date('Y-m-d H:i:s', time() + 3600);
+                $Silian_upd = $this->db->prepare('UPDATE users SET reset_token = ?, reset_token_expires_at = ?, updated_at = NOW() WHERE id = ?');
+                $Silian_upd->execute([$Silian_resetToken, $Silian_expiresAt, $Silian_user['id']]);
                 try {
-                    $this->emailService->sendPasswordResetEmail((string)$user['email'], (string)$user['username'], $resetToken);
-                } catch (\Throwable $e) {
-                    $this->logger->warning('Failed to send password reset email', ['error' => $e->getMessage()]);
+                    $this->emailService->sendPasswordResetEmail((string)$Silian_user['email'], (string)$Silian_user['username'], $Silian_resetToken);
+                } catch (\Throwable $Silian_e) {
+                    $this->logger->warning('Failed to send password reset email', ['error' => $Silian_e->getMessage()]);
                 }
-                $this->auditLogService->logAuthOperation('password_reset_request', $user['id'], true, [
-                    'ip_address' => $this->getClientIP($request),
-                    'user_agent' => $request->getHeaderLine('User-Agent')
+                $this->auditLogService->logAuthOperation('password_reset_request', $Silian_user['id'], true, [
+                    'ip_address' => $this->getClientIP($Silian_request),
+                    'user_agent' => $Silian_request->getHeaderLine('User-Agent')
                 ]);
             }
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'If the email exists, a password reset link has been sent'
             ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('Forgot password failed', ['error' => $e->getMessage()]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Forgot password failed', ['error' => $Silian_e->getMessage()]);
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to process password reset request'
             ], 500);
         }
     }
 
-    public function resetPassword(Request $request, Response $response): Response
+    public function resetPassword(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $data = $request->getParsedBody();
-            $required = ['token', 'password', 'confirm_password'];
-            foreach ($required as $field) {
-                if (empty($data[$field])) {
-                    return $this->jsonResponse($response, [
+            $Silian_data = $Silian_request->getParsedBody();
+            $Silian_required = ['token', 'password', 'confirm_password'];
+            foreach ($Silian_required as $Silian_field) {
+                if (empty($Silian_data[$Silian_field])) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
-                        'message' => "Missing required field: {$field}",
+                        'message' => "Missing required field: {$Silian_field}",
                         'code' => 'MISSING_FIELD'
                     ], 400);
                 }
             }
-            if ($data['password'] !== $data['confirm_password']) {
-                return $this->jsonResponse($response, [
+            if ($Silian_data['password'] !== $Silian_data['confirm_password']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Password confirmation does not match',
                     'code' => 'PASSWORD_MISMATCH'
                 ], 400);
             }
-            $stmt = $this->db->prepare('SELECT * FROM users WHERE reset_token = ? AND reset_token_expires_at > NOW() AND deleted_at IS NULL');
-            $stmt->execute([$data['token']]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_stmt = $this->db->prepare('SELECT * FROM users WHERE reset_token = ? AND reset_token_expires_at > NOW() AND deleted_at IS NULL');
+            $Silian_stmt->execute([$Silian_data['token']]);
+            $Silian_user = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Invalid or expired reset token',
                     'code' => 'INVALID_TOKEN'
                 ], 400);
             }
-            $hashed = password_hash((string)$data['password'], PASSWORD_DEFAULT);
+            $Silian_hashed = password_hash((string)$Silian_data['password'], PASSWORD_DEFAULT);
             try {
-                $upd = $this->db->prepare('UPDATE users SET password_hash = ?, password = ?, reset_token = NULL, reset_token_expires_at = NULL, updated_at = NOW() WHERE id = ?');
-                $upd->execute([$hashed, $hashed, $user['id']]);
-            } catch (\Throwable $e) {
+                $Silian_upd = $this->db->prepare('UPDATE users SET password_hash = ?, password = ?, reset_token = NULL, reset_token_expires_at = NULL, updated_at = NOW() WHERE id = ?');
+                $Silian_upd->execute([$Silian_hashed, $Silian_hashed, $Silian_user['id']]);
+            } catch (\Throwable $Silian_e) {
                 try {
-                    $upd = $this->db->prepare('UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires_at = NULL, updated_at = NOW() WHERE id = ?');
-                    $upd->execute([$hashed, $user['id']]);
-                } catch (\Throwable $e2) {
-                    $upd = $this->db->prepare('UPDATE users SET password = ?, reset_token = NULL, reset_token_expires_at = NULL, updated_at = NOW() WHERE id = ?');
-                    $upd->execute([$hashed, $user['id']]);
+                    $Silian_upd = $this->db->prepare('UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires_at = NULL, updated_at = NOW() WHERE id = ?');
+                    $Silian_upd->execute([$Silian_hashed, $Silian_user['id']]);
+                } catch (\Throwable $Silian_e2) {
+                    $Silian_upd = $this->db->prepare('UPDATE users SET password = ?, reset_token = NULL, reset_token_expires_at = NULL, updated_at = NOW() WHERE id = ?');
+                    $Silian_upd->execute([$Silian_hashed, $Silian_user['id']]);
                 }
             }
-            $this->auditLogService->logAuthOperation('password_reset', $user['id'], true, [
-                'ip_address' => $this->getClientIP($request),
-                'user_agent' => $request->getHeaderLine('User-Agent')
+            $this->auditLogService->logAuthOperation('password_reset', $Silian_user['id'], true, [
+                'ip_address' => $this->getClientIP($Silian_request),
+                'user_agent' => $Silian_request->getHeaderLine('User-Agent')
             ]);
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Password reset successful'
             ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('Password reset failed', ['error' => $e->getMessage()]);
-            try { if ($this->errorLogService) { $this->errorLogService->logException($e, $request); } } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Password reset failed', ['error' => $Silian_e->getMessage()]);
+            try { if ($this->errorLogService) { $this->errorLogService->logException($Silian_e, $Silian_request); } } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Password reset failed'
             ], 500);
         }
     }
 
-    public function changePassword(Request $request, Response $response): Response
+    public function changePassword(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->jsonResponse($response, [
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Unauthorized',
                     'code' => 'UNAUTHORIZED'
                 ], 401);
             }
-            $data = $request->getParsedBody();
-            $required = ['current_password', 'new_password', 'confirm_password'];
-            foreach ($required as $field) {
-                if (empty($data[$field])) {
-                    return $this->jsonResponse($response, [
+            $Silian_data = $Silian_request->getParsedBody();
+            $Silian_required = ['current_password', 'new_password', 'confirm_password'];
+            foreach ($Silian_required as $Silian_field) {
+                if (empty($Silian_data[$Silian_field])) {
+                    return $this->jsonResponse($Silian_response, [
                         'success' => false,
-                        'message' => "Missing required field: {$field}",
+                        'message' => "Missing required field: {$Silian_field}",
                         'code' => 'MISSING_FIELD'
                     ], 400);
                 }
             }
-            if ($data['new_password'] !== $data['confirm_password']) {
-                return $this->jsonResponse($response, [
+            if ($Silian_data['new_password'] !== $Silian_data['confirm_password']) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'New password confirmation does not match',
                     'code' => 'PASSWORD_MISMATCH'
                 ], 400);
             }
-            $stmt = $this->db->prepare('SELECT * FROM users WHERE id = ? AND deleted_at IS NULL');
-            $stmt->execute([$user['id']]);
-            $current = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-            if (!$current) {
-                return $this->jsonResponse($response, [
+            $Silian_stmt = $this->db->prepare('SELECT * FROM users WHERE id = ? AND deleted_at IS NULL');
+            $Silian_stmt->execute([$Silian_user['id']]);
+            $Silian_current = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            if (!$Silian_current) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'User not found',
                     'code' => 'USER_NOT_FOUND'
                 ], 404);
             }
-            $passwordField = !empty($current['password_hash']) ? 'password_hash' : (!empty($current['password']) ? 'password' : null);
-            if (!$passwordField || !password_verify((string)$data['current_password'], (string)$current[$passwordField])) {
-                return $this->jsonResponse($response, [
+            $Silian_passwordField = !empty($Silian_current['password_hash']) ? 'password_hash' : (!empty($Silian_current['password']) ? 'password' : null);
+            if (!$Silian_passwordField || !password_verify((string)$Silian_data['current_password'], (string)$Silian_current[$Silian_passwordField])) {
+                return $this->jsonResponse($Silian_response, [
                     'success' => false,
                     'message' => 'Current password is incorrect',
                     'code' => 'INVALID_CURRENT_PASSWORD'
                 ], 400);
             }
-            $hashed = password_hash((string)$data['new_password'], PASSWORD_DEFAULT);
+            $Silian_hashed = password_hash((string)$Silian_data['new_password'], PASSWORD_DEFAULT);
             try {
-                $upd = $this->db->prepare('UPDATE users SET password_hash = ?, password = ?, updated_at = NOW() WHERE id = ?');
-                $upd->execute([$hashed, $hashed, $user['id']]);
-            } catch (\Throwable $e) {
+                $Silian_upd = $this->db->prepare('UPDATE users SET password_hash = ?, password = ?, updated_at = NOW() WHERE id = ?');
+                $Silian_upd->execute([$Silian_hashed, $Silian_hashed, $Silian_user['id']]);
+            } catch (\Throwable $Silian_e) {
                 try {
-                    $upd = $this->db->prepare('UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?');
-                    $upd->execute([$hashed, $user['id']]);
-                } catch (\Throwable $e2) {
-                    $upd = $this->db->prepare('UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?');
-                    $upd->execute([$hashed, $user['id']]);
+                    $Silian_upd = $this->db->prepare('UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?');
+                    $Silian_upd->execute([$Silian_hashed, $Silian_user['id']]);
+                } catch (\Throwable $Silian_e2) {
+                    $Silian_upd = $this->db->prepare('UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?');
+                    $Silian_upd->execute([$Silian_hashed, $Silian_user['id']]);
                 }
             }
-            $this->auditLogService->logAuthOperation('password_change', $user['id'], true, [
-                'ip_address' => $this->getClientIP($request),
-                'user_agent' => $request->getHeaderLine('User-Agent')
+            $this->auditLogService->logAuthOperation('password_change', $Silian_user['id'], true, [
+                'ip_address' => $this->getClientIP($Silian_request),
+                'user_agent' => $Silian_request->getHeaderLine('User-Agent')
             ]);
-            return $this->jsonResponse($response, [
+            return $this->jsonResponse($Silian_response, [
                 'success' => true,
                 'message' => 'Password changed successfully'
             ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('Change password failed', ['error' => $e->getMessage()]);
-            try { $this->errorLogService->logException($e, $request); } catch (\Throwable $ignore) {}
-            return $this->jsonResponse($response, [
+        } catch (\Throwable $Silian_e) {
+            $this->logger->error('Change password failed', ['error' => $Silian_e->getMessage()]);
+            try { $this->errorLogService->logException($Silian_e, $Silian_request); } catch (\Throwable $Silian_ignore) {}
+            return $this->jsonResponse($Silian_response, [
                 'success' => false,
                 'message' => 'Failed to change password'
             ], 500);
         }
     }
 
-    private function handlePendingEmailVerification(array $user): ?array
+    private function handlePendingEmailVerification(array $Silian_user): ?array
     {
-        $email = $user['email'] ?? null;
-        if (!$email) {
+        $Silian_email = $Silian_user['email'] ?? null;
+        if (!$Silian_email) {
             return null;
         }
 
-        $meta = [
+        $Silian_meta = [
             'required' => true,
             'sent' => false,
             'expires_at' => null,
@@ -836,183 +836,183 @@ class AuthController
             'rate_limited' => false,
         ];
 
-        $now = new \DateTimeImmutable('now');
-        $existingExpiryRaw = $user['verification_code_expires_at'] ?? null;
-        $existingCode = $user['verification_code'] ?? null;
-        $expiry = null;
+        $Silian_now = new \DateTimeImmutable('now');
+        $Silian_existingExpiryRaw = $Silian_user['verification_code_expires_at'] ?? null;
+        $Silian_existingCode = $Silian_user['verification_code'] ?? null;
+        $Silian_expiry = null;
 
-        if ($existingExpiryRaw) {
+        if ($Silian_existingExpiryRaw) {
             try {
-                $expiry = new \DateTimeImmutable((string)$existingExpiryRaw);
-                $meta['expires_at'] = $expiry->format('Y-m-d H:i:s');
-            } catch (\Throwable $e) {
-                $expiry = null;
-                $meta['expires_at'] = is_string($existingExpiryRaw) ? $existingExpiryRaw : null;
+                $Silian_expiry = new \DateTimeImmutable((string)$Silian_existingExpiryRaw);
+                $Silian_meta['expires_at'] = $Silian_expiry->format('Y-m-d H:i:s');
+            } catch (\Throwable $Silian_e) {
+                $Silian_expiry = null;
+                $Silian_meta['expires_at'] = is_string($Silian_existingExpiryRaw) ? $Silian_existingExpiryRaw : null;
             }
         }
 
-        $shouldSend = false;
-        if (empty($existingCode)) {
-            $shouldSend = true;
-        } elseif (!$expiry || $expiry <= $now) {
-            $shouldSend = true;
+        $Silian_shouldSend = false;
+        if (empty($Silian_existingCode)) {
+            $Silian_shouldSend = true;
+        } elseif (!$Silian_expiry || $Silian_expiry <= $Silian_now) {
+            $Silian_shouldSend = true;
         }
 
-        if ($shouldSend) {
-            $throttle = $this->calculateVerificationThrottle($user);
-            if ($throttle['blocked']) {
-                $meta['rate_limited'] = true;
-                $meta['resend_available_at'] = $throttle['retry_after'] ?? null;
-                return $meta;
+        if ($Silian_shouldSend) {
+            $Silian_throttle = $this->calculateVerificationThrottle($Silian_user);
+            if ($Silian_throttle['blocked']) {
+                $Silian_meta['rate_limited'] = true;
+                $Silian_meta['resend_available_at'] = $Silian_throttle['retry_after'] ?? null;
+                return $Silian_meta;
             }
 
-            $challenge = $this->dispatchEmailVerification(
-                (int)$user['id'],
-                (string)$email,
-                (string)($user['username'] ?? ''),
-                $throttle['send_count'],
-                $throttle['retry_after'] ?? null
+            $Silian_challenge = $this->dispatchEmailVerification(
+                (int)$Silian_user['id'],
+                (string)$Silian_email,
+                (string)($Silian_user['username'] ?? ''),
+                $Silian_throttle['send_count'],
+                $Silian_throttle['retry_after'] ?? null
             );
 
-            $meta['sent'] = (bool)($challenge['dispatched'] ?? false);
-            $meta['expires_at'] = $challenge['expires_at'] ?? $meta['expires_at'];
-            $meta['resend_available_at'] = $challenge['resend_available_at'] ?? $meta['resend_available_at'];
-            return $meta;
+            $Silian_meta['sent'] = (bool)($Silian_challenge['dispatched'] ?? false);
+            $Silian_meta['expires_at'] = $Silian_challenge['expires_at'] ?? $Silian_meta['expires_at'];
+            $Silian_meta['resend_available_at'] = $Silian_challenge['resend_available_at'] ?? $Silian_meta['resend_available_at'];
+            return $Silian_meta;
         }
 
-        $lastSentRaw = $user['verification_last_sent_at'] ?? null;
-        if ($lastSentRaw) {
+        $Silian_lastSentRaw = $Silian_user['verification_last_sent_at'] ?? null;
+        if ($Silian_lastSentRaw) {
             try {
-                $lastSent = new \DateTimeImmutable((string)$lastSentRaw);
-                $meta['resend_available_at'] = $lastSent->modify('+1 hour')->format('Y-m-d H:i:s');
-            } catch (\Throwable $e) {
-                $meta['resend_available_at'] = is_string($lastSentRaw) ? $lastSentRaw : null;
+                $Silian_lastSent = new \DateTimeImmutable((string)$Silian_lastSentRaw);
+                $Silian_meta['resend_available_at'] = $Silian_lastSent->modify('+1 hour')->format('Y-m-d H:i:s');
+            } catch (\Throwable $Silian_e) {
+                $Silian_meta['resend_available_at'] = is_string($Silian_lastSentRaw) ? $Silian_lastSentRaw : null;
             }
         }
 
-        return $meta;
+        return $Silian_meta;
     }
 
-    private function calculateVerificationThrottle(array $user): array
+    private function calculateVerificationThrottle(array $Silian_user): array
     {
-        $sendCount = (int)($user['verification_send_count'] ?? 0);
-        $lastSentAtRaw = $user['verification_last_sent_at'] ?? null;
-        $now = new \DateTimeImmutable('now');
-        $windowStart = $now->modify('-1 hour');
-        $lastSentAt = null;
+        $Silian_sendCount = (int)($Silian_user['verification_send_count'] ?? 0);
+        $Silian_lastSentAtRaw = $Silian_user['verification_last_sent_at'] ?? null;
+        $Silian_now = new \DateTimeImmutable('now');
+        $Silian_windowStart = $Silian_now->modify('-1 hour');
+        $Silian_lastSentAt = null;
 
-        if ($lastSentAtRaw) {
+        if ($Silian_lastSentAtRaw) {
             try {
-                $lastSentAt = new \DateTimeImmutable((string)$lastSentAtRaw);
-            } catch (\Throwable $e) {
-                $lastSentAt = null;
+                $Silian_lastSentAt = new \DateTimeImmutable((string)$Silian_lastSentAtRaw);
+            } catch (\Throwable $Silian_e) {
+                $Silian_lastSentAt = null;
             }
         }
 
-        if ($lastSentAt && $lastSentAt > $windowStart) {
-            if ($sendCount >= self::VERIFICATION_RESEND_LIMIT) {
-                $retryAfter = $lastSentAt->modify('+1 hour')->format('Y-m-d H:i:s');
+        if ($Silian_lastSentAt && $Silian_lastSentAt > $Silian_windowStart) {
+            if ($Silian_sendCount >= self::VERIFICATION_RESEND_LIMIT) {
+                $Silian_retryAfter = $Silian_lastSentAt->modify('+1 hour')->format('Y-m-d H:i:s');
                 return [
                     'blocked' => true,
-                    'send_count' => $sendCount,
-                    'retry_after' => $retryAfter
+                    'send_count' => $Silian_sendCount,
+                    'retry_after' => $Silian_retryAfter
                 ];
             }
 
-            $retryAfter = $lastSentAt->modify('+1 hour')->format('Y-m-d H:i:s');
+            $Silian_retryAfter = $Silian_lastSentAt->modify('+1 hour')->format('Y-m-d H:i:s');
             return [
                 'blocked' => false,
-                'send_count' => $sendCount + 1,
-                'retry_after' => $retryAfter
+                'send_count' => $Silian_sendCount + 1,
+                'retry_after' => $Silian_retryAfter
             ];
         }
 
         return [
             'blocked' => false,
             'send_count' => 1,
-            'retry_after' => $now->modify('+1 hour')->format('Y-m-d H:i:s')
+            'retry_after' => $Silian_now->modify('+1 hour')->format('Y-m-d H:i:s')
         ];
     }
 
-    private function dispatchEmailVerification(int $userId, string $email, string $username, int $sendCount, ?string $retryAfter = null): array
+    private function dispatchEmailVerification(int $Silian_userId, string $Silian_email, string $Silian_username, int $Silian_sendCount, ?string $Silian_retryAfter = null): array
     {
-        $challenge = $this->createVerificationChallenge($userId, $email, $username, $sendCount);
-        $challenge['resend_available_at'] = $retryAfter;
+        $Silian_challenge = $this->createVerificationChallenge($Silian_userId, $Silian_email, $Silian_username, $Silian_sendCount);
+        $Silian_challenge['resend_available_at'] = $Silian_retryAfter;
 
-        $context = [
-            'attempt' => $sendCount,
-            'expires_at' => $challenge['expires_at'],
-            'resend_available_at' => $challenge['resend_available_at'],
-            'email' => $email
+        $Silian_context = [
+            'attempt' => $Silian_sendCount,
+            'expires_at' => $Silian_challenge['expires_at'],
+            'resend_available_at' => $Silian_challenge['resend_available_at'],
+            'email' => $Silian_email
         ];
 
-        $dispatched = $this->sendVerificationEmailWithStrategy(
-            $userId,
-            $email,
-            $challenge['recipient_name'],
-            $challenge['code'],
-            $challenge['ttl_minutes'],
-            $challenge['link'],
-            $context
+        $Silian_dispatched = $this->sendVerificationEmailWithStrategy(
+            $Silian_userId,
+            $Silian_email,
+            $Silian_challenge['recipient_name'],
+            $Silian_challenge['code'],
+            $Silian_challenge['ttl_minutes'],
+            $Silian_challenge['link'],
+            $Silian_context
         );
 
-        if (!$dispatched) {
+        if (!$Silian_dispatched) {
             $this->logger->warning('Verification email dispatch could not be queued', [
-                'user_id' => $userId,
-                'email' => $email
+                'user_id' => $Silian_userId,
+                'email' => $Silian_email
             ]);
         }
 
-        $challenge['dispatched'] = $dispatched;
+        $Silian_challenge['dispatched'] = $Silian_dispatched;
 
-        return $challenge;
+        return $Silian_challenge;
     }
 
     private function sendVerificationEmailWithStrategy(
-        int $userId,
-        string $email,
-        string $recipientName,
-        string $code,
-        int $ttlMinutes,
-        ?string $link,
-        array $context
+        int $Silian_userId,
+        string $Silian_email,
+        string $Silian_recipientName,
+        string $Silian_code,
+        int $Silian_ttlMinutes,
+        ?string $Silian_link,
+        array $Silian_context
     ): bool {
-        $sapi = PHP_SAPI ?? php_sapi_name();
-        $isCli = in_array($sapi, ['cli', 'phpdbg', 'embed'], true);
+        $Silian_sapi = PHP_SAPI ?? php_sapi_name();
+        $Silian_isCli = in_array($Silian_sapi, ['cli', 'phpdbg', 'embed'], true);
 
-        if ($isCli) {
+        if ($Silian_isCli) {
             return $this->sendVerificationEmailNow(
-                $userId,
-                $email,
-                $recipientName,
-                $code,
-                $ttlMinutes,
-                $link,
+                $Silian_userId,
+                $Silian_email,
+                $Silian_recipientName,
+                $Silian_code,
+                $Silian_ttlMinutes,
+                $Silian_link,
                 false,
-                $context
+                $Silian_context
             );
         }
 
-        $queued = $this->queueVerificationEmail(
-            $userId,
-            $email,
-            $recipientName,
-            $code,
-            $ttlMinutes,
-            $link,
-            $context
+        $Silian_queued = $this->queueVerificationEmail(
+            $Silian_userId,
+            $Silian_email,
+            $Silian_recipientName,
+            $Silian_code,
+            $Silian_ttlMinutes,
+            $Silian_link,
+            $Silian_context
         );
 
-        if (!$queued) {
+        if (!$Silian_queued) {
             return $this->sendVerificationEmailNow(
-                $userId,
-                $email,
-                $recipientName,
-                $code,
-                $ttlMinutes,
-                $link,
+                $Silian_userId,
+                $Silian_email,
+                $Silian_recipientName,
+                $Silian_code,
+                $Silian_ttlMinutes,
+                $Silian_link,
                 false,
-                $context
+                $Silian_context
             );
         }
 
@@ -1020,114 +1020,114 @@ class AuthController
     }
 
     private function sendVerificationEmailNow(
-        int $userId,
-        string $email,
-        string $recipientName,
-        string $code,
-        int $ttlMinutes,
-        ?string $link,
-        bool $asyncContext,
-        array $context
+        int $Silian_userId,
+        string $Silian_email,
+        string $Silian_recipientName,
+        string $Silian_code,
+        int $Silian_ttlMinutes,
+        ?string $Silian_link,
+        bool $Silian_asyncContext,
+        array $Silian_context
     ): bool {
-        $sent = false;
+        $Silian_sent = false;
         try {
-            $sent = $this->emailService->sendVerificationCode(
-                $email,
-                $recipientName,
-                $code,
-                $ttlMinutes,
-                $link
+            $Silian_sent = $this->emailService->sendVerificationCode(
+                $Silian_email,
+                $Silian_recipientName,
+                $Silian_code,
+                $Silian_ttlMinutes,
+                $Silian_link
             );
 
-            if (!$sent) {
+            if (!$Silian_sent) {
                 $this->logger->warning('Verification email send reported failure', [
-                    'user_id' => $userId,
-                    'email' => $email,
-                    'context' => $asyncContext ? 'async' : 'sync'
+                    'user_id' => $Silian_userId,
+                    'email' => $Silian_email,
+                    'context' => $Silian_asyncContext ? 'async' : 'sync'
                 ]);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Verification email send failed', [
-                'user_id' => $userId,
-                'email' => $email,
-                'error' => $e->getMessage(),
-                'context' => $asyncContext ? 'async' : 'sync'
+                'user_id' => $Silian_userId,
+                'email' => $Silian_email,
+                'error' => $Silian_e->getMessage(),
+                'context' => $Silian_asyncContext ? 'async' : 'sync'
             ]);
         }
 
         try {
             $this->auditLogService->logAuthOperation(
-                $asyncContext ? 'email_verification_code_sent_async' : 'email_verification_code_sent',
-                $userId,
-                $sent,
-                array_merge($context, [
-                    'strategy' => $asyncContext ? 'async' : 'sync'
+                $Silian_asyncContext ? 'email_verification_code_sent_async' : 'email_verification_code_sent',
+                $Silian_userId,
+                $Silian_sent,
+                array_merge($Silian_context, [
+                    'strategy' => $Silian_asyncContext ? 'async' : 'sync'
                 ])
             );
-        } catch (\Throwable $e) {
+        } catch (\Throwable $Silian_e) {
             $this->logger->debug('Failed to record verification email audit log', [
-                'error' => $e->getMessage(),
-                'strategy' => $asyncContext ? 'async' : 'sync'
+                'error' => $Silian_e->getMessage(),
+                'strategy' => $Silian_asyncContext ? 'async' : 'sync'
             ]);
         }
 
-        return $sent;
+        return $Silian_sent;
     }
 
     private function queueVerificationEmail(
-        int $userId,
-        string $email,
-        string $recipientName,
-        string $code,
-        int $ttlMinutes,
-        ?string $link,
-        array $context
+        int $Silian_userId,
+        string $Silian_email,
+        string $Silian_recipientName,
+        string $Silian_code,
+        int $Silian_ttlMinutes,
+        ?string $Silian_link,
+        array $Silian_context
     ): bool {
         try {
-            $result = $this->emailService->dispatchAsyncEmail(
-                function (bool $async) use ($userId, $email, $recipientName, $code, $ttlMinutes, $link, $context) {
+            $Silian_result = $this->emailService->dispatchAsyncEmail(
+                function (bool $Silian_async) use ($Silian_userId, $Silian_email, $Silian_recipientName, $Silian_code, $Silian_ttlMinutes, $Silian_link, $Silian_context) {
                     return $this->sendVerificationEmailNow(
-                        $userId,
-                        $email,
-                        $recipientName,
-                        $code,
-                        $ttlMinutes,
-                        $link,
-                        $async,
-                        $context
+                        $Silian_userId,
+                        $Silian_email,
+                        $Silian_recipientName,
+                        $Silian_code,
+                        $Silian_ttlMinutes,
+                        $Silian_link,
+                        $Silian_async,
+                        $Silian_context
                     );
                 },
-                array_merge($context, [
-                    'user_id' => $userId,
-                    'email' => $email,
+                array_merge($Silian_context, [
+                    'user_id' => $Silian_userId,
+                    'email' => $Silian_email,
                     'purpose' => 'verification_code',
                 ])
             );
 
             try {
-                $this->auditLogService->logAuthOperation('email_verification_code_schedule', $userId, true, array_merge($context, [
-                    'strategy' => $result ? 'async' : 'sync'
+                $this->auditLogService->logAuthOperation('email_verification_code_schedule', $Silian_userId, true, array_merge($Silian_context, [
+                    'strategy' => $Silian_result ? 'async' : 'sync'
                 ]));
-            } catch (\Throwable $e) {
-                $this->logger->debug('Failed to record verification email schedule log', ['error' => $e->getMessage()]);
+            } catch (\Throwable $Silian_e) {
+                $this->logger->debug('Failed to record verification email schedule log', ['error' => $Silian_e->getMessage()]);
             }
 
-            return $result;
-        } catch (\Throwable $e) {
+            return $Silian_result;
+        } catch (\Throwable $Silian_e) {
             $this->logger->error('Failed to queue verification email', [
-                'user_id' => $userId,
-                'email' => $email,
-                'error' => $e->getMessage()
+                'user_id' => $Silian_userId,
+                'email' => $Silian_email,
+                'error' => $Silian_e->getMessage()
             ]);
 
             try {
-                $this->auditLogService->logAuthOperation('email_verification_code_schedule', $userId, false, array_merge($context, [
+                $this->auditLogService->logAuthOperation('email_verification_code_schedule', $Silian_userId, false, array_merge($Silian_context, [
                     'strategy' => 'async',
-                    'error' => $e->getMessage()
+                    'error' => $Silian_e->getMessage()
                 ]));
-            } catch (\Throwable $logError) {
+            } catch (\Throwable $Silian_logError) {
                 $this->logger->debug('Failed to record verification email schedule failure', [
-                    'error' => $logError->getMessage()
+                    'error' => $Silian_logError->getMessage()
                 ]);
             }
 
@@ -1135,85 +1135,85 @@ class AuthController
         }
     }
 
-    private function createVerificationChallenge(int $userId, string $email, string $username, int $sendCount): array
+    private function createVerificationChallenge(int $Silian_userId, string $Silian_email, string $Silian_username, int $Silian_sendCount): array
     {
-        $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        $token = bin2hex(random_bytes(32));
-        $ttlMinutes = (int)($_ENV['EMAIL_VERIFICATION_TTL_MINUTES'] ?? self::VERIFICATION_CODE_TTL_MINUTES);
-        if ($ttlMinutes <= 0) {
-            $ttlMinutes = self::VERIFICATION_CODE_TTL_MINUTES;
+        $Silian_code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $Silian_token = bin2hex(random_bytes(32));
+        $Silian_ttlMinutes = (int)($_ENV['EMAIL_VERIFICATION_TTL_MINUTES'] ?? self::VERIFICATION_CODE_TTL_MINUTES);
+        if ($Silian_ttlMinutes <= 0) {
+            $Silian_ttlMinutes = self::VERIFICATION_CODE_TTL_MINUTES;
         }
-        $now = date('Y-m-d H:i:s');
-        $expiresAt = (new \DateTimeImmutable($now))->modify('+' . $ttlMinutes . ' minutes')->format('Y-m-d H:i:s');
+        $Silian_now = date('Y-m-d H:i:s');
+        $Silian_expiresAt = (new \DateTimeImmutable($Silian_now))->modify('+' . $Silian_ttlMinutes . ' minutes')->format('Y-m-d H:i:s');
 
-        $stmt = $this->db->prepare('UPDATE users SET verification_code = ?, verification_token = ?, verification_code_expires_at = ?, verification_attempts = 0, verification_send_count = ?, verification_last_sent_at = ?, updated_at = ? WHERE id = ?');
-        $stmt->execute([
-            $code,
-            $token,
-            $expiresAt,
-            $sendCount,
-            $now,
-            $now,
-            $userId
+        $Silian_stmt = $this->db->prepare('UPDATE users SET verification_code = ?, verification_token = ?, verification_code_expires_at = ?, verification_attempts = 0, verification_send_count = ?, verification_last_sent_at = ?, updated_at = ? WHERE id = ?');
+        $Silian_stmt->execute([
+            $Silian_code,
+            $Silian_token,
+            $Silian_expiresAt,
+            $Silian_sendCount,
+            $Silian_now,
+            $Silian_now,
+            $Silian_userId
         ]);
 
         return [
-            'code' => $code,
-            'token' => $token,
-            'ttl_minutes' => $ttlMinutes,
-            'expires_at' => $expiresAt,
-            'link' => $this->buildVerificationLink($token),
-            'recipient_name' => $username !== '' ? $username : explode('@', $email)[0]
+            'code' => $Silian_code,
+            'token' => $Silian_token,
+            'ttl_minutes' => $Silian_ttlMinutes,
+            'expires_at' => $Silian_expiresAt,
+            'link' => $this->buildVerificationLink($Silian_token),
+            'recipient_name' => $Silian_username !== '' ? $Silian_username : explode('@', $Silian_email)[0]
         ];
     }
 
-    private function buildVerificationLink(string $token): ?string
+    private function buildVerificationLink(string $Silian_token): ?string
     {
-        $base = $_ENV['EMAIL_VERIFICATION_URL']
+        $Silian_base = $_ENV['EMAIL_VERIFICATION_URL']
             ?? $_ENV['FRONTEND_URL']
             ?? $_ENV['APP_URL']
             ?? null;
 
-        if (!$base) {
+        if (!$Silian_base) {
             return null;
         }
 
-        $path = $_ENV['EMAIL_VERIFICATION_PATH'] ?? '/auth/verify-email';
-        $normalizedBase = rtrim($base, '/');
-        $normalizedPath = '/' . ltrim($path, '/');
+        $Silian_path = $_ENV['EMAIL_VERIFICATION_PATH'] ?? '/auth/verify-email';
+        $Silian_normalizedBase = rtrim($Silian_base, '/');
+        $Silian_normalizedPath = '/' . ltrim($Silian_path, '/');
 
-        return $normalizedBase . $normalizedPath . '?token=' . urlencode($token);
+        return $Silian_normalizedBase . $Silian_normalizedPath . '?token=' . urlencode($Silian_token);
     }
 
-    private function markEmailVerified(int $userId): void
+    private function markEmailVerified(int $Silian_userId): void
     {
-        $now = date('Y-m-d H:i:s');
-        $stmt = $this->db->prepare('UPDATE users SET email_verified_at = ?, verification_code = NULL, verification_token = NULL, verification_code_expires_at = NULL, verification_attempts = 0, verification_send_count = 0, verification_last_sent_at = NULL, updated_at = ? WHERE id = ?');
-        $stmt->execute([$now, $now, $userId]);
+        $Silian_now = date('Y-m-d H:i:s');
+        $Silian_stmt = $this->db->prepare('UPDATE users SET email_verified_at = ?, verification_code = NULL, verification_token = NULL, verification_code_expires_at = NULL, verification_attempts = 0, verification_send_count = 0, verification_last_sent_at = NULL, updated_at = ? WHERE id = ?');
+        $Silian_stmt->execute([$Silian_now, $Silian_now, $Silian_userId]);
     }
 
-    private function isTurnstileVerificationSuccessful($token): bool
+    private function isTurnstileVerificationSuccessful($Silian_token): bool
     {
-        $token = is_string($token) ? trim($token) : '';
-        if ($token === '') {
+        $Silian_token = is_string($Silian_token) ? trim($Silian_token) : '';
+        if ($Silian_token === '') {
             return false;
         }
 
         // TurnstileService::verify() returns a structured array, not a boolean.
-        $verification = $this->turnstileService->verify($token);
+        $Silian_verification = $this->turnstileService->verify($Silian_token);
 
-        return is_array($verification) && !empty($verification['success']);
+        return is_array($Silian_verification) && !empty($Silian_verification['success']);
     }
 
-    private function updateVerificationAttempts(int $userId, int $attempts): void
+    private function updateVerificationAttempts(int $Silian_userId, int $Silian_attempts): void
     {
-        $stmt = $this->db->prepare('UPDATE users SET verification_attempts = ?, updated_at = ? WHERE id = ?');
-        $stmt->execute([$attempts, date('Y-m-d H:i:s'), $userId]);
+        $Silian_stmt = $this->db->prepare('UPDATE users SET verification_attempts = ?, updated_at = ? WHERE id = ?');
+        $Silian_stmt->execute([$Silian_attempts, date('Y-m-d H:i:s'), $Silian_userId]);
     }
 
-    private function findUserDetailed(int $userId): ?array
+    private function findUserDetailed(int $Silian_userId): ?array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT u.*, s.name AS school_name, a.file_path AS avatar_path
             FROM users u
             LEFT JOIN schools s ON u.school_id = s.id
@@ -1221,82 +1221,82 @@ class AuthController
             WHERE u.id = ? AND u.deleted_at IS NULL
             LIMIT 1
         ");
-        $stmt->execute([$userId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
+        $Silian_stmt->execute([$Silian_userId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$Silian_row) {
             return null;
         }
 
-        return $row;
+        return $Silian_row;
     }
 
-    private function formatUserPayload(array $row): array
+    private function formatUserPayload(array $Silian_row): array
     {
-        $avatar = $this->resolveAvatar($row['avatar_path'] ?? $row['avatar_url'] ?? null);
-        $profileFields = $this->userProfileViewService->buildProfileFields($row);
-        $roleView = $this->authService->normalizeUserRoleView($row);
+        $Silian_avatar = $this->resolveAvatar($Silian_row['avatar_path'] ?? $Silian_row['avatar_url'] ?? null);
+        $Silian_profileFields = $this->userProfileViewService->buildProfileFields($Silian_row);
+        $Silian_roleView = $this->authService->normalizeUserRoleView($Silian_row);
         return [
-            'id' => (int)($row['id'] ?? 0),
-            'uuid' => $row['uuid'] ?? null,
-            'username' => $row['username'] ?? null,
-            'email' => $row['email'] ?? null,
-            'school_id' => $profileFields['school_id'],
-            'school_name' => $profileFields['school_name'],
-            'points' => (int)($row['points'] ?? 0),
-            'role' => $roleView['role'] ?? 'user',
-            'is_admin' => (bool)($roleView['is_admin'] ?? false),
-            'is_support' => (bool)($roleView['is_support'] ?? false),
-            'email_verified_at' => $row['email_verified_at'] ?? null,
-            'avatar_id' => $row['avatar_id'] ?? null,
-            'avatar_path' => $avatar['avatar_path'],
-            'avatar_url' => $avatar['avatar_url'],
-            'lastlgn' => $row['lastlgn'] ?? ($row['last_login_at'] ?? null),
-            'status' => $row['status'] ?? null,
-            'updated_at' => $row['updated_at'] ?? null,
-            'region_code' => $profileFields['region_code'],
-            'region_label' => $profileFields['region_label'],
-            'country_code' => $profileFields['country_code'],
-            'state_code' => $profileFields['state_code'],
-            'country_name' => $profileFields['country_name'],
-            'state_name' => $profileFields['state_name'],
+            'id' => (int)($Silian_row['id'] ?? 0),
+            'uuid' => $Silian_row['uuid'] ?? null,
+            'username' => $Silian_row['username'] ?? null,
+            'email' => $Silian_row['email'] ?? null,
+            'school_id' => $Silian_profileFields['school_id'],
+            'school_name' => $Silian_profileFields['school_name'],
+            'points' => (int)($Silian_row['points'] ?? 0),
+            'role' => $Silian_roleView['role'] ?? 'user',
+            'is_admin' => (bool)($Silian_roleView['is_admin'] ?? false),
+            'is_support' => (bool)($Silian_roleView['is_support'] ?? false),
+            'email_verified_at' => $Silian_row['email_verified_at'] ?? null,
+            'avatar_id' => $Silian_row['avatar_id'] ?? null,
+            'avatar_path' => $Silian_avatar['avatar_path'],
+            'avatar_url' => $Silian_avatar['avatar_url'],
+            'lastlgn' => $Silian_row['lastlgn'] ?? ($Silian_row['last_login_at'] ?? null),
+            'status' => $Silian_row['status'] ?? null,
+            'updated_at' => $Silian_row['updated_at'] ?? null,
+            'region_code' => $Silian_profileFields['region_code'],
+            'region_label' => $Silian_profileFields['region_label'],
+            'country_code' => $Silian_profileFields['country_code'],
+            'state_code' => $Silian_profileFields['state_code'],
+            'country_name' => $Silian_profileFields['country_name'],
+            'state_name' => $Silian_profileFields['state_name'],
         ];
     }
 
-    private function resolveAvatar(?string $filePath): array
+    private function resolveAvatar(?string $Silian_filePath): array
     {
-        $originalPath = $filePath !== null ? trim($filePath) : null;
-        if ($originalPath === '') {
-            $originalPath = null;
+        $Silian_originalPath = $Silian_filePath !== null ? trim($Silian_filePath) : null;
+        if ($Silian_originalPath === '') {
+            $Silian_originalPath = null;
         }
 
-        $normalized = $originalPath ? ltrim($originalPath, '/') : null;
-        $url = ($normalized && $this->r2Service) ? $this->r2Service->getPublicUrl($normalized) : null;
+        $Silian_normalized = $Silian_originalPath ? ltrim($Silian_originalPath, '/') : null;
+        $Silian_url = ($Silian_normalized && $this->r2Service) ? $this->r2Service->getPublicUrl($Silian_normalized) : null;
 
         return [
-            'avatar_path' => $originalPath,
-            'avatar_url' => $url,
+            'avatar_path' => $Silian_originalPath,
+            'avatar_url' => $Silian_url,
         ];
     }
 
-    private function jsonResponse(Response $response, array $data, int $status = 200): Response
+    private function jsonResponse(Response $Silian_response, array $Silian_data, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus($status);
+        $Silian_response->getBody()->write(json_encode($Silian_data, JSON_UNESCAPED_UNICODE));
+        return $Silian_response->withHeader('Content-Type', 'application/json')->withStatus($Silian_status);
     }
 
-    private function getClientIP(Request $request): string
+    private function getClientIP(Request $Silian_request): string
     {
-        $server = $request->getServerParams();
-        $xff = $request->getHeaderLine('X-Forwarded-For');
-        if ($xff) {
-            $parts = explode(',', $xff);
-            return trim($parts[0]);
+        $Silian_server = $Silian_request->getServerParams();
+        $Silian_xff = $Silian_request->getHeaderLine('X-Forwarded-For');
+        if ($Silian_xff) {
+            $Silian_parts = explode(',', $Silian_xff);
+            return trim($Silian_parts[0]);
         }
-        $cf = $request->getHeaderLine('CF-Connecting-IP');
-        if ($cf) {
-            return $cf;
+        $Silian_cf = $Silian_request->getHeaderLine('CF-Connecting-IP');
+        if ($Silian_cf) {
+            return $Silian_cf;
         }
-        return $server['REMOTE_ADDR'] ?? '0.0.0.0';
+        return $Silian_server['REMOTE_ADDR'] ?? '0.0.0.0';
     }
 
 }

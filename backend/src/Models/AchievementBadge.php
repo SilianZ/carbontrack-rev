@@ -46,8 +46,8 @@ class AchievementBadge extends Model
         return $this->hasMany(UserBadge::class, 'badge_id');
     }
 
-    public function scopeActive($query)
+    public function scopeActive($Silian_query)
     {
-        return $query->where('is_active', true)->whereNull('deleted_at');
+        return $Silian_query->where('is_active', true)->whereNull('deleted_at');
     }
 }

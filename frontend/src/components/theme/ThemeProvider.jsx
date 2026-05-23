@@ -1,17 +1,17 @@
-import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import { ThemeProvider as Silian_NextThemesProvider } from 'next-themes'
 
-function ThemeProvider({ children, ...props }) {
+function Silian_ThemeProvider({ children: Silian_children, ...Silian_props }) {
   return (
-    <NextThemesProvider
+    <Silian_NextThemesProvider
       attribute="class"
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
-      {...props}
+      {...Silian_props}
     >
-      {children}
-    </NextThemesProvider>
+      {Silian_children}
+    </Silian_NextThemesProvider>
   )
 }
 
-export { ThemeProvider }
+export { Silian_ThemeProvider as ThemeProvider }

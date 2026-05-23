@@ -11,9 +11,9 @@ class AdminAiCommandRepository
     /**
      * @param array<int,string> $paths
      */
-    public function __construct(array $paths)
+    public function __construct(array $Silian_paths)
     {
-        $this->paths = array_values(array_filter($paths, static fn ($path) => is_string($path) && $path !== ''));
+        $this->paths = array_values(array_filter($Silian_paths, static fn ($Silian_path) => is_string($Silian_path) && $Silian_path !== ''));
     }
 
     /**
@@ -63,26 +63,26 @@ class AdminAiCommandRepository
 
     private function ensureFreshConfig(): void
     {
-        foreach ($this->paths as $path) {
-            if (!is_file($path) || !is_readable($path)) {
+        foreach ($this->paths as $Silian_path) {
+            if (!is_file($Silian_path) || !is_readable($Silian_path)) {
                 continue;
             }
 
-            $modifiedAt = @filemtime($path) ?: null;
+            $Silian_modifiedAt = @filemtime($Silian_path) ?: null;
 
-            if ($this->activePath === $path && $this->cachedConfig !== null && $this->activeModifiedAt === $modifiedAt) {
+            if ($this->activePath === $Silian_path && $this->cachedConfig !== null && $this->activeModifiedAt === $Silian_modifiedAt) {
                 return;
             }
 
-            $config = require $path;
-            if (!is_array($config)) {
+            $Silian_config = require $Silian_path;
+            if (!is_array($Silian_config)) {
                 continue;
             }
 
-            $this->cachedConfig = $config;
-            $this->activePath = $path;
-            $this->activeModifiedAt = $modifiedAt;
-            $this->activeFingerprint = $this->computeFingerprint($config, $path, $modifiedAt);
+            $this->cachedConfig = $Silian_config;
+            $this->activePath = $Silian_path;
+            $this->activeModifiedAt = $Silian_modifiedAt;
+            $this->activeFingerprint = $this->computeFingerprint($Silian_config, $Silian_path, $Silian_modifiedAt);
             $this->lastLoadedAt = microtime(true);
 
             return;
@@ -109,15 +109,15 @@ class AdminAiCommandRepository
     /**
      * @param array<string,mixed> $config
      */
-    private function computeFingerprint(array $config, string $path, ?int $modifiedAt): string
+    private function computeFingerprint(array $Silian_config, string $Silian_path, ?int $Silian_modifiedAt): string
     {
         try {
-            $encoded = json_encode($config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $Silian_encoded = json_encode($Silian_config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         } catch (JsonException) {
-            $encoded = serialize($config);
+            $Silian_encoded = serialize($Silian_config);
         }
 
-        return sha1($path . '|' . (string) $modifiedAt . '|' . $encoded);
+        return sha1($Silian_path . '|' . (string) $Silian_modifiedAt . '|' . $Silian_encoded);
     }
 
     /**

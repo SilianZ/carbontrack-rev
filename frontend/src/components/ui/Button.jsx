@@ -1,29 +1,29 @@
-import React from 'react';
-import { cn } from '../../lib/cn';
-import { baseButtonClasses, buttonSizeClasses, buttonVariantClasses } from './button-variants';
+import Silian_React from 'react';
+import { cn as Silian_cn } from '../../lib/cn';
+import { baseButtonClasses as Silian_baseButtonClasses, buttonSizeClasses as Silian_buttonSizeClasses, buttonVariantClasses as Silian_buttonVariantClasses } from './button-variants';
 
-const Button = React.forwardRef(({ 
-  className, 
-  variant = "default", 
-  size = "default", 
-  loading = false,
-  children,
-  disabled,
-  ...props 
-}, ref) => {
+const Silian_Button = Silian_React.forwardRef(({
+  className: Silian_className,
+  variant: Silian_variant = "default",
+  size: Silian_size = "default",
+  loading: Silian_loading = false,
+  children: Silian_children,
+  disabled: Silian_disabled,
+  ...Silian_props
+}, Silian_ref) => {
   return (
     <button
-      className={cn(
-  baseButtonClasses,
-  buttonVariantClasses[variant],
-  buttonSizeClasses[size],
-        className
+      className={Silian_cn(
+  Silian_baseButtonClasses,
+  Silian_buttonVariantClasses[Silian_variant],
+  Silian_buttonSizeClasses[Silian_size],
+        Silian_className
       )}
-      ref={ref}
-      disabled={disabled || loading}
-      {...props}
+      ref={Silian_ref}
+      disabled={Silian_disabled || Silian_loading}
+      {...Silian_props}
     >
-      {loading && (
+      {Silian_loading && (
         <svg
           className="mr-2 h-4 w-4 animate-spin"
           xmlns="http://www.w3.org/2000/svg"
@@ -45,11 +45,11 @@ const Button = React.forwardRef(({
           />
         </svg>
       )}
-      {children}
+      {Silian_children}
     </button>
   );
 });
 
-Button.displayName = "Button";
+Silian_Button.displayName = "Button";
 
-export { Button };
+export { Silian_Button as Button };

@@ -15,9 +15,9 @@ class UserPasskey
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function listActiveByUserUuid(string $userUuid): array
+    public function listActiveByUserUuid(string $Silian_userUuid): array
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'SELECT id, user_uuid, credential_id, label, rp_id, user_handle, transports, aaguid, sign_count,
                     last_used_at, attested_at, credential_type, attestation_format, backup_eligible, backup_state,
                     created_at, updated_at
@@ -25,42 +25,42 @@ class UserPasskey
              WHERE user_uuid = :user_uuid AND disabled_at IS NULL
              ORDER BY created_at ASC, id ASC'
         );
-        $stmt->execute(['user_uuid' => strtolower($userUuid)]);
+        $Silian_stmt->execute(['user_uuid' => strtolower($Silian_userUuid)]);
 
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        return array_map([$this, 'hydratePasskeyRow'], $rows);
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        return array_map([$this, 'hydratePasskeyRow'], $Silian_rows);
     }
 
     /**
      * @return array<string, mixed>|null
      */
-    public function findActiveByCredentialId(string $credentialId): ?array
+    public function findActiveByCredentialId(string $Silian_credentialId): ?array
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'SELECT * FROM user_passkeys
              WHERE credential_id_hash = :credential_id_hash AND disabled_at IS NULL
              LIMIT 1'
         );
-        $stmt->execute([
-            'credential_id_hash' => hash('sha256', $credentialId),
+        $Silian_stmt->execute([
+            'credential_id_hash' => hash('sha256', $Silian_credentialId),
         ]);
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$Silian_row) {
             return null;
         }
 
-        return $this->hydratePasskeyRow($row);
+        return $this->hydratePasskeyRow($Silian_row);
     }
 
     /**
      * @param array<string, mixed> $record
      * @return array<string, mixed>
      */
-    public function create(array $record): array
+    public function create(array $Silian_record): array
     {
-        $now = gmdate('Y-m-d H:i:s');
-        $stmt = $this->db->prepare(
+        $Silian_now = gmdate('Y-m-d H:i:s');
+        $Silian_stmt = $this->db->prepare(
             'INSERT INTO user_passkeys (
                 user_uuid, credential_id, credential_id_hash, credential_type, label, public_key, rp_id, user_handle,
                 transports, aaguid, sign_count, attestation_format, backup_eligible, backup_state, meta_json,
@@ -72,59 +72,59 @@ class UserPasskey
             )'
         );
 
-        $stmt->execute([
-            'user_uuid' => strtolower((string) $record['user_uuid']),
-            'credential_id' => (string) $record['credential_id'],
-            'credential_id_hash' => hash('sha256', (string) $record['credential_id']),
-            'credential_type' => (string) ($record['credential_type'] ?? 'public-key'),
-            'label' => $record['label'] ?? null,
-            'public_key' => (string) $record['public_key'],
-            'rp_id' => (string) $record['rp_id'],
-            'user_handle' => (string) $record['user_handle'],
-            'transports' => $this->encodeJson($record['transports'] ?? []),
-            'aaguid' => $record['aaguid'] ?? null,
-            'sign_count' => (int) ($record['sign_count'] ?? 0),
-            'attestation_format' => $record['attestation_format'] ?? null,
-            'backup_eligible' => !empty($record['backup_eligible']) ? 1 : 0,
-            'backup_state' => !empty($record['backup_state']) ? 1 : 0,
-            'meta_json' => $this->encodeJson($record['meta'] ?? null),
-            'last_used_at' => $record['last_used_at'] ?? null,
-            'attested_at' => $record['attested_at'] ?? $now,
-            'created_at' => $record['created_at'] ?? $now,
-            'updated_at' => $record['updated_at'] ?? $now,
+        $Silian_stmt->execute([
+            'user_uuid' => strtolower((string) $Silian_record['user_uuid']),
+            'credential_id' => (string) $Silian_record['credential_id'],
+            'credential_id_hash' => hash('sha256', (string) $Silian_record['credential_id']),
+            'credential_type' => (string) ($Silian_record['credential_type'] ?? 'public-key'),
+            'label' => $Silian_record['label'] ?? null,
+            'public_key' => (string) $Silian_record['public_key'],
+            'rp_id' => (string) $Silian_record['rp_id'],
+            'user_handle' => (string) $Silian_record['user_handle'],
+            'transports' => $this->encodeJson($Silian_record['transports'] ?? []),
+            'aaguid' => $Silian_record['aaguid'] ?? null,
+            'sign_count' => (int) ($Silian_record['sign_count'] ?? 0),
+            'attestation_format' => $Silian_record['attestation_format'] ?? null,
+            'backup_eligible' => !empty($Silian_record['backup_eligible']) ? 1 : 0,
+            'backup_state' => !empty($Silian_record['backup_state']) ? 1 : 0,
+            'meta_json' => $this->encodeJson($Silian_record['meta'] ?? null),
+            'last_used_at' => $Silian_record['last_used_at'] ?? null,
+            'attested_at' => $Silian_record['attested_at'] ?? $Silian_now,
+            'created_at' => $Silian_record['created_at'] ?? $Silian_now,
+            'updated_at' => $Silian_record['updated_at'] ?? $Silian_now,
         ]);
 
-        $id = (int) $this->db->lastInsertId();
-        $created = $this->findById($id);
-        return $created ?? [];
+        $Silian_id = (int) $this->db->lastInsertId();
+        $Silian_created = $this->findById($Silian_id);
+        return $Silian_created ?? [];
     }
 
     /**
      * @return array<string, mixed>|null
      */
-    public function findActiveByIdForUserUuid(int $passkeyId, string $userUuid): ?array
+    public function findActiveByIdForUserUuid(int $Silian_passkeyId, string $Silian_userUuid): ?array
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'SELECT * FROM user_passkeys
              WHERE id = :id AND user_uuid = :user_uuid AND disabled_at IS NULL
              LIMIT 1'
         );
-        $stmt->execute([
-            'id' => $passkeyId,
-            'user_uuid' => strtolower($userUuid),
+        $Silian_stmt->execute([
+            'id' => $Silian_passkeyId,
+            'user_uuid' => strtolower($Silian_userUuid),
         ]);
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$Silian_row) {
             return null;
         }
 
-        return $this->hydratePasskeyRow($row);
+        return $this->hydratePasskeyRow($Silian_row);
     }
 
-    public function touchAuthentication(int $passkeyId, int $signCount, bool $backupState, ?string $lastUsedAt = null): bool
+    public function touchAuthentication(int $Silian_passkeyId, int $Silian_signCount, bool $Silian_backupState, ?string $Silian_lastUsedAt = null): bool
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'UPDATE user_passkeys
              SET sign_count = :sign_count,
                  backup_state = :backup_state,
@@ -133,92 +133,92 @@ class UserPasskey
              WHERE id = :id AND disabled_at IS NULL'
         );
 
-        $now = gmdate('Y-m-d H:i:s');
-        return $stmt->execute([
-            'sign_count' => $signCount,
-            'backup_state' => $backupState ? 1 : 0,
-            'last_used_at' => $lastUsedAt ?? $now,
-            'updated_at' => $now,
-            'id' => $passkeyId,
+        $Silian_now = gmdate('Y-m-d H:i:s');
+        return $Silian_stmt->execute([
+            'sign_count' => $Silian_signCount,
+            'backup_state' => $Silian_backupState ? 1 : 0,
+            'last_used_at' => $Silian_lastUsedAt ?? $Silian_now,
+            'updated_at' => $Silian_now,
+            'id' => $Silian_passkeyId,
         ]);
     }
 
-    public function disable(int $passkeyId, string $userUuid): bool
+    public function disable(int $Silian_passkeyId, string $Silian_userUuid): bool
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'UPDATE user_passkeys
              SET disabled_at = :disabled_at, updated_at = :updated_at
              WHERE id = :id AND user_uuid = :user_uuid AND disabled_at IS NULL'
         );
 
-        $now = gmdate('Y-m-d H:i:s');
-        $stmt->execute([
-            'disabled_at' => $now,
-            'updated_at' => $now,
-            'id' => $passkeyId,
-            'user_uuid' => strtolower($userUuid),
+        $Silian_now = gmdate('Y-m-d H:i:s');
+        $Silian_stmt->execute([
+            'disabled_at' => $Silian_now,
+            'updated_at' => $Silian_now,
+            'id' => $Silian_passkeyId,
+            'user_uuid' => strtolower($Silian_userUuid),
         ]);
 
-        return $stmt->rowCount() > 0;
+        return $Silian_stmt->rowCount() > 0;
     }
 
     /**
      * @return array<string, mixed>|null
      */
-    public function updateLabel(int $passkeyId, string $userUuid, ?string $label): ?array
+    public function updateLabel(int $Silian_passkeyId, string $Silian_userUuid, ?string $Silian_label): ?array
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'UPDATE user_passkeys
              SET label = :label, updated_at = :updated_at
              WHERE id = :id AND user_uuid = :user_uuid AND disabled_at IS NULL'
         );
 
-        $now = gmdate('Y-m-d H:i:s');
-        $stmt->execute([
-            'label' => $label,
-            'updated_at' => $now,
-            'id' => $passkeyId,
-            'user_uuid' => strtolower($userUuid),
+        $Silian_now = gmdate('Y-m-d H:i:s');
+        $Silian_stmt->execute([
+            'label' => $Silian_label,
+            'updated_at' => $Silian_now,
+            'id' => $Silian_passkeyId,
+            'user_uuid' => strtolower($Silian_userUuid),
         ]);
 
-        if ($stmt->rowCount() === 0) {
-            $existing = $this->findActiveByIdForUserUuid($passkeyId, $userUuid);
-            if ($existing === null) {
+        if ($Silian_stmt->rowCount() === 0) {
+            $Silian_existing = $this->findActiveByIdForUserUuid($Silian_passkeyId, $Silian_userUuid);
+            if ($Silian_existing === null) {
                 return null;
             }
         }
 
-        return $this->findActiveByIdForUserUuid($passkeyId, $userUuid);
+        return $this->findActiveByIdForUserUuid($Silian_passkeyId, $Silian_userUuid);
     }
 
     /**
      * @return array{items: array<int, array<string, mixed>>, total: int}
      */
     public function listAdminPasskeys(
-        string $search = '',
-        int $limit = 20,
-        int $offset = 0,
-        string $sort = 'created_at_desc'
+        string $Silian_search = '',
+        int $Silian_limit = 20,
+        int $Silian_offset = 0,
+        string $Silian_sort = 'created_at_desc'
     ): array {
-        $sortMap = [
+        $Silian_sortMap = [
             'created_at_desc' => 'up.created_at DESC, up.id DESC',
             'last_used_at_desc' => 'CASE WHEN up.last_used_at IS NULL THEN 1 ELSE 0 END ASC, up.last_used_at DESC, up.id DESC',
             'sign_count_desc' => 'up.sign_count DESC, up.id DESC',
         ];
-        $orderBy = $sortMap[$sort] ?? $sortMap['created_at_desc'];
+        $Silian_orderBy = $Silian_sortMap[$Silian_sort] ?? $Silian_sortMap['created_at_desc'];
 
-        $where = ['up.disabled_at IS NULL', 'u.deleted_at IS NULL'];
-        $params = [];
-        if ($search !== '') {
-            $where[] = '(u.username LIKE :search_username OR u.email LIKE :search_email OR up.label LIKE :search_label OR u.uuid LIKE :search_uuid)';
-            $params['search_username'] = '%' . $search . '%';
-            $params['search_email'] = '%' . $search . '%';
-            $params['search_label'] = '%' . $search . '%';
-            $params['search_uuid'] = '%' . $search . '%';
+        $Silian_where = ['up.disabled_at IS NULL', 'u.deleted_at IS NULL'];
+        $Silian_params = [];
+        if ($Silian_search !== '') {
+            $Silian_where[] = '(u.username LIKE :search_username OR u.email LIKE :search_email OR up.label LIKE :search_label OR u.uuid LIKE :search_uuid)';
+            $Silian_params['search_username'] = '%' . $Silian_search . '%';
+            $Silian_params['search_email'] = '%' . $Silian_search . '%';
+            $Silian_params['search_label'] = '%' . $Silian_search . '%';
+            $Silian_params['search_uuid'] = '%' . $Silian_search . '%';
         }
-        $whereSql = implode(' AND ', $where);
+        $Silian_whereSql = implode(' AND ', $Silian_where);
 
-        $sql = "
+        $Silian_sql = "
             SELECT
                 up.id,
                 up.user_uuid,
@@ -237,58 +237,58 @@ class UserPasskey
             FROM user_passkeys up
             INNER JOIN users u ON u.uuid = up.user_uuid
             LEFT JOIN schools s ON s.id = u.school_id
-            WHERE {$whereSql}
-            ORDER BY {$orderBy}
+            WHERE {$Silian_whereSql}
+            ORDER BY {$Silian_orderBy}
             LIMIT :limit OFFSET :offset
         ";
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue(':' . $Silian_key, $Silian_value);
         }
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt->bindValue(':limit', $Silian_limit, PDO::PARAM_INT);
+        $Silian_stmt->bindValue(':offset', $Silian_offset, PDO::PARAM_INT);
+        $Silian_stmt->execute();
+        $Silian_items = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $countSql = "
+        $Silian_countSql = "
             SELECT COUNT(*)
             FROM user_passkeys up
             INNER JOIN users u ON u.uuid = up.user_uuid
-            WHERE {$whereSql}
+            WHERE {$Silian_whereSql}
         ";
-        $countStmt = $this->db->prepare($countSql);
-        foreach ($params as $key => $value) {
-            $countStmt->bindValue(':' . $key, $value);
+        $Silian_countStmt = $this->db->prepare($Silian_countSql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_countStmt->bindValue(':' . $Silian_key, $Silian_value);
         }
-        $countStmt->execute();
-        $total = (int) $countStmt->fetchColumn();
+        $Silian_countStmt->execute();
+        $Silian_total = (int) $Silian_countStmt->fetchColumn();
 
         return [
-            'items' => array_map(function (array $row): array {
-                $row['id'] = (int) ($row['id'] ?? 0);
-                $row['user_id'] = (int) ($row['user_id'] ?? 0);
-                $row['user_uuid'] = isset($row['user_uuid']) ? strtolower((string) $row['user_uuid']) : null;
-                $row['sign_count'] = (int) ($row['sign_count'] ?? 0);
-                $row['backup_eligible'] = (bool) ($row['backup_eligible'] ?? false);
-                $row['backup_state'] = (bool) ($row['backup_state'] ?? false);
-                return $row;
-            }, $items),
-            'total' => $total,
+            'items' => array_map(function (array $Silian_row): array {
+                $Silian_row['id'] = (int) ($Silian_row['id'] ?? 0);
+                $Silian_row['user_id'] = (int) ($Silian_row['user_id'] ?? 0);
+                $Silian_row['user_uuid'] = isset($Silian_row['user_uuid']) ? strtolower((string) $Silian_row['user_uuid']) : null;
+                $Silian_row['sign_count'] = (int) ($Silian_row['sign_count'] ?? 0);
+                $Silian_row['backup_eligible'] = (bool) ($Silian_row['backup_eligible'] ?? false);
+                $Silian_row['backup_state'] = (bool) ($Silian_row['backup_state'] ?? false);
+                return $Silian_row;
+            }, $Silian_items),
+            'total' => $Silian_total,
         ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    public function getAdminPasskeyStats(?string $since30Days = null): array
+    public function getAdminPasskeyStats(?string $Silian_since30Days = null): array
     {
-        $stats = [
+        $Silian_stats = [
             'users_with_passkeys' => 0,
             'total_active_passkeys' => 0,
             'new_passkeys_30d' => 0,
         ];
 
-        $baseSql = '
+        $Silian_baseSql = '
             SELECT
                 COUNT(*) AS total_active_passkeys,
                 COUNT(DISTINCT up.user_uuid) AS users_with_passkeys
@@ -297,13 +297,13 @@ class UserPasskey
             WHERE up.disabled_at IS NULL
               AND u.deleted_at IS NULL
         ';
-        $baseStmt = $this->db->query($baseSql);
-        $baseRow = $baseStmt ? ($baseStmt->fetch(PDO::FETCH_ASSOC) ?: []) : [];
-        $stats['users_with_passkeys'] = (int) ($baseRow['users_with_passkeys'] ?? 0);
-        $stats['total_active_passkeys'] = (int) ($baseRow['total_active_passkeys'] ?? 0);
+        $Silian_baseStmt = $this->db->query($Silian_baseSql);
+        $Silian_baseRow = $Silian_baseStmt ? ($Silian_baseStmt->fetch(PDO::FETCH_ASSOC) ?: []) : [];
+        $Silian_stats['users_with_passkeys'] = (int) ($Silian_baseRow['users_with_passkeys'] ?? 0);
+        $Silian_stats['total_active_passkeys'] = (int) ($Silian_baseRow['total_active_passkeys'] ?? 0);
 
-        if ($since30Days !== null) {
-            $newStmt = $this->db->prepare(
+        if ($Silian_since30Days !== null) {
+            $Silian_newStmt = $this->db->prepare(
                 'SELECT COUNT(*)
                  FROM user_passkeys up
                  INNER JOIN users u ON u.uuid = up.user_uuid
@@ -311,19 +311,19 @@ class UserPasskey
                    AND u.deleted_at IS NULL
                    AND up.created_at >= :since_30_days'
             );
-            $newStmt->execute(['since_30_days' => $since30Days]);
-            $stats['new_passkeys_30d'] = (int) $newStmt->fetchColumn();
+            $Silian_newStmt->execute(['since_30_days' => $Silian_since30Days]);
+            $Silian_stats['new_passkeys_30d'] = (int) $Silian_newStmt->fetchColumn();
         }
 
-        return $stats;
+        return $Silian_stats;
     }
 
     /**
      * @return array<string, mixed>
      */
-    public function getUserPasskeySummary(string $userUuid): array
+    public function getUserPasskeySummary(string $Silian_userUuid): array
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'SELECT
                 COUNT(*) AS total,
                 SUM(CASE WHEN backup_state = 1 THEN 1 ELSE 0 END) AS backup_enabled,
@@ -333,24 +333,24 @@ class UserPasskey
              FROM user_passkeys
              WHERE user_uuid = :user_uuid AND disabled_at IS NULL'
         );
-        $stmt->execute(['user_uuid' => strtolower($userUuid)]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt->execute(['user_uuid' => strtolower($Silian_userUuid)]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
         return [
-            'total' => (int) ($row['total'] ?? 0),
-            'backup_enabled' => (int) ($row['backup_enabled'] ?? 0),
-            'backup_eligible' => (int) ($row['backup_eligible'] ?? 0),
-            'last_used_at' => $row['last_used_at'] ?? null,
-            'last_registered_at' => $row['last_registered_at'] ?? null,
+            'total' => (int) ($Silian_row['total'] ?? 0),
+            'backup_enabled' => (int) ($Silian_row['backup_enabled'] ?? 0),
+            'backup_eligible' => (int) ($Silian_row['backup_eligible'] ?? 0),
+            'last_used_at' => $Silian_row['last_used_at'] ?? null,
+            'last_registered_at' => $Silian_row['last_registered_at'] ?? null,
         ];
     }
 
     /**
      * @return array<string, mixed>|null
      */
-    private function findById(int $id): ?array
+    private function findById(int $Silian_id): ?array
     {
-        $stmt = $this->db->prepare(
+        $Silian_stmt = $this->db->prepare(
             'SELECT id, user_uuid, credential_id, label, rp_id, user_handle, transports, aaguid, sign_count,
                     last_used_at, attested_at, credential_type, attestation_format, backup_eligible, backup_state,
                     created_at, updated_at
@@ -358,60 +358,60 @@ class UserPasskey
              WHERE id = :id
              LIMIT 1'
         );
-        $stmt->execute(['id' => $id]);
+        $Silian_stmt->execute(['id' => $Silian_id]);
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$Silian_row) {
             return null;
         }
 
-        return $this->hydratePasskeyRow($row);
+        return $this->hydratePasskeyRow($Silian_row);
     }
 
     /**
      * @param mixed $value
      */
-    private function encodeJson($value): ?string
+    private function encodeJson($Silian_value): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
 
-        $encoded = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        return $encoded === false ? null : $encoded;
+        $Silian_encoded = json_encode($Silian_value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return $Silian_encoded === false ? null : $Silian_encoded;
     }
 
     /**
      * @return string[]
      */
-    private function decodeJsonList(?string $value): array
+    private function decodeJsonList(?string $Silian_value): array
     {
-        if ($value === null || trim($value) === '') {
+        if ($Silian_value === null || trim($Silian_value) === '') {
             return [];
         }
 
-        $decoded = json_decode($value, true);
-        if (!is_array($decoded)) {
+        $Silian_decoded = json_decode($Silian_value, true);
+        if (!is_array($Silian_decoded)) {
             return [];
         }
 
-        return array_values(array_filter(array_map('strval', $decoded), static fn (string $item): bool => $item !== ''));
+        return array_values(array_filter(array_map('strval', $Silian_decoded), static fn (string $Silian_item): bool => $Silian_item !== ''));
     }
 
     /**
      * @param array<string, mixed> $row
      * @return array<string, mixed>
      */
-    private function hydratePasskeyRow(array $row): array
+    private function hydratePasskeyRow(array $Silian_row): array
     {
-        if (isset($row['user_uuid'])) {
-            $row['user_uuid'] = strtolower((string) $row['user_uuid']);
+        if (isset($Silian_row['user_uuid'])) {
+            $Silian_row['user_uuid'] = strtolower((string) $Silian_row['user_uuid']);
         }
-        $row['transports'] = $this->decodeJsonList($row['transports'] ?? null);
-        $row['backup_eligible'] = (bool) ($row['backup_eligible'] ?? false);
-        $row['backup_state'] = (bool) ($row['backup_state'] ?? false);
-        $row['sign_count'] = (int) ($row['sign_count'] ?? 0);
+        $Silian_row['transports'] = $this->decodeJsonList($Silian_row['transports'] ?? null);
+        $Silian_row['backup_eligible'] = (bool) ($Silian_row['backup_eligible'] ?? false);
+        $Silian_row['backup_state'] = (bool) ($Silian_row['backup_state'] ?? false);
+        $Silian_row['sign_count'] = (int) ($Silian_row['sign_count'] ?? 0);
 
-        return $row;
+        return $Silian_row;
     }
 }

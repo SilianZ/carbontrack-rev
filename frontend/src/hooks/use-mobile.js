@@ -1,19 +1,19 @@
-import * as React from "react"
+import * as Silian_React from "react"
 
-const MOBILE_BREAKPOINT = 768
+const Silian_MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState(undefined)
+  const [Silian_isMobile, Silian_setIsMobile] = Silian_React.useState(undefined)
 
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+  Silian_React.useEffect(() => {
+    const Silian_mql = window.matchMedia(`(max-width: ${Silian_MOBILE_BREAKPOINT - 1}px)`)
+    const Silian_onChange = () => {
+      Silian_setIsMobile(window.innerWidth < Silian_MOBILE_BREAKPOINT)
     }
-    mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange);
+    Silian_mql.addEventListener("change", Silian_onChange)
+    Silian_setIsMobile(window.innerWidth < Silian_MOBILE_BREAKPOINT)
+    return () => Silian_mql.removeEventListener("change", Silian_onChange);
   }, [])
 
-  return !!isMobile
+  return !!Silian_isMobile
 }

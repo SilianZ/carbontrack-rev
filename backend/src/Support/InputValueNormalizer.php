@@ -10,78 +10,78 @@ final class InputValueNormalizer
     {
     }
 
-    public static function boolean(mixed $value, string $field, bool $default = false): bool
+    public static function boolean(mixed $Silian_value, string $Silian_field, bool $Silian_default = false): bool
     {
-        if (is_bool($value)) {
-            return $value;
+        if (is_bool($Silian_value)) {
+            return $Silian_value;
         }
 
-        if (is_int($value)) {
-            if ($value === 0 || $value === 1) {
-                return $value === 1;
+        if (is_int($Silian_value)) {
+            if ($Silian_value === 0 || $Silian_value === 1) {
+                return $Silian_value === 1;
             }
 
-            throw new \InvalidArgumentException($field . ' must be a boolean');
+            throw new \InvalidArgumentException($Silian_field . ' must be a boolean');
         }
 
-        if (is_float($value)) {
-            if (floor($value) !== $value || !in_array((int) $value, [0, 1], true)) {
-                throw new \InvalidArgumentException($field . ' must be a boolean');
+        if (is_float($Silian_value)) {
+            if (floor($Silian_value) !== $Silian_value || !in_array((int) $Silian_value, [0, 1], true)) {
+                throw new \InvalidArgumentException($Silian_field . ' must be a boolean');
             }
 
-            return ((int) $value) === 1;
+            return ((int) $Silian_value) === 1;
         }
 
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '') {
-                return $default;
+        if (is_string($Silian_value)) {
+            $Silian_trimmed = trim($Silian_value);
+            if ($Silian_trimmed === '') {
+                return $Silian_default;
             }
 
-            return match (strtolower($trimmed)) {
+            return match (strtolower($Silian_trimmed)) {
                 '1', 'true', 'yes', 'on' => true,
                 '0', 'false', 'no', 'off' => false,
-                default => throw new \InvalidArgumentException($field . ' must be a boolean'),
+                default => throw new \InvalidArgumentException($Silian_field . ' must be a boolean'),
             };
         }
 
-        throw new \InvalidArgumentException($field . ' must be a boolean');
+        throw new \InvalidArgumentException($Silian_field . ' must be a boolean');
     }
 
-    public static function integer(mixed $value, string $field, int $default = 0): int
+    public static function integer(mixed $Silian_value, string $Silian_field, int $Silian_default = 0): int
     {
-        if (is_int($value)) {
-            return $value;
+        if (is_int($Silian_value)) {
+            return $Silian_value;
         }
 
-        if (is_bool($value)) {
-            return $value ? 1 : 0;
+        if (is_bool($Silian_value)) {
+            return $Silian_value ? 1 : 0;
         }
 
-        if (is_float($value)) {
-            if (floor($value) !== $value) {
-                throw new \InvalidArgumentException($field . ' must be an integer');
+        if (is_float($Silian_value)) {
+            if (floor($Silian_value) !== $Silian_value) {
+                throw new \InvalidArgumentException($Silian_field . ' must be an integer');
             }
 
-            return (int) $value;
+            return (int) $Silian_value;
         }
 
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '') {
-                return $default;
+        if (is_string($Silian_value)) {
+            $Silian_trimmed = trim($Silian_value);
+            if ($Silian_trimmed === '') {
+                return $Silian_default;
             }
 
-            if (preg_match('/^-?\d+$/', $trimmed) === 1) {
-                return (int) $trimmed;
+            if (preg_match('/^-?\d+$/', $Silian_trimmed) === 1) {
+                return (int) $Silian_trimmed;
             }
         }
 
-        throw new \InvalidArgumentException($field . ' must be an integer');
+        throw new \InvalidArgumentException($Silian_field . ' must be an integer');
     }
 
-    public static function booleanFlagInteger(mixed $value, string $field, int $default = 0): int
+    public static function booleanFlagInteger(mixed $Silian_value, string $Silian_field, int $Silian_default = 0): int
     {
-        return self::boolean($value, $field, $default !== 0) ? 1 : 0;
+        return self::boolean($Silian_value, $Silian_field, $Silian_default !== 0) ? 1 : 0;
     }
 }

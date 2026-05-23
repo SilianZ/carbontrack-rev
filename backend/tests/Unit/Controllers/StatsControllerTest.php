@@ -15,8 +15,8 @@ class StatsControllerTest extends TestCase
 {
     public function testGetPublicSummaryWritesAuditLog(): void
     {
-        $statisticsService = $this->createMock(StatisticsService::class);
-        $statisticsService->expects($this->once())
+        $Silian_statisticsService = $this->createMock(StatisticsService::class);
+        $Silian_statisticsService->expects($this->once())
             ->method('getPublicStats')
             ->with(false)
             ->willReturn([
@@ -24,21 +24,21 @@ class StatsControllerTest extends TestCase
                 'total_checkins' => 34,
             ]);
 
-        $auditLogService = $this->createMock(AuditLogService::class);
-        $auditLogService->expects($this->once())->method('logSystemEvent')->willReturn(true);
+        $Silian_auditLogService = $this->createMock(AuditLogService::class);
+        $Silian_auditLogService->expects($this->once())->method('logSystemEvent')->willReturn(true);
 
-        $controller = new StatsController(
-            $statisticsService,
-            $auditLogService,
+        $Silian_controller = new StatsController(
+            $Silian_statisticsService,
+            $Silian_auditLogService,
             $this->createMock(ErrorLogService::class)
         );
 
-        $request = makeRequest('GET', '/stats/summary')->withAttribute('request_id', 'req-stats');
-        $response = $controller->getPublicSummary($request, new Response());
+        $Silian_request = makeRequest('GET', '/stats/summary')->withAttribute('request_id', 'req-stats');
+        $Silian_response = $Silian_controller->getPublicSummary($Silian_request, new Response());
 
-        $this->assertSame(200, $response->getStatusCode());
-        $payload = json_decode((string) $response->getBody(), true);
-        $this->assertTrue($payload['success']);
-        $this->assertSame(12, $payload['data']['total_users']);
+        $this->assertSame(200, $Silian_response->getStatusCode());
+        $Silian_payload = json_decode((string) $Silian_response->getBody(), true);
+        $this->assertTrue($Silian_payload['success']);
+        $this->assertSame(12, $Silian_payload['data']['total_users']);
     }
 }

@@ -35,47 +35,47 @@ class CarbonTrackController
     private const ERRLOG_PREFIX = 'ErrorLogService failed: ';
 
     public function __construct(
-        PDO $db,
-        $carbonCalculator,
-        $messageService,
-        $auditLog,
-        $authService,
-        UserProfileViewService $userProfileViewService,
-        $errorLogService = null,
-        $r2Service = null,
-        $checkinService = null,
-        $quotaService = null,
-        ?BadgeService $badgeService = null
+        PDO $Silian_db,
+        $Silian_carbonCalculator,
+        $Silian_messageService,
+        $Silian_auditLog,
+        $Silian_authService,
+        UserProfileViewService $Silian_userProfileViewService,
+        $Silian_errorLogService = null,
+        $Silian_r2Service = null,
+        $Silian_checkinService = null,
+        $Silian_quotaService = null,
+        ?BadgeService $Silian_badgeService = null
     ) {
-        $this->db = $db;
-        $this->carbonCalculator = $carbonCalculator;
-        $this->messageService = $messageService;
-        $this->auditLog = $auditLog;
-        $this->authService = $authService;
-        $this->userProfileViewService = $userProfileViewService;
-        $this->errorLogService = $errorLogService;
-        $this->r2Service = $r2Service;
-        $this->checkinService = $checkinService;
-        $this->quotaService = $quotaService;
-        $this->badgeService = $badgeService;
+        $this->db = $Silian_db;
+        $this->carbonCalculator = $Silian_carbonCalculator;
+        $this->messageService = $Silian_messageService;
+        $this->auditLog = $Silian_auditLog;
+        $this->authService = $Silian_authService;
+        $this->userProfileViewService = $Silian_userProfileViewService;
+        $this->errorLogService = $Silian_errorLogService;
+        $this->r2Service = $Silian_r2Service;
+        $this->checkinService = $Silian_checkinService;
+        $this->quotaService = $Silian_quotaService;
+        $this->badgeService = $Silian_badgeService;
     }
 
     /**
      * 提交碳减排记录
      */
-    public function submitRecord(Request $request, Response $response): Response
+    public function submitRecord(Request $Silian_request, Response $Silian_response): Response
     {
     try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $data = $request->getParsedBody();
-            if (!is_array($data)) { $data = []; }
+            $Silian_data = $Silian_request->getParsedBody();
+            if (!is_array($Silian_data)) { $Silian_data = []; }
 
             // 同义词兼容映射：将多种前端可能传入的键统一为内部标准键
-            $synonyms = [
+            $Silian_synonyms = [
                 // 统一数值 amount（旧代码个别使用 data、value）
                 'amount' => ['data', 'value', 'amount_value'],
                 // 日期
@@ -89,11 +89,11 @@ class CarbonTrackController
                 // 打卡日期（补打卡）
                 'checkin_date' => ['makeup_date', 'checkinDate', 'makeupDate', 'check_in_date']
             ];
-            foreach ($synonyms as $primary => $alts) {
-                if (!array_key_exists($primary, $data) || $data[$primary] === '' || $data[$primary] === null) {
-                    foreach ($alts as $alt) {
-                        if (array_key_exists($alt, $data) && $data[$alt] !== '' && $data[$alt] !== null) {
-                            $data[$primary] = $data[$alt];
+            foreach ($Silian_synonyms as $Silian_primary => $Silian_alts) {
+                if (!array_key_exists($Silian_primary, $Silian_data) || $Silian_data[$Silian_primary] === '' || $Silian_data[$Silian_primary] === null) {
+                    foreach ($Silian_alts as $Silian_alt) {
+                        if (array_key_exists($Silian_alt, $Silian_data) && $Silian_data[$Silian_alt] !== '' && $Silian_data[$Silian_alt] !== null) {
+                            $Silian_data[$Silian_primary] = $Silian_data[$Silian_alt];
                             break;
                         }
                     }
@@ -101,86 +101,86 @@ class CarbonTrackController
             }
 
             // 兼容 multipart/form-data 与 application/json
-            $uploadedFiles = $request->getUploadedFiles();
-            $imageFiles = [];
-            if (is_array($uploadedFiles)) {
-                foreach (['images', 'files', 'attachments', 'image'] as $field) {
-                    if (!empty($uploadedFiles[$field])) {
-                        $f = $uploadedFiles[$field];
-                        if (is_array($f)) {
-                            foreach ($f as $fi) {
-                                if ($fi && $fi->getError() === UPLOAD_ERR_OK) {
-                                    $imageFiles[] = $fi;
+            $Silian_uploadedFiles = $Silian_request->getUploadedFiles();
+            $Silian_imageFiles = [];
+            if (is_array($Silian_uploadedFiles)) {
+                foreach (['images', 'files', 'attachments', 'image'] as $Silian_field) {
+                    if (!empty($Silian_uploadedFiles[$Silian_field])) {
+                        $Silian_f = $Silian_uploadedFiles[$Silian_field];
+                        if (is_array($Silian_f)) {
+                            foreach ($Silian_f as $Silian_fi) {
+                                if ($Silian_fi && $Silian_fi->getError() === UPLOAD_ERR_OK) {
+                                    $Silian_imageFiles[] = $Silian_fi;
                                 }
                             }
                         } else {
-                            if ($f && $f->getError() === UPLOAD_ERR_OK) {
-                                $imageFiles[] = $f;
+                            if ($Silian_f && $Silian_f->getError() === UPLOAD_ERR_OK) {
+                                $Silian_imageFiles[] = $Silian_f;
                             }
                         }
                     }
                 }
             }
-            
+
             // 验证必需字段（图片现在为必填）
-            $requiredFields = ['activity_id', 'amount', 'date'];
-            foreach ($requiredFields as $field) {
-                if (!isset($data[$field]) || empty($data[$field])) {
-                    return $this->json($response, [
-                        'error' => "Missing required field: {$field}"
+            $Silian_requiredFields = ['activity_id', 'amount', 'date'];
+            foreach ($Silian_requiredFields as $Silian_field) {
+                if (!isset($Silian_data[$Silian_field]) || empty($Silian_data[$Silian_field])) {
+                    return $this->json($Silian_response, [
+                        'error' => "Missing required field: {$Silian_field}"
                     ], 400);
                 }
             }
 
-            $checkinDate = null;
-            $isMakeup = false;
-            if (!empty($data['checkin_date'])) {
-                $checkinDate = $this->normalizeCheckinDate((string) $data['checkin_date']);
-                if (!$checkinDate) {
-                    return $this->json($response, [
+            $Silian_checkinDate = null;
+            $Silian_isMakeup = false;
+            if (!empty($Silian_data['checkin_date'])) {
+                $Silian_checkinDate = $this->normalizeCheckinDate((string) $Silian_data['checkin_date']);
+                if (!$Silian_checkinDate) {
+                    return $this->json($Silian_response, [
                         'error' => 'Invalid checkin date',
                         'code' => 'INVALID_CHECKIN_DATE'
                     ], 400);
                 }
 
-                $tzName = $_ENV['APP_TIMEZONE'] ?? date_default_timezone_get();
-                if (!$tzName) {
-                    $tzName = 'UTC';
+                $Silian_tzName = $_ENV['APP_TIMEZONE'] ?? date_default_timezone_get();
+                if (!$Silian_tzName) {
+                    $Silian_tzName = 'UTC';
                 }
-                $todayStr = (new \DateTimeImmutable('now', new \DateTimeZone($tzName)))->format('Y-m-d');
-                if ($checkinDate > $todayStr) {
-                    return $this->json($response, [
+                $Silian_todayStr = (new \DateTimeImmutable('now', new \DateTimeZone($Silian_tzName)))->format('Y-m-d');
+                if ($Silian_checkinDate > $Silian_todayStr) {
+                    return $this->json($Silian_response, [
                         'error' => 'Cannot check in for future dates',
                         'code' => 'CHECKIN_DATE_IN_FUTURE'
                     ], 400);
                 }
 
-                $isMakeup = ($checkinDate !== $todayStr);
-                if ($isMakeup) {
+                $Silian_isMakeup = ($Silian_checkinDate !== $Silian_todayStr);
+                if ($Silian_isMakeup) {
                     if (!$this->checkinService || !$this->quotaService) {
-                        return $this->json($response, [
+                        return $this->json($Silian_response, [
                             'error' => 'Checkin service unavailable',
                             'code' => 'CHECKIN_UNAVAILABLE'
                         ], 500);
                     }
 
-                    if ($this->checkinService->hasCheckin((int) $user['id'], $checkinDate)) {
-                        return $this->json($response, [
+                    if ($this->checkinService->hasCheckin((int) $Silian_user['id'], $Silian_checkinDate)) {
+                        return $this->json($Silian_response, [
                             'error' => 'Already checked in for this date',
                             'code' => 'ALREADY_CHECKED_IN'
                         ], 409);
                     }
 
-                    $userModel = $this->authService->getCurrentUserModel($request);
-                    if (!$userModel) {
-                        return $this->json($response, [
+                    $Silian_userModel = $this->authService->getCurrentUserModel($Silian_request);
+                    if (!$Silian_userModel) {
+                        return $this->json($Silian_response, [
                             'error' => 'Unauthorized',
                             'code' => 'UNAUTHORIZED'
                         ], 401);
                     }
 
-                    if (!$this->quotaService->checkAndConsume($userModel, 'checkin_makeup', 1)) {
-                        return $this->json($response, [
+                    if (!$this->quotaService->checkAndConsume($Silian_userModel, 'checkin_makeup', 1)) {
+                        return $this->json($Silian_response, [
                             'error' => 'Makeup quota exceeded',
                             'code' => 'QUOTA_EXCEEDED',
                             'translation_key' => 'error.quota.exceeded'
@@ -190,116 +190,116 @@ class CarbonTrackController
             }
 
             // 解析客户端直接传的 images（即便也有 multipart）以便统一校验
-            $clientProvidedImages = [];
-            if (!empty($data['images'])) {
-                if (is_string($data['images'])) {
-                    $decoded = json_decode($data['images'], true);
-                    if (is_array($decoded)) { $clientProvidedImages = $decoded; }
-                } elseif (is_array($data['images'])) {
-                    $clientProvidedImages = $data['images'];
+            $Silian_clientProvidedImages = [];
+            if (!empty($Silian_data['images'])) {
+                if (is_string($Silian_data['images'])) {
+                    $Silian_decoded = json_decode($Silian_data['images'], true);
+                    if (is_array($Silian_decoded)) { $Silian_clientProvidedImages = $Silian_decoded; }
+                } elseif (is_array($Silian_data['images'])) {
+                    $Silian_clientProvidedImages = $Silian_data['images'];
                 }
             }
 
             // 如果既没有上传文件也没有有效的客户端图片数组 -> 路径敏感判断
-            $path = $request->getUri()->getPath();
-            if (empty($imageFiles) && empty($clientProvidedImages)) {
+            $Silian_path = $Silian_request->getUri()->getPath();
+            if (empty($Silian_imageFiles) && empty($Silian_clientProvidedImages)) {
                 // /api/v1/carbon-records 端点：严格要求图片（旧持久化测试期望）
-                if (str_contains($path, '/api/v1/carbon-records')) {
-                    return $this->json($response, [ 'error' => 'Missing required field: images' ], 400);
+                if (str_contains($Silian_path, '/api/v1/carbon-records')) {
+                    return $this->json($Silian_response, [ 'error' => 'Missing required field: images' ], 400);
                 }
                 // 其它路径（如 /carbon-track/record）保持向后兼容允许无图片
             }
 
             // 获取活动信息
-            $activity = CarbonActivity::findById($this->db, $data['activity_id']);
-            if (!$activity) {
-                return $this->json($response, ['error' => 'Activity not found'], 404);
+            $Silian_activity = CarbonActivity::findById($this->db, $Silian_data['activity_id']);
+            if (!$Silian_activity) {
+                return $this->json($Silian_response, ['error' => 'Activity not found'], 404);
             }
 
-            $amountValue = floatval($data['amount']);
+            $Silian_amountValue = floatval($Silian_data['amount']);
 
             // 计算碳减排量和积分（仅使用 calculateCarbonSavings，旧 calculate 已移除兼容）
             try {
-                $calc = $this->carbonCalculator->calculateCarbonSavings($data['activity_id'], $amountValue, $activity);
-            } catch (\Throwable $e) {
-                return $this->json($response, ['error' => 'calc_failed', 'message' => $e->getMessage()], 500);
+                $Silian_calc = $this->carbonCalculator->calculateCarbonSavings($Silian_data['activity_id'], $Silian_amountValue, $Silian_activity);
+            } catch (\Throwable $Silian_e) {
+                return $this->json($Silian_response, ['error' => 'calc_failed', 'message' => $Silian_e->getMessage()], 500);
             }
-            $carbonSaved = $calc['carbon_savings'] ?? 0;
-            $pointsEarned = $calc['points_earned'] ?? (int)round($carbonSaved * 10);
-            $calculation = [
-                'carbon_saved' => $carbonSaved,
-                'points_earned' => $pointsEarned,
-                'carbon_factor' => isset($calc['carbon_factor']) ? (float) $calc['carbon_factor'] : null,
-                'unit' => $calc['unit'] ?? ($data['unit'] ?? $activity['unit'] ?? null),
+            $Silian_carbonSaved = $Silian_calc['carbon_savings'] ?? 0;
+            $Silian_pointsEarned = $Silian_calc['points_earned'] ?? (int)round($Silian_carbonSaved * 10);
+            $Silian_calculation = [
+                'carbon_saved' => $Silian_carbonSaved,
+                'points_earned' => $Silian_pointsEarned,
+                'carbon_factor' => isset($Silian_calc['carbon_factor']) ? (float) $Silian_calc['carbon_factor'] : null,
+                'unit' => $Silian_calc['unit'] ?? ($Silian_data['unit'] ?? $Silian_activity['unit'] ?? null),
             ];
 
             // 先处理附件上传（如有），上传到 R2 并备好 images 数组
-            $images = [];
-            if (!empty($imageFiles)) {
+            $Silian_images = [];
+            if (!empty($Silian_imageFiles)) {
                 // 限制最多 10 张
-                if (count($imageFiles) > 10) {
-                    return $this->json($response, ['error' => 'Too many files. Maximum 10 images allowed'], 400);
+                if (count($Silian_imageFiles) > 10) {
+                    return $this->json($Silian_response, ['error' => 'Too many files. Maximum 10 images allowed'], 400);
                 }
 
                 try {
                     if (!$this->r2Service) {
                         throw new \RuntimeException('R2 service not configured');
                     }
-                    $uploadResult = $this->r2Service->uploadMultipleFiles(
-                        $imageFiles,
+                    $Silian_uploadResult = $this->r2Service->uploadMultipleFiles(
+                        $Silian_imageFiles,
                         'activities',
-                        $user['id'] ?? null,
+                        $Silian_user['id'] ?? null,
                         'carbon_record',
                         null
                     );
 
-                    foreach ($uploadResult['results'] as $res) {
+                    foreach ($Silian_uploadResult['results'] as $Silian_res) {
                         // 仅收集成功项
-                        if (!empty($res['success'])) {
-                            $images[] = [
-                                'file_path' => $res['file_path'] ?? null,
-                                'public_url' => $res['public_url'] ?? null,
-                                'original_name' => $res['original_name'] ?? null,
-                                'mime_type' => $res['mime_type'] ?? null,
-                                'file_size' => $res['file_size'] ?? null,
+                        if (!empty($Silian_res['success'])) {
+                            $Silian_images[] = [
+                                'file_path' => $Silian_res['file_path'] ?? null,
+                                'public_url' => $Silian_res['public_url'] ?? null,
+                                'original_name' => $Silian_res['original_name'] ?? null,
+                                'mime_type' => $Silian_res['mime_type'] ?? null,
+                                'file_size' => $Silian_res['file_size'] ?? null,
                             ];
                         } else {
                             // 如果uploadMultipleFiles未标识success字段，也将非空结果记录
-                            if (isset($res['file_path']) || isset($res['public_url'])) {
-                                $images[] = [
-                                    'file_path' => $res['file_path'] ?? null,
-                                    'public_url' => $res['public_url'] ?? null,
-                                    'original_name' => $res['original_name'] ?? null,
-                                    'mime_type' => $res['mime_type'] ?? null,
-                                    'file_size' => $res['file_size'] ?? null,
+                            if (isset($Silian_res['file_path']) || isset($Silian_res['public_url'])) {
+                                $Silian_images[] = [
+                                    'file_path' => $Silian_res['file_path'] ?? null,
+                                    'public_url' => $Silian_res['public_url'] ?? null,
+                                    'original_name' => $Silian_res['original_name'] ?? null,
+                                    'mime_type' => $Silian_res['mime_type'] ?? null,
+                                    'file_size' => $Silian_res['file_size'] ?? null,
                                 ];
                             }
                         }
                     }
-                } catch (\Throwable $e) {
-                    $this->logControllerException($e, $request, 'CarbonTrackController::submitRecord image upload error: ' . $e->getMessage());
+                } catch (\Throwable $Silian_e) {
+                    $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::submitRecord image upload error: ' . $Silian_e->getMessage());
                     // 如果无 R2 服务或上传失败，继续流程但不附带上传图片
-                    $images = [];
+                    $Silian_images = [];
                 }
-            } else if (!empty($data['images'])) {
+            } else if (!empty($Silian_data['images'])) {
                 // 兼容前端直接传URL数组的旧逻辑
-                if (is_string($data['images'])) {
-                    $decoded = json_decode($data['images'], true);
-                    if (is_array($decoded)) {
-                        foreach ($decoded as $item) {
-                            if (is_string($item)) {
-                                $images[] = ['public_url' => $item];
-                            } elseif (is_array($item)) {
-                                $images[] = $item;
+                if (is_string($Silian_data['images'])) {
+                    $Silian_decoded = json_decode($Silian_data['images'], true);
+                    if (is_array($Silian_decoded)) {
+                        foreach ($Silian_decoded as $Silian_item) {
+                            if (is_string($Silian_item)) {
+                                $Silian_images[] = ['public_url' => $Silian_item];
+                            } elseif (is_array($Silian_item)) {
+                                $Silian_images[] = $Silian_item;
                             }
                         }
                     }
-                } elseif (is_array($data['images'])) {
-                    foreach ($data['images'] as $item) {
-                        if (is_string($item)) {
-                            $images[] = ['public_url' => $item];
-                        } elseif (is_array($item)) {
-                            $images[] = $item;
+                } elseif (is_array($Silian_data['images'])) {
+                    foreach ($Silian_data['images'] as $Silian_item) {
+                        if (is_string($Silian_item)) {
+                            $Silian_images[] = ['public_url' => $Silian_item];
+                        } elseif (is_array($Silian_item)) {
+                            $Silian_images[] = $Silian_item;
                         }
                     }
                 }
@@ -307,142 +307,142 @@ class CarbonTrackController
 
             // 创建记录
             // 统一 images: 若为空则存储空数组 JSON，若是字符串直接包裹为 public_url 结构
-            $finalImages = [];
-            if (!empty($images)) {
-                $finalImages = $images;
-            } elseif (!empty($data['images'])) {
+            $Silian_finalImages = [];
+            if (!empty($Silian_images)) {
+                $Silian_finalImages = $Silian_images;
+            } elseif (!empty($Silian_data['images'])) {
                 // 来自客户端的 images 可能是字符串数组或对象数组
-                if (is_array($data['images'])) {
-                    foreach ($data['images'] as $it) {
-                        if (is_string($it)) { $finalImages[] = ['public_url' => $it]; }
-                        elseif (is_array($it)) { $finalImages[] = $it; }
+                if (is_array($Silian_data['images'])) {
+                    foreach ($Silian_data['images'] as $Silian_it) {
+                        if (is_string($Silian_it)) { $Silian_finalImages[] = ['public_url' => $Silian_it]; }
+                        elseif (is_array($Silian_it)) { $Silian_finalImages[] = $Silian_it; }
                     }
-                } elseif (is_string($data['images'])) {
-                    $decodedClient = json_decode($data['images'], true);
-                    if (is_array($decodedClient)) {
-                        foreach ($decodedClient as $it) {
-                            if (is_string($it)) { $finalImages[] = ['public_url' => $it]; }
-                            elseif (is_array($it)) { $finalImages[] = $it; }
+                } elseif (is_string($Silian_data['images'])) {
+                    $Silian_decodedClient = json_decode($Silian_data['images'], true);
+                    if (is_array($Silian_decodedClient)) {
+                        foreach ($Silian_decodedClient as $Silian_it) {
+                            if (is_string($Silian_it)) { $Silian_finalImages[] = ['public_url' => $Silian_it]; }
+                            elseif (is_array($Silian_it)) { $Silian_finalImages[] = $Silian_it; }
                         }
                     }
                 }
             }
 
-            $recordId = null;
-            $submittedAt = new \DateTimeImmutable('now');
-            if ($isMakeup) {
+            $Silian_recordId = null;
+            $Silian_submittedAt = new \DateTimeImmutable('now');
+            if ($Silian_isMakeup) {
                 $this->db->beginTransaction();
             }
 
             try {
-                $recordId = $this->createCarbonRecord([
-                    'user_id' => $user['id'],
-                    'activity_id' => $data['activity_id'],
-                    'amount' => $amountValue,
-                    'unit' => $data['unit'] ?? $activity['unit'],
-                    'carbon_saved' => $carbonSaved,
-                    'points_earned' => $pointsEarned,
-                    'date' => $data['date'],
-                    'description' => $data['description'] ?? null,
-                    'images' => $finalImages,
+                $Silian_recordId = $this->createCarbonRecord([
+                    'user_id' => $Silian_user['id'],
+                    'activity_id' => $Silian_data['activity_id'],
+                    'amount' => $Silian_amountValue,
+                    'unit' => $Silian_data['unit'] ?? $Silian_activity['unit'],
+                    'carbon_saved' => $Silian_carbonSaved,
+                    'points_earned' => $Silian_pointsEarned,
+                    'date' => $Silian_data['date'],
+                    'description' => $Silian_data['description'] ?? null,
+                    'images' => $Silian_finalImages,
                     'status' => 'pending'
                 ]);
 
                 if ($this->checkinService) {
                     try {
-                        if ($checkinDate && $isMakeup) {
-                            $checkinAdded = $this->checkinService->createMakeupCheckin((int) $user['id'], $checkinDate, null, $recordId, $submittedAt);
-                            if (!$checkinAdded) {
+                        if ($Silian_checkinDate && $Silian_isMakeup) {
+                            $Silian_checkinAdded = $this->checkinService->createMakeupCheckin((int) $Silian_user['id'], $Silian_checkinDate, null, $Silian_recordId, $Silian_submittedAt);
+                            if (!$Silian_checkinAdded) {
                                 throw new \RuntimeException('Failed to apply makeup checkin');
                             }
-                            $this->auditLog->logUserAction((int) $user['id'], 'checkin_makeup_recorded', [
-                                'checkin_date' => $checkinDate,
-                                'record_id' => $recordId,
+                            $this->auditLog->logUserAction((int) $Silian_user['id'], 'checkin_makeup_recorded', [
+                                'checkin_date' => $Silian_checkinDate,
+                                'record_id' => $Silian_recordId,
                             ]);
                         } else {
-                            $checkinDateValue = $checkinDate ?: $submittedAt->format('Y-m-d');
-                            $checkinAdded = $this->checkinService->recordCheckinForDate((int) $user['id'], $checkinDateValue, 'record', $recordId, $submittedAt);
-                            if ($checkinAdded) {
-                                $this->auditLog->logUserAction((int) $user['id'], 'checkin_recorded', [
-                                    'checkin_date' => $checkinDateValue,
-                                    'record_id' => $recordId,
+                            $Silian_checkinDateValue = $Silian_checkinDate ?: $Silian_submittedAt->format('Y-m-d');
+                            $Silian_checkinAdded = $this->checkinService->recordCheckinForDate((int) $Silian_user['id'], $Silian_checkinDateValue, 'record', $Silian_recordId, $Silian_submittedAt);
+                            if ($Silian_checkinAdded) {
+                                $this->auditLog->logUserAction((int) $Silian_user['id'], 'checkin_recorded', [
+                                    'checkin_date' => $Silian_checkinDateValue,
+                                    'record_id' => $Silian_recordId,
                                 ]);
                             }
                         }
-                    } catch (\Throwable $e) {
-                        if ($isMakeup) {
-                            throw $e;
+                    } catch (\Throwable $Silian_e) {
+                        if ($Silian_isMakeup) {
+                            throw $Silian_e;
                         }
-                        $this->logControllerException($e, $request, 'CarbonTrackController::submitRecord checkin error: ' . $e->getMessage());
+                        $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::submitRecord checkin error: ' . $Silian_e->getMessage());
                     }
                 }
 
-                if ($isMakeup && $this->db->inTransaction()) {
+                if ($Silian_isMakeup && $this->db->inTransaction()) {
                     $this->db->commit();
                 }
-            } catch (\Throwable $e) {
-                if ($isMakeup && $this->db->inTransaction()) {
+            } catch (\Throwable $Silian_e) {
+                if ($Silian_isMakeup && $this->db->inTransaction()) {
                     $this->db->rollBack();
                 }
-                throw $e;
+                throw $Silian_e;
             }
 
             // 记录审计日志（使用向后兼容的 log()，方便测试 mock）
             $this->auditLog->log([
                 'action' => 'record_submitted',
                 'operation_category' => 'carbon_management',
-                'user_id' => $user['id'],
+                'user_id' => $Silian_user['id'],
                 'actor_type' => 'user',
                 'affected_table' => 'carbon_records',
-                'affected_id' => $recordId,
+                'affected_id' => $Silian_recordId,
                 'new_data' => [
-                    'activity_id' => $data['activity_id'],
-                    'amount' => $data['amount']
+                    'activity_id' => $Silian_data['activity_id'],
+                    'amount' => $Silian_data['amount']
                 ],
-                'data' => [ 'request_data' => $data ]
+                'data' => [ 'request_data' => $Silian_data ]
             ]);
 
             // 发送站内信
             $this->messageService->sendMessage(
-                $user['id'],
+                $Silian_user['id'],
                 'record_submitted',
                 '碳减排记录提交成功',
-                "您的{$activity['name_zh']}记录已提交，预计获得{$calculation['points_earned']}积分，等待审核。",
+                "您的{$Silian_activity['name_zh']}记录已提交，预计获得{$Silian_calculation['points_earned']}积分，等待审核。",
                 'normal'
             );
 
             // 通知管理员
-            $this->notifyAdminsNewRecord($recordId, $user, $activity);
+            $this->notifyAdminsNewRecord($Silian_recordId, $Silian_user, $Silian_activity);
 
             // 触发自动徽章授予（基于新数据可能解锁徽章）
             if ($this->badgeService) {
                 try {
                     // 仅对当前用户运行，以减少性能开销
-                    $this->badgeService->runAutoGrant(null, (int) $user['id']);
-                } catch (\Throwable $e) {
+                    $this->badgeService->runAutoGrant(null, (int) $Silian_user['id']);
+                } catch (\Throwable $Silian_e) {
                     // 徽章授予失败不应阻塞主流程
-                    $this->logControllerException($e, $request, 'Auto badge grant failed after submission');
+                    $this->logControllerException($Silian_e, $Silian_request, 'Auto badge grant failed after submission');
                 }
             }
-            
+
             // 获取最新的打卡连续天数（Gamification）
-            $checkinStats = ['current_streak' => 0, 'longest_streak' => 0];
+            $Silian_checkinStats = ['current_streak' => 0, 'longest_streak' => 0];
             if ($this->checkinService) {
                 try {
-                    $streakData = $this->checkinService->getUserStreakStats((int) $user['id']);
-                    $checkinStats['current_streak'] = (int)($streakData['current_streak_days'] ?? 0);
-                    $checkinStats['longest_streak'] = (int)($streakData['longest_streak_days'] ?? 0);
-                } catch (\Throwable $e) {
+                    $Silian_streakData = $this->checkinService->getUserStreakStats((int) $Silian_user['id']);
+                    $Silian_checkinStats['current_streak'] = (int)($Silian_streakData['current_streak_days'] ?? 0);
+                    $Silian_checkinStats['longest_streak'] = (int)($Silian_streakData['longest_streak_days'] ?? 0);
+                } catch (\Throwable $Silian_e) {
                      // 忽略错误，以免影响主要返回
                 }
             }
 
-            $monthlyAchievements = [];
+            $Silian_monthlyAchievements = [];
             try {
-                $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
-                $currentMonth = date('Y-m');
-                if ($driver === 'sqlite') {
-                    $achievementsSql = "
+                $Silian_driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME);
+                $Silian_currentMonth = date('Y-m');
+                if ($Silian_driver === 'sqlite') {
+                    $Silian_achievementsSql = "
                         SELECT a.name_zh as name, SUM(r.points_earned) as points
                         FROM carbon_records r
                         LEFT JOIN carbon_activities a ON r.activity_id = a.id
@@ -454,7 +454,7 @@ class CarbonTrackController
                         ORDER BY SUM(r.points_earned) DESC
                         LIMIT 10";
                 } else {
-                    $achievementsSql = "
+                    $Silian_achievementsSql = "
                         SELECT a.name_zh as name, SUM(r.points_earned) as points
                         FROM carbon_records r
                         LEFT JOIN carbon_activities a ON r.activity_id = a.id
@@ -466,176 +466,176 @@ class CarbonTrackController
                         ORDER BY SUM(r.points_earned) DESC
                         LIMIT 10";
                 }
-                $achievementsStmt = $this->db->prepare($achievementsSql);
-                $achievementsStmt->execute([
-                    'user_id' => $user['id'],
-                    'current_month' => $currentMonth
+                $Silian_achievementsStmt = $this->db->prepare($Silian_achievementsSql);
+                $Silian_achievementsStmt->execute([
+                    'user_id' => $Silian_user['id'],
+                    'current_month' => $Silian_currentMonth
                 ]);
-                $monthlyAchievements = $achievementsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-            } catch (\Throwable $e) {
+                $Silian_monthlyAchievements = $Silian_achievementsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            } catch (\Throwable $Silian_e) {
                 // ignore achievement errors in non-MySQL test environments
             }
 
             // 规范化返回的 images（public_url -> url）
-            $returnImages = [];
-            foreach ($finalImages as $img) {
-                if (is_array($img)) {
-                    $mapped = $img;
-                    if (isset($mapped['public_url']) && !isset($mapped['url'])) {
-                        $mapped['url'] = $mapped['public_url'];
+            $Silian_returnImages = [];
+            foreach ($Silian_finalImages as $Silian_img) {
+                if (is_array($Silian_img)) {
+                    $Silian_mapped = $Silian_img;
+                    if (isset($Silian_mapped['public_url']) && !isset($Silian_mapped['url'])) {
+                        $Silian_mapped['url'] = $Silian_mapped['public_url'];
                     }
-                    $returnImages[] = $mapped;
-                } elseif (is_string($img)) {
-                    $returnImages[] = ['url' => $img];
+                    $Silian_returnImages[] = $Silian_mapped;
+                } elseif (is_string($Silian_img)) {
+                    $Silian_returnImages[] = ['url' => $Silian_img];
                 }
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'message' => 'Record submitted successfully',
                 // 向后兼容：旧测试期望顶级 calculation 对象
-                'calculation' => $calculation,
+                'calculation' => $Silian_calculation,
                 'data' => [
-                    'record_id' => $recordId,
-                    'carbon_saved' => $carbonSaved,
-                    'points_earned' => $pointsEarned,
+                    'record_id' => $Silian_recordId,
+                    'carbon_saved' => $Silian_carbonSaved,
+                    'points_earned' => $Silian_pointsEarned,
                     'status' => 'pending',
-                    'images' => $returnImages,
-                    'monthly_achievements' => $monthlyAchievements,
-                    'checkin_stats' => $checkinStats,
+                    'images' => $Silian_returnImages,
+                    'monthly_achievements' => $Silian_monthlyAchievements,
+                    'checkin_stats' => $Silian_checkinStats,
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            return $this->json($response, ['error' => self::ERR_INTERNAL, 'exception' => $e->getMessage(), 'trace' => $e->getFile().':'.$e->getLine()], 500);
+        } catch (\Exception $Silian_e) {
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL, 'exception' => $Silian_e->getMessage(), 'trace' => $Silian_e->getFile().':'.$Silian_e->getLine()], 500);
         }
     }
 
     /**
      * 计算碳减排（仅返回计算结果，不落库）
      */
-    public function calculate(Request $request, Response $response): Response
+    public function calculate(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $data = $request->getParsedBody();
-            if (!is_array($data)) { $data = []; }
+            $Silian_data = $Silian_request->getParsedBody();
+            if (!is_array($Silian_data)) { $Silian_data = []; }
 
             // 同义词：计算接口历史上使用 data，新前端可能用 amount
-            if (!isset($data['data']) && isset($data['amount'])) {
-                $data['data'] = $data['amount'];
-            } elseif (isset($data['data']) && !isset($data['amount'])) {
-                $data['amount'] = $data['data'];
+            if (!isset($Silian_data['data']) && isset($Silian_data['amount'])) {
+                $Silian_data['data'] = $Silian_data['amount'];
+            } elseif (isset($Silian_data['data']) && !isset($Silian_data['amount'])) {
+                $Silian_data['amount'] = $Silian_data['data'];
             }
-            if (!isset($data['activity_id']) || !isset($data['data'])) {
-                return $this->json($response, ['error' => 'Missing required fields'], 400);
-            }
-
-            $activity = CarbonActivity::findById($this->db, $data['activity_id']);
-            if (!$activity) {
-                return $this->json($response, ['error' => 'Activity not found'], 404);
+            if (!isset($Silian_data['activity_id']) || !isset($Silian_data['data'])) {
+                return $this->json($Silian_response, ['error' => 'Missing required fields'], 400);
             }
 
-            $amountValue = floatval($data['data']);
-            $carbonFactor = $activity['carbon_factor'] ?? null;
-            $calculationUnit = $data['unit'] ?? $activity['unit'] ?? null;
+            $Silian_activity = CarbonActivity::findById($this->db, $Silian_data['activity_id']);
+            if (!$Silian_activity) {
+                return $this->json($Silian_response, ['error' => 'Activity not found'], 404);
+            }
+
+            $Silian_amountValue = floatval($Silian_data['data']);
+            $Silian_carbonFactor = $Silian_activity['carbon_factor'] ?? null;
+            $Silian_calculationUnit = $Silian_data['unit'] ?? $Silian_activity['unit'] ?? null;
 
             // Support both new and old service APIs
             if (method_exists($this->carbonCalculator, 'calculate')) {
-                $calculation = call_user_func([
+                $Silian_calculation = call_user_func([
                     $this->carbonCalculator,
                     'calculate'
                 ],
-                    $data['activity_id'],
-                    $amountValue,
-                    $data['unit'] ?? $activity['unit']
+                    $Silian_data['activity_id'],
+                    $Silian_amountValue,
+                    $Silian_data['unit'] ?? $Silian_activity['unit']
                 );
-                $carbonSaved = $calculation['carbon_saved'] ?? 0;
-                $pointsEarned = $calculation['points_earned'] ?? 0;
-                $carbonFactor = $calculation['carbon_factor'] ?? $carbonFactor;
-                $calculationUnit = $calculation['unit'] ?? $calculationUnit;
+                $Silian_carbonSaved = $Silian_calculation['carbon_saved'] ?? 0;
+                $Silian_pointsEarned = $Silian_calculation['points_earned'] ?? 0;
+                $Silian_carbonFactor = $Silian_calculation['carbon_factor'] ?? $Silian_carbonFactor;
+                $Silian_calculationUnit = $Silian_calculation['unit'] ?? $Silian_calculationUnit;
             } else {
-                $calc = $this->carbonCalculator->calculateCarbonSavings($data['activity_id'], $amountValue, $activity);
-                $carbonSaved = $calc['carbon_savings'] ?? 0;
-                $pointsEarned = $calc['points_earned'] ?? (int)round($carbonSaved * 10);
-                $carbonFactor = $calc['carbon_factor'] ?? ($activity['carbon_factor'] ?? null);
-                $calculationUnit = $calc['unit'] ?? $calculationUnit;
+                $Silian_calc = $this->carbonCalculator->calculateCarbonSavings($Silian_data['activity_id'], $Silian_amountValue, $Silian_activity);
+                $Silian_carbonSaved = $Silian_calc['carbon_savings'] ?? 0;
+                $Silian_pointsEarned = $Silian_calc['points_earned'] ?? (int)round($Silian_carbonSaved * 10);
+                $Silian_carbonFactor = $Silian_calc['carbon_factor'] ?? ($Silian_activity['carbon_factor'] ?? null);
+                $Silian_calculationUnit = $Silian_calc['unit'] ?? $Silian_calculationUnit;
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'carbon_saved' => $carbonSaved,
-                    'points_earned' => $pointsEarned,
-                    'carbon_factor' => $carbonFactor !== null ? (float) $carbonFactor : null,
-                    'unit' => $calculationUnit,
+                    'carbon_saved' => $Silian_carbonSaved,
+                    'points_earned' => $Silian_pointsEarned,
+                    'carbon_factor' => $Silian_carbonFactor !== null ? (float) $Silian_carbonFactor : null,
+                    'unit' => $Silian_calculationUnit,
                 ]
             ]);
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'CarbonTrackController::calculate error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::calculate error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 获取用户记录列表
      */
-    public function getUserRecords(Request $request, Response $response): Response
+    public function getUserRecords(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $params = $request->getQueryParams();
-            $page = max(1, intval($params['page'] ?? 1));
-            $limit = min(50, max(10, intval($params['limit'] ?? 20)));
-            $offset = ($page - 1) * $limit;
+            $Silian_params = $Silian_request->getQueryParams();
+            $Silian_page = max(1, intval($Silian_params['page'] ?? 1));
+            $Silian_limit = min(50, max(10, intval($Silian_params['limit'] ?? 20)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
 
             // 构建查询条件
-            $where = ['r.user_id = :user_id', 'r.deleted_at IS NULL'];
-            $bindings = ['user_id' => $user['id']];
+            $Silian_where = ['r.user_id = :user_id', 'r.deleted_at IS NULL'];
+            $Silian_bindings = ['user_id' => $Silian_user['id']];
 
-            if (!empty($params['status'])) {
-                $where[] = 'r.status = :status';
-                $bindings['status'] = $params['status'];
+            if (!empty($Silian_params['status'])) {
+                $Silian_where[] = 'r.status = :status';
+                $Silian_bindings['status'] = $Silian_params['status'];
             }
 
-            if (!empty($params['activity_id'])) {
-                $where[] = 'r.activity_id = :activity_id';
-                $bindings['activity_id'] = $params['activity_id'];
+            if (!empty($Silian_params['activity_id'])) {
+                $Silian_where[] = 'r.activity_id = :activity_id';
+                $Silian_bindings['activity_id'] = $Silian_params['activity_id'];
             }
 
-            if (!empty($params['date_from'])) {
-                $where[] = 'r.date >= :date_from';
-                $bindings['date_from'] = $params['date_from'];
+            if (!empty($Silian_params['date_from'])) {
+                $Silian_where[] = 'r.date >= :date_from';
+                $Silian_bindings['date_from'] = $Silian_params['date_from'];
             }
 
-            if (!empty($params['date_to'])) {
-                $where[] = 'r.date <= :date_to';
-                $bindings['date_to'] = $params['date_to'];
+            if (!empty($Silian_params['date_to'])) {
+                $Silian_where[] = 'r.date <= :date_to';
+                $Silian_bindings['date_to'] = $Silian_params['date_to'];
             }
 
-            $whereClause = implode(' AND ', $where);
+            $Silian_whereClause = implode(' AND ', $Silian_where);
 
             // 获取总数
-            $countSql = "
+            $Silian_countSql = "
                 SELECT COUNT(*) as total
                 FROM carbon_records r
-                WHERE {$whereClause}
+                WHERE {$Silian_whereClause}
             ";
-            $countStmt = $this->db->prepare($countSql);
-            $countStmt->execute($bindings);
-            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $Silian_countStmt = $this->db->prepare($Silian_countSql);
+            $Silian_countStmt->execute($Silian_bindings);
+            $Silian_total = $Silian_countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
             // 获取记录列表
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     r.*,
                     a.name_zh as activity_name_zh,
                     a.name_en as activity_name_en,
@@ -643,59 +643,59 @@ class CarbonTrackController
                     a.icon
                 FROM carbon_records r
                 LEFT JOIN carbon_activities a ON r.activity_id = a.id
-                WHERE {$whereClause}
+                WHERE {$Silian_whereClause}
                 ORDER BY r.created_at DESC
                 LIMIT :limit OFFSET :offset
             ";
 
-            $stmt = $this->db->prepare($sql);
-            foreach ($bindings as $key => $value) {
-                $stmt->bindValue($key, $value);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_bindings as $Silian_key => $Silian_value) {
+                $Silian_stmt->bindValue($Silian_key, $Silian_value);
             }
-            $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
+            $Silian_stmt->bindValue('limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->bindValue('offset', $Silian_offset, PDO::PARAM_INT);
+            $Silian_stmt->execute();
 
-            $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_records = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 处理图片字段（统一为标准数组结构）
-            foreach ($records as &$record) {
-                $decoded = $record['images'] ? json_decode($record['images'], true) : [];
-                $record['images'] = $this->normalizeImages($decoded);
+            foreach ($Silian_records as &$Silian_record) {
+                $Silian_decoded = $Silian_record['images'] ? json_decode($Silian_record['images'], true) : [];
+                $Silian_record['images'] = $this->normalizeImages($Silian_decoded);
             }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $records,
+                'data' => $Silian_records,
                 'pagination' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'total' => intval($total),
-                    'pages' => ceil($total / $limit)
+                    'page' => $Silian_page,
+                    'limit' => $Silian_limit,
+                    'total' => intval($Silian_total),
+                    'pages' => ceil($Silian_total / $Silian_limit)
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'CarbonTrackController::getUserRecords error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::getUserRecords error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 获取记录详情
      */
-    public function getRecordDetail(Request $request, Response $response, array $args): Response
+    public function getRecordDetail(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $recordId = $args['id'];
+            $Silian_recordId = $Silian_args['id'];
 
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     r.*,
                     a.name_zh as activity_name_zh,
                     a.name_en as activity_name_en,
@@ -711,143 +711,143 @@ class CarbonTrackController
             ";
 
             // 非管理员只能查看自己的记录
-            if (!$this->authService->isAdminUser($user)) {
-                $sql .= " AND r.user_id = :user_id";
+            if (!$this->authService->isAdminUser($Silian_user)) {
+                $Silian_sql .= " AND r.user_id = :user_id";
             }
 
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue('record_id', $recordId);
-            if (!$this->authService->isAdminUser($user)) {
-                $stmt->bindValue('user_id', $user['id']);
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_stmt->bindValue('record_id', $Silian_recordId);
+            if (!$this->authService->isAdminUser($Silian_user)) {
+                $Silian_stmt->bindValue('user_id', $Silian_user['id']);
             }
-            $stmt->execute();
+            $Silian_stmt->execute();
 
-            $record = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$record) {
-                return $this->json($response, ['error' => 'Record not found'], 404);
+            $Silian_record = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$Silian_record) {
+                return $this->json($Silian_response, ['error' => 'Record not found'], 404);
             }
 
             // 处理图片字段（详情）
-            $decoded = $record['images'] ? json_decode($record['images'], true) : [];
-            $record['images'] = $this->normalizeImages($decoded);
+            $Silian_decoded = $Silian_record['images'] ? json_decode($Silian_record['images'], true) : [];
+            $Silian_record['images'] = $this->normalizeImages($Silian_decoded);
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $record
+                'data' => $Silian_record
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'CarbonTrackController::getRecordDetail error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::getRecordDetail error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 管理员审核记录
      */
-    public function reviewRecord(Request $request, Response $response, array $args): Response
+    public function reviewRecord(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $adminUser = $this->authService->getCurrentUser($request);
-            if (!$adminUser || !$this->authService->isAdminUser($adminUser)) {
-                return $this->json($response, ['error' => 'Admin access required'], 403);
+            $Silian_adminUser = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_adminUser || !$this->authService->isAdminUser($Silian_adminUser)) {
+                return $this->json($Silian_response, ['error' => 'Admin access required'], 403);
             }
 
-            $data = $request->getParsedBody();
-            if (!is_array($data)) {
-                $data = [];
+            $Silian_data = $Silian_request->getParsedBody();
+            if (!is_array($Silian_data)) {
+                $Silian_data = [];
             }
 
-            $action = $this->resolveReviewAction($data);
-            if ($action === null) {
-                return $this->json($response, ['error' => 'Invalid action or status'], 400);
+            $Silian_action = $this->resolveReviewAction($Silian_data);
+            if ($Silian_action === null) {
+                return $this->json($Silian_response, ['error' => 'Invalid action or status'], 400);
             }
 
-            $recordId = (string) $args['id'];
-            $records = $this->getCarbonRecordsByIds([$recordId]);
-            $record = $records[0] ?? null;
-            if (!$record) {
-                return $this->json($response, ['error' => 'Record not found'], 404);
+            $Silian_recordId = (string) $Silian_args['id'];
+            $Silian_records = $this->getCarbonRecordsByIds([$Silian_recordId]);
+            $Silian_record = $Silian_records[0] ?? null;
+            if (!$Silian_record) {
+                return $this->json($Silian_response, ['error' => 'Record not found'], 404);
             }
 
-            if (($record['status'] ?? '') !== 'pending') {
-                return $this->json($response, ['error' => 'Record already reviewed'], 400);
+            if (($Silian_record['status'] ?? '') !== 'pending') {
+                return $this->json($Silian_response, ['error' => 'Record already reviewed'], 400);
             }
 
-            $reviewNote = $this->normalizeReviewNote($data);
+            $Silian_reviewNote = $this->normalizeReviewNote($Silian_data);
 
-            $result = $this->processRecordReviewBatch([$record], $action, $reviewNote, $adminUser);
+            $Silian_result = $this->processRecordReviewBatch([$Silian_record], $Silian_action, $Silian_reviewNote, $Silian_adminUser);
 
-            return $this->json($response, [
-                'success' => !empty($result['processed']),
-                'message' => $action === 'approve'
+            return $this->json($Silian_response, [
+                'success' => !empty($Silian_result['processed']),
+                'message' => $Silian_action === 'approve'
                     ? 'Record approved successfully'
                     : 'Record rejected successfully',
-                'processed_ids' => $result['processed'],
-                'skipped' => $result['skipped'],
+                'processed_ids' => $Silian_result['processed'],
+                'skipped' => $Silian_result['skipped'],
             ]);
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'CarbonTrackController::reviewRecord error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::reviewRecord error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
     /**
      * 管理员批量审核碳减排记录
      */
-    public function reviewRecordsBulk(Request $request, Response $response): Response
+    public function reviewRecordsBulk(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $adminUser = $this->authService->getCurrentUser($request);
-            if (!$adminUser || !$this->authService->isAdminUser($adminUser)) {
-                return $this->json($response, ['error' => 'Admin access required'], 403);
+            $Silian_adminUser = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_adminUser || !$this->authService->isAdminUser($Silian_adminUser)) {
+                return $this->json($Silian_response, ['error' => 'Admin access required'], 403);
             }
 
-            $data = $request->getParsedBody();
-            if (!is_array($data)) {
-                $data = [];
+            $Silian_data = $Silian_request->getParsedBody();
+            if (!is_array($Silian_data)) {
+                $Silian_data = [];
             }
 
-            $action = $this->resolveReviewAction($data);
-            if ($action === null) {
-                return $this->json($response, ['error' => 'Invalid action or status'], 400);
+            $Silian_action = $this->resolveReviewAction($Silian_data);
+            if ($Silian_action === null) {
+                return $this->json($Silian_response, ['error' => 'Invalid action or status'], 400);
             }
 
-            $recordIds = $this->normalizeRecordIds($data['record_ids'] ?? ($data['ids'] ?? null));
-            if (empty($recordIds)) {
-                return $this->json($response, ['error' => 'record_ids must be a non-empty array'], 400);
+            $Silian_recordIds = $this->normalizeRecordIds($Silian_data['record_ids'] ?? ($Silian_data['ids'] ?? null));
+            if (empty($Silian_recordIds)) {
+                return $this->json($Silian_response, ['error' => 'record_ids must be a non-empty array'], 400);
             }
 
-            $records = $this->getCarbonRecordsByIds($recordIds);
-            if (empty($records)) {
-                return $this->json($response, [
+            $Silian_records = $this->getCarbonRecordsByIds($Silian_recordIds);
+            if (empty($Silian_records)) {
+                return $this->json($Silian_response, [
                     'error' => 'No records found for provided ids',
-                    'missing_ids' => array_values($recordIds),
+                    'missing_ids' => array_values($Silian_recordIds),
                 ], 404);
             }
 
-            $reviewNote = $this->normalizeReviewNote($data);
+            $Silian_reviewNote = $this->normalizeReviewNote($Silian_data);
 
-            $result = $this->processRecordReviewBatch($records, $action, $reviewNote, $adminUser);
+            $Silian_result = $this->processRecordReviewBatch($Silian_records, $Silian_action, $Silian_reviewNote, $Silian_adminUser);
 
-            $foundIds = array_column($records, 'id');
-            $missingIds = array_values(array_diff($recordIds, $foundIds));
+            $Silian_foundIds = array_column($Silian_records, 'id');
+            $Silian_missingIds = array_values(array_diff($Silian_recordIds, $Silian_foundIds));
 
-            $processedCount = count($result['processed']);
-            $message = $processedCount > 0
-                ? sprintf('%d record(s) %s', $processedCount, $action === 'approve' ? 'approved' : 'rejected')
+            $Silian_processedCount = count($Silian_result['processed']);
+            $Silian_message = $Silian_processedCount > 0
+                ? sprintf('%d record(s) %s', $Silian_processedCount, $Silian_action === 'approve' ? 'approved' : 'rejected')
                 : 'No pending records matched the selection';
 
-            return $this->json($response, [
-                'success' => $processedCount > 0,
-                'message' => $message,
-                'processed_ids' => $result['processed'],
-                'skipped' => $result['skipped'],
-                'missing_ids' => $missingIds,
+            return $this->json($Silian_response, [
+                'success' => $Silian_processedCount > 0,
+                'message' => $Silian_message,
+                'processed_ids' => $Silian_result['processed'],
+                'skipped' => $Silian_result['skipped'],
+                'missing_ids' => $Silian_missingIds,
             ]);
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'CarbonTrackController::reviewRecordsBulk error: ' . $e->getMessage());
-            return $this->json($response, ['error' => self::ERR_INTERNAL], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::reviewRecordsBulk error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => self::ERR_INTERNAL], 500);
         }
     }
 
@@ -860,22 +860,22 @@ class CarbonTrackController
      * - sort: created_at_asc|created_at_desc（默认 created_at_asc）
      * - page, limit: 分页
      */
-    public function getPendingRecords(Request $request, Response $response): Response
+    public function getPendingRecords(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user || !$this->authService->isAdminUser($user)) {
-                return $this->json($response, ['error' => 'Admin access required'], 403);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user || !$this->authService->isAdminUser($Silian_user)) {
+                return $this->json($Silian_response, ['error' => 'Admin access required'], 403);
             }
 
-            $params = $request->getQueryParams();
-            $page = max(1, intval($params['page'] ?? 1));
-            $limit = min(50, max(10, intval($params['limit'] ?? 20)));
-            $offset = ($page - 1) * $limit;
-            $status = isset($params['status']) ? trim((string)$params['status']) : '';
-            $search = isset($params['search']) ? trim((string)$params['search']) : '';
+            $Silian_params = $Silian_request->getQueryParams();
+            $Silian_page = max(1, intval($Silian_params['page'] ?? 1));
+            $Silian_limit = min(50, max(10, intval($Silian_params['limit'] ?? 20)));
+            $Silian_offset = ($Silian_page - 1) * $Silian_limit;
+            $Silian_status = isset($Silian_params['status']) ? trim((string)$Silian_params['status']) : '';
+            $Silian_search = isset($Silian_params['search']) ? trim((string)$Silian_params['search']) : '';
             // 兼容旧 sort（created_at_asc/created_at_desc）与新 sort_by + order
-            $allowedSortBy = [
+            $Silian_allowedSortBy = [
                 'created_at' => 'r.created_at',
                 'date' => 'r.date',
                 'carbon_saved' => 'r.carbon_saved',
@@ -883,65 +883,65 @@ class CarbonTrackController
                 'amount' => 'r.amount',
                 'status' => 'r.status'
             ];
-            $sort = isset($params['sort']) ? (string)$params['sort'] : '';
-            $sortByParam = isset($params['sort_by']) ? (string)$params['sort_by'] : '';
-            $orderParam = isset($params['order']) ? (string)$params['order'] : '';
-            if ($sortByParam !== '') {
-                $sortBy = $allowedSortBy[$sortByParam] ?? 'r.created_at';
-                $order = strtoupper($orderParam) === 'DESC' ? 'DESC' : 'ASC';
-            } else if ($sort !== '') {
+            $Silian_sort = isset($Silian_params['sort']) ? (string)$Silian_params['sort'] : '';
+            $Silian_sortByParam = isset($Silian_params['sort_by']) ? (string)$Silian_params['sort_by'] : '';
+            $Silian_orderParam = isset($Silian_params['order']) ? (string)$Silian_params['order'] : '';
+            if ($Silian_sortByParam !== '') {
+                $Silian_sortBy = $Silian_allowedSortBy[$Silian_sortByParam] ?? 'r.created_at';
+                $Silian_order = strtoupper($Silian_orderParam) === 'DESC' ? 'DESC' : 'ASC';
+            } else if ($Silian_sort !== '') {
                 // 旧版：created_at_asc / created_at_desc
-                $sortBy = 'r.created_at';
-                $order = str_ends_with($sort, '_desc') ? 'DESC' : 'ASC';
+                $Silian_sortBy = 'r.created_at';
+                $Silian_order = str_ends_with($Silian_sort, '_desc') ? 'DESC' : 'ASC';
             } else {
-                $sortBy = 'r.created_at';
-                $order = 'ASC';
+                $Silian_sortBy = 'r.created_at';
+                $Silian_order = 'ASC';
             }
 
             // 构建筛选条件
-            $where = ['r.deleted_at IS NULL'];
-            $bindings = [];
-            if ($status !== '') {
-                $where[] = 'r.status = :status';
-                $bindings['status'] = $status;
+            $Silian_where = ['r.deleted_at IS NULL'];
+            $Silian_bindings = [];
+            if ($Silian_status !== '') {
+                $Silian_where[] = 'r.status = :status';
+                $Silian_bindings['status'] = $Silian_status;
             }
-            if ($search !== '') {
-                $where[] = '(u.username LIKE :search_username OR u.email LIKE :search_email OR a.name_zh LIKE :search_name_zh OR a.name_en LIKE :search_name_en)';
-                $searchPattern = "%{$search}%";
-                $bindings['search_username'] = $searchPattern;
-                $bindings['search_email'] = $searchPattern;
-                $bindings['search_name_zh'] = $searchPattern;
-                $bindings['search_name_en'] = $searchPattern;
+            if ($Silian_search !== '') {
+                $Silian_where[] = '(u.username LIKE :search_username OR u.email LIKE :search_email OR a.name_zh LIKE :search_name_zh OR a.name_en LIKE :search_name_en)';
+                $Silian_searchPattern = "%{$Silian_search}%";
+                $Silian_bindings['search_username'] = $Silian_searchPattern;
+                $Silian_bindings['search_email'] = $Silian_searchPattern;
+                $Silian_bindings['search_name_zh'] = $Silian_searchPattern;
+                $Silian_bindings['search_name_en'] = $Silian_searchPattern;
             }
             // 额外筛选条件
-            if (!empty($params['activity_id'])) { $where[] = 'r.activity_id = :activity_id'; $bindings['activity_id'] = $params['activity_id']; }
-            if (!empty($params['user_id'])) { $where[] = 'r.user_id = :user_id'; $bindings['user_id'] = $params['user_id']; }
-            if (!empty($params['school_id'])) { $where[] = 'u.school_id = :school_id'; $bindings['school_id'] = $params['school_id']; }
-            if (!empty($params['category'])) { $where[] = 'a.category = :category'; $bindings['category'] = $params['category']; }
-            if (!empty($params['date_from'])) { $where[] = 'r.date >= :date_from'; $bindings['date_from'] = $params['date_from']; }
-            if (!empty($params['date_to'])) { $where[] = 'r.date <= :date_to'; $bindings['date_to'] = $params['date_to']; }
-            if (isset($params['min_carbon']) && $params['min_carbon'] !== '') { $where[] = 'r.carbon_saved >= :min_carbon'; $bindings['min_carbon'] = (float)$params['min_carbon']; }
-            if (isset($params['max_carbon']) && $params['max_carbon'] !== '') { $where[] = 'r.carbon_saved <= :max_carbon'; $bindings['max_carbon'] = (float)$params['max_carbon']; }
-            if (isset($params['min_points']) && $params['min_points'] !== '') { $where[] = 'r.points_earned >= :min_points'; $bindings['min_points'] = (float)$params['min_points']; }
-            if (isset($params['max_points']) && $params['max_points'] !== '') { $where[] = 'r.points_earned <= :max_points'; $bindings['max_points'] = (float)$params['max_points']; }
-            $whereClause = implode(' AND ', $where);
+            if (!empty($Silian_params['activity_id'])) { $Silian_where[] = 'r.activity_id = :activity_id'; $Silian_bindings['activity_id'] = $Silian_params['activity_id']; }
+            if (!empty($Silian_params['user_id'])) { $Silian_where[] = 'r.user_id = :user_id'; $Silian_bindings['user_id'] = $Silian_params['user_id']; }
+            if (!empty($Silian_params['school_id'])) { $Silian_where[] = 'u.school_id = :school_id'; $Silian_bindings['school_id'] = $Silian_params['school_id']; }
+            if (!empty($Silian_params['category'])) { $Silian_where[] = 'a.category = :category'; $Silian_bindings['category'] = $Silian_params['category']; }
+            if (!empty($Silian_params['date_from'])) { $Silian_where[] = 'r.date >= :date_from'; $Silian_bindings['date_from'] = $Silian_params['date_from']; }
+            if (!empty($Silian_params['date_to'])) { $Silian_where[] = 'r.date <= :date_to'; $Silian_bindings['date_to'] = $Silian_params['date_to']; }
+            if (isset($Silian_params['min_carbon']) && $Silian_params['min_carbon'] !== '') { $Silian_where[] = 'r.carbon_saved >= :min_carbon'; $Silian_bindings['min_carbon'] = (float)$Silian_params['min_carbon']; }
+            if (isset($Silian_params['max_carbon']) && $Silian_params['max_carbon'] !== '') { $Silian_where[] = 'r.carbon_saved <= :max_carbon'; $Silian_bindings['max_carbon'] = (float)$Silian_params['max_carbon']; }
+            if (isset($Silian_params['min_points']) && $Silian_params['min_points'] !== '') { $Silian_where[] = 'r.points_earned >= :min_points'; $Silian_bindings['min_points'] = (float)$Silian_params['min_points']; }
+            if (isset($Silian_params['max_points']) && $Silian_params['max_points'] !== '') { $Silian_where[] = 'r.points_earned <= :max_points'; $Silian_bindings['max_points'] = (float)$Silian_params['max_points']; }
+            $Silian_whereClause = implode(' AND ', $Silian_where);
 
             // 获取总数（包含联表以支持 search 条件）
-            $countSql = "
+            $Silian_countSql = "
                 SELECT COUNT(*) as total
                 FROM carbon_records r
                 LEFT JOIN users u ON r.user_id = u.id
                 LEFT JOIN carbon_activities a ON r.activity_id = a.id
-                WHERE {$whereClause}
+                WHERE {$Silian_whereClause}
             ";
-            $countStmt = $this->db->prepare($countSql);
-            foreach ($bindings as $k => $v) { $countStmt->bindValue($k, $v); }
-            $countStmt->execute();
-            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $Silian_countStmt = $this->db->prepare($Silian_countSql);
+            foreach ($Silian_bindings as $Silian_k => $Silian_v) { $Silian_countStmt->bindValue($Silian_k, $Silian_v); }
+            $Silian_countStmt->execute();
+            $Silian_total = $Silian_countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
             // 获取记录列表
-            $sql = "
-                SELECT 
+            $Silian_sql = "
+                SELECT
                     r.*,
                     a.name_zh as activity_name_zh,
                     a.name_en as activity_name_en,
@@ -953,87 +953,87 @@ class CarbonTrackController
                 LEFT JOIN carbon_activities a ON r.activity_id = a.id
                 LEFT JOIN users u ON r.user_id = u.id
                 LEFT JOIN schools s ON u.school_id = s.id
-                WHERE {$whereClause}
-                ORDER BY {$sortBy} {$order}
+                WHERE {$Silian_whereClause}
+                ORDER BY {$Silian_sortBy} {$Silian_order}
                 LIMIT :limit OFFSET :offset
             ";
 
-            $stmt = $this->db->prepare($sql);
-            foreach ($bindings as $k => $v) { $stmt->bindValue($k, $v); }
-            $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            foreach ($Silian_bindings as $Silian_k => $Silian_v) { $Silian_stmt->bindValue($Silian_k, $Silian_v); }
+            $Silian_stmt->bindValue('limit', $Silian_limit, PDO::PARAM_INT);
+            $Silian_stmt->bindValue('offset', $Silian_offset, PDO::PARAM_INT);
+            $Silian_stmt->execute();
 
-            $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $Silian_records = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 处理图片字段与前端期望的别名（同时在这里直接返回可用 URL，前端不再单独请求预签名）
-            foreach ($records as &$record) {
-                $profileFields = $this->userProfileViewService->buildProfileFields($record);
-                $record['school_name'] = $profileFields['school_name'];
-                $decoded = $record['images'] ? json_decode($record['images'], true) : [];
-                $record['images'] = $this->normalizeImages($decoded);
-                if ($this->r2Service && is_array($record['images'])) {
-                    foreach ($record['images'] as &$img) {
+            foreach ($Silian_records as &$Silian_record) {
+                $Silian_profileFields = $this->userProfileViewService->buildProfileFields($Silian_record);
+                $Silian_record['school_name'] = $Silian_profileFields['school_name'];
+                $Silian_decoded = $Silian_record['images'] ? json_decode($Silian_record['images'], true) : [];
+                $Silian_record['images'] = $this->normalizeImages($Silian_decoded);
+                if ($this->r2Service && is_array($Silian_record['images'])) {
+                    foreach ($Silian_record['images'] as &$Silian_img) {
                         // 如果已有 public_url/url 则跳过；否则尝试基于 file_path 生成
-                        if (!isset($img['public_url']) && !isset($img['url']) && !empty($img['file_path'])) {
+                        if (!isset($Silian_img['public_url']) && !isset($Silian_img['url']) && !empty($Silian_img['file_path'])) {
                             try {
-                                $public = $this->r2Service->getPublicUrl($img['file_path']);
-                                if ($public) { $img['public_url'] = $public; $img['url'] = $public; }
-                            } catch (\Throwable $ignore) { /* ignore individual image failure */ }
-                        } elseif (isset($img['public_url']) && !isset($img['url'])) {
-                            $img['url'] = $img['public_url'];
+                                $Silian_public = $this->r2Service->getPublicUrl($Silian_img['file_path']);
+                                if ($Silian_public) { $Silian_img['public_url'] = $Silian_public; $Silian_img['url'] = $Silian_public; }
+                            } catch (\Throwable $Silian_ignore) { /* ignore individual image failure */ }
+                        } elseif (isset($Silian_img['public_url']) && !isset($Silian_img['url'])) {
+                            $Silian_img['url'] = $Silian_img['public_url'];
                         }
                     }
-                    unset($img);
+                    unset($Silian_img);
                 }
                 // 前端列表兼容字段
-                $record['user_username'] = $record['username'] ?? null;
-                $record['user_email'] = $record['email'] ?? null;
-                $record['activity_name'] = $record['activity_name_zh'] ?? ($record['activity_name_en'] ?? null);
-                $record['activity_category'] = $record['category'] ?? null;
-                $record['data_value'] = $record['amount'] ?? null;
-                $record['activity_unit'] = $record['unit'] ?? null;
-                $record['carbon_saved'] = $record['carbon_saved'] ?? ($record['carbon_amount'] ?? ($record['carbon_savings'] ?? 0));
+                $Silian_record['user_username'] = $Silian_record['username'] ?? null;
+                $Silian_record['user_email'] = $Silian_record['email'] ?? null;
+                $Silian_record['activity_name'] = $Silian_record['activity_name_zh'] ?? ($Silian_record['activity_name_en'] ?? null);
+                $Silian_record['activity_category'] = $Silian_record['category'] ?? null;
+                $Silian_record['data_value'] = $Silian_record['amount'] ?? null;
+                $Silian_record['activity_unit'] = $Silian_record['unit'] ?? null;
+                $Silian_record['carbon_saved'] = $Silian_record['carbon_saved'] ?? ($Silian_record['carbon_amount'] ?? ($Silian_record['carbon_savings'] ?? 0));
                 // points_earned 字段已存在
             }
 
-            $pages = (int)ceil($total / $limit);
-            return $this->json($response, [
+            $Silian_pages = (int)ceil($Silian_total / $Silian_limit);
+            return $this->json($Silian_response, [
                 'success' => true,
-                'data' => $records,
+                'data' => $Silian_records,
                 'pagination' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'total' => intval($total),
-                    'pages' => $pages,
+                    'page' => $Silian_page,
+                    'limit' => $Silian_limit,
+                    'total' => intval($Silian_total),
+                    'pages' => $Silian_pages,
                     // 别名，方便前端统一解析
-                    'current_page' => $page,
-                    'per_page' => $limit,
-                    'total_items' => intval($total),
-                    'total_pages' => $pages
+                    'current_page' => $Silian_page,
+                    'per_page' => $Silian_limit,
+                    'total_items' => intval($Silian_total),
+                    'total_pages' => $Silian_pages
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'CarbonTrackController::getPendingRecords error: ' . $e->getMessage());
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::getPendingRecords error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 获取用户统计信息
      */
-    public function getUserStats(Request $request, Response $response): Response
+    public function getUserStats(Request $Silian_request, Response $Silian_response): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
 
-            $driver = null; try { $driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME); } catch (\Throwable $ignore) {}
+            $Silian_driver = null; try { $Silian_driver = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME); } catch (\Throwable $Silian_ignore) {}
 
-            $stats = [
+            $Silian_stats = [
                 'total_records' => 0,
                 'approved_records' => 0,
                 'pending_records' => 0,
@@ -1042,7 +1042,7 @@ class CarbonTrackController
                 'total_points_earned' => 0
             ];
             try {
-                $sql = "SELECT 
+                $Silian_sql = "SELECT
                     COUNT(*) as total_records,
                     SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved_records,
                     SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_records,
@@ -1050,17 +1050,17 @@ class CarbonTrackController
                     COALESCE(SUM(CASE WHEN status = 'approved' THEN carbon_saved ELSE 0 END),0) as total_carbon_saved,
                     COALESCE(SUM(CASE WHEN status = 'approved' THEN points_earned ELSE 0 END),0) as total_points_earned
                     FROM carbon_records WHERE user_id = :user_id AND deleted_at IS NULL";
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute(['user_id' => $user['id']]);
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($row) { $stats = $row; }
-            } catch (\Throwable $ignore) { /* mock prepare null or driver unsupported */ }
+                $Silian_stmt = $this->db->prepare($Silian_sql);
+                $Silian_stmt->execute(['user_id' => $Silian_user['id']]);
+                $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+                if ($Silian_row) { $Silian_stats = $Silian_row; }
+            } catch (\Throwable $Silian_ignore) { /* mock prepare null or driver unsupported */ }
 
             // 月度统计：根据驱动选用不同语法
-            $monthlyStats = [];
+            $Silian_monthlyStats = [];
             try {
-                if ($driver === 'sqlite') {
-                    $monthlySql = "SELECT strftime('%Y-%m', date) as month,
+                if ($Silian_driver === 'sqlite') {
+                    $Silian_monthlySql = "SELECT strftime('%Y-%m', date) as month,
                         COUNT(*) as records_count,
                         COALESCE(SUM(CASE WHEN status='approved' THEN carbon_saved ELSE 0 END),0) as carbon_saved,
                         COALESCE(SUM(CASE WHEN status='approved' THEN points_earned ELSE 0 END),0) as points_earned
@@ -1070,7 +1070,7 @@ class CarbonTrackController
                         GROUP BY strftime('%Y-%m', date)
                         ORDER BY month DESC";
                 } else {
-                    $monthlySql = "SELECT DATE_FORMAT(date,'%Y-%m') as month,
+                    $Silian_monthlySql = "SELECT DATE_FORMAT(date,'%Y-%m') as month,
                         COUNT(*) as records_count,
                         COALESCE(SUM(CASE WHEN status='approved' THEN carbon_saved ELSE 0 END),0) as carbon_saved,
                         COALESCE(SUM(CASE WHEN status='approved' THEN points_earned ELSE 0 END),0) as points_earned
@@ -1080,53 +1080,53 @@ class CarbonTrackController
                         GROUP BY DATE_FORMAT(date,'%Y-%m')
                         ORDER BY month DESC";
                 }
-                $monthlyStmt = $this->db->prepare($monthlySql);
-                $monthlyStmt->execute(['user_id' => $user['id']]);
-                $monthlyStats = $monthlyStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-            } catch (\Throwable $ignore) { /* swallow for unit mocks */ }
+                $Silian_monthlyStmt = $this->db->prepare($Silian_monthlySql);
+                $Silian_monthlyStmt->execute(['user_id' => $Silian_user['id']]);
+                $Silian_monthlyStats = $Silian_monthlyStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            } catch (\Throwable $Silian_ignore) { /* swallow for unit mocks */ }
 
-            $monthlyAchievements = [];
+            $Silian_monthlyAchievements = [];
             try {
-                $currentMonth = date('Y-m');
-                if ($driver === 'sqlite') {
-                    $achievementsSql = "SELECT a.name_zh as name, SUM(r.points_earned) as points
+                $Silian_currentMonth = date('Y-m');
+                if ($Silian_driver === 'sqlite') {
+                    $Silian_achievementsSql = "SELECT a.name_zh as name, SUM(r.points_earned) as points
                         FROM carbon_records r LEFT JOIN carbon_activities a ON r.activity_id = a.id
                         WHERE r.user_id = :user_id AND r.status='approved'
                         AND strftime('%Y-%m', r.date) = :current_month AND r.deleted_at IS NULL
                         GROUP BY r.activity_id, a.name_zh ORDER BY SUM(r.points_earned) DESC LIMIT 10";
                 } else {
-                    $achievementsSql = "SELECT a.name_zh as name, SUM(r.points_earned) as points
+                    $Silian_achievementsSql = "SELECT a.name_zh as name, SUM(r.points_earned) as points
                         FROM carbon_records r LEFT JOIN carbon_activities a ON r.activity_id = a.id
                         WHERE r.user_id = :user_id AND r.status='approved'
                         AND DATE_FORMAT(r.date,'%Y-%m') = :current_month AND r.deleted_at IS NULL
                         GROUP BY r.activity_id, a.name_zh ORDER BY SUM(r.points_earned) DESC LIMIT 10";
                 }
-                $achievementsStmt = $this->db->prepare($achievementsSql);
-                $achievementsStmt->execute(['user_id' => $user['id'], 'current_month' => $currentMonth]);
-                $monthlyAchievements = $achievementsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-            } catch (\Throwable $ignore) { /* swallow */ }
+                $Silian_achievementsStmt = $this->db->prepare($Silian_achievementsSql);
+                $Silian_achievementsStmt->execute(['user_id' => $Silian_user['id'], 'current_month' => $Silian_currentMonth]);
+                $Silian_monthlyAchievements = $Silian_achievementsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            } catch (\Throwable $Silian_ignore) { /* swallow */ }
 
-            return $this->json($response, [
+            return $this->json($Silian_response, [
                 'success' => true,
                 'data' => [
-                    'overview' => $stats,
-                    'monthly' => $monthlyStats,
-                    'monthly_achievements' => $monthlyAchievements
+                    'overview' => $Silian_stats,
+                    'monthly' => $Silian_monthlyStats,
+                    'monthly_achievements' => $Silian_monthlyAchievements
                 ]
             ]);
 
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'CarbonTrackController::getUserStats error: ' . $e->getMessage());
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::getUserStats error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 获取碳减排因子（占位，向后兼容）
      */
-    public function getCarbonFactors(Request $request, Response $response): Response
+    public function getCarbonFactors(Request $Silian_request, Response $Silian_response): Response
     {
-        return $this->json($response, [
+        return $this->json($Silian_response, [
             'success' => true,
             'data' => [
                 'version' => '1.0',
@@ -1138,156 +1138,156 @@ class CarbonTrackController
     /**
      * 删除记录（软删除）
      */
-    public function deleteTransaction(Request $request, Response $response, array $args): Response
+    public function deleteTransaction(Request $Silian_request, Response $Silian_response, array $Silian_args): Response
     {
         try {
-            $user = $this->authService->getCurrentUser($request);
-            if (!$user) {
-                return $this->json($response, ['error' => 'Unauthorized'], 401);
+            $Silian_user = $this->authService->getCurrentUser($Silian_request);
+            if (!$Silian_user) {
+                return $this->json($Silian_response, ['error' => 'Unauthorized'], 401);
             }
-            $recordId = $args['id'];
+            $Silian_recordId = $Silian_args['id'];
 
             // 非管理员只能删自己的记录
-            $condition = $this->authService->isAdminUser($user) ? '' : ' AND user_id = :user_id';
-            $sql = "UPDATE carbon_records SET deleted_at = NOW() WHERE id = :id{$condition} AND deleted_at IS NULL";
-            $stmt = $this->db->prepare($sql);
-            $params = ['id' => $recordId];
-            if (!$this->authService->isAdminUser($user)) {
-                $params['user_id'] = $user['id'];
+            $Silian_condition = $this->authService->isAdminUser($Silian_user) ? '' : ' AND user_id = :user_id';
+            $Silian_sql = "UPDATE carbon_records SET deleted_at = NOW() WHERE id = :id{$Silian_condition} AND deleted_at IS NULL";
+            $Silian_stmt = $this->db->prepare($Silian_sql);
+            $Silian_params = ['id' => $Silian_recordId];
+            if (!$this->authService->isAdminUser($Silian_user)) {
+                $Silian_params['user_id'] = $Silian_user['id'];
             }
-            $stmt->execute($params);
+            $Silian_stmt->execute($Silian_params);
 
             // 审计日志：软删除碳减排记录（不区分是否真的删除成功，这里记录用户意图）
             try {
                 $this->auditLog->logDataChange(
                     'carbon_management',
                     'record_deleted',
-                    $user['id'],
-                    $this->authService->isAdminUser($user) ? 'admin' : 'user',
+                    $Silian_user['id'],
+                    $this->authService->isAdminUser($Silian_user) ? 'admin' : 'user',
                     'carbon_records',
-                    $recordId,
+                    $Silian_recordId,
                     null,
                     null,
-                    ['by_admin' => $this->authService->isAdminUser($user)]
+                    ['by_admin' => $this->authService->isAdminUser($Silian_user)]
                 );
-            } catch (\Throwable $ignore) { /* ignore audit failures */ }
+            } catch (\Throwable $Silian_ignore) { /* ignore audit failures */ }
 
-            return $this->json($response, ['success' => true]);
-        } catch (\Exception $e) {
-            $this->logControllerException($e, $request, 'CarbonTrackController::getCarbonFactors error: ' . $e->getMessage());
-            return $this->json($response, ['error' => 'Internal server error'], 500);
+            return $this->json($Silian_response, ['success' => true]);
+        } catch (\Exception $Silian_e) {
+            $this->logControllerException($Silian_e, $Silian_request, 'CarbonTrackController::getCarbonFactors error: ' . $Silian_e->getMessage());
+            return $this->json($Silian_response, ['error' => 'Internal server error'], 500);
         }
     }
 
     /**
      * 创建碳减排记录
      */
-    private function createCarbonRecord(array $data): string
+    private function createCarbonRecord(array $Silian_data): string
     {
-        $nowExpr = ($this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') ? 'datetime("now")' : 'NOW()';
-        $sql = "
+        $Silian_nowExpr = ($this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') ? 'datetime("now")' : 'NOW()';
+        $Silian_sql = "
             INSERT INTO carbon_records (
                 id, user_id, activity_id, amount, unit, carbon_saved,
                 points_earned, date, description, images, status, created_at
             ) VALUES (
                 :id, :user_id, :activity_id, :amount, :unit, :carbon_saved,
-                :points_earned, :date, :description, :images, :status, $nowExpr
+                :points_earned, :date, :description, :images, :status, $Silian_nowExpr
             )
         ";
-        $recordId = $this->generateUuid();
-        $images = $data['images'] ?? [];
-        if (!is_array($images)) {
-            $decoded = json_decode((string)$images, true);
-            if (is_array($decoded)) { $images = $decoded; } else { $images = []; }
+        $Silian_recordId = $this->generateUuid();
+        $Silian_images = $Silian_data['images'] ?? [];
+        if (!is_array($Silian_images)) {
+            $Silian_decoded = json_decode((string)$Silian_images, true);
+            if (is_array($Silian_decoded)) { $Silian_images = $Silian_decoded; } else { $Silian_images = []; }
         }
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            'id' => $recordId,
-            'user_id' => $data['user_id'],
-            'activity_id' => $data['activity_id'],
-            'amount' => $data['amount'],
-            'unit' => $data['unit'],
-            'carbon_saved' => $data['carbon_saved'],
-            'points_earned' => $data['points_earned'],
-            'date' => $data['date'],
-            'description' => $data['description'],
-            'images' => json_encode($images),
-            'status' => $data['status']
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute([
+            'id' => $Silian_recordId,
+            'user_id' => $Silian_data['user_id'],
+            'activity_id' => $Silian_data['activity_id'],
+            'amount' => $Silian_data['amount'],
+            'unit' => $Silian_data['unit'],
+            'carbon_saved' => $Silian_data['carbon_saved'],
+            'points_earned' => $Silian_data['points_earned'],
+            'date' => $Silian_data['date'],
+            'description' => $Silian_data['description'],
+            'images' => json_encode($Silian_images),
+            'status' => $Silian_data['status']
         ]);
-        return $recordId;
+        return $Silian_recordId;
     }
 
     /**
      * 获取碳减排记录
      */
-    private function resolveReviewAction(array $data): ?string
+    private function resolveReviewAction(array $Silian_data): ?string
     {
-        $action = $data['action'] ?? null;
-        if ($action === null && isset($data['status'])) {
-            $action = $data['status'];
+        $Silian_action = $Silian_data['action'] ?? null;
+        if ($Silian_action === null && isset($Silian_data['status'])) {
+            $Silian_action = $Silian_data['status'];
         }
 
-        if (!is_string($action)) {
+        if (!is_string($Silian_action)) {
             return null;
         }
 
-        $normalized = strtolower(trim($action));
-        if ($normalized === 'approve' || $normalized === 'approved') {
+        $Silian_normalized = strtolower(trim($Silian_action));
+        if ($Silian_normalized === 'approve' || $Silian_normalized === 'approved') {
             return 'approve';
         }
-        if ($normalized === 'reject' || $normalized === 'rejected') {
+        if ($Silian_normalized === 'reject' || $Silian_normalized === 'rejected') {
             return 'reject';
         }
 
         return null;
     }
 
-    private function normalizeReviewNote($raw): ?string
+    private function normalizeReviewNote($Silian_raw): ?string
     {
-        $note = null;
-        if (is_array($raw)) {
-            $note = $raw['review_note'] ?? ($raw['admin_notes'] ?? ($raw['note'] ?? null));
-        } elseif (is_string($raw)) {
-            $note = $raw;
+        $Silian_note = null;
+        if (is_array($Silian_raw)) {
+            $Silian_note = $Silian_raw['review_note'] ?? ($Silian_raw['admin_notes'] ?? ($Silian_raw['note'] ?? null));
+        } elseif (is_string($Silian_raw)) {
+            $Silian_note = $Silian_raw;
         }
 
-        if (!is_string($note)) {
+        if (!is_string($Silian_note)) {
             return null;
         }
 
-        $note = trim($note);
-        return $note === '' ? null : $note;
+        $Silian_note = trim($Silian_note);
+        return $Silian_note === '' ? null : $Silian_note;
     }
 
     /**
      * @param mixed $raw
      * @return array<int,string>
      */
-    private function normalizeRecordIds($raw): array
+    private function normalizeRecordIds($Silian_raw): array
     {
-        if (is_string($raw)) {
-            $raw = preg_split('/[\s,]+/', $raw);
+        if (is_string($Silian_raw)) {
+            $Silian_raw = preg_split('/[\s,]+/', $Silian_raw);
         }
 
-        if (!is_array($raw)) {
+        if (!is_array($Silian_raw)) {
             return [];
         }
 
-        $normalized = [];
-        foreach ($raw as $value) {
-            if (is_array($value) || is_object($value)) {
+        $Silian_normalized = [];
+        foreach ($Silian_raw as $Silian_value) {
+            if (is_array($Silian_value) || is_object($Silian_value)) {
                 continue;
             }
 
-            $id = trim((string) $value);
-            if ($id === '') {
+            $Silian_id = trim((string) $Silian_value);
+            if ($Silian_id === '') {
                 continue;
             }
 
-            $normalized[$id] = $id;
+            $Silian_normalized[$Silian_id] = $Silian_id;
         }
 
-        return array_values($normalized);
+        return array_values($Silian_normalized);
     }
 
     /**
@@ -1295,138 +1295,138 @@ class CarbonTrackController
      * @param array<string,mixed> $adminUser
      * @return array{processed:array<int,string>,skipped:array<int,array<string,mixed>>}
      */
-    private function processRecordReviewBatch(array $records, string $action, ?string $reviewNote, array $adminUser): array
+    private function processRecordReviewBatch(array $Silian_records, string $Silian_action, ?string $Silian_reviewNote, array $Silian_adminUser): array
     {
-        $pending = [];
-        $skipped = [];
+        $Silian_pending = [];
+        $Silian_skipped = [];
 
-        foreach ($records as $record) {
-            $status = $record['status'] ?? '';
-            if ($status !== 'pending') {
-                $skipped[] = [
-                    'id' => $record['id'] ?? null,
-                    'status' => $status,
+        foreach ($Silian_records as $Silian_record) {
+            $Silian_status = $Silian_record['status'] ?? '';
+            if ($Silian_status !== 'pending') {
+                $Silian_skipped[] = [
+                    'id' => $Silian_record['id'] ?? null,
+                    'status' => $Silian_status,
                 ];
                 continue;
             }
 
-            $pending[] = $record;
+            $Silian_pending[] = $Silian_record;
         }
 
-        if (empty($pending)) {
-            return ['processed' => [], 'skipped' => $skipped];
+        if (empty($Silian_pending)) {
+            return ['processed' => [], 'skipped' => $Silian_skipped];
         }
 
-        $newStatus = $action === 'approve' ? 'approved' : 'rejected';
-        $pointsByUser = [];
-        $startedTransaction = false;
+        $Silian_newStatus = $Silian_action === 'approve' ? 'approved' : 'rejected';
+        $Silian_pointsByUser = [];
+        $Silian_startedTransaction = false;
 
         try {
-            $inTransaction = false;
+            $Silian_inTransaction = false;
             if (method_exists($this->db, 'inTransaction')) {
                 try {
-                    $inTransaction = $this->db->inTransaction();
-                } catch (\Throwable $ignore) {
-                    $inTransaction = false;
+                    $Silian_inTransaction = $this->db->inTransaction();
+                } catch (\Throwable $Silian_ignore) {
+                    $Silian_inTransaction = false;
                 }
             }
 
-            if (!$inTransaction) {
-                $startedTransaction = $this->db->beginTransaction();
+            if (!$Silian_inTransaction) {
+                $Silian_startedTransaction = $this->db->beginTransaction();
             }
 
-            $updateStmt = $this->db->prepare("UPDATE carbon_records\n                    SET status = :status,\n                        reviewed_by = :reviewed_by,\n                        reviewed_at = NOW(),\n                        review_note = :review_note\n                 WHERE id = :record_id");
+            $Silian_updateStmt = $this->db->prepare("UPDATE carbon_records\n                    SET status = :status,\n                        reviewed_by = :reviewed_by,\n                        reviewed_at = NOW(),\n                        review_note = :review_note\n                 WHERE id = :record_id");
 
-            foreach ($pending as $index => $record) {
-                $updateStmt->execute([
-                    'status' => $newStatus,
-                    'reviewed_by' => $adminUser['id'] ?? null,
-                    'review_note' => $reviewNote,
-                    'record_id' => $record['id'],
+            foreach ($Silian_pending as $Silian_index => $Silian_record) {
+                $Silian_updateStmt->execute([
+                    'status' => $Silian_newStatus,
+                    'reviewed_by' => $Silian_adminUser['id'] ?? null,
+                    'review_note' => $Silian_reviewNote,
+                    'record_id' => $Silian_record['id'],
                 ]);
 
-                if ($action === 'approve') {
-                    $points = (float) ($record['points_earned'] ?? 0);
-                    if ($points !== 0.0) {
-                        $userId = (int) ($record['user_id'] ?? 0);
-                        if ($userId > 0) {
-                            $pointsByUser[$userId] = ($pointsByUser[$userId] ?? 0) + $points;
+                if ($Silian_action === 'approve') {
+                    $Silian_points = (float) ($Silian_record['points_earned'] ?? 0);
+                    if ($Silian_points !== 0.0) {
+                        $Silian_userId = (int) ($Silian_record['user_id'] ?? 0);
+                        if ($Silian_userId > 0) {
+                            $Silian_pointsByUser[$Silian_userId] = ($Silian_pointsByUser[$Silian_userId] ?? 0) + $Silian_points;
                         }
                     }
                 }
 
-                $pending[$index]['status'] = $newStatus;
-                $pending[$index]['review_note'] = $reviewNote;
-                $pending[$index]['reviewed_by'] = $adminUser['id'] ?? null;
+                $Silian_pending[$Silian_index]['status'] = $Silian_newStatus;
+                $Silian_pending[$Silian_index]['review_note'] = $Silian_reviewNote;
+                $Silian_pending[$Silian_index]['reviewed_by'] = $Silian_adminUser['id'] ?? null;
             }
 
-            if ($action === 'approve' && !empty($pointsByUser)) {
-                foreach ($pointsByUser as $userId => $points) {
-                    if ($points != 0.0) {
-                        $this->updateUserPoints($userId, $points);
+            if ($Silian_action === 'approve' && !empty($Silian_pointsByUser)) {
+                foreach ($Silian_pointsByUser as $Silian_userId => $Silian_points) {
+                    if ($Silian_points != 0.0) {
+                        $this->updateUserPoints($Silian_userId, $Silian_points);
                     }
                 }
             }
 
-            if ($startedTransaction) {
+            if ($Silian_startedTransaction) {
                 $this->db->commit();
             }
-        } catch (\Throwable $e) {
-            if ($startedTransaction) {
+        } catch (\Throwable $Silian_e) {
+            if ($Silian_startedTransaction) {
                 try {
                     if ($this->db->inTransaction()) {
                         $this->db->rollBack();
                     }
-                } catch (\Throwable $ignore) {
+                } catch (\Throwable $Silian_ignore) {
                     // ignore rollback failure
                 }
             }
-            throw $e;
+            throw $Silian_e;
         }
 
-        foreach ($pending as $record) {
+        foreach ($Silian_pending as $Silian_record) {
             $this->auditLog->logAdminOperation(
-                'carbon_record_' . ($action === 'approve' ? 'approve' : 'reject'),
-                $adminUser['id'] ?? null,
+                'carbon_record_' . ($Silian_action === 'approve' ? 'approve' : 'reject'),
+                $Silian_adminUser['id'] ?? null,
                 'carbon_management',
                 [
                     'table' => 'carbon_records',
-                    'record_id' => $record['id'],
-                    'review_note' => $reviewNote,
+                    'record_id' => $Silian_record['id'],
+                    'review_note' => $Silian_reviewNote,
                     'old_data' => ['status' => 'pending'],
-                    'new_data' => ['status' => $record['status']],
+                    'new_data' => ['status' => $Silian_record['status']],
                 ]
             );
         }
 
-        $recordsByUser = [];
-        foreach ($pending as $record) {
-            $userId = (int) ($record['user_id'] ?? 0);
-            if ($userId <= 0) {
+        $Silian_recordsByUser = [];
+        foreach ($Silian_pending as $Silian_record) {
+            $Silian_userId = (int) ($Silian_record['user_id'] ?? 0);
+            if ($Silian_userId <= 0) {
                 continue;
             }
 
-            $recordsByUser[$userId][] = $this->buildReviewSummaryRecord($record);
+            $Silian_recordsByUser[$Silian_userId][] = $this->buildReviewSummaryRecord($Silian_record);
         }
 
-        foreach ($recordsByUser as $userId => $userRecords) {
-            $options = [
-                'reviewed_by' => $adminUser['username'] ?? null,
-                'reviewed_by_id' => $adminUser['id'] ?? null,
+        foreach ($Silian_recordsByUser as $Silian_userId => $Silian_userRecords) {
+            $Silian_options = [
+                'reviewed_by' => $Silian_adminUser['username'] ?? null,
+                'reviewed_by_id' => $Silian_adminUser['id'] ?? null,
             ];
-            $this->messageService->sendCarbonRecordReviewSummary($userId, $action, $userRecords, $reviewNote, $options);
+            $this->messageService->sendCarbonRecordReviewSummary($Silian_userId, $Silian_action, $Silian_userRecords, $Silian_reviewNote, $Silian_options);
         }
 
-        $processedIds = [];
-        foreach ($pending as $record) {
-            if (isset($record['id'])) {
-                $processedIds[] = $record['id'];
+        $Silian_processedIds = [];
+        foreach ($Silian_pending as $Silian_record) {
+            if (isset($Silian_record['id'])) {
+                $Silian_processedIds[] = $Silian_record['id'];
             }
         }
 
         return [
-            'processed' => $processedIds,
-            'skipped' => $skipped,
+            'processed' => $Silian_processedIds,
+            'skipped' => $Silian_skipped,
         ];
     }
 
@@ -1434,128 +1434,128 @@ class CarbonTrackController
      * @param array<string,mixed> $record
      * @return array<string,mixed>
      */
-    private function buildReviewSummaryRecord(array $record): array
+    private function buildReviewSummaryRecord(array $Silian_record): array
     {
-        $activityName = $record['activity_name_zh']
-            ?? $record['activity_name_en']
-            ?? $record['activity_name']
-            ?? $record['activity_id']
+        $Silian_activityName = $Silian_record['activity_name_zh']
+            ?? $Silian_record['activity_name_en']
+            ?? $Silian_record['activity_name']
+            ?? $Silian_record['activity_id']
             ?? '';
 
-        $amount = $record['amount'] ?? ($record['data_value'] ?? null);
-        $unit = $record['activity_unit'] ?? ($record['unit'] ?? null);
-        $date = $record['date'] ?? ($record['created_at'] ?? null);
+        $Silian_amount = $Silian_record['amount'] ?? ($Silian_record['data_value'] ?? null);
+        $Silian_unit = $Silian_record['activity_unit'] ?? ($Silian_record['unit'] ?? null);
+        $Silian_date = $Silian_record['date'] ?? ($Silian_record['created_at'] ?? null);
 
         return [
-            'id' => $record['id'] ?? null,
-            'activity_name' => $activityName,
-            'activity_category' => $record['activity_category'] ?? null,
-            'data_value' => $amount,
-            'unit' => $unit,
-            'carbon_saved' => $record['carbon_saved'] ?? null,
-            'points_earned' => $record['points_earned'] ?? null,
-            'date' => $date,
-            'status' => $record['status'] ?? null,
-            'review_note' => $record['review_note'] ?? null,
+            'id' => $Silian_record['id'] ?? null,
+            'activity_name' => $Silian_activityName,
+            'activity_category' => $Silian_record['activity_category'] ?? null,
+            'data_value' => $Silian_amount,
+            'unit' => $Silian_unit,
+            'carbon_saved' => $Silian_record['carbon_saved'] ?? null,
+            'points_earned' => $Silian_record['points_earned'] ?? null,
+            'date' => $Silian_date,
+            'status' => $Silian_record['status'] ?? null,
+            'review_note' => $Silian_record['review_note'] ?? null,
         ];
     }
 
-    private function getCarbonRecord(string $recordId): ?array
+    private function getCarbonRecord(string $Silian_recordId): ?array
     {
-        $records = $this->getCarbonRecordsByIds([$recordId]);
-        return $records[0] ?? null;
+        $Silian_records = $this->getCarbonRecordsByIds([$Silian_recordId]);
+        return $Silian_records[0] ?? null;
     }
 
     /**
      * @param array<int,string> $recordIds
      * @return array<int,array<string,mixed>>
      */
-    private function getCarbonRecordsByIds(array $recordIds): array
+    private function getCarbonRecordsByIds(array $Silian_recordIds): array
     {
-        if (empty($recordIds)) {
+        if (empty($Silian_recordIds)) {
             return [];
         }
 
-        $recordIds = array_values(array_unique(array_filter(array_map(static function ($value) {
-            if (is_array($value) || is_object($value)) {
+        $Silian_recordIds = array_values(array_unique(array_filter(array_map(static function ($Silian_value) {
+            if (is_array($Silian_value) || is_object($Silian_value)) {
                 return null;
             }
 
-            $value = trim((string) $value);
-            return $value === '' ? null : $value;
-        }, $recordIds))));
+            $Silian_value = trim((string) $Silian_value);
+            return $Silian_value === '' ? null : $Silian_value;
+        }, $Silian_recordIds))));
 
-        if (empty($recordIds)) {
+        if (empty($Silian_recordIds)) {
             return [];
         }
 
-        $placeholders = [];
-        $params = [];
-        foreach ($recordIds as $index => $id) {
-            $placeholder = ':id' . $index;
-            $placeholders[] = $placeholder;
-            $params[$placeholder] = $id;
+        $Silian_placeholders = [];
+        $Silian_params = [];
+        foreach ($Silian_recordIds as $Silian_index => $Silian_id) {
+            $Silian_placeholder = ':id' . $Silian_index;
+            $Silian_placeholders[] = $Silian_placeholder;
+            $Silian_params[$Silian_placeholder] = $Silian_id;
         }
 
             // Installations do not have a `full_name` column on the `users` table.
             // Use `username` as a safe fallback to avoid SQL errors.
-            $sql = sprintf(
+            $Silian_sql = sprintf(
             "SELECT r.*,\n                    u.username AS user_username,\n                    u.email AS user_email,\n                    u.username AS user_full_name,\n                    a.name_zh AS activity_name_zh,\n                    a.name_en AS activity_name_en,\n                    a.category AS activity_category,\n                    a.unit AS activity_unit\n             FROM carbon_records r\n             LEFT JOIN users u ON r.user_id = u.id\n             LEFT JOIN carbon_activities a ON r.activity_id = a.id\n             WHERE r.id IN (%s) AND r.deleted_at IS NULL",
-            implode(',', $placeholders)
+            implode(',', $Silian_placeholders)
         );
 
-        $stmt = $this->db->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        foreach ($Silian_params as $Silian_key => $Silian_value) {
+            $Silian_stmt->bindValue($Silian_key, $Silian_value);
         }
-        $stmt->execute();
+        $Silian_stmt->execute();
 
-        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if (!is_array($records)) {
+        $Silian_records = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!is_array($Silian_records)) {
             return [];
         }
 
-        return $records;
+        return $Silian_records;
     }
 
     /**
      * 更新用户积分
      */
-    private function updateUserPoints(int $userId, float $points): void
+    private function updateUserPoints(int $Silian_userId, float $Silian_points): void
     {
-        $sql = "UPDATE users SET points = points + :points WHERE id = :user_id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['points' => $points, 'user_id' => $userId]);
+        $Silian_sql = "UPDATE users SET points = points + :points WHERE id = :user_id";
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute(['points' => $Silian_points, 'user_id' => $Silian_userId]);
     }
 
     /**
      * 通知管理员新记录
      */
-    private function notifyAdminsNewRecord(string $recordId, array $user, array $activity): void
+    private function notifyAdminsNewRecord(string $Silian_recordId, array $Silian_user, array $Silian_activity): void
     {
         // 获取管理员列表
-        $sql = "SELECT id, email, username FROM users WHERE is_admin = 1 AND deleted_at IS NULL";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $Silian_sql = "SELECT id, email, username FROM users WHERE is_admin = 1 AND deleted_at IS NULL";
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute();
+        $Silian_admins = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if (empty($admins)) {
+        if (empty($Silian_admins)) {
             return;
         }
 
-        $recipients = array_map(static function (array $admin): array {
+        $Silian_recipients = array_map(static function (array $Silian_admin): array {
             return [
-                'id' => isset($admin['id']) ? (int) $admin['id'] : 0,
-                'email' => $admin['email'] ?? null,
-                'username' => $admin['username'] ?? null,
+                'id' => isset($Silian_admin['id']) ? (int) $Silian_admin['id'] : 0,
+                'email' => $Silian_admin['email'] ?? null,
+                'username' => $Silian_admin['username'] ?? null,
             ];
-        }, $admins);
+        }, $Silian_admins);
 
         $this->messageService->sendAdminNotificationBatch(
-            $recipients,
+            $Silian_recipients,
             'new_record_pending',
             '有新待审核碳减排记录',
-            "用户 {$user['username']} 提交了新的 {$activity['name_zh']} 记录，请及时处理。",
+            "用户 {$Silian_user['username']} 提交了新的 {$Silian_activity['name_zh']} 记录，请及时处理。",
             'high'
         );
     }
@@ -1578,7 +1578,7 @@ class CarbonTrackController
             mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
         );
     }
-    
+
     /**
      * 规范化 images 字段
      * 支持多种传入格式并统一输出标准数组：
@@ -1588,129 +1588,129 @@ class CarbonTrackController
      * - 单个字符串 "url"
      * 最终统一为 [{"url": "...", "file_path": "...", "original_name": "...", "mime_type": "...", "size": int|null }]
      */
-    private function normalizeImages($raw): array
+    private function normalizeImages($Silian_raw): array
     {
-        if (empty($raw)) { return []; }
-        if (is_string($raw)) {
-            $raw = [$raw];
+        if (empty($Silian_raw)) { return []; }
+        if (is_string($Silian_raw)) {
+            $Silian_raw = [$Silian_raw];
         }
-        if (!is_array($raw)) {
+        if (!is_array($Silian_raw)) {
             return [];
         }
 
-        $result = [];
-        foreach ($raw as $item) {
-            $normalized = $this->normalizeImageItem($item);
-            if ($normalized !== null) {
-                $result[] = $normalized;
+        $Silian_result = [];
+        foreach ($Silian_raw as $Silian_item) {
+            $Silian_normalized = $this->normalizeImageItem($Silian_item);
+            if ($Silian_normalized !== null) {
+                $Silian_result[] = $Silian_normalized;
             }
         }
 
-        return $result;
+        return $Silian_result;
     }
 
     /**
      * 规范化单个图片项
      * @param mixed $item
      */
-    private function normalizeImageItem($item): ?array
+    private function normalizeImageItem($Silian_item): ?array
     {
-        if (is_string($item)) {
-            $item = ['url' => $item];
-        } elseif (!is_array($item)) {
+        if (is_string($Silian_item)) {
+            $Silian_item = ['url' => $Silian_item];
+        } elseif (!is_array($Silian_item)) {
             return null;
         }
 
-        $url = $item['url'] ?? $item['public_url'] ?? null;
-        $filePath = $item['file_path'] ?? null;
+        $Silian_url = $Silian_item['url'] ?? $Silian_item['public_url'] ?? null;
+        $Silian_filePath = $Silian_item['file_path'] ?? null;
 
-        if (!$filePath && isset($item['public_url']) && $this->r2Service) {
-            $filePath = $this->r2Service->resolveKeyFromUrl((string)$item['public_url']);
+        if (!$Silian_filePath && isset($Silian_item['public_url']) && $this->r2Service) {
+            $Silian_filePath = $this->r2Service->resolveKeyFromUrl((string)$Silian_item['public_url']);
         }
 
-        if (!$filePath && $url && $this->r2Service) {
-            $filePath = $this->r2Service->resolveKeyFromUrl((string)$url);
+        if (!$Silian_filePath && $Silian_url && $this->r2Service) {
+            $Silian_filePath = $this->r2Service->resolveKeyFromUrl((string)$Silian_url);
         }
 
-        if (is_string($filePath) && $filePath !== '') {
-            $filePath = ltrim($filePath, '/');
+        if (is_string($Silian_filePath) && $Silian_filePath !== '') {
+            $Silian_filePath = ltrim($Silian_filePath, '/');
         } else {
-            $filePath = null;
+            $Silian_filePath = null;
         }
 
-        if (!$url && $filePath && $this->r2Service) {
+        if (!$Silian_url && $Silian_filePath && $this->r2Service) {
             try {
-                $url = $this->r2Service->getPublicUrl($filePath);
-            } catch (\Throwable $ignore) {
-                $url = null;
+                $Silian_url = $this->r2Service->getPublicUrl($Silian_filePath);
+            } catch (\Throwable $Silian_ignore) {
+                $Silian_url = null;
             }
         }
 
-        $meta = [
-            'url' => $url,
-            'file_path' => $filePath,
-            'original_name' => $item['original_name'] ?? null,
-            'mime_type' => $item['mime_type'] ?? null,
-            'size' => $item['file_size'] ?? ($item['size'] ?? null),
-            'presigned_url' => $item['presigned_url'] ?? null,
+        $Silian_meta = [
+            'url' => $Silian_url,
+            'file_path' => $Silian_filePath,
+            'original_name' => $Silian_item['original_name'] ?? null,
+            'mime_type' => $Silian_item['mime_type'] ?? null,
+            'size' => $Silian_item['file_size'] ?? ($Silian_item['size'] ?? null),
+            'presigned_url' => $Silian_item['presigned_url'] ?? null,
         ];
 
-        if (isset($item['thumbnail_path'])) {
-            $meta['thumbnail_path'] = $item['thumbnail_path'];
+        if (isset($Silian_item['thumbnail_path'])) {
+            $Silian_meta['thumbnail_path'] = $Silian_item['thumbnail_path'];
         }
 
-        if ($filePath && $this->r2Service) {
+        if ($Silian_filePath && $this->r2Service) {
             try {
-                $meta['presigned_url'] = $this->r2Service->generatePresignedUrl($filePath, 600);
-            } catch (\Throwable $ignore) {
+                $Silian_meta['presigned_url'] = $this->r2Service->generatePresignedUrl($Silian_filePath, 600);
+            } catch (\Throwable $Silian_ignore) {
                 // ignore failure
             }
         }
 
-        return $meta;
+        return $Silian_meta;
     }
-    private function json(Response $response, array $data, int $status = 200): Response
+    private function json(Response $Silian_response, array $Silian_data, int $Silian_status = 200): Response
     {
-        $response->getBody()->write(json_encode($data));
-        return $response->withStatus($status)->withHeader('Content-Type', 'application/json');
+        $Silian_response->getBody()->write(json_encode($Silian_data));
+        return $Silian_response->withStatus($Silian_status)->withHeader('Content-Type', 'application/json');
     }
 
-    private function normalizeCheckinDate(string $raw): ?string
+    private function normalizeCheckinDate(string $Silian_raw): ?string
     {
-        $raw = trim($raw);
-        if ($raw === '') {
+        $Silian_raw = trim($Silian_raw);
+        if ($Silian_raw === '') {
             return null;
         }
 
-        $candidate = \DateTimeImmutable::createFromFormat('Y-m-d', $raw);
-        if ($candidate instanceof \DateTimeImmutable && $candidate->format('Y-m-d') === $raw) {
-            return $candidate->format('Y-m-d');
+        $Silian_candidate = \DateTimeImmutable::createFromFormat('Y-m-d', $Silian_raw);
+        if ($Silian_candidate instanceof \DateTimeImmutable && $Silian_candidate->format('Y-m-d') === $Silian_raw) {
+            return $Silian_candidate->format('Y-m-d');
         }
 
         try {
-            $fallback = new \DateTimeImmutable($raw);
-            return $fallback->format('Y-m-d');
-        } catch (\Throwable $e) {
+            $Silian_fallback = new \DateTimeImmutable($Silian_raw);
+            return $Silian_fallback->format('Y-m-d');
+        } catch (\Throwable $Silian_e) {
             return null;
         }
     }
 
 
-    private function logControllerException(\Throwable $exception, Request $request, string $contextMessage = ''): void
+    private function logControllerException(\Throwable $Silian_exception, Request $Silian_request, string $Silian_contextMessage = ''): void
     {
         if ($this->errorLogService) {
             try {
-                $extra = $contextMessage !== '' ? ['context_message' => $contextMessage] : [];
-                $this->errorLogService->logException($exception, $request, $extra);
+                $Silian_extra = $Silian_contextMessage !== '' ? ['context_message' => $Silian_contextMessage] : [];
+                $this->errorLogService->logException($Silian_exception, $Silian_request, $Silian_extra);
                 return;
-            } catch (\Throwable $loggingError) {
-                error_log(self::ERRLOG_PREFIX . $loggingError->getMessage());
+            } catch (\Throwable $Silian_loggingError) {
+                error_log(self::ERRLOG_PREFIX . $Silian_loggingError->getMessage());
             }
         }
-        if ($contextMessage !== '') {
-            error_log($contextMessage);
+        if ($Silian_contextMessage !== '') {
+            error_log($Silian_contextMessage);
         } else {
-            error_log($exception->getMessage());
+            error_log($Silian_exception->getMessage());
         }
     }
 

@@ -23,121 +23,121 @@ class RequestLoggingMiddlewareTest extends TestCase
 
     public function testInjectsUuidWhenMissing(): void
     {
-        $systemLog = $this->createMock(SystemLogService::class);
-        $systemLog->expects($this->never())->method('log');
-        $authService = $this->createMock(AuthService::class);
-        $authService->method('getCurrentUser')->willReturn(null);
-        $logger = $this->createMock(Logger::class);
+        $Silian_systemLog = $this->createMock(SystemLogService::class);
+        $Silian_systemLog->expects($this->never())->method('log');
+        $Silian_authService = $this->createMock(AuthService::class);
+        $Silian_authService->method('getCurrentUser')->willReturn(null);
+        $Silian_logger = $this->createMock(Logger::class);
 
-        $middleware = new RequestLoggingMiddleware($systemLog, $authService, $logger);
+        $Silian_middleware = new RequestLoggingMiddleware($Silian_systemLog, $Silian_authService, $Silian_logger);
 
-        $handler = new class implements RequestHandlerInterface {
+        $Silian_handler = new class implements RequestHandlerInterface {
             public ?string $header = null;
             public ?string $attribute = null;
 
-            public function handle(ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface
+            public function handle(ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface
             {
-                $this->header = $request->getHeaderLine('X-Request-ID');
-                $this->attribute = $request->getAttribute('request_id');
+                $this->header = $Silian_request->getHeaderLine('X-Request-ID');
+                $this->attribute = $Silian_request->getAttribute('request_id');
                 return new Response(200);
             }
         };
 
-        $request = makeRequest('POST', '/');
-        $response = $middleware->process($request, $handler);
+        $Silian_request = makeRequest('POST', '/');
+        $Silian_response = $Silian_middleware->process($Silian_request, $Silian_handler);
 
-        $this->assertNotEmpty($handler->header);
-        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $handler->header);
-        $this->assertSame($handler->header, $handler->attribute);
-        $this->assertSame($handler->header, $response->getHeaderLine('X-Request-ID'));
-        $this->assertSame($handler->header, $_SERVER['HTTP_X_REQUEST_ID']);
+        $this->assertNotEmpty($Silian_handler->header);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $Silian_handler->header);
+        $this->assertSame($Silian_handler->header, $Silian_handler->attribute);
+        $this->assertSame($Silian_handler->header, $Silian_response->getHeaderLine('X-Request-ID'));
+        $this->assertSame($Silian_handler->header, $_SERVER['HTTP_X_REQUEST_ID']);
     }
 
     public function testReplacesInvalidRequestIdWithUuid(): void
     {
-        $systemLog = $this->createMock(SystemLogService::class);
-        $systemLog->expects($this->once())
+        $Silian_systemLog = $this->createMock(SystemLogService::class);
+        $Silian_systemLog->expects($this->once())
             ->method('log')
-            ->with($this->callback(function (array $context): bool {
-                return isset($context['request_id'])
-                    && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $context['request_id']) === 1;
+            ->with($this->callback(function (array $Silian_context): bool {
+                return isset($Silian_context['request_id'])
+                    && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $Silian_context['request_id']) === 1;
             }));
 
-        $authService = $this->createMock(AuthService::class);
-        $authService->method('getCurrentUser')->willReturn(null);
-        $logger = $this->createMock(Logger::class);
+        $Silian_authService = $this->createMock(AuthService::class);
+        $Silian_authService->method('getCurrentUser')->willReturn(null);
+        $Silian_logger = $this->createMock(Logger::class);
 
-        $middleware = new RequestLoggingMiddleware($systemLog, $authService, $logger);
+        $Silian_middleware = new RequestLoggingMiddleware($Silian_systemLog, $Silian_authService, $Silian_logger);
 
-        $handler = new class implements RequestHandlerInterface {
+        $Silian_handler = new class implements RequestHandlerInterface {
             public ?string $header = null;
             public ?string $attribute = null;
 
-            public function handle(ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface
+            public function handle(ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface
             {
-                $this->header = $request->getHeaderLine('X-Request-ID');
-                $this->attribute = $request->getAttribute('request_id');
+                $this->header = $Silian_request->getHeaderLine('X-Request-ID');
+                $this->attribute = $Silian_request->getAttribute('request_id');
                 return new Response(201);
             }
         };
 
-        $request = makeRequest('POST', '/api/v1/admin/messages/broadcast', null, null, [
+        $Silian_request = makeRequest('POST', '/api/v1/admin/messages/broadcast', null, null, [
             'X-Request-ID' => ['not-a-uuid'],
             'User-Agent' => ['PHPUnit']
         ]);
 
-        $response = $middleware->process($request, $handler);
+        $Silian_response = $Silian_middleware->process($Silian_request, $Silian_handler);
 
-        $this->assertNotSame('not-a-uuid', $handler->header);
-        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $handler->header);
-        $this->assertSame($handler->header, $handler->attribute);
-        $this->assertSame($handler->header, $response->getHeaderLine('X-Request-ID'));
-        $this->assertSame($handler->header, $_SERVER['HTTP_X_REQUEST_ID']);
+        $this->assertNotSame('not-a-uuid', $Silian_handler->header);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $Silian_handler->header);
+        $this->assertSame($Silian_handler->header, $Silian_handler->attribute);
+        $this->assertSame($Silian_handler->header, $Silian_response->getHeaderLine('X-Request-ID'));
+        $this->assertSame($Silian_handler->header, $_SERVER['HTTP_X_REQUEST_ID']);
     }
 
     public function testPreservesValidRequestId(): void
     {
-        $systemLog = $this->createMock(SystemLogService::class);
-        $systemLog->expects($this->once())
+        $Silian_systemLog = $this->createMock(SystemLogService::class);
+        $Silian_systemLog->expects($this->once())
             ->method('log')
-            ->with($this->callback(function (array $context): bool {
-                return ($context['request_id'] ?? null) === '123e4567-e89b-12d3-a456-426614174000'
-                    && ($context['user_id'] ?? null) === 42
-                    && ($context['user_uuid'] ?? null) === '550e8400-e29b-41d4-a716-446655440042';
+            ->with($this->callback(function (array $Silian_context): bool {
+                return ($Silian_context['request_id'] ?? null) === '123e4567-e89b-12d3-a456-426614174000'
+                    && ($Silian_context['user_id'] ?? null) === 42
+                    && ($Silian_context['user_uuid'] ?? null) === '550e8400-e29b-41d4-a716-446655440042';
             }));
 
-        $authService = $this->createMock(AuthService::class);
-        $authService->method('getCurrentUser')->willReturn([
+        $Silian_authService = $this->createMock(AuthService::class);
+        $Silian_authService->method('getCurrentUser')->willReturn([
             'id' => 42,
             'uuid' => '550e8400-e29b-41d4-a716-446655440042',
         ]);
-        $logger = $this->createMock(Logger::class);
+        $Silian_logger = $this->createMock(Logger::class);
 
-        $middleware = new RequestLoggingMiddleware($systemLog, $authService, $logger);
+        $Silian_middleware = new RequestLoggingMiddleware($Silian_systemLog, $Silian_authService, $Silian_logger);
 
-        $handler = new class implements RequestHandlerInterface {
+        $Silian_handler = new class implements RequestHandlerInterface {
             public ?string $header = null;
             public ?string $attribute = null;
 
-            public function handle(ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface
+            public function handle(ServerRequestInterface $Silian_request): \Psr\Http\Message\ResponseInterface
             {
-                $this->header = $request->getHeaderLine('X-Request-ID');
-                $this->attribute = $request->getAttribute('request_id');
+                $this->header = $Silian_request->getHeaderLine('X-Request-ID');
+                $this->attribute = $Silian_request->getAttribute('request_id');
                 return new Response(200);
             }
         };
 
-        $original = '123E4567-E89B-12D3-A456-426614174000';
-        $request = makeRequest('POST', '/api/v1/admin/messages/broadcast', null, null, [
-            'X-Request-ID' => [$original],
+        $Silian_original = '123E4567-E89B-12D3-A456-426614174000';
+        $Silian_request = makeRequest('POST', '/api/v1/admin/messages/broadcast', null, null, [
+            'X-Request-ID' => [$Silian_original],
             'User-Agent' => ['PHPUnit']
         ]);
 
-        $response = $middleware->process($request, $handler);
+        $Silian_response = $Silian_middleware->process($Silian_request, $Silian_handler);
 
-        $this->assertSame('123e4567-e89b-12d3-a456-426614174000', $handler->header);
-        $this->assertSame($handler->header, $handler->attribute);
-        $this->assertSame($handler->header, $response->getHeaderLine('X-Request-ID'));
-        $this->assertSame($handler->header, $_SERVER['HTTP_X_REQUEST_ID']);
+        $this->assertSame('123e4567-e89b-12d3-a456-426614174000', $Silian_handler->header);
+        $this->assertSame($Silian_handler->header, $Silian_handler->attribute);
+        $this->assertSame($Silian_handler->header, $Silian_response->getHeaderLine('X-Request-ID'));
+        $this->assertSame($Silian_handler->header, $_SERVER['HTTP_X_REQUEST_ID']);
     }
 }

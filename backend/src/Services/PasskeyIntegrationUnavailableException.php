@@ -6,16 +6,16 @@ namespace CarbonTrack\Services;
 
 class PasskeyIntegrationUnavailableException extends PasskeyOperationException
 {
-    public function __construct(string $packageName, ?\Throwable $previous = null)
+    public function __construct(string $Silian_packageName, ?\Throwable $Silian_previous = null)
     {
         parent::__construct(
             sprintf(
                 'WebAuthn verification is not available because %s is not installed in this environment.',
-                $packageName
+                $Silian_packageName
             ),
             'WEBAUTHN_LIBRARY_UNAVAILABLE',
             501,
-            $previous
+            $Silian_previous
         );
     }
 }

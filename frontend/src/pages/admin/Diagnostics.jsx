@@ -1,56 +1,56 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from '../../hooks/useTranslation';
-import { useQuery } from 'react-query';
+import Silian_React, { useEffect as Silian_useEffect, useMemo as Silian_useMemo, useState as Silian_useState } from 'react';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { useQuery as Silian_useQuery } from 'react-query';
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
+  Card as Silian_Card,
+  CardHeader as Silian_CardHeader,
+  CardTitle as Silian_CardTitle,
+  CardDescription as Silian_CardDescription,
+  CardContent as Silian_CardContent,
 } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/Alert';
-import { Input } from '../../components/ui/Input';
-import { Textarea } from '../../components/ui/textarea';
+import { Button as Silian_Button } from '../../components/ui/Button';
+import { Badge as Silian_Badge } from '../../components/ui/badge';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription, AlertTitle as Silian_AlertTitle } from '../../components/ui/Alert';
+import { Input as Silian_Input } from '../../components/ui/Input';
+import { Textarea as Silian_Textarea } from '../../components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select as Silian_Select,
+  SelectContent as Silian_SelectContent,
+  SelectItem as Silian_SelectItem,
+  SelectTrigger as Silian_SelectTrigger,
+  SelectValue as Silian_SelectValue,
 } from '../../components/ui/select';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+  Accordion as Silian_Accordion,
+  AccordionContent as Silian_AccordionContent,
+  AccordionItem as Silian_AccordionItem,
+  AccordionTrigger as Silian_AccordionTrigger,
 } from '../../components/ui/accordion';
-import { Switch } from '../../components/ui/switch';
+import { Switch as Silian_Switch } from '../../components/ui/switch';
 import {
-  RefreshCw,
-  Loader2,
-  ListChecks,
-  ShieldCheck,
-  Shield,
-  Layers,
-  Code,
-  Globe2,
-  Download,
-  Search,
+  RefreshCw as Silian_RefreshCw,
+  Loader2 as Silian_Loader2,
+  ListChecks as Silian_ListChecks,
+  ShieldCheck as Silian_ShieldCheck,
+  Shield as Silian_Shield,
+  Layers as Silian_Layers,
+  Code as Silian_Code,
+  Globe2 as Silian_Globe2,
+  Download as Silian_Download,
+  Search as Silian_Search,
 } from 'lucide-react';
-import { cn } from '../../lib/utils';
-import { API_BASE_URL } from '../../lib/api';
+import { cn as Silian_cn } from '../../lib/utils';
+import { API_BASE_URL as Silian_API_BASE_URL } from '../../lib/api';
 
-const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'];
-const UNTAGGED_TOKEN = '__untagged__';
-const REMOTE_SPEC_FALLBACK =
+const Silian_HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'];
+const Silian_UNTAGGED_TOKEN = '__untagged__';
+const Silian_REMOTE_SPEC_FALLBACK =
   'https://raw.githubusercontent.com/carbon-track/carbontrack-rev/refs/heads/main/backend/openapi.json';
-const API_TEST_BASE_URL = API_BASE_URL;
-const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+const Silian_API_TEST_BASE_URL = Silian_API_BASE_URL;
+const Silian_METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
-const HTTP_METHOD_STYLES = {
+const Silian_HTTP_METHOD_STYLES = {
   GET: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300',
   POST: 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-500/30 dark:bg-sky-500/15 dark:text-sky-300',
   PUT: 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300',
@@ -61,186 +61,186 @@ const HTTP_METHOD_STYLES = {
   DEFAULT: 'border-slate-200 bg-slate-100 text-slate-700 dark:border-border dark:bg-muted dark:text-muted-foreground',
 };
 
-function computeDefaultSpecUrl() {
-  const explicit = import.meta.env?.VITE_OPENAPI_SPEC_URL;
-  if (explicit) {
-    return explicit;
+function Silian_computeDefaultSpecUrl() {
+  const Silian_explicit = import.meta.env?.VITE_OPENAPI_SPEC_URL;
+  if (Silian_explicit) {
+    return Silian_explicit;
   }
-  return REMOTE_SPEC_FALLBACK;
+  return Silian_REMOTE_SPEC_FALLBACK;
 }
 
-const DEFAULT_SPEC_URL = computeDefaultSpecUrl();
-async function fetchOpenApiSpec({ signal }) {
-  const response = await fetch(DEFAULT_SPEC_URL, {
+const Silian_DEFAULT_SPEC_URL = Silian_computeDefaultSpecUrl();
+async function Silian_fetchOpenApiSpec({ signal: Silian_signal }) {
+  const Silian_response = await fetch(Silian_DEFAULT_SPEC_URL, {
     method: 'GET',
     headers: {
       Accept: 'application/json',
     },
     cache: 'no-store',
-    signal,
+    signal: Silian_signal,
   });
 
-  if (!response.ok) {
-    throw new Error(`Failed to load OpenAPI spec (${response.status})`);
+  if (!Silian_response.ok) {
+    throw new Error(`Failed to load OpenAPI spec (${Silian_response.status})`);
   }
 
-  const spec = await response.json();
-  if (!spec || typeof spec !== 'object' || !spec.paths) {
+  const Silian_spec = await Silian_response.json();
+  if (!Silian_spec || typeof Silian_spec !== 'object' || !Silian_spec.paths) {
     throw new Error('OpenAPI document is missing path definitions');
   }
 
-  return spec;
+  return Silian_spec;
 }
 
-function buildOperations(spec) {
-  if (!spec?.paths) {
+function Silian_buildOperations(Silian_spec) {
+  if (!Silian_spec?.paths) {
     return [];
   }
 
-  const globalSecurity = Array.isArray(spec.security) ? spec.security : [];
-  const operations = [];
+  const Silian_globalSecurity = Array.isArray(Silian_spec.security) ? Silian_spec.security : [];
+  const Silian_operations = [];
 
-  Object.entries(spec.paths).forEach(([path, pathItem]) => {
-    if (!pathItem || typeof pathItem !== 'object') return;
+  Object.entries(Silian_spec.paths).forEach(([Silian_path, Silian_pathItem]) => {
+    if (!Silian_pathItem || typeof Silian_pathItem !== 'object') return;
 
-    Object.entries(pathItem).forEach(([method, operation]) => {
-      if (!HTTP_METHODS.includes(method.toLowerCase())) return;
-      if (!operation || typeof operation !== 'object') return;
+    Object.entries(Silian_pathItem).forEach(([Silian_method, Silian_operation]) => {
+      if (!Silian_HTTP_METHODS.includes(Silian_method.toLowerCase())) return;
+      if (!Silian_operation || typeof Silian_operation !== 'object') return;
 
-      const requestBody = operation.requestBody || null;
-      const responses = operation.responses || {};
-      const responseCodes = Object.keys(responses);
-      const security = Array.isArray(operation.security) ? operation.security : globalSecurity;
-      const requiresAuth = Array.isArray(security) && security.length > 0;
+      const Silian_requestBody = Silian_operation.requestBody || null;
+      const Silian_responses = Silian_operation.responses || {};
+      const Silian_responseCodes = Object.keys(Silian_responses);
+      const Silian_security = Array.isArray(Silian_operation.security) ? Silian_operation.security : Silian_globalSecurity;
+      const Silian_requiresAuth = Array.isArray(Silian_security) && Silian_security.length > 0;
 
-      const combinedParameters = [
-        ...(Array.isArray(pathItem.parameters) ? pathItem.parameters : []),
-        ...(Array.isArray(operation.parameters) ? operation.parameters : []),
+      const Silian_combinedParameters = [
+        ...(Array.isArray(Silian_pathItem.parameters) ? Silian_pathItem.parameters : []),
+        ...(Array.isArray(Silian_operation.parameters) ? Silian_operation.parameters : []),
       ];
 
-      const securitySchemes = Array.isArray(security)
-        ? [...new Set(security.flatMap((rule) => Object.keys(rule || {})))]
+      const Silian_securitySchemes = Array.isArray(Silian_security)
+        ? [...new Set(Silian_security.flatMap((Silian_rule) => Object.keys(Silian_rule || {})))]
         : [];
 
-      operations.push({
-        id: `${method.toUpperCase()} ${path}`,
-        path,
-        method: method.toUpperCase(),
-        summary: operation.summary || '',
-        description: operation.description || '',
-        tags: operation.tags && operation.tags.length ? operation.tags : [UNTAGGED_TOKEN],
-        deprecated: Boolean(operation.deprecated),
-        servers: operation.servers || spec.servers || [],
-        requestBody,
-        responses,
-        responseCodes,
-        parameters: combinedParameters,
-        security,
-        securitySchemes,
-        requiresAuth,
-        requestContentTypes: requestBody?.content ? Object.keys(requestBody.content) : [],
-        responseContentTypes: Object.entries(responses).reduce((acc, [status, payload]) => {
-          acc[status] = payload?.content ? Object.keys(payload.content) : [];
-          return acc;
+      Silian_operations.push({
+        id: `${Silian_method.toUpperCase()} ${Silian_path}`,
+        path: Silian_path,
+        method: Silian_method.toUpperCase(),
+        summary: Silian_operation.summary || '',
+        description: Silian_operation.description || '',
+        tags: Silian_operation.tags && Silian_operation.tags.length ? Silian_operation.tags : [Silian_UNTAGGED_TOKEN],
+        deprecated: Boolean(Silian_operation.deprecated),
+        servers: Silian_operation.servers || Silian_spec.servers || [],
+        requestBody: Silian_requestBody,
+        responses: Silian_responses,
+        responseCodes: Silian_responseCodes,
+        parameters: Silian_combinedParameters,
+        security: Silian_security,
+        securitySchemes: Silian_securitySchemes,
+        requiresAuth: Silian_requiresAuth,
+        requestContentTypes: Silian_requestBody?.content ? Object.keys(Silian_requestBody.content) : [],
+        responseContentTypes: Object.entries(Silian_responses).reduce((Silian_acc, [Silian_status, Silian_payload]) => {
+          Silian_acc[Silian_status] = Silian_payload?.content ? Object.keys(Silian_payload.content) : [];
+          return Silian_acc;
         }, {}),
       });
     });
   });
 
-  return operations.sort((a, b) => {
-    if (a.path === b.path) {
-      return a.method.localeCompare(b.method);
+  return Silian_operations.sort((Silian_a, Silian_b) => {
+    if (Silian_a.path === Silian_b.path) {
+      return Silian_a.method.localeCompare(Silian_b.method);
     }
-    return a.path.localeCompare(b.path);
+    return Silian_a.path.localeCompare(Silian_b.path);
   });
 }
-function formatSchema(schema) {
-  if (!schema) return '';
-  if (schema.$ref) {
-    return schema.$ref.split('/').pop();
+function Silian_formatSchema(Silian_schema) {
+  if (!Silian_schema) return '';
+  if (Silian_schema.$ref) {
+    return Silian_schema.$ref.split('/').pop();
   }
-  if (schema.type === 'array') {
-    const inner = formatSchema(schema.items);
-    return inner ? `array<${inner}>` : 'array';
+  if (Silian_schema.type === 'array') {
+    const Silian_inner = Silian_formatSchema(Silian_schema.items);
+    return Silian_inner ? `array<${Silian_inner}>` : 'array';
   }
-  return schema.type || '';
+  return Silian_schema.type || '';
 }
 
-function sortStatusCodes(codes) {
-  return [...codes].sort((a, b) => {
-    const numericA = /^\d+$/.test(a);
-    const numericB = /^\d+$/.test(b);
-    if (numericA && numericB) {
-      return Number(a) - Number(b);
+function Silian_sortStatusCodes(Silian_codes) {
+  return [...Silian_codes].sort((Silian_a, Silian_b) => {
+    const Silian_numericA = /^\d+$/.test(Silian_a);
+    const Silian_numericB = /^\d+$/.test(Silian_b);
+    if (Silian_numericA && Silian_numericB) {
+      return Number(Silian_a) - Number(Silian_b);
     }
-    if (numericA) return -1;
-    if (numericB) return 1;
-    return a.localeCompare(b);
+    if (Silian_numericA) return -1;
+    if (Silian_numericB) return 1;
+    return Silian_a.localeCompare(Silian_b);
   });
 }
 export default function AdminDiagnosticsPage() {
-  const { t, currentLanguage } = useTranslation(['admin', 'errors', 'messages']);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [methodFilter, setMethodFilter] = useState('all');
-  const [tagFilter, setTagFilter] = useState('all');
-  const [securityFilter, setSecurityFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const { t: Silian_t, currentLanguage: Silian_currentLanguage } = Silian_useTranslation(['admin', 'errors', 'messages']);
+  const [Silian_searchTerm, Silian_setSearchTerm] = Silian_useState('');
+  const [Silian_methodFilter, Silian_setMethodFilter] = Silian_useState('all');
+  const [Silian_tagFilter, Silian_setTagFilter] = Silian_useState('all');
+  const [Silian_securityFilter, Silian_setSecurityFilter] = Silian_useState('all');
+  const [Silian_statusFilter, Silian_setStatusFilter] = Silian_useState('all');
 
-  const query = useQuery(['openapi-spec'], fetchOpenApiSpec, {
+  const Silian_query = Silian_useQuery(['openapi-spec'], Silian_fetchOpenApiSpec, {
     staleTime: 5 * 60 * 1000,
     cacheTime: 15 * 60 * 1000,
   });
 
-  const spec = query.data;
-  const operations = useMemo(() => buildOperations(spec), [spec]);
+  const Silian_spec = Silian_query.data;
+  const Silian_operations = Silian_useMemo(() => Silian_buildOperations(Silian_spec), [Silian_spec]);
 
-  const availableMethods = useMemo(
-    () => [...new Set(operations.map((op) => op.method))],
-    [operations]
+  const Silian_availableMethods = Silian_useMemo(
+    () => [...new Set(Silian_operations.map((Silian_op) => Silian_op.method))],
+    [Silian_operations]
   );
 
-  const availableTags = useMemo(() => {
-    const tagSet = new Set();
-    operations.forEach((op) => op.tags.forEach((tag) => tagSet.add(tag)));
-    return [...tagSet];
-  }, [operations]);
+  const Silian_availableTags = Silian_useMemo(() => {
+    const Silian_tagSet = new Set();
+    Silian_operations.forEach((Silian_op) => Silian_op.tags.forEach((Silian_tag) => Silian_tagSet.add(Silian_tag)));
+    return [...Silian_tagSet];
+  }, [Silian_operations]);
 
-  const availableStatuses = useMemo(() => {
-    const codes = new Set();
-    operations.forEach((op) => op.responseCodes.forEach((code) => codes.add(code)));
-    return sortStatusCodes([...codes]);
-  }, [operations]);
+  const Silian_availableStatuses = Silian_useMemo(() => {
+    const Silian_codes = new Set();
+    Silian_operations.forEach((Silian_op) => Silian_op.responseCodes.forEach((Silian_code) => Silian_codes.add(Silian_code)));
+    return Silian_sortStatusCodes([...Silian_codes]);
+  }, [Silian_operations]);
 
-  const filteredOperations = useMemo(() => {
-    if (!operations.length) return [];
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-    return operations.filter((operation) => {
-      if (methodFilter !== 'all' && operation.method !== methodFilter) {
+  const Silian_filteredOperations = Silian_useMemo(() => {
+    if (!Silian_operations.length) return [];
+    const Silian_normalizedSearch = Silian_searchTerm.trim().toLowerCase();
+    return Silian_operations.filter((Silian_operation) => {
+      if (Silian_methodFilter !== 'all' && Silian_operation.method !== Silian_methodFilter) {
         return false;
       }
-      if (tagFilter !== 'all' && !operation.tags.includes(tagFilter)) {
+      if (Silian_tagFilter !== 'all' && !Silian_operation.tags.includes(Silian_tagFilter)) {
         return false;
       }
-      if (securityFilter === 'secured' && !operation.requiresAuth) {
+      if (Silian_securityFilter === 'secured' && !Silian_operation.requiresAuth) {
         return false;
       }
-      if (securityFilter === 'public' && operation.requiresAuth) {
+      if (Silian_securityFilter === 'public' && Silian_operation.requiresAuth) {
         return false;
       }
-      if (statusFilter !== 'all' && !operation.responseCodes.includes(statusFilter)) {
+      if (Silian_statusFilter !== 'all' && !Silian_operation.responseCodes.includes(Silian_statusFilter)) {
         return false;
       }
-      if (!normalizedSearch) {
+      if (!Silian_normalizedSearch) {
         return true;
       }
-      return [operation.path, operation.summary, operation.description]
+      return [Silian_operation.path, Silian_operation.summary, Silian_operation.description]
         .filter(Boolean)
-        .some((field) => field.toLowerCase().includes(normalizedSearch));
+        .some((Silian_field) => Silian_field.toLowerCase().includes(Silian_normalizedSearch));
     });
-  }, [operations, methodFilter, tagFilter, securityFilter, statusFilter, searchTerm]);
+  }, [Silian_operations, Silian_methodFilter, Silian_tagFilter, Silian_securityFilter, Silian_statusFilter, Silian_searchTerm]);
 
-  const stats = useMemo(() => {
-    if (!operations.length) {
+  const Silian_stats = Silian_useMemo(() => {
+    if (!Silian_operations.length) {
       return {
         total: 0,
         secured: 0,
@@ -249,346 +249,346 @@ export default function AdminDiagnosticsPage() {
         methods: 0,
       };
     }
-    const secured = operations.filter((op) => op.requiresAuth).length;
-    const tagCount = new Set(operations.flatMap((op) => op.tags)).size;
-    const methodCount = new Set(operations.map((op) => op.method)).size;
+    const Silian_secured = Silian_operations.filter((Silian_op) => Silian_op.requiresAuth).length;
+    const Silian_tagCount = new Set(Silian_operations.flatMap((Silian_op) => Silian_op.tags)).size;
+    const Silian_methodCount = new Set(Silian_operations.map((Silian_op) => Silian_op.method)).size;
     return {
-      total: operations.length,
-      secured,
-      publicCount: operations.length - secured,
-      tags: tagCount,
-      methods: methodCount,
+      total: Silian_operations.length,
+      secured: Silian_secured,
+      publicCount: Silian_operations.length - Silian_secured,
+      tags: Silian_tagCount,
+      methods: Silian_methodCount,
     };
-  }, [operations]);
+  }, [Silian_operations]);
 
-  const translatedTag = (tag) => {
-    if (tag !== UNTAGGED_TOKEN) return tag;
-    return t('admin.diagnostics.labels.untagged');
+  const Silian_translatedTag = (Silian_tag) => {
+    if (Silian_tag !== Silian_UNTAGGED_TOKEN) return Silian_tag;
+    return Silian_t('admin.diagnostics.labels.untagged');
   };
 
-  const securityLabels = useMemo(
+  const Silian_securityLabels = Silian_useMemo(
     () => ({
-      secured: t('admin.diagnostics.labels.authRequired'),
-      public: t('admin.diagnostics.labels.publicEndpoint'),
+      secured: Silian_t('admin.diagnostics.labels.authRequired'),
+      public: Silian_t('admin.diagnostics.labels.publicEndpoint'),
     }),
-    [t]
+    [Silian_t]
   );
 
-  const lastFetchedText = useMemo(() => {
-    if (!query.dataUpdatedAt) return null;
+  const Silian_lastFetchedText = Silian_useMemo(() => {
+    if (!Silian_query.dataUpdatedAt) return null;
     try {
-      const formatter = new Intl.DateTimeFormat(currentLanguage || undefined, {
+      const Silian_formatter = new Intl.DateTimeFormat(Silian_currentLanguage || undefined, {
         dateStyle: 'medium',
         timeStyle: 'medium',
       });
-      return formatter.format(new Date(query.dataUpdatedAt));
+      return Silian_formatter.format(new Date(Silian_query.dataUpdatedAt));
     } catch {
-      return new Date(query.dataUpdatedAt).toLocaleString();
+      return new Date(Silian_query.dataUpdatedAt).toLocaleString();
     }
-  }, [currentLanguage, query.dataUpdatedAt]);
+  }, [Silian_currentLanguage, Silian_query.dataUpdatedAt]);
 
-  const specVersion = spec?.info?.version;
-  const specTitle = spec?.info?.title;
-  const servers = Array.isArray(spec?.servers) ? spec.servers : [];
+  const Silian_specVersion = Silian_spec?.info?.version;
+  const Silian_specTitle = Silian_spec?.info?.title;
+  const Silian_servers = Array.isArray(Silian_spec?.servers) ? Silian_spec.servers : [];
 
   return (
     <div className="space-y-6">
-      <Card className="border-border/70 bg-card/90">
-        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <Silian_Card className="border-border/70 bg-card/90">
+        <Silian_CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle>{t('admin.diagnostics.title')}</CardTitle>
-            <CardDescription>
-              {t(
+            <Silian_CardTitle>{Silian_t('admin.diagnostics.title')}</Silian_CardTitle>
+            <Silian_CardDescription>
+              {Silian_t(
                 'admin.diagnostics.description')}
-            </CardDescription>
+            </Silian_CardDescription>
             <dl className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
-              {specTitle && (
+              {Silian_specTitle && (
                 <div>
                   <dt className="font-semibold uppercase tracking-wide">
-                    {t('admin.diagnostics.spec.title')}
+                    {Silian_t('admin.diagnostics.spec.title')}
                   </dt>
-                  <dd>{specTitle}</dd>
+                  <dd>{Silian_specTitle}</dd>
                 </div>
               )}
-              {specVersion && (
+              {Silian_specVersion && (
                 <div>
                   <dt className="font-semibold uppercase tracking-wide">
-                    {t('admin.diagnostics.spec.version')}
+                    {Silian_t('admin.diagnostics.spec.version')}
                   </dt>
-                  <dd>{specVersion}</dd>
+                  <dd>{Silian_specVersion}</dd>
                 </div>
               )}
-              {lastFetchedText && (
+              {Silian_lastFetchedText && (
                 <div>
                   <dt className="font-semibold uppercase tracking-wide">
-                    {t('admin.diagnostics.spec.fetchedAt')}
+                    {Silian_t('admin.diagnostics.spec.fetchedAt')}
                   </dt>
-                  <dd>{lastFetchedText}</dd>
+                  <dd>{Silian_lastFetchedText}</dd>
                 </div>
               )}
             </dl>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
+            <Silian_Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => window.open(DEFAULT_SPEC_URL, '_blank', 'noopener,noreferrer')}
+              onClick={() => window.open(Silian_DEFAULT_SPEC_URL, '_blank', 'noopener,noreferrer')}
             >
-              <Download className="mr-2 h-4 w-4" />
-              {t('admin.diagnostics.spec.download')}
-            </Button>
-            <Button
+              <Silian_Download className="mr-2 h-4 w-4" />
+              {Silian_t('admin.diagnostics.spec.download')}
+            </Silian_Button>
+            <Silian_Button
               type="button"
               size="sm"
-              onClick={() => query.refetch()}
-              disabled={query.isFetching}
+              onClick={() => Silian_query.refetch()}
+              disabled={Silian_query.isFetching}
             >
-              {query.isFetching ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {Silian_query.isFetching ? (
+                <Silian_Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <RefreshCw className="mr-2 h-4 w-4" />
+                <Silian_RefreshCw className="mr-2 h-4 w-4" />
               )}
-              {t('admin.diagnostics.actions.refresh')}
-            </Button>
+              {Silian_t('admin.diagnostics.actions.refresh')}
+            </Silian_Button>
           </div>
-        </CardHeader>
-      </Card>
+        </Silian_CardHeader>
+      </Silian_Card>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <StatCard
-          icon={ListChecks}
-          label={t('admin.diagnostics.stats.endpoints')}
-          value={stats.total}
+        <Silian_StatCard
+          icon={Silian_ListChecks}
+          label={Silian_t('admin.diagnostics.stats.endpoints')}
+          value={Silian_stats.total}
         />
-        <StatCard
-          icon={ShieldCheck}
-          label={t('admin.diagnostics.stats.secured')}
-          value={stats.secured}
+        <Silian_StatCard
+          icon={Silian_ShieldCheck}
+          label={Silian_t('admin.diagnostics.stats.secured')}
+          value={Silian_stats.secured}
         />
-        <StatCard
-          icon={Shield}
-          label={t('admin.diagnostics.stats.public')}
-          value={stats.publicCount}
+        <Silian_StatCard
+          icon={Silian_Shield}
+          label={Silian_t('admin.diagnostics.stats.public')}
+          value={Silian_stats.publicCount}
         />
-        <StatCard
-          icon={Layers}
-          label={t('admin.diagnostics.stats.tags')}
-          value={stats.tags}
+        <Silian_StatCard
+          icon={Silian_Layers}
+          label={Silian_t('admin.diagnostics.stats.tags')}
+          value={Silian_stats.tags}
         />
-        <StatCard
-          icon={Code}
-          label={t('admin.diagnostics.stats.methods')}
-          value={stats.methods}
+        <Silian_StatCard
+          icon={Silian_Code}
+          label={Silian_t('admin.diagnostics.stats.methods')}
+          value={Silian_stats.methods}
         />
       </div>
 
-      <Card className="border-border/70 bg-card/90">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">
-            {t('admin.diagnostics.filters.title')}
-          </CardTitle>
-          <CardDescription>
-            {t(
+      <Silian_Card className="border-border/70 bg-card/90">
+        <Silian_CardHeader className="pb-2">
+          <Silian_CardTitle className="text-base">
+            {Silian_t('admin.diagnostics.filters.title')}
+          </Silian_CardTitle>
+          <Silian_CardDescription>
+            {Silian_t(
               'admin.diagnostics.filters.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 lg:grid-cols-2">
+          </Silian_CardDescription>
+        </Silian_CardHeader>
+        <Silian_CardContent className="grid gap-4 lg:grid-cols-2">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-foreground">
-              {t('admin.diagnostics.filters.search')}
+              {Silian_t('admin.diagnostics.filters.search')}
             </label>
             <div className="relative">
-              <Search className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-              <Input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder={t(
+              <Silian_Search className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+              <Silian_Input
+                value={Silian_searchTerm}
+                onChange={(Silian_event) => Silian_setSearchTerm(Silian_event.target.value)}
+                placeholder={Silian_t(
                   'admin.diagnostics.filters.searchPlaceholder')}
                 className="pl-9"
               />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FilterSelect
-              label={t('admin.diagnostics.filters.method')}
-              value={methodFilter}
-              onValueChange={setMethodFilter}
-              placeholder={t('admin.diagnostics.filters.methodAll')}
-              options={availableMethods.map((method) => ({
-                label: method,
-                value: method,
+            <Silian_FilterSelect
+              label={Silian_t('admin.diagnostics.filters.method')}
+              value={Silian_methodFilter}
+              onValueChange={Silian_setMethodFilter}
+              placeholder={Silian_t('admin.diagnostics.filters.methodAll')}
+              options={Silian_availableMethods.map((Silian_method) => ({
+                label: Silian_method,
+                value: Silian_method,
               }))}
             />
-            <FilterSelect
-              label={t('admin.diagnostics.filters.tag')}
-              value={tagFilter}
-              onValueChange={setTagFilter}
-              placeholder={t('admin.diagnostics.filters.tagAll')}
-              options={availableTags.map((tag) => ({
-                label: translatedTag(tag),
-                value: tag,
+            <Silian_FilterSelect
+              label={Silian_t('admin.diagnostics.filters.tag')}
+              value={Silian_tagFilter}
+              onValueChange={Silian_setTagFilter}
+              placeholder={Silian_t('admin.diagnostics.filters.tagAll')}
+              options={Silian_availableTags.map((Silian_tag) => ({
+                label: Silian_translatedTag(Silian_tag),
+                value: Silian_tag,
               }))}
             />
-            <FilterSelect
-              label={t('admin.diagnostics.filters.security')}
-              value={securityFilter}
-              onValueChange={setSecurityFilter}
-              placeholder={t('admin.diagnostics.filters.securityAll')}
+            <Silian_FilterSelect
+              label={Silian_t('admin.diagnostics.filters.security')}
+              value={Silian_securityFilter}
+              onValueChange={Silian_setSecurityFilter}
+              placeholder={Silian_t('admin.diagnostics.filters.securityAll')}
               options={[
                 {
                   value: 'secured',
-                  label: t('admin.diagnostics.filters.securitySecured'),
+                  label: Silian_t('admin.diagnostics.filters.securitySecured'),
                 },
                 {
                   value: 'public',
-                  label: t('admin.diagnostics.filters.securityPublic'),
+                  label: Silian_t('admin.diagnostics.filters.securityPublic'),
                 },
               ]}
             />
-            <FilterSelect
-              label={t('admin.diagnostics.filters.status')}
-              value={statusFilter}
-              onValueChange={setStatusFilter}
-              placeholder={t('admin.diagnostics.filters.statusAll')}
-              options={availableStatuses.map((code) => ({
-                label: code,
-                value: code,
+            <Silian_FilterSelect
+              label={Silian_t('admin.diagnostics.filters.status')}
+              value={Silian_statusFilter}
+              onValueChange={Silian_setStatusFilter}
+              placeholder={Silian_t('admin.diagnostics.filters.statusAll')}
+              options={Silian_availableStatuses.map((Silian_code) => ({
+                label: Silian_code,
+                value: Silian_code,
               }))}
             />
           </div>
-        </CardContent>
-      </Card>
+        </Silian_CardContent>
+      </Silian_Card>
 
-      {query.isError && (
-        <Alert variant="destructive">
-          <AlertTitle>{t('admin.diagnostics.status.errorTitle')}</AlertTitle>
-          <AlertDescription>
-            {query.error?.message ||
-              t(
+      {Silian_query.isError && (
+        <Silian_Alert variant="destructive">
+          <Silian_AlertTitle>{Silian_t('admin.diagnostics.status.errorTitle')}</Silian_AlertTitle>
+          <Silian_AlertDescription>
+            {Silian_query.error?.message ||
+              Silian_t(
                 'admin.diagnostics.status.errorDescription')}
-          </AlertDescription>
-        </Alert>
+          </Silian_AlertDescription>
+        </Silian_Alert>
       )}
 
-      <Card className="border-border/70 bg-card/90">
-        <CardHeader className="flex flex-col gap-2 border-b border-border/80 pb-4">
+      <Silian_Card className="border-border/70 bg-card/90">
+        <Silian_CardHeader className="flex flex-col gap-2 border-b border-border/80 pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-base">
-                {t('admin.diagnostics.results.title')}
-              </CardTitle>
-              <CardDescription>
-                {t('admin.diagnostics.results.count',  {
-                  count: filteredOperations.length,
+              <Silian_CardTitle className="text-base">
+                {Silian_t('admin.diagnostics.results.title')}
+              </Silian_CardTitle>
+              <Silian_CardDescription>
+                {Silian_t('admin.diagnostics.results.count',  {
+                  count: Silian_filteredOperations.length,
                 })}
-              </CardDescription>
+              </Silian_CardDescription>
             </div>
-            {servers.length > 0 && (
+            {Silian_servers.length > 0 && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Globe2 className="h-4 w-4" />
+                <Silian_Globe2 className="h-4 w-4" />
                 <span>
-                  {t('admin.diagnostics.spec.servers')}: {servers.length}
+                  {Silian_t('admin.diagnostics.spec.servers')}: {Silian_servers.length}
                 </span>
               </div>
             )}
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          {query.isLoading ? (
+        </Silian_CardHeader>
+        <Silian_CardContent className="p-0">
+          {Silian_query.isLoading ? (
             <div className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t('admin.diagnostics.status.loading')}
+              <Silian_Loader2 className="h-4 w-4 animate-spin" />
+              {Silian_t('admin.diagnostics.status.loading')}
             </div>
-          ) : filteredOperations.length === 0 ? (
+          ) : Silian_filteredOperations.length === 0 ? (
             <div className="p-6 text-sm text-muted-foreground">
-              {t('admin.diagnostics.status.empty')}
+              {Silian_t('admin.diagnostics.status.empty')}
             </div>
           ) : (
-            <Accordion type="single" collapsible>
-              {filteredOperations.map((operation) => (
-                <AccordionItem key={operation.id} value={operation.id}>
-                  <AccordionTrigger className="px-4">
+            <Silian_Accordion type="single" collapsible>
+              {Silian_filteredOperations.map((Silian_operation) => (
+                <Silian_AccordionItem key={Silian_operation.id} value={Silian_operation.id}>
+                  <Silian_AccordionTrigger className="px-4">
                     <div className="flex w-full flex-col gap-3 text-left md:flex-row md:items-center md:justify-between">
                       <div className="flex flex-1 flex-col gap-2">
                         <div className="flex flex-wrap items-center gap-3">
-                          <MethodBadge method={operation.method} />
-                          <p className="font-mono text-sm text-foreground">{operation.path}</p>
-                          {operation.deprecated && (
-                            <Badge
+                          <Silian_MethodBadge method={Silian_operation.method} />
+                          <p className="font-mono text-sm text-foreground">{Silian_operation.path}</p>
+                          {Silian_operation.deprecated && (
+                            <Silian_Badge
                               variant="destructive"
                               className="border-rose-200 bg-rose-50 text-xs uppercase tracking-wide text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/15 dark:text-rose-300"
                             >
-                              {t('admin.diagnostics.labels.deprecated')}
-                            </Badge>
+                              {Silian_t('admin.diagnostics.labels.deprecated')}
+                            </Silian_Badge>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {operation.summary ||
-                            operation.description ||
-                            t('admin.diagnostics.labels.noSummary')}
+                          {Silian_operation.summary ||
+                            Silian_operation.description ||
+                            Silian_t('admin.diagnostics.labels.noSummary')}
                         </p>
                       </div>
                       <div className="flex flex-col items-start gap-2 md:items-end">
-                        <SecurityBadge secured={operation.requiresAuth} labels={securityLabels} />
+                        <Silian_SecurityBadge secured={Silian_operation.requiresAuth} labels={Silian_securityLabels} />
                         <div className="flex flex-wrap gap-1">
-                          {operation.tags.slice(0, 3).map((tag) => (
-                            <Badge key={`${operation.id}-${tag}`} variant="outline">
-                              {translatedTag(tag)}
-                            </Badge>
+                          {Silian_operation.tags.slice(0, 3).map((Silian_tag) => (
+                            <Silian_Badge key={`${Silian_operation.id}-${Silian_tag}`} variant="outline">
+                              {Silian_translatedTag(Silian_tag)}
+                            </Silian_Badge>
                           ))}
-                          {operation.tags.length > 3 && (
+                          {Silian_operation.tags.length > 3 && (
                             <span className="text-xs text-muted-foreground">
-                              +{operation.tags.length - 3}
+                              +{Silian_operation.tags.length - 3}
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="bg-muted/40 px-4">
+                  </Silian_AccordionTrigger>
+                  <Silian_AccordionContent className="bg-muted/40 px-4">
                     <div className="space-y-6 rounded-lg border border-border bg-card/95 p-6">
-                      {operation.description && (
-                        <p className="text-sm text-muted-foreground">{operation.description}</p>
+                      {Silian_operation.description && (
+                        <p className="text-sm text-muted-foreground">{Silian_operation.description}</p>
                       )}
 
                       <div className="grid gap-6 md:grid-cols-2">
-                        <InfoBlock
-                          title={t('admin.diagnostics.labels.tags')}
+                        <Silian_InfoBlock
+                          title={Silian_t('admin.diagnostics.labels.tags')}
                           value={
                             <div className="flex flex-wrap gap-2">
-                              {operation.tags.map((tag) => (
-                                <Badge key={`${operation.id}-${tag}-detail`} variant="secondary">
-                                  {translatedTag(tag)}
-                                </Badge>
+                              {Silian_operation.tags.map((Silian_tag) => (
+                                <Silian_Badge key={`${Silian_operation.id}-${Silian_tag}-detail`} variant="secondary">
+                                  {Silian_translatedTag(Silian_tag)}
+                                </Silian_Badge>
                               ))}
                             </div>
                           }
                         />
-                        <InfoBlock
-                          title={t('admin.diagnostics.labels.security')}
+                        <Silian_InfoBlock
+                          title={Silian_t('admin.diagnostics.labels.security')}
                           value={
-                            operation.requiresAuth ? (
+                            Silian_operation.requiresAuth ? (
                               <div className="space-y-1 text-sm text-foreground/90">
-                                <p>{securityLabels.secured}</p>
-                                {operation.securitySchemes.length > 0 && (
+                                <p>{Silian_securityLabels.secured}</p>
+                                {Silian_operation.securitySchemes.length > 0 && (
                                   <p className="text-xs text-muted-foreground">
-                                    {operation.securitySchemes.join(', ')}
+                                    {Silian_operation.securitySchemes.join(', ')}
                                   </p>
                                 )}
                               </div>
                             ) : (
-                              <p className="text-sm text-muted-foreground">{securityLabels.public}</p>
+                              <p className="text-sm text-muted-foreground">{Silian_securityLabels.public}</p>
                             )
                           }
                         />
                       </div>
 
                       <div className="grid gap-6 lg:grid-cols-2">
-                        <Section title={t('admin.diagnostics.labels.parameters')}>
-                          {operation.parameters.length === 0 ? (
+                        <Silian_Section title={Silian_t('admin.diagnostics.labels.parameters')}>
+                          {Silian_operation.parameters.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
-                              {t('admin.diagnostics.labels.noParameters')}
+                              {Silian_t('admin.diagnostics.labels.noParameters')}
                             </p>
                           ) : (
                             <div className="overflow-x-auto rounded-lg border border-border">
@@ -596,35 +596,35 @@ export default function AdminDiagnosticsPage() {
                                 <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
                                   <tr>
                                     <th className="px-3 py-2 font-semibold">
-                                      {t('admin.diagnostics.table.name')}
+                                      {Silian_t('admin.diagnostics.table.name')}
                                     </th>
                                     <th className="px-3 py-2 font-semibold">
-                                      {t('admin.diagnostics.table.in')}
+                                      {Silian_t('admin.diagnostics.table.in')}
                                     </th>
                                     <th className="px-3 py-2 font-semibold">
-                                      {t('admin.diagnostics.table.required')}
+                                      {Silian_t('admin.diagnostics.table.required')}
                                     </th>
                                     <th className="px-3 py-2 font-semibold">
-                                      {t('admin.diagnostics.table.type')}
+                                      {Silian_t('admin.diagnostics.table.type')}
                                     </th>
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {operation.parameters.map((parameter, index) => (
-                                    <tr key={`${operation.id}-${parameter.name || index}`}>
+                                  {Silian_operation.parameters.map((Silian_parameter, Silian_index) => (
+                                    <tr key={`${Silian_operation.id}-${Silian_parameter.name || Silian_index}`}>
                                       <td className="border-t px-3 py-2 font-mono text-xs">
-                                        {parameter.name || '—'}
+                                        {Silian_parameter.name || '—'}
                                       </td>
                                       <td className="border-t border-border px-3 py-2 text-xs uppercase text-muted-foreground">
-                                        {parameter.in || '—'}
+                                        {Silian_parameter.in || '—'}
                                       </td>
                                       <td className="border-t border-border px-3 py-2 text-xs">
-                                        {parameter.required
-                                          ? t('admin.diagnostics.labels.yes')
-                                          : t('admin.diagnostics.labels.no')}
+                                        {Silian_parameter.required
+                                          ? Silian_t('admin.diagnostics.labels.yes')
+                                          : Silian_t('admin.diagnostics.labels.no')}
                                       </td>
                                       <td className="border-t border-border px-3 py-2 text-xs">
-                                        {formatSchema(parameter.schema) || '—'}
+                                        {Silian_formatSchema(Silian_parameter.schema) || '—'}
                                       </td>
                                     </tr>
                                   ))}
@@ -632,64 +632,64 @@ export default function AdminDiagnosticsPage() {
                               </table>
                             </div>
                           )}
-                        </Section>
+                        </Silian_Section>
 
-                        <Section title={t('admin.diagnostics.labels.requestBody')}>
-                          {operation.requestBody ? (
+                        <Silian_Section title={Silian_t('admin.diagnostics.labels.requestBody')}>
+                          {Silian_operation.requestBody ? (
                             <div className="space-y-2 text-sm">
                               <p className="text-muted-foreground">
-                                {operation.requestBody.description ||
-                                  t('admin.diagnostics.labels.requestBodyDescription')}
+                                {Silian_operation.requestBody.description ||
+                                  Silian_t('admin.diagnostics.labels.requestBodyDescription')}
                               </p>
-                              {operation.requestContentTypes.length > 0 && (
+                              {Silian_operation.requestContentTypes.length > 0 && (
                                 <div className="flex flex-wrap gap-2">
-                                  {operation.requestContentTypes.map((type) => (
-                                    <Badge key={`${operation.id}-${type}`} variant="outline">
-                                      {type}
-                                    </Badge>
+                                  {Silian_operation.requestContentTypes.map((Silian_type) => (
+                                    <Silian_Badge key={`${Silian_operation.id}-${Silian_type}`} variant="outline">
+                                      {Silian_type}
+                                    </Silian_Badge>
                                   ))}
                                 </div>
                               )}
                             </div>
                           ) : (
                             <p className="text-sm text-muted-foreground">
-                              {t('admin.diagnostics.labels.noRequestBody')}
+                              {Silian_t('admin.diagnostics.labels.noRequestBody')}
                             </p>
                           )}
-                        </Section>
+                        </Silian_Section>
                       </div>
 
-                      <Section title={t('admin.diagnostics.labels.responses')}>
-                        {operation.responseCodes.length === 0 ? (
+                      <Silian_Section title={Silian_t('admin.diagnostics.labels.responses')}>
+                        {Silian_operation.responseCodes.length === 0 ? (
                           <p className="text-sm text-muted-foreground">
-                            {t('admin.diagnostics.labels.noResponses')}
+                            {Silian_t('admin.diagnostics.labels.noResponses')}
                           </p>
                         ) : (
                           <div className="space-y-3">
-                            {sortStatusCodes(operation.responseCodes).map((code) => {
-                              const response = operation.responses[code];
+                            {Silian_sortStatusCodes(Silian_operation.responseCodes).map((Silian_code) => {
+                              const Silian_response = Silian_operation.responses[Silian_code];
                               return (
                                 <div
-                                  key={`${operation.id}-${code}`}
+                                  key={`${Silian_operation.id}-${Silian_code}`}
                                   className="rounded-xl border border-border bg-muted/50 p-4"
                                 >
                                   <div className="flex flex-wrap items-center gap-3">
-                                    <Badge
+                                    <Silian_Badge
                                       variant="outline"
                                       className="border-border bg-background/80 font-mono text-xs"
                                     >
-                                      {code.toUpperCase()}
-                                    </Badge>
+                                      {Silian_code.toUpperCase()}
+                                    </Silian_Badge>
                                     <p className="text-sm font-medium text-foreground/90">
-                                      {response?.description ||
-                                        t(
+                                      {Silian_response?.description ||
+                                        Silian_t(
                                           'admin.diagnostics.labels.noResponseDescription')}
                                     </p>
                                   </div>
-                                  {operation.responseContentTypes[code]?.length > 0 && (
+                                  {Silian_operation.responseContentTypes[Silian_code]?.length > 0 && (
                                     <p className="mt-2 text-xs text-muted-foreground">
-                                      {t('admin.diagnostics.labels.responseContent')}:{' '}
-                                      {operation.responseContentTypes[code].join(', ')}
+                                      {Silian_t('admin.diagnostics.labels.responseContent')}:{' '}
+                                      {Silian_operation.responseContentTypes[Silian_code].join(', ')}
                                     </p>
                                   )}
                                 </div>
@@ -697,273 +697,273 @@ export default function AdminDiagnosticsPage() {
                             })}
                           </div>
                         )}
-                      </Section>
+                      </Silian_Section>
 
-                      <Section title={t('admin.diagnostics.tester.title')}>
-                        <RequestTester operation={operation} />
-                      </Section>
+                      <Silian_Section title={Silian_t('admin.diagnostics.tester.title')}>
+                        <Silian_RequestTester operation={Silian_operation} />
+                      </Silian_Section>
                     </div>
-                  </AccordionContent>
-                </AccordionItem>
+                  </Silian_AccordionContent>
+                </Silian_AccordionItem>
               ))}
-            </Accordion>
+            </Silian_Accordion>
           )}
-        </CardContent>
-      </Card>
+        </Silian_CardContent>
+      </Silian_Card>
     </div>
   );
 }
 
-function StatCard({ icon, label, value }) {
-  const IconComponent = icon;
+function Silian_StatCard({ icon: Silian_icon, label: Silian_label, value: Silian_value }) {
+  const Silian_IconComponent = Silian_icon;
   return (
-    <Card className="border-border/70 bg-card/90">
-      <CardContent className="flex items-center gap-3 p-4">
+    <Silian_Card className="border-border/70 bg-card/90">
+      <Silian_CardContent className="flex items-center gap-3 p-4">
         <div className="rounded-full bg-muted p-2 text-foreground/80">
-          <IconComponent className="h-5 w-5" />
+          <Silian_IconComponent className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-          <p className="text-xl font-semibold text-foreground">{value}</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">{Silian_label}</p>
+          <p className="text-xl font-semibold text-foreground">{Silian_value}</p>
         </div>
-      </CardContent>
-    </Card>
+      </Silian_CardContent>
+    </Silian_Card>
   );
 }
 
-function FilterSelect({ label, value, onValueChange, placeholder, options = [] }) {
+function Silian_FilterSelect({ label: Silian_label, value: Silian_value, onValueChange: Silian_onValueChange, placeholder: Silian_placeholder, options: Silian_options = [] }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-foreground">{label}</label>
-      <Select value={value} onValueChange={(val) => onValueChange(val)}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{placeholder}</SelectItem>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
+      <label className="text-sm font-medium text-foreground">{Silian_label}</label>
+      <Silian_Select value={Silian_value} onValueChange={(Silian_val) => Silian_onValueChange(Silian_val)}>
+        <Silian_SelectTrigger className="w-full">
+          <Silian_SelectValue placeholder={Silian_placeholder} />
+        </Silian_SelectTrigger>
+        <Silian_SelectContent>
+          <Silian_SelectItem value="all">{Silian_placeholder}</Silian_SelectItem>
+          {Silian_options.map((Silian_option) => (
+            <Silian_SelectItem key={Silian_option.value} value={Silian_option.value}>
+              {Silian_option.label}
+            </Silian_SelectItem>
           ))}
-        </SelectContent>
-      </Select>
+        </Silian_SelectContent>
+      </Silian_Select>
     </div>
   );
 }
 
-function MethodBadge({ method }) {
-  const style =
-    HTTP_METHOD_STYLES[method] || HTTP_METHOD_STYLES[method.toUpperCase()] || HTTP_METHOD_STYLES.DEFAULT;
+function Silian_MethodBadge({ method: Silian_method }) {
+  const Silian_style =
+    Silian_HTTP_METHOD_STYLES[Silian_method] || Silian_HTTP_METHOD_STYLES[Silian_method.toUpperCase()] || Silian_HTTP_METHOD_STYLES.DEFAULT;
   return (
-    <Badge variant="outline" className={cn('font-mono text-xs uppercase', style)}>
-      {method}
-    </Badge>
+    <Silian_Badge variant="outline" className={Silian_cn('font-mono text-xs uppercase', Silian_style)}>
+      {Silian_method}
+    </Silian_Badge>
   );
 }
 
-function SecurityBadge({ secured, labels }) {
-  return secured ? (
-    <Badge
+function Silian_SecurityBadge({ secured: Silian_secured, labels: Silian_labels }) {
+  return Silian_secured ? (
+    <Silian_Badge
       variant="outline"
       className="border-amber-200 bg-amber-50 text-xs font-medium uppercase tracking-wide text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300"
     >
-      {labels.secured}
-    </Badge>
+      {Silian_labels.secured}
+    </Silian_Badge>
   ) : (
-    <Badge
+    <Silian_Badge
       variant="outline"
       className="border-emerald-200 bg-emerald-50 text-xs font-medium uppercase tracking-wide text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300"
     >
-      {labels.public}
-    </Badge>
+      {Silian_labels.public}
+    </Silian_Badge>
   );
 }
 
-function Section({ title, children }) {
+function Silian_Section({ title: Silian_title, children: Silian_children }) {
   return (
     <div className="space-y-3">
-      <h4 className="text-sm font-semibold text-foreground">{title}</h4>
-      <div className="text-sm text-foreground/80">{children}</div>
+      <h4 className="text-sm font-semibold text-foreground">{Silian_title}</h4>
+      <div className="text-sm text-foreground/80">{Silian_children}</div>
     </div>
   );
 }
 
-function InfoBlock({ title, value }) {
+function Silian_InfoBlock({ title: Silian_title, value: Silian_value }) {
   return (
     <div className="space-y-2 rounded-xl border border-border/80 bg-muted/40 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</p>
-      {typeof value === 'string' || typeof value === 'number' ? (
-        <p className="text-sm text-foreground/90">{value}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{Silian_title}</p>
+      {typeof Silian_value === 'string' || typeof Silian_value === 'number' ? (
+        <p className="text-sm text-foreground/90">{Silian_value}</p>
       ) : (
-        value
+        Silian_value
       )}
     </div>
   );
 }
 
-function RequestTester({ operation }) {
-  const { t } = useTranslation();
-  const pathParams = useMemo(
-    () => (operation.parameters || []).filter((param) => param.in === 'path'),
-    [operation.parameters]
+function Silian_RequestTester({ operation: Silian_operation }) {
+  const { t: Silian_t } = Silian_useTranslation();
+  const Silian_pathParams = Silian_useMemo(
+    () => (Silian_operation.parameters || []).filter((Silian_param) => Silian_param.in === 'path'),
+    [Silian_operation.parameters]
   );
-  const [isOpen, setIsOpen] = useState(false);
-  const [baseUrl, setBaseUrl] = useState(API_TEST_BASE_URL);
-  const [paramValues, setParamValues] = useState(() => initializePathParamValues(pathParams));
-  const [queryInput, setQueryInput] = useState('');
-  const [headersInput, setHeadersInput] = useState('');
-  const [bodyInput, setBodyInput] = useState('');
-  const [includeAuth, setIncludeAuth] = useState(operation.requiresAuth);
-  const [isSending, setIsSending] = useState(false);
-  const [error, setError] = useState(null);
-  const [responseInfo, setResponseInfo] = useState(null);
-  const [lastUrl, setLastUrl] = useState('');
+  const [Silian_isOpen, Silian_setIsOpen] = Silian_useState(false);
+  const [Silian_baseUrl, Silian_setBaseUrl] = Silian_useState(Silian_API_TEST_BASE_URL);
+  const [Silian_paramValues, Silian_setParamValues] = Silian_useState(() => Silian_initializePathParamValues(Silian_pathParams));
+  const [Silian_queryInput, Silian_setQueryInput] = Silian_useState('');
+  const [Silian_headersInput, Silian_setHeadersInput] = Silian_useState('');
+  const [Silian_bodyInput, Silian_setBodyInput] = Silian_useState('');
+  const [Silian_includeAuth, Silian_setIncludeAuth] = Silian_useState(Silian_operation.requiresAuth);
+  const [Silian_isSending, Silian_setIsSending] = Silian_useState(false);
+  const [Silian_error, Silian_setError] = Silian_useState(null);
+  const [Silian_responseInfo, Silian_setResponseInfo] = Silian_useState(null);
+  const [Silian_lastUrl, Silian_setLastUrl] = Silian_useState('');
 
-  useEffect(() => {
-    setParamValues(initializePathParamValues(pathParams));
-  }, [pathParams]);
+  Silian_useEffect(() => {
+    Silian_setParamValues(Silian_initializePathParamValues(Silian_pathParams));
+  }, [Silian_pathParams]);
 
-  const resolvedPath = useMemo(
-    () => replacePathParams(operation.path, paramValues),
-    [operation.path, paramValues]
+  const Silian_resolvedPath = Silian_useMemo(
+    () => Silian_replacePathParams(Silian_operation.path, Silian_paramValues),
+    [Silian_operation.path, Silian_paramValues]
   );
-  const previewUrl = useMemo(() => composePreviewUrl(baseUrl, resolvedPath), [baseUrl, resolvedPath]);
-  const canSendBody = METHODS_WITH_BODY.has(operation.method);
+  const Silian_previewUrl = Silian_useMemo(() => Silian_composePreviewUrl(Silian_baseUrl, Silian_resolvedPath), [Silian_baseUrl, Silian_resolvedPath]);
+  const Silian_canSendBody = Silian_METHODS_WITH_BODY.has(Silian_operation.method);
 
-  const handleSendTest = async () => {
-    setError(null);
-    setResponseInfo(null);
+  const Silian_handleSendTest = async () => {
+    Silian_setError(null);
+    Silian_setResponseInfo(null);
 
-    const missingRequired = pathParams.find(
-      (param) => param.required && !paramValues[param.name]
+    const Silian_missingRequired = Silian_pathParams.find(
+      (Silian_param) => Silian_param.required && !Silian_paramValues[Silian_param.name]
     );
-    if (missingRequired) {
-      setError(
-        t('admin.diagnostics.tester.messages.pathParamRequired', {
-          name: missingRequired.name,
+    if (Silian_missingRequired) {
+      Silian_setError(
+        Silian_t('admin.diagnostics.tester.messages.pathParamRequired', {
+          name: Silian_missingRequired.name,
         })
       );
       return;
     }
 
-    let queryObject = {};
-    let headerObject = {};
-    let bodyValue = null;
+    let Silian_queryObject = {};
+    let Silian_headerObject = {};
+    let Silian_bodyValue = null;
 
     try {
-      queryObject = parseJsonObject(queryInput);
+      Silian_queryObject = Silian_parseJsonObject(Silian_queryInput);
     } catch {
-      setError(
-        t('admin.diagnostics.tester.messages.invalidJsonObject', {
-        field: t('admin.diagnostics.tester.fields.query'),
+      Silian_setError(
+        Silian_t('admin.diagnostics.tester.messages.invalidJsonObject', {
+        field: Silian_t('admin.diagnostics.tester.fields.query'),
         })
       );
       return;
     }
 
     try {
-      headerObject = parseJsonObject(headersInput);
+      Silian_headerObject = Silian_parseJsonObject(Silian_headersInput);
     } catch {
-      setError(
-        t('admin.diagnostics.tester.messages.invalidJsonObject', {
-        field: t('admin.diagnostics.tester.fields.headers'),
+      Silian_setError(
+        Silian_t('admin.diagnostics.tester.messages.invalidJsonObject', {
+        field: Silian_t('admin.diagnostics.tester.fields.headers'),
         })
       );
       return;
     }
 
     try {
-      bodyValue = parseJsonValue(bodyInput);
+      Silian_bodyValue = Silian_parseJsonValue(Silian_bodyInput);
     } catch {
-      setError(
-        t('admin.diagnostics.tester.messages.invalidJsonValue', {
-        field: t('admin.diagnostics.tester.fields.body'),
+      Silian_setError(
+        Silian_t('admin.diagnostics.tester.messages.invalidJsonValue', {
+        field: Silian_t('admin.diagnostics.tester.fields.body'),
         })
       );
       return;
     }
 
-    if (bodyValue !== null && !canSendBody) {
-      setError(
-        t('admin.diagnostics.tester.messages.bodyNotAllowed')
+    if (Silian_bodyValue !== null && !Silian_canSendBody) {
+      Silian_setError(
+        Silian_t('admin.diagnostics.tester.messages.bodyNotAllowed')
       );
       return;
     }
 
-    const url = buildFinalUrl(baseUrl, resolvedPath, queryObject);
-    setIsSending(true);
+    const Silian_url = Silian_buildFinalUrl(Silian_baseUrl, Silian_resolvedPath, Silian_queryObject);
+    Silian_setIsSending(true);
     try {
-      const headers = Object.entries(headerObject).reduce((acc, [key, value]) => {
-        if (!key) return acc;
-        acc[key] = value == null ? '' : String(value);
-        return acc;
+      const Silian_headers = Object.entries(Silian_headerObject).reduce((Silian_acc, [Silian_key, Silian_value]) => {
+        if (!Silian_key) return Silian_acc;
+        Silian_acc[Silian_key] = Silian_value == null ? '' : String(Silian_value);
+        return Silian_acc;
       }, {});
 
-      if (includeAuth && typeof window !== 'undefined') {
-        const token = window.localStorage?.getItem('auth_token');
-        if (token) {
-          headers.Authorization = `Bearer ${token}`;
+      if (Silian_includeAuth && typeof window !== 'undefined') {
+        const Silian_token = window.localStorage?.getItem('auth_token');
+        if (Silian_token) {
+          Silian_headers.Authorization = `Bearer ${Silian_token}`;
         }
       }
 
-      let bodyPayload;
-      if (bodyValue !== null) {
-        bodyPayload = typeof bodyValue === 'string' ? bodyValue : JSON.stringify(bodyValue);
+      let Silian_bodyPayload;
+      if (Silian_bodyValue !== null) {
+        Silian_bodyPayload = typeof Silian_bodyValue === 'string' ? Silian_bodyValue : JSON.stringify(Silian_bodyValue);
         if (
-          typeof bodyValue !== 'string' &&
-          !headers['Content-Type'] &&
-          !headers['content-type']
+          typeof Silian_bodyValue !== 'string' &&
+          !Silian_headers['Content-Type'] &&
+          !Silian_headers['content-type']
         ) {
-          headers['Content-Type'] = 'application/json';
+          Silian_headers['Content-Type'] = 'application/json';
         }
       }
 
-      const start = performance.now();
-      const response = await fetch(url, {
-        method: operation.method,
-        headers,
-        body: bodyPayload,
+      const Silian_start = performance.now();
+      const Silian_response = await fetch(Silian_url, {
+        method: Silian_operation.method,
+        headers: Silian_headers,
+        body: Silian_bodyPayload,
       });
-      const duration = performance.now() - start;
-      const responseText = await response.text();
-      let parsedBody = null;
+      const Silian_duration = performance.now() - Silian_start;
+      const Silian_responseText = await Silian_response.text();
+      let Silian_parsedBody = null;
       try {
-        parsedBody = responseText ? JSON.parse(responseText) : null;
+        Silian_parsedBody = Silian_responseText ? JSON.parse(Silian_responseText) : null;
       } catch {
-        parsedBody = null;
+        Silian_parsedBody = null;
       }
-      const headerList = [];
-      response.headers.forEach((value, key) => {
-        headerList.push({ key, value });
+      const Silian_headerList = [];
+      Silian_response.headers.forEach((Silian_value, Silian_key) => {
+        Silian_headerList.push({ key: Silian_key, value: Silian_value });
       });
-      setResponseInfo({
-        ok: response.ok,
-        status: response.status,
-        statusText: response.statusText || '',
-        duration,
-        headers: headerList,
-        body: parsedBody ?? responseText,
-        isJson: parsedBody !== null,
+      Silian_setResponseInfo({
+        ok: Silian_response.ok,
+        status: Silian_response.status,
+        statusText: Silian_response.statusText || '',
+        duration: Silian_duration,
+        headers: Silian_headerList,
+        body: Silian_parsedBody ?? Silian_responseText,
+        isJson: Silian_parsedBody !== null,
       });
-      setLastUrl(url);
-    } catch (requestError) {
-      setError(
-        requestError?.message ||
-          t('admin.diagnostics.tester.messages.requestFailed')
+      Silian_setLastUrl(Silian_url);
+    } catch (Silian_requestError) {
+      Silian_setError(
+        Silian_requestError?.message ||
+          Silian_t('admin.diagnostics.tester.messages.requestFailed')
       );
     } finally {
-      setIsSending(false);
+      Silian_setIsSending(false);
     }
   };
 
-  const handleReset = () => {
-    setQueryInput('');
-    setHeadersInput('');
-    setBodyInput('');
-    setResponseInfo(null);
-    setError(null);
-    setLastUrl('');
+  const Silian_handleReset = () => {
+    Silian_setQueryInput('');
+    Silian_setHeadersInput('');
+    Silian_setBodyInput('');
+    Silian_setResponseInfo(null);
+    Silian_setError(null);
+    Silian_setLastUrl('');
   };
 
   return (
@@ -971,68 +971,68 @@ function RequestTester({ operation }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-foreground">
-            {t('admin.diagnostics.tester.title')}
+            {Silian_t('admin.diagnostics.tester.title')}
           </p>
           <p className="text-xs text-muted-foreground">
-            {t(
+            {Silian_t(
               'admin.diagnostics.tester.description')}
           </p>
         </div>
-        <Button variant="outline" size="sm" type="button" onClick={() => setIsOpen((prev) => !prev)}>
-          {isOpen
-            ? t('admin.diagnostics.tester.actions.close')
-            : t('admin.diagnostics.tester.actions.open')}
-        </Button>
+        <Silian_Button variant="outline" size="sm" type="button" onClick={() => Silian_setIsOpen((Silian_prev) => !Silian_prev)}>
+          {Silian_isOpen
+            ? Silian_t('admin.diagnostics.tester.actions.close')
+            : Silian_t('admin.diagnostics.tester.actions.open')}
+        </Silian_Button>
       </div>
 
-      {isOpen && (
+      {Silian_isOpen && (
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="text-sm font-medium text-foreground">
-                {t('admin.diagnostics.tester.fields.baseUrl')}
+                {Silian_t('admin.diagnostics.tester.fields.baseUrl')}
               </label>
-              <Input
-                value={baseUrl}
-                onChange={(event) => setBaseUrl(event.target.value)}
+              <Silian_Input
+                value={Silian_baseUrl}
+                onChange={(Silian_event) => Silian_setBaseUrl(Silian_event.target.value)}
                 placeholder="https://api.example.com"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-foreground">
-                {t('admin.diagnostics.tester.fields.resolvedPath')}
+                {Silian_t('admin.diagnostics.tester.fields.resolvedPath')}
               </label>
-              <Input value={resolvedPath} readOnly className="font-mono text-xs" />
+              <Silian_Input value={Silian_resolvedPath} readOnly className="font-mono text-xs" />
             </div>
           </div>
 
           <div>
             <label className="text-sm font-medium text-foreground">
-              {t('admin.diagnostics.tester.fields.finalUrl')}
+              {Silian_t('admin.diagnostics.tester.fields.finalUrl')}
             </label>
-            <Input value={lastUrl || previewUrl} readOnly className="font-mono text-xs" />
+            <Silian_Input value={Silian_lastUrl || Silian_previewUrl} readOnly className="font-mono text-xs" />
           </div>
 
-          {pathParams.length > 0 && (
+          {Silian_pathParams.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-foreground">
-                {t('admin.diagnostics.tester.fields.pathParams')}
+                {Silian_t('admin.diagnostics.tester.fields.pathParams')}
               </p>
               <div className="grid gap-4 md:grid-cols-2">
-                {pathParams.map((param) => (
-                  <div key={param.name}>
+                {Silian_pathParams.map((Silian_param) => (
+                  <div key={Silian_param.name}>
                     <label className="text-xs font-semibold text-muted-foreground">
-                      {t('admin.diagnostics.tester.messages.pathParam', {
-                        name: param.name,
+                      {Silian_t('admin.diagnostics.tester.messages.pathParam', {
+                        name: Silian_param.name,
                       })}
                     </label>
-                    <Input
-                      value={paramValues[param.name] ?? ''}
-                      placeholder={param.description || param.name}
-                      onChange={(event) =>
-                        setParamValues((current) => ({
-                          ...current,
-                          [param.name]: event.target.value,
+                    <Silian_Input
+                      value={Silian_paramValues[Silian_param.name] ?? ''}
+                      placeholder={Silian_param.description || Silian_param.name}
+                      onChange={(Silian_event) =>
+                        Silian_setParamValues((Silian_current) => ({
+                          ...Silian_current,
+                          [Silian_param.name]: Silian_event.target.value,
                         }))
                       }
                     />
@@ -1045,23 +1045,23 @@ function RequestTester({ operation }) {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="text-sm font-medium text-foreground">
-                {t('admin.diagnostics.tester.fields.query')}
+                {Silian_t('admin.diagnostics.tester.fields.query')}
               </label>
-              <Textarea
-                value={queryInput}
-                onChange={(event) => setQueryInput(event.target.value)}
-                placeholder={t('admin.diagnostics.tester.placeholders.query')}
+              <Silian_Textarea
+                value={Silian_queryInput}
+                onChange={(Silian_event) => Silian_setQueryInput(Silian_event.target.value)}
+                placeholder={Silian_t('admin.diagnostics.tester.placeholders.query')}
                 className="font-mono text-xs"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-foreground">
-                {t('admin.diagnostics.tester.fields.headers')}
+                {Silian_t('admin.diagnostics.tester.fields.headers')}
               </label>
-              <Textarea
-                value={headersInput}
-                onChange={(event) => setHeadersInput(event.target.value)}
-                placeholder={t('admin.diagnostics.tester.placeholders.headers')}
+              <Silian_Textarea
+                value={Silian_headersInput}
+                onChange={(Silian_event) => Silian_setHeadersInput(Silian_event.target.value)}
+                placeholder={Silian_t('admin.diagnostics.tester.placeholders.headers')}
                 className="font-mono text-xs"
               />
             </div>
@@ -1069,96 +1069,96 @@ function RequestTester({ operation }) {
 
           <div>
             <label className="text-sm font-medium text-foreground">
-              {t('admin.diagnostics.tester.fields.body')}
+              {Silian_t('admin.diagnostics.tester.fields.body')}
             </label>
-            <Textarea
-              value={bodyInput}
-              onChange={(event) => setBodyInput(event.target.value)}
-              placeholder={t(
+            <Silian_Textarea
+              value={Silian_bodyInput}
+              onChange={(Silian_event) => Silian_setBodyInput(Silian_event.target.value)}
+              placeholder={Silian_t(
                 'admin.diagnostics.tester.placeholders.body')}
               className="font-mono text-xs"
-              disabled={!canSendBody}
+              disabled={!Silian_canSendBody}
             />
-            {!canSendBody && (
+            {!Silian_canSendBody && (
               <p className="mt-1 text-xs text-muted-foreground">
-                {t(
+                {Silian_t(
                   'admin.diagnostics.tester.messages.bodyNotAllowed')}
               </p>
             )}
           </div>
 
           <div className="flex items-center gap-3 rounded-lg border border-border/80 bg-muted/50 p-3">
-            <Switch
-              id={`tester-auth-${operation.id}`}
-              checked={includeAuth}
-              onCheckedChange={setIncludeAuth}
+            <Silian_Switch
+              id={`tester-auth-${Silian_operation.id}`}
+              checked={Silian_includeAuth}
+              onCheckedChange={Silian_setIncludeAuth}
             />
             <div>
-              <label className="text-sm font-medium text-foreground" htmlFor={`tester-auth-${operation.id}`}>
-                {t('admin.diagnostics.tester.fields.auth')}
+              <label className="text-sm font-medium text-foreground" htmlFor={`tester-auth-${Silian_operation.id}`}>
+                {Silian_t('admin.diagnostics.tester.fields.auth')}
               </label>
               <p className="text-xs text-muted-foreground">
-                {t(
+                {Silian_t(
                   'admin.diagnostics.tester.fields.authDescription')}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button type="button" onClick={handleSendTest} disabled={isSending}>
-              {isSending ? (
+            <Silian_Button type="button" onClick={Silian_handleSendTest} disabled={Silian_isSending}>
+              {Silian_isSending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('admin.diagnostics.tester.actions.sending')}
+                  <Silian_Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {Silian_t('admin.diagnostics.tester.actions.sending')}
                 </>
               ) : (
                 <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  {t('admin.diagnostics.tester.actions.send')}
+                  <Silian_RefreshCw className="mr-2 h-4 w-4" />
+                  {Silian_t('admin.diagnostics.tester.actions.send')}
                 </>
               )}
-            </Button>
-            <Button type="button" variant="outline" onClick={handleReset} disabled={isSending}>
-              {t('admin.diagnostics.tester.actions.reset')}
-            </Button>
+            </Silian_Button>
+            <Silian_Button type="button" variant="outline" onClick={Silian_handleReset} disabled={Silian_isSending}>
+              {Silian_t('admin.diagnostics.tester.actions.reset')}
+            </Silian_Button>
           </div>
 
-          {error && (
-            <Alert variant="destructive">
-              <AlertTitle>
-                {t('admin.diagnostics.tester.messages.requestFailed')}
-              </AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+          {Silian_error && (
+            <Silian_Alert variant="destructive">
+              <Silian_AlertTitle>
+                {Silian_t('admin.diagnostics.tester.messages.requestFailed')}
+              </Silian_AlertTitle>
+              <Silian_AlertDescription>{Silian_error}</Silian_AlertDescription>
+            </Silian_Alert>
           )}
 
-          {responseInfo && (
+          {Silian_responseInfo && (
             <div className="space-y-3 rounded-xl border border-border/80 bg-muted/50 p-4">
               <div className="flex flex-wrap items-center gap-3">
-                <Badge
-                  variant={responseInfo.ok ? 'secondary' : 'destructive'}
+                <Silian_Badge
+                  variant={Silian_responseInfo.ok ? 'secondary' : 'destructive'}
                   className="font-mono text-xs"
                 >
-                  {responseInfo.status} {responseInfo.statusText}
-                </Badge>
+                  {Silian_responseInfo.status} {Silian_responseInfo.statusText}
+                </Silian_Badge>
                 <span className="text-xs text-muted-foreground">
-                  {t('admin.diagnostics.tester.messages.duration', {
-                    value: responseInfo.duration.toFixed(1),
+                  {Silian_t('admin.diagnostics.tester.messages.duration', {
+                    value: Silian_responseInfo.duration.toFixed(1),
                   })}
                 </span>
-                {lastUrl && (
-                  <span className="font-mono text-[11px] text-muted-foreground break-all">{lastUrl}</span>
+                {Silian_lastUrl && (
+                  <span className="font-mono text-[11px] text-muted-foreground break-all">{Silian_lastUrl}</span>
                 )}
               </div>
-              {responseInfo.headers.length > 0 && (
+              {Silian_responseInfo.headers.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {t('admin.diagnostics.tester.results.headers')}
+                    {Silian_t('admin.diagnostics.tester.results.headers')}
                   </p>
                   <ul className="mt-2 space-y-1 text-xs font-mono text-foreground/80">
-                    {responseInfo.headers.map((header) => (
-                      <li key={`${header.key}-${header.value}`}>
-                        <span className="text-muted-foreground">{header.key}:</span> {header.value}
+                    {Silian_responseInfo.headers.map((Silian_header) => (
+                      <li key={`${Silian_header.key}-${Silian_header.value}`}>
+                        <span className="text-muted-foreground">{Silian_header.key}:</span> {Silian_header.value}
                       </li>
                     ))}
                   </ul>
@@ -1166,12 +1166,12 @@ function RequestTester({ operation }) {
               )}
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t('admin.diagnostics.tester.results.body')}
+                  {Silian_t('admin.diagnostics.tester.results.body')}
                 </p>
                 <pre className="mt-2 max-h-72 overflow-auto rounded-lg bg-slate-900/95 p-3 text-xs leading-relaxed text-emerald-100">
-                  {responseInfo.isJson
-                    ? JSON.stringify(responseInfo.body, null, 2)
-                    : String(responseInfo.body ?? '')}
+                  {Silian_responseInfo.isJson
+                    ? JSON.stringify(Silian_responseInfo.body, null, 2)
+                    : String(Silian_responseInfo.body ?? '')}
                 </pre>
               </div>
             </div>
@@ -1182,52 +1182,52 @@ function RequestTester({ operation }) {
   );
 }
 
-function initializePathParamValues(params) {
-  return params.reduce((acc, param) => {
-    acc[param.name] = '';
-    return acc;
+function Silian_initializePathParamValues(Silian_params) {
+  return Silian_params.reduce((Silian_acc, Silian_param) => {
+    Silian_acc[Silian_param.name] = '';
+    return Silian_acc;
   }, {});
 }
 
-function replacePathParams(path, values) {
-  return path.replace(/{([^}]+)}/g, (match, key) => {
-    const value = values[key];
-    return value !== undefined && value !== '' ? encodeURIComponent(value) : match;
+function Silian_replacePathParams(Silian_path, Silian_values) {
+  return Silian_path.replace(/{([^}]+)}/g, (Silian_match, Silian_key) => {
+    const Silian_value = Silian_values[Silian_key];
+    return Silian_value !== undefined && Silian_value !== '' ? encodeURIComponent(Silian_value) : Silian_match;
   });
 }
 
-function composePreviewUrl(base, path) {
-  if (!base) {
-    return path;
+function Silian_composePreviewUrl(Silian_base, Silian_path) {
+  if (!Silian_base) {
+    return Silian_path;
   }
-  const trimmedBase = base.replace(/\/+$/, '');
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${trimmedBase}${normalizedPath}`;
+  const Silian_trimmedBase = Silian_base.replace(/\/+$/, '');
+  const Silian_normalizedPath = Silian_path.startsWith('/') ? Silian_path : `/${Silian_path}`;
+  return `${Silian_trimmedBase}${Silian_normalizedPath}`;
 }
 
-function buildFinalUrl(base, path, query) {
-  const preview = composePreviewUrl(base, path);
-  const searchParams = new URLSearchParams();
-  Object.entries(query || {}).forEach(([key, value]) => {
-    if (key) {
-      searchParams.append(key, value == null ? '' : String(value));
+function Silian_buildFinalUrl(Silian_base, Silian_path, Silian_query) {
+  const Silian_preview = Silian_composePreviewUrl(Silian_base, Silian_path);
+  const Silian_searchParams = new URLSearchParams();
+  Object.entries(Silian_query || {}).forEach(([Silian_key, Silian_value]) => {
+    if (Silian_key) {
+      Silian_searchParams.append(Silian_key, Silian_value == null ? '' : String(Silian_value));
     }
   });
-  const queryString = searchParams.toString();
-  if (!queryString) {
-    return preview;
+  const Silian_queryString = Silian_searchParams.toString();
+  if (!Silian_queryString) {
+    return Silian_preview;
   }
-  return `${preview}${preview.includes('?') ? '&' : '?'}${queryString}`;
+  return `${Silian_preview}${Silian_preview.includes('?') ? '&' : '?'}${Silian_queryString}`;
 }
 
-function parseJsonObject(value) {
-  if (!value || !value.trim()) {
+function Silian_parseJsonObject(Silian_value) {
+  if (!Silian_value || !Silian_value.trim()) {
     return {};
   }
   try {
-    const parsed = JSON.parse(value);
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed;
+    const Silian_parsed = JSON.parse(Silian_value);
+    if (Silian_parsed && typeof Silian_parsed === 'object' && !Array.isArray(Silian_parsed)) {
+      return Silian_parsed;
     }
   } catch {
     /* noop */
@@ -1235,12 +1235,12 @@ function parseJsonObject(value) {
   throw new Error('INVALID_JSON_OBJECT');
 }
 
-function parseJsonValue(value) {
-  if (!value || !value.trim()) {
+function Silian_parseJsonValue(Silian_value) {
+  if (!Silian_value || !Silian_value.trim()) {
     return null;
   }
   try {
-    return JSON.parse(value);
+    return JSON.parse(Silian_value);
   } catch {
     throw new Error('INVALID_JSON_VALUE');
   }

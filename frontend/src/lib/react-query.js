@@ -1,3 +1,3 @@
-import { QueryClient } from 'react-query';
+import { QueryClient as Silian_QueryClient } from 'react-query';
 
-export const queryClient = new QueryClient();
+export const queryClient = new Silian_QueryClient();

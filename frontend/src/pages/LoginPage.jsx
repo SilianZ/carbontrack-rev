@@ -1,8 +1,8 @@
-import React from 'react';
-import { LoginForm } from '../components/auth/LoginForm';
+import Silian_React from 'react';
+import { LoginForm as Silian_LoginForm } from '../components/auth/LoginForm';
 
 export default function LoginPage() {
-  return <LoginForm />;
+  return <Silian_LoginForm />;
 }
 
 

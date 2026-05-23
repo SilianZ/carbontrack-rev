@@ -1,45 +1,45 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { toast } from 'react-hot-toast';
-import { Loader2, Play, RefreshCw } from 'lucide-react';
+import Silian_React, { useEffect as Silian_useEffect, useMemo as Silian_useMemo, useState as Silian_useState } from 'react';
+import { useMutation as Silian_useMutation, useQuery as Silian_useQuery, useQueryClient as Silian_useQueryClient } from 'react-query';
+import { toast as Silian_toast } from 'react-hot-toast';
+import { Loader2 as Silian_Loader2, Play as Silian_Play, RefreshCw as Silian_RefreshCw } from 'lucide-react';
 
-import { adminAPI } from '../../lib/api';
-import { useTranslation } from '../../hooks/useTranslation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/badge';
-import { Switch } from '../../components/ui/switch';
-import { Input } from '../../components/ui/Input';
+import { adminAPI as Silian_adminAPI } from '../../lib/api';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { Card as Silian_Card, CardContent as Silian_CardContent, CardDescription as Silian_CardDescription, CardHeader as Silian_CardHeader, CardTitle as Silian_CardTitle } from '../../components/ui/Card';
+import { Button as Silian_Button } from '../../components/ui/Button';
+import { Badge as Silian_Badge } from '../../components/ui/badge';
+import { Switch as Silian_Switch } from '../../components/ui/switch';
+import { Input as Silian_Input } from '../../components/ui/Input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select as Silian_Select,
+  SelectContent as Silian_SelectContent,
+  SelectItem as Silian_SelectItem,
+  SelectTrigger as Silian_SelectTrigger,
+  SelectValue as Silian_SelectValue,
 } from '../../components/ui/select';
 
-function formatDateTime(value, locale) {
-  if (!value) {
+function Silian_formatDateTime(Silian_value, Silian_locale) {
+  if (!Silian_value) {
     return '--';
   }
 
-  const normalized = typeof value === 'string' && value.includes(' ') ? value.replace(' ', 'T') : value;
-  const parsed = new Date(normalized);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
+  const Silian_normalized = typeof Silian_value === 'string' && Silian_value.includes(' ') ? Silian_value.replace(' ', 'T') : Silian_value;
+  const Silian_parsed = new Date(Silian_normalized);
+  if (Number.isNaN(Silian_parsed.getTime())) {
+    return Silian_value;
   }
 
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(Silian_locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(parsed);
+  }).format(Silian_parsed);
 }
 
-function taskStatusTone(status) {
-  switch (status) {
+function Silian_taskStatusTone(Silian_status) {
+  switch (Silian_status) {
     case 'success':
       return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200';
     case 'failed':
@@ -51,149 +51,149 @@ function taskStatusTone(status) {
   }
 }
 
-function translateCronStatus(t, status) {
-  if (status === 'idle' || status === 'running' || status === 'success' || status === 'failed' || status === 'skipped') {
-    return t(`admin.cron.status.${status}`);
+function Silian_translateCronStatus(Silian_t, Silian_status) {
+  if (Silian_status === 'idle' || Silian_status === 'running' || Silian_status === 'success' || Silian_status === 'failed' || Silian_status === 'skipped') {
+    return Silian_t(`admin.cron.status.${Silian_status}`);
   }
 
-  return status || 'idle';
+  return Silian_status || 'idle';
 }
 
-function translateTriggerSource(t, triggerSource) {
-  if (triggerSource === 'cron_endpoint' || triggerSource === 'legacy_endpoint' || triggerSource === 'admin_manual') {
-    return t(`admin.cron.triggerSources.${triggerSource}`);
+function Silian_translateTriggerSource(Silian_t, Silian_triggerSource) {
+  if (Silian_triggerSource === 'cron_endpoint' || Silian_triggerSource === 'legacy_endpoint' || Silian_triggerSource === 'admin_manual') {
+    return Silian_t(`admin.cron.triggerSources.${Silian_triggerSource}`);
   }
 
-  return triggerSource || '--';
+  return Silian_triggerSource || '--';
 }
 
 export default function AdminCronPage() {
-  const { t, currentLanguage } = useTranslation(['admin', 'common', 'errors']);
-  const locale = currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
-  const queryClient = useQueryClient();
-  const [taskFilter, setTaskFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [drafts, setDrafts] = useState({});
-  const [dirtyTaskKeys, setDirtyTaskKeys] = useState({});
+  const { t: Silian_t, currentLanguage: Silian_currentLanguage } = Silian_useTranslation(['admin', 'common', 'errors']);
+  const Silian_locale = Silian_currentLanguage === 'zh' ? 'zh-CN' : 'en-US';
+  const Silian_queryClient = Silian_useQueryClient();
+  const [Silian_taskFilter, Silian_setTaskFilter] = Silian_useState('all');
+  const [Silian_statusFilter, Silian_setStatusFilter] = Silian_useState('all');
+  const [Silian_drafts, Silian_setDrafts] = Silian_useState({});
+  const [Silian_dirtyTaskKeys, Silian_setDirtyTaskKeys] = Silian_useState({});
 
-  const tasksQuery = useQuery(['admin-cron-tasks'], async () => {
-    const response = await adminAPI.getCronTasks();
-    return response.data?.data ?? [];
+  const Silian_tasksQuery = Silian_useQuery(['admin-cron-tasks'], async () => {
+    const Silian_response = await Silian_adminAPI.getCronTasks();
+    return Silian_response.data?.data ?? [];
   });
 
-  const runsQuery = useQuery(['admin-cron-runs', taskFilter, statusFilter], async () => {
-    const params = {
+  const Silian_runsQuery = Silian_useQuery(['admin-cron-runs', Silian_taskFilter, Silian_statusFilter], async () => {
+    const Silian_params = {
       limit: 20,
-      ...(taskFilter !== 'all' ? { task_key: taskFilter } : {}),
-      ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
+      ...(Silian_taskFilter !== 'all' ? { task_key: Silian_taskFilter } : {}),
+      ...(Silian_statusFilter !== 'all' ? { status: Silian_statusFilter } : {}),
     };
-    const response = await adminAPI.getCronRuns(params);
-    return response.data?.data ?? { items: [], pagination: { page: 1, limit: 20, total: 0 } };
+    const Silian_response = await Silian_adminAPI.getCronRuns(Silian_params);
+    return Silian_response.data?.data ?? { items: [], pagination: { page: 1, limit: 20, total: 0 } };
   });
 
-  const tasks = useMemo(() => tasksQuery.data ?? [], [tasksQuery.data]);
-  const runs = useMemo(() => runsQuery.data?.items ?? [], [runsQuery.data]);
+  const Silian_tasks = Silian_useMemo(() => Silian_tasksQuery.data ?? [], [Silian_tasksQuery.data]);
+  const Silian_runs = Silian_useMemo(() => Silian_runsQuery.data?.items ?? [], [Silian_runsQuery.data]);
 
-  const saveTaskMutation = useMutation(
-    ({ taskKey, payload }) => adminAPI.updateCronTask(taskKey, payload),
+  const Silian_saveTaskMutation = Silian_useMutation(
+    ({ taskKey: Silian_taskKey, payload: Silian_payload }) => Silian_adminAPI.updateCronTask(Silian_taskKey, Silian_payload),
     {
-      onSuccess: (_, variables) => {
-        setDirtyTaskKeys((current) => {
-          const next = { ...current };
-          delete next[variables.taskKey];
-          return next;
+      onSuccess: (Silian__, Silian_variables) => {
+        Silian_setDirtyTaskKeys((Silian_current) => {
+          const Silian_next = { ...Silian_current };
+          delete Silian_next[Silian_variables.taskKey];
+          return Silian_next;
         });
-        toast.success(t('admin.cron.messages.saved'));
-        queryClient.invalidateQueries(['admin-cron-tasks']);
+        Silian_toast.success(Silian_t('admin.cron.messages.saved'));
+        Silian_queryClient.invalidateQueries(['admin-cron-tasks']);
       },
-      onError: (error) => {
-        toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
+      onError: (Silian_error) => {
+        Silian_toast.error(Silian_error?.response?.data?.message || Silian_error?.message || Silian_t('errors.operationFailed'));
       },
     }
   );
 
-  const runTaskMutation = useMutation(
-    (taskKey) => adminAPI.runCronTask(taskKey),
+  const Silian_runTaskMutation = Silian_useMutation(
+    (Silian_taskKey) => Silian_adminAPI.runCronTask(Silian_taskKey),
     {
       onSuccess: () => {
-        toast.success(t('admin.cron.messages.executed'));
+        Silian_toast.success(Silian_t('admin.cron.messages.executed'));
       },
-      onError: (error) => {
-        toast.error(error?.response?.data?.message || error?.message || t('errors.operationFailed'));
+      onError: (Silian_error) => {
+        Silian_toast.error(Silian_error?.response?.data?.message || Silian_error?.message || Silian_t('errors.operationFailed'));
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['admin-cron-tasks']);
-        queryClient.invalidateQueries(['admin-cron-runs']);
+        Silian_queryClient.invalidateQueries(['admin-cron-tasks']);
+        Silian_queryClient.invalidateQueries(['admin-cron-runs']);
       },
     }
   );
 
-  useEffect(() => {
-    if (!tasks.length) {
+  Silian_useEffect(() => {
+    if (!Silian_tasks.length) {
       return;
     }
 
-    const activeSaveTaskKey = saveTaskMutation.isLoading ? (saveTaskMutation.variables?.taskKey ?? null) : null;
-    const activeRunTaskKey = runTaskMutation.isLoading ? (runTaskMutation.variables ?? null) : null;
+    const Silian_activeSaveTaskKey = Silian_saveTaskMutation.isLoading ? (Silian_saveTaskMutation.variables?.taskKey ?? null) : null;
+    const Silian_activeRunTaskKey = Silian_runTaskMutation.isLoading ? (Silian_runTaskMutation.variables ?? null) : null;
 
-    setDrafts((current) => {
-      const next = {};
-      for (const task of tasks) {
-        const isDirty = Boolean(dirtyTaskKeys[task.task_key]);
-        const shouldPreserveDraft = isDirty || task.task_key === activeSaveTaskKey || task.task_key === activeRunTaskKey;
-        next[task.task_key] = shouldPreserveDraft && current[task.task_key]
-          ? current[task.task_key]
+    Silian_setDrafts((Silian_current) => {
+      const Silian_next = {};
+      for (const Silian_task of Silian_tasks) {
+        const Silian_isDirty = Boolean(Silian_dirtyTaskKeys[Silian_task.task_key]);
+        const Silian_shouldPreserveDraft = Silian_isDirty || Silian_task.task_key === Silian_activeSaveTaskKey || Silian_task.task_key === Silian_activeRunTaskKey;
+        Silian_next[Silian_task.task_key] = Silian_shouldPreserveDraft && Silian_current[Silian_task.task_key]
+          ? Silian_current[Silian_task.task_key]
           : {
-              enabled: Boolean(task.enabled),
-              interval_minutes: String(task.interval_minutes ?? ''),
+              enabled: Boolean(Silian_task.enabled),
+              interval_minutes: String(Silian_task.interval_minutes ?? ''),
             };
       }
-      return next;
+      return Silian_next;
     });
-  }, [dirtyTaskKeys, runTaskMutation.isLoading, runTaskMutation.variables, saveTaskMutation.isLoading, saveTaskMutation.variables, tasks]);
+  }, [Silian_dirtyTaskKeys, Silian_runTaskMutation.isLoading, Silian_runTaskMutation.variables, Silian_saveTaskMutation.isLoading, Silian_saveTaskMutation.variables, Silian_tasks]);
 
-  const summary = useMemo(() => {
-    const enabled = tasks.filter((task) => task.enabled).length;
-    const due = tasks.filter((task) => task.is_due).length;
-    const failed = tasks.filter((task) => task.last_status === 'failed').length;
-    return { enabled, due, failed };
-  }, [tasks]);
+  const Silian_summary = Silian_useMemo(() => {
+    const Silian_enabled = Silian_tasks.filter((Silian_task) => Silian_task.enabled).length;
+    const Silian_due = Silian_tasks.filter((Silian_task) => Silian_task.is_due).length;
+    const Silian_failed = Silian_tasks.filter((Silian_task) => Silian_task.last_status === 'failed').length;
+    return { enabled: Silian_enabled, due: Silian_due, failed: Silian_failed };
+  }, [Silian_tasks]);
 
-  const parseIntervalMinutes = (rawValue) => {
-    const normalized = String(rawValue ?? '').trim();
-    if (normalized === '') {
+  const Silian_parseIntervalMinutes = (Silian_rawValue) => {
+    const Silian_normalized = String(Silian_rawValue ?? '').trim();
+    if (Silian_normalized === '') {
       return null;
     }
 
-    const parsed = Number(normalized);
-    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1440) {
+    const Silian_parsed = Number(Silian_normalized);
+    if (!Number.isInteger(Silian_parsed) || Silian_parsed < 1 || Silian_parsed > 1440) {
       return null;
     }
 
-    return parsed;
+    return Silian_parsed;
   };
 
-  const saveDraftForTask = (taskKey, draft) => {
-    const task = tasks.find((item) => item.task_key === taskKey);
-    const isDisableUnregisteredTask = task?.is_registered === false && draft.enabled === false;
-    const intervalMinutes = isDisableUnregisteredTask ? null : parseIntervalMinutes(draft.interval_minutes);
+  const Silian_saveDraftForTask = (Silian_taskKey, Silian_draft) => {
+    const Silian_task = Silian_tasks.find((Silian_item) => Silian_item.task_key === Silian_taskKey);
+    const Silian_isDisableUnregisteredTask = Silian_task?.is_registered === false && Silian_draft.enabled === false;
+    const Silian_intervalMinutes = Silian_isDisableUnregisteredTask ? null : Silian_parseIntervalMinutes(Silian_draft.interval_minutes);
 
-    if (!isDisableUnregisteredTask && intervalMinutes === null) {
-      toast.error(t('admin.cron.messages.invalidInterval'));
+    if (!Silian_isDisableUnregisteredTask && Silian_intervalMinutes === null) {
+      Silian_toast.error(Silian_t('admin.cron.messages.invalidInterval'));
       return;
     }
 
-    const payload = {
-      enabled: draft.enabled,
+    const Silian_payload = {
+      enabled: Silian_draft.enabled,
     };
 
-    if (!isDisableUnregisteredTask) {
-      payload.interval_minutes = intervalMinutes;
+    if (!Silian_isDisableUnregisteredTask) {
+      Silian_payload.interval_minutes = Silian_intervalMinutes;
     }
 
-    saveTaskMutation.mutate({
-      taskKey,
-      payload,
+    Silian_saveTaskMutation.mutate({
+      taskKey: Silian_taskKey,
+      payload: Silian_payload,
     });
   };
 
@@ -201,235 +201,235 @@ export default function AdminCronPage() {
     <div className="space-y-6">
       <section className="rounded-[1.8rem] border border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f5fbff_100%)] px-6 py-6 shadow-sm dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.95)_0%,rgba(14,116,144,0.18)_100%)]">
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-600/80 dark:text-sky-300/80">
-          {t('admin.cron.eyebrow')}
+          {Silian_t('admin.cron.eyebrow')}
         </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{t('admin.cron.title')}</h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">{t('admin.cron.subtitle')}</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{Silian_t('admin.cron.title')}</h1>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">{Silian_t('admin.cron.subtitle')}</p>
       </section>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t('admin.cron.summary.enabled')}</p>
-            <p className="mt-3 text-3xl font-semibold">{summary.enabled}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t('admin.cron.summary.due')}</p>
-            <p className="mt-3 text-3xl font-semibold">{summary.due}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{t('admin.cron.summary.failed')}</p>
-            <p className="mt-3 text-3xl font-semibold">{summary.failed}</p>
-          </CardContent>
-        </Card>
+        <Silian_Card>
+          <Silian_CardContent className="pt-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{Silian_t('admin.cron.summary.enabled')}</p>
+            <p className="mt-3 text-3xl font-semibold">{Silian_summary.enabled}</p>
+          </Silian_CardContent>
+        </Silian_Card>
+        <Silian_Card>
+          <Silian_CardContent className="pt-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{Silian_t('admin.cron.summary.due')}</p>
+            <p className="mt-3 text-3xl font-semibold">{Silian_summary.due}</p>
+          </Silian_CardContent>
+        </Silian_Card>
+        <Silian_Card>
+          <Silian_CardContent className="pt-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{Silian_t('admin.cron.summary.failed')}</p>
+            <p className="mt-3 text-3xl font-semibold">{Silian_summary.failed}</p>
+          </Silian_CardContent>
+        </Silian_Card>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <Silian_Card>
+        <Silian_CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <CardTitle>{t('admin.cron.tasks.title')}</CardTitle>
-            <CardDescription>{t('admin.cron.tasks.subtitle')}</CardDescription>
+            <Silian_CardTitle>{Silian_t('admin.cron.tasks.title')}</Silian_CardTitle>
+            <Silian_CardDescription>{Silian_t('admin.cron.tasks.subtitle')}</Silian_CardDescription>
           </div>
-          <Button type="button" variant="outline" onClick={() => queryClient.invalidateQueries(['admin-cron-tasks'])}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            {t('admin.cron.actions.refresh')}
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {tasksQuery.isLoading ? (
+          <Silian_Button type="button" variant="outline" onClick={() => Silian_queryClient.invalidateQueries(['admin-cron-tasks'])}>
+            <Silian_RefreshCw className="mr-2 h-4 w-4" />
+            {Silian_t('admin.cron.actions.refresh')}
+          </Silian_Button>
+        </Silian_CardHeader>
+        <Silian_CardContent className="space-y-4">
+          {Silian_tasksQuery.isLoading ? (
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t('common.loading')}
+              <Silian_Loader2 className="h-4 w-4 animate-spin" />
+              {Silian_t('common.loading')}
             </div>
           ) : null}
 
-          {tasks.map((task) => {
-            const draft = drafts[task.task_key] ?? {
-              enabled: Boolean(task.enabled),
-              interval_minutes: String(task.interval_minutes ?? ''),
+          {Silian_tasks.map((Silian_task) => {
+            const Silian_draft = Silian_drafts[Silian_task.task_key] ?? {
+              enabled: Boolean(Silian_task.enabled),
+              interval_minutes: String(Silian_task.interval_minutes ?? ''),
             };
-            const intervalMinutes = parseIntervalMinutes(draft.interval_minutes);
-            const canDisableUnregisteredTask = task.is_registered === false && draft.enabled === false;
-            const saveLoading = saveTaskMutation.isLoading && saveTaskMutation.variables?.taskKey === task.task_key;
-            const runLoading = runTaskMutation.isLoading && runTaskMutation.variables === task.task_key;
-            const saveDisabled = runLoading || (task.is_registered === false ? !canDisableUnregisteredTask : intervalMinutes === null);
+            const Silian_intervalMinutes = Silian_parseIntervalMinutes(Silian_draft.interval_minutes);
+            const Silian_canDisableUnregisteredTask = Silian_task.is_registered === false && Silian_draft.enabled === false;
+            const Silian_saveLoading = Silian_saveTaskMutation.isLoading && Silian_saveTaskMutation.variables?.taskKey === Silian_task.task_key;
+            const Silian_runLoading = Silian_runTaskMutation.isLoading && Silian_runTaskMutation.variables === Silian_task.task_key;
+            const Silian_saveDisabled = Silian_runLoading || (Silian_task.is_registered === false ? !Silian_canDisableUnregisteredTask : Silian_intervalMinutes === null);
 
             return (
-              <div key={task.task_key} className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-5 py-5 dark:border-white/10 dark:bg-white/5">
+              <div key={Silian_task.task_key} className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-5 py-5 dark:border-white/10 dark:bg-white/5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-3">
-                      <h2 className="text-lg font-semibold">{task.task_name}</h2>
-                      <Badge variant="outline" className={taskStatusTone(task.last_status)}>
-                        {translateCronStatus(t, task.last_status || 'idle')}
-                      </Badge>
-                      {task.is_due ? (
-                        <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-                          {t('admin.cron.tasks.dueNow')}
-                        </Badge>
+                      <h2 className="text-lg font-semibold">{Silian_task.task_name}</h2>
+                      <Silian_Badge variant="outline" className={Silian_taskStatusTone(Silian_task.last_status)}>
+                        {Silian_translateCronStatus(Silian_t, Silian_task.last_status || 'idle')}
+                      </Silian_Badge>
+                      {Silian_task.is_due ? (
+                        <Silian_Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                          {Silian_t('admin.cron.tasks.dueNow')}
+                        </Silian_Badge>
                       ) : null}
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-300">{task.description || '--'}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300">{Silian_task.description || '--'}</p>
                     <div className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('admin.cron.tasks.nextRun')}</p>
-                        <p className="mt-2">{formatDateTime(task.next_run_at, locale)}</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{Silian_t('admin.cron.tasks.nextRun')}</p>
+                        <p className="mt-2">{Silian_formatDateTime(Silian_task.next_run_at, Silian_locale)}</p>
                       </div>
                       <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('admin.cron.tasks.lastFinished')}</p>
-                        <p className="mt-2">{formatDateTime(task.last_finished_at, locale)}</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{Silian_t('admin.cron.tasks.lastFinished')}</p>
+                        <p className="mt-2">{Silian_formatDateTime(Silian_task.last_finished_at, Silian_locale)}</p>
                       </div>
                       <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('admin.cron.tasks.duration')}</p>
-                        <p className="mt-2">{task.last_duration_ms ?? '--'} ms</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{Silian_t('admin.cron.tasks.duration')}</p>
+                        <p className="mt-2">{Silian_task.last_duration_ms ?? '--'} ms</p>
                       </div>
                       <div>
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{t('admin.cron.tasks.failures')}</p>
-                        <p className="mt-2">{task.consecutive_failures ?? 0}</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">{Silian_t('admin.cron.tasks.failures')}</p>
+                        <p className="mt-2">{Silian_task.consecutive_failures ?? 0}</p>
                       </div>
                     </div>
-                    {task.last_error ? (
+                    {Silian_task.last_error ? (
                       <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
-                        {task.last_error}
+                        {Silian_task.last_error}
                       </p>
                     ) : null}
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-[140px_160px_auto] xl:w-[420px]">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">{t('admin.cron.tasks.enabled')}</label>
+                      <label className="text-sm font-medium">{Silian_t('admin.cron.tasks.enabled')}</label>
                       <div className="flex h-10 items-center rounded-xl border border-slate-200 bg-white px-3 dark:border-white/10 dark:bg-slate-950/70">
-                        <Switch
-                          checked={Boolean(draft.enabled)}
-                          onCheckedChange={(checked) => {
-                            setDrafts((current) => ({
-                              ...current,
-                              [task.task_key]: { ...draft, enabled: checked },
+                        <Silian_Switch
+                          checked={Boolean(Silian_draft.enabled)}
+                          onCheckedChange={(Silian_checked) => {
+                            Silian_setDrafts((Silian_current) => ({
+                              ...Silian_current,
+                              [Silian_task.task_key]: { ...Silian_draft, enabled: Silian_checked },
                             }));
-                            setDirtyTaskKeys((current) => ({ ...current, [task.task_key]: true }));
+                            Silian_setDirtyTaskKeys((Silian_current) => ({ ...Silian_current, [Silian_task.task_key]: true }));
                           }}
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">{t('admin.cron.tasks.intervalMinutes')}</label>
-                      <Input
+                      <label className="text-sm font-medium">{Silian_t('admin.cron.tasks.intervalMinutes')}</label>
+                      <Silian_Input
                         type="number"
                         min="1"
                         max="1440"
-                        aria-invalid={intervalMinutes === null}
-                        value={draft.interval_minutes}
-                        onChange={(event) => {
-                          setDrafts((current) => ({
-                            ...current,
-                            [task.task_key]: { ...draft, interval_minutes: event.target.value },
+                        aria-invalid={Silian_intervalMinutes === null}
+                        value={Silian_draft.interval_minutes}
+                        onChange={(Silian_event) => {
+                          Silian_setDrafts((Silian_current) => ({
+                            ...Silian_current,
+                            [Silian_task.task_key]: { ...Silian_draft, interval_minutes: Silian_event.target.value },
                           }));
-                          setDirtyTaskKeys((current) => ({ ...current, [task.task_key]: true }));
+                          Silian_setDirtyTaskKeys((Silian_current) => ({ ...Silian_current, [Silian_task.task_key]: true }));
                         }}
                       />
                     </div>
                     <div className="flex items-end gap-2">
-                      <Button
+                      <Silian_Button
                         type="button"
                         className="flex-1"
-                        onClick={() => saveDraftForTask(task.task_key, draft)}
-                        disabled={saveDisabled}
-                        loading={saveLoading}
+                        onClick={() => Silian_saveDraftForTask(Silian_task.task_key, Silian_draft)}
+                        disabled={Silian_saveDisabled}
+                        loading={Silian_saveLoading}
                       >
-                        {t('admin.cron.actions.save')}
-                      </Button>
-                      <Button
+                        {Silian_t('admin.cron.actions.save')}
+                      </Silian_Button>
+                      <Silian_Button
                         type="button"
                         variant="outline"
-                        aria-label={t('admin.cron.actions.runNow')}
-                        title={t('admin.cron.actions.runNow')}
-                        onClick={() => runTaskMutation.mutate(task.task_key)}
-                        disabled={saveLoading}
-                        loading={runLoading}
+                        aria-label={Silian_t('admin.cron.actions.runNow')}
+                        title={Silian_t('admin.cron.actions.runNow')}
+                        onClick={() => Silian_runTaskMutation.mutate(Silian_task.task_key)}
+                        disabled={Silian_saveLoading}
+                        loading={Silian_runLoading}
                       >
-                        <Play className="h-4 w-4" />
-                      </Button>
+                        <Silian_Play className="h-4 w-4" />
+                      </Silian_Button>
                     </div>
                   </div>
                 </div>
               </div>
             );
           })}
-        </CardContent>
-      </Card>
+        </Silian_CardContent>
+      </Silian_Card>
 
-      <Card>
-        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <Silian_Card>
+        <Silian_CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <CardTitle>{t('admin.cron.runs.title')}</CardTitle>
-            <CardDescription>{t('admin.cron.runs.subtitle')}</CardDescription>
+            <Silian_CardTitle>{Silian_t('admin.cron.runs.title')}</Silian_CardTitle>
+            <Silian_CardDescription>{Silian_t('admin.cron.runs.subtitle')}</Silian_CardDescription>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Select value={taskFilter} onValueChange={setTaskFilter}>
-              <SelectTrigger className="min-w-[220px]">
-                <SelectValue placeholder={t('admin.cron.filters.task')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('admin.cron.filters.allTasks')}</SelectItem>
-                {tasks.map((task) => (
-                  <SelectItem key={task.task_key} value={task.task_key}>
-                    {task.task_name}
-                  </SelectItem>
+            <Silian_Select value={Silian_taskFilter} onValueChange={Silian_setTaskFilter}>
+              <Silian_SelectTrigger className="min-w-[220px]">
+                <Silian_SelectValue placeholder={Silian_t('admin.cron.filters.task')} />
+              </Silian_SelectTrigger>
+              <Silian_SelectContent>
+                <Silian_SelectItem value="all">{Silian_t('admin.cron.filters.allTasks')}</Silian_SelectItem>
+                {Silian_tasks.map((Silian_task) => (
+                  <Silian_SelectItem key={Silian_task.task_key} value={Silian_task.task_key}>
+                    {Silian_task.task_name}
+                  </Silian_SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="min-w-[180px]">
-                <SelectValue placeholder={t('admin.cron.filters.status')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('admin.cron.filters.allStatuses')}</SelectItem>
-                <SelectItem value="success">{t('admin.cron.status.success')}</SelectItem>
-                <SelectItem value="failed">{t('admin.cron.status.failed')}</SelectItem>
-                <SelectItem value="skipped">{t('admin.cron.status.skipped')}</SelectItem>
-              </SelectContent>
-            </Select>
+              </Silian_SelectContent>
+            </Silian_Select>
+            <Silian_Select value={Silian_statusFilter} onValueChange={Silian_setStatusFilter}>
+              <Silian_SelectTrigger className="min-w-[180px]">
+                <Silian_SelectValue placeholder={Silian_t('admin.cron.filters.status')} />
+              </Silian_SelectTrigger>
+              <Silian_SelectContent>
+                <Silian_SelectItem value="all">{Silian_t('admin.cron.filters.allStatuses')}</Silian_SelectItem>
+                <Silian_SelectItem value="success">{Silian_t('admin.cron.status.success')}</Silian_SelectItem>
+                <Silian_SelectItem value="failed">{Silian_t('admin.cron.status.failed')}</Silian_SelectItem>
+                <Silian_SelectItem value="skipped">{Silian_t('admin.cron.status.skipped')}</Silian_SelectItem>
+              </Silian_SelectContent>
+            </Silian_Select>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {runsQuery.isLoading ? (
+        </Silian_CardHeader>
+        <Silian_CardContent className="space-y-3">
+          {Silian_runsQuery.isLoading ? (
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t('common.loading')}
+              <Silian_Loader2 className="h-4 w-4 animate-spin" />
+              {Silian_t('common.loading')}
             </div>
           ) : null}
 
-          {!runs.length && !runsQuery.isLoading ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">{t('admin.cron.runs.empty')}</p>
+          {!Silian_runs.length && !Silian_runsQuery.isLoading ? (
+            <p className="text-sm text-slate-500 dark:text-slate-400">{Silian_t('admin.cron.runs.empty')}</p>
           ) : null}
 
-          {runs.map((run) => (
-            <div key={run.id} className="rounded-[1.3rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
+          {Silian_runs.map((Silian_run) => (
+            <div key={Silian_run.id} className="rounded-[1.3rem] border border-slate-200 bg-slate-50 px-4 py-4 dark:border-white/10 dark:bg-white/5">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">{run.task_key}</p>
-                    <Badge variant="outline" className={taskStatusTone(run.status)}>
-                      {translateCronStatus(t, run.status)}
-                    </Badge>
-                    <Badge variant="outline">{translateTriggerSource(t, run.trigger_source)}</Badge>
+                    <p className="font-medium">{Silian_run.task_key}</p>
+                    <Silian_Badge variant="outline" className={Silian_taskStatusTone(Silian_run.status)}>
+                      {Silian_translateCronStatus(Silian_t, Silian_run.status)}
+                    </Silian_Badge>
+                    <Silian_Badge variant="outline">{Silian_translateTriggerSource(Silian_t, Silian_run.trigger_source)}</Silian_Badge>
                   </div>
                   <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                    {formatDateTime(run.started_at, locale)} · {run.duration_ms ?? '--'} ms
+                    {Silian_formatDateTime(Silian_run.started_at, Silian_locale)} · {Silian_run.duration_ms ?? '--'} ms
                   </p>
                 </div>
                 <div className="text-sm text-slate-600 dark:text-slate-300">
-                  {run.error_message ? run.error_message : JSON.stringify(run.result || {})}
+                  {Silian_run.error_message ? Silian_run.error_message : JSON.stringify(Silian_run.result || {})}
                 </div>
               </div>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </Silian_CardContent>
+      </Silian_Card>
     </div>
   );
 }

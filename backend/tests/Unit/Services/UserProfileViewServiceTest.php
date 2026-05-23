@@ -12,8 +12,8 @@ class UserProfileViewServiceTest extends TestCase
 {
     public function testBuildProfileFieldsFallsBackToLegacyLocationAndSchool(): void
     {
-        $regionService = $this->createMock(RegionService::class);
-        $regionService->expects($this->once())
+        $Silian_regionService = $this->createMock(RegionService::class);
+        $Silian_regionService->expects($this->once())
             ->method('getRegionContext')
             ->with('US-UM-81')
             ->willReturn([
@@ -25,24 +25,24 @@ class UserProfileViewServiceTest extends TestCase
                 'state_name' => null,
             ]);
 
-        $service = new UserProfileViewService($regionService);
+        $Silian_service = new UserProfileViewService($Silian_regionService);
 
-        $fields = $service->buildProfileFields([
+        $Silian_fields = $Silian_service->buildProfileFields([
             'school' => 'Legacy Academy',
             'location' => 'US-UM-81',
         ]);
 
-        $this->assertNull($fields['school_id']);
-        $this->assertSame('Legacy Academy', $fields['school_name']);
-        $this->assertSame('US-UM-81', $fields['region_code']);
-        $this->assertSame('US', $fields['country_code']);
-        $this->assertSame('UM-81', $fields['state_code']);
+        $this->assertNull($Silian_fields['school_id']);
+        $this->assertSame('Legacy Academy', $Silian_fields['school_name']);
+        $this->assertSame('US-UM-81', $Silian_fields['region_code']);
+        $this->assertSame('US', $Silian_fields['country_code']);
+        $this->assertSame('UM-81', $Silian_fields['state_code']);
     }
 
     public function testBuildProfileFieldsFallsBackToLegacySchoolWhenJoinedNameMissing(): void
     {
-        $regionService = $this->createMock(RegionService::class);
-        $regionService->expects($this->once())
+        $Silian_regionService = $this->createMock(RegionService::class);
+        $Silian_regionService->expects($this->once())
             ->method('getRegionContext')
             ->with('US-UM-81')
             ->willReturn([
@@ -54,28 +54,28 @@ class UserProfileViewServiceTest extends TestCase
                 'state_name' => null,
             ]);
 
-        $service = new UserProfileViewService($regionService);
+        $Silian_service = new UserProfileViewService($Silian_regionService);
 
-        $row = [
+        $Silian_row = [
             'school_id' => 7,
             'school_name' => null,
             'school' => 'Legacy Academy',
             'region_code' => 'US-UM-81',
         ];
-        $fields = $service->buildProfileFields($row);
+        $Silian_fields = $Silian_service->buildProfileFields($Silian_row);
 
-        $legacy = $service->buildLegacyDisplayFields($row, $fields);
+        $Silian_legacy = $Silian_service->buildLegacyDisplayFields($Silian_row, $Silian_fields);
 
-        $this->assertSame(7, $fields['school_id']);
-        $this->assertSame('Legacy Academy', $fields['school_name']);
-        $this->assertSame('Legacy Academy', $legacy['school']);
-        $this->assertSame('US-UM-81', $legacy['location']);
+        $this->assertSame(7, $Silian_fields['school_id']);
+        $this->assertSame('Legacy Academy', $Silian_fields['school_name']);
+        $this->assertSame('Legacy Academy', $Silian_legacy['school']);
+        $this->assertSame('US-UM-81', $Silian_legacy['location']);
     }
 
     public function testCanonicalFieldsTakePriorityOverLegacyValues(): void
     {
-        $regionService = $this->createMock(RegionService::class);
-        $regionService->expects($this->once())
+        $Silian_regionService = $this->createMock(RegionService::class);
+        $Silian_regionService->expects($this->once())
             ->method('getRegionContext')
             ->with('US-UM-81')
             ->willReturn([
@@ -87,9 +87,9 @@ class UserProfileViewServiceTest extends TestCase
                 'state_name' => 'Baker Island',
             ]);
 
-        $service = new UserProfileViewService($regionService);
+        $Silian_service = new UserProfileViewService($Silian_regionService);
 
-        $row = [
+        $Silian_row = [
             'school_id' => 7,
             'school_name' => 'Canonical Academy',
             'school' => 'Legacy Academy',
@@ -97,13 +97,13 @@ class UserProfileViewServiceTest extends TestCase
             'location' => 'CN-GD',
         ];
 
-        $fields = $service->buildProfileFields($row);
-        $legacy = $service->buildLegacyDisplayFields($row, $fields);
+        $Silian_fields = $Silian_service->buildProfileFields($Silian_row);
+        $Silian_legacy = $Silian_service->buildLegacyDisplayFields($Silian_row, $Silian_fields);
 
-        $this->assertSame(7, $fields['school_id']);
-        $this->assertSame('Canonical Academy', $fields['school_name']);
-        $this->assertSame('US-UM-81', $fields['region_code']);
-        $this->assertSame('Canonical Academy', $legacy['school']);
-        $this->assertSame('United States · Baker Island', $legacy['location']);
+        $this->assertSame(7, $Silian_fields['school_id']);
+        $this->assertSame('Canonical Academy', $Silian_fields['school_name']);
+        $this->assertSame('US-UM-81', $Silian_fields['region_code']);
+        $this->assertSame('Canonical Academy', $Silian_legacy['school']);
+        $this->assertSame('United States · Baker Island', $Silian_legacy['location']);
     }
 }

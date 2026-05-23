@@ -1,8 +1,8 @@
-import React from 'react';
-import { CarbonCalculator } from '../components/carbon/CarbonCalculator';
+import Silian_React from 'react';
+import { CarbonCalculator as Silian_CarbonCalculator } from '../components/carbon/CarbonCalculator';
 
 export default function CalculatePage() {
-  return <CarbonCalculator />;
+  return <Silian_CarbonCalculator />;
 }
 
 

@@ -1,344 +1,344 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/Alert';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/badge';
-import { Upload, X, File, Image, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { fileUploader } from '@/lib/upload';
-import { useTranslation } from '@/hooks/useTranslation';
-import { cn } from '@/lib/utils';
+import { useState as Silian_useState, useRef as Silian_useRef, useCallback as Silian_useCallback, useEffect as Silian_useEffect } from 'react';
+import { Progress as Silian_Progress } from '@/components/ui/progress';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription } from '@/components/ui/Alert';
+import { Card as Silian_Card, CardContent as Silian_CardContent } from '@/components/ui/Card';
+import { Button as Silian_Button } from '@/components/ui/Button';
+import { Badge as Silian_Badge } from '@/components/ui/badge';
+import { Upload as Silian_Upload, X as Silian_X, File as Silian_File, Image as Silian_Image, AlertCircle as Silian_AlertCircle, CheckCircle2 as Silian_CheckCircle2 } from 'lucide-react';
+import { fileUploader as Silian_fileUploader } from '@/lib/upload';
+import { useTranslation as Silian_useTranslation } from '@/hooks/useTranslation';
+import { cn as Silian_cn } from '@/lib/utils';
 
-const FileUpload = ({
-  multiple = false,
-  directory = 'uploads',
-  entityType = null,
-  entityId = null,
-  onUploadSuccess = () => {},
-  onUploadError = () => {},
-  onStateChange = () => {},
-  className = '',
-  accept = 'image/*',
-  maxFiles = 5,
-  disabled = false,
-  showPreview = true,
-  compressImages = false
+const Silian_FileUpload = ({
+  multiple: Silian_multiple = false,
+  directory: Silian_directory = 'uploads',
+  entityType: Silian_entityType = null,
+  entityId: Silian_entityId = null,
+  onUploadSuccess: Silian_onUploadSuccess = () => {},
+  onUploadError: Silian_onUploadError = () => {},
+  onStateChange: Silian_onStateChange = () => {},
+  className: Silian_className = '',
+  accept: Silian_accept = 'image/*',
+  maxFiles: Silian_maxFiles = 5,
+  disabled: Silian_disabled = false,
+  showPreview: Silian_showPreview = true,
+  compressImages: Silian_compressImages = false
 }) => {
-  const { t } = useTranslation(['errors', 'upload', 'validation']);
-  const [files, setFiles] = useState([]);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [error, setError] = useState('');
-  const [dragActive, setDragActive] = useState(false);
-  const fileInputRef = useRef(null);
-  const [mode, setMode] = useState('direct'); // direct | legacy
+  const { t: Silian_t } = Silian_useTranslation(['errors', 'upload', 'validation']);
+  const [Silian_files, Silian_setFiles] = Silian_useState([]);
+  const [Silian_uploading, Silian_setUploading] = Silian_useState(false);
+  const [Silian_uploadProgress, Silian_setUploadProgress] = Silian_useState(0);
+  const [Silian_error, Silian_setError] = Silian_useState('');
+  const [Silian_dragActive, Silian_setDragActive] = Silian_useState(false);
+  const Silian_fileInputRef = Silian_useRef(null);
+  const [Silian_mode, Silian_setMode] = Silian_useState('direct'); // direct | legacy
 
   // 处理文件选择
-  const handleFileSelect = useCallback(async (selectedFiles) => {
-    setError('');
-    
-    const fileArray = Array.from(selectedFiles);
-    
+  const Silian_handleFileSelect = Silian_useCallback(async (Silian_selectedFiles) => {
+    Silian_setError('');
+
+    const Silian_fileArray = Array.from(Silian_selectedFiles);
+
     // 检查文件数量限制
-    if (multiple && fileArray.length > maxFiles) {
-      setError(t('errors.tooManyFiles', { max: maxFiles }));
+    if (Silian_multiple && Silian_fileArray.length > Silian_maxFiles) {
+      Silian_setError(Silian_t('errors.tooManyFiles', { max: Silian_maxFiles }));
       return;
     }
-    
-    if (!multiple && fileArray.length > 1) {
-      setError(t('errors.singleFileOnly'));
+
+    if (!Silian_multiple && Silian_fileArray.length > 1) {
+      Silian_setError(Silian_t('errors.singleFileOnly'));
       return;
     }
 
     // 验证文件
-    const validatedFiles = [];
-    for (const file of fileArray) {
-      const validation = fileUploader.validateFile(file);
-      if (validation.isValid) {
-        let processedFile = file;
-        
+    const Silian_validatedFiles = [];
+    for (const Silian_file of Silian_fileArray) {
+      const Silian_validation = Silian_fileUploader.validateFile(Silian_file);
+      if (Silian_validation.isValid) {
+        let Silian_processedFile = Silian_file;
+
         // 如果启用图片压缩且是图片文件
-        if (compressImages && fileUploader.isImageFile(file)) {
+        if (Silian_compressImages && Silian_fileUploader.isImageFile(Silian_file)) {
           try {
-            processedFile = await fileUploader.compressImage(file);
-          } catch (compressionError) {
-            console.warn('Image compression failed, using original file:', compressionError);
+            Silian_processedFile = await Silian_fileUploader.compressImage(Silian_file);
+          } catch (Silian_compressionError) {
+            console.warn('Image compression failed, using original file:', Silian_compressionError);
           }
         }
-        
-        validatedFiles.push({
-          file: processedFile,
+
+        Silian_validatedFiles.push({
+          file: Silian_processedFile,
           id: Math.random().toString(36).substr(2, 9),
-          preview: showPreview && fileUploader.isImageFile(processedFile) 
-            ? fileUploader.createPreviewUrl(processedFile) 
+          preview: Silian_showPreview && Silian_fileUploader.isImageFile(Silian_processedFile)
+            ? Silian_fileUploader.createPreviewUrl(Silian_processedFile)
             : null,
           status: 'pending',
           progress: 0,
           error: null
         });
       } else {
-        setError(validation.errors.join('; '));
+        Silian_setError(Silian_validation.errors.join('; '));
         return;
       }
     }
 
-    setFiles(validatedFiles);
-  }, [multiple, maxFiles, compressImages, showPreview, t]);
+    Silian_setFiles(Silian_validatedFiles);
+  }, [Silian_multiple, Silian_maxFiles, Silian_compressImages, Silian_showPreview, Silian_t]);
 
   // 处理文件上传
-  const handleUpload = useCallback(async (overrideFiles = null) => {
-    const sourceFiles = overrideFiles ?? files;
-    const pendingFiles = sourceFiles.filter((file) => file.status === 'pending');
-    if (pendingFiles.length === 0 || uploading) return;
+  const Silian_handleUpload = Silian_useCallback(async (Silian_overrideFiles = null) => {
+    const Silian_sourceFiles = Silian_overrideFiles ?? Silian_files;
+    const Silian_pendingFiles = Silian_sourceFiles.filter((Silian_file) => Silian_file.status === 'pending');
+    if (Silian_pendingFiles.length === 0 || Silian_uploading) return;
 
-    setUploading(true);
-    setUploadProgress(0);
-    setError('');
+    Silian_setUploading(true);
+    Silian_setUploadProgress(0);
+    Silian_setError('');
 
     try {
-      const filesToUpload = pendingFiles.map(f => f.file);
-      
-      const uploadOptions = {
-        directory,
-        entityType,
-        entityId,
-        mode,
-        onProgress: (progressEvent) => {
+      const Silian_filesToUpload = Silian_pendingFiles.map(Silian_f => Silian_f.file);
+
+      const Silian_uploadOptions = {
+        directory: Silian_directory,
+        entityType: Silian_entityType,
+        entityId: Silian_entityId,
+        mode: Silian_mode,
+        onProgress: (Silian_progressEvent) => {
           // direct 多文件时我们包装为 loaded: overall,total:100
-          if (progressEvent.total === 100) {
-            setUploadProgress(Math.round(progressEvent.loaded));
-          } else if (progressEvent.total) {
-            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setUploadProgress(progress);
+          if (Silian_progressEvent.total === 100) {
+            Silian_setUploadProgress(Math.round(Silian_progressEvent.loaded));
+          } else if (Silian_progressEvent.total) {
+            const Silian_progress = Math.round((Silian_progressEvent.loaded * 100) / Silian_progressEvent.total);
+            Silian_setUploadProgress(Silian_progress);
           }
         }
       };
 
-      let result;
+      let Silian_result;
       try {
-        if (multiple && filesToUpload.length > 1) {
-          result = await fileUploader.uploadMultipleFiles(filesToUpload, uploadOptions);
+        if (Silian_multiple && Silian_filesToUpload.length > 1) {
+          Silian_result = await Silian_fileUploader.uploadMultipleFiles(Silian_filesToUpload, Silian_uploadOptions);
         } else {
-          result = await fileUploader.uploadFile(filesToUpload[0], uploadOptions);
+          Silian_result = await Silian_fileUploader.uploadFile(Silian_filesToUpload[0], Silian_uploadOptions);
         }
-      } catch (e) {
-        if (mode === 'direct') {
-          console.warn('Direct upload failed, fallback to legacy mode', e);
-          setMode('legacy');
+      } catch (Silian_e) {
+        if (Silian_mode === 'direct') {
+          console.warn('Direct upload failed, fallback to legacy mode', Silian_e);
+          Silian_setMode('legacy');
           // 重置进度后回退
-          setUploadProgress(0);
-          const fallbackOptions = { ...uploadOptions, mode: 'legacy' };
-          if (multiple && filesToUpload.length > 1) {
-            result = await fileUploader.uploadMultipleFiles(filesToUpload, fallbackOptions);
+          Silian_setUploadProgress(0);
+          const Silian_fallbackOptions = { ...Silian_uploadOptions, mode: 'legacy' };
+          if (Silian_multiple && Silian_filesToUpload.length > 1) {
+            Silian_result = await Silian_fileUploader.uploadMultipleFiles(Silian_filesToUpload, Silian_fallbackOptions);
           } else {
-            result = await fileUploader.uploadFile(filesToUpload[0], fallbackOptions);
+            Silian_result = await Silian_fileUploader.uploadFile(Silian_filesToUpload[0], Silian_fallbackOptions);
           }
         } else {
-          throw e;
+          throw Silian_e;
         }
       }
 
       // 更新文件状态
-      setFiles(prevFiles =>
-        prevFiles.map((file) => (
-          pendingFiles.some((pending) => pending.id === file.id)
-            ? { ...file, status: 'success', progress: 100, error: null }
-            : file
+      Silian_setFiles(Silian_prevFiles =>
+        Silian_prevFiles.map((Silian_file) => (
+          Silian_pendingFiles.some((Silian_pending) => Silian_pending.id === Silian_file.id)
+            ? { ...Silian_file, status: 'success', progress: 100, error: null }
+            : Silian_file
         ))
       );
 
-      onUploadSuccess(result);
-      
+      Silian_onUploadSuccess(Silian_result);
+
       // 清理预览URL
-      sourceFiles.forEach(f => {
-        if (f.preview) {
-          fileUploader.revokePreviewUrl(f.preview);
+      Silian_sourceFiles.forEach(Silian_f => {
+        if (Silian_f.preview) {
+          Silian_fileUploader.revokePreviewUrl(Silian_f.preview);
         }
       });
-      
+
       // 重置状态
       setTimeout(() => {
-        setFiles([]);
-        setUploadProgress(0);
+        Silian_setFiles([]);
+        Silian_setUploadProgress(0);
       }, 2000);
 
-    } catch (uploadError) {
-      setError(uploadError.message);
-      setFiles(prevFiles =>
-        prevFiles.map((file) => (
-          pendingFiles.some((pending) => pending.id === file.id)
-            ? { ...file, status: 'error', error: uploadError.message }
-            : file
+    } catch (Silian_uploadError) {
+      Silian_setError(Silian_uploadError.message);
+      Silian_setFiles(Silian_prevFiles =>
+        Silian_prevFiles.map((Silian_file) => (
+          Silian_pendingFiles.some((Silian_pending) => Silian_pending.id === Silian_file.id)
+            ? { ...Silian_file, status: 'error', error: Silian_uploadError.message }
+            : Silian_file
         ))
       );
-      onUploadError(uploadError);
+      Silian_onUploadError(Silian_uploadError);
     } finally {
-      setUploading(false);
+      Silian_setUploading(false);
     }
-  }, [files, uploading, directory, entityType, entityId, mode, multiple, onUploadSuccess, onUploadError]);
+  }, [Silian_files, Silian_uploading, Silian_directory, Silian_entityType, Silian_entityId, Silian_mode, Silian_multiple, Silian_onUploadSuccess, Silian_onUploadError]);
 
-  useEffect(() => {
-    if (!uploading && files.some((file) => file.status === 'pending')) {
-      void handleUpload(files);
+  Silian_useEffect(() => {
+    if (!Silian_uploading && Silian_files.some((Silian_file) => Silian_file.status === 'pending')) {
+      void Silian_handleUpload(Silian_files);
     }
-  }, [files, uploading, handleUpload]);
+  }, [Silian_files, Silian_uploading, Silian_handleUpload]);
 
   // 移除文件
-  const removeFile = useCallback((fileId) => {
-    setFiles(prevFiles => {
-      const fileToRemove = prevFiles.find(f => f.id === fileId);
-      if (fileToRemove?.preview) {
-        fileUploader.revokePreviewUrl(fileToRemove.preview);
+  const Silian_removeFile = Silian_useCallback((Silian_fileId) => {
+    Silian_setFiles(Silian_prevFiles => {
+      const Silian_fileToRemove = Silian_prevFiles.find(Silian_f => Silian_f.id === Silian_fileId);
+      if (Silian_fileToRemove?.preview) {
+        Silian_fileUploader.revokePreviewUrl(Silian_fileToRemove.preview);
       }
-      return prevFiles.filter(f => f.id !== fileId);
+      return Silian_prevFiles.filter(Silian_f => Silian_f.id !== Silian_fileId);
     });
   }, []);
 
   // 拖拽处理
-  const handleDrag = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
+  const Silian_handleDrag = Silian_useCallback((Silian_e) => {
+    Silian_e.preventDefault();
+    Silian_e.stopPropagation();
+    if (Silian_e.type === 'dragenter' || Silian_e.type === 'dragover') {
+      Silian_setDragActive(true);
+    } else if (Silian_e.type === 'dragleave') {
+      Silian_setDragActive(false);
     }
   }, []);
 
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    if (disabled || uploading) return;
-    
-    const droppedFiles = e.dataTransfer.files;
-    if (droppedFiles?.length > 0) {
-      handleFileSelect(droppedFiles);
+  const Silian_handleDrop = Silian_useCallback((Silian_e) => {
+    Silian_e.preventDefault();
+    Silian_e.stopPropagation();
+    Silian_setDragActive(false);
+
+    if (Silian_disabled || Silian_uploading) return;
+
+    const Silian_droppedFiles = Silian_e.dataTransfer.files;
+    if (Silian_droppedFiles?.length > 0) {
+      Silian_handleFileSelect(Silian_droppedFiles);
     }
-  }, [disabled, uploading, handleFileSelect]);
+  }, [Silian_disabled, Silian_uploading, Silian_handleFileSelect]);
 
   // 点击上传区域
-  const handleClick = useCallback(() => {
-    if (!disabled && !uploading) {
-      fileInputRef.current?.click();
+  const Silian_handleClick = Silian_useCallback(() => {
+    if (!Silian_disabled && !Silian_uploading) {
+      Silian_fileInputRef.current?.click();
     }
-  }, [disabled, uploading]);
+  }, [Silian_disabled, Silian_uploading]);
 
   // 文件输入变化
-  const handleFileInputChange = useCallback((e) => {
-    const selectedFiles = e.target.files;
-    if (selectedFiles?.length > 0) {
-      handleFileSelect(selectedFiles);
+  const Silian_handleFileInputChange = Silian_useCallback((Silian_e) => {
+    const Silian_selectedFiles = Silian_e.target.files;
+    if (Silian_selectedFiles?.length > 0) {
+      Silian_handleFileSelect(Silian_selectedFiles);
     }
     // 重置input值，允许重复选择同一文件
-    e.target.value = '';
-  }, [handleFileSelect]);
+    Silian_e.target.value = '';
+  }, [Silian_handleFileSelect]);
 
-  useEffect(() => {
-    const pendingCount = files.filter((file) => file.status === 'pending').length;
-    const successCount = files.filter((file) => file.status === 'success').length;
-    const errorCount = files.filter((file) => file.status === 'error').length;
+  Silian_useEffect(() => {
+    const Silian_pendingCount = Silian_files.filter((Silian_file) => Silian_file.status === 'pending').length;
+    const Silian_successCount = Silian_files.filter((Silian_file) => Silian_file.status === 'success').length;
+    const Silian_errorCount = Silian_files.filter((Silian_file) => Silian_file.status === 'error').length;
 
-    onStateChange({
-      totalCount: files.length,
-      pendingCount,
-      successCount,
-      errorCount,
-      uploading,
-      mode,
-      hasPendingUploads: uploading || pendingCount > 0,
-      hasUploadErrors: errorCount > 0,
-      isSubmissionBlocked: uploading || pendingCount > 0 || errorCount > 0,
+    Silian_onStateChange({
+      totalCount: Silian_files.length,
+      pendingCount: Silian_pendingCount,
+      successCount: Silian_successCount,
+      errorCount: Silian_errorCount,
+      uploading: Silian_uploading,
+      mode: Silian_mode,
+      hasPendingUploads: Silian_uploading || Silian_pendingCount > 0,
+      hasUploadErrors: Silian_errorCount > 0,
+      isSubmissionBlocked: Silian_uploading || Silian_pendingCount > 0 || Silian_errorCount > 0,
     });
-  }, [files, uploading, mode, onStateChange]);
+  }, [Silian_files, Silian_uploading, Silian_mode, Silian_onStateChange]);
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={Silian_cn('space-y-4', Silian_className)}>
       {/* 上传区域 */}
       <div
-        className={cn(
+        className={Silian_cn(
           'rounded-lg border-2 border-dashed p-6 text-center transition-colors',
           'cursor-pointer border-border bg-background',
-          dragActive ? 'border-primary bg-primary/5' : 'hover:border-foreground/30',
-          disabled && 'opacity-50 cursor-not-allowed',
-          uploading && 'pointer-events-none'
+          Silian_dragActive ? 'border-primary bg-primary/5' : 'hover:border-foreground/30',
+          Silian_disabled && 'opacity-50 cursor-not-allowed',
+          Silian_uploading && 'pointer-events-none'
         )}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={handleClick}
+        onDragEnter={Silian_handleDrag}
+        onDragLeave={Silian_handleDrag}
+        onDragOver={Silian_handleDrag}
+        onDrop={Silian_handleDrop}
+        onClick={Silian_handleClick}
       >
         <input
-          ref={fileInputRef}
+          ref={Silian_fileInputRef}
           type="file"
-          multiple={multiple}
-          accept={accept}
-          onChange={handleFileInputChange}
+          multiple={Silian_multiple}
+          accept={Silian_accept}
+          onChange={Silian_handleFileInputChange}
           className="hidden"
-          disabled={disabled || uploading}
+          disabled={Silian_disabled || Silian_uploading}
         />
-        
-        <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+
+        <Silian_Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
         <p className="mb-2 flex items-center justify-center gap-2 text-lg font-medium text-foreground">
           <span>
-            {dragActive 
-              ? t('upload.dropFiles') 
-              : t('upload.clickOrDrag')
+            {Silian_dragActive
+              ? Silian_t('upload.dropFiles')
+              : Silian_t('upload.clickOrDrag')
             }
           </span>
           <span
-            onClick={(e) => { e.stopPropagation(); setMode(m => m === 'direct' ? 'legacy' : 'direct'); }}
-            className={cn('text-xs px-2 py-0.5 rounded border cursor-pointer select-none',
-              mode === 'direct'
+            onClick={(Silian_e) => { Silian_e.stopPropagation(); Silian_setMode(Silian_m => Silian_m === 'direct' ? 'legacy' : 'direct'); }}
+            className={Silian_cn('text-xs px-2 py-0.5 rounded border cursor-pointer select-none',
+              Silian_mode === 'direct'
                 ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300'
                 : 'border-border bg-muted text-muted-foreground')}
-            title={mode === 'direct' ? '当前：直传（点击切换为旧兼容模式）' : '当前：旧模式（点击切换为直传）'}
-          >{mode === 'direct' ? 'Direct' : 'Legacy'}</span>
+            title={Silian_mode === 'direct' ? '当前：直传（点击切换为旧兼容模式）' : '当前：旧模式（点击切换为直传）'}
+          >{Silian_mode === 'direct' ? 'Direct' : 'Legacy'}</span>
         </p>
         <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <span>
-            {multiple 
-              ? t('upload.supportMultiple', { max: maxFiles })
-              : t('upload.supportSingle')
+            {Silian_multiple
+              ? Silian_t('upload.supportMultiple', { max: Silian_maxFiles })
+              : Silian_t('upload.supportSingle')
             }
           </span>
         </p>
         <p className="mt-2 text-xs text-muted-foreground/80">
-          {t('upload.supportedFormats')}: {t('upload.supportedFormatsDetail')}
+          {Silian_t('upload.supportedFormats')}: {Silian_t('upload.supportedFormatsDetail')}
         </p>
       </div>
 
       {/* 错误提示 */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+      {Silian_error && (
+        <Silian_Alert variant="destructive">
+          <Silian_AlertCircle className="h-4 w-4" />
+          <Silian_AlertDescription>{Silian_error}</Silian_AlertDescription>
+        </Silian_Alert>
       )}
 
       {/* 文件列表 */}
-      {files.length > 0 && (
+      {Silian_files.length > 0 && (
         <div className="space-y-2">
-          {files.map((fileItem) => (
-            <Card key={fileItem.id} className="p-3">
-              <CardContent className="p-0">
+          {Silian_files.map((Silian_fileItem) => (
+            <Silian_Card key={Silian_fileItem.id} className="p-3">
+              <Silian_CardContent className="p-0">
                 <div className="flex items-center space-x-3">
                   {/* 文件图标/预览 */}
                   <div className="flex-shrink-0">
-                    {fileItem.preview ? (
+                    {Silian_fileItem.preview ? (
                       <img
-                        src={fileItem.preview}
-                        alt={fileItem.file.name}
+                        src={Silian_fileItem.preview}
+                        alt={Silian_fileItem.file.name}
                         className="w-12 h-12 object-cover rounded"
                       />
                     ) : (
                       <div className="flex h-12 w-12 items-center justify-center rounded bg-muted">
-                        {fileUploader.isImageFile(fileItem.file) ? (
-                          <Image className="h-6 w-6 text-muted-foreground" />
+                        {Silian_fileUploader.isImageFile(Silian_fileItem.file) ? (
+                          <Silian_Image className="h-6 w-6 text-muted-foreground" />
                         ) : (
-                          <File className="h-6 w-6 text-muted-foreground" />
+                          <Silian_File className="h-6 w-6 text-muted-foreground" />
                         )}
                       </div>
                     )}
@@ -347,67 +347,67 @@ const FileUpload = ({
                   {/* 文件信息 */}
                   <div className="flex-1 min-w-0">
                     <p className="truncate text-sm font-medium text-foreground">
-                      {fileItem.file.name}
+                      {Silian_fileItem.file.name}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {fileUploader.formatFileSize(fileItem.file.size)}
+                      {Silian_fileUploader.formatFileSize(Silian_fileItem.file.size)}
                     </p>
-                    
+
                     {/* 状态 */}
                     <div className="flex items-center space-x-2 mt-1">
-                      {fileItem.status === 'pending' && (
-                        <Badge variant="secondary">
-                          {t('upload.pending')}
-                        </Badge>
+                      {Silian_fileItem.status === 'pending' && (
+                        <Silian_Badge variant="secondary">
+                          {Silian_t('upload.pending')}
+                        </Silian_Badge>
                       )}
-                      {fileItem.status === 'success' && (
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                          {t('upload.success')}
-                        </Badge>
+                      {Silian_fileItem.status === 'success' && (
+                        <Silian_Badge variant="default" className="bg-green-100 text-green-800">
+                          <Silian_CheckCircle2 className="h-3 w-3 mr-1" />
+                          {Silian_t('upload.success')}
+                        </Silian_Badge>
                       )}
-                      {fileItem.status === 'error' && (
-                        <Badge variant="destructive">
-                          <AlertCircle className="h-3 w-3 mr-1" />
-                          {t('upload.error')}
-                        </Badge>
+                      {Silian_fileItem.status === 'error' && (
+                        <Silian_Badge variant="destructive">
+                          <Silian_AlertCircle className="h-3 w-3 mr-1" />
+                          {Silian_t('upload.error')}
+                        </Silian_Badge>
                       )}
                     </div>
 
                     {/* 错误信息 */}
-                    {fileItem.error && (
+                    {Silian_fileItem.error && (
                       <p className="text-xs text-red-600 mt-1">
-                        {fileItem.error}
+                        {Silian_fileItem.error}
                       </p>
                     )}
                   </div>
 
                   {/* 移除按钮 */}
-                  {fileItem.status !== 'success' && !uploading && (
-                    <Button
+                  {Silian_fileItem.status !== 'success' && !Silian_uploading && (
+                    <Silian_Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeFile(fileItem.id)}
+                      onClick={() => Silian_removeFile(Silian_fileItem.id)}
                       className="flex-shrink-0"
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
+                      <Silian_X className="h-4 w-4" />
+                    </Silian_Button>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </Silian_CardContent>
+            </Silian_Card>
           ))}
         </div>
       )}
 
       {/* 上传进度 */}
-      {uploading && (
+      {Silian_uploading && (
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>{t('upload.uploading')}</span>
-            <span>{uploadProgress}%</span>
+            <span>{Silian_t('upload.uploading')}</span>
+            <span>{Silian_uploadProgress}%</span>
           </div>
-          <Progress value={uploadProgress} className="w-full" />
+          <Silian_Progress value={Silian_uploadProgress} className="w-full" />
         </div>
       )}
 
@@ -415,5 +415,5 @@ const FileUpload = ({
   );
 };
 
-export default FileUpload;
+export default Silian_FileUpload;
 

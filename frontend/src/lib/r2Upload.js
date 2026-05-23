@@ -1,40 +1,40 @@
 // Utility for presigned direct uploads to R2
 // Import default axios instance
-import api from './api';
+import Silian_api from './api';
 
-function createUploadError(message, extras = {}) {
-  const error = new Error(message);
-  error.name = 'UploadError';
-  error.isUploadError = true;
-  Object.assign(error, extras);
-  return error;
+function Silian_createUploadError(Silian_message, Silian_extras = {}) {
+  const Silian_error = new Error(Silian_message);
+  Silian_error.name = 'UploadError';
+  Silian_error.isUploadError = true;
+  Object.assign(Silian_error, Silian_extras);
+  return Silian_error;
 }
 
-function normalizeUploadError(error, fallbackMessage, extras = {}) {
-  if (error?.isUploadError) {
-    return Object.assign(error, extras);
+function Silian_normalizeUploadError(Silian_error, Silian_fallbackMessage, Silian_extras = {}) {
+  if (Silian_error?.isUploadError) {
+    return Object.assign(Silian_error, Silian_extras);
   }
 
-  const responseData = error?.response?.data;
-  const responseHeaders = error?.response?.headers || {};
-  const rawMessage =
-    responseData?.message ||
-    responseData?.error ||
-    error?.message ||
-    fallbackMessage;
+  const Silian_responseData = Silian_error?.response?.data;
+  const Silian_responseHeaders = Silian_error?.response?.headers || {};
+  const Silian_rawMessage =
+    Silian_responseData?.message ||
+    Silian_responseData?.error ||
+    Silian_error?.message ||
+    Silian_fallbackMessage;
 
-  return createUploadError(rawMessage || fallbackMessage, {
-    rawMessage,
-    status: error?.response?.status ?? error?.status ?? null,
-    code: responseData?.code || error?.code || null,
+  return Silian_createUploadError(Silian_rawMessage || Silian_fallbackMessage, {
+    rawMessage: Silian_rawMessage,
+    status: Silian_error?.response?.status ?? Silian_error?.status ?? null,
+    code: Silian_responseData?.code || Silian_error?.code || null,
     requestId:
-      error?.request_id ||
-      responseData?.request_id ||
-      responseHeaders['x-request-id'] ||
+      Silian_error?.request_id ||
+      Silian_responseData?.request_id ||
+      Silian_responseHeaders['x-request-id'] ||
       null,
-    details: responseData?.details || responseData?.errors || null,
-    cause: error,
-    ...extras,
+    details: Silian_responseData?.details || Silian_responseData?.errors || null,
+    cause: Silian_error,
+    ...Silian_extras,
   });
 }
 
@@ -45,35 +45,35 @@ function normalizeUploadError(error, fallbackMessage, extras = {}) {
  * @returns {Promise<object>} presign data
  */
 export async function presignFile(
-  file,
-  { directory = 'activities', entityType = 'carbon_record', entityId = null, sha256, expiresIn = 600 } = {}
+  Silian_file,
+  { directory: Silian_directory = 'activities', entityType: Silian_entityType = 'carbon_record', entityId: Silian_entityId = null, sha256: Silian_sha256, expiresIn: Silian_expiresIn = 600 } = {}
 ) {
   try {
-    const body = {
-      original_name: file.name,
-      directory,
-      mime_type: file.type || 'application/octet-stream',
-      file_size: file.size,
-      entity_type: entityType,
-      entity_id: entityId,
-      sha256,
-      expires_in: expiresIn
+    const Silian_body = {
+      original_name: Silian_file.name,
+      directory: Silian_directory,
+      mime_type: Silian_file.type || 'application/octet-stream',
+      file_size: Silian_file.size,
+      entity_type: Silian_entityType,
+      entity_id: Silian_entityId,
+      sha256: Silian_sha256,
+      expires_in: Silian_expiresIn
     };
-    const res = await api.post('/files/presign', body);
-    if (!res.data?.success) {
-      throw createUploadError(res.data?.message || 'Presign failed', {
-        status: res.status,
+    const Silian_res = await Silian_api.post('/files/presign', Silian_body);
+    if (!Silian_res.data?.success) {
+      throw Silian_createUploadError(Silian_res.data?.message || 'Presign failed', {
+        status: Silian_res.status,
         step: 'presign',
-        fileName: file.name,
-        code: res.data?.code || null,
-        requestId: res.data?.request_id || res.headers?.['x-request-id'] || null,
+        fileName: Silian_file.name,
+        code: Silian_res.data?.code || null,
+        requestId: Silian_res.data?.request_id || Silian_res.headers?.['x-request-id'] || null,
       });
     }
-    return res.data.data;
-  } catch (error) {
-    throw normalizeUploadError(error, 'Failed to prepare upload', {
+    return Silian_res.data.data;
+  } catch (Silian_error) {
+    throw Silian_normalizeUploadError(Silian_error, 'Failed to prepare upload', {
       step: 'presign',
-      fileName: file.name,
+      fileName: Silian_file.name,
     });
   }
 }
@@ -83,31 +83,31 @@ export async function presignFile(
  * @param {File} file
  * @param {object} presign { url, headers }
  */
-export async function putFile(file, presign) {
+export async function putFile(Silian_file, Silian_presign) {
   try {
-    const headers = new Headers(presign.headers || {});
-    if (!headers.has('Content-Type') && file.type) headers.set('Content-Type', file.type);
-    const resp = await fetch(presign.url, { method: 'PUT', body: file, headers });
-    if (!resp.ok) {
-      let responseText = '';
+    const Silian_headers = new Headers(Silian_presign.headers || {});
+    if (!Silian_headers.has('Content-Type') && Silian_file.type) Silian_headers.set('Content-Type', Silian_file.type);
+    const Silian_resp = await fetch(Silian_presign.url, { method: 'PUT', body: Silian_file, headers: Silian_headers });
+    if (!Silian_resp.ok) {
+      let Silian_responseText = '';
       try {
-        responseText = await resp.text();
+        Silian_responseText = await Silian_resp.text();
       } catch {
-        responseText = '';
+        Silian_responseText = '';
       }
 
-      throw createUploadError(`Storage upload failed (${resp.status})`, {
+      throw Silian_createUploadError(`Storage upload failed (${Silian_resp.status})`, {
         step: 'put',
-        fileName: file.name,
-        status: resp.status,
-        rawMessage: responseText || resp.statusText || 'PUT upload failed',
+        fileName: Silian_file.name,
+        status: Silian_resp.status,
+        rawMessage: Silian_responseText || Silian_resp.statusText || 'PUT upload failed',
       });
     }
     return true;
-  } catch (error) {
-    throw normalizeUploadError(error, 'Storage upload failed', {
+  } catch (Silian_error) {
+    throw Silian_normalizeUploadError(Silian_error, 'Storage upload failed', {
       step: 'put',
-      fileName: file.name,
+      fileName: Silian_file.name,
     });
   }
 }
@@ -116,23 +116,23 @@ export async function putFile(file, presign) {
  * Confirm upload so backend can record metadata (if required)
  * @param {object} meta { file_path, original_name, entity_type, entity_id }
  */
-export async function confirmUpload(meta) {
+export async function confirmUpload(Silian_meta) {
   try {
-    const res = await api.post('/files/confirm', meta);
-    if (!res.data?.success) {
-      throw createUploadError(res.data?.message || 'Confirm failed', {
-        status: res.status,
+    const Silian_res = await Silian_api.post('/files/confirm', Silian_meta);
+    if (!Silian_res.data?.success) {
+      throw Silian_createUploadError(Silian_res.data?.message || 'Confirm failed', {
+        status: Silian_res.status,
         step: 'confirm',
-        fileName: meta?.original_name || null,
-        code: res.data?.code || null,
-        requestId: res.data?.request_id || res.headers?.['x-request-id'] || null,
+        fileName: Silian_meta?.original_name || null,
+        code: Silian_res.data?.code || null,
+        requestId: Silian_res.data?.request_id || Silian_res.headers?.['x-request-id'] || null,
       });
     }
-    return res.data.data;
-  } catch (error) {
-    throw normalizeUploadError(error, 'Failed to confirm upload', {
+    return Silian_res.data.data;
+  } catch (Silian_error) {
+    throw Silian_normalizeUploadError(Silian_error, 'Failed to confirm upload', {
       step: 'confirm',
-      fileName: meta?.original_name || null,
+      fileName: Silian_meta?.original_name || null,
     });
   }
 }
@@ -141,62 +141,62 @@ export async function confirmUpload(meta) {
  * Full pipeline: presign -> PUT -> confirm (skip confirm if duplicate or no confirm flag)
  * Returns normalized image object with url + meta
  */
-export async function uploadViaPresign(file, opts = {}) {
+export async function uploadViaPresign(Silian_file, Silian_opts = {}) {
   try {
-    const presign = await presignFile(file, opts);
-    const buildResult = (extra = {}) => {
-      const result = {
-        url: presign.public_url || null,
-        file_path: presign.file_path,
-        thumbnail_path: presign.thumbnail_path || null,
-        presigned_url: presign.presigned_url || null,
-        original_name: file.name,
-        mime_type: file.type,
-        size: file.size,
-        ...extra,
+    const Silian_presign = await presignFile(Silian_file, Silian_opts);
+    const Silian_buildResult = (Silian_extra = {}) => {
+      const Silian_result = {
+        url: Silian_presign.public_url || null,
+        file_path: Silian_presign.file_path,
+        thumbnail_path: Silian_presign.thumbnail_path || null,
+        presigned_url: Silian_presign.presigned_url || null,
+        original_name: Silian_file.name,
+        mime_type: Silian_file.type,
+        size: Silian_file.size,
+        ...Silian_extra,
       };
-      result.duplicate = Boolean(extra.duplicate ?? result.duplicate ?? false);
-      if (extra.file_path) result.file_path = extra.file_path;
-      if (extra.thumbnail_path) result.thumbnail_path = extra.thumbnail_path;
-      if (extra.url) result.url = extra.url;
-      if (extra.presigned_url) result.presigned_url = extra.presigned_url;
-      return result;
+      Silian_result.duplicate = Boolean(Silian_extra.duplicate ?? Silian_result.duplicate ?? false);
+      if (Silian_extra.file_path) Silian_result.file_path = Silian_extra.file_path;
+      if (Silian_extra.thumbnail_path) Silian_result.thumbnail_path = Silian_extra.thumbnail_path;
+      if (Silian_extra.url) Silian_result.url = Silian_extra.url;
+      if (Silian_extra.presigned_url) Silian_result.presigned_url = Silian_extra.presigned_url;
+      return Silian_result;
     };
 
-    const confirmPayload = {
-      file_path: presign.file_path,
-      original_name: file.name,
-      entity_type: opts.entityType || 'carbon_record',
-      entity_id: opts.entityId || null,
+    const Silian_confirmPayload = {
+      file_path: Silian_presign.file_path,
+      original_name: Silian_file.name,
+      entity_type: Silian_opts.entityType || 'carbon_record',
+      entity_id: Silian_opts.entityId || null,
     };
 
-    if (presign.duplicate) {
-      let confirmedMeta = null;
-      if (presign.confirm_required) {
+    if (Silian_presign.duplicate) {
+      let Silian_confirmedMeta = null;
+      if (Silian_presign.confirm_required) {
         try {
-          confirmedMeta = await confirmUpload(confirmPayload);
-        } catch (e) {
-          console.warn('Confirm upload failed for duplicate', e);
+          Silian_confirmedMeta = await confirmUpload(Silian_confirmPayload);
+        } catch (Silian_e) {
+          console.warn('Confirm upload failed for duplicate', Silian_e);
         }
       }
-      return buildResult({ duplicate: true, ...(confirmedMeta || {}) });
+      return Silian_buildResult({ duplicate: true, ...(Silian_confirmedMeta || {}) });
     }
 
-    await putFile(file, presign);
+    await putFile(Silian_file, Silian_presign);
 
-    let confirmMeta = null;
-    if (presign.confirm_required !== false) {
+    let Silian_confirmMeta = null;
+    if (Silian_presign.confirm_required !== false) {
       try {
-        confirmMeta = await confirmUpload(confirmPayload);
-      } catch (e) {
-        console.warn('Confirm upload failed', e);
+        Silian_confirmMeta = await confirmUpload(Silian_confirmPayload);
+      } catch (Silian_e) {
+        console.warn('Confirm upload failed', Silian_e);
       }
     }
 
-    return buildResult({ duplicate: false, ...(confirmMeta || {}) });
-  } catch (error) {
-    throw normalizeUploadError(error, 'Upload failed', {
-      fileName: file.name,
+    return Silian_buildResult({ duplicate: false, ...(Silian_confirmMeta || {}) });
+  } catch (Silian_error) {
+    throw Silian_normalizeUploadError(Silian_error, 'Upload failed', {
+      fileName: Silian_file.name,
     });
   }
 }
@@ -204,14 +204,14 @@ export async function uploadViaPresign(file, opts = {}) {
 /**
  * Batch upload files sequentially (can optimize to parallel with concurrency limit)
  */
-export async function batchUpload(files, opts = {}, onProgress) {
-  const results = [];
-  let index = 0;
-  for (const f of files) {
+export async function batchUpload(Silian_files, Silian_opts = {}, Silian_onProgress) {
+  const Silian_results = [];
+  let Silian_index = 0;
+  for (const Silian_f of Silian_files) {
     // naive SHA256 omitted for speed; could add WebCrypto hashing if dedupe important client-side
-    const img = await uploadViaPresign(f, opts);
-    results.push(img);
-    index++; if (onProgress) onProgress(index, files.length, img);
+    const Silian_img = await uploadViaPresign(Silian_f, Silian_opts);
+    Silian_results.push(Silian_img);
+    Silian_index++; if (Silian_onProgress) Silian_onProgress(Silian_index, Silian_files.length, Silian_img);
   }
-  return results;
+  return Silian_results;
 }

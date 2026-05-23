@@ -1,43 +1,43 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import Silian_React, { useCallback as Silian_useCallback, useEffect as Silian_useEffect, useMemo as Silian_useMemo, useRef as Silian_useRef, useState as Silian_useState } from 'react';
+import { useMutation as Silian_useMutation, useQuery as Silian_useQuery, useQueryClient as Silian_useQueryClient } from 'react-query';
+import { useNavigate as Silian_useNavigate, useSearchParams as Silian_useSearchParams } from 'react-router-dom';
+import { AnimatePresence as Silian_AnimatePresence, motion as Silian_motion } from 'framer-motion';
 import {
-  Activity,
-  ArrowUpRight,
-  Bot,
-  ChevronRight,
-  Clock3,
-  Command,
-  Cpu,
-  ExternalLink,
-  Filter,
-  History,
-  Loader2,
-  Search,
-  ShieldCheck,
-  TerminalSquare,
-  MessageSquare,
-  Plus,
-  ShieldAlert,
-  Sparkles,
+  Activity as Silian_Activity,
+  ArrowUpRight as Silian_ArrowUpRight,
+  Bot as Silian_Bot,
+  ChevronRight as Silian_ChevronRight,
+  Clock3 as Silian_Clock3,
+  Command as Silian_Command,
+  Cpu as Silian_Cpu,
+  ExternalLink as Silian_ExternalLink,
+  Filter as Silian_Filter,
+  History as Silian_History,
+  Loader2 as Silian_Loader2,
+  Search as Silian_Search,
+  ShieldCheck as Silian_ShieldCheck,
+  TerminalSquare as Silian_TerminalSquare,
+  MessageSquare as Silian_MessageSquare,
+  Plus as Silian_Plus,
+  ShieldAlert as Silian_ShieldAlert,
+  Sparkles as Silian_Sparkles,
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast as Silian_toast } from 'sonner';
 
-import { adminAPI } from '../../lib/api';
-import { userManager } from '../../lib/auth';
-import { useTranslation } from '../../hooks/useTranslation';
-import { cn } from '../../lib/utils';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/badge';
-import { Textarea } from '../../components/ui/textarea';
-import { ScrollArea } from '../../components/ui/scroll-area';
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/Alert';
+import { adminAPI as Silian_adminAPI } from '../../lib/api';
+import { userManager as Silian_userManager } from '../../lib/auth';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { cn as Silian_cn } from '../../lib/utils';
+import { Button as Silian_Button } from '../../components/ui/Button';
+import { Badge as Silian_Badge } from '../../components/ui/badge';
+import { Textarea as Silian_Textarea } from '../../components/ui/textarea';
+import { ScrollArea as Silian_ScrollArea } from '../../components/ui/scroll-area';
+import { Alert as Silian_Alert, AlertDescription as Silian_AlertDescription, AlertTitle as Silian_AlertTitle } from '../../components/ui/Alert';
 
-const COMMAND_MIN_LENGTH = 2;
-const EMPTY_ARRAY = [];
-const EMPTY_OBJECT = {};
-const ROUTE_COPY = {
+const Silian_COMMAND_MIN_LENGTH = 2;
+const Silian_EMPTY_ARRAY = [];
+const Silian_EMPTY_OBJECT = {};
+const Silian_ROUTE_COPY = {
   dashboard: {
     zh: { label: '管理总览', description: '后台总览、关键指标与快捷处理入口。' },
     en: { label: 'Admin dashboard', description: 'Overview, key metrics, and quick admin tasks.' },
@@ -100,7 +100,7 @@ const ROUTE_COPY = {
   },
 };
 
-const QUICK_ACTION_COPY = {
+const Silian_QUICK_ACTION_COPY = {
   'open-ai-workspace': {
     zh: { label: '打开 AI 工作台', description: '直接回到 AI 指挥台并聚焦输入框。' },
     en: { label: 'Open AI workspace', description: 'Jump straight into the admin AI workspace.' },
@@ -127,7 +127,7 @@ const QUICK_ACTION_COPY = {
   },
 };
 
-const ACTION_DESCRIPTION_COPY = {
+const Silian_ACTION_DESCRIPTION_COPY = {
   get_admin_stats: {
     zh: '读取后台总览指标与平台整体运行状态。',
     en: 'Read dashboard-level metrics and operating state.',
@@ -178,14 +178,14 @@ const ACTION_DESCRIPTION_COPY = {
   },
 };
 
-const ACTION_SCOPE_COPY = {
+const Silian_ACTION_SCOPE_COPY = {
   admin_report: { zh: { label: '管理简报' }, en: { label: 'Admin report' } },
   pending_carbon_records: { zh: { label: '待审核碳记录' }, en: { label: 'Pending carbon records' } },
   llm_usage_analytics: { zh: { label: 'AI 用量' }, en: { label: 'LLM usage analytics' } },
   admin_stats: { zh: { label: '后台总览' }, en: { label: 'Admin stats' } },
 };
 
-const ROUTE_KEY_BY_PATH = {
+const Silian_ROUTE_KEY_BY_PATH = {
   '/admin/dashboard': 'dashboard',
   '/admin/passkeys': 'passkeys',
   '/admin/users': 'users',
@@ -203,161 +203,161 @@ const ROUTE_KEY_BY_PATH = {
   '/admin/diagnostics': 'diagnostics',
 };
 
-const MotionDiv = motion.div;
+const Silian_MotionDiv = Silian_motion.div;
 
-function buildRouteWithQuery(route, query = {}) {
-  if (!route) return null;
+function Silian_buildRouteWithQuery(Silian_route, Silian_query = {}) {
+  if (!Silian_route) return null;
 
-  const entries = Object.entries(query || {}).filter(([, value]) => value !== undefined && value !== null && value !== '');
-  if (entries.length === 0) return route;
+  const Silian_entries = Object.entries(Silian_query || {}).filter(([, Silian_value]) => Silian_value !== undefined && Silian_value !== null && Silian_value !== '');
+  if (Silian_entries.length === 0) return Silian_route;
 
-  const params = new URLSearchParams();
-  for (const [key, value] of entries) {
-    params.set(key, String(value));
+  const Silian_params = new URLSearchParams();
+  for (const [Silian_key, Silian_value] of Silian_entries) {
+    Silian_params.set(Silian_key, String(Silian_value));
   }
 
-  return `${route}?${params.toString()}`;
+  return `${Silian_route}?${Silian_params.toString()}`;
 }
 
-function hasRenderableMessages(conversation) {
-  return Array.isArray(conversation?.messages) && conversation.messages.some((item) => item?.kind === 'message');
+function Silian_hasRenderableMessages(Silian_conversation) {
+  return Array.isArray(Silian_conversation?.messages) && Silian_conversation.messages.some((Silian_item) => Silian_item?.kind === 'message');
 }
 
-function buildFallbackConversation(conversation, conversationId, previousConversation, userMessage, assistantMessage) {
-  if (hasRenderableMessages(conversation)) {
-    return conversation;
+function Silian_buildFallbackConversation(Silian_conversation, Silian_conversationId, Silian_previousConversation, Silian_userMessage, Silian_assistantMessage) {
+  if (Silian_hasRenderableMessages(Silian_conversation)) {
+    return Silian_conversation;
   }
 
-  const previousMessages = Array.isArray(previousConversation?.messages)
-    ? previousConversation.messages.filter((item) => item?.kind === 'message')
+  const Silian_previousMessages = Array.isArray(Silian_previousConversation?.messages)
+    ? Silian_previousConversation.messages.filter((Silian_item) => Silian_item?.kind === 'message')
     : [];
-  const nextMessages = [...previousMessages];
+  const Silian_nextMessages = [...Silian_previousMessages];
 
-  if (userMessage) {
-    nextMessages.push({
-      id: `local-user-${conversationId || 'new'}-${nextMessages.length}`,
+  if (Silian_userMessage) {
+    Silian_nextMessages.push({
+      id: `local-user-${Silian_conversationId || 'new'}-${Silian_nextMessages.length}`,
       kind: 'message',
       role: 'user',
-      content: userMessage,
+      content: Silian_userMessage,
       created_at: new Date().toISOString(),
       meta: { data: { source: 'client_fallback' } },
     });
   }
 
-  if (assistantMessage) {
-    nextMessages.push({
-      id: `local-assistant-${conversationId || 'new'}-${nextMessages.length}`,
+  if (Silian_assistantMessage) {
+    Silian_nextMessages.push({
+      id: `local-assistant-${Silian_conversationId || 'new'}-${Silian_nextMessages.length}`,
       kind: 'message',
       role: 'assistant',
-      content: assistantMessage,
+      content: Silian_assistantMessage,
       created_at: new Date().toISOString(),
       meta: { data: { source: 'client_fallback' } },
     });
   }
 
-  if (nextMessages.length === 0) {
-    return conversation;
+  if (Silian_nextMessages.length === 0) {
+    return Silian_conversation;
   }
 
   return {
-    ...(previousConversation || {}),
-    ...(conversation || {}),
-    conversation_id: conversation?.conversation_id || conversationId || previousConversation?.conversation_id || null,
-    messages: nextMessages,
+    ...(Silian_previousConversation || {}),
+    ...(Silian_conversation || {}),
+    conversation_id: Silian_conversation?.conversation_id || Silian_conversationId || Silian_previousConversation?.conversation_id || null,
+    messages: Silian_nextMessages,
     summary: {
-      ...(previousConversation?.summary || {}),
-      ...(conversation?.summary || {}),
-      message_count: nextMessages.length,
+      ...(Silian_previousConversation?.summary || {}),
+      ...(Silian_conversation?.summary || {}),
+      message_count: Silian_nextMessages.length,
       last_activity_at: new Date().toISOString(),
     },
   };
 }
 
-function formatAbsoluteTime(value, locale = 'zh-CN') {
-  if (!value) return '--';
+function Silian_formatAbsoluteTime(Silian_value, Silian_locale = 'zh-CN') {
+  if (!Silian_value) return '--';
 
   try {
-    return new Intl.DateTimeFormat(locale, {
+    return new Intl.DateTimeFormat(Silian_locale, {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    }).format(new Date(value));
+    }).format(new Date(Silian_value));
   } catch {
-    return String(value);
+    return String(Silian_value);
   }
 }
 
-function formatRelativeTime(value, locale = 'zh-CN', isZh = true) {
-  if (!value) return isZh ? '刚刚' : 'just now';
+function Silian_formatRelativeTime(Silian_value, Silian_locale = 'zh-CN', Silian_isZh = true) {
+  if (!Silian_value) return Silian_isZh ? '刚刚' : 'just now';
 
-  const time = new Date(value).getTime();
-  if (Number.isNaN(time)) {
-    return formatAbsoluteTime(value, locale);
+  const Silian_time = new Date(Silian_value).getTime();
+  if (Number.isNaN(Silian_time)) {
+    return Silian_formatAbsoluteTime(Silian_value, Silian_locale);
   }
 
-  const diffSeconds = Math.round((time - Date.now()) / 1000);
-  const absSeconds = Math.abs(diffSeconds);
-  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  const Silian_diffSeconds = Math.round((Silian_time - Date.now()) / 1000);
+  const Silian_absSeconds = Math.abs(Silian_diffSeconds);
+  const Silian_rtf = new Intl.RelativeTimeFormat(Silian_locale, { numeric: 'auto' });
 
-  if (absSeconds < 60) return rtf.format(diffSeconds, 'second');
-  if (absSeconds < 3600) return rtf.format(Math.round(diffSeconds / 60), 'minute');
-  if (absSeconds < 86400) return rtf.format(Math.round(diffSeconds / 3600), 'hour');
-  if (absSeconds < 2592000) return rtf.format(Math.round(diffSeconds / 86400), 'day');
-  return rtf.format(Math.round(diffSeconds / 2592000), 'month');
+  if (Silian_absSeconds < 60) return Silian_rtf.format(Silian_diffSeconds, 'second');
+  if (Silian_absSeconds < 3600) return Silian_rtf.format(Math.round(Silian_diffSeconds / 60), 'minute');
+  if (Silian_absSeconds < 86400) return Silian_rtf.format(Math.round(Silian_diffSeconds / 3600), 'hour');
+  if (Silian_absSeconds < 2592000) return Silian_rtf.format(Math.round(Silian_diffSeconds / 86400), 'day');
+  return Silian_rtf.format(Math.round(Silian_diffSeconds / 2592000), 'month');
 }
 
-function formatCompactNumber(value) {
-  const numeric = Number(value || 0);
-  if (!Number.isFinite(numeric)) return '--';
-  if (numeric >= 1000000) return `${(numeric / 1000000).toFixed(1)}M`;
-  if (numeric >= 1000) return `${(numeric / 1000).toFixed(1)}k`;
-  return String(Math.round(numeric));
+function Silian_formatCompactNumber(Silian_value) {
+  const Silian_numeric = Number(Silian_value || 0);
+  if (!Number.isFinite(Silian_numeric)) return '--';
+  if (Silian_numeric >= 1000000) return `${(Silian_numeric / 1000000).toFixed(1)}M`;
+  if (Silian_numeric >= 1000) return `${(Silian_numeric / 1000).toFixed(1)}k`;
+  return String(Math.round(Silian_numeric));
 }
 
-function formatLatency(value, isZh) {
-  const numeric = Number(value || 0);
-  if (!Number.isFinite(numeric) || numeric <= 0) {
-    return isZh ? '未记录' : 'Not recorded';
+function Silian_formatLatency(Silian_value, Silian_isZh) {
+  const Silian_numeric = Number(Silian_value || 0);
+  if (!Number.isFinite(Silian_numeric) || Silian_numeric <= 0) {
+    return Silian_isZh ? '未记录' : 'Not recorded';
   }
 
-  if (numeric >= 1000) {
-    return `${(numeric / 1000).toFixed(2)}s`;
+  if (Silian_numeric >= 1000) {
+    return `${(Silian_numeric / 1000).toFixed(2)}s`;
   }
 
-  return `${Math.round(numeric)}ms`;
+  return `${Math.round(Silian_numeric)}ms`;
 }
 
-function stringifyValue(value) {
-  if (value == null) return '';
-  if (typeof value === 'string') return value;
+function Silian_stringifyValue(Silian_value) {
+  if (Silian_value == null) return '';
+  if (typeof Silian_value === 'string') return Silian_value;
 
   try {
-    return JSON.stringify(value, null, 2);
+    return JSON.stringify(Silian_value, null, 2);
   } catch {
-    return String(value);
+    return String(Silian_value);
   }
 }
 
-function prettifyActionName(value) {
-  if (!value || typeof value !== 'string') return null;
-  return value
+function Silian_prettifyActionName(Silian_value) {
+  if (!Silian_value || typeof Silian_value !== 'string') return null;
+  return Silian_value
     .replace(/^admin_ai_/, '')
     .replaceAll('_', ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+    .replace(/\b\w/g, (Silian_char) => Silian_char.toUpperCase());
 }
 
-function pickLocalizedCopy(entry, isZh, field) {
-  if (!entry) return null;
-  return isZh ? entry?.zh?.[field] : entry?.en?.[field];
+function Silian_pickLocalizedCopy(Silian_entry, Silian_isZh, Silian_field) {
+  if (!Silian_entry) return null;
+  return Silian_isZh ? Silian_entry?.zh?.[Silian_field] : Silian_entry?.en?.[Silian_field];
 }
 
-function getLocalizedActionLabel(action, isZh) {
-  const name = action?.name || action?.action_name;
-  const label = action?.label;
-  if (!isZh) return label || prettifyActionName(name) || 'Admin action';
+function Silian_getLocalizedActionLabel(Silian_action, Silian_isZh) {
+  const Silian_name = Silian_action?.name || Silian_action?.action_name;
+  const Silian_label = Silian_action?.label;
+  if (!Silian_isZh) return Silian_label || Silian_prettifyActionName(Silian_name) || 'Admin action';
 
-  const map = {
+  const Silian_map = {
     get_admin_stats: '查看后台总览',
     get_pending_carbon_records: '查看待审核碳记录',
     get_llm_usage_analytics: '查看 AI 用量',
@@ -377,309 +377,309 @@ function getLocalizedActionLabel(action, isZh) {
     adjust_product_inventory: '准备调整商品库存',
   };
 
-  return map[name] || label || prettifyActionName(name) || '后台动作';
+  return Silian_map[Silian_name] || Silian_label || Silian_prettifyActionName(Silian_name) || '后台动作';
 }
 
-function getLocalizedActionDescription(action, isZh) {
-  const name = action?.name || action?.action_name;
-  const localized = isZh ? ACTION_DESCRIPTION_COPY[name]?.zh : ACTION_DESCRIPTION_COPY[name]?.en;
-  return localized || action?.description || (isZh ? '暂无说明。' : 'No description.');
+function Silian_getLocalizedActionDescription(Silian_action, Silian_isZh) {
+  const Silian_name = Silian_action?.name || Silian_action?.action_name;
+  const Silian_localized = Silian_isZh ? Silian_ACTION_DESCRIPTION_COPY[Silian_name]?.zh : Silian_ACTION_DESCRIPTION_COPY[Silian_name]?.en;
+  return Silian_localized || Silian_action?.description || (Silian_isZh ? '暂无说明。' : 'No description.');
 }
 
-function getLocalizedQuickActionCopy(action, isZh) {
-  const localized = QUICK_ACTION_COPY[action?.id] || ROUTE_COPY[action?.routeId];
+function Silian_getLocalizedQuickActionCopy(Silian_action, Silian_isZh) {
+  const Silian_localized = Silian_QUICK_ACTION_COPY[Silian_action?.id] || Silian_ROUTE_COPY[Silian_action?.routeId];
   return {
-    label: pickLocalizedCopy(localized, isZh, 'label') || action?.label || (isZh ? '快捷入口' : 'Shortcut'),
-    description: pickLocalizedCopy(localized, isZh, 'description') || action?.description || (isZh ? '直接跳转到对应后台页面。' : 'Jump to the related admin page.'),
+    label: Silian_pickLocalizedCopy(Silian_localized, Silian_isZh, 'label') || Silian_action?.label || (Silian_isZh ? '快捷入口' : 'Shortcut'),
+    description: Silian_pickLocalizedCopy(Silian_localized, Silian_isZh, 'description') || Silian_action?.description || (Silian_isZh ? '直接跳转到对应后台页面。' : 'Jump to the related admin page.'),
   };
 }
 
-function getLocalizedNavigationCopy(target, isZh) {
-  const localized = ROUTE_COPY[target?.id];
+function Silian_getLocalizedNavigationCopy(Silian_target, Silian_isZh) {
+  const Silian_localized = Silian_ROUTE_COPY[Silian_target?.id];
   return {
-    label: pickLocalizedCopy(localized, isZh, 'label') || target?.label || (isZh ? '后台页面' : 'Admin page'),
-    description: pickLocalizedCopy(localized, isZh, 'description') || target?.description || (isZh ? '打开对应后台模块。' : 'Open the related admin module.'),
+    label: Silian_pickLocalizedCopy(Silian_localized, Silian_isZh, 'label') || Silian_target?.label || (Silian_isZh ? '后台页面' : 'Admin page'),
+    description: Silian_pickLocalizedCopy(Silian_localized, Silian_isZh, 'description') || Silian_target?.description || (Silian_isZh ? '打开对应后台模块。' : 'Open the related admin module.'),
   };
 }
 
-function getLocalizedRouteLabel(route, isZh, fallbackLabel = null) {
-  const routeKey = ROUTE_KEY_BY_PATH[route];
-  const localized = routeKey ? ROUTE_COPY[routeKey] : null;
-  return pickLocalizedCopy(localized, isZh, 'label') || fallbackLabel || (isZh ? '打开建议页面' : 'Open suggestion');
+function Silian_getLocalizedRouteLabel(Silian_route, Silian_isZh, Silian_fallbackLabel = null) {
+  const Silian_routeKey = Silian_ROUTE_KEY_BY_PATH[Silian_route];
+  const Silian_localized = Silian_routeKey ? Silian_ROUTE_COPY[Silian_routeKey] : null;
+  return Silian_pickLocalizedCopy(Silian_localized, Silian_isZh, 'label') || Silian_fallbackLabel || (Silian_isZh ? '打开建议页面' : 'Open suggestion');
 }
 
-function getLocalizedScopeLabel(scope, isZh) {
-  return pickLocalizedCopy(ACTION_SCOPE_COPY[scope], isZh, 'label') || scope || (isZh ? '结果' : 'Result');
+function Silian_getLocalizedScopeLabel(Silian_scope, Silian_isZh) {
+  return Silian_pickLocalizedCopy(Silian_ACTION_SCOPE_COPY[Silian_scope], Silian_isZh, 'label') || Silian_scope || (Silian_isZh ? '结果' : 'Result');
 }
 
-function getLocalizedConfirmationPolicy(policy, isZh) {
-  if (policy === 'write_requires_confirmation') {
-    return isZh ? '写入前需确认' : 'Write requires confirmation';
+function Silian_getLocalizedConfirmationPolicy(Silian_policy, Silian_isZh) {
+  if (Silian_policy === 'write_requires_confirmation') {
+    return Silian_isZh ? '写入前需确认' : 'Write requires confirmation';
   }
-  return policy || (isZh ? '依据系统策略' : 'Policy driven');
+  return Silian_policy || (Silian_isZh ? '依据系统策略' : 'Policy driven');
 }
 
-function getLocalizedCallStatus(status, isZh) {
-  switch (status) {
+function Silian_getLocalizedCallStatus(Silian_status, Silian_isZh) {
+  switch (Silian_status) {
     case 'success':
-      return isZh ? '成功' : 'Success';
+      return Silian_isZh ? '成功' : 'Success';
     case 'failed':
-      return isZh ? '失败' : 'Failed';
+      return Silian_isZh ? '失败' : 'Failed';
     case 'running':
-      return isZh ? '执行中' : 'Running';
+      return Silian_isZh ? '执行中' : 'Running';
     default:
-      return isZh ? '未知' : 'Unknown';
+      return Silian_isZh ? '未知' : 'Unknown';
   }
 }
 
-function getLocalizedEventKind(kind, isZh) {
-  switch (kind) {
+function Silian_getLocalizedEventKind(Silian_kind, Silian_isZh) {
+  switch (Silian_kind) {
     case 'tool':
-      return isZh ? '工具' : 'Tool';
+      return Silian_isZh ? '工具' : 'Tool';
     case 'action_proposed':
-      return isZh ? '提案' : 'Proposal';
+      return Silian_isZh ? '提案' : 'Proposal';
     case 'action_event':
-      return isZh ? '事件' : 'Event';
+      return Silian_isZh ? '事件' : 'Event';
     case 'message':
-      return isZh ? '消息' : 'Message';
+      return Silian_isZh ? '消息' : 'Message';
     default:
-      return isZh ? '事件' : 'Event';
+      return Silian_isZh ? '事件' : 'Event';
   }
 }
 
-function summarizeObject(value, isZh) {
-  if (!value || typeof value !== 'object') {
-    return isZh ? '没有附带结构化数据。' : 'No structured data attached.';
+function Silian_summarizeObject(Silian_value, Silian_isZh) {
+  if (!Silian_value || typeof Silian_value !== 'object') {
+    return Silian_isZh ? '没有附带结构化数据。' : 'No structured data attached.';
   }
 
-  const entries = Object.entries(value)
-    .filter(([, item]) => item !== null && item !== '' && item !== false)
+  const Silian_entries = Object.entries(Silian_value)
+    .filter(([, Silian_item]) => Silian_item !== null && Silian_item !== '' && Silian_item !== false)
     .slice(0, 4)
-    .map(([key, item]) => {
-      if (Array.isArray(item)) {
-        return `${key}: ${item.slice(0, 3).join(', ')}${item.length > 3 ? '…' : ''}`;
+    .map(([Silian_key, Silian_item]) => {
+      if (Array.isArray(Silian_item)) {
+        return `${Silian_key}: ${Silian_item.slice(0, 3).join(', ')}${Silian_item.length > 3 ? '…' : ''}`;
       }
-      if (typeof item === 'object') {
-        return `${key}: ${Object.keys(item).slice(0, 3).join(', ') || '{}'}`;
+      if (typeof Silian_item === 'object') {
+        return `${Silian_key}: ${Object.keys(Silian_item).slice(0, 3).join(', ') || '{}'}`;
       }
-      return `${key}: ${String(item)}`;
+      return `${Silian_key}: ${String(Silian_item)}`;
     });
 
-  if (entries.length === 0) {
-    return isZh ? '没有附带结构化数据。' : 'No structured data attached.';
+  if (Silian_entries.length === 0) {
+    return Silian_isZh ? '没有附带结构化数据。' : 'No structured data attached.';
   }
 
-  return entries.join(' | ');
+  return Silian_entries.join(' | ');
 }
 
-function buildEventCopy(item, isZh) {
-  const metaData = item?.meta?.data || {};
-  const actionName = metaData.action_name || metaData.tool_name || item?.proposal?.action_name || item?.action || null;
-  const actionLabel = getLocalizedActionLabel({
-    name: actionName,
-    label: metaData.label || item?.proposal?.label,
-  }, isZh);
-  const status = item?.status || '';
+function Silian_buildEventCopy(Silian_item, Silian_isZh) {
+  const Silian_metaData = Silian_item?.meta?.data || {};
+  const Silian_actionName = Silian_metaData.action_name || Silian_metaData.tool_name || Silian_item?.proposal?.action_name || Silian_item?.action || null;
+  const Silian_actionLabel = Silian_getLocalizedActionLabel({
+    name: Silian_actionName,
+    label: Silian_metaData.label || Silian_item?.proposal?.label,
+  }, Silian_isZh);
+  const Silian_status = Silian_item?.status || '';
 
-  if (item?.kind === 'tool') {
+  if (Silian_item?.kind === 'tool') {
     return {
-      title: isZh ? `调用工具：${actionLabel}` : `Tool call: ${actionLabel}`,
-      description: metaData.summary || summarizeObject(metaData.request_payload || metaData.payload || metaData, isZh),
+      title: Silian_isZh ? `调用工具：${Silian_actionLabel}` : `Tool call: ${Silian_actionLabel}`,
+      description: Silian_metaData.summary || Silian_summarizeObject(Silian_metaData.request_payload || Silian_metaData.payload || Silian_metaData, Silian_isZh),
       tone: 'tool',
     };
   }
 
-  if (item?.kind === 'action_proposed') {
+  if (Silian_item?.kind === 'action_proposed') {
     return {
-      title: isZh ? `待确认：${actionLabel}` : `Pending: ${actionLabel}`,
-      description: item?.proposal?.summary || metaData.summary || summarizeObject(item?.proposal?.payload || metaData.payload || metaData, isZh),
+      title: Silian_isZh ? `待确认：${Silian_actionLabel}` : `Pending: ${Silian_actionLabel}`,
+      description: Silian_item?.proposal?.summary || Silian_metaData.summary || Silian_summarizeObject(Silian_item?.proposal?.payload || Silian_metaData.payload || Silian_metaData, Silian_isZh),
       tone: 'proposal',
     };
   }
 
-  if (item?.kind === 'action_event') {
-    if (status === 'failed') {
+  if (Silian_item?.kind === 'action_event') {
+    if (Silian_status === 'failed') {
       return {
-        title: isZh ? `执行失败：${actionLabel}` : `Failed: ${actionLabel}`,
-        description: summarizeObject(metaData.new_data || metaData.result || metaData.request_payload || metaData.payload || metaData, isZh),
+        title: Silian_isZh ? `执行失败：${Silian_actionLabel}` : `Failed: ${Silian_actionLabel}`,
+        description: Silian_summarizeObject(Silian_metaData.new_data || Silian_metaData.result || Silian_metaData.request_payload || Silian_metaData.payload || Silian_metaData, Silian_isZh),
         tone: 'failed',
       };
     }
 
-    if ((item?.action || '').endsWith('_rejected')) {
+    if ((Silian_item?.action || '').endsWith('_rejected')) {
       return {
-        title: isZh ? `已驳回：${actionLabel}` : `Rejected: ${actionLabel}`,
-        description: summarizeObject(metaData.request_payload || metaData.payload || metaData, isZh),
+        title: Silian_isZh ? `已驳回：${Silian_actionLabel}` : `Rejected: ${Silian_actionLabel}`,
+        description: Silian_summarizeObject(Silian_metaData.request_payload || Silian_metaData.payload || Silian_metaData, Silian_isZh),
         tone: 'muted',
       };
     }
 
-    if ((item?.action || '').endsWith('_confirmed')) {
+    if ((Silian_item?.action || '').endsWith('_confirmed')) {
       return {
-        title: isZh ? `已确认：${actionLabel}` : `Confirmed: ${actionLabel}`,
-        description: summarizeObject(metaData.request_payload || metaData.payload || metaData, isZh),
+        title: Silian_isZh ? `已确认：${Silian_actionLabel}` : `Confirmed: ${Silian_actionLabel}`,
+        description: Silian_summarizeObject(Silian_metaData.request_payload || Silian_metaData.payload || Silian_metaData, Silian_isZh),
         tone: 'success',
       };
     }
 
-    if ((item?.action || '').endsWith('_executed')) {
+    if ((Silian_item?.action || '').endsWith('_executed')) {
       return {
-        title: isZh ? `已执行：${actionLabel}` : `Executed: ${actionLabel}`,
-        description: summarizeObject(metaData.new_data || metaData.result || metaData, isZh),
+        title: Silian_isZh ? `已执行：${Silian_actionLabel}` : `Executed: ${Silian_actionLabel}`,
+        description: Silian_summarizeObject(Silian_metaData.new_data || Silian_metaData.result || Silian_metaData, Silian_isZh),
         tone: 'success',
       };
     }
   }
 
   return {
-    title: actionLabel,
-    description: item?.content || summarizeObject(metaData, isZh),
+    title: Silian_actionLabel,
+    description: Silian_item?.content || Silian_summarizeObject(Silian_metaData, Silian_isZh),
     tone: 'muted',
   };
 }
 
-function getConversationStatusLabel(status, isZh) {
-  switch (status) {
+function Silian_getConversationStatusLabel(Silian_status, Silian_isZh) {
+  switch (Silian_status) {
     case 'waiting_confirmation':
-      return isZh ? '待确认' : 'Awaiting confirmation';
+      return Silian_isZh ? '待确认' : 'Awaiting confirmation';
     case 'completed':
-      return isZh ? '已完成' : 'Completed';
+      return Silian_isZh ? '已完成' : 'Completed';
     case 'active':
-      return isZh ? '进行中' : 'Active';
+      return Silian_isZh ? '进行中' : 'Active';
     default:
-      return isZh ? '会话' : 'Session';
+      return Silian_isZh ? '会话' : 'Session';
   }
 }
 
-const PANEL_SHELL_CLASS = 'overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/88 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03] dark:shadow-[0_24px_70px_rgba(0,0,0,0.28)]';
-const PANEL_DIVIDER_CLASS = 'border-slate-200/70 dark:border-white/8';
-const SURFACE_MUTED_CLASS = 'rounded-[22px] border border-slate-200/80 bg-slate-50/90 dark:border-white/10 dark:bg-black/20';
-const SURFACE_SOFT_CLASS = 'rounded-[22px] border border-slate-200/80 bg-white/78 dark:border-white/8 dark:bg-white/[0.02]';
-const TEXT_PRIMARY_CLASS = 'text-slate-950 dark:text-white';
-const TEXT_SECONDARY_CLASS = 'text-slate-600 dark:text-slate-400';
-const TEXT_TERTIARY_CLASS = 'text-slate-500 dark:text-slate-500';
-const OUTLINE_BUTTON_CLASS = 'rounded-full border border-slate-300/80 bg-white/70 text-slate-700 hover:bg-slate-100 dark:border-white/15 dark:bg-transparent dark:text-white dark:hover:bg-white/8';
-const INPUT_SHELL_CLASS = 'border border-slate-200/80 bg-white/75 text-slate-900 outline-none placeholder:text-slate-400 dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-slate-500';
-const PAGE_SCROLLBAR_CLASS = '[&_[data-slot=scroll-area-scrollbar]]:p-0.5 [&_[data-slot=scroll-area-scrollbar][data-orientation=vertical]]:w-3 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:h-3 [&_[data-slot=scroll-area-thumb]]:rounded-full [&_[data-slot=scroll-area-thumb]]:bg-slate-300/75 dark:[&_[data-slot=scroll-area-thumb]]:bg-white/16 hover:[&_[data-slot=scroll-area-thumb]]:bg-slate-400/90 dark:hover:[&_[data-slot=scroll-area-thumb]]:bg-white/24';
-const INLINE_SCROLLBAR_CLASS = '[scrollbar-width:thin] [scrollbar-color:rgba(148,163,184,0.75)_transparent] dark:[scrollbar-color:rgba(255,255,255,0.16)_transparent] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300/80 dark:[&::-webkit-scrollbar-thumb]:bg-white/16 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400/90 dark:hover:[&::-webkit-scrollbar-thumb]:bg-white/24';
+const Silian_PANEL_SHELL_CLASS = 'overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/88 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03] dark:shadow-[0_24px_70px_rgba(0,0,0,0.28)]';
+const Silian_PANEL_DIVIDER_CLASS = 'border-slate-200/70 dark:border-white/8';
+const Silian_SURFACE_MUTED_CLASS = 'rounded-[22px] border border-slate-200/80 bg-slate-50/90 dark:border-white/10 dark:bg-black/20';
+const Silian_SURFACE_SOFT_CLASS = 'rounded-[22px] border border-slate-200/80 bg-white/78 dark:border-white/8 dark:bg-white/[0.02]';
+const Silian_TEXT_PRIMARY_CLASS = 'text-slate-950 dark:text-white';
+const Silian_TEXT_SECONDARY_CLASS = 'text-slate-600 dark:text-slate-400';
+const Silian_TEXT_TERTIARY_CLASS = 'text-slate-500 dark:text-slate-500';
+const Silian_OUTLINE_BUTTON_CLASS = 'rounded-full border border-slate-300/80 bg-white/70 text-slate-700 hover:bg-slate-100 dark:border-white/15 dark:bg-transparent dark:text-white dark:hover:bg-white/8';
+const Silian_INPUT_SHELL_CLASS = 'border border-slate-200/80 bg-white/75 text-slate-900 outline-none placeholder:text-slate-400 dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-slate-500';
+const Silian_PAGE_SCROLLBAR_CLASS = '[&_[data-slot=scroll-area-scrollbar]]:p-0.5 [&_[data-slot=scroll-area-scrollbar][data-orientation=vertical]]:w-3 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:h-3 [&_[data-slot=scroll-area-thumb]]:rounded-full [&_[data-slot=scroll-area-thumb]]:bg-slate-300/75 dark:[&_[data-slot=scroll-area-thumb]]:bg-white/16 hover:[&_[data-slot=scroll-area-thumb]]:bg-slate-400/90 dark:hover:[&_[data-slot=scroll-area-thumb]]:bg-white/24';
+const Silian_INLINE_SCROLLBAR_CLASS = '[scrollbar-width:thin] [scrollbar-color:rgba(148,163,184,0.75)_transparent] dark:[scrollbar-color:rgba(255,255,255,0.16)_transparent] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300/80 dark:[&::-webkit-scrollbar-thumb]:bg-white/16 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400/90 dark:hover:[&::-webkit-scrollbar-thumb]:bg-white/24';
 
-function Panel({
-  title,
-  description,
-  action,
-  className,
-  bodyClassName,
-  headerClassName,
-  titleClassName,
-  stackAction = false,
-  children,
+function Silian_Panel({
+  title: Silian_title,
+  description: Silian_description,
+  action: Silian_action,
+  className: Silian_className,
+  bodyClassName: Silian_bodyClassName,
+  headerClassName: Silian_headerClassName,
+  titleClassName: Silian_titleClassName,
+  stackAction: Silian_stackAction = false,
+  children: Silian_children,
 }) {
   return (
-    <div className={cn(
-      PANEL_SHELL_CLASS,
-      className
+    <div className={Silian_cn(
+      Silian_PANEL_SHELL_CLASS,
+      Silian_className
     )}>
-      {(title || description || action) ? (
-        <div className={cn(
-          `px-5 py-4 ${PANEL_DIVIDER_CLASS}`,
-          stackAction ? 'space-y-3' : 'flex flex-col gap-3',
-          headerClassName
+      {(Silian_title || Silian_description || Silian_action) ? (
+        <div className={Silian_cn(
+          `px-5 py-4 ${Silian_PANEL_DIVIDER_CLASS}`,
+          Silian_stackAction ? 'space-y-3' : 'flex flex-col gap-3',
+          Silian_headerClassName
         )}>
           <div className="min-w-0 flex-1">
-            {title ? <div className={cn(`break-words text-sm font-semibold ${TEXT_PRIMARY_CLASS}`, titleClassName)}>{title}</div> : null}
-            {description ? <div className={cn(`mt-1 break-words text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>{description}</div> : null}
+            {Silian_title ? <div className={Silian_cn(`break-words text-sm font-semibold ${Silian_TEXT_PRIMARY_CLASS}`, Silian_titleClassName)}>{Silian_title}</div> : null}
+            {Silian_description ? <div className={Silian_cn(`mt-1 break-words text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>{Silian_description}</div> : null}
           </div>
-          {action ? (
-            <div className={cn('min-w-0', stackAction ? 'w-full' : 'flex flex-wrap items-center gap-2')}>
-              {action}
+          {Silian_action ? (
+            <div className={Silian_cn('min-w-0', Silian_stackAction ? 'w-full' : 'flex flex-wrap items-center gap-2')}>
+              {Silian_action}
             </div>
           ) : null}
         </div>
       ) : null}
-      <div className={cn('p-5', bodyClassName)}>{children}</div>
+      <div className={Silian_cn('p-5', Silian_bodyClassName)}>{Silian_children}</div>
     </div>
   );
 }
 
-function StatusChip({ tone = 'neutral', children }) {
+function Silian_StatusChip({ tone: Silian_tone = 'neutral', children: Silian_children }) {
   return (
     <span
-      className={cn(
+      className={Silian_cn(
         'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-medium',
-        tone === 'success' && 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-200',
-        tone === 'warning' && 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100',
-        tone === 'neutral' && 'border-slate-200 bg-white/85 text-slate-700 dark:border-white/12 dark:bg-white/[0.05] dark:text-slate-200'
+        Silian_tone === 'success' && 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-200',
+        Silian_tone === 'warning' && 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100',
+        Silian_tone === 'neutral' && 'border-slate-200 bg-white/85 text-slate-700 dark:border-white/12 dark:bg-white/[0.05] dark:text-slate-200'
       )}
     >
-      {children}
+      {Silian_children}
     </span>
   );
 }
 
-function MetricTile({ label, value, hint }) {
+function Silian_MetricTile({ label: Silian_label, value: Silian_value, hint: Silian_hint }) {
   return (
-    <div className={cn(SURFACE_MUTED_CLASS, 'px-4 py-4')}>
-      <div className={cn(`text-[11px] uppercase tracking-[0.22em] ${TEXT_TERTIARY_CLASS}`)}>{label}</div>
-      <div className={cn(`mt-3 text-2xl font-semibold ${TEXT_PRIMARY_CLASS}`)}>{value}</div>
-      {hint ? <div className={cn(`mt-2 break-words text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>{hint}</div> : null}
+    <div className={Silian_cn(Silian_SURFACE_MUTED_CLASS, 'px-4 py-4')}>
+      <div className={Silian_cn(`text-[11px] uppercase tracking-[0.22em] ${Silian_TEXT_TERTIARY_CLASS}`)}>{Silian_label}</div>
+      <div className={Silian_cn(`mt-3 text-2xl font-semibold ${Silian_TEXT_PRIMARY_CLASS}`)}>{Silian_value}</div>
+      {Silian_hint ? <div className={Silian_cn(`mt-2 break-words text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>{Silian_hint}</div> : null}
     </div>
   );
 }
 
-function ConversationRow({ item, active, locale, isZh, onSelect }) {
-  const status = item?.status;
-  const pendingCount = Number(item?.pending_action_count || 0);
-  const messageCount = Number(item?.message_count || 0);
-  const llmCalls = Number(item?.llm_calls || 0);
+function Silian_ConversationRow({ item: Silian_item, active: Silian_active, locale: Silian_locale, isZh: Silian_isZh, onSelect: Silian_onSelect }) {
+  const Silian_status = Silian_item?.status;
+  const Silian_pendingCount = Number(Silian_item?.pending_action_count || 0);
+  const Silian_messageCount = Number(Silian_item?.message_count || 0);
+  const Silian_llmCalls = Number(Silian_item?.llm_calls || 0);
 
   return (
     <button
       type="button"
-      onClick={() => onSelect(item.conversation_id)}
-      className={cn(
+      onClick={() => Silian_onSelect(Silian_item.conversation_id)}
+      className={Silian_cn(
         'w-full rounded-[22px] border px-4 py-4 text-left transition-all',
-        active
+        Silian_active
           ? 'border-emerald-300 bg-emerald-50/90 shadow-[0_18px_45px_rgba(16,185,129,0.12)] dark:border-emerald-400/35 dark:bg-emerald-400/[0.12] dark:shadow-[0_18px_45px_rgba(16,185,129,0.14)]'
           : 'border-slate-200/80 bg-white/78 hover:border-slate-300 hover:bg-white dark:border-white/8 dark:bg-white/[0.02] dark:hover:border-white/15 dark:hover:bg-white/[0.04]'
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className={cn(`line-clamp-2 break-words pr-2 text-sm font-semibold ${TEXT_PRIMARY_CLASS}`)}>
-            {item.title || (isZh ? '未命名会话' : 'Untitled session')}
+          <div className={Silian_cn(`line-clamp-2 break-words pr-2 text-sm font-semibold ${Silian_TEXT_PRIMARY_CLASS}`)}>
+            {Silian_item.title || (Silian_isZh ? '未命名会话' : 'Untitled session')}
           </div>
-          <div className={cn(`mt-1 line-clamp-2 break-all text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>
-            {item.last_message_preview || (isZh ? '尚无摘要。' : 'No summary yet.')}
+          <div className={Silian_cn(`mt-1 line-clamp-2 break-all text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>
+            {Silian_item.last_message_preview || (Silian_isZh ? '尚无摘要。' : 'No summary yet.')}
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
           <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-700 dark:border-white/10 dark:bg-black/20 dark:text-slate-300">
-            {pendingCount > 0
-              ? `${pendingCount} ${isZh ? '待确认' : 'pending'}`
-              : `${messageCount} ${isZh ? '条' : 'msgs'}`}
+            {Silian_pendingCount > 0
+              ? `${Silian_pendingCount} ${Silian_isZh ? '待确认' : 'pending'}`
+              : `${Silian_messageCount} ${Silian_isZh ? '条' : 'msgs'}`}
           </span>
-          <span className={cn(`text-[10px] uppercase tracking-[0.2em] ${TEXT_TERTIARY_CLASS}`)}>
-            {getConversationStatusLabel(status, isZh)}
+          <span className={Silian_cn(`text-[10px] uppercase tracking-[0.2em] ${Silian_TEXT_TERTIARY_CLASS}`)}>
+            {Silian_getConversationStatusLabel(Silian_status, Silian_isZh)}
           </span>
         </div>
       </div>
-      <div className={cn(`mt-3 flex items-center justify-between gap-3 text-[11px] ${TEXT_TERTIARY_CLASS}`)}>
+      <div className={Silian_cn(`mt-3 flex items-center justify-between gap-3 text-[11px] ${Silian_TEXT_TERTIARY_CLASS}`)}>
         <span className="inline-flex items-center gap-1.5">
-          <Clock3 className="h-3 w-3" />
-          {formatRelativeTime(item.last_activity_at, locale, isZh)}
+          <Silian_Clock3 className="h-3 w-3" />
+          {Silian_formatRelativeTime(Silian_item.last_activity_at, Silian_locale, Silian_isZh)}
         </span>
-        <span>{formatAbsoluteTime(item.last_activity_at, locale)}</span>
+        <span>{Silian_formatAbsoluteTime(Silian_item.last_activity_at, Silian_locale)}</span>
       </div>
-      <div className={cn(`mt-3 flex flex-wrap items-center gap-2 text-[10px] ${TEXT_SECONDARY_CLASS}`)}>
+      <div className={Silian_cn(`mt-3 flex flex-wrap items-center gap-2 text-[10px] ${Silian_TEXT_SECONDARY_CLASS}`)}>
         <span className="rounded-full border border-slate-200 bg-slate-100 px-2 py-1 dark:border-white/8 dark:bg-black/20">
-          {llmCalls} LLM
+          {Silian_llmCalls} LLM
         </span>
         <span className="rounded-full border border-slate-200 bg-slate-100 px-2 py-1 dark:border-white/8 dark:bg-black/20">
-          {formatCompactNumber(item?.total_tokens || 0)} tok
+          {Silian_formatCompactNumber(Silian_item?.total_tokens || 0)} tok
         </span>
-        {item?.last_model ? (
+        {Silian_item?.last_model ? (
           <span className="truncate rounded-full border border-slate-200 bg-slate-100 px-2 py-1 dark:border-white/8 dark:bg-black/20">
-            {item.last_model}
+            {Silian_item.last_model}
           </span>
         ) : null}
       </div>
@@ -687,239 +687,239 @@ function ConversationRow({ item, active, locale, isZh, onSelect }) {
   );
 }
 
-function QuickLaunchButton({ label, description, onClick }) {
+function Silian_QuickLaunchButton({ label: Silian_label, description: Silian_description, onClick: Silian_onClick }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={Silian_onClick}
       className="group w-full rounded-[22px] border border-slate-200/80 bg-white/80 px-4 py-4 text-left transition-all hover:border-slate-300 hover:bg-white dark:border-white/8 dark:bg-white/[0.03] dark:hover:border-white/16 dark:hover:bg-white/[0.06]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className={cn(`break-words text-sm font-medium ${TEXT_PRIMARY_CLASS}`)}>{label}</div>
-          {description ? <div className={cn(`mt-1 break-words text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>{description}</div> : null}
+          <div className={Silian_cn(`break-words text-sm font-medium ${Silian_TEXT_PRIMARY_CLASS}`)}>{Silian_label}</div>
+          {Silian_description ? <div className={Silian_cn(`mt-1 break-words text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>{Silian_description}</div> : null}
         </div>
-        <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-200" />
+        <Silian_ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-200" />
       </div>
     </button>
   );
 }
 
-function PromptButton({ label, prompt, onUse }) {
+function Silian_PromptButton({ label: Silian_label, prompt: Silian_prompt, onUse: Silian_onUse }) {
   return (
     <button
       type="button"
-      onClick={() => onUse(prompt)}
+      onClick={() => Silian_onUse(Silian_prompt)}
       className="group rounded-[22px] border border-slate-200/80 bg-slate-50/90 p-4 text-left transition-all hover:border-emerald-300 hover:bg-emerald-50 dark:border-white/8 dark:bg-black/20 dark:hover:border-emerald-400/25 dark:hover:bg-emerald-400/[0.08]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className={cn(`text-sm font-medium ${TEXT_PRIMARY_CLASS}`)}>{label}</div>
-          <div className={cn(`mt-2 text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>{prompt}</div>
+          <div className={Silian_cn(`text-sm font-medium ${Silian_TEXT_PRIMARY_CLASS}`)}>{Silian_label}</div>
+          <div className={Silian_cn(`mt-2 text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>{Silian_prompt}</div>
         </div>
-        <ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-emerald-600 dark:text-slate-500 dark:group-hover:text-emerald-200" />
+        <Silian_ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-emerald-600 dark:text-slate-500 dark:group-hover:text-emerald-200" />
       </div>
     </button>
   );
 }
 
-function RiskBadge({ action, isZh }) {
-  if (action?.requires_confirmation) {
-    return <Badge className="border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/15 dark:text-amber-100">{isZh ? '需确认' : 'Confirm required'}</Badge>;
+function Silian_RiskBadge({ action: Silian_action, isZh: Silian_isZh }) {
+  if (Silian_action?.requires_confirmation) {
+    return <Silian_Badge className="border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/15 dark:text-amber-100">{Silian_isZh ? '需确认' : 'Confirm required'}</Silian_Badge>;
   }
 
-  if (action?.risk_level === 'write') {
-    return <Badge className="border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/20 dark:bg-rose-400/15 dark:text-rose-100">{isZh ? '写入' : 'Write'}</Badge>;
+  if (Silian_action?.risk_level === 'write') {
+    return <Silian_Badge className="border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/20 dark:bg-rose-400/15 dark:text-rose-100">{Silian_isZh ? '写入' : 'Write'}</Silian_Badge>;
   }
 
-  if (action?.risk_level === 'read') {
-    return <Badge className="border border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/20 dark:bg-sky-400/15 dark:text-sky-100">{isZh ? '读取' : 'Read'}</Badge>;
+  if (Silian_action?.risk_level === 'read') {
+    return <Silian_Badge className="border border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/20 dark:bg-sky-400/15 dark:text-sky-100">{Silian_isZh ? '读取' : 'Read'}</Silian_Badge>;
   }
 
-  return <Badge className="border border-slate-200 bg-white/85 text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-200">{isZh ? '待定' : 'Pending'}</Badge>;
+  return <Silian_Badge className="border border-slate-200 bg-white/85 text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-200">{Silian_isZh ? '待定' : 'Pending'}</Silian_Badge>;
 }
 
-function PendingActionTile({ action, disabled, isZh, onConfirm, onReject }) {
-  const actionLabel = getLocalizedActionLabel(action, isZh);
+function Silian_PendingActionTile({ action: Silian_action, disabled: Silian_disabled, isZh: Silian_isZh, onConfirm: Silian_onConfirm, onReject: Silian_onReject }) {
+  const Silian_actionLabel = Silian_getLocalizedActionLabel(Silian_action, Silian_isZh);
   return (
     <div className="rounded-[24px] border border-slate-200/80 bg-slate-50/90 p-4 dark:border-white/10 dark:bg-black/20">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className={cn(`text-sm font-semibold ${TEXT_PRIMARY_CLASS}`)}>
-            {actionLabel || action.action_name || `${isZh ? '提案' : 'Proposal'} #${action.proposal_id}`}
+          <div className={Silian_cn(`text-sm font-semibold ${Silian_TEXT_PRIMARY_CLASS}`)}>
+            {Silian_actionLabel || Silian_action.action_name || `${Silian_isZh ? '提案' : 'Proposal'} #${Silian_action.proposal_id}`}
           </div>
-          <div className={cn(`mt-2 text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>
-            {action.summary || (isZh ? '系统已生成一条待确认操作。' : 'A pending action is ready for review.')}
+          <div className={Silian_cn(`mt-2 text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>
+            {Silian_action.summary || (Silian_isZh ? '系统已生成一条待确认操作。' : 'A pending action is ready for review.')}
           </div>
         </div>
-        <RiskBadge action={action} isZh={isZh} />
+        <Silian_RiskBadge action={Silian_action} isZh={Silian_isZh} />
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button
+        <Silian_Button
           size="sm"
-          disabled={disabled}
+          disabled={Silian_disabled}
           className="rounded-full bg-emerald-500 text-black hover:bg-emerald-400"
-          onClick={() => onConfirm(action.proposal_id)}
+          onClick={() => Silian_onConfirm(Silian_action.proposal_id)}
         >
-          {isZh ? '确认执行' : 'Confirm'}
-        </Button>
-        <Button
+          {Silian_isZh ? '确认执行' : 'Confirm'}
+        </Silian_Button>
+        <Silian_Button
           size="sm"
           variant="outline"
-          disabled={disabled}
-          className={OUTLINE_BUTTON_CLASS}
-          onClick={() => onReject(action.proposal_id)}
+          disabled={Silian_disabled}
+          className={Silian_OUTLINE_BUTTON_CLASS}
+          onClick={() => Silian_onReject(Silian_action.proposal_id)}
         >
-          {isZh ? '驳回' : 'Reject'}
-        </Button>
+          {Silian_isZh ? '驳回' : 'Reject'}
+        </Silian_Button>
       </div>
     </div>
   );
 }
 
-function CapabilityTile({ action, isZh }) {
+function Silian_CapabilityTile({ action: Silian_action, isZh: Silian_isZh }) {
   return (
-    <div className={cn(SURFACE_SOFT_CLASS, 'px-4 py-4')}>
+    <div className={Silian_cn(Silian_SURFACE_SOFT_CLASS, 'px-4 py-4')}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className={cn(`text-sm font-medium ${TEXT_PRIMARY_CLASS}`)}>{getLocalizedActionLabel(action, isZh)}</div>
-          <div className={cn(`mt-1 break-words text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>{getLocalizedActionDescription(action, isZh)}</div>
+          <div className={Silian_cn(`text-sm font-medium ${Silian_TEXT_PRIMARY_CLASS}`)}>{Silian_getLocalizedActionLabel(Silian_action, Silian_isZh)}</div>
+          <div className={Silian_cn(`mt-1 break-words text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>{Silian_getLocalizedActionDescription(Silian_action, Silian_isZh)}</div>
         </div>
-        <RiskBadge action={action} isZh={isZh} />
+        <Silian_RiskBadge action={Silian_action} isZh={Silian_isZh} />
       </div>
-      {Array.isArray(action.requirements) && action.requirements.length > 0 ? (
-        <div className={cn(`mt-3 text-[11px] leading-5 ${TEXT_TERTIARY_CLASS}`)}>
-          {isZh ? '所需字段' : 'Required fields'}: {action.requirements.join(', ')}
+      {Array.isArray(Silian_action.requirements) && Silian_action.requirements.length > 0 ? (
+        <div className={Silian_cn(`mt-3 text-[11px] leading-5 ${Silian_TEXT_TERTIARY_CLASS}`)}>
+          {Silian_isZh ? '所需字段' : 'Required fields'}: {Silian_action.requirements.join(', ')}
         </div>
       ) : null}
     </div>
   );
 }
 
-function FilterPill({ active, onClick, children }) {
+function Silian_FilterPill({ active: Silian_active, onClick: Silian_onClick, children: Silian_children }) {
   return (
     <button
       type="button"
-      onClick={onClick}
-      className={cn(
+      onClick={Silian_onClick}
+      className={Silian_cn(
         'rounded-full border px-3 py-1.5 text-xs transition-all',
-        active
+        Silian_active
           ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/[0.14] dark:text-emerald-100'
           : 'border-slate-200/80 bg-white/75 text-slate-600 hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-white/16 dark:hover:bg-white/[0.05]'
       )}
     >
-      {children}
+      {Silian_children}
     </button>
   );
 }
 
-function WorkspaceSectionButton({ active, icon, label, count, onClick }) {
-  const iconNode = icon ? React.createElement(icon, { className: 'h-4 w-4' }) : null;
+function Silian_WorkspaceSectionButton({ active: Silian_active, icon: Silian_icon, label: Silian_label, count: Silian_count, onClick: Silian_onClick }) {
+  const Silian_iconNode = Silian_icon ? Silian_React.createElement(Silian_icon, { className: 'h-4 w-4' }) : null;
 
   return (
     <button
       type="button"
-      onClick={onClick}
-      className={cn(
+      onClick={Silian_onClick}
+      className={Silian_cn(
         'inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-all',
-        active
+        Silian_active
           ? 'border-slate-900 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)] dark:border-emerald-400/25 dark:bg-emerald-400/15 dark:text-emerald-50 dark:shadow-[0_10px_24px_rgba(16,185,129,0.12)]'
           : 'border-slate-200/80 bg-white/78 text-slate-600 hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-white/18 dark:hover:text-white'
       )}
     >
-      {iconNode}
-      <span>{label}</span>
-      {count !== undefined ? (
-        <span className={cn(
+      {Silian_iconNode}
+      <span>{Silian_label}</span>
+      {Silian_count !== undefined ? (
+        <span className={Silian_cn(
           'rounded-full px-2 py-0.5 text-[11px]',
-          active
+          Silian_active
             ? 'bg-white/15 text-white dark:bg-black/20 dark:text-emerald-50'
             : 'bg-slate-100 text-slate-500 dark:bg-white/8 dark:text-slate-400'
         )}>
-          {count}
+          {Silian_count}
         </span>
       ) : null}
     </button>
   );
 }
 
-function JsonPreview({ value, className }) {
-  const text = stringifyValue(value);
-  if (!text) return null;
+function Silian_JsonPreview({ value: Silian_value, className: Silian_className }) {
+  const Silian_text = Silian_stringifyValue(Silian_value);
+  if (!Silian_text) return null;
 
   return (
-    <pre className={cn(`max-h-[20rem] overflow-auto whitespace-pre-wrap break-all rounded-[18px] border border-white/8 bg-[#050816] px-3 py-3 text-[11px] leading-5 text-slate-300 ${INLINE_SCROLLBAR_CLASS}`, className)}>
-      {text}
+    <pre className={Silian_cn(`max-h-[20rem] overflow-auto whitespace-pre-wrap break-all rounded-[18px] border border-white/8 bg-[#050816] px-3 py-3 text-[11px] leading-5 text-slate-300 ${Silian_INLINE_SCROLLBAR_CLASS}`, Silian_className)}>
+      {Silian_text}
     </pre>
   );
 }
 
-function ResultSnapshot({ title, value, isZh }) {
-  const hasValue = value != null && value !== '';
-  const [open, setOpen] = useState(false);
-  const summary = useMemo(() => {
-    if (!hasValue) {
-      return isZh ? '无结果' : 'No result';
+function Silian_ResultSnapshot({ title: Silian_title, value: Silian_value, isZh: Silian_isZh }) {
+  const Silian_hasValue = Silian_value != null && Silian_value !== '';
+  const [Silian_open, Silian_setOpen] = Silian_useState(false);
+  const Silian_summary = Silian_useMemo(() => {
+    if (!Silian_hasValue) {
+      return Silian_isZh ? '无结果' : 'No result';
     }
 
-    if (Array.isArray(value)) {
-      return isZh ? `数组 · ${value.length} 项` : `Array · ${value.length} items`;
+    if (Array.isArray(Silian_value)) {
+      return Silian_isZh ? `数组 · ${Silian_value.length} 项` : `Array · ${Silian_value.length} items`;
     }
 
-    if (typeof value === 'object') {
-      const size = Object.keys(value).length;
-      return isZh ? `对象 · ${size} 个字段` : `Object · ${size} fields`;
+    if (typeof Silian_value === 'object') {
+      const Silian_size = Object.keys(Silian_value).length;
+      return Silian_isZh ? `对象 · ${Silian_size} 个字段` : `Object · ${Silian_size} fields`;
     }
 
-    const text = String(value);
-    if (!text) {
-      return isZh ? '无结果' : 'No result';
+    const Silian_text = String(Silian_value);
+    if (!Silian_text) {
+      return Silian_isZh ? '无结果' : 'No result';
     }
 
-    const compact = text.replace(/\s+/g, ' ').trim();
-    return compact.length > 56 ? `${compact.slice(0, 56)}...` : compact;
-  }, [hasValue, isZh, value]);
+    const Silian_compact = Silian_text.replace(/\s+/g, ' ').trim();
+    return Silian_compact.length > 56 ? `${Silian_compact.slice(0, 56)}...` : Silian_compact;
+  }, [Silian_hasValue, Silian_isZh, Silian_value]);
 
-  if (!hasValue) return null;
+  if (!Silian_hasValue) return null;
 
   return (
     <div className="rounded-[20px] border border-slate-200/80 bg-slate-50/90 p-4 dark:border-white/8 dark:bg-black/20">
       <button
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => Silian_setOpen((Silian_current) => !Silian_current)}
         className="flex w-full items-center justify-between gap-3 text-left"
       >
         <div className="min-w-0">
-          <div className={cn(`text-[11px] uppercase tracking-[0.2em] ${TEXT_TERTIARY_CLASS}`)}>{title}</div>
-          <div className={cn(`mt-2 truncate text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>{summary}</div>
+          <div className={Silian_cn(`text-[11px] uppercase tracking-[0.2em] ${Silian_TEXT_TERTIARY_CLASS}`)}>{Silian_title}</div>
+          <div className={Silian_cn(`mt-2 truncate text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>{Silian_summary}</div>
         </div>
-        <span className={cn(
-          `inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] ${TEXT_SECONDARY_CLASS}`,
+        <span className={Silian_cn(
+          `inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] ${Silian_TEXT_SECONDARY_CLASS}`,
           'border-slate-200 bg-white/80 dark:border-white/10 dark:bg-white/[0.04]'
         )}>
-          <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-90')} />
-          {open ? (isZh ? '收起' : 'Collapse') : (isZh ? '展开' : 'Expand')}
+          <Silian_ChevronRight className={Silian_cn('h-3.5 w-3.5 transition-transform', Silian_open && 'rotate-90')} />
+          {Silian_open ? (Silian_isZh ? '收起' : 'Collapse') : (Silian_isZh ? '展开' : 'Expand')}
         </span>
       </button>
-      {open ? (
-        typeof value === 'object'
-          ? <JsonPreview value={value} className="mt-3" />
-          : <div className={cn(`mt-3 text-xs leading-6 ${TEXT_SECONDARY_CLASS}`)}>{String(value) || (isZh ? '无结果。' : 'No result.')}</div>
+      {Silian_open ? (
+        typeof Silian_value === 'object'
+          ? <Silian_JsonPreview value={Silian_value} className="mt-3" />
+          : <div className={Silian_cn(`mt-3 text-xs leading-6 ${Silian_TEXT_SECONDARY_CLASS}`)}>{String(Silian_value) || (Silian_isZh ? '无结果。' : 'No result.')}</div>
       ) : null}
     </div>
   );
 }
 
-function EventTimelineRow({ item, locale, isZh, disabled, onConfirmProposal, onRejectProposal }) {
-  const event = buildEventCopy(item, isZh);
-  const proposal = item?.proposal;
-  const metaData = item?.meta?.data || {};
-  const payload = proposal?.payload || metaData.request_payload || metaData.payload || null;
-  const result = metaData.new_data || metaData.result || null;
+function Silian_EventTimelineRow({ item: Silian_item, locale: Silian_locale, isZh: Silian_isZh, disabled: Silian_disabled, onConfirmProposal: Silian_onConfirmProposal, onRejectProposal: Silian_onRejectProposal }) {
+  const Silian_event = Silian_buildEventCopy(Silian_item, Silian_isZh);
+  const Silian_proposal = Silian_item?.proposal;
+  const Silian_metaData = Silian_item?.meta?.data || {};
+  const Silian_payload = Silian_proposal?.payload || Silian_metaData.request_payload || Silian_metaData.payload || null;
+  const Silian_result = Silian_metaData.new_data || Silian_metaData.result || null;
 
   return (
-    <MotionDiv
+    <Silian_MotionDiv
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -927,237 +927,237 @@ function EventTimelineRow({ item, locale, isZh, disabled, onConfirmProposal, onR
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex items-start gap-3">
-          <span className={cn(
+          <span className={Silian_cn(
             'mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border',
-            event.tone === 'success' && 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/[0.12] dark:text-emerald-200',
-            event.tone === 'proposal' && 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/[0.12] dark:text-amber-100',
-            event.tone === 'failed' && 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/20 dark:bg-rose-400/[0.12] dark:text-rose-100',
-            event.tone === 'tool' && 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/20 dark:bg-sky-400/[0.12] dark:text-sky-100',
-            event.tone === 'muted' && 'border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300'
+            Silian_event.tone === 'success' && 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/[0.12] dark:text-emerald-200',
+            Silian_event.tone === 'proposal' && 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/[0.12] dark:text-amber-100',
+            Silian_event.tone === 'failed' && 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/20 dark:bg-rose-400/[0.12] dark:text-rose-100',
+            Silian_event.tone === 'tool' && 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/20 dark:bg-sky-400/[0.12] dark:text-sky-100',
+            Silian_event.tone === 'muted' && 'border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300'
           )}>
-            {item?.kind === 'tool'
-              ? <TerminalSquare className="h-4 w-4" />
-              : item?.kind === 'action_proposed'
-                ? <ShieldAlert className="h-4 w-4" />
-                : <ShieldCheck className="h-4 w-4" />}
+            {Silian_item?.kind === 'tool'
+              ? <Silian_TerminalSquare className="h-4 w-4" />
+              : Silian_item?.kind === 'action_proposed'
+                ? <Silian_ShieldAlert className="h-4 w-4" />
+                : <Silian_ShieldCheck className="h-4 w-4" />}
           </span>
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <div className={cn(`text-sm font-medium ${TEXT_PRIMARY_CLASS}`)}>{event.title}</div>
+              <div className={Silian_cn(`text-sm font-medium ${Silian_TEXT_PRIMARY_CLASS}`)}>{Silian_event.title}</div>
               <span className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-400">
-                {getLocalizedEventKind(item?.kind, isZh)}
+                {Silian_getLocalizedEventKind(Silian_item?.kind, Silian_isZh)}
               </span>
             </div>
-            <div className={cn(`mt-2 text-xs leading-6 ${TEXT_SECONDARY_CLASS}`)}>{event.description}</div>
+            <div className={Silian_cn(`mt-2 text-xs leading-6 ${Silian_TEXT_SECONDARY_CLASS}`)}>{Silian_event.description}</div>
           </div>
         </div>
-        <div className={cn(`shrink-0 pt-1 text-[11px] ${TEXT_TERTIARY_CLASS}`)}>{formatAbsoluteTime(item?.created_at, locale)}</div>
+        <div className={Silian_cn(`shrink-0 pt-1 text-[11px] ${Silian_TEXT_TERTIARY_CLASS}`)}>{Silian_formatAbsoluteTime(Silian_item?.created_at, Silian_locale)}</div>
       </div>
 
-      {payload ? <JsonPreview value={payload} className="mt-4" /> : null}
-      {result ? <JsonPreview value={result} className="mt-3" /> : null}
+      {Silian_payload ? <Silian_JsonPreview value={Silian_payload} className="mt-4" /> : null}
+      {Silian_result ? <Silian_JsonPreview value={Silian_result} className="mt-3" /> : null}
 
-      {proposal?.proposal_id && proposal?.status === 'pending' ? (
+      {Silian_proposal?.proposal_id && Silian_proposal?.status === 'pending' ? (
         <div className="mt-4 flex flex-wrap gap-2">
-          <Button
+          <Silian_Button
             size="sm"
-            disabled={disabled}
+            disabled={Silian_disabled}
             className="rounded-full bg-emerald-500 text-black hover:bg-emerald-400"
-            onClick={() => onConfirmProposal(proposal.proposal_id)}
+            onClick={() => Silian_onConfirmProposal(Silian_proposal.proposal_id)}
           >
-            {isZh ? '确认执行' : 'Confirm'}
-          </Button>
-          <Button
+            {Silian_isZh ? '确认执行' : 'Confirm'}
+          </Silian_Button>
+          <Silian_Button
             size="sm"
             variant="outline"
-            disabled={disabled}
-            className={OUTLINE_BUTTON_CLASS}
-            onClick={() => onRejectProposal(proposal.proposal_id)}
+            disabled={Silian_disabled}
+            className={Silian_OUTLINE_BUTTON_CLASS}
+            onClick={() => Silian_onRejectProposal(Silian_proposal.proposal_id)}
           >
-            {isZh ? '驳回' : 'Reject'}
-          </Button>
+            {Silian_isZh ? '驳回' : 'Reject'}
+          </Silian_Button>
         </div>
       ) : null}
-    </MotionDiv>
+    </Silian_MotionDiv>
   );
 }
 
-function LlmCallCard({ item, locale, isZh }) {
+function Silian_LlmCallCard({ item: Silian_item, locale: Silian_locale, isZh: Silian_isZh }) {
   return (
     <div className="rounded-[22px] border border-slate-200/80 bg-white/80 p-4 dark:border-white/8 dark:bg-white/[0.02]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className={cn(`flex items-center gap-2 text-sm font-medium ${TEXT_PRIMARY_CLASS}`)}>
-            <Cpu className="h-4 w-4 text-sky-600 dark:text-sky-200" />
-            {isZh ? `模型回合 #${item.turn_no || '--'}` : `Model turn #${item.turn_no || '--'}`}
+          <div className={Silian_cn(`flex items-center gap-2 text-sm font-medium ${Silian_TEXT_PRIMARY_CLASS}`)}>
+            <Silian_Cpu className="h-4 w-4 text-sky-600 dark:text-sky-200" />
+            {Silian_isZh ? `模型回合 #${Silian_item.turn_no || '--'}` : `Model turn #${Silian_item.turn_no || '--'}`}
           </div>
-          <div className={cn(`mt-1 text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>{item.model || '--'}</div>
+          <div className={Silian_cn(`mt-1 text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>{Silian_item.model || '--'}</div>
         </div>
-        <span className={cn(
+        <span className={Silian_cn(
           'rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.16em]',
-          item.status === 'success'
+          Silian_item.status === 'success'
             ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/[0.12] dark:text-emerald-100'
             : 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/20 dark:bg-rose-400/[0.12] dark:text-rose-100'
         )}>
-          {getLocalizedCallStatus(item.status, isZh)}
+          {Silian_getLocalizedCallStatus(Silian_item.status, Silian_isZh)}
         </span>
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-[18px] border border-slate-200/80 bg-slate-50/90 px-3 py-3 dark:border-white/6 dark:bg-black/20">
-          <div className={cn(`text-[10px] uppercase tracking-[0.18em] ${TEXT_TERTIARY_CLASS}`)}>{isZh ? '令牌' : 'Tokens'}</div>
-          <div className={cn(`mt-2 text-lg font-semibold ${TEXT_PRIMARY_CLASS}`)}>{formatCompactNumber(item.total_tokens)}</div>
+          <div className={Silian_cn(`text-[10px] uppercase tracking-[0.18em] ${Silian_TEXT_TERTIARY_CLASS}`)}>{Silian_isZh ? '令牌' : 'Tokens'}</div>
+          <div className={Silian_cn(`mt-2 text-lg font-semibold ${Silian_TEXT_PRIMARY_CLASS}`)}>{Silian_formatCompactNumber(Silian_item.total_tokens)}</div>
         </div>
         <div className="rounded-[18px] border border-slate-200/80 bg-slate-50/90 px-3 py-3 dark:border-white/6 dark:bg-black/20">
-          <div className={cn(`text-[10px] uppercase tracking-[0.18em] ${TEXT_TERTIARY_CLASS}`)}>{isZh ? '延迟' : 'Latency'}</div>
-          <div className={cn(`mt-2 text-lg font-semibold ${TEXT_PRIMARY_CLASS}`)}>{formatLatency(item.latency_ms, isZh)}</div>
+          <div className={Silian_cn(`text-[10px] uppercase tracking-[0.18em] ${Silian_TEXT_TERTIARY_CLASS}`)}>{Silian_isZh ? '延迟' : 'Latency'}</div>
+          <div className={Silian_cn(`mt-2 text-lg font-semibold ${Silian_TEXT_PRIMARY_CLASS}`)}>{Silian_formatLatency(Silian_item.latency_ms, Silian_isZh)}</div>
         </div>
       </div>
-      <div className={cn(`mt-3 flex items-center justify-between gap-3 text-[11px] ${TEXT_TERTIARY_CLASS}`)}>
-        <span>{formatAbsoluteTime(item.created_at, locale)}</span>
-        <span className="truncate font-mono">{item.request_id || '--'}</span>
+      <div className={Silian_cn(`mt-3 flex items-center justify-between gap-3 text-[11px] ${Silian_TEXT_TERTIARY_CLASS}`)}>
+        <span>{Silian_formatAbsoluteTime(Silian_item.created_at, Silian_locale)}</span>
+        <span className="truncate font-mono">{Silian_item.request_id || '--'}</span>
       </div>
     </div>
   );
 }
 
-function MessageBubble({
-  message,
-  locale,
-  isZh,
-  disabled,
-  onNavigateSuggestion,
-  onConfirmProposal,
-  onRejectProposal,
+function Silian_MessageBubble({
+  message: Silian_message,
+  locale: Silian_locale,
+  isZh: Silian_isZh,
+  disabled: Silian_disabled,
+  onNavigateSuggestion: Silian_onNavigateSuggestion,
+  onConfirmProposal: Silian_onConfirmProposal,
+  onRejectProposal: Silian_onRejectProposal,
 }) {
-  const isUser = message?.role === 'user';
-  const suggestion = message?.meta?.data?.suggestion;
-  const proposal = message?.proposal || message?.meta?.data?.proposal;
-  const result = message?.meta?.data?.result;
-  const actionName = message?.meta?.data?.meta?.action_name || null;
-  const missing = Array.isArray(message?.meta?.data?.meta?.missing) ? message.meta.data.meta.missing : [];
-  const messageWidthClass = 'w-full max-w-[min(100%,36rem)]';
+  const Silian_isUser = Silian_message?.role === 'user';
+  const Silian_suggestion = Silian_message?.meta?.data?.suggestion;
+  const Silian_proposal = Silian_message?.proposal || Silian_message?.meta?.data?.proposal;
+  const Silian_result = Silian_message?.meta?.data?.result;
+  const Silian_actionName = Silian_message?.meta?.data?.meta?.action_name || null;
+  const Silian_missing = Array.isArray(Silian_message?.meta?.data?.meta?.missing) ? Silian_message.meta.data.meta.missing : [];
+  const Silian_messageWidthClass = 'w-full max-w-[min(100%,36rem)]';
 
   return (
-    <MotionDiv
+    <Silian_MotionDiv
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn('flex flex-col gap-3', isUser ? 'items-end' : 'items-start')}
+      className={Silian_cn('flex flex-col gap-3', Silian_isUser ? 'items-end' : 'items-start')}
     >
-      <div className={cn(messageWidthClass, 'space-y-3')}>
-        <div className={cn(
-          `flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] ${TEXT_TERTIARY_CLASS}`,
-          isUser ? 'justify-end' : 'justify-start'
+      <div className={Silian_cn(Silian_messageWidthClass, 'space-y-3')}>
+        <div className={Silian_cn(
+          `flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] ${Silian_TEXT_TERTIARY_CLASS}`,
+          Silian_isUser ? 'justify-end' : 'justify-start'
         )}>
-          <span className={cn(
+          <span className={Silian_cn(
             'inline-flex h-9 w-9 items-center justify-center rounded-full border',
-            isUser
+            Silian_isUser
               ? 'order-2 border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-white/[0.05] dark:text-white'
               : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/18 dark:bg-emerald-400/[0.12] dark:text-emerald-200'
           )}>
-            {isUser ? <MessageSquare className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+            {Silian_isUser ? <Silian_MessageSquare className="h-4 w-4" /> : <Silian_Bot className="h-4 w-4" />}
           </span>
-          <span className={isUser ? 'order-1' : ''}>{isUser ? (isZh ? '管理员' : 'Admin') : 'CarbonTrack AI'}</span>
-          {message?.created_at ? <span className={cn('normal-case tracking-normal', isUser ? 'order-1' : '')}>{formatAbsoluteTime(message.created_at, locale)}</span> : null}
+          <span className={Silian_isUser ? 'order-1' : ''}>{Silian_isUser ? (Silian_isZh ? '管理员' : 'Admin') : 'CarbonTrack AI'}</span>
+          {Silian_message?.created_at ? <span className={Silian_cn('normal-case tracking-normal', Silian_isUser ? 'order-1' : '')}>{Silian_formatAbsoluteTime(Silian_message.created_at, Silian_locale)}</span> : null}
         </div>
 
-        <div className={cn(
+        <div className={Silian_cn(
           'break-words rounded-[24px] border px-5 py-4 text-sm leading-7 shadow-[0_12px_30px_rgba(0,0,0,0.18)]',
-          isUser
+          Silian_isUser
             ? 'rounded-tr-lg border-slate-200 bg-white text-slate-900 dark:border-white/12 dark:bg-white/[0.08] dark:text-white'
             : 'rounded-tl-lg border-emerald-200 bg-emerald-50/85 text-slate-800 dark:border-emerald-400/14 dark:bg-emerald-400/[0.08] dark:text-slate-100'
         )}>
-          {message?.content || (isZh ? 'AI 未返回文本。' : 'No assistant text returned.')}
+          {Silian_message?.content || (Silian_isZh ? 'AI 未返回文本。' : 'No assistant text returned.')}
         </div>
 
-        {!isUser && (actionName || result || missing.length > 0) ? (
+        {!Silian_isUser && (Silian_actionName || Silian_result || Silian_missing.length > 0) ? (
           <div className="grid gap-3">
-            {actionName ? (
+            {Silian_actionName ? (
               <div className="inline-flex w-fit items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs text-sky-700 dark:border-sky-400/20 dark:bg-sky-400/[0.12] dark:text-sky-100">
-                <Activity className="h-3.5 w-3.5" />
-                {getLocalizedActionLabel({ name: actionName }, isZh)}
+                <Silian_Activity className="h-3.5 w-3.5" />
+                {Silian_getLocalizedActionLabel({ name: Silian_actionName }, Silian_isZh)}
               </div>
             ) : null}
-            {missing.length > 0 ? (
+            {Silian_missing.length > 0 ? (
               <div className="rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-6 text-amber-700 dark:border-amber-400/18 dark:bg-amber-400/[0.10] dark:text-amber-50">
-                {isZh ? '缺少字段：' : 'Missing fields: '}
-                {missing.map((item) => item.field).join(', ')}
+                {Silian_isZh ? '缺少字段：' : 'Missing fields: '}
+                {Silian_missing.map((Silian_item) => Silian_item.field).join(', ')}
               </div>
             ) : null}
-            {result ? <ResultSnapshot title={isZh ? '结果快照' : 'Result snapshot'} value={result} isZh={isZh} /> : null}
+            {Silian_result ? <Silian_ResultSnapshot title={Silian_isZh ? '结果快照' : 'Result snapshot'} value={Silian_result} isZh={Silian_isZh} /> : null}
           </div>
         ) : null}
 
-        {suggestion?.route ? (
+        {Silian_suggestion?.route ? (
           <button
             type="button"
-            onClick={() => onNavigateSuggestion(suggestion)}
+            onClick={() => Silian_onNavigateSuggestion(Silian_suggestion)}
             className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:border-white/16 dark:hover:bg-white/[0.08]"
           >
-            <ExternalLink className="h-3.5 w-3.5" />
-            {getLocalizedRouteLabel(suggestion.route, isZh, suggestion.label)}
+            <Silian_ExternalLink className="h-3.5 w-3.5" />
+            {Silian_getLocalizedRouteLabel(Silian_suggestion.route, Silian_isZh, Silian_suggestion.label)}
           </button>
         ) : null}
 
-        {proposal?.proposal_id && proposal?.status === 'pending' ? (
+        {Silian_proposal?.proposal_id && Silian_proposal?.status === 'pending' ? (
           <div className="flex flex-wrap gap-2">
-            <Button
+            <Silian_Button
               size="sm"
-              disabled={disabled}
+              disabled={Silian_disabled}
               className="rounded-full bg-emerald-500 text-black hover:bg-emerald-400"
-              onClick={() => onConfirmProposal(proposal.proposal_id)}
+              onClick={() => Silian_onConfirmProposal(Silian_proposal.proposal_id)}
             >
-              {isZh ? '确认执行' : 'Confirm'}
-            </Button>
-            <Button
+              {Silian_isZh ? '确认执行' : 'Confirm'}
+            </Silian_Button>
+            <Silian_Button
               size="sm"
               variant="outline"
-              disabled={disabled}
-              className={OUTLINE_BUTTON_CLASS}
-              onClick={() => onRejectProposal(proposal.proposal_id)}
+              disabled={Silian_disabled}
+              className={Silian_OUTLINE_BUTTON_CLASS}
+              onClick={() => Silian_onRejectProposal(Silian_proposal.proposal_id)}
             >
-              {isZh ? '驳回' : 'Reject'}
-            </Button>
+              {Silian_isZh ? '驳回' : 'Reject'}
+            </Silian_Button>
           </div>
         ) : null}
       </div>
-    </MotionDiv>
+    </Silian_MotionDiv>
   );
 }
 
-function EmptyConversationState({ isZh, starterPrompts, onUsePrompt, onNavigateAudit }) {
+function Silian_EmptyConversationState({ isZh: Silian_isZh, starterPrompts: Silian_starterPrompts, onUsePrompt: Silian_onUsePrompt, onNavigateAudit: Silian_onNavigateAudit }) {
   return (
     <div className="flex h-full items-center justify-center p-6 md:p-8">
       <div className="w-full max-w-4xl">
         <div className="mx-auto max-w-2xl text-center">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/18 dark:bg-emerald-400/[0.12] dark:text-emerald-200">
-            <Command className="h-9 w-9" />
+            <Silian_Command className="h-9 w-9" />
           </div>
-          <h3 className={cn(`mt-6 text-3xl font-semibold tracking-tight ${TEXT_PRIMARY_CLASS}`)}>
-            {isZh ? '从一个明确任务开始' : 'Start from a clear task'}
+          <h3 className={Silian_cn(`mt-6 text-3xl font-semibold tracking-tight ${Silian_TEXT_PRIMARY_CLASS}`)}>
+            {Silian_isZh ? '从一个明确任务开始' : 'Start from a clear task'}
           </h3>
-          <p className={cn(`mt-3 text-sm leading-7 ${TEXT_SECONDARY_CLASS}`)}>
-            {isZh
+          <p className={Silian_cn(`mt-3 text-sm leading-7 ${Silian_TEXT_SECONDARY_CLASS}`)}>
+            {Silian_isZh
               ? '这不是宣传页，也不是摘要墙。直接输入目标、对象与范围，让工作台生成查询、建议或待确认动作。'
               : 'This surface is for action. State the target, subject, and scope, then let the workspace draft queries, suggestions, or confirmation-ready proposals.'}
           </p>
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">
-          {starterPrompts.slice(0, 4).map((item) => (
-            <PromptButton key={item.id} label={item.label} prompt={item.prompt} onUse={onUsePrompt} />
+          {Silian_starterPrompts.slice(0, 4).map((Silian_item) => (
+            <Silian_PromptButton key={Silian_item.id} label={Silian_item.label} prompt={Silian_item.prompt} onUse={Silian_onUsePrompt} />
           ))}
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <button
             type="button"
-            onClick={onNavigateAudit}
+            onClick={Silian_onNavigateAudit}
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:border-white/16 dark:hover:bg-white/[0.08]"
           >
-            <History className="h-4 w-4" />
-            {isZh ? '查看会话审计' : 'Open session audit'}
+            <Silian_History className="h-4 w-4" />
+            {Silian_isZh ? '查看会话审计' : 'Open session audit'}
           </button>
         </div>
       </div>
@@ -1166,428 +1166,428 @@ function EmptyConversationState({ isZh, starterPrompts, onUsePrompt, onNavigateA
 }
 
 export default function AdminAiWorkspacePage() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const composerRef = useRef(null);
-  const [searchParams] = useSearchParams();
-  const { currentLanguage } = useTranslation();
+  const Silian_navigate = Silian_useNavigate();
+  const Silian_queryClient = Silian_useQueryClient();
+  const Silian_composerRef = Silian_useRef(null);
+  const [Silian_searchParams] = Silian_useSearchParams();
+  const { currentLanguage: Silian_currentLanguage } = Silian_useTranslation();
 
-  const currentAdminId = useMemo(() => {
-    const user = userManager.getUser();
-    return user?.id ?? null;
+  const Silian_currentAdminId = Silian_useMemo(() => {
+    const Silian_user = Silian_userManager.getUser();
+    return Silian_user?.id ?? null;
   }, []);
 
-  const locale = currentLanguage || 'zh-CN';
-  const isZh = locale.toLowerCase().startsWith('zh');
+  const Silian_locale = Silian_currentLanguage || 'zh-CN';
+  const Silian_isZh = Silian_locale.toLowerCase().startsWith('zh');
 
-  const [selectedConversationId, setSelectedConversationId] = useState(null);
-  const [draft, setDraft] = useState('');
-  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
-  const [conversationSearch, setConversationSearch] = useState('');
-  const [conversationFilter, setConversationFilter] = useState('all');
-  const [inspectorOpen, setInspectorOpen] = useState(false);
-  const [workspaceSection, setWorkspaceSection] = useState('actions');
+  const [Silian_selectedConversationId, Silian_setSelectedConversationId] = Silian_useState(null);
+  const [Silian_draft, Silian_setDraft] = Silian_useState('');
+  const [Silian_isCreatingConversation, Silian_setIsCreatingConversation] = Silian_useState(false);
+  const [Silian_conversationSearch, Silian_setConversationSearch] = Silian_useState('');
+  const [Silian_conversationFilter, Silian_setConversationFilter] = Silian_useState('all');
+  const [Silian_inspectorOpen, Silian_setInspectorOpen] = Silian_useState(false);
+  const [Silian_workspaceSection, Silian_setWorkspaceSection] = Silian_useState('actions');
 
-  const aiContext = useMemo(() => ({
+  const Silian_aiContext = Silian_useMemo(() => ({
     activeRoute: '/admin/ai',
-    locale,
+    locale: Silian_locale,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Shanghai',
-  }), [locale]);
+  }), [Silian_locale]);
 
-  const workspaceQuery = useQuery(
+  const Silian_workspaceQuery = Silian_useQuery(
     ['adminAiWorkspace'],
     async () => {
-      const response = await adminAPI.getAiWorkspace();
-      return response.data?.data || response.data;
+      const Silian_response = await Silian_adminAPI.getAiWorkspace();
+      return Silian_response.data?.data || Silian_response.data;
     }
   );
 
-  const conversationsQuery = useQuery(
-    ['adminAiConversations', currentAdminId],
+  const Silian_conversationsQuery = Silian_useQuery(
+    ['adminAiConversations', Silian_currentAdminId],
     async () => {
-      const response = await adminAPI.getAiConversations({
+      const Silian_response = await Silian_adminAPI.getAiConversations({
         limit: 24,
-        admin_id: currentAdminId || undefined,
+        admin_id: Silian_currentAdminId || undefined,
       });
-      return response.data?.data || [];
+      return Silian_response.data?.data || [];
     },
     { keepPreviousData: true }
   );
 
-  const conversationItems = useMemo(() => {
-    if (Array.isArray(conversationsQuery.data) && conversationsQuery.data.length > 0) {
-      return conversationsQuery.data;
+  const Silian_conversationItems = Silian_useMemo(() => {
+    if (Array.isArray(Silian_conversationsQuery.data) && Silian_conversationsQuery.data.length > 0) {
+      return Silian_conversationsQuery.data;
     }
 
-    return Array.isArray(workspaceQuery.data?.recent_conversations) ? workspaceQuery.data.recent_conversations : [];
-  }, [conversationsQuery.data, workspaceQuery.data?.recent_conversations]);
+    return Array.isArray(Silian_workspaceQuery.data?.recent_conversations) ? Silian_workspaceQuery.data.recent_conversations : [];
+  }, [Silian_conversationsQuery.data, Silian_workspaceQuery.data?.recent_conversations]);
 
-  const filteredConversationItems = useMemo(() => {
-    const keyword = conversationSearch.trim().toLowerCase();
+  const Silian_filteredConversationItems = Silian_useMemo(() => {
+    const Silian_keyword = Silian_conversationSearch.trim().toLowerCase();
 
-    return conversationItems.filter((item) => {
-      if (conversationFilter === 'pending' && Number(item?.pending_action_count || 0) <= 0) {
+    return Silian_conversationItems.filter((Silian_item) => {
+      if (Silian_conversationFilter === 'pending' && Number(Silian_item?.pending_action_count || 0) <= 0) {
         return false;
       }
 
-      if (conversationFilter === 'active' && Number(item?.pending_action_count || 0) > 0) {
+      if (Silian_conversationFilter === 'active' && Number(Silian_item?.pending_action_count || 0) > 0) {
         return false;
       }
 
-      if (!keyword) {
+      if (!Silian_keyword) {
         return true;
       }
 
-      const haystack = [
-        item?.title,
-        item?.last_message_preview,
-        item?.conversation_id,
-        item?.last_model,
+      const Silian_haystack = [
+        Silian_item?.title,
+        Silian_item?.last_message_preview,
+        Silian_item?.conversation_id,
+        Silian_item?.last_model,
       ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
 
-      return haystack.includes(keyword);
+      return Silian_haystack.includes(Silian_keyword);
     });
-  }, [conversationFilter, conversationItems, conversationSearch]);
+  }, [Silian_conversationFilter, Silian_conversationItems, Silian_conversationSearch]);
 
-  useEffect(() => {
-    if (!selectedConversationId && !isCreatingConversation && filteredConversationItems.length > 0) {
-      setSelectedConversationId(filteredConversationItems[0].conversation_id);
+  Silian_useEffect(() => {
+    if (!Silian_selectedConversationId && !Silian_isCreatingConversation && Silian_filteredConversationItems.length > 0) {
+      Silian_setSelectedConversationId(Silian_filteredConversationItems[0].conversation_id);
     }
-  }, [filteredConversationItems, isCreatingConversation, selectedConversationId]);
+  }, [Silian_filteredConversationItems, Silian_isCreatingConversation, Silian_selectedConversationId]);
 
-  useEffect(() => {
-    if (isCreatingConversation || !selectedConversationId) {
+  Silian_useEffect(() => {
+    if (Silian_isCreatingConversation || !Silian_selectedConversationId) {
       return;
     }
 
-    const stillVisible = filteredConversationItems.some((item) => item.conversation_id === selectedConversationId);
-    if (!stillVisible && filteredConversationItems.length > 0) {
-      setSelectedConversationId(filteredConversationItems[0].conversation_id);
+    const Silian_stillVisible = Silian_filteredConversationItems.some((Silian_item) => Silian_item.conversation_id === Silian_selectedConversationId);
+    if (!Silian_stillVisible && Silian_filteredConversationItems.length > 0) {
+      Silian_setSelectedConversationId(Silian_filteredConversationItems[0].conversation_id);
     }
-  }, [filteredConversationItems, isCreatingConversation, selectedConversationId]);
+  }, [Silian_filteredConversationItems, Silian_isCreatingConversation, Silian_selectedConversationId]);
 
-  useEffect(() => {
-    if (searchParams.get('focus') === 'composer') {
-      requestAnimationFrame(() => composerRef.current?.focus());
+  Silian_useEffect(() => {
+    if (Silian_searchParams.get('focus') === 'composer') {
+      requestAnimationFrame(() => Silian_composerRef.current?.focus());
     }
-  }, [searchParams]);
+  }, [Silian_searchParams]);
 
-  const conversationDetailQuery = useQuery(
-    ['adminAiConversation', selectedConversationId],
+  const Silian_conversationDetailQuery = Silian_useQuery(
+    ['adminAiConversation', Silian_selectedConversationId],
     async () => {
-      const response = await adminAPI.getAiConversation(selectedConversationId);
-      return response.data?.data || response.data;
+      const Silian_response = await Silian_adminAPI.getAiConversation(Silian_selectedConversationId);
+      return Silian_response.data?.data || Silian_response.data;
     },
     {
-      enabled: Boolean(selectedConversationId),
+      enabled: Boolean(Silian_selectedConversationId),
     }
   );
 
-  const activeConversation = isCreatingConversation ? null : (conversationDetailQuery.data || null);
-  const activeConversationId = activeConversation?.conversation_id == null ? null : String(activeConversation.conversation_id);
-  const normalizedSelectedConversationId = selectedConversationId == null ? null : String(selectedConversationId);
+  const Silian_activeConversation = Silian_isCreatingConversation ? null : (Silian_conversationDetailQuery.data || null);
+  const Silian_activeConversationId = Silian_activeConversation?.conversation_id == null ? null : String(Silian_activeConversation.conversation_id);
+  const Silian_normalizedSelectedConversationId = Silian_selectedConversationId == null ? null : String(Silian_selectedConversationId);
 
-  const conversationTimeline = useMemo(
-    () => (Array.isArray(activeConversation?.messages) ? activeConversation.messages : []),
-    [activeConversation]
+  const Silian_conversationTimeline = Silian_useMemo(
+    () => (Array.isArray(Silian_activeConversation?.messages) ? Silian_activeConversation.messages : []),
+    [Silian_activeConversation]
   );
-  const visibleMessages = useMemo(
-    () => conversationTimeline.filter((item) => item?.kind === 'message'),
-    [conversationTimeline]
+  const Silian_visibleMessages = Silian_useMemo(
+    () => Silian_conversationTimeline.filter((Silian_item) => Silian_item?.kind === 'message'),
+    [Silian_conversationTimeline]
   );
-  const pendingActions = useMemo(
-    () => (Array.isArray(activeConversation?.pending_actions) ? activeConversation.pending_actions : []),
-    [activeConversation]
+  const Silian_pendingActions = Silian_useMemo(
+    () => (Array.isArray(Silian_activeConversation?.pending_actions) ? Silian_activeConversation.pending_actions : []),
+    [Silian_activeConversation]
   );
-  const llmCalls = useMemo(
-    () => (Array.isArray(activeConversation?.llm_calls) ? activeConversation.llm_calls : []),
-    [activeConversation]
+  const Silian_llmCalls = Silian_useMemo(
+    () => (Array.isArray(Silian_activeConversation?.llm_calls) ? Silian_activeConversation.llm_calls : []),
+    [Silian_activeConversation]
   );
 
-  const invalidateWorkspace = useCallback(() => {
-    queryClient.invalidateQueries(['adminAiWorkspace']);
-    queryClient.invalidateQueries(['adminAiConversations', currentAdminId]);
-  }, [currentAdminId, queryClient]);
+  const Silian_invalidateWorkspace = Silian_useCallback(() => {
+    Silian_queryClient.invalidateQueries(['adminAiWorkspace']);
+    Silian_queryClient.invalidateQueries(['adminAiConversations', Silian_currentAdminId]);
+  }, [Silian_currentAdminId, Silian_queryClient]);
 
-  const hasStaleConversationDetail = Boolean(normalizedSelectedConversationId)
-    && activeConversationId !== normalizedSelectedConversationId;
+  const Silian_hasStaleConversationDetail = Boolean(Silian_normalizedSelectedConversationId)
+    && Silian_activeConversationId !== Silian_normalizedSelectedConversationId;
 
-  const sendMutation = useMutation(
-    async ({ message, conversationId }) => adminAPI.chatWithAdminAi({
-      conversation_id: conversationId || undefined,
-      message,
-      context: aiContext,
+  const Silian_sendMutation = Silian_useMutation(
+    async ({ message: Silian_message, conversationId: Silian_conversationId }) => Silian_adminAPI.chatWithAdminAi({
+      conversation_id: Silian_conversationId || undefined,
+      message: Silian_message,
+      context: Silian_aiContext,
       source: 'admin:/admin/ai',
     }),
     {
-      onSuccess: (response, variables) => {
-        const payload = response.data || {};
-        const nextConversation = buildFallbackConversation(
-          payload.conversation || null,
-          payload.conversation_id || variables.conversationId || null,
-          activeConversation,
-          variables.message,
-          payload.message || null
+      onSuccess: (Silian_response, Silian_variables) => {
+        const Silian_payload = Silian_response.data || {};
+        const Silian_nextConversation = Silian_buildFallbackConversation(
+          Silian_payload.conversation || null,
+          Silian_payload.conversation_id || Silian_variables.conversationId || null,
+          Silian_activeConversation,
+          Silian_variables.message,
+          Silian_payload.message || null
         );
-        const nextConversationId = payload.conversation_id || nextConversation?.conversation_id || null;
+        const Silian_nextConversationId = Silian_payload.conversation_id || Silian_nextConversation?.conversation_id || null;
 
-        if (nextConversationId) {
-          queryClient.setQueryData(['adminAiConversation', nextConversationId], nextConversation);
-          setSelectedConversationId(nextConversationId);
+        if (Silian_nextConversationId) {
+          Silian_queryClient.setQueryData(['adminAiConversation', Silian_nextConversationId], Silian_nextConversation);
+          Silian_setSelectedConversationId(Silian_nextConversationId);
         }
 
-        setIsCreatingConversation(false);
-        setDraft('');
-        invalidateWorkspace();
+        Silian_setIsCreatingConversation(false);
+        Silian_setDraft('');
+        Silian_invalidateWorkspace();
       },
-      onError: (error) => {
-        toast.error(error?.response?.data?.error || (isZh ? 'AI 请求失败，请稍后重试。' : 'AI request failed. Please try again.'));
+      onError: (Silian_error) => {
+        Silian_toast.error(Silian_error?.response?.data?.error || (Silian_isZh ? 'AI 请求失败，请稍后重试。' : 'AI request failed. Please try again.'));
       },
     }
   );
 
-  const decisionMutation = useMutation(
-    async ({ proposalId, outcome, conversationId }) => adminAPI.chatWithAdminAi({
-      conversation_id: conversationId,
-      context: aiContext,
+  const Silian_decisionMutation = Silian_useMutation(
+    async ({ proposalId: Silian_proposalId, outcome: Silian_outcome, conversationId: Silian_conversationId }) => Silian_adminAPI.chatWithAdminAi({
+      conversation_id: Silian_conversationId,
+      context: Silian_aiContext,
       decision: {
-        proposal_id: proposalId,
-        outcome,
+        proposal_id: Silian_proposalId,
+        outcome: Silian_outcome,
       },
       source: 'admin:/admin/ai',
     }),
     {
-      onSuccess: (response, variables) => {
-        const payload = response.data || {};
-        const previousConversation = variables?.conversationId
-          ? queryClient.getQueryData(['adminAiConversation', variables.conversationId])
+      onSuccess: (Silian_response, Silian_variables) => {
+        const Silian_payload = Silian_response.data || {};
+        const Silian_previousConversation = Silian_variables?.conversationId
+          ? Silian_queryClient.getQueryData(['adminAiConversation', Silian_variables.conversationId])
           : null;
-        const nextConversation = buildFallbackConversation(
-          payload.conversation || null,
-          payload.conversation_id || variables?.conversationId || null,
-          previousConversation,
+        const Silian_nextConversation = Silian_buildFallbackConversation(
+          Silian_payload.conversation || null,
+          Silian_payload.conversation_id || Silian_variables?.conversationId || null,
+          Silian_previousConversation,
           null,
-          payload.message || null
+          Silian_payload.message || null
         );
-        const nextConversationId = payload.conversation_id || variables?.conversationId || null;
+        const Silian_nextConversationId = Silian_payload.conversation_id || Silian_variables?.conversationId || null;
 
-        if (nextConversationId) {
-          queryClient.setQueryData(['adminAiConversation', nextConversationId], nextConversation);
+        if (Silian_nextConversationId) {
+          Silian_queryClient.setQueryData(['adminAiConversation', Silian_nextConversationId], Silian_nextConversation);
         }
 
-        invalidateWorkspace();
+        Silian_invalidateWorkspace();
       },
-      onError: (error) => {
-        toast.error(error?.response?.data?.error || (isZh ? '操作决策失败。' : 'Decision failed.'));
+      onError: (Silian_error) => {
+        Silian_toast.error(Silian_error?.response?.data?.error || (Silian_isZh ? '操作决策失败。' : 'Decision failed.'));
       },
     }
   );
 
-  const workspaceData = workspaceQuery.data;
-  const assistant = workspaceData?.assistant || EMPTY_OBJECT;
-  const starterPrompts = useMemo(
-    () => (Array.isArray(workspaceData?.starter_prompts) ? workspaceData.starter_prompts : EMPTY_ARRAY),
-    [workspaceData?.starter_prompts]
+  const Silian_workspaceData = Silian_workspaceQuery.data;
+  const Silian_assistant = Silian_workspaceData?.assistant || Silian_EMPTY_OBJECT;
+  const Silian_starterPrompts = Silian_useMemo(
+    () => (Array.isArray(Silian_workspaceData?.starter_prompts) ? Silian_workspaceData.starter_prompts : Silian_EMPTY_ARRAY),
+    [Silian_workspaceData?.starter_prompts]
   );
-  const quickActions = useMemo(
-    () => (Array.isArray(workspaceData?.quick_actions) ? workspaceData.quick_actions : EMPTY_ARRAY),
-    [workspaceData?.quick_actions]
+  const Silian_quickActions = Silian_useMemo(
+    () => (Array.isArray(Silian_workspaceData?.quick_actions) ? Silian_workspaceData.quick_actions : Silian_EMPTY_ARRAY),
+    [Silian_workspaceData?.quick_actions]
   );
-  const navigationTargets = useMemo(
-    () => (Array.isArray(workspaceData?.navigation_targets) ? workspaceData.navigation_targets : EMPTY_ARRAY),
-    [workspaceData?.navigation_targets]
+  const Silian_navigationTargets = Silian_useMemo(
+    () => (Array.isArray(Silian_workspaceData?.navigation_targets) ? Silian_workspaceData.navigation_targets : Silian_EMPTY_ARRAY),
+    [Silian_workspaceData?.navigation_targets]
   );
-  const managementActions = useMemo(
-    () => (Array.isArray(workspaceData?.management_actions) ? workspaceData.management_actions : EMPTY_ARRAY),
-    [workspaceData?.management_actions]
+  const Silian_managementActions = Silian_useMemo(
+    () => (Array.isArray(Silian_workspaceData?.management_actions) ? Silian_workspaceData.management_actions : Silian_EMPTY_ARRAY),
+    [Silian_workspaceData?.management_actions]
   );
 
-  const currentSummary = activeConversation?.summary || conversationItems.find((item) => item.conversation_id === selectedConversationId) || {};
-  const selectedConversationTitle = currentSummary.title || (isCreatingConversation ? (isZh ? '新会话' : 'New session') : (isZh ? '控制通道' : 'Control channel'));
-  const currentConversationIdLabel = activeConversationId || normalizedSelectedConversationId || null;
-  const lastActivityLabel = formatAbsoluteTime(currentSummary.last_activity_at, locale);
-  const canSend = draft.trim().length >= COMMAND_MIN_LENGTH && !sendMutation.isLoading && assistant.chat_enabled !== false;
-  const canCreateConversation = !sendMutation.isLoading && !decisionMutation.isLoading;
-  const disableProposalActions = decisionMutation.isLoading || hasStaleConversationDetail;
+  const Silian_currentSummary = Silian_activeConversation?.summary || Silian_conversationItems.find((Silian_item) => Silian_item.conversation_id === Silian_selectedConversationId) || {};
+  const Silian_selectedConversationTitle = Silian_currentSummary.title || (Silian_isCreatingConversation ? (Silian_isZh ? '新会话' : 'New session') : (Silian_isZh ? '控制通道' : 'Control channel'));
+  const Silian_currentConversationIdLabel = Silian_activeConversationId || Silian_normalizedSelectedConversationId || null;
+  const Silian_lastActivityLabel = Silian_formatAbsoluteTime(Silian_currentSummary.last_activity_at, Silian_locale);
+  const Silian_canSend = Silian_draft.trim().length >= Silian_COMMAND_MIN_LENGTH && !Silian_sendMutation.isLoading && Silian_assistant.chat_enabled !== false;
+  const Silian_canCreateConversation = !Silian_sendMutation.isLoading && !Silian_decisionMutation.isLoading;
+  const Silian_disableProposalActions = Silian_decisionMutation.isLoading || Silian_hasStaleConversationDetail;
 
-  const capabilitySummary = useMemo(() => ({
-    readCount: managementActions.filter((item) => item.risk_level === 'read').length,
-    writeCount: managementActions.filter((item) => item.risk_level === 'write').length,
-    confirmationCount: managementActions.filter((item) => item.requires_confirmation).length,
-  }), [managementActions]);
+  const Silian_capabilitySummary = Silian_useMemo(() => ({
+    readCount: Silian_managementActions.filter((Silian_item) => Silian_item.risk_level === 'read').length,
+    writeCount: Silian_managementActions.filter((Silian_item) => Silian_item.risk_level === 'write').length,
+    confirmationCount: Silian_managementActions.filter((Silian_item) => Silian_item.requires_confirmation).length,
+  }), [Silian_managementActions]);
 
-  const spotlightRoutes = useMemo(() => quickActions.slice(0, 4), [quickActions]);
-  const sideRoutes = useMemo(() => navigationTargets.filter((item) => item.route !== '/admin/ai').slice(0, 6), [navigationTargets]);
-  const capabilityPreview = useMemo(() => managementActions.slice(0, 6), [managementActions]);
-  const localizedSpotlightRoutes = useMemo(
-    () => spotlightRoutes.map((action) => ({ ...action, ...getLocalizedQuickActionCopy(action, isZh) })),
-    [isZh, spotlightRoutes]
+  const Silian_spotlightRoutes = Silian_useMemo(() => Silian_quickActions.slice(0, 4), [Silian_quickActions]);
+  const Silian_sideRoutes = Silian_useMemo(() => Silian_navigationTargets.filter((Silian_item) => Silian_item.route !== '/admin/ai').slice(0, 6), [Silian_navigationTargets]);
+  const Silian_capabilityPreview = Silian_useMemo(() => Silian_managementActions.slice(0, 6), [Silian_managementActions]);
+  const Silian_localizedSpotlightRoutes = Silian_useMemo(
+    () => Silian_spotlightRoutes.map((Silian_action) => ({ ...Silian_action, ...Silian_getLocalizedQuickActionCopy(Silian_action, Silian_isZh) })),
+    [Silian_isZh, Silian_spotlightRoutes]
   );
-  const localizedSideRoutes = useMemo(
-    () => sideRoutes.map((target) => ({ ...target, ...getLocalizedNavigationCopy(target, isZh) })),
-    [isZh, sideRoutes]
+  const Silian_localizedSideRoutes = Silian_useMemo(
+    () => Silian_sideRoutes.map((Silian_target) => ({ ...Silian_target, ...Silian_getLocalizedNavigationCopy(Silian_target, Silian_isZh) })),
+    [Silian_isZh, Silian_sideRoutes]
   );
-  const taskTemplates = useMemo(
-    () => managementActions
+  const Silian_taskTemplates = Silian_useMemo(
+    () => Silian_managementActions
       .slice(0, 8)
-      .map((action) => ({
-        ...action,
-        localizedLabel: getLocalizedActionLabel(action, isZh),
-        prompt: action.risk_level === 'write'
-          ? `${isZh ? '请帮我准备一个待确认操作：' : 'Prepare a confirmation-ready operation for '} ${getLocalizedActionLabel(action, isZh)}${action.requirements?.length ? `；${isZh ? '如缺字段请直接追问：' : 'ask follow-up for: '}${action.requirements.join(', ')}` : ''}`
-          : `${isZh ? '请帮我执行查询：' : 'Run this query: '} ${getLocalizedActionLabel(action, isZh)}${action.requirements?.length ? `；${isZh ? '如缺字段请直接追问：' : 'ask follow-up for: '}${action.requirements.join(', ')}` : ''}`,
+      .map((Silian_action) => ({
+        ...Silian_action,
+        localizedLabel: Silian_getLocalizedActionLabel(Silian_action, Silian_isZh),
+        prompt: Silian_action.risk_level === 'write'
+          ? `${Silian_isZh ? '请帮我准备一个待确认操作：' : 'Prepare a confirmation-ready operation for '} ${Silian_getLocalizedActionLabel(Silian_action, Silian_isZh)}${Silian_action.requirements?.length ? `；${Silian_isZh ? '如缺字段请直接追问：' : 'ask follow-up for: '}${Silian_action.requirements.join(', ')}` : ''}`
+          : `${Silian_isZh ? '请帮我执行查询：' : 'Run this query: '} ${Silian_getLocalizedActionLabel(Silian_action, Silian_isZh)}${Silian_action.requirements?.length ? `；${Silian_isZh ? '如缺字段请直接追问：' : 'ask follow-up for: '}${Silian_action.requirements.join(', ')}` : ''}`,
       })),
-    [isZh, managementActions]
+    [Silian_isZh, Silian_managementActions]
   );
-  const latestAssistantResult = useMemo(() => {
-    const assistantMessages = [...visibleMessages].reverse();
-    return assistantMessages.find((item) => item?.meta?.data?.result)?.meta?.data?.result || null;
-  }, [visibleMessages]);
-  const resultFollowUps = useMemo(() => {
-    if (!latestAssistantResult || typeof latestAssistantResult !== 'object') {
+  const Silian_latestAssistantResult = Silian_useMemo(() => {
+    const Silian_assistantMessages = [...Silian_visibleMessages].reverse();
+    return Silian_assistantMessages.find((Silian_item) => Silian_item?.meta?.data?.result)?.meta?.data?.result || null;
+  }, [Silian_visibleMessages]);
+  const Silian_resultFollowUps = Silian_useMemo(() => {
+    if (!Silian_latestAssistantResult || typeof Silian_latestAssistantResult !== 'object') {
       return [];
     }
 
-    if (latestAssistantResult.scope === 'pending_carbon_records' && Array.isArray(latestAssistantResult.items) && latestAssistantResult.items.length > 0) {
-      const ids = latestAssistantResult.items.slice(0, 5).map((item) => item.id).filter(Boolean);
-      if (ids.length === 0) return [];
+    if (Silian_latestAssistantResult.scope === 'pending_carbon_records' && Array.isArray(Silian_latestAssistantResult.items) && Silian_latestAssistantResult.items.length > 0) {
+      const Silian_ids = Silian_latestAssistantResult.items.slice(0, 5).map((Silian_item) => Silian_item.id).filter(Boolean);
+      if (Silian_ids.length === 0) return [];
 
       return [
         {
           id: 'approve-pending-result',
-          label: isZh ? '基于结果准备批量通过' : 'Prepare approval from result',
-          description: isZh ? '把当前结果里的前 5 条待审记录直接组装成待确认通过动作。' : 'Turn the first five pending records into a confirmation-ready approval action.',
-          prompt: `请准备一个待确认操作：批量通过这些碳记录，record_ids=${ids.join(', ')}。如果需要 review_note，请先问我。`,
+          label: Silian_isZh ? '基于结果准备批量通过' : 'Prepare approval from result',
+          description: Silian_isZh ? '把当前结果里的前 5 条待审记录直接组装成待确认通过动作。' : 'Turn the first five pending records into a confirmation-ready approval action.',
+          prompt: `请准备一个待确认操作：批量通过这些碳记录，record_ids=${Silian_ids.join(', ')}。如果需要 review_note，请先问我。`,
         },
         {
           id: 'reject-pending-result',
-          label: isZh ? '基于结果准备批量驳回' : 'Prepare rejection from result',
-          description: isZh ? '把当前结果里的前 5 条待审记录直接组装成待确认驳回动作。' : 'Turn the first five pending records into a confirmation-ready rejection action.',
-          prompt: `请准备一个待确认操作：批量驳回这些碳记录，record_ids=${ids.join(', ')}。如果需要 review_note，请先问我。`,
+          label: Silian_isZh ? '基于结果准备批量驳回' : 'Prepare rejection from result',
+          description: Silian_isZh ? '把当前结果里的前 5 条待审记录直接组装成待确认驳回动作。' : 'Turn the first five pending records into a confirmation-ready rejection action.',
+          prompt: `请准备一个待确认操作：批量驳回这些碳记录，record_ids=${Silian_ids.join(', ')}。如果需要 review_note，请先问我。`,
         },
       ];
     }
 
     return [];
-  }, [isZh, latestAssistantResult]);
-  const inspectorSummary = useMemo(() => {
-    const messageCount = currentSummary.message_count || 0;
-    const llmCount = currentSummary.llm_calls || 0;
-    const pendingLabel = pendingActions.length > 0
-      ? `${pendingActions.length}${isZh ? ' 个待确认动作' : ' pending actions'}`
-      : (isZh ? '无挂起动作' : 'No pending action');
-    const latestScope = latestAssistantResult?.scope
-      ? `${isZh ? '最近结果' : 'Latest result'}: ${getLocalizedScopeLabel(latestAssistantResult.scope, isZh)}`
+  }, [Silian_isZh, Silian_latestAssistantResult]);
+  const Silian_inspectorSummary = Silian_useMemo(() => {
+    const Silian_messageCount = Silian_currentSummary.message_count || 0;
+    const Silian_llmCount = Silian_currentSummary.llm_calls || 0;
+    const Silian_pendingLabel = Silian_pendingActions.length > 0
+      ? `${Silian_pendingActions.length}${Silian_isZh ? ' 个待确认动作' : ' pending actions'}`
+      : (Silian_isZh ? '无挂起动作' : 'No pending action');
+    const Silian_latestScope = Silian_latestAssistantResult?.scope
+      ? `${Silian_isZh ? '最近结果' : 'Latest result'}: ${Silian_getLocalizedScopeLabel(Silian_latestAssistantResult.scope, Silian_isZh)}`
       : null;
 
     return {
-      title: isZh
-        ? `${messageCount} 条消息，${llmCount} 次模型调用`
-        : `${messageCount} messages, ${llmCount} model turns`,
-      detail: latestScope ? `${pendingLabel} · ${latestScope}` : pendingLabel,
+      title: Silian_isZh
+        ? `${Silian_messageCount} 条消息，${Silian_llmCount} 次模型调用`
+        : `${Silian_messageCount} messages, ${Silian_llmCount} model turns`,
+      detail: Silian_latestScope ? `${Silian_pendingLabel} · ${Silian_latestScope}` : Silian_pendingLabel,
     };
-  }, [currentSummary.llm_calls, currentSummary.message_count, isZh, latestAssistantResult?.scope, pendingActions.length]);
-  const secondarySections = useMemo(() => ([
+  }, [Silian_currentSummary.llm_calls, Silian_currentSummary.message_count, Silian_isZh, Silian_latestAssistantResult?.scope, Silian_pendingActions.length]);
+  const Silian_secondarySections = Silian_useMemo(() => ([
     {
       id: 'actions',
-      label: isZh ? '执行面板' : 'Action deck',
-      icon: ShieldCheck,
-      count: pendingActions.length + resultFollowUps.length,
-      description: isZh ? '处理待确认动作与基于结果的下一步。' : 'Handle confirmations and next-step suggestions.',
+      label: Silian_isZh ? '执行面板' : 'Action deck',
+      icon: Silian_ShieldCheck,
+      count: Silian_pendingActions.length + Silian_resultFollowUps.length,
+      description: Silian_isZh ? '处理待确认动作与基于结果的下一步。' : 'Handle confirmations and next-step suggestions.',
     },
     {
       id: 'shortcuts',
-      label: isZh ? '快捷入口' : 'Shortcuts',
-      icon: Sparkles,
-      count: localizedSpotlightRoutes.length + localizedSideRoutes.length,
-      description: isZh ? '直接跳到高频后台页或人工处理入口。' : 'Jump to common admin surfaces and manual follow-ups.',
+      label: Silian_isZh ? '快捷入口' : 'Shortcuts',
+      icon: Silian_Sparkles,
+      count: Silian_localizedSpotlightRoutes.length + Silian_localizedSideRoutes.length,
+      description: Silian_isZh ? '直接跳到高频后台页或人工处理入口。' : 'Jump to common admin surfaces and manual follow-ups.',
     },
     {
       id: 'inspector',
-      label: isZh ? '会话检查' : 'Inspector',
-      icon: Cpu,
-      count: llmCalls.length,
-      description: isZh ? '查看模型回合、结果快照与会话强度。' : 'Inspect model turns, snapshots, and session density.',
+      label: Silian_isZh ? '会话检查' : 'Inspector',
+      icon: Silian_Cpu,
+      count: Silian_llmCalls.length,
+      description: Silian_isZh ? '查看模型回合、结果快照与会话强度。' : 'Inspect model turns, snapshots, and session density.',
     },
     {
       id: 'capabilities',
-      label: isZh ? '工具目录' : 'Capabilities',
-      icon: Command,
-      count: capabilityPreview.length + Math.min(taskTemplates.length, 5),
-      description: isZh ? '查看能力边界与更稳的任务模板。' : 'Review guardrails and reliable task templates.',
+      label: Silian_isZh ? '工具目录' : 'Capabilities',
+      icon: Silian_Command,
+      count: Silian_capabilityPreview.length + Math.min(Silian_taskTemplates.length, 5),
+      description: Silian_isZh ? '查看能力边界与更稳的任务模板。' : 'Review guardrails and reliable task templates.',
     },
-  ]), [capabilityPreview.length, isZh, llmCalls.length, localizedSideRoutes.length, localizedSpotlightRoutes.length, pendingActions.length, resultFollowUps.length, taskTemplates.length]);
-  const currentSection = secondarySections.find((item) => item.id === workspaceSection) || secondarySections[0];
+  ]), [Silian_capabilityPreview.length, Silian_isZh, Silian_llmCalls.length, Silian_localizedSideRoutes.length, Silian_localizedSpotlightRoutes.length, Silian_pendingActions.length, Silian_resultFollowUps.length, Silian_taskTemplates.length]);
+  const Silian_currentSection = Silian_secondarySections.find((Silian_item) => Silian_item.id === Silian_workspaceSection) || Silian_secondarySections[0];
 
-  const handleSelectConversation = useCallback((conversationId) => {
-    setIsCreatingConversation(false);
-    setSelectedConversationId(conversationId);
+  const Silian_handleSelectConversation = Silian_useCallback((Silian_conversationId) => {
+    Silian_setIsCreatingConversation(false);
+    Silian_setSelectedConversationId(Silian_conversationId);
   }, []);
 
-  const handleUsePrompt = useCallback((prompt) => {
-    setDraft(prompt);
-    requestAnimationFrame(() => composerRef.current?.focus());
+  const Silian_handleUsePrompt = Silian_useCallback((Silian_prompt) => {
+    Silian_setDraft(Silian_prompt);
+    requestAnimationFrame(() => Silian_composerRef.current?.focus());
   }, []);
 
-  const handleStartConversation = useCallback(() => {
-    setIsCreatingConversation(true);
-    setSelectedConversationId(null);
-    queryClient.removeQueries(['adminAiConversation']);
-    requestAnimationFrame(() => composerRef.current?.focus());
-  }, [queryClient]);
+  const Silian_handleStartConversation = Silian_useCallback(() => {
+    Silian_setIsCreatingConversation(true);
+    Silian_setSelectedConversationId(null);
+    Silian_queryClient.removeQueries(['adminAiConversation']);
+    requestAnimationFrame(() => Silian_composerRef.current?.focus());
+  }, [Silian_queryClient]);
 
-  const handleSend = useCallback(() => {
-    const message = draft.trim();
-    if (message.length < COMMAND_MIN_LENGTH || sendMutation.isLoading || assistant.chat_enabled === false) {
+  const Silian_handleSend = Silian_useCallback(() => {
+    const Silian_message = Silian_draft.trim();
+    if (Silian_message.length < Silian_COMMAND_MIN_LENGTH || Silian_sendMutation.isLoading || Silian_assistant.chat_enabled === false) {
       return;
     }
 
-    sendMutation.mutate({
-      message,
-      conversationId: isCreatingConversation ? null : selectedConversationId,
+    Silian_sendMutation.mutate({
+      message: Silian_message,
+      conversationId: Silian_isCreatingConversation ? null : Silian_selectedConversationId,
     });
-  }, [assistant.chat_enabled, draft, isCreatingConversation, selectedConversationId, sendMutation]);
+  }, [Silian_assistant.chat_enabled, Silian_draft, Silian_isCreatingConversation, Silian_selectedConversationId, Silian_sendMutation]);
 
-  const handleComposerKeyDown = useCallback((event) => {
-    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-      event.preventDefault();
-      handleSend();
+  const Silian_handleComposerKeyDown = Silian_useCallback((Silian_event) => {
+    if ((Silian_event.metaKey || Silian_event.ctrlKey) && Silian_event.key === 'Enter') {
+      Silian_event.preventDefault();
+      Silian_handleSend();
     }
-  }, [handleSend]);
+  }, [Silian_handleSend]);
 
-  const handleNavigateSuggestion = useCallback((suggestion) => {
-    const fullRoute = buildRouteWithQuery(suggestion?.route, suggestion?.query || {});
-    if (!fullRoute) {
-      toast.error(isZh ? '缺少可跳转的目标页面。' : 'Missing destination route.');
+  const Silian_handleNavigateSuggestion = Silian_useCallback((Silian_suggestion) => {
+    const Silian_fullRoute = Silian_buildRouteWithQuery(Silian_suggestion?.route, Silian_suggestion?.query || {});
+    if (!Silian_fullRoute) {
+      Silian_toast.error(Silian_isZh ? '缺少可跳转的目标页面。' : 'Missing destination route.');
       return;
     }
 
-    navigate(fullRoute);
-  }, [isZh, navigate]);
+    Silian_navigate(Silian_fullRoute);
+  }, [Silian_isZh, Silian_navigate]);
 
-  const handleRunQuickAction = useCallback((action) => {
-    const fullRoute = buildRouteWithQuery(action?.route, action?.query || {});
-    if (!fullRoute) {
-      toast.error(isZh ? '缺少可跳转的目标页面。' : 'Missing destination route.');
+  const Silian_handleRunQuickAction = Silian_useCallback((Silian_action) => {
+    const Silian_fullRoute = Silian_buildRouteWithQuery(Silian_action?.route, Silian_action?.query || {});
+    if (!Silian_fullRoute) {
+      Silian_toast.error(Silian_isZh ? '缺少可跳转的目标页面。' : 'Missing destination route.');
       return;
     }
 
-    navigate(fullRoute);
-  }, [isZh, navigate]);
+    Silian_navigate(Silian_fullRoute);
+  }, [Silian_isZh, Silian_navigate]);
 
-  const handleNavigateAudit = useCallback(() => {
-    navigate('/admin/llm-usage');
-  }, [navigate]);
+  const Silian_handleNavigateAudit = Silian_useCallback(() => {
+    Silian_navigate('/admin/llm-usage');
+  }, [Silian_navigate]);
 
-  const busyLabel = sendMutation.isLoading
-    ? (isZh ? '正在请求模型...' : 'Sending to model...')
-    : decisionMutation.isLoading
-      ? (isZh ? '正在写回决策...' : 'Applying decision...')
-      : conversationDetailQuery.isFetching && !isCreatingConversation
-        ? (isZh ? '同步会话中...' : 'Syncing session...')
+  const Silian_busyLabel = Silian_sendMutation.isLoading
+    ? (Silian_isZh ? '正在请求模型...' : 'Sending to model...')
+    : Silian_decisionMutation.isLoading
+      ? (Silian_isZh ? '正在写回决策...' : 'Applying decision...')
+      : Silian_conversationDetailQuery.isFetching && !Silian_isCreatingConversation
+        ? (Silian_isZh ? '同步会话中...' : 'Syncing session...')
         : null;
 
   return (
@@ -1597,193 +1597,193 @@ export default function AdminAiWorkspacePage() {
         <div className="pointer-events-none absolute inset-0 opacity-40 dark:opacity-25 [background-image:linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] [background-size:32px_32px]" />
 
         <div className="relative">
-          <div className={`border-b px-6 py-6 md:px-8 ${PANEL_DIVIDER_CLASS}`}>
+          <div className={`border-b px-6 py-6 md:px-8 ${Silian_PANEL_DIVIDER_CLASS}`}>
             <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-[minmax(0,1.25fr)_repeat(4,minmax(0,1fr))]">
               <div className="min-w-0 space-y-4 lg:col-span-2 2xl:col-span-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <StatusChip tone="success">
-                    <Bot className="h-3.5 w-3.5" />
-                    {isZh ? '管理 AI' : 'Admin AI'}
-                  </StatusChip>
-                  <StatusChip tone={assistant.chat_enabled ? 'success' : 'warning'}>
-                    {assistant.chat_enabled ? (isZh ? '对话已就绪' : 'Chat ready') : (isZh ? '对话不可用' : 'Chat unavailable')}
-                  </StatusChip>
-                  <StatusChip tone={assistant.intent_enabled ? 'success' : 'warning'}>
-                    {assistant.intent_enabled ? (isZh ? '意图解析在线' : 'Intent online') : (isZh ? '意图解析关闭' : 'Intent offline')}
-                  </StatusChip>
+                  <Silian_StatusChip tone="success">
+                    <Silian_Bot className="h-3.5 w-3.5" />
+                    {Silian_isZh ? '管理 AI' : 'Admin AI'}
+                  </Silian_StatusChip>
+                  <Silian_StatusChip tone={Silian_assistant.chat_enabled ? 'success' : 'warning'}>
+                    {Silian_assistant.chat_enabled ? (Silian_isZh ? '对话已就绪' : 'Chat ready') : (Silian_isZh ? '对话不可用' : 'Chat unavailable')}
+                  </Silian_StatusChip>
+                  <Silian_StatusChip tone={Silian_assistant.intent_enabled ? 'success' : 'warning'}>
+                    {Silian_assistant.intent_enabled ? (Silian_isZh ? '意图解析在线' : 'Intent online') : (Silian_isZh ? '意图解析关闭' : 'Intent offline')}
+                  </Silian_StatusChip>
                 </div>
 
                 <div>
-                  <div className={cn(`text-[11px] uppercase tracking-[0.32em] ${TEXT_TERTIARY_CLASS}`)}>
-                    {isZh ? '治理工作面' : 'Operations surface'}
+                  <div className={Silian_cn(`text-[11px] uppercase tracking-[0.32em] ${Silian_TEXT_TERTIARY_CLASS}`)}>
+                    {Silian_isZh ? '治理工作面' : 'Operations surface'}
                   </div>
                   <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                    {isZh ? '管理 AI 指挥台' : 'Admin AI cockpit'}
+                    {Silian_isZh ? '管理 AI 指挥台' : 'Admin AI cockpit'}
                   </h2>
                 </div>
               </div>
 
-              <MetricTile
-                label={isZh ? '读取能力' : 'Read ops'}
-                value={capabilitySummary.readCount}
-                hint={isZh ? '无副作用查询' : 'Side-effect free queries'}
+              <Silian_MetricTile
+                label={Silian_isZh ? '读取能力' : 'Read ops'}
+                value={Silian_capabilitySummary.readCount}
+                hint={Silian_isZh ? '无副作用查询' : 'Side-effect free queries'}
               />
-              <MetricTile
-                label={isZh ? '写入能力' : 'Write ops'}
-                value={capabilitySummary.writeCount}
-                hint={isZh ? '可能改动系统状态' : 'May change system state'}
+              <Silian_MetricTile
+                label={Silian_isZh ? '写入能力' : 'Write ops'}
+                value={Silian_capabilitySummary.writeCount}
+                hint={Silian_isZh ? '可能改动系统状态' : 'May change system state'}
               />
-              <MetricTile
-                label={isZh ? '确认动作' : 'Confirmations'}
-                value={capabilitySummary.confirmationCount}
-                hint={getLocalizedConfirmationPolicy(assistant.default_confirmation_policy, isZh)}
+              <Silian_MetricTile
+                label={Silian_isZh ? '确认动作' : 'Confirmations'}
+                value={Silian_capabilitySummary.confirmationCount}
+                hint={Silian_getLocalizedConfirmationPolicy(Silian_assistant.default_confirmation_policy, Silian_isZh)}
               />
-              <MetricTile
-                label={isZh ? '历史窗口' : 'History window'}
-                value={assistant.max_history_messages || '--'}
-                hint={assistant.max_auto_read_steps
-                  ? `${assistant.max_auto_read_steps} ${isZh ? '次自动读取' : 'auto reads'}`
-                  : (isZh ? '按配置回放' : 'Config controlled')}
+              <Silian_MetricTile
+                label={Silian_isZh ? '历史窗口' : 'History window'}
+                value={Silian_assistant.max_history_messages || '--'}
+                hint={Silian_assistant.max_auto_read_steps
+                  ? `${Silian_assistant.max_auto_read_steps} ${Silian_isZh ? '次自动读取' : 'auto reads'}`
+                  : (Silian_isZh ? '按配置回放' : 'Config controlled')}
               />
             </div>
           </div>
 
-          {assistant.chat_enabled === false ? (
+          {Silian_assistant.chat_enabled === false ? (
             <div className="px-6 pt-6 md:px-8">
-              <Alert className="border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-50">
-                <ShieldAlert className="h-4 w-4" />
-                <AlertTitle>{isZh ? 'AI 暂不可用' : 'AI unavailable'}</AlertTitle>
-                <AlertDescription>
-                  {isZh
+              <Silian_Alert className="border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-50">
+                <Silian_ShieldAlert className="h-4 w-4" />
+                <Silian_AlertTitle>{Silian_isZh ? 'AI 暂不可用' : 'AI unavailable'}</Silian_AlertTitle>
+                <Silian_AlertDescription>
+                  {Silian_isZh
                     ? '服务器尚未配置可用的模型密钥。你仍可查看历史会话和能力目录，但无法发送新请求。'
                     : 'The server does not currently expose a live model key. You can still inspect history and capability metadata, but cannot send new prompts.'}
-                </AlertDescription>
-              </Alert>
+                </Silian_AlertDescription>
+              </Silian_Alert>
             </div>
           ) : null}
 
           <div className="grid gap-5 px-6 py-6 xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)] md:px-8">
             <div className="min-w-0 space-y-5">
-              <Panel
-                title={isZh ? '会话队列' : 'Session queue'}
-                description={isZh ? '切换上下文或直接开新线程。' : 'Switch context or open a fresh thread.'}
+              <Silian_Panel
+                title={Silian_isZh ? '会话队列' : 'Session queue'}
+                description={Silian_isZh ? '切换上下文或直接开新线程。' : 'Switch context or open a fresh thread.'}
                 action={(
-                  <Button
+                  <Silian_Button
                     size="sm"
-                    disabled={!canCreateConversation}
-                    onClick={handleStartConversation}
+                    disabled={!Silian_canCreateConversation}
+                    onClick={Silian_handleStartConversation}
                     className="rounded-full bg-white text-slate-950 hover:bg-slate-100"
                   >
-                    <Plus className="mr-1 h-3.5 w-3.5" />
-                    {isZh ? '新会话' : 'New'}
-                  </Button>
+                    <Silian_Plus className="mr-1 h-3.5 w-3.5" />
+                    {Silian_isZh ? '新会话' : 'New'}
+                  </Silian_Button>
                 )}
                 bodyClassName="p-0"
               >
-                <div className={`border-b px-4 py-4 ${PANEL_DIVIDER_CLASS}`}>
+                <div className={`border-b px-4 py-4 ${Silian_PANEL_DIVIDER_CLASS}`}>
                   <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+                    <Silian_Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                     <input
-                      value={conversationSearch}
-                      onChange={(event) => setConversationSearch(event.target.value)}
-                      placeholder={isZh ? '搜索标题、摘要、模型或会话 ID' : 'Search title, preview, model, or session id'}
-                      className={cn(INPUT_SHELL_CLASS, 'h-11 w-full rounded-[18px] pl-10 pr-4 text-sm')}
+                      value={Silian_conversationSearch}
+                      onChange={(Silian_event) => Silian_setConversationSearch(Silian_event.target.value)}
+                      placeholder={Silian_isZh ? '搜索标题、摘要、模型或会话 ID' : 'Search title, preview, model, or session id'}
+                      className={Silian_cn(Silian_INPUT_SHELL_CLASS, 'h-11 w-full rounded-[18px] pl-10 pr-4 text-sm')}
                     />
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <Filter className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-                    <FilterPill active={conversationFilter === 'all'} onClick={() => setConversationFilter('all')}>
-                      {isZh ? '全部' : 'All'}
-                    </FilterPill>
-                    <FilterPill active={conversationFilter === 'pending'} onClick={() => setConversationFilter('pending')}>
-                      {isZh ? '待确认' : 'Pending'}
-                    </FilterPill>
-                    <FilterPill active={conversationFilter === 'active'} onClick={() => setConversationFilter('active')}>
-                      {isZh ? '进行中' : 'Active'}
-                    </FilterPill>
+                    <Silian_Filter className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
+                    <Silian_FilterPill active={Silian_conversationFilter === 'all'} onClick={() => Silian_setConversationFilter('all')}>
+                      {Silian_isZh ? '全部' : 'All'}
+                    </Silian_FilterPill>
+                    <Silian_FilterPill active={Silian_conversationFilter === 'pending'} onClick={() => Silian_setConversationFilter('pending')}>
+                      {Silian_isZh ? '待确认' : 'Pending'}
+                    </Silian_FilterPill>
+                    <Silian_FilterPill active={Silian_conversationFilter === 'active'} onClick={() => Silian_setConversationFilter('active')}>
+                      {Silian_isZh ? '进行中' : 'Active'}
+                    </Silian_FilterPill>
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-2">
-                    <MetricTile label={isZh ? '会话' : 'Sessions'} value={conversationItems.length} />
-                    <MetricTile label="LLM" value={conversationItems.reduce((sum, item) => sum + Number(item?.llm_calls || 0), 0)} />
-                    <MetricTile label={isZh ? '待确认' : 'Pending'} value={conversationItems.reduce((sum, item) => sum + Number(item?.pending_action_count || 0), 0)} />
+                    <Silian_MetricTile label={Silian_isZh ? '会话' : 'Sessions'} value={Silian_conversationItems.length} />
+                    <Silian_MetricTile label="LLM" value={Silian_conversationItems.reduce((Silian_sum, Silian_item) => Silian_sum + Number(Silian_item?.llm_calls || 0), 0)} />
+                    <Silian_MetricTile label={Silian_isZh ? '待确认' : 'Pending'} value={Silian_conversationItems.reduce((Silian_sum, Silian_item) => Silian_sum + Number(Silian_item?.pending_action_count || 0), 0)} />
                   </div>
                 </div>
-                <ScrollArea className={cn('h-[28rem]', PAGE_SCROLLBAR_CLASS)}>
+                <Silian_ScrollArea className={Silian_cn('h-[28rem]', Silian_PAGE_SCROLLBAR_CLASS)}>
                   <div className="space-y-3 p-4">
-                    {isCreatingConversation ? (
+                    {Silian_isCreatingConversation ? (
                       <div className="rounded-[22px] border border-emerald-300 bg-emerald-50 px-4 py-4 dark:border-emerald-400/25 dark:bg-emerald-400/[0.12]">
-                        <div className={cn(`text-sm font-semibold ${TEXT_PRIMARY_CLASS}`)}>{isZh ? '当前为新会话草稿' : 'Drafting a new session'}</div>
-                        <div className={cn(`mt-1 text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>
-                          {isZh ? '输入第一条命令后会自动建立线程。' : 'The first prompt will create the thread automatically.'}
+                        <div className={Silian_cn(`text-sm font-semibold ${Silian_TEXT_PRIMARY_CLASS}`)}>{Silian_isZh ? '当前为新会话草稿' : 'Drafting a new session'}</div>
+                        <div className={Silian_cn(`mt-1 text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>
+                          {Silian_isZh ? '输入第一条命令后会自动建立线程。' : 'The first prompt will create the thread automatically.'}
                         </div>
                       </div>
                     ) : null}
 
-                    {filteredConversationItems.map((item) => (
-                      <ConversationRow
-                        key={item.conversation_id}
-                        item={item}
-                        active={!isCreatingConversation && selectedConversationId === item.conversation_id}
-                        locale={locale}
-                        isZh={isZh}
-                        onSelect={handleSelectConversation}
+                    {Silian_filteredConversationItems.map((Silian_item) => (
+                      <Silian_ConversationRow
+                        key={Silian_item.conversation_id}
+                        item={Silian_item}
+                        active={!Silian_isCreatingConversation && Silian_selectedConversationId === Silian_item.conversation_id}
+                        locale={Silian_locale}
+                        isZh={Silian_isZh}
+                        onSelect={Silian_handleSelectConversation}
                       />
                     ))}
 
-                    {filteredConversationItems.length === 0 && !conversationsQuery.isLoading && !workspaceQuery.isLoading ? (
+                    {Silian_filteredConversationItems.length === 0 && !Silian_conversationsQuery.isLoading && !Silian_workspaceQuery.isLoading ? (
                       <div className="rounded-[22px] border border-dashed border-slate-300/80 px-4 py-8 text-center text-sm leading-6 text-slate-500 dark:border-white/10 dark:text-slate-400">
-                        {conversationItems.length === 0
-                          ? (isZh ? '还没有会话记录。直接开一个新的。' : 'No sessions yet. Start a new one.')
-                          : (isZh ? '没有符合当前筛选条件的会话。' : 'No sessions match the current filters.')}
+                        {Silian_conversationItems.length === 0
+                          ? (Silian_isZh ? '还没有会话记录。直接开一个新的。' : 'No sessions yet. Start a new one.')
+                          : (Silian_isZh ? '没有符合当前筛选条件的会话。' : 'No sessions match the current filters.')}
                       </div>
                     ) : null}
                   </div>
-                </ScrollArea>
-              </Panel>
+                </Silian_ScrollArea>
+              </Silian_Panel>
             </div>
 
             <div className="min-w-0 space-y-5">
-              <Panel
-                title={selectedConversationTitle}
-                description={isCreatingConversation
-                  ? (isZh ? '新线程将在你发送第一条消息时建立。' : 'A new thread will be created when you send the first prompt.')
-                  : (currentConversationIdLabel
-                    ? (isZh ? `会话 ID：${currentConversationIdLabel}` : `Session ID: ${currentConversationIdLabel}`)
-                    : (isZh ? '会话 ID：--' : 'Session ID: --'))}
+              <Silian_Panel
+                title={Silian_selectedConversationTitle}
+                description={Silian_isCreatingConversation
+                  ? (Silian_isZh ? '新线程将在你发送第一条消息时建立。' : 'A new thread will be created when you send the first prompt.')
+                  : (Silian_currentConversationIdLabel
+                    ? (Silian_isZh ? `会话 ID：${Silian_currentConversationIdLabel}` : `Session ID: ${Silian_currentConversationIdLabel}`)
+                    : (Silian_isZh ? '会话 ID：--' : 'Session ID: --'))}
                 titleClassName="text-[1.9rem] leading-[1.14] md:text-[2.35rem]"
                 action={(
                   <div className="flex flex-wrap items-center gap-2 pt-1">
-                    {currentSummary.message_count ? (
-                      <StatusChip>
-                        <MessageSquare className="h-3.5 w-3.5" />
-                        {currentSummary.message_count} {isZh ? '条消息' : 'messages'}
-                      </StatusChip>
+                    {Silian_currentSummary.message_count ? (
+                      <Silian_StatusChip>
+                        <Silian_MessageSquare className="h-3.5 w-3.5" />
+                        {Silian_currentSummary.message_count} {Silian_isZh ? '条消息' : 'messages'}
+                      </Silian_StatusChip>
                     ) : null}
-                    {currentSummary.llm_calls ? (
-                      <StatusChip>
-                        <Cpu className="h-3.5 w-3.5" />
-                        {currentSummary.llm_calls} LLM
-                      </StatusChip>
+                    {Silian_currentSummary.llm_calls ? (
+                      <Silian_StatusChip>
+                        <Silian_Cpu className="h-3.5 w-3.5" />
+                        {Silian_currentSummary.llm_calls} LLM
+                      </Silian_StatusChip>
                     ) : null}
-                    {currentSummary.total_tokens ? (
-                      <StatusChip>
-                        {formatCompactNumber(currentSummary.total_tokens)} {isZh ? '令牌' : 'tok'}
-                      </StatusChip>
+                    {Silian_currentSummary.total_tokens ? (
+                      <Silian_StatusChip>
+                        {Silian_formatCompactNumber(Silian_currentSummary.total_tokens)} {Silian_isZh ? '令牌' : 'tok'}
+                      </Silian_StatusChip>
                     ) : null}
-                    {currentSummary.last_activity_at ? (
-                      <StatusChip>
-                        <Clock3 className="h-3.5 w-3.5" />
-                        {lastActivityLabel}
-                      </StatusChip>
+                    {Silian_currentSummary.last_activity_at ? (
+                      <Silian_StatusChip>
+                        <Silian_Clock3 className="h-3.5 w-3.5" />
+                        {Silian_lastActivityLabel}
+                      </Silian_StatusChip>
                     ) : null}
-                    <Button
+                    <Silian_Button
                       size="sm"
                       variant="outline"
-                      className={OUTLINE_BUTTON_CLASS}
-                      onClick={handleNavigateAudit}
+                      className={Silian_OUTLINE_BUTTON_CLASS}
+                      onClick={Silian_handleNavigateAudit}
                     >
-                      {isZh ? '审计' : 'Audit'}
-                    </Button>
+                      {Silian_isZh ? '审计' : 'Audit'}
+                    </Silian_Button>
                   </div>
                 )}
                 stackAction
@@ -1794,334 +1794,334 @@ export default function AdminAiWorkspacePage() {
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.06),transparent_34%)] dark:bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.08),transparent_30%)]" />
 
                   <div className="min-h-0 flex-1">
-                    {conversationDetailQuery.isLoading && !isCreatingConversation ? (
+                    {Silian_conversationDetailQuery.isLoading && !Silian_isCreatingConversation ? (
                       <div className="flex h-full items-center justify-center">
-                        <Loader2 className="h-5 w-5 animate-spin text-slate-400 dark:text-slate-500" />
+                        <Silian_Loader2 className="h-5 w-5 animate-spin text-slate-400 dark:text-slate-500" />
                       </div>
-                    ) : conversationTimeline.length === 0 ? (
-                      <EmptyConversationState
-                        isZh={isZh}
-                        starterPrompts={starterPrompts}
-                        onUsePrompt={handleUsePrompt}
-                        onNavigateAudit={handleNavigateAudit}
+                    ) : Silian_conversationTimeline.length === 0 ? (
+                      <Silian_EmptyConversationState
+                        isZh={Silian_isZh}
+                        starterPrompts={Silian_starterPrompts}
+                        onUsePrompt={Silian_handleUsePrompt}
+                        onNavigateAudit={Silian_handleNavigateAudit}
                       />
                     ) : (
-                      <ScrollArea className={cn('h-[34rem]', PAGE_SCROLLBAR_CLASS)}>
+                      <Silian_ScrollArea className={Silian_cn('h-[34rem]', Silian_PAGE_SCROLLBAR_CLASS)}>
                         <div className="space-y-6 p-5 md:p-6">
-                          <AnimatePresence initial={false}>
-                            {conversationTimeline.map((item) => (
-                              item?.kind === 'message' ? (
-                                <MessageBubble
-                                  key={item.id}
-                                  message={item}
-                                  locale={locale}
-                                  isZh={isZh}
-                                  disabled={disableProposalActions}
-                                  onNavigateSuggestion={handleNavigateSuggestion}
-                                  onConfirmProposal={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
-                                    proposalId,
+                          <Silian_AnimatePresence initial={false}>
+                            {Silian_conversationTimeline.map((Silian_item) => (
+                              Silian_item?.kind === 'message' ? (
+                                <Silian_MessageBubble
+                                  key={Silian_item.id}
+                                  message={Silian_item}
+                                  locale={Silian_locale}
+                                  isZh={Silian_isZh}
+                                  disabled={Silian_disableProposalActions}
+                                  onNavigateSuggestion={Silian_handleNavigateSuggestion}
+                                  onConfirmProposal={(Silian_proposalId) => Silian_normalizedSelectedConversationId && Silian_decisionMutation.mutate({
+                                    proposalId: Silian_proposalId,
                                     outcome: 'confirm',
-                                    conversationId: normalizedSelectedConversationId,
+                                    conversationId: Silian_normalizedSelectedConversationId,
                                   })}
-                                  onRejectProposal={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
-                                    proposalId,
+                                  onRejectProposal={(Silian_proposalId) => Silian_normalizedSelectedConversationId && Silian_decisionMutation.mutate({
+                                    proposalId: Silian_proposalId,
                                     outcome: 'reject',
-                                    conversationId: normalizedSelectedConversationId,
+                                    conversationId: Silian_normalizedSelectedConversationId,
                                   })}
                                 />
                               ) : (
-                                <EventTimelineRow
-                                  key={item.id}
-                                  item={item}
-                                  locale={locale}
-                                  isZh={isZh}
-                                  disabled={disableProposalActions}
-                                  onConfirmProposal={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
-                                    proposalId,
+                                <Silian_EventTimelineRow
+                                  key={Silian_item.id}
+                                  item={Silian_item}
+                                  locale={Silian_locale}
+                                  isZh={Silian_isZh}
+                                  disabled={Silian_disableProposalActions}
+                                  onConfirmProposal={(Silian_proposalId) => Silian_normalizedSelectedConversationId && Silian_decisionMutation.mutate({
+                                    proposalId: Silian_proposalId,
                                     outcome: 'confirm',
-                                    conversationId: normalizedSelectedConversationId,
+                                    conversationId: Silian_normalizedSelectedConversationId,
                                   })}
-                                  onRejectProposal={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
-                                    proposalId,
+                                  onRejectProposal={(Silian_proposalId) => Silian_normalizedSelectedConversationId && Silian_decisionMutation.mutate({
+                                    proposalId: Silian_proposalId,
                                     outcome: 'reject',
-                                    conversationId: normalizedSelectedConversationId,
+                                    conversationId: Silian_normalizedSelectedConversationId,
                                   })}
                                 />
                               )
                             ))}
-                          </AnimatePresence>
+                          </Silian_AnimatePresence>
                         </div>
-                      </ScrollArea>
+                      </Silian_ScrollArea>
                     )}
                   </div>
 
-                  <div className={`border-t bg-slate-50/80 px-5 py-5 dark:bg-black/20 ${PANEL_DIVIDER_CLASS}`}>
-                    <div className={cn(`mb-3 flex flex-wrap items-center justify-between gap-3 text-xs ${TEXT_SECONDARY_CLASS}`)}>
+                  <div className={`border-t bg-slate-50/80 px-5 py-5 dark:bg-black/20 ${Silian_PANEL_DIVIDER_CLASS}`}>
+                    <div className={Silian_cn(`mb-3 flex flex-wrap items-center justify-between gap-3 text-xs ${Silian_TEXT_SECONDARY_CLASS}`)}>
                       <span>
-                        {isZh
+                        {Silian_isZh
                           ? '写清目标、对象、时间范围；Ctrl/Cmd + Enter 发送。'
                           : 'State the objective, subject, and time scope; press Ctrl/Cmd + Enter to send.'}
                       </span>
-                      {busyLabel ? (
-                        <span className={cn(`inline-flex items-center gap-2 ${TEXT_SECONDARY_CLASS}`)}>
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          {busyLabel}
+                      {Silian_busyLabel ? (
+                        <span className={Silian_cn(`inline-flex items-center gap-2 ${Silian_TEXT_SECONDARY_CLASS}`)}>
+                          <Silian_Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          {Silian_busyLabel}
                         </span>
                       ) : null}
                     </div>
 
                     <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_160px]">
-                      <Textarea
-                        ref={composerRef}
-                        value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
-                        onKeyDown={handleComposerKeyDown}
-                        placeholder={assistant.chat_enabled === false
-                          ? (isZh ? '模型未启用，暂不可发送。' : 'Model access is disabled.')
-                          : (isZh ? '例如：汇总最近 7 天待处理事项，并按优先级给出建议。' : 'Example: Summarize unresolved items from the last 7 days and rank the next actions.')}
-                        disabled={assistant.chat_enabled === false}
-                        className={cn(INPUT_SHELL_CLASS, 'min-h-[146px] rounded-[28px] px-5 py-4 text-sm')}
+                      <Silian_Textarea
+                        ref={Silian_composerRef}
+                        value={Silian_draft}
+                        onChange={(Silian_event) => Silian_setDraft(Silian_event.target.value)}
+                        onKeyDown={Silian_handleComposerKeyDown}
+                        placeholder={Silian_assistant.chat_enabled === false
+                          ? (Silian_isZh ? '模型未启用，暂不可发送。' : 'Model access is disabled.')
+                          : (Silian_isZh ? '例如：汇总最近 7 天待处理事项，并按优先级给出建议。' : 'Example: Summarize unresolved items from the last 7 days and rank the next actions.')}
+                        disabled={Silian_assistant.chat_enabled === false}
+                        className={Silian_cn(Silian_INPUT_SHELL_CLASS, 'min-h-[146px] rounded-[28px] px-5 py-4 text-sm')}
                       />
-                      <Button
+                      <Silian_Button
                         className="h-auto rounded-[28px] bg-emerald-500 text-base text-black hover:bg-emerald-400"
-                        disabled={!canSend}
-                        onClick={handleSend}
+                        disabled={!Silian_canSend}
+                        onClick={Silian_handleSend}
                       >
-                        {sendMutation.isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                        {isZh ? '发送任务' : 'Send task'}
-                      </Button>
+                        {Silian_sendMutation.isLoading ? <Silian_Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Silian_Sparkles className="mr-2 h-4 w-4" />}
+                        {Silian_isZh ? '发送任务' : 'Send task'}
+                      </Silian_Button>
                     </div>
                   </div>
                 </div>
-              </Panel>
+              </Silian_Panel>
 
-              <div className={cn(PANEL_SHELL_CLASS, 'p-4 md:p-5')}>
+              <div className={Silian_cn(Silian_PANEL_SHELL_CLASS, 'p-4 md:p-5')}>
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div className="min-w-0">
-                      <div className={cn(`text-sm font-semibold ${TEXT_PRIMARY_CLASS}`)}>
-                        {isZh ? '二级工作区' : 'Secondary workspace'}
+                      <div className={Silian_cn(`text-sm font-semibold ${Silian_TEXT_PRIMARY_CLASS}`)}>
+                        {Silian_isZh ? '二级工作区' : 'Secondary workspace'}
                       </div>
-                      <div className={cn(`mt-1 text-xs leading-5 ${TEXT_SECONDARY_CLASS}`)}>
-                        {currentSection?.description || (isZh ? '把补充信息收进切换面板，主会话只保留真正的工作流。' : 'Keep supporting controls behind a switcher so the main workspace stays readable.')}
+                      <div className={Silian_cn(`mt-1 text-xs leading-5 ${Silian_TEXT_SECONDARY_CLASS}`)}>
+                        {Silian_currentSection?.description || (Silian_isZh ? '把补充信息收进切换面板，主会话只保留真正的工作流。' : 'Keep supporting controls behind a switcher so the main workspace stays readable.')}
                       </div>
                     </div>
-                    <div className={cn(`text-xs ${TEXT_TERTIARY_CLASS}`)}>
-                      {isZh ? '不再把检查器、工具和导航摊成第三列。' : 'Inspector, tools, and routes no longer fight as a third column.'}
+                    <div className={Silian_cn(`text-xs ${Silian_TEXT_TERTIARY_CLASS}`)}>
+                      {Silian_isZh ? '不再把检查器、工具和导航摊成第三列。' : 'Inspector, tools, and routes no longer fight as a third column.'}
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {secondarySections.map((section) => (
-                      <WorkspaceSectionButton
-                        key={section.id}
-                        active={workspaceSection === section.id}
-                        icon={section.icon}
-                        label={section.label}
-                        count={section.count}
-                        onClick={() => setWorkspaceSection(section.id)}
+                    {Silian_secondarySections.map((Silian_section) => (
+                      <Silian_WorkspaceSectionButton
+                        key={Silian_section.id}
+                        active={Silian_workspaceSection === Silian_section.id}
+                        icon={Silian_section.icon}
+                        label={Silian_section.label}
+                        count={Silian_section.count}
+                        onClick={() => Silian_setWorkspaceSection(Silian_section.id)}
                       />
                     ))}
                   </div>
                 </div>
               </div>
 
-              <AnimatePresence mode="wait" initial={false}>
-                <MotionDiv
-                  key={workspaceSection}
+              <Silian_AnimatePresence mode="wait" initial={false}>
+                <Silian_MotionDiv
+                  key={Silian_workspaceSection}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   className="space-y-5"
                 >
-                  {workspaceSection === 'actions' ? (
+                  {Silian_workspaceSection === 'actions' ? (
                     <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-                      <Panel
-                        title={isZh ? '待确认动作' : 'Pending actions'}
-                        description={isZh ? '所有写入类提案都先落在这里。' : 'Write proposals surface here before execution.'}
+                      <Silian_Panel
+                        title={Silian_isZh ? '待确认动作' : 'Pending actions'}
+                        description={Silian_isZh ? '所有写入类提案都先落在这里。' : 'Write proposals surface here before execution.'}
                       >
                         <div className="space-y-3">
-                          {pendingActions.length > 0 ? pendingActions.map((action) => (
-                            <PendingActionTile
-                              key={action.proposal_id}
-                              action={action}
-                              disabled={disableProposalActions}
-                              isZh={isZh}
-                              onConfirm={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
-                                proposalId,
+                          {Silian_pendingActions.length > 0 ? Silian_pendingActions.map((Silian_action) => (
+                            <Silian_PendingActionTile
+                              key={Silian_action.proposal_id}
+                              action={Silian_action}
+                              disabled={Silian_disableProposalActions}
+                              isZh={Silian_isZh}
+                              onConfirm={(Silian_proposalId) => Silian_normalizedSelectedConversationId && Silian_decisionMutation.mutate({
+                                proposalId: Silian_proposalId,
                                 outcome: 'confirm',
-                                conversationId: normalizedSelectedConversationId,
+                                conversationId: Silian_normalizedSelectedConversationId,
                               })}
-                              onReject={(proposalId) => normalizedSelectedConversationId && decisionMutation.mutate({
-                                proposalId,
+                              onReject={(Silian_proposalId) => Silian_normalizedSelectedConversationId && Silian_decisionMutation.mutate({
+                                proposalId: Silian_proposalId,
                                 outcome: 'reject',
-                                conversationId: normalizedSelectedConversationId,
+                                conversationId: Silian_normalizedSelectedConversationId,
                               })}
                             />
                           )) : (
                             <div className="rounded-[22px] border border-dashed border-slate-300/80 px-4 py-6 text-sm leading-6 text-slate-500 dark:border-white/10 dark:text-slate-400">
-                              {isZh ? '当前会话没有挂起动作。' : 'No pending actions in this session.'}
+                              {Silian_isZh ? '当前会话没有挂起动作。' : 'No pending actions in this session.'}
                             </div>
                           )}
                         </div>
-                      </Panel>
+                      </Silian_Panel>
 
-                      <Panel
-                        title={isZh ? '下一步衔接' : 'Next-step handoff'}
-                        description={isZh ? '把刚查出的结果直接改写成下一步动作，避免重新描述上下文。' : 'Turn the current read result into the next action without restating context.'}
+                      <Silian_Panel
+                        title={Silian_isZh ? '下一步衔接' : 'Next-step handoff'}
+                        description={Silian_isZh ? '把刚查出的结果直接改写成下一步动作，避免重新描述上下文。' : 'Turn the current read result into the next action without restating context.'}
                       >
                         <div className="space-y-3">
-                          {resultFollowUps.length > 0 ? resultFollowUps.map((item) => (
-                            <QuickLaunchButton
-                              key={item.id}
-                              label={item.label}
-                              description={item.description}
-                              onClick={() => handleUsePrompt(item.prompt)}
+                          {Silian_resultFollowUps.length > 0 ? Silian_resultFollowUps.map((Silian_item) => (
+                            <Silian_QuickLaunchButton
+                              key={Silian_item.id}
+                              label={Silian_item.label}
+                              description={Silian_item.description}
+                              onClick={() => Silian_handleUsePrompt(Silian_item.prompt)}
                             />
                           )) : (
                             <div className="rounded-[22px] border border-dashed border-slate-300/80 px-4 py-6 text-sm leading-6 text-slate-500 dark:border-white/10 dark:text-slate-400">
-                              {isZh ? '当前结果还没有可直接续接的动作建议。' : 'The current result does not expose follow-up actions yet.'}
+                              {Silian_isZh ? '当前结果还没有可直接续接的动作建议。' : 'The current result does not expose follow-up actions yet.'}
                             </div>
                           )}
                         </div>
-                      </Panel>
+                      </Silian_Panel>
                     </div>
                   ) : null}
 
-                  {workspaceSection === 'shortcuts' ? (
+                  {Silian_workspaceSection === 'shortcuts' ? (
                     <div className="grid gap-5 xl:grid-cols-2">
-                      <Panel
-                        title={isZh ? '快速切入' : 'Launchpad'}
-                        description={isZh ? '直接跳到高频任务页，不必先问 AI。' : 'Jump to common admin surfaces without going through chat first.'}
+                      <Silian_Panel
+                        title={Silian_isZh ? '快速切入' : 'Launchpad'}
+                        description={Silian_isZh ? '直接跳到高频任务页，不必先问 AI。' : 'Jump to common admin surfaces without going through chat first.'}
                       >
                         <div className="space-y-3">
-                          {localizedSpotlightRoutes.length > 0 ? localizedSpotlightRoutes.map((action) => (
-                            <QuickLaunchButton
-                              key={action.id}
-                              label={action.label}
-                              description={action.description}
-                              onClick={() => handleRunQuickAction(action)}
+                          {Silian_localizedSpotlightRoutes.length > 0 ? Silian_localizedSpotlightRoutes.map((Silian_action) => (
+                            <Silian_QuickLaunchButton
+                              key={Silian_action.id}
+                              label={Silian_action.label}
+                              description={Silian_action.description}
+                              onClick={() => Silian_handleRunQuickAction(Silian_action)}
                             />
                           )) : (
                             <div className="rounded-[22px] border border-dashed border-slate-300/80 px-4 py-6 text-sm leading-6 text-slate-500 dark:border-white/10 dark:text-slate-400">
-                              {isZh ? '当前没有可展示的快捷入口。' : 'No quick actions available.'}
+                              {Silian_isZh ? '当前没有可展示的快捷入口。' : 'No quick actions available.'}
                             </div>
                           )}
                         </div>
-                      </Panel>
+                      </Silian_Panel>
 
-                      <Panel
-                        title={isZh ? '导航跳板' : 'Route bridge'}
-                        description={isZh ? '直接跳转到其他后台页进行人工处理。' : 'Jump into another admin surface for manual follow-up.'}
+                      <Silian_Panel
+                        title={Silian_isZh ? '导航跳板' : 'Route bridge'}
+                        description={Silian_isZh ? '直接跳转到其他后台页进行人工处理。' : 'Jump into another admin surface for manual follow-up.'}
                       >
                         <div className="space-y-3">
-                          {localizedSideRoutes.map((target) => (
-                            <QuickLaunchButton
-                              key={target.id}
-                              label={target.label}
-                              description={target.description}
-                              onClick={() => navigate(target.route)}
+                          {Silian_localizedSideRoutes.map((Silian_target) => (
+                            <Silian_QuickLaunchButton
+                              key={Silian_target.id}
+                              label={Silian_target.label}
+                              description={Silian_target.description}
+                              onClick={() => Silian_navigate(Silian_target.route)}
                             />
                           ))}
                         </div>
-                      </Panel>
+                      </Silian_Panel>
                     </div>
                   ) : null}
 
-                  {workspaceSection === 'inspector' ? (
-                    <Panel
-                      title={isZh ? '当前会话检查器' : 'Current session inspector'}
-                      description={isZh ? '模型回合、结果快照和操作密度都在这里。' : 'Model turns, result snapshots, and execution density live here.'}
+                  {Silian_workspaceSection === 'inspector' ? (
+                    <Silian_Panel
+                      title={Silian_isZh ? '当前会话检查器' : 'Current session inspector'}
+                      description={Silian_isZh ? '模型回合、结果快照和操作密度都在这里。' : 'Model turns, result snapshots, and execution density live here.'}
                       action={(
-                        <Button
+                        <Silian_Button
                           size="sm"
                           variant="outline"
-                          className={OUTLINE_BUTTON_CLASS}
-                          onClick={() => setInspectorOpen((value) => !value)}
+                          className={Silian_OUTLINE_BUTTON_CLASS}
+                          onClick={() => Silian_setInspectorOpen((Silian_value) => !Silian_value)}
                         >
-                          {inspectorOpen ? (isZh ? '收起' : 'Collapse') : (isZh ? '展开' : 'Expand')}
-                        </Button>
+                          {Silian_inspectorOpen ? (Silian_isZh ? '收起' : 'Collapse') : (Silian_isZh ? '展开' : 'Expand')}
+                        </Silian_Button>
                       )}
                     >
-                      {inspectorOpen ? (
+                      {Silian_inspectorOpen ? (
                         <>
                           <div className="grid gap-3 sm:grid-cols-3">
-                            <MetricTile
-                              label={isZh ? '消息' : 'Messages'}
-                              value={currentSummary.message_count || 0}
-                              hint={getConversationStatusLabel(currentSummary.status, isZh)}
+                            <Silian_MetricTile
+                              label={Silian_isZh ? '消息' : 'Messages'}
+                              value={Silian_currentSummary.message_count || 0}
+                              hint={Silian_getConversationStatusLabel(Silian_currentSummary.status, Silian_isZh)}
                             />
-                            <MetricTile
+                            <Silian_MetricTile
                               label="LLM"
-                              value={currentSummary.llm_calls || 0}
-                              hint={currentSummary.last_model || (isZh ? '暂无模型信息' : 'No model info')}
+                              value={Silian_currentSummary.llm_calls || 0}
+                              hint={Silian_currentSummary.last_model || (Silian_isZh ? '暂无模型信息' : 'No model info')}
                             />
-                            <MetricTile
-                              label={isZh ? '令牌' : 'Tokens'}
-                              value={formatCompactNumber(currentSummary.total_tokens || 0)}
-                              hint={pendingActions.length > 0
-                                ? `${pendingActions.length} ${isZh ? '个待确认动作' : 'pending actions'}`
-                                : (isZh ? '无挂起动作' : 'No pending action')}
+                            <Silian_MetricTile
+                              label={Silian_isZh ? '令牌' : 'Tokens'}
+                              value={Silian_formatCompactNumber(Silian_currentSummary.total_tokens || 0)}
+                              hint={Silian_pendingActions.length > 0
+                                ? `${Silian_pendingActions.length} ${Silian_isZh ? '个待确认动作' : 'pending actions'}`
+                                : (Silian_isZh ? '无挂起动作' : 'No pending action')}
                             />
                           </div>
 
-                          {latestAssistantResult ? (
+                          {Silian_latestAssistantResult ? (
                             <div className="mt-4">
-                              <ResultSnapshot title={isZh ? '最新结果快照' : 'Latest result snapshot'} value={latestAssistantResult} isZh={isZh} />
+                              <Silian_ResultSnapshot title={Silian_isZh ? '最新结果快照' : 'Latest result snapshot'} value={Silian_latestAssistantResult} isZh={Silian_isZh} />
                             </div>
                           ) : null}
 
                           <div className="mt-4 space-y-3">
-                            {(llmCalls.length > 0 ? llmCalls.slice(-3).reverse() : []).map((item) => (
-                              <LlmCallCard key={item.id} item={item} locale={locale} isZh={isZh} />
+                            {(Silian_llmCalls.length > 0 ? Silian_llmCalls.slice(-3).reverse() : []).map((Silian_item) => (
+                              <Silian_LlmCallCard key={Silian_item.id} item={Silian_item} locale={Silian_locale} isZh={Silian_isZh} />
                             ))}
-                            {llmCalls.length === 0 ? (
+                            {Silian_llmCalls.length === 0 ? (
                               <div className="rounded-[22px] border border-dashed border-slate-300/80 px-4 py-6 text-sm leading-6 text-slate-500 dark:border-white/10 dark:text-slate-400">
-                                {isZh ? '这条会话还没有模型回合。' : 'No model turns recorded for this session yet.'}
+                                {Silian_isZh ? '这条会话还没有模型回合。' : 'No model turns recorded for this session yet.'}
                               </div>
                             ) : null}
                           </div>
                         </>
                       ) : (
                         <div className="rounded-[22px] border border-dashed border-slate-300/80 bg-slate-50/80 px-4 py-4 dark:border-white/10 dark:bg-black/20">
-                          <div className={cn(`text-sm font-medium ${TEXT_PRIMARY_CLASS}`)}>{inspectorSummary.title}</div>
-                          <div className={cn(`mt-2 text-xs leading-6 ${TEXT_SECONDARY_CLASS}`)}>{inspectorSummary.detail}</div>
+                          <div className={Silian_cn(`text-sm font-medium ${Silian_TEXT_PRIMARY_CLASS}`)}>{Silian_inspectorSummary.title}</div>
+                          <div className={Silian_cn(`mt-2 text-xs leading-6 ${Silian_TEXT_SECONDARY_CLASS}`)}>{Silian_inspectorSummary.detail}</div>
                         </div>
                       )}
-                    </Panel>
+                    </Silian_Panel>
                   ) : null}
 
-                  {workspaceSection === 'capabilities' ? (
+                  {Silian_workspaceSection === 'capabilities' ? (
                     <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-                      <Panel
-                        title={isZh ? '能力边界' : 'Capability guardrails'}
-                        description={isZh ? '当前工作台理解并可调用的管理动作。' : 'Management actions currently exposed to the workspace.'}
+                      <Silian_Panel
+                        title={Silian_isZh ? '能力边界' : 'Capability guardrails'}
+                        description={Silian_isZh ? '当前工作台理解并可调用的管理动作。' : 'Management actions currently exposed to the workspace.'}
                       >
                         <div className="space-y-3">
-                          {capabilityPreview.length > 0 ? capabilityPreview.map((action) => (
-                            <CapabilityTile key={action.name} action={action} isZh={isZh} />
+                          {Silian_capabilityPreview.length > 0 ? Silian_capabilityPreview.map((Silian_action) => (
+                            <Silian_CapabilityTile key={Silian_action.name} action={Silian_action} isZh={Silian_isZh} />
                           )) : (
                             <div className="rounded-[22px] border border-dashed border-slate-300/80 px-4 py-6 text-sm leading-6 text-slate-500 dark:border-white/10 dark:text-slate-400">
-                              {isZh ? '没有可显示的能力目录。' : 'No capability catalog available.'}
+                              {Silian_isZh ? '没有可显示的能力目录。' : 'No capability catalog available.'}
                             </div>
                           )}
                         </div>
-                      </Panel>
+                      </Silian_Panel>
 
-                      <Panel
-                        title={isZh ? '任务模板' : 'Task templates'}
-                        description={isZh ? '把常见管理动作改写成更容易触发工具调用的指令。' : 'Reuse operational prompts that are more likely to trigger the right tool path.'}
+                      <Silian_Panel
+                        title={Silian_isZh ? '任务模板' : 'Task templates'}
+                        description={Silian_isZh ? '把常见管理动作改写成更容易触发工具调用的指令。' : 'Reuse operational prompts that are more likely to trigger the right tool path.'}
                       >
                         <div className="space-y-3">
-                          {taskTemplates.slice(0, 5).map((item) => (
-                            <PromptButton key={item.name} label={item.localizedLabel || item.label} prompt={item.prompt} onUse={handleUsePrompt} />
+                          {Silian_taskTemplates.slice(0, 5).map((Silian_item) => (
+                            <Silian_PromptButton key={Silian_item.name} label={Silian_item.localizedLabel || Silian_item.label} prompt={Silian_item.prompt} onUse={Silian_handleUsePrompt} />
                           ))}
                         </div>
-                      </Panel>
+                      </Silian_Panel>
                     </div>
                   ) : null}
-                </MotionDiv>
-              </AnimatePresence>
+                </Silian_MotionDiv>
+              </Silian_AnimatePresence>
             </div>
           </div>
         </div>

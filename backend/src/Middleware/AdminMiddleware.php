@@ -16,87 +16,87 @@ class AdminMiddleware implements MiddlewareInterface
     private AuthService $authService;
     private ?ErrorLogService $errorLogService;
 
-    public function __construct(AuthService $authService, ?ErrorLogService $errorLogService = null)
+    public function __construct(AuthService $Silian_authService, ?ErrorLogService $Silian_errorLogService = null)
     {
-        $this->authService = $authService;
-        $this->errorLogService = $errorLogService;
+        $this->authService = $Silian_authService;
+        $this->errorLogService = $Silian_errorLogService;
     }
 
-    public function process(Request $request, RequestHandler $handler): Response
+    public function process(Request $Silian_request, RequestHandler $Silian_handler): Response
     {
-        $isTesting = strtolower((string)($_ENV['APP_ENV'] ?? '')) === 'testing';
+        $Silian_isTesting = strtolower((string)($_ENV['APP_ENV'] ?? '')) === 'testing';
         try {
             // 获取当前用户
-            $user = null;
-            $payload = $request->getAttribute('token_payload');
-            if (is_array($payload) && isset($payload['user'])) {
-                $user = $payload['user'];
+            $Silian_user = null;
+            $Silian_payload = $Silian_request->getAttribute('token_payload');
+            if (is_array($Silian_payload) && isset($Silian_payload['user'])) {
+                $Silian_user = $Silian_payload['user'];
             } else {
-                $user = $this->authService->getCurrentUser($request);
+                $Silian_user = $this->authService->getCurrentUser($Silian_request);
             }
-            
-            if (!$user) {
-                if (!$isTesting) {
-                    $response = new \Slim\Psr7\Response();
-                    $response->getBody()->write(json_encode([
+
+            if (!$Silian_user) {
+                if (!$Silian_isTesting) {
+                    $Silian_response = new \Slim\Psr7\Response();
+                    $Silian_response->getBody()->write(json_encode([
                         'success' => false,
                         'error' => 'Authentication required',
                         'code' => 'AUTH_REQUIRED'
                     ]));
-                    return $response
+                    return $Silian_response
                         ->withStatus(401)
                         ->withHeader('Content-Type', 'application/json');
                 }
-                $user = ['id' => null, 'is_admin' => true];
+                $Silian_user = ['id' => null, 'is_admin' => true];
             }
 
             // 检查是否为管理员
-            if (!$this->authService->isAdminUser($user)) {
-                if (!$isTesting) {
-                    $response = new \Slim\Psr7\Response();
-                    $response->getBody()->write(json_encode([
+            if (!$this->authService->isAdminUser($Silian_user)) {
+                if (!$Silian_isTesting) {
+                    $Silian_response = new \Slim\Psr7\Response();
+                    $Silian_response->getBody()->write(json_encode([
                         'success' => false,
                         'error' => 'Admin access required',
                         'code' => 'ADMIN_REQUIRED'
                     ]));
-                    return $response
+                    return $Silian_response
                         ->withStatus(403)
                         ->withHeader('Content-Type', 'application/json');
                 }
             }
 
             // 将用户信息添加到请求属性中
-            $request = $request->withAttribute('user', $user);
-            
-            return $handler->handle($request);
-            
-        } catch (\Exception $e) {
-            $this->logExceptionWithFallback($e, $request, 'AdminMiddleware error: ' . $e->getMessage());
-            
-            $response = new \Slim\Psr7\Response();
-            $response->getBody()->write(json_encode([
+            $Silian_request = $Silian_request->withAttribute('user', $Silian_user);
+
+            return $Silian_handler->handle($Silian_request);
+
+        } catch (\Exception $Silian_e) {
+            $this->logExceptionWithFallback($Silian_e, $Silian_request, 'AdminMiddleware error: ' . $Silian_e->getMessage());
+
+            $Silian_response = new \Slim\Psr7\Response();
+            $Silian_response->getBody()->write(json_encode([
                 'success' => false,
                 'error' => 'Internal server error',
                 'code' => 'INTERNAL_ERROR'
             ]));
-            return $response
+            return $Silian_response
                 ->withStatus(500)
                 ->withHeader('Content-Type', 'application/json');
         }
     }
 
 
-    private function logExceptionWithFallback(\Throwable $exception, Request $request, string $contextMessage): void
+    private function logExceptionWithFallback(\Throwable $Silian_exception, Request $Silian_request, string $Silian_contextMessage): void
     {
         if ($this->errorLogService) {
             try {
-                $this->errorLogService->logException($exception, $request, ['context_message' => $contextMessage]);
+                $this->errorLogService->logException($Silian_exception, $Silian_request, ['context_message' => $Silian_contextMessage]);
                 return;
-            } catch (\Throwable $loggingError) {
-                error_log('ErrorLogService logging failed: ' . $loggingError->getMessage());
+            } catch (\Throwable $Silian_loggingError) {
+                error_log('ErrorLogService logging failed: ' . $Silian_loggingError->getMessage());
             }
         }
-        error_log($contextMessage);
+        error_log($Silian_contextMessage);
     }
 
 }

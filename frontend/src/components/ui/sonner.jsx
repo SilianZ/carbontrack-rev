@@ -1,14 +1,14 @@
-import { useTheme } from "next-themes"
-import { Toaster as Sonner } from "sonner";
+import { useTheme as Silian_useTheme } from "next-themes"
+import { Toaster as Silian_Sonner } from "sonner";
 
-const Toaster = ({
-  ...props
+const Silian_Toaster = ({
+  ...Silian_props
 }) => {
-  const { theme = "system" } = useTheme()
+  const { theme: Silian_theme = "system" } = Silian_useTheme()
 
   return (
-    <Sonner
-      theme={theme}
+    <Silian_Sonner
+      theme={Silian_theme}
       className="toaster group"
       style={
         {
@@ -17,8 +17,8 @@ const Toaster = ({
           "--normal-border": "var(--border)"
         }
       }
-      {...props} />
+      {...Silian_props} />
   );
 }
 
-export { Toaster }
+export { Silian_Toaster as Toaster }

@@ -28,29 +28,29 @@ final class CarbonRecordImagePersistenceTest extends TestCase
     $this->pdo->exec("INSERT INTO users (id,username,email,is_admin,school_id,points) VALUES (2,'admin','admin@example.com',1,1,0);");
     }
 
-    private function makeController(array $uploadResults = []): CarbonTrackController
+    private function makeController(array $Silian_uploadResults = []): CarbonTrackController
     {
-    $calc = $this->getMockBuilder(CarbonCalculatorService::class)->disableOriginalConstructor()->getMock();
-    $msg = $this->getMockBuilder(MessageService::class)->disableOriginalConstructor()->getMock();
-    $audit = $this->getMockBuilder(AuditLogService::class)->disableOriginalConstructor()->getMock();
-    $auth = $this->getMockBuilder(AuthService::class)->disableOriginalConstructor()->getMock();
-    $auth->method('getCurrentUser')->willReturn(['id' => 1, 'username' => 'tester', 'is_admin' => 0]);
-    $auth->method('isAdminUser')->willReturn(false);
-    $err = $this->getMockBuilder(ErrorLogService::class)->disableOriginalConstructor()->getMock();
-    $r2 = $this->getMockBuilder(CloudflareR2Service::class)->disableOriginalConstructor()->getMock();
-        if ($uploadResults) {
-            $r2->method('uploadMultipleFiles')->willReturn(['results' => $uploadResults]);
-            $r2->method('getPublicUrl')->willReturnCallback(fn(string $p) => 'https://cdn.example/' . ltrim($p,'/'));
+    $Silian_calc = $this->getMockBuilder(CarbonCalculatorService::class)->disableOriginalConstructor()->getMock();
+    $Silian_msg = $this->getMockBuilder(MessageService::class)->disableOriginalConstructor()->getMock();
+    $Silian_audit = $this->getMockBuilder(AuditLogService::class)->disableOriginalConstructor()->getMock();
+    $Silian_auth = $this->getMockBuilder(AuthService::class)->disableOriginalConstructor()->getMock();
+    $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'username' => 'tester', 'is_admin' => 0]);
+    $Silian_auth->method('isAdminUser')->willReturn(false);
+    $Silian_err = $this->getMockBuilder(ErrorLogService::class)->disableOriginalConstructor()->getMock();
+    $Silian_r2 = $this->getMockBuilder(CloudflareR2Service::class)->disableOriginalConstructor()->getMock();
+        if ($Silian_uploadResults) {
+            $Silian_r2->method('uploadMultipleFiles')->willReturn(['results' => $Silian_uploadResults]);
+            $Silian_r2->method('getPublicUrl')->willReturnCallback(fn(string $Silian_p) => 'https://cdn.example/' . ltrim($Silian_p,'/'));
         }
         return new CarbonTrackController(
             $this->pdo,
-            $calc,
-            $msg,
-            $audit,
-            $auth,
+            $Silian_calc,
+            $Silian_msg,
+            $Silian_audit,
+            $Silian_auth,
             new UserProfileViewService(new RegionService(null, null, null, null)),
-            $err,
-            $r2,
+            $Silian_err,
+            $Silian_r2,
             null,
             null,
             null
@@ -59,73 +59,73 @@ final class CarbonRecordImagePersistenceTest extends TestCase
 
     public function testStoresImageUrlsFromRequestBody(): void
     {
-        $controller = $this->makeController();
-        $body = [
+        $Silian_controller = $this->makeController();
+        $Silian_body = [
             'activity_id' => 'act-1',
             'amount' => 2,
             'date' => '2025-09-01',
             'images' => ['https://a/img1.png','https://b/img2.png']
         ];
-        $req = (new ServerRequestFactory())->createServerRequest('POST','/api/v1/carbon-records');
-        $req = $req->withParsedBody($body);
-    $resp = new Response();
-    $out = $controller->submitRecord($req, $resp);
-        $raw = (string)$out->getBody();
-        $data = json_decode($raw, true);
-        if (!isset($data['success'])) {
-            fwrite(STDERR, "RAW RESPONSE: $raw\n");
+        $Silian_req = (new ServerRequestFactory())->createServerRequest('POST','/api/v1/carbon-records');
+        $Silian_req = $Silian_req->withParsedBody($Silian_body);
+    $Silian_resp = new Response();
+    $Silian_out = $Silian_controller->submitRecord($Silian_req, $Silian_resp);
+        $Silian_raw = (string)$Silian_out->getBody();
+        $Silian_data = json_decode($Silian_raw, true);
+        if (!isset($Silian_data['success'])) {
+            fwrite(STDERR, "RAW RESPONSE: $Silian_raw\n");
         }
-        $this->assertArrayHasKey('success', $data);
-        $this->assertTrue($data['success']);
-        $recId = $data['data']['record_id'];
-        $row = $this->pdo->query("SELECT images FROM carbon_records WHERE id = '$recId'")->fetch(PDO::FETCH_ASSOC);
-        $decoded = json_decode($row['images'], true);
-        $this->assertCount(2, $decoded);
-        $this->assertEquals('https://a/img1.png', $decoded[0]['public_url'] ?? $decoded[0]['url']);
+        $this->assertArrayHasKey('success', $Silian_data);
+        $this->assertTrue($Silian_data['success']);
+        $Silian_recId = $Silian_data['data']['record_id'];
+        $Silian_row = $this->pdo->query("SELECT images FROM carbon_records WHERE id = '$Silian_recId'")->fetch(PDO::FETCH_ASSOC);
+        $Silian_decoded = json_decode($Silian_row['images'], true);
+        $this->assertCount(2, $Silian_decoded);
+        $this->assertEquals('https://a/img1.png', $Silian_decoded[0]['public_url'] ?? $Silian_decoded[0]['url']);
     }
 
     public function testStoresUploadedImagesFromR2(): void
     {
-        $uploadResults = [
+        $Silian_uploadResults = [
             ['success' => true, 'file_path' => 'activities/1/a.jpg', 'public_url' => 'https://cdn.example/activities/1/a.jpg', 'original_name' => 'a.jpg', 'mime_type' => 'image/jpeg', 'file_size' => 1234]
         ];
-        $controller = $this->makeController($uploadResults);
-    $tmpFile = tempnam(sys_get_temp_dir(), 'upl');
-    file_put_contents($tmpFile, 'dummy');
-    $uploaded = new UploadedFile($tmpFile, 'a.jpg', 'image/jpeg', filesize($tmpFile), UPLOAD_ERR_OK);
-        $req = (new ServerRequestFactory())->createServerRequest('POST','/api/v1/carbon-records');
-        $req = $req->withUploadedFiles(['images' => [$uploaded]])->withParsedBody([
+        $Silian_controller = $this->makeController($Silian_uploadResults);
+    $Silian_tmpFile = tempnam(sys_get_temp_dir(), 'upl');
+    file_put_contents($Silian_tmpFile, 'dummy');
+    $Silian_uploaded = new UploadedFile($Silian_tmpFile, 'a.jpg', 'image/jpeg', filesize($Silian_tmpFile), UPLOAD_ERR_OK);
+        $Silian_req = (new ServerRequestFactory())->createServerRequest('POST','/api/v1/carbon-records');
+        $Silian_req = $Silian_req->withUploadedFiles(['images' => [$Silian_uploaded]])->withParsedBody([
             'activity_id' => 'act-1',
             'amount' => 1,
             'date' => '2025-09-01'
         ]);
-    $resp = new Response();
-    $out = $controller->submitRecord($req, $resp);
-    $raw = (string)$out->getBody();
-    $data = json_decode($raw, true);
-    $this->assertArrayHasKey('success', $data, 'Response missing success key. Raw: ' . $raw);
-    $this->assertTrue($data['success']);
-        $recId = $data['data']['record_id'];
-        $row = $this->pdo->query("SELECT images FROM carbon_records WHERE id = '$recId'")->fetch(PDO::FETCH_ASSOC);
-        $decoded = json_decode($row['images'], true);
-        $this->assertCount(1, $decoded);
-        $this->assertEquals('https://cdn.example/activities/1/a.jpg', $decoded[0]['public_url'] ?? $decoded[0]['url']);
+    $Silian_resp = new Response();
+    $Silian_out = $Silian_controller->submitRecord($Silian_req, $Silian_resp);
+    $Silian_raw = (string)$Silian_out->getBody();
+    $Silian_data = json_decode($Silian_raw, true);
+    $this->assertArrayHasKey('success', $Silian_data, 'Response missing success key. Raw: ' . $Silian_raw);
+    $this->assertTrue($Silian_data['success']);
+        $Silian_recId = $Silian_data['data']['record_id'];
+        $Silian_row = $this->pdo->query("SELECT images FROM carbon_records WHERE id = '$Silian_recId'")->fetch(PDO::FETCH_ASSOC);
+        $Silian_decoded = json_decode($Silian_row['images'], true);
+        $this->assertCount(1, $Silian_decoded);
+        $this->assertEquals('https://cdn.example/activities/1/a.jpg', $Silian_decoded[0]['public_url'] ?? $Silian_decoded[0]['url']);
     }
 
     public function testRejectsWhenNoImagesProvided(): void
     {
-        $controller = $this->makeController();
-        $req = (new ServerRequestFactory())->createServerRequest('POST','/api/v1/carbon-records');
-        $req = $req->withParsedBody([
+        $Silian_controller = $this->makeController();
+        $Silian_req = (new ServerRequestFactory())->createServerRequest('POST','/api/v1/carbon-records');
+        $Silian_req = $Silian_req->withParsedBody([
             'activity_id' => 'act-1',
             'amount' => 5,
             'date' => '2025-09-02'
         ]);
-        $resp = new Response();
-        $out = $controller->submitRecord($req, $resp);
-        $raw = (string)$out->getBody();
-        $data = json_decode($raw, true);
-        $this->assertArrayNotHasKey('success', $data, 'Should not succeed without images. Raw: ' . $raw);
-        $this->assertEquals('Missing required field: images', $data['error'] ?? null, 'Expected images required error');
+        $Silian_resp = new Response();
+        $Silian_out = $Silian_controller->submitRecord($Silian_req, $Silian_resp);
+        $Silian_raw = (string)$Silian_out->getBody();
+        $Silian_data = json_decode($Silian_raw, true);
+        $this->assertArrayNotHasKey('success', $Silian_data, 'Should not succeed without images. Raw: ' . $Silian_raw);
+        $this->assertEquals('Missing required field: images', $Silian_data['error'] ?? null, 'Expected images required error');
     }
 }

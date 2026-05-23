@@ -1,22 +1,22 @@
-import React from 'react';
-import { cn } from '../../lib/utils';
+import Silian_React from 'react';
+import { cn as Silian_cn } from '../../lib/utils';
 
-const Input = React.forwardRef(({ className, type, error, ...props }, ref) => {
+const Silian_Input = Silian_React.forwardRef(({ className: Silian_className, type: Silian_type, error: Silian_error, ...Silian_props }, Silian_ref) => {
   return (
     <input
-      type={type}
-      className={cn(
+      type={Silian_type}
+      className={Silian_cn(
         "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-        error && "border-red-500 focus-visible:ring-red-500",
-        className
+        Silian_error && "border-red-500 focus-visible:ring-red-500",
+        Silian_className
       )}
-      ref={ref}
-      {...props}
+      ref={Silian_ref}
+      {...Silian_props}
     />
   );
 });
 
-Input.displayName = "Input";
+Silian_Input.displayName = "Input";
 
-export { Input };
+export { Silian_Input as Input };
 

@@ -18,20 +18,20 @@ class TurnstileService
     private bool $useNativeCaStore;
 
     public function __construct(
-        string $secretKey,
-        Logger $logger,
-        ?AuditLogService $auditLogService = null,
-        ?ErrorLogService $errorLogService = null,
-        ?string $caBundlePath = null,
-        bool $useNativeCaStore = false
+        string $Silian_secretKey,
+        Logger $Silian_logger,
+        ?AuditLogService $Silian_auditLogService = null,
+        ?ErrorLogService $Silian_errorLogService = null,
+        ?string $Silian_caBundlePath = null,
+        bool $Silian_useNativeCaStore = false
     )
     {
-        $this->secretKey = $secretKey;
-        $this->logger = $logger;
-        $this->auditLogService = $auditLogService;
-        $this->errorLogService = $errorLogService;
-        $this->caBundlePath = is_string($caBundlePath) && trim($caBundlePath) !== '' ? trim($caBundlePath) : null;
-        $this->useNativeCaStore = $useNativeCaStore;
+        $this->secretKey = $Silian_secretKey;
+        $this->logger = $Silian_logger;
+        $this->auditLogService = $Silian_auditLogService;
+        $this->errorLogService = $Silian_errorLogService;
+        $this->caBundlePath = is_string($Silian_caBundlePath) && trim($Silian_caBundlePath) !== '' ? trim($Silian_caBundlePath) : null;
+        $this->useNativeCaStore = $Silian_useNativeCaStore;
     }
 
     /**
@@ -41,16 +41,16 @@ class TurnstileService
      * @param string|null $remoteIp The client's IP address
      * @return array Verification result with success status and details
      */
-    public function verify(string $token, ?string $remoteIp = null): array
+    public function verify(string $Silian_token, ?string $Silian_remoteIp = null): array
     {
-        $appEnv = strtolower((string)($_ENV['APP_ENV'] ?? ''));
-        $bypass = filter_var($_ENV['TURNSTILE_BYPASS'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        if ($appEnv === 'testing' || $bypass) {
+        $Silian_appEnv = strtolower((string)($_ENV['APP_ENV'] ?? ''));
+        $Silian_bypass = filter_var($_ENV['TURNSTILE_BYPASS'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        if ($Silian_appEnv === 'testing' || $Silian_bypass) {
             return ['success' => true, 'bypassed' => true];
         }
 
-        if (empty($token)) {
-            $this->logAudit('turnstile_verification_missing_token', ['remote_ip' => $remoteIp], 'failed');
+        if (empty($Silian_token)) {
+            $this->logAudit('turnstile_verification_missing_token', ['remote_ip' => $Silian_remoteIp], 'failed');
             return [
                 'success' => false,
                 'error' => 'missing-input-response',
@@ -58,21 +58,21 @@ class TurnstileService
             ];
         }
 
-        $postData = [
+        $Silian_postData = [
             'secret' => $this->secretKey,
-            'response' => $token
+            'response' => $Silian_token
         ];
 
-        if ($remoteIp) {
-            $postData['remoteip'] = $remoteIp;
+        if ($Silian_remoteIp) {
+            $Silian_postData['remoteip'] = $Silian_remoteIp;
         }
 
         try {
-            $ch = curl_init();
-            $curlOptions = [
+            $Silian_ch = curl_init();
+            $Silian_curlOptions = [
                 CURLOPT_URL => $this->verifyUrl,
                 CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => http_build_query($postData),
+                CURLOPT_POSTFIELDS => http_build_query($Silian_postData),
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 10,
                 CURLOPT_CONNECTTIMEOUT => 5,
@@ -84,20 +84,20 @@ class TurnstileService
                 CURLOPT_SSL_VERIFYHOST => 2
             ];
 
-            $this->applyCertificateOptions($curlOptions);
-            curl_setopt_array($ch, $curlOptions);
+            $this->applyCertificateOptions($Silian_curlOptions);
+            curl_setopt_array($Silian_ch, $Silian_curlOptions);
 
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($ch);
-            curl_close($ch);
+            $Silian_response = curl_exec($Silian_ch);
+            $Silian_httpCode = curl_getinfo($Silian_ch, CURLINFO_HTTP_CODE);
+            $Silian_curlError = curl_error($Silian_ch);
+            curl_close($Silian_ch);
 
-            if ($curlError) {
-                $this->logFailure('turnstile_verification_network_failed', new \RuntimeException($curlError), ['remote_ip' => $remoteIp], '/internal/turnstile/verify');
+            if ($Silian_curlError) {
+                $this->logFailure('turnstile_verification_network_failed', new \RuntimeException($Silian_curlError), ['remote_ip' => $Silian_remoteIp], '/internal/turnstile/verify');
                 $this->logger->error('Turnstile verification cURL error', [
-                    'error' => $curlError,
-                    'token' => substr($token, 0, 20) . '...',
-                    'ip' => $remoteIp
+                    'error' => $Silian_curlError,
+                    'token' => substr($Silian_token, 0, 20) . '...',
+                    'ip' => $Silian_remoteIp
                 ]);
 
                 return [
@@ -107,16 +107,16 @@ class TurnstileService
                 ];
             }
 
-            if ($httpCode !== 200) {
-                $this->logFailure('turnstile_verification_http_failed', new \RuntimeException('Unexpected HTTP status: ' . $httpCode), [
-                    'http_code' => $httpCode,
-                    'remote_ip' => $remoteIp,
+            if ($Silian_httpCode !== 200) {
+                $this->logFailure('turnstile_verification_http_failed', new \RuntimeException('Unexpected HTTP status: ' . $Silian_httpCode), [
+                    'http_code' => $Silian_httpCode,
+                    'remote_ip' => $Silian_remoteIp,
                 ], '/internal/turnstile/verify');
                 $this->logger->error('Turnstile verification HTTP error', [
-                    'http_code' => $httpCode,
-                    'response' => $response,
-                    'token' => substr($token, 0, 20) . '...',
-                    'ip' => $remoteIp
+                    'http_code' => $Silian_httpCode,
+                    'response' => $Silian_response,
+                    'token' => substr($Silian_token, 0, 20) . '...',
+                    'ip' => $Silian_remoteIp
                 ]);
 
                 return [
@@ -126,15 +126,15 @@ class TurnstileService
                 ];
             }
 
-            $result = json_decode($response, true);
+            $Silian_result = json_decode($Silian_response, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->logFailure('turnstile_verification_decode_failed', new \RuntimeException(json_last_error_msg()), ['remote_ip' => $remoteIp], '/internal/turnstile/verify');
+                $this->logFailure('turnstile_verification_decode_failed', new \RuntimeException(json_last_error_msg()), ['remote_ip' => $Silian_remoteIp], '/internal/turnstile/verify');
                 $this->logger->error('Turnstile verification JSON decode error', [
                     'json_error' => json_last_error_msg(),
-                    'response' => $response,
-                    'token' => substr($token, 0, 20) . '...',
-                    'ip' => $remoteIp
+                    'response' => $Silian_response,
+                    'token' => substr($Silian_token, 0, 20) . '...',
+                    'ip' => $Silian_remoteIp
                 ]);
 
                 return [
@@ -144,51 +144,51 @@ class TurnstileService
                 ];
             }
 
-            if ($result['success']) {
+            if ($Silian_result['success']) {
                 $this->logAudit('turnstile_verification_succeeded', [
-                    'remote_ip' => $remoteIp,
-                    'hostname' => $result['hostname'] ?? null,
+                    'remote_ip' => $Silian_remoteIp,
+                    'hostname' => $Silian_result['hostname'] ?? null,
                 ]);
                 $this->logger->info('Turnstile verification successful', [
-                    'token' => substr($token, 0, 20) . '...',
-                    'ip' => $remoteIp,
-                    'challenge_ts' => $result['challenge_ts'] ?? null,
-                    'hostname' => $result['hostname'] ?? null
+                    'token' => substr($Silian_token, 0, 20) . '...',
+                    'ip' => $Silian_remoteIp,
+                    'challenge_ts' => $Silian_result['challenge_ts'] ?? null,
+                    'hostname' => $Silian_result['hostname'] ?? null
                 ]);
 
                 return [
                     'success' => true,
-                    'challenge_ts' => $result['challenge_ts'] ?? null,
-                    'hostname' => $result['hostname'] ?? null,
-                    'action' => $result['action'] ?? null,
-                    'cdata' => $result['cdata'] ?? null
+                    'challenge_ts' => $Silian_result['challenge_ts'] ?? null,
+                    'hostname' => $Silian_result['hostname'] ?? null,
+                    'action' => $Silian_result['action'] ?? null,
+                    'cdata' => $Silian_result['cdata'] ?? null
                 ];
             } else {
-                $errorCodes = $result['error-codes'] ?? ['unknown-error'];
+                $Silian_errorCodes = $Silian_result['error-codes'] ?? ['unknown-error'];
                 $this->logAudit('turnstile_verification_failed', [
-                    'remote_ip' => $remoteIp,
-                    'error_codes' => $errorCodes,
+                    'remote_ip' => $Silian_remoteIp,
+                    'error_codes' => $Silian_errorCodes,
                 ], 'failed');
                 $this->logger->warning('Turnstile verification failed', [
-                    'error_codes' => $errorCodes,
-                    'token' => substr($token, 0, 20) . '...',
-                    'ip' => $remoteIp
+                    'error_codes' => $Silian_errorCodes,
+                    'token' => substr($Silian_token, 0, 20) . '...',
+                    'ip' => $Silian_remoteIp
                 ]);
 
                 return [
                     'success' => false,
-                    'error' => $errorCodes[0],
-                    'error_codes' => $errorCodes,
-                    'message' => $this->getErrorMessage($errorCodes[0])
+                    'error' => $Silian_errorCodes[0],
+                    'error_codes' => $Silian_errorCodes,
+                    'message' => $this->getErrorMessage($Silian_errorCodes[0])
                 ];
             }
 
-        } catch (\Exception $e) {
-            $this->logFailure('turnstile_verification_exception', $e, ['remote_ip' => $remoteIp], '/internal/turnstile/verify');
+        } catch (\Exception $Silian_e) {
+            $this->logFailure('turnstile_verification_exception', $Silian_e, ['remote_ip' => $Silian_remoteIp], '/internal/turnstile/verify');
             $this->logger->error('Turnstile verification exception', [
-                'error' => $e->getMessage(),
-                'token' => substr($token, 0, 20) . '...',
-                'ip' => $remoteIp
+                'error' => $Silian_e->getMessage(),
+                'token' => substr($Silian_token, 0, 20) . '...',
+                'ip' => $Silian_remoteIp
             ]);
 
             return [
@@ -202,9 +202,9 @@ class TurnstileService
     /**
      * Get human-readable error message for Turnstile error codes
      */
-    private function getErrorMessage(string $errorCode): string
+    private function getErrorMessage(string $Silian_errorCode): string
     {
-        $errorMessages = [
+        $Silian_errorMessages = [
             'missing-input-secret' => 'The secret parameter is missing',
             'invalid-input-secret' => 'The secret parameter is invalid or malformed',
             'missing-input-response' => 'The response parameter is missing',
@@ -215,7 +215,7 @@ class TurnstileService
             'unknown-error' => 'Unknown error occurred during verification'
         ];
 
-        return $errorMessages[$errorCode] ?? 'Unknown error occurred during verification';
+        return $Silian_errorMessages[$Silian_errorCode] ?? 'Unknown error occurred during verification';
     }
 
     /**
@@ -226,7 +226,7 @@ class TurnstileService
         return !empty($this->secretKey);
     }
 
-    private function logAudit(string $action, array $context = [], string $status = 'success'): void
+    private function logAudit(string $Silian_action, array $Silian_context = [], string $Silian_status = 'success'): void
     {
         if ($this->auditLogService === null) {
             return;
@@ -234,29 +234,29 @@ class TurnstileService
 
         try {
             $this->auditLogService->log([
-                'action' => $action,
+                'action' => $Silian_action,
                 'operation_category' => 'security',
                 'actor_type' => 'system',
-                'status' => $status,
-                'data' => $context,
+                'status' => $Silian_status,
+                'data' => $Silian_context,
             ]);
-        } catch (\Throwable $ignore) {
+        } catch (\Throwable $Silian_ignore) {
             // ignore audit failures for turnstile service
         }
     }
 
-    private function logFailure(string $action, \Throwable $e, array $context, string $path): void
+    private function logFailure(string $Silian_action, \Throwable $Silian_e, array $Silian_context, string $Silian_path): void
     {
-        $this->logAudit($action, $context, 'failed');
+        $this->logAudit($Silian_action, $Silian_context, 'failed');
 
         if ($this->errorLogService === null) {
             return;
         }
 
         try {
-            $request = SyntheticRequestFactory::fromContext($path, 'POST', null, [], $context);
-            $this->errorLogService->logException($e, $request, ['context_message' => $action] + $context);
-        } catch (\Throwable $ignore) {
+            $Silian_request = SyntheticRequestFactory::fromContext($Silian_path, 'POST', null, [], $Silian_context);
+            $this->errorLogService->logException($Silian_e, $Silian_request, ['context_message' => $Silian_action] + $Silian_context);
+        } catch (\Throwable $Silian_ignore) {
             // ignore error log failures for turnstile service
         }
     }
@@ -264,10 +264,10 @@ class TurnstileService
     /**
      * @param array<int|string, mixed> $curlOptions
      */
-    private function applyCertificateOptions(array &$curlOptions): void
+    private function applyCertificateOptions(array &$Silian_curlOptions): void
     {
         if ($this->caBundlePath !== null) {
-            $curlOptions[CURLOPT_CAINFO] = $this->caBundlePath;
+            $Silian_curlOptions[CURLOPT_CAINFO] = $this->caBundlePath;
         }
 
         if (
@@ -275,8 +275,8 @@ class TurnstileService
             && \defined('CURLOPT_SSL_OPTIONS')
             && \defined('CURLSSLOPT_NATIVE_CA')
         ) {
-            $existingSslOptions = $curlOptions[CURLOPT_SSL_OPTIONS] ?? 0;
-            $curlOptions[CURLOPT_SSL_OPTIONS] = $existingSslOptions | CURLSSLOPT_NATIVE_CA;
+            $Silian_existingSslOptions = $Silian_curlOptions[CURLOPT_SSL_OPTIONS] ?? 0;
+            $Silian_curlOptions[CURLOPT_SSL_OPTIONS] = $Silian_existingSslOptions | CURLSSLOPT_NATIVE_CA;
         }
     }
 }

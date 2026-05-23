@@ -9,7 +9,7 @@
 //   raw: originalInput
 // }
 
-const KEY_MAP = {
+const Silian_KEY_MAP = {
   req: 'request_id',
   rid: 'request_id',
   request_id: 'request_id',
@@ -47,64 +47,64 @@ const KEY_MAP = {
   llm_status: 'llm_status'
 };
 
-const RANGE_KEYS = new Set(['duration_ms','status_code']);
+const Silian_RANGE_KEYS = new Set(['duration_ms','status_code']);
 
-export function parseLogQuery(input) {
-  const tokens = {};
-  const ranges = {};
-  const rest = [];
-  const regex = /("[^"]+"|\S+)/g;
-  const parts = (input || '').match(regex) || [];
-  for (const partRaw of parts) {
-    const part = partRaw.trim();
-    if (!part) continue;
-    const m = part.match(/^([^:!<>=]+)(!?=|>=|<=|>|<|:)(.+)$/);
-    if (m) {
-      let [, k, op, v] = m;
-      k = k.trim(); v = v.trim();
-      if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1);
-      const mapped = KEY_MAP[k] || k;
-      if (RANGE_KEYS.has(mapped) && /^(>=|<=|>|<)$/.test(op)) {
-        ranges[mapped] = ranges[mapped] || {};
-        ranges[mapped][op] = v;
+export function parseLogQuery(Silian_input) {
+  const Silian_tokens = {};
+  const Silian_ranges = {};
+  const Silian_rest = [];
+  const Silian_regex = /("[^"]+"|\S+)/g;
+  const Silian_parts = (Silian_input || '').match(Silian_regex) || [];
+  for (const Silian_partRaw of Silian_parts) {
+    const Silian_part = Silian_partRaw.trim();
+    if (!Silian_part) continue;
+    const Silian_m = Silian_part.match(/^([^:!<>=]+)(!?=|>=|<=|>|<|:)(.+)$/);
+    if (Silian_m) {
+      let [, Silian_k, Silian_op, Silian_v] = Silian_m;
+      Silian_k = Silian_k.trim(); Silian_v = Silian_v.trim();
+      if (Silian_v.startsWith('"') && Silian_v.endsWith('"')) Silian_v = Silian_v.slice(1, -1);
+      const Silian_mapped = Silian_KEY_MAP[Silian_k] || Silian_k;
+      if (Silian_RANGE_KEYS.has(Silian_mapped) && /^(>=|<=|>|<)$/.test(Silian_op)) {
+        Silian_ranges[Silian_mapped] = Silian_ranges[Silian_mapped] || {};
+        Silian_ranges[Silian_mapped][Silian_op] = Silian_v;
         continue;
       }
-      if (op === '!=') { // negation placeholder (not sent to backend yet)
-        tokens[mapped] = { value: v, negate: true };
+      if (Silian_op === '!=') { // negation placeholder (not sent to backend yet)
+        Silian_tokens[Silian_mapped] = { value: Silian_v, negate: true };
         continue;
       }
-      tokens[mapped] = v;
+      Silian_tokens[Silian_mapped] = Silian_v;
     } else {
-      rest.push(part.replace(/^"|"$/g, ''));
+      Silian_rest.push(Silian_part.replace(/^"|"$/g, ''));
     }
   }
-  return { tokens, free: rest.join(' '), ranges, raw: input };
+  return { tokens: Silian_tokens, free: Silian_rest.join(' '), ranges: Silian_ranges, raw: Silian_input };
 }
 
-export function buildQueryParams(parsed) {
-  const params = {};
-  Object.entries(parsed.tokens).forEach(([k,v]) => {
-    if (v && typeof v === 'object' && v.negate) return; // skip negate for now
-    switch (k) {
+export function buildQueryParams(Silian_parsed) {
+  const Silian_params = {};
+  Object.entries(Silian_parsed.tokens).forEach(([Silian_k,Silian_v]) => {
+    if (Silian_v && typeof Silian_v === 'object' && Silian_v.negate) return; // skip negate for now
+    switch (Silian_k) {
       case 'duration_ms':
         // handled via ranges mapping
         break;
       case 'audit_status':
-        params['audit_status'] = v;
+        Silian_params['audit_status'] = Silian_v;
         break;
       default:
-        params[k] = typeof v === 'object' ? v.value : v;
+        Silian_params[Silian_k] = typeof Silian_v === 'object' ? Silian_v.value : Silian_v;
     }
   });
   // ranges mapping -> backend param names
-  if (parsed.ranges.duration_ms) {
-    const r = parsed.ranges.duration_ms;
-    if (r['>'] || r['>=']) params.min_duration = r['>'] || r['>='];
-    if (r['<'] || r['<=']) params.max_duration = r['<'] || r['<='];
+  if (Silian_parsed.ranges.duration_ms) {
+    const Silian_r = Silian_parsed.ranges.duration_ms;
+    if (Silian_r['>'] || Silian_r['>=']) Silian_params.min_duration = Silian_r['>'] || Silian_r['>='];
+    if (Silian_r['<'] || Silian_r['<=']) Silian_params.max_duration = Silian_r['<'] || Silian_r['<='];
   }
   // status_code range not currently supported server-side (only equality). Ignore >/< for now.
-  if (parsed.free) params.q = (params.q ? params.q + ' ' : '') + parsed.free;
-  return params;
+  if (Silian_parsed.free) Silian_params.q = (Silian_params.q ? Silian_params.q + ' ' : '') + Silian_parsed.free;
+  return Silian_params;
 }
 
 export default { parseLogQuery, buildQueryParams };

@@ -12,7 +12,7 @@ use DI\Container;
 
 /**
  * Realistic Business Data Test
- * 
+ *
  * Tests the core business flows with realistic data scenarios
  * without requiring external server setup
  */
@@ -46,7 +46,7 @@ class RealisticBusinessDataTest extends TestCase
             $this->container = new Container();
 
             // Provide database config for dependencies.php (Illuminate setup)
-            $config = [
+            $Silian_config = [
                 'database' => [
                     'default' => 'sqlite',
                     'connections' => [
@@ -58,18 +58,18 @@ class RealisticBusinessDataTest extends TestCase
                     ]
                 ]
             ];
-            $this->container->set('config', $config);
+            $this->container->set('config', $Silian_config);
 
             // Load dependencies initializer and execute it with our container
-            $depsInitializer = require __DIR__ . '/../../src/dependencies.php';
-            if (is_callable($depsInitializer)) {
-                $depsInitializer($this->container);
+            $Silian_depsInitializer = require __DIR__ . '/../../src/dependencies.php';
+            if (is_callable($Silian_depsInitializer)) {
+                $Silian_depsInitializer($this->container);
             }
 
             // Initialize unified minimal schema + seed BEFORE app boot
             /** @var DatabaseService $dbServiceSchema */
-            $dbServiceSchema = $this->container->get(DatabaseService::class);
-            TestSchemaBuilder::init($dbServiceSchema->getConnection()->getPdo());
+            $Silian_dbServiceSchema = $this->container->get(DatabaseService::class);
+            TestSchemaBuilder::init($Silian_dbServiceSchema->getConnection()->getPdo());
 
             // Create Slim app
             $this->app = \Slim\Factory\AppFactory::createFromContainer($this->container);
@@ -78,155 +78,155 @@ class RealisticBusinessDataTest extends TestCase
             $this->app->addRoutingMiddleware();
 
             // Add routes
-            $routes = require __DIR__ . '/../../src/routes.php';
-            $routes($this->app);
+            $Silian_routes = require __DIR__ . '/../../src/routes.php';
+            $Silian_routes($this->app);
 
             // Previously inline creation of carbon_activities & avatars now handled by TestSchemaBuilder
-        } catch (\Exception $e) {
-            $this->markTestSkipped('Could not set up test environment: ' . $e->getMessage());
+        } catch (\Exception $Silian_e) {
+            $this->markTestSkipped('Could not set up test environment: ' . $Silian_e->getMessage());
         }
     }
 
-    private function createRequest(string $method, string $uri, array $data = [], array $headers = []): \Psr\Http\Message\ServerRequestInterface
+    private function createRequest(string $Silian_method, string $Silian_uri, array $Silian_data = [], array $Silian_headers = []): \Psr\Http\Message\ServerRequestInterface
     {
-        $factory = new ServerRequestFactory();
-        $request = $factory->createServerRequest($method, $uri);
-        
+        $Silian_factory = new ServerRequestFactory();
+        $Silian_request = $Silian_factory->createServerRequest($Silian_method, $Silian_uri);
+
         if (
-            strtoupper($method) === 'POST'
-            && preg_match('#/auth/register$#i', $uri)
-            && !array_key_exists('cf_turnstile_response', $data)
+            strtoupper($Silian_method) === 'POST'
+            && preg_match('#/auth/register$#i', $Silian_uri)
+            && !array_key_exists('cf_turnstile_response', $Silian_data)
         ) {
-            $data['cf_turnstile_response'] = 'test_turnstile_token';
+            $Silian_data['cf_turnstile_response'] = 'test_turnstile_token';
         }
 
-        if (!empty($data)) {
-            $request = $request->withParsedBody($data);
+        if (!empty($Silian_data)) {
+            $Silian_request = $Silian_request->withParsedBody($Silian_data);
         }
-        
-        foreach ($headers as $name => $value) {
-            $request = $request->withHeader($name, $value);
+
+        foreach ($Silian_headers as $Silian_name => $Silian_value) {
+            $Silian_request = $Silian_request->withHeader($Silian_name, $Silian_value);
         }
-        
-        return $request;
+
+        return $Silian_request;
     }
 
     public function testHealthCheckEndpoint(): void
     {
-        $request = $this->createRequest('GET', '/');
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('GET', '/');
+        $Silian_response = $this->app->handle($Silian_request);
 
-        $this->assertEquals(200, $response->getStatusCode());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertEquals('CarbonTrack API is running', $data['message']);
-        $this->assertEquals('1.0.0', $data['version']);
+        $this->assertEquals(200, $Silian_response->getStatusCode());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertEquals('CarbonTrack API is running', $Silian_data['message']);
+        $this->assertEquals('1.0.0', $Silian_data['version']);
     }
 
     public function testApiV1RootEndpoint(): void
     {
-        $request = $this->createRequest('GET', '/api/v1');
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('GET', '/api/v1');
+        $Silian_response = $this->app->handle($Silian_request);
 
-        $this->assertEquals(200, $response->getStatusCode());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertEquals('CarbonTrack API v1', $data['message']);
-        $this->assertArrayHasKey('endpoints', $data);
-        
+        $this->assertEquals(200, $Silian_response->getStatusCode());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertEquals('CarbonTrack API v1', $Silian_data['message']);
+        $this->assertArrayHasKey('endpoints', $Silian_data);
+
         // Verify all major endpoints are listed
-        $expectedEndpoints = [
-            'auth', 'users', 'carbon-activities', 'carbon-track', 
+        $Silian_expectedEndpoints = [
+            'auth', 'users', 'carbon-activities', 'carbon-track',
             'products', 'exchange', 'messages', 'avatars', 'admin'
         ];
-        
-        foreach ($expectedEndpoints as $endpoint) {
-            $this->assertArrayHasKey($endpoint, $data['endpoints'], "Should have {$endpoint} endpoint listed");
+
+        foreach ($Silian_expectedEndpoints as $Silian_endpoint) {
+            $this->assertArrayHasKey($Silian_endpoint, $Silian_data['endpoints'], "Should have {$Silian_endpoint} endpoint listed");
         }
     }
 
     public function testCarbonActivitiesPublicEndpoint(): void
     {
-        $request = $this->createRequest('GET', '/api/v1/carbon-activities');
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('GET', '/api/v1/carbon-activities');
+        $Silian_response = $this->app->handle($Silian_request);
 
-        $this->assertEquals(200, $response->getStatusCode());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertIsArray($data['data']);
+        $this->assertEquals(200, $Silian_response->getStatusCode());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertIsArray($Silian_data['data']);
 
         // New API structure: data.activities holds list
-        $activitiesList = $data['data']['activities'] ?? $data['data'];
-        $this->assertIsArray($activitiesList, 'Activities list should be an array');
-        
+        $Silian_activitiesList = $Silian_data['data']['activities'] ?? $Silian_data['data'];
+        $this->assertIsArray($Silian_activitiesList, 'Activities list should be an array');
+
         // Verify we have carbon activities data with realistic structure
-        if (!empty($activitiesList)) {
-            $activity = $activitiesList[0];
-            $this->assertArrayHasKey('id', $activity);
-            $this->assertArrayHasKey('name_zh', $activity);
-            $this->assertArrayHasKey('name_en', $activity);
-            $this->assertArrayHasKey('category', $activity);
-            $this->assertArrayHasKey('carbon_factor', $activity);
-            $this->assertArrayHasKey('unit', $activity);
-            
+        if (!empty($Silian_activitiesList)) {
+            $Silian_activity = $Silian_activitiesList[0];
+            $this->assertArrayHasKey('id', $Silian_activity);
+            $this->assertArrayHasKey('name_zh', $Silian_activity);
+            $this->assertArrayHasKey('name_en', $Silian_activity);
+            $this->assertArrayHasKey('category', $Silian_activity);
+            $this->assertArrayHasKey('carbon_factor', $Silian_activity);
+            $this->assertArrayHasKey('unit', $Silian_activity);
+
             // Verify realistic business data
-            $this->assertNotEmpty($activity['name_zh'], 'Should have Chinese name');
-            $this->assertNotEmpty($activity['name_en'], 'Should have English name');
-            $this->assertIsNumeric($activity['carbon_factor'], 'Carbon factor should be numeric');
-            $this->assertNotEmpty($activity['unit'], 'Should have unit');
+            $this->assertNotEmpty($Silian_activity['name_zh'], 'Should have Chinese name');
+            $this->assertNotEmpty($Silian_activity['name_en'], 'Should have English name');
+            $this->assertIsNumeric($Silian_activity['carbon_factor'], 'Carbon factor should be numeric');
+            $this->assertNotEmpty($Silian_activity['unit'], 'Should have unit');
         }
     }
 
     public function testAvatarsPublicEndpoint(): void
     {
-        $request = $this->createRequest('GET', '/api/v1/avatars');
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('GET', '/api/v1/avatars');
+        $Silian_response = $this->app->handle($Silian_request);
 
-        $this->assertEquals(200, $response->getStatusCode());
-        
-        $body = (string) $response->getBody();
-        $data = json_decode($body, true);
-        
-        $this->assertTrue($data['success']);
-        $this->assertIsArray($data['data']);
-        
+        $this->assertEquals(200, $Silian_response->getStatusCode());
+
+        $Silian_body = (string) $Silian_response->getBody();
+        $Silian_data = json_decode($Silian_body, true);
+
+        $this->assertTrue($Silian_data['success']);
+        $this->assertIsArray($Silian_data['data']);
+
         // Verify avatar data structure
-        if (!empty($data['data'])) {
-            $avatar = $data['data'][0];
-            $this->assertArrayHasKey('id', $avatar);
-            $this->assertArrayHasKey('name', $avatar);
-            $this->assertArrayHasKey('file_path', $avatar);
-            $this->assertArrayHasKey('category', $avatar);
+        if (!empty($Silian_data['data'])) {
+            $Silian_avatar = $Silian_data['data'][0];
+            $this->assertArrayHasKey('id', $Silian_avatar);
+            $this->assertArrayHasKey('name', $Silian_avatar);
+            $this->assertArrayHasKey('file_path', $Silian_avatar);
+            $this->assertArrayHasKey('category', $Silian_avatar);
         }
     }
 
     public function testUnauthorizedAccessHandling(): void
     {
         // Test accessing protected endpoint without auth
-        $request = $this->createRequest('GET', '/api/v1/users/me');
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('GET', '/api/v1/users/me');
+        $Silian_response = $this->app->handle($Silian_request);
 
-        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertEquals(401, $Silian_response->getStatusCode());
 
         // Legacy alias should also require auth when OpenAPI marks it as protected
-        $request = $this->createRequest('GET', '/api/v1/activities/categories');
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('GET', '/api/v1/activities/categories');
+        $Silian_response = $this->app->handle($Silian_request);
 
-        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertEquals(401, $Silian_response->getStatusCode());
     }
 
     public function testProtectedEndpointsRequireAuthentication(): void
     {
-        $recordPayload = [
+        $Silian_recordPayload = [
             'activity_id' => '550e8400-e29b-41d4-a716-446655440001',
             'amount' => 1,
             'unit' => 'times',
@@ -236,7 +236,7 @@ class RealisticBusinessDataTest extends TestCase
             'request_id' => 'auth-consistency-' . uniqid('', true),
         ];
 
-        $cases = [
+        $Silian_cases = [
             [
                 'method' => 'GET',
                 'uri' => '/api/v1/activities',
@@ -252,7 +252,7 @@ class RealisticBusinessDataTest extends TestCase
             [
                 'method' => 'POST',
                 'uri' => '/api/v1/carbon-track/record',
-                'data' => $recordPayload,
+                'data' => $Silian_recordPayload,
                 'expected_status' => 401,
             ],
             [
@@ -269,14 +269,14 @@ class RealisticBusinessDataTest extends TestCase
             ],
         ];
 
-        foreach ($cases as $case) {
-            $request = $this->createRequest($case['method'], $case['uri'], $case['data']);
-            $response = $this->app->handle($request);
+        foreach ($Silian_cases as $Silian_case) {
+            $Silian_request = $this->createRequest($Silian_case['method'], $Silian_case['uri'], $Silian_case['data']);
+            $Silian_response = $this->app->handle($Silian_request);
 
             $this->assertSame(
-                $case['expected_status'],
-                $response->getStatusCode(),
-                sprintf('%s %s should reject unauthenticated access', $case['method'], $case['uri'])
+                $Silian_case['expected_status'],
+                $Silian_response->getStatusCode(),
+                sprintf('%s %s should reject unauthenticated access', $Silian_case['method'], $Silian_case['uri'])
             );
         }
     }
@@ -284,41 +284,41 @@ class RealisticBusinessDataTest extends TestCase
     public function testCarbonCalculationWithRealisticData(): void
     {
         // Test calculation endpoint (if accessible without auth, or mock auth)
-        $realisticCalculationData = [
+        $Silian_realisticCalculationData = [
             'activity_id' => '550e8400-e29b-41d4-a716-446655440001', // From sample data
             'amount' => 3.5,
             'unit' => 'times'
         ];
 
         // This may require authentication, so we test with mock token
-        $mockToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test.signature'; // Mock JWT
-        
-        $request = $this->createRequest('POST', '/api/v1/carbon-track/calculate', $realisticCalculationData, [
-            'Authorization' => 'Bearer ' . $mockToken
+        $Silian_mockToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test.signature'; // Mock JWT
+
+        $Silian_request = $this->createRequest('POST', '/api/v1/carbon-track/calculate', $Silian_realisticCalculationData, [
+            'Authorization' => 'Bearer ' . $Silian_mockToken
         ]);
-        
-        $response = $this->app->handle($request);
-        
+
+        $Silian_response = $this->app->handle($Silian_request);
+
         // We expect either 200 (success) or 401 (unauthorized), not 500 (server error)
-        $this->assertContains($response->getStatusCode(), [200, 401], 
+        $this->assertContains($Silian_response->getStatusCode(), [200, 401],
             'Carbon calculation should either work or require auth, not crash');
-        
-        if ($response->getStatusCode() === 200) {
-            $body = (string) $response->getBody();
-            $data = json_decode($body, true);
-            
-            $this->assertTrue($data['success']);
-            $this->assertArrayHasKey('carbon_saved', $data['data']);
-            $this->assertArrayHasKey('points_earned', $data['data']);
-            $this->assertIsNumeric($data['data']['carbon_saved']);
-            $this->assertIsNumeric($data['data']['points_earned']);
+
+        if ($Silian_response->getStatusCode() === 200) {
+            $Silian_body = (string) $Silian_response->getBody();
+            $Silian_data = json_decode($Silian_body, true);
+
+            $this->assertTrue($Silian_data['success']);
+            $this->assertArrayHasKey('carbon_saved', $Silian_data['data']);
+            $this->assertArrayHasKey('points_earned', $Silian_data['data']);
+            $this->assertIsNumeric($Silian_data['data']['carbon_saved']);
+            $this->assertIsNumeric($Silian_data['data']['points_earned']);
         }
     }
 
     public function testUserRegistrationValidation(): void
     {
         // Test with realistic but potentially problematic data
-        $realisticRegistrationData = [
+        $Silian_realisticRegistrationData = [
             'username' => 'test_user_' . time(), // Unique username
             'email' => 'test_user_' . time() . '@example.com', // Unique email
             'password' => 'SecurePassword123!',
@@ -327,27 +327,27 @@ class RealisticBusinessDataTest extends TestCase
             // 省略 cf_turnstile_response 以跳过外部验证
         ];
 
-        $request = $this->createRequest('POST', '/api/v1/auth/register', $realisticRegistrationData);
-        $response = $this->app->handle($request);
+        $Silian_request = $this->createRequest('POST', '/api/v1/auth/register', $Silian_realisticRegistrationData);
+        $Silian_response = $this->app->handle($Silian_request);
 
         // Should either succeed or fail gracefully (not crash)
-    $this->assertContains($response->getStatusCode(), [200, 201, 400, 422, 429],
+    $this->assertContains($Silian_response->getStatusCode(), [200, 201, 400, 422, 429],
             'Registration should handle realistic data gracefully');
-        
-        if ($response->getStatusCode() === 200) {
-            $body = (string) $response->getBody();
-            $data = json_decode($body, true);
-            
-            $this->assertTrue($data['success']);
-            $this->assertArrayHasKey('user', $data['data']);
-            $this->assertArrayHasKey('token', $data['data']);
+
+        if ($Silian_response->getStatusCode() === 200) {
+            $Silian_body = (string) $Silian_response->getBody();
+            $Silian_data = json_decode($Silian_body, true);
+
+            $this->assertTrue($Silian_data['success']);
+            $this->assertArrayHasKey('user', $Silian_data['data']);
+            $this->assertArrayHasKey('token', $Silian_data['data']);
         }
     }
 
     public function testInvalidDataHandling(): void
     {
         // Test with various invalid data scenarios
-        $invalidScenarios = [
+        $Silian_invalidScenarios = [
             // Empty registration
             [
                 'data' => [],
@@ -386,66 +386,66 @@ class RealisticBusinessDataTest extends TestCase
             ]
         ];
 
-        foreach ($invalidScenarios as $scenario) {
-            $request = $this->createRequest($scenario['method'], $scenario['endpoint'], $scenario['data']);
-            $response = $this->app->handle($request);
-            
+        foreach ($Silian_invalidScenarios as $Silian_scenario) {
+            $Silian_request = $this->createRequest($Silian_scenario['method'], $Silian_scenario['endpoint'], $Silian_scenario['data']);
+            $Silian_response = $this->app->handle($Silian_request);
+
             // Should reject invalid data gracefully (400-level error, not 500)
-            $this->assertGreaterThanOrEqual(400, $response->getStatusCode());
-            $this->assertLessThan(500, $response->getStatusCode());
+            $this->assertGreaterThanOrEqual(400, $Silian_response->getStatusCode());
+            $this->assertLessThan(500, $Silian_response->getStatusCode());
         }
     }
 
     public function testLargeDataHandling(): void
     {
         // Test with realistic but large data sets
-        $largeDescription = str_repeat('这是一个测试描述。', 100); // 1000+ characters Chinese text
-        
-        $largeDataRequest = [
+        $Silian_largeDescription = str_repeat('这是一个测试描述。', 100); // 1000+ characters Chinese text
+
+        $Silian_largeDataRequest = [
             'activity_id' => '550e8400-e29b-41d4-a716-446655440001',
             'amount' => 999999.99, // Large amount
-            'description' => $largeDescription,
+            'description' => $Silian_largeDescription,
             'proof_images' => array_fill(0, 10, '/test/image_' . uniqid() . '.jpg'), // Multiple images
             'request_id' => 'large_test_' . uniqid()
         ];
 
-        $mockToken = 'mock_jwt_token';
-        $request = $this->createRequest('POST', '/api/v1/carbon-track/record', $largeDataRequest, [
-            'Authorization' => 'Bearer ' . $mockToken,
-            'X-Request-ID' => $largeDataRequest['request_id']
+        $Silian_mockToken = 'mock_jwt_token';
+        $Silian_request = $this->createRequest('POST', '/api/v1/carbon-track/record', $Silian_largeDataRequest, [
+            'Authorization' => 'Bearer ' . $Silian_mockToken,
+            'X-Request-ID' => $Silian_largeDataRequest['request_id']
         ]);
-        
-        $response = $this->app->handle($request);
-        
+
+        $Silian_response = $this->app->handle($Silian_request);
+
         // Should handle large data gracefully (not crash with 500 error)
-    $this->assertNotEquals(500, $response->getStatusCode(),
+    $this->assertNotEquals(500, $Silian_response->getStatusCode(),
             'Large data should not cause server errors');
     }
 
     public function testConcurrentRequestHandling(): void
     {
         // Simulate concurrent requests with different request IDs
-        $requests = [];
-        for ($i = 0; $i < 5; $i++) {
-            $data = [
+        $Silian_requests = [];
+        for ($Silian_i = 0; $Silian_i < 5; $Silian_i++) {
+            $Silian_data = [
                 'activity_id' => '550e8400-e29b-41d4-a716-446655440001',
-                'amount' => 1.0 + $i,
-                'description' => "Concurrent test request {$i}",
-                'request_id' => 'concurrent_test_' . $i . '_' . uniqid()
+                'amount' => 1.0 + $Silian_i,
+                'description' => "Concurrent test request {$Silian_i}",
+                'request_id' => 'concurrent_test_' . $Silian_i . '_' . uniqid()
             ];
-            
-            $requests[] = $this->createRequest('POST', '/api/v1/carbon-track/calculate', $data);
+
+            $Silian_requests[] = $this->createRequest('POST', '/api/v1/carbon-track/calculate', $Silian_data);
         }
 
         // Execute requests
-        $responses = [];
-        foreach ($requests as $request) {
-            $responses[] = $this->app->handle($request);
+        $Silian_responses = [];
+        foreach ($Silian_requests as $Silian_request) {
+            $Silian_responses[] = $this->app->handle($Silian_request);
         }
 
         // All requests should be handled consistently
-        foreach ($responses as $response) {
-            $this->assertContains($response->getStatusCode(), [200, 401, 422],
+        foreach ($Silian_responses as $Silian_response) {
+            $this->assertContains($Silian_response->getStatusCode(), [200, 401, 422],
                 'Concurrent requests should be handled consistently');
         }
     }

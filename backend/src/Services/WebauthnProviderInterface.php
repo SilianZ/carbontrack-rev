@@ -20,10 +20,10 @@ interface WebauthnProviderInterface
      * @return array<string, mixed>
      */
     public function verifyRegistrationResponse(
-        array $credential,
-        array $challengeRecord,
-        array $user,
-        PasskeyConfig $config
+        array $Silian_credential,
+        array $Silian_challengeRecord,
+        array $Silian_user,
+        PasskeyConfig $Silian_config
     ): array;
 
     /**
@@ -33,9 +33,9 @@ interface WebauthnProviderInterface
      * @return array<string, mixed>
      */
     public function verifyAuthenticationResponse(
-        array $credential,
-        array $challengeRecord,
-        array $passkey,
-        PasskeyConfig $config
+        array $Silian_credential,
+        array $Silian_challengeRecord,
+        array $Silian_passkey,
+        PasskeyConfig $Silian_config
     ): array;
 }

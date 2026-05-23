@@ -1,61 +1,61 @@
 "use client";
-import * as React from "react"
-import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
+import * as Silian_React from "react"
+import * as Silian_ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
 
-import { cn } from "@/lib/utils"
-import { toggleVariants } from "@/components/ui/toggle-styles"
+import { cn as Silian_cn } from "@/lib/utils"
+import { toggleVariants as Silian_toggleVariants } from "@/components/ui/toggle-styles"
 
-const ToggleGroupContext = React.createContext({
+const Silian_ToggleGroupContext = Silian_React.createContext({
   size: "default",
   variant: "default",
 })
 
-function ToggleGroup({
-  className,
-  variant,
-  size,
-  children,
-  ...props
+function Silian_ToggleGroup({
+  className: Silian_className,
+  variant: Silian_variant,
+  size: Silian_size,
+  children: Silian_children,
+  ...Silian_props
 }) {
   return (
-    <ToggleGroupPrimitive.Root
+    <Silian_ToggleGroupPrimitive.Root
       data-slot="toggle-group"
-      data-variant={variant}
-      data-size={size}
-      className={cn(
+      data-variant={Silian_variant}
+      data-size={Silian_size}
+      className={Silian_cn(
         "group/toggle-group flex w-fit items-center rounded-md data-[variant=outline]:shadow-xs",
-        className
+        Silian_className
       )}
-      {...props}>
-      <ToggleGroupContext.Provider value={{ variant, size }}>
-        {children}
-      </ToggleGroupContext.Provider>
-    </ToggleGroupPrimitive.Root>
+      {...Silian_props}>
+      <Silian_ToggleGroupContext.Provider value={{ variant: Silian_variant, size: Silian_size }}>
+        {Silian_children}
+      </Silian_ToggleGroupContext.Provider>
+    </Silian_ToggleGroupPrimitive.Root>
   );
 }
 
-function ToggleGroupItem({
-  className,
-  children,
-  variant,
-  size,
-  ...props
+function Silian_ToggleGroupItem({
+  className: Silian_className,
+  children: Silian_children,
+  variant: Silian_variant,
+  size: Silian_size,
+  ...Silian_props
 }) {
-  const context = React.useContext(ToggleGroupContext)
+  const Silian_context = Silian_React.useContext(Silian_ToggleGroupContext)
 
   return (
-    <ToggleGroupPrimitive.Item
+    <Silian_ToggleGroupPrimitive.Item
       data-slot="toggle-group-item"
-      data-variant={context.variant || variant}
-      data-size={context.size || size}
-      className={cn(toggleVariants({
-        variant: context.variant || variant,
-        size: context.size || size,
-      }), "min-w-0 flex-1 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10 data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l", className)}
-      {...props}>
-      {children}
-    </ToggleGroupPrimitive.Item>
+      data-variant={Silian_context.variant || Silian_variant}
+      data-size={Silian_context.size || Silian_size}
+      className={Silian_cn(Silian_toggleVariants({
+        variant: Silian_context.variant || Silian_variant,
+        size: Silian_context.size || Silian_size,
+      }), "min-w-0 flex-1 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10 data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l", Silian_className)}
+      {...Silian_props}>
+      {Silian_children}
+    </Silian_ToggleGroupPrimitive.Item>
   );
 }
 
-export { ToggleGroup, ToggleGroupItem }
+export { Silian_ToggleGroup as ToggleGroup, Silian_ToggleGroupItem as ToggleGroupItem }

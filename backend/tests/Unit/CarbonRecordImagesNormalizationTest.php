@@ -48,27 +48,27 @@ final class CarbonRecordImagesNormalizationTest extends TestCase
     private function makeController(): CarbonTrackController
     {
         // 创建最小可用的依赖 mock/stub
-    $calc = $this->createMock(CarbonCalculatorService::class);
+    $Silian_calc = $this->createMock(CarbonCalculatorService::class);
     // Use existing method name from service for consistency
-    $calc->method('calculateCarbonReduction')->willReturn(1.23);
-        $msg = $this->createMock(MessageService::class);
-        $audit = $this->createMock(AuditLogService::class);
-        $auth = $this->createMock(AuthService::class);
-    $auth->method('getCurrentUser')->willReturn(['id' => 1, 'username' => 'tester', 'is_admin' => 0]);
-        $auth->method('isAdminUser')->willReturn(false);
-        $err = $this->createMock(ErrorLogService::class);
-        $r2 = $this->createMock(CloudflareR2Service::class);
-        $r2->method('getPublicUrl')->willReturnCallback(fn(string $p) => 'https://cdn.example/' . ltrim($p,'/'));
+    $Silian_calc->method('calculateCarbonReduction')->willReturn(1.23);
+        $Silian_msg = $this->createMock(MessageService::class);
+        $Silian_audit = $this->createMock(AuditLogService::class);
+        $Silian_auth = $this->createMock(AuthService::class);
+    $Silian_auth->method('getCurrentUser')->willReturn(['id' => 1, 'username' => 'tester', 'is_admin' => 0]);
+        $Silian_auth->method('isAdminUser')->willReturn(false);
+        $Silian_err = $this->createMock(ErrorLogService::class);
+        $Silian_r2 = $this->createMock(CloudflareR2Service::class);
+        $Silian_r2->method('getPublicUrl')->willReturnCallback(fn(string $Silian_p) => 'https://cdn.example/' . ltrim($Silian_p,'/'));
 
         return new CarbonTrackController(
             $this->pdo,
-            $calc,
-            $msg,
-            $audit,
-            $auth,
+            $Silian_calc,
+            $Silian_msg,
+            $Silian_audit,
+            $Silian_auth,
             new UserProfileViewService(new RegionService(null, null, null, null)),
-            $err,
-            $r2,
+            $Silian_err,
+            $Silian_r2,
             null,
             null,
             null
@@ -77,27 +77,27 @@ final class CarbonRecordImagesNormalizationTest extends TestCase
 
     public function testNormalizeExistingStringArrayImages(): void
     {
-        $controller = $this->makeController();
-        $ref = new ReflectionClass($controller);
-        $norm = $ref->getMethod('normalizeImages');
-        $norm->setAccessible(true);
-        $input = ['https://a/img1.png','https://b/img2.png'];
-        $out = $norm->invoke($controller, $input);
-        $this->assertCount(2, $out);
-        $this->assertArrayHasKey('url', $out[0]);
-        $this->assertEquals('https://a/img1.png', $out[0]['url']);
+        $Silian_controller = $this->makeController();
+        $Silian_ref = new ReflectionClass($Silian_controller);
+        $Silian_norm = $Silian_ref->getMethod('normalizeImages');
+        $Silian_norm->setAccessible(true);
+        $Silian_input = ['https://a/img1.png','https://b/img2.png'];
+        $Silian_out = $Silian_norm->invoke($Silian_controller, $Silian_input);
+        $this->assertCount(2, $Silian_out);
+        $this->assertArrayHasKey('url', $Silian_out[0]);
+        $this->assertEquals('https://a/img1.png', $Silian_out[0]['url']);
     }
 
     public function testNormalizeLegacyObjectWithoutPublicUrl(): void
     {
-        $controller = $this->makeController();
-        $ref = new ReflectionClass($controller);
-        $norm = $ref->getMethod('normalizeImages');
-        $norm->setAccessible(true);
-        $input = [[ 'file_path' => 'activities/2025/09/01/img1.jpg', 'original_name' => 'img1.jpg' ]];
-        $out = $norm->invoke($controller, $input);
-        $this->assertCount(1, $out);
-        $this->assertStringContainsString('activities/2025/09/01/img1.jpg', $out[0]['url']);
-        $this->assertEquals('img1.jpg', $out[0]['original_name']);
+        $Silian_controller = $this->makeController();
+        $Silian_ref = new ReflectionClass($Silian_controller);
+        $Silian_norm = $Silian_ref->getMethod('normalizeImages');
+        $Silian_norm->setAccessible(true);
+        $Silian_input = [[ 'file_path' => 'activities/2025/09/01/img1.jpg', 'original_name' => 'img1.jpg' ]];
+        $Silian_out = $Silian_norm->invoke($Silian_controller, $Silian_input);
+        $this->assertCount(1, $Silian_out);
+        $this->assertStringContainsString('activities/2025/09/01/img1.jpg', $Silian_out[0]['url']);
+        $this->assertEquals('img1.jpg', $Silian_out[0]['original_name']);
     }
 }

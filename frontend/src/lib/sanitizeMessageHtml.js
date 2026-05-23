@@ -1,7 +1,7 @@
-import DOMPurify from 'dompurify';
+import Silian_DOMPurify from 'dompurify';
 
-const SAFE_URI_PATTERN = /^(?:(?:https?|mailto|tel):|#|\/)/i;
-const SANITIZE_OPTIONS = {
+const Silian_SAFE_URI_PATTERN = /^(?:(?:https?|mailto|tel):|#|\/)/i;
+const Silian_SANITIZE_OPTIONS = {
   ALLOWED_TAGS: [
     'a',
     'abbr',
@@ -31,45 +31,45 @@ const SANITIZE_OPTIONS = {
   FORBID_TAGS: ['form', 'iframe', 'input', 'meta', 'object', 'script', 'style', 'textarea'],
 };
 
-const MESSAGE_SANITIZE_HOOK_SENTINEL = '__carbontrack_message_sanitize_hook_registered__';
+const Silian_MESSAGE_SANITIZE_HOOK_SENTINEL = '__carbontrack_message_sanitize_hook_registered__';
 
-function isMessageHookRegisteredGlobally() {
-  return globalThis[MESSAGE_SANITIZE_HOOK_SENTINEL] === true;
+function Silian_isMessageHookRegisteredGlobally() {
+  return globalThis[Silian_MESSAGE_SANITIZE_HOOK_SENTINEL] === true;
 }
 
-function markMessageHookRegisteredGlobally() {
-  globalThis[MESSAGE_SANITIZE_HOOK_SENTINEL] = true;
+function Silian_markMessageHookRegisteredGlobally() {
+  globalThis[Silian_MESSAGE_SANITIZE_HOOK_SENTINEL] = true;
 }
 
-function sanitizeLinkAttributes(node) {
-  if (node.tagName !== 'A') {
+function Silian_sanitizeLinkAttributes(Silian_node) {
+  if (Silian_node.tagName !== 'A') {
     return;
   }
 
-  const href = (node.getAttribute('href') || '').trim();
-  if (!href || !SAFE_URI_PATTERN.test(href)) {
-    node.removeAttribute('href');
+  const Silian_href = (Silian_node.getAttribute('href') || '').trim();
+  if (!Silian_href || !Silian_SAFE_URI_PATTERN.test(Silian_href)) {
+    Silian_node.removeAttribute('href');
   }
 
-  if (node.hasAttribute('href')) {
-    node.setAttribute('rel', 'noopener noreferrer');
-    node.setAttribute('target', '_blank');
+  if (Silian_node.hasAttribute('href')) {
+    Silian_node.setAttribute('rel', 'noopener noreferrer');
+    Silian_node.setAttribute('target', '_blank');
   } else {
-    node.removeAttribute('rel');
-    node.removeAttribute('target');
+    Silian_node.removeAttribute('rel');
+    Silian_node.removeAttribute('target');
   }
 }
 
-if (!isMessageHookRegisteredGlobally()) {
-  DOMPurify.addHook('afterSanitizeAttributes', sanitizeLinkAttributes);
-  markMessageHookRegisteredGlobally();
+if (!Silian_isMessageHookRegisteredGlobally()) {
+  Silian_DOMPurify.addHook('afterSanitizeAttributes', Silian_sanitizeLinkAttributes);
+  Silian_markMessageHookRegisteredGlobally();
 }
 
-export function sanitizeMessageHtml(content) {
-  const dirty = typeof content === 'string' ? content : '';
+export function sanitizeMessageHtml(Silian_content) {
+  const Silian_dirty = typeof Silian_content === 'string' ? Silian_content : '';
 
-  return DOMPurify.sanitize(dirty, {
-    ...SANITIZE_OPTIONS,
+  return Silian_DOMPurify.sanitize(Silian_dirty, {
+    ...Silian_SANITIZE_OPTIONS,
     ALLOW_DATA_ATTR: false,
   });
 }

@@ -29,7 +29,7 @@ class SupportAutomationService
 
     public function listAssignableUsers(): array
     {
-        $stmt = $this->db->query("
+        $Silian_stmt = $this->db->query("
             SELECT
                 u.id,
                 u.uuid,
@@ -98,12 +98,12 @@ class SupportAutomationService
             ORDER BY u.is_admin DESC, COALESCE(u.username, u.email, '') ASC, u.id ASC
         ");
 
-        return array_map(fn (array $row): array => $this->formatAssignableUser($row), $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(fn (array $Silian_row): array => $this->formatAssignableUser($Silian_row), $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
-    public function getAssignableUserDetail(int $userId): ?array
+    public function getAssignableUserDetail(int $Silian_userId): ?array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 u.id,
                 u.uuid,
@@ -174,140 +174,140 @@ class SupportAutomationService
                 feedback.rating_count
             LIMIT 1
         ");
-        $stmt->execute(['id' => $userId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
+        $Silian_stmt->execute(['id' => $Silian_userId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$Silian_row) {
             return null;
         }
 
-        $detail = $this->formatAssignableUser($row);
-        $detail['admin_notes'] = $row['admin_notes'] ?? null;
-        $detail['recent_tickets'] = $this->recentTicketsForAssignee($userId);
-        $detail['feedback_summary'] = $this->feedbackSummaryForAssignee($userId);
-        $detail['feedback_entries'] = $this->feedbackEntriesForAssignee($userId);
-        $detail['routing_profile'] = [
-            'user_id' => $detail['id'],
-            'level' => (int) ($row['routing_level'] ?? 1),
-            'skills' => $this->decodeJsonList($row['skills_json'] ?? null),
-            'languages' => $this->decodeJsonList($row['languages_json'] ?? null),
-            'max_active_tickets' => (int) ($row['max_active_tickets'] ?? 10),
-            'is_auto_assignable' => !empty($row['is_auto_assignable']),
-            'weight_overrides' => $this->decodeJsonObject($row['weight_overrides_json'] ?? null) ?? [],
-            'status' => $row['routing_status'] ?? 'active',
-            'avg_feedback_rating' => round((float) ($row['avg_feedback_rating'] ?? 3.5), 2),
-            'rating_count' => (int) ($row['rating_count'] ?? 0),
+        $Silian_detail = $this->formatAssignableUser($Silian_row);
+        $Silian_detail['admin_notes'] = $Silian_row['admin_notes'] ?? null;
+        $Silian_detail['recent_tickets'] = $this->recentTicketsForAssignee($Silian_userId);
+        $Silian_detail['feedback_summary'] = $this->feedbackSummaryForAssignee($Silian_userId);
+        $Silian_detail['feedback_entries'] = $this->feedbackEntriesForAssignee($Silian_userId);
+        $Silian_detail['routing_profile'] = [
+            'user_id' => $Silian_detail['id'],
+            'level' => (int) ($Silian_row['routing_level'] ?? 1),
+            'skills' => $this->decodeJsonList($Silian_row['skills_json'] ?? null),
+            'languages' => $this->decodeJsonList($Silian_row['languages_json'] ?? null),
+            'max_active_tickets' => (int) ($Silian_row['max_active_tickets'] ?? 10),
+            'is_auto_assignable' => !empty($Silian_row['is_auto_assignable']),
+            'weight_overrides' => $this->decodeJsonObject($Silian_row['weight_overrides_json'] ?? null) ?? [],
+            'status' => $Silian_row['routing_status'] ?? 'active',
+            'avg_feedback_rating' => round((float) ($Silian_row['avg_feedback_rating'] ?? 3.5), 2),
+            'rating_count' => (int) ($Silian_row['rating_count'] ?? 0),
         ];
 
-        return $detail;
+        return $Silian_detail;
     }
 
     public function getRoutingSettings(): array
     {
-        $row = $this->findRoutingSettingsRow();
-        return $this->formatRoutingSettings($row ?? []);
+        $Silian_row = $this->findRoutingSettingsRow();
+        return $this->formatRoutingSettings($Silian_row ?? []);
     }
 
-    public function saveRoutingSettings(array $actor, array $payload): array
+    public function saveRoutingSettings(array $Silian_actor, array $Silian_payload): array
     {
-        $existing = $this->findRoutingSettingsRow();
-        $weights = $this->normalizeJsonObject($payload['weights'] ?? ($this->decodeJsonObject($existing['weights_json'] ?? null) ?? []));
-        $fallback = $this->normalizeJsonObject($payload['fallback'] ?? ($this->decodeJsonObject($existing['fallback_json'] ?? null) ?? []));
-        $defaults = $this->normalizeJsonObject($payload['defaults'] ?? ($this->decodeJsonObject($existing['defaults_json'] ?? null) ?? []));
-        $data = [
-            'ai_enabled' => array_key_exists('ai_enabled', $payload) ? (bool) $payload['ai_enabled'] : (bool) ($existing['ai_enabled'] ?? true),
-            'ai_timeout_ms' => max(1000, (int) ($payload['ai_timeout_ms'] ?? ($existing['ai_timeout_ms'] ?? 12000))),
-            'due_soon_minutes' => max(1, (int) ($payload['due_soon_minutes'] ?? ($existing['due_soon_minutes'] ?? 30))),
-            'weights_json' => json_encode($weights, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'fallback_json' => json_encode($fallback, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'defaults_json' => json_encode($defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        $Silian_existing = $this->findRoutingSettingsRow();
+        $Silian_weights = $this->normalizeJsonObject($Silian_payload['weights'] ?? ($this->decodeJsonObject($Silian_existing['weights_json'] ?? null) ?? []));
+        $Silian_fallback = $this->normalizeJsonObject($Silian_payload['fallback'] ?? ($this->decodeJsonObject($Silian_existing['fallback_json'] ?? null) ?? []));
+        $Silian_defaults = $this->normalizeJsonObject($Silian_payload['defaults'] ?? ($this->decodeJsonObject($Silian_existing['defaults_json'] ?? null) ?? []));
+        $Silian_data = [
+            'ai_enabled' => array_key_exists('ai_enabled', $Silian_payload) ? (bool) $Silian_payload['ai_enabled'] : (bool) ($Silian_existing['ai_enabled'] ?? true),
+            'ai_timeout_ms' => max(1000, (int) ($Silian_payload['ai_timeout_ms'] ?? ($Silian_existing['ai_timeout_ms'] ?? 12000))),
+            'due_soon_minutes' => max(1, (int) ($Silian_payload['due_soon_minutes'] ?? ($Silian_existing['due_soon_minutes'] ?? 30))),
+            'weights_json' => json_encode($Silian_weights, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'fallback_json' => json_encode($Silian_fallback, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'defaults_json' => json_encode($Silian_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'updated_at' => $this->now(),
         ];
 
-        if ($existing !== null) {
-            $settings = SupportRoutingSetting::find((int) $existing['id']);
-            $settings?->fill($data);
-            $settings?->save();
-            $result = $this->findRoutingSettingsRow();
-            $action = 'support_routing_settings_updated';
+        if ($Silian_existing !== null) {
+            $Silian_settings = SupportRoutingSetting::find((int) $Silian_existing['id']);
+            $Silian_settings?->fill($Silian_data);
+            $Silian_settings?->save();
+            $Silian_result = $this->findRoutingSettingsRow();
+            $Silian_action = 'support_routing_settings_updated';
         } else {
-            $settings = SupportRoutingSetting::create($data + ['created_at' => $this->now()]);
-            $result = $this->findRoutingSettingsRow((int) ($settings->id ?? 0));
-            $action = 'support_routing_settings_created';
+            $Silian_settings = SupportRoutingSetting::create($Silian_data + ['created_at' => $this->now()]);
+            $Silian_result = $this->findRoutingSettingsRow((int) ($Silian_settings->id ?? 0));
+            $Silian_action = 'support_routing_settings_created';
         }
 
-        $formatted = $this->formatRoutingSettings($result ?? []);
+        $Silian_formatted = $this->formatRoutingSettings($Silian_result ?? []);
         $this->auditLogService->log([
-            'user_id' => (int) ($actor['id'] ?? 0),
-            'action' => $action,
+            'user_id' => (int) ($Silian_actor['id'] ?? 0),
+            'action' => $Silian_action,
             'operation_category' => 'support',
-            'actor_type' => !empty($actor['is_admin']) ? 'admin' : 'support',
+            'actor_type' => !empty($Silian_actor['is_admin']) ? 'admin' : 'support',
             'affected_table' => 'support_routing_settings',
-            'affected_id' => (int) ($formatted['id'] ?? 0),
+            'affected_id' => (int) ($Silian_formatted['id'] ?? 0),
             'status' => 'success',
-            'new_data' => $formatted,
+            'new_data' => $Silian_formatted,
         ]);
 
-        return $formatted;
+        return $Silian_formatted;
     }
 
-    public function getAssigneeRoutingProfile(int $userId): ?array
+    public function getAssigneeRoutingProfile(int $Silian_userId): ?array
     {
-        $detail = $this->getAssignableUserDetail($userId);
-        if ($detail === null) {
+        $Silian_detail = $this->getAssignableUserDetail($Silian_userId);
+        if ($Silian_detail === null) {
             return null;
         }
 
-        return $detail['routing_profile'] ?? null;
+        return $Silian_detail['routing_profile'] ?? null;
     }
 
-    public function saveAssigneeRoutingProfile(array $actor, int $userId, array $payload): array
+    public function saveAssigneeRoutingProfile(array $Silian_actor, int $Silian_userId, array $Silian_payload): array
     {
-        $assignee = $this->getAssignableUserDetail($userId);
-        if ($assignee === null) {
+        $Silian_assignee = $this->getAssignableUserDetail($Silian_userId);
+        if ($Silian_assignee === null) {
             throw new \RuntimeException('Support assignee not found');
         }
 
-        $existing = $this->findAssigneeProfileRow($userId);
-        $data = [
-            'user_id' => $userId,
-            'level' => max(1, min(5, (int) ($payload['level'] ?? ($existing['level'] ?? ($assignee['routing_profile']['level'] ?? 1))))),
-            'skills_json' => json_encode($this->normalizeStringList($payload['skills'] ?? $this->decodeJsonList($existing['skills_json'] ?? null)), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'languages_json' => json_encode($this->normalizeStringList($payload['languages'] ?? $this->decodeJsonList($existing['languages_json'] ?? null)), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'max_active_tickets' => max(1, (int) ($payload['max_active_tickets'] ?? ($existing['max_active_tickets'] ?? 10))),
-            'is_auto_assignable' => array_key_exists('is_auto_assignable', $payload) ? (bool) $payload['is_auto_assignable'] : (bool) ($existing['is_auto_assignable'] ?? true),
-            'weight_overrides_json' => json_encode($this->normalizeJsonObject($payload['weight_overrides'] ?? ($this->decodeJsonObject($existing['weight_overrides_json'] ?? null) ?? [])), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'status' => $this->normalizeProfileStatus($payload['status'] ?? ($existing['status'] ?? 'active')),
+        $Silian_existing = $this->findAssigneeProfileRow($Silian_userId);
+        $Silian_data = [
+            'user_id' => $Silian_userId,
+            'level' => max(1, min(5, (int) ($Silian_payload['level'] ?? ($Silian_existing['level'] ?? ($Silian_assignee['routing_profile']['level'] ?? 1))))),
+            'skills_json' => json_encode($this->normalizeStringList($Silian_payload['skills'] ?? $this->decodeJsonList($Silian_existing['skills_json'] ?? null)), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'languages_json' => json_encode($this->normalizeStringList($Silian_payload['languages'] ?? $this->decodeJsonList($Silian_existing['languages_json'] ?? null)), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'max_active_tickets' => max(1, (int) ($Silian_payload['max_active_tickets'] ?? ($Silian_existing['max_active_tickets'] ?? 10))),
+            'is_auto_assignable' => array_key_exists('is_auto_assignable', $Silian_payload) ? (bool) $Silian_payload['is_auto_assignable'] : (bool) ($Silian_existing['is_auto_assignable'] ?? true),
+            'weight_overrides_json' => json_encode($this->normalizeJsonObject($Silian_payload['weight_overrides'] ?? ($this->decodeJsonObject($Silian_existing['weight_overrides_json'] ?? null) ?? [])), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'status' => $this->normalizeProfileStatus($Silian_payload['status'] ?? ($Silian_existing['status'] ?? 'active')),
             'updated_at' => $this->now(),
         ];
 
-        if ($existing !== null) {
-            $profile = SupportAssigneeProfile::find((int) $existing['id']);
-            $profile?->fill($data);
-            $profile?->save();
-            $action = 'support_assignee_profile_updated';
+        if ($Silian_existing !== null) {
+            $Silian_profile = SupportAssigneeProfile::find((int) $Silian_existing['id']);
+            $Silian_profile?->fill($Silian_data);
+            $Silian_profile?->save();
+            $Silian_action = 'support_assignee_profile_updated';
         } else {
-            SupportAssigneeProfile::create($data + ['created_at' => $this->now()]);
-            $action = 'support_assignee_profile_created';
+            SupportAssigneeProfile::create($Silian_data + ['created_at' => $this->now()]);
+            $Silian_action = 'support_assignee_profile_created';
         }
 
-        $detail = $this->getAssignableUserDetail($userId);
+        $Silian_detail = $this->getAssignableUserDetail($Silian_userId);
         $this->auditLogService->log([
-            'user_id' => (int) ($actor['id'] ?? 0),
-            'action' => $action,
+            'user_id' => (int) ($Silian_actor['id'] ?? 0),
+            'action' => $Silian_action,
             'operation_category' => 'support',
-            'actor_type' => !empty($actor['is_admin']) ? 'admin' : 'support',
+            'actor_type' => !empty($Silian_actor['is_admin']) ? 'admin' : 'support',
             'affected_table' => 'support_assignee_profiles',
-            'affected_id' => $userId,
+            'affected_id' => $Silian_userId,
             'status' => 'success',
-            'new_data' => $detail['routing_profile'] ?? null,
+            'new_data' => $Silian_detail['routing_profile'] ?? null,
         ]);
 
-        return $detail ?? [];
+        return $Silian_detail ?? [];
     }
 
     public function listTags(): array
     {
-        $stmt = $this->db->query("
+        $Silian_stmt = $this->db->query("
             SELECT
                 t.*,
                 COUNT(DISTINCT sta.ticket_id) AS ticket_count
@@ -317,77 +317,77 @@ class SupportAutomationService
             ORDER BY t.is_active DESC, t.name ASC, t.id ASC
         ");
 
-        return array_map(fn (array $row): array => $this->formatTag($row), $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(fn (array $Silian_row): array => $this->formatTag($Silian_row), $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
-    public function saveTag(array $actor, array $payload, ?int $tagId = null): array
+    public function saveTag(array $Silian_actor, array $Silian_payload, ?int $Silian_tagId = null): array
     {
-        $existing = $tagId ? $this->findTagRow($tagId) : null;
-        if ($tagId && $existing === null) {
+        $Silian_existing = $Silian_tagId ? $this->findTagRow($Silian_tagId) : null;
+        if ($Silian_tagId && $Silian_existing === null) {
             throw new \RuntimeException('Tag not found');
         }
 
-        $name = $this->requireString($payload['name'] ?? null, 'name');
-        $slug = $this->normalizeSlug($payload['slug'] ?? $name);
-        $color = $this->normalizeColor($payload['color'] ?? ($existing['color'] ?? 'emerald'));
-        $description = $this->nullableString($payload['description'] ?? null);
-        $isActive = array_key_exists('is_active', $payload) ? (bool) $payload['is_active'] : (bool) ($existing['is_active'] ?? true);
+        $Silian_name = $this->requireString($Silian_payload['name'] ?? null, 'name');
+        $Silian_slug = $this->normalizeSlug($Silian_payload['slug'] ?? $Silian_name);
+        $Silian_color = $this->normalizeColor($Silian_payload['color'] ?? ($Silian_existing['color'] ?? 'emerald'));
+        $Silian_description = $this->nullableString($Silian_payload['description'] ?? null);
+        $Silian_isActive = array_key_exists('is_active', $Silian_payload) ? (bool) $Silian_payload['is_active'] : (bool) ($Silian_existing['is_active'] ?? true);
 
-        $duplicateStmt = $this->db->prepare('SELECT id FROM support_ticket_tags WHERE slug = :slug AND (:tag_id_null IS NULL OR id <> :tag_id_compare) LIMIT 1');
-        $duplicateStmt->execute([
-            'slug' => $slug,
-            'tag_id_null' => $tagId,
-            'tag_id_compare' => $tagId,
+        $Silian_duplicateStmt = $this->db->prepare('SELECT id FROM support_ticket_tags WHERE slug = :slug AND (:tag_id_null IS NULL OR id <> :tag_id_compare) LIMIT 1');
+        $Silian_duplicateStmt->execute([
+            'slug' => $Silian_slug,
+            'tag_id_null' => $Silian_tagId,
+            'tag_id_compare' => $Silian_tagId,
         ]);
-        if ($duplicateStmt->fetchColumn()) {
+        if ($Silian_duplicateStmt->fetchColumn()) {
             throw new \InvalidArgumentException('Tag slug already exists');
         }
 
-        $now = $this->now();
-        if ($existing) {
-            $tag = SupportTicketTag::find($tagId);
-            $tag->fill([
-                'slug' => $slug,
-                'name' => $name,
-                'color' => $color,
-                'description' => $description,
-                'is_active' => $isActive,
-                'updated_at' => $now,
+        $Silian_now = $this->now();
+        if ($Silian_existing) {
+            $Silian_tag = SupportTicketTag::find($Silian_tagId);
+            $Silian_tag->fill([
+                'slug' => $Silian_slug,
+                'name' => $Silian_name,
+                'color' => $Silian_color,
+                'description' => $Silian_description,
+                'is_active' => $Silian_isActive,
+                'updated_at' => $Silian_now,
             ]);
-            $tag->save();
-            $result = $this->findTagRow($tagId);
-            $action = 'support_tag_updated';
+            $Silian_tag->save();
+            $Silian_result = $this->findTagRow($Silian_tagId);
+            $Silian_action = 'support_tag_updated';
         } else {
-            $tag = SupportTicketTag::create([
-                'slug' => $slug,
-                'name' => $name,
-                'color' => $color,
-                'description' => $description,
-                'is_active' => $isActive,
-                'created_at' => $now,
-                'updated_at' => $now,
+            $Silian_tag = SupportTicketTag::create([
+                'slug' => $Silian_slug,
+                'name' => $Silian_name,
+                'color' => $Silian_color,
+                'description' => $Silian_description,
+                'is_active' => $Silian_isActive,
+                'created_at' => $Silian_now,
+                'updated_at' => $Silian_now,
             ]);
-            $result = $this->findTagRow((int) $tag->id);
-            $action = 'support_tag_created';
+            $Silian_result = $this->findTagRow((int) $Silian_tag->id);
+            $Silian_action = 'support_tag_created';
         }
 
         $this->auditLogService->log([
-            'user_id' => (int) ($actor['id'] ?? 0),
-            'action' => $action,
+            'user_id' => (int) ($Silian_actor['id'] ?? 0),
+            'action' => $Silian_action,
             'operation_category' => 'support',
-            'actor_type' => !empty($actor['is_admin']) ? 'admin' : 'support',
+            'actor_type' => !empty($Silian_actor['is_admin']) ? 'admin' : 'support',
             'affected_table' => 'support_ticket_tags',
-            'affected_id' => (int) ($result['id'] ?? 0),
+            'affected_id' => (int) ($Silian_result['id'] ?? 0),
             'status' => 'success',
-            'new_data' => $result,
+            'new_data' => $Silian_result,
         ]);
 
-        return $this->formatTag($result ?: []);
+        return $this->formatTag($Silian_result ?: []);
     }
 
     public function listRules(): array
     {
-        $stmt = $this->db->query("
+        $Silian_stmt = $this->db->query("
             SELECT
                 r.*,
                 assignee.username AS assignee_username,
@@ -396,92 +396,92 @@ class SupportAutomationService
             LEFT JOIN users assignee ON assignee.id = r.assign_to
             ORDER BY r.sort_order ASC, r.id ASC
         ");
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        return array_map(fn (array $row): array => $this->formatRule($row), $rows);
+        return array_map(fn (array $Silian_row): array => $this->formatRule($Silian_row), $Silian_rows);
     }
 
-    public function saveRule(array $actor, array $payload, ?int $ruleId = null): array
+    public function saveRule(array $Silian_actor, array $Silian_payload, ?int $Silian_ruleId = null): array
     {
-        $existing = $ruleId ? $this->findRuleRow($ruleId) : null;
-        if ($ruleId && $existing === null) {
+        $Silian_existing = $Silian_ruleId ? $this->findRuleRow($Silian_ruleId) : null;
+        if ($Silian_ruleId && $Silian_existing === null) {
             throw new \RuntimeException('Rule not found');
         }
 
-        $name = $this->requireString($payload['name'] ?? null, 'name');
-        $description = $this->nullableString($payload['description'] ?? null);
-        $isActive = array_key_exists('is_active', $payload) ? (bool) $payload['is_active'] : (bool) ($existing['is_active'] ?? true);
-        $sortOrder = isset($payload['sort_order']) ? (int) $payload['sort_order'] : (int) ($existing['sort_order'] ?? 0);
-        $matchCategory = $this->nullableString($payload['match_category'] ?? ($existing['match_category'] ?? null));
-        $matchPriority = $this->nullableString($payload['match_priority'] ?? ($existing['match_priority'] ?? null));
-        $weekdays = $this->normalizeWeekdays($payload['match_weekdays'] ?? $this->decodeJsonList($existing['match_weekdays'] ?? null));
-        $timeStart = $this->normalizeTime($payload['match_time_start'] ?? ($existing['match_time_start'] ?? null));
-        $timeEnd = $this->normalizeTime($payload['match_time_end'] ?? ($existing['match_time_end'] ?? null));
-        $timezone = $this->normalizeTimezone($payload['timezone'] ?? ($existing['timezone'] ?? 'Asia/Shanghai'));
-        $assignTo = $this->normalizeAssignableUser($payload['assign_to'] ?? ($existing['assign_to'] ?? null));
-        $scoreBoost = isset($payload['score_boost']) ? round((float) $payload['score_boost'], 2) : (float) ($existing['score_boost'] ?? ($assignTo ? 20 : 0));
-        $requiredAgentLevel = $this->normalizeRequiredAgentLevel($payload['required_agent_level'] ?? ($existing['required_agent_level'] ?? null));
-        $skillHints = $this->normalizeStringList($payload['skill_hints'] ?? $this->decodeJsonList($existing['skill_hints_json'] ?? null));
-        $tagIds = $this->normalizeTagIds($payload['tag_ids'] ?? $this->decodeJsonList($existing['add_tag_ids'] ?? null));
+        $Silian_name = $this->requireString($Silian_payload['name'] ?? null, 'name');
+        $Silian_description = $this->nullableString($Silian_payload['description'] ?? null);
+        $Silian_isActive = array_key_exists('is_active', $Silian_payload) ? (bool) $Silian_payload['is_active'] : (bool) ($Silian_existing['is_active'] ?? true);
+        $Silian_sortOrder = isset($Silian_payload['sort_order']) ? (int) $Silian_payload['sort_order'] : (int) ($Silian_existing['sort_order'] ?? 0);
+        $Silian_matchCategory = $this->nullableString($Silian_payload['match_category'] ?? ($Silian_existing['match_category'] ?? null));
+        $Silian_matchPriority = $this->nullableString($Silian_payload['match_priority'] ?? ($Silian_existing['match_priority'] ?? null));
+        $Silian_weekdays = $this->normalizeWeekdays($Silian_payload['match_weekdays'] ?? $this->decodeJsonList($Silian_existing['match_weekdays'] ?? null));
+        $Silian_timeStart = $this->normalizeTime($Silian_payload['match_time_start'] ?? ($Silian_existing['match_time_start'] ?? null));
+        $Silian_timeEnd = $this->normalizeTime($Silian_payload['match_time_end'] ?? ($Silian_existing['match_time_end'] ?? null));
+        $Silian_timezone = $this->normalizeTimezone($Silian_payload['timezone'] ?? ($Silian_existing['timezone'] ?? 'Asia/Shanghai'));
+        $Silian_assignTo = $this->normalizeAssignableUser($Silian_payload['assign_to'] ?? ($Silian_existing['assign_to'] ?? null));
+        $Silian_scoreBoost = isset($Silian_payload['score_boost']) ? round((float) $Silian_payload['score_boost'], 2) : (float) ($Silian_existing['score_boost'] ?? ($Silian_assignTo ? 20 : 0));
+        $Silian_requiredAgentLevel = $this->normalizeRequiredAgentLevel($Silian_payload['required_agent_level'] ?? ($Silian_existing['required_agent_level'] ?? null));
+        $Silian_skillHints = $this->normalizeStringList($Silian_payload['skill_hints'] ?? $this->decodeJsonList($Silian_existing['skill_hints_json'] ?? null));
+        $Silian_tagIds = $this->normalizeTagIds($Silian_payload['tag_ids'] ?? $this->decodeJsonList($Silian_existing['add_tag_ids'] ?? null));
 
-        $now = $this->now();
-        $data = [
-            'name' => $name,
-            'description' => $description,
-            'is_active' => $isActive,
-            'sort_order' => $sortOrder,
-            'match_category' => $matchCategory,
-            'match_priority' => $matchPriority,
-            'match_weekdays' => $weekdays === [] ? null : json_encode($weekdays),
-            'match_time_start' => $timeStart,
-            'match_time_end' => $timeEnd,
-            'timezone' => $timezone,
-            'assign_to' => $assignTo,
-            'score_boost' => $scoreBoost,
-            'required_agent_level' => $requiredAgentLevel,
-            'skill_hints_json' => $skillHints === [] ? null : json_encode($skillHints, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'add_tag_ids' => $tagIds === [] ? null : json_encode($tagIds),
+        $Silian_now = $this->now();
+        $Silian_data = [
+            'name' => $Silian_name,
+            'description' => $Silian_description,
+            'is_active' => $Silian_isActive,
+            'sort_order' => $Silian_sortOrder,
+            'match_category' => $Silian_matchCategory,
+            'match_priority' => $Silian_matchPriority,
+            'match_weekdays' => $Silian_weekdays === [] ? null : json_encode($Silian_weekdays),
+            'match_time_start' => $Silian_timeStart,
+            'match_time_end' => $Silian_timeEnd,
+            'timezone' => $Silian_timezone,
+            'assign_to' => $Silian_assignTo,
+            'score_boost' => $Silian_scoreBoost,
+            'required_agent_level' => $Silian_requiredAgentLevel,
+            'skill_hints_json' => $Silian_skillHints === [] ? null : json_encode($Silian_skillHints, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'add_tag_ids' => $Silian_tagIds === [] ? null : json_encode($Silian_tagIds),
             'stop_processing' => false,
-            'updated_at' => $now,
+            'updated_at' => $Silian_now,
         ];
 
-        if ($existing) {
-            $rule = SupportTicketAutomationRule::find($ruleId);
-            $rule->fill($data);
-            $rule->save();
-            $result = $this->findRuleRow($ruleId);
-            $action = 'support_rule_updated';
+        if ($Silian_existing) {
+            $Silian_rule = SupportTicketAutomationRule::find($Silian_ruleId);
+            $Silian_rule->fill($Silian_data);
+            $Silian_rule->save();
+            $Silian_result = $this->findRuleRow($Silian_ruleId);
+            $Silian_action = 'support_rule_updated';
         } else {
-            $rule = SupportTicketAutomationRule::create($data + [
+            $Silian_rule = SupportTicketAutomationRule::create($Silian_data + [
                 'trigger_count' => 0,
                 'last_triggered_at' => null,
-                'created_at' => $now,
+                'created_at' => $Silian_now,
             ]);
-            $result = $this->findRuleRow((int) $rule->id);
-            $action = 'support_rule_created';
+            $Silian_result = $this->findRuleRow((int) $Silian_rule->id);
+            $Silian_action = 'support_rule_created';
         }
 
         $this->auditLogService->log([
-            'user_id' => (int) ($actor['id'] ?? 0),
-            'action' => $action,
+            'user_id' => (int) ($Silian_actor['id'] ?? 0),
+            'action' => $Silian_action,
             'operation_category' => 'support',
-            'actor_type' => !empty($actor['is_admin']) ? 'admin' : 'support',
+            'actor_type' => !empty($Silian_actor['is_admin']) ? 'admin' : 'support',
             'affected_table' => 'support_ticket_automation_rules',
-            'affected_id' => (int) ($result['id'] ?? 0),
+            'affected_id' => (int) ($Silian_result['id'] ?? 0),
             'status' => 'success',
-            'new_data' => $result,
+            'new_data' => $Silian_result,
         ]);
 
-        return $this->formatRule($result ?: []);
+        return $this->formatRule($Silian_result ?: []);
     }
 
-    public function getReports(array $query = []): array
+    public function getReports(array $Silian_query = []): array
     {
-        $days = max(7, min(90, (int) ($query['days'] ?? 14)));
+        $Silian_days = max(7, min(90, (int) ($Silian_query['days'] ?? 14)));
 
         return [
             'summary' => $this->summaryMetrics(),
-            'timeline' => $this->createdTimeline($days),
+            'timeline' => $this->createdTimeline($Silian_days),
             'by_status' => $this->breakdown('status'),
             'by_category' => $this->breakdown('category'),
             'by_priority' => $this->breakdown('priority'),
@@ -493,14 +493,14 @@ class SupportAutomationService
         ];
     }
 
-    public function applyRulesToTicket(int $ticketId, ?array $ticket = null, string $trigger = 'created'): array
+    public function applyRulesToTicket(int $Silian_ticketId, ?array $Silian_ticket = null, string $Silian_trigger = 'created'): array
     {
-        $ticketRow = $ticket ?? $this->findTicketRow($ticketId);
-        if ($ticketRow === null) {
+        $Silian_ticketRow = $Silian_ticket ?? $this->findTicketRow($Silian_ticketId);
+        if ($Silian_ticketRow === null) {
             throw new \RuntimeException('Ticket not found');
         }
 
-        $rulesStmt = $this->db->query("
+        $Silian_rulesStmt = $this->db->query("
             SELECT
                 r.*,
                 assignee.username AS assignee_username,
@@ -510,47 +510,47 @@ class SupportAutomationService
             WHERE r.is_active = 1
             ORDER BY r.sort_order ASC, r.id ASC
         ");
-        $rules = $rulesStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_rules = $Silian_rulesStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $ticketTags = $this->getTagsForTicketIds([$ticketId]);
-        $applied = [];
+        $Silian_ticketTags = $this->getTagsForTicketIds([$Silian_ticketId]);
+        $Silian_applied = [];
 
-        foreach ($rules as $rule) {
-            if (!$this->ruleMatchesTicket($rule, $ticketRow)) {
+        foreach ($Silian_rules as $Silian_rule) {
+            if (!$this->ruleMatchesTicket($Silian_rule, $Silian_ticketRow)) {
                 continue;
             }
 
-            $appliedTagIds = [];
-            $ruleTagIds = $this->decodeJsonList($rule['add_tag_ids'] ?? null);
-            foreach ($ruleTagIds as $tagId) {
-                $tagId = (int) $tagId;
-                if ($tagId <= 0 || isset($ticketTags[$ticketId][$tagId])) {
+            $Silian_appliedTagIds = [];
+            $Silian_ruleTagIds = $this->decodeJsonList($Silian_rule['add_tag_ids'] ?? null);
+            foreach ($Silian_ruleTagIds as $Silian_tagId) {
+                $Silian_tagId = (int) $Silian_tagId;
+                if ($Silian_tagId <= 0 || isset($Silian_ticketTags[$Silian_ticketId][$Silian_tagId])) {
                     continue;
                 }
-                $tagRow = $this->findTagRow($tagId);
-                if ($tagRow === null || empty($tagRow['is_active'])) {
+                $Silian_tagRow = $this->findTagRow($Silian_tagId);
+                if ($Silian_tagRow === null || empty($Silian_tagRow['is_active'])) {
                     continue;
                 }
                 SupportTicketTagAssignment::create([
-                    'ticket_id' => $ticketId,
-                    'tag_id' => $tagId,
+                    'ticket_id' => $Silian_ticketId,
+                    'tag_id' => $Silian_tagId,
                     'source_type' => 'rule',
-                    'rule_id' => (int) $rule['id'],
+                    'rule_id' => (int) $Silian_rule['id'],
                     'created_at' => $this->now(),
                 ]);
-                $ticketTags[$ticketId][$tagId] = $this->formatTag($tagRow);
-                $appliedTagIds[] = $tagId;
+                $Silian_ticketTags[$Silian_ticketId][$Silian_tagId] = $this->formatTag($Silian_tagRow);
+                $Silian_appliedTagIds[] = $Silian_tagId;
             }
 
-            if ($appliedTagIds !== [] || !empty($rule['assign_to']) || (float) ($rule['score_boost'] ?? 0) !== 0.0) {
-                $this->touchRuleMetrics((int) $rule['id']);
-                $applied[] = [
-                    'rule_id' => (int) $rule['id'],
-                    'rule_name' => (string) $rule['name'],
-                    'assigned_to' => !empty($rule['assign_to']) ? (int) $rule['assign_to'] : null,
-                    'score_boost' => round((float) ($rule['score_boost'] ?? 0), 2),
-                    'required_agent_level' => isset($rule['required_agent_level']) ? (int) $rule['required_agent_level'] : null,
-                    'tag_ids' => $appliedTagIds,
+            if ($Silian_appliedTagIds !== [] || !empty($Silian_rule['assign_to']) || (float) ($Silian_rule['score_boost'] ?? 0) !== 0.0) {
+                $this->touchRuleMetrics((int) $Silian_rule['id']);
+                $Silian_applied[] = [
+                    'rule_id' => (int) $Silian_rule['id'],
+                    'rule_name' => (string) $Silian_rule['name'],
+                    'assigned_to' => !empty($Silian_rule['assign_to']) ? (int) $Silian_rule['assign_to'] : null,
+                    'score_boost' => round((float) ($Silian_rule['score_boost'] ?? 0), 2),
+                    'required_agent_level' => isset($Silian_rule['required_agent_level']) ? (int) $Silian_rule['required_agent_level'] : null,
+                    'tag_ids' => $Silian_appliedTagIds,
                 ];
 
                 $this->auditLogService->log([
@@ -559,41 +559,41 @@ class SupportAutomationService
                     'operation_category' => 'support',
                     'actor_type' => 'system',
                     'affected_table' => 'support_tickets',
-                    'affected_id' => $ticketId,
+                    'affected_id' => $Silian_ticketId,
                     'status' => 'success',
                     'data' => [
-                        'trigger' => $trigger,
-                        'rule_id' => (int) $rule['id'],
-                        'assigned_to' => !empty($rule['assign_to']) ? (int) $rule['assign_to'] : null,
-                        'score_boost' => round((float) ($rule['score_boost'] ?? 0), 2),
-                        'tag_ids' => $appliedTagIds,
+                        'trigger' => $Silian_trigger,
+                        'rule_id' => (int) $Silian_rule['id'],
+                        'assigned_to' => !empty($Silian_rule['assign_to']) ? (int) $Silian_rule['assign_to'] : null,
+                        'score_boost' => round((float) ($Silian_rule['score_boost'] ?? 0), 2),
+                        'tag_ids' => $Silian_appliedTagIds,
                     ],
                 ]);
             }
         }
 
         return [
-            'assigned_to' => isset($ticketRow['assigned_to']) ? (int) $ticketRow['assigned_to'] : null,
-            'assignment_source' => $ticketRow['assignment_source'] ?? null,
-            'assigned_rule_id' => isset($ticketRow['assigned_rule_id']) ? (int) $ticketRow['assigned_rule_id'] : null,
-            'applied_rules' => $applied,
-            'tags' => array_values($ticketTags[$ticketId] ?? []),
+            'assigned_to' => isset($Silian_ticketRow['assigned_to']) ? (int) $Silian_ticketRow['assigned_to'] : null,
+            'assignment_source' => $Silian_ticketRow['assignment_source'] ?? null,
+            'assigned_rule_id' => isset($Silian_ticketRow['assigned_rule_id']) ? (int) $Silian_ticketRow['assigned_rule_id'] : null,
+            'applied_rules' => $Silian_applied,
+            'tags' => array_values($Silian_ticketTags[$Silian_ticketId] ?? []),
         ];
     }
 
-    public function getTagsForTicket(int $ticketId): array
+    public function getTagsForTicket(int $Silian_ticketId): array
     {
-        return array_values($this->getTagsForTicketIds([$ticketId])[$ticketId] ?? []);
+        return array_values($this->getTagsForTicketIds([$Silian_ticketId])[$Silian_ticketId] ?? []);
     }
 
-    public function getTagsForTicketIds(array $ticketIds): array
+    public function getTagsForTicketIds(array $Silian_ticketIds): array
     {
-        $ticketIds = array_values(array_unique(array_filter(array_map('intval', $ticketIds), fn (int $id): bool => $id > 0)));
-        if ($ticketIds === []) {
+        $Silian_ticketIds = array_values(array_unique(array_filter(array_map('intval', $Silian_ticketIds), fn (int $Silian_id): bool => $Silian_id > 0)));
+        if ($Silian_ticketIds === []) {
             return [];
         }
 
-        $sql = '
+        $Silian_sql = '
             SELECT
                 sta.ticket_id,
                 sta.source_type,
@@ -601,28 +601,28 @@ class SupportAutomationService
                 t.*
             FROM support_ticket_tag_assignments sta
             INNER JOIN support_ticket_tags t ON t.id = sta.tag_id
-            WHERE sta.ticket_id IN (' . implode(',', array_fill(0, count($ticketIds), '?')) . ')
+            WHERE sta.ticket_id IN (' . implode(',', array_fill(0, count($Silian_ticketIds), '?')) . ')
             ORDER BY t.name ASC, t.id ASC
         ';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($ticketIds);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_ticketIds);
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-        $tagsByTicket = [];
-        foreach ($rows as $row) {
-            $ticketId = (int) $row['ticket_id'];
-            $tag = $this->formatTag($row);
-            $tag['source_type'] = $row['source_type'] ?? 'rule';
-            $tag['rule_id'] = isset($row['rule_id']) ? (int) $row['rule_id'] : null;
-            $tagsByTicket[$ticketId][$tag['id']] = $tag;
+        $Silian_tagsByTicket = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_ticketId = (int) $Silian_row['ticket_id'];
+            $Silian_tag = $this->formatTag($Silian_row);
+            $Silian_tag['source_type'] = $Silian_row['source_type'] ?? 'rule';
+            $Silian_tag['rule_id'] = isset($Silian_row['rule_id']) ? (int) $Silian_row['rule_id'] : null;
+            $Silian_tagsByTicket[$Silian_ticketId][$Silian_tag['id']] = $Silian_tag;
         }
 
-        return $tagsByTicket;
+        return $Silian_tagsByTicket;
     }
 
     private function summaryMetrics(): array
     {
-        $stmt = $this->db->query("
+        $Silian_stmt = $this->db->query("
             SELECT
                 COUNT(*) AS total,
                 SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) AS open_count,
@@ -636,86 +636,86 @@ class SupportAutomationService
                 SUM(CASE WHEN sla_status IN ('breached', 'escalated') THEN 1 ELSE 0 END) AS sla_breach_count
             FROM support_tickets
         ");
-        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $avgResolutionHours = null;
-        $resolutionStmt = $this->db->query('SELECT created_at, resolved_at FROM support_tickets WHERE resolved_at IS NOT NULL');
-        $resolutionRows = $resolutionStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        if ($resolutionRows !== []) {
-            $hours = [];
-            foreach ($resolutionRows as $resolutionRow) {
+        $Silian_avgResolutionHours = null;
+        $Silian_resolutionStmt = $this->db->query('SELECT created_at, resolved_at FROM support_tickets WHERE resolved_at IS NOT NULL');
+        $Silian_resolutionRows = $Silian_resolutionStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        if ($Silian_resolutionRows !== []) {
+            $Silian_hours = [];
+            foreach ($Silian_resolutionRows as $Silian_resolutionRow) {
                 try {
-                    $createdAt = new DateTimeImmutable((string) $resolutionRow['created_at']);
-                    $resolvedAt = new DateTimeImmutable((string) $resolutionRow['resolved_at']);
-                    $hours[] = max(0, ($resolvedAt->getTimestamp() - $createdAt->getTimestamp()) / 3600);
+                    $Silian_createdAt = new DateTimeImmutable((string) $Silian_resolutionRow['created_at']);
+                    $Silian_resolvedAt = new DateTimeImmutable((string) $Silian_resolutionRow['resolved_at']);
+                    $Silian_hours[] = max(0, ($Silian_resolvedAt->getTimestamp() - $Silian_createdAt->getTimestamp()) / 3600);
                 } catch (\Throwable) {
                     continue;
                 }
             }
-            if ($hours !== []) {
-                $avgResolutionHours = round(array_sum($hours) / count($hours), 1);
+            if ($Silian_hours !== []) {
+                $Silian_avgResolutionHours = round(array_sum($Silian_hours) / count($Silian_hours), 1);
             }
         }
 
         return [
-            'total' => (int) ($row['total'] ?? 0),
-            'open' => (int) ($row['open_count'] ?? 0),
-            'in_progress' => (int) ($row['in_progress_count'] ?? 0),
-            'waiting_user' => (int) ($row['waiting_user_count'] ?? 0),
-            'resolved' => (int) ($row['resolved_count'] ?? 0),
-            'closed' => (int) ($row['closed_count'] ?? 0),
-            'unassigned' => (int) ($row['unassigned_count'] ?? 0),
-            'smart_assignment_count' => (int) ($row['smart_assigned_count'] ?? 0),
-            'manual_assigned' => (int) ($row['manual_assigned_count'] ?? 0),
-            'sla_breach_count' => (int) ($row['sla_breach_count'] ?? 0),
-            'avg_resolution_hours' => $avgResolutionHours,
+            'total' => (int) ($Silian_row['total'] ?? 0),
+            'open' => (int) ($Silian_row['open_count'] ?? 0),
+            'in_progress' => (int) ($Silian_row['in_progress_count'] ?? 0),
+            'waiting_user' => (int) ($Silian_row['waiting_user_count'] ?? 0),
+            'resolved' => (int) ($Silian_row['resolved_count'] ?? 0),
+            'closed' => (int) ($Silian_row['closed_count'] ?? 0),
+            'unassigned' => (int) ($Silian_row['unassigned_count'] ?? 0),
+            'smart_assignment_count' => (int) ($Silian_row['smart_assigned_count'] ?? 0),
+            'manual_assigned' => (int) ($Silian_row['manual_assigned_count'] ?? 0),
+            'sla_breach_count' => (int) ($Silian_row['sla_breach_count'] ?? 0),
+            'avg_resolution_hours' => $Silian_avgResolutionHours,
         ];
     }
 
-    private function createdTimeline(int $days): array
+    private function createdTimeline(int $Silian_days): array
     {
-        $startDate = (new DateTimeImmutable('today'))->modify('-' . ($days - 1) . ' days')->format('Y-m-d 00:00:00');
-        $stmt = $this->db->prepare("
+        $Silian_startDate = (new DateTimeImmutable('today'))->modify('-' . ($Silian_days - 1) . ' days')->format('Y-m-d 00:00:00');
+        $Silian_stmt = $this->db->prepare("
             SELECT DATE(created_at) AS date_key, COUNT(*) AS ticket_count
             FROM support_tickets
             WHERE created_at >= :start_date
             GROUP BY DATE(created_at)
             ORDER BY DATE(created_at) ASC
         ");
-        $stmt->execute(['start_date' => $startDate]);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        $indexed = [];
-        foreach ($rows as $row) {
-            $indexed[(string) $row['date_key']] = (int) $row['ticket_count'];
+        $Silian_stmt->execute(['start_date' => $Silian_startDate]);
+        $Silian_rows = $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $Silian_indexed = [];
+        foreach ($Silian_rows as $Silian_row) {
+            $Silian_indexed[(string) $Silian_row['date_key']] = (int) $Silian_row['ticket_count'];
         }
 
-        $result = [];
-        for ($i = 0; $i < $days; $i++) {
-            $date = (new DateTimeImmutable('today'))->modify('-' . ($days - $i - 1) . ' days')->format('Y-m-d');
-            $result[] = ['date' => $date, 'count' => (int) ($indexed[$date] ?? 0)];
+        $Silian_result = [];
+        for ($Silian_i = 0; $Silian_i < $Silian_days; $Silian_i++) {
+            $Silian_date = (new DateTimeImmutable('today'))->modify('-' . ($Silian_days - $Silian_i - 1) . ' days')->format('Y-m-d');
+            $Silian_result[] = ['date' => $Silian_date, 'count' => (int) ($Silian_indexed[$Silian_date] ?? 0)];
         }
 
-        return $result;
+        return $Silian_result;
     }
 
-    private function breakdown(string $field): array
+    private function breakdown(string $Silian_field): array
     {
-        $stmt = $this->db->query("
-            SELECT {$field} AS bucket, COUNT(*) AS ticket_count
+        $Silian_stmt = $this->db->query("
+            SELECT {$Silian_field} AS bucket, COUNT(*) AS ticket_count
             FROM support_tickets
-            GROUP BY {$field}
-            ORDER BY ticket_count DESC, {$field} ASC
+            GROUP BY {$Silian_field}
+            ORDER BY ticket_count DESC, {$Silian_field} ASC
         ");
 
-        return array_map(fn (array $row): array => [
-            'key' => (string) ($row['bucket'] ?? ''),
-            'count' => (int) ($row['ticket_count'] ?? 0),
-        ], $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(fn (array $Silian_row): array => [
+            'key' => (string) ($Silian_row['bucket'] ?? ''),
+            'count' => (int) ($Silian_row['ticket_count'] ?? 0),
+        ], $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
     private function assigneeBreakdown(): array
     {
-        $stmt = $this->db->query("
+        $Silian_stmt = $this->db->query("
             SELECT
                 COALESCE(u.username, 'unassigned') AS label,
                 t.assigned_to,
@@ -726,16 +726,16 @@ class SupportAutomationService
             ORDER BY ticket_count DESC, label ASC
         ");
 
-        return array_map(fn (array $row): array => [
-            'id' => isset($row['assigned_to']) ? (int) $row['assigned_to'] : null,
-            'label' => (string) ($row['label'] ?? 'unassigned'),
-            'count' => (int) ($row['ticket_count'] ?? 0),
-        ], $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(fn (array $Silian_row): array => [
+            'id' => isset($Silian_row['assigned_to']) ? (int) $Silian_row['assigned_to'] : null,
+            'label' => (string) ($Silian_row['label'] ?? 'unassigned'),
+            'count' => (int) ($Silian_row['ticket_count'] ?? 0),
+        ], $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
     private function agentLevelBreakdown(): array
     {
-        $stmt = $this->db->query("
+        $Silian_stmt = $this->db->query("
             SELECT
                 COALESCE(p.level, 0) AS level_bucket,
                 COUNT(*) AS assignee_count
@@ -747,15 +747,15 @@ class SupportAutomationService
             ORDER BY level_bucket ASC
         ");
 
-        return array_map(static fn (array $row): array => [
-            'level' => (int) ($row['level_bucket'] ?? 0),
-            'count' => (int) ($row['assignee_count'] ?? 0),
-        ], $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(static fn (array $Silian_row): array => [
+            'level' => (int) ($Silian_row['level_bucket'] ?? 0),
+            'count' => (int) ($Silian_row['assignee_count'] ?? 0),
+        ], $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
     private function tagBreakdown(): array
     {
-        $stmt = $this->db->query("
+        $Silian_stmt = $this->db->query("
             SELECT
                 t.id,
                 t.slug,
@@ -768,35 +768,35 @@ class SupportAutomationService
             ORDER BY ticket_count DESC, t.name ASC
         ");
 
-        return array_map(fn (array $row): array => [
-            'id' => (int) $row['id'],
-            'slug' => (string) $row['slug'],
-            'name' => (string) $row['name'],
-            'color' => (string) $row['color'],
-            'count' => (int) ($row['ticket_count'] ?? 0),
-        ], $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(fn (array $Silian_row): array => [
+            'id' => (int) $Silian_row['id'],
+            'slug' => (string) $Silian_row['slug'],
+            'name' => (string) $Silian_row['name'],
+            'color' => (string) $Silian_row['color'],
+            'count' => (int) ($Silian_row['ticket_count'] ?? 0),
+        ], $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
     private function ruleHitBreakdown(): array
     {
-        $stmt = $this->db->query("
+        $Silian_stmt = $this->db->query("
             SELECT id, name, trigger_count, last_triggered_at, is_active
             FROM support_ticket_automation_rules
             ORDER BY trigger_count DESC, sort_order ASC, id ASC
         ");
 
-        return array_map(fn (array $row): array => [
-            'id' => (int) $row['id'],
-            'name' => (string) $row['name'],
-            'trigger_count' => (int) ($row['trigger_count'] ?? 0),
-            'last_triggered_at' => $row['last_triggered_at'] ?? null,
-            'is_active' => !empty($row['is_active']),
-        ], $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(fn (array $Silian_row): array => [
+            'id' => (int) $Silian_row['id'],
+            'name' => (string) $Silian_row['name'],
+            'trigger_count' => (int) ($Silian_row['trigger_count'] ?? 0),
+            'last_triggered_at' => $Silian_row['last_triggered_at'] ?? null,
+            'is_active' => !empty($Silian_row['is_active']),
+        ], $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
     private function routingOutcomeBreakdown(): array
     {
-        $stmt = $this->db->query("
+        $Silian_stmt = $this->db->query("
             SELECT
                 COALESCE(`trigger`, 'unknown') AS trigger_bucket,
                 COUNT(*) AS run_count,
@@ -807,42 +807,42 @@ class SupportAutomationService
             ORDER BY run_count DESC, trigger_bucket ASC
         ");
 
-        return array_map(static fn (array $row): array => [
-            'trigger' => (string) ($row['trigger_bucket'] ?? 'unknown'),
-            'count' => (int) ($row['run_count'] ?? 0),
-            'no_winner_count' => (int) ($row['no_winner_count'] ?? 0),
-            'used_ai_count' => (int) ($row['used_ai_count'] ?? 0),
-        ], $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(static fn (array $Silian_row): array => [
+            'trigger' => (string) ($Silian_row['trigger_bucket'] ?? 'unknown'),
+            'count' => (int) ($Silian_row['run_count'] ?? 0),
+            'no_winner_count' => (int) ($Silian_row['no_winner_count'] ?? 0),
+            'used_ai_count' => (int) ($Silian_row['used_ai_count'] ?? 0),
+        ], $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
-    private function touchRuleMetrics(int $ruleId): void
+    private function touchRuleMetrics(int $Silian_ruleId): void
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             UPDATE support_ticket_automation_rules
             SET trigger_count = trigger_count + 1,
                 last_triggered_at = :last_triggered_at,
                 updated_at = :updated_at
             WHERE id = :id
         ");
-        $now = $this->now();
-        $stmt->execute([
-            'last_triggered_at' => $now,
-            'updated_at' => $now,
-            'id' => $ruleId,
+        $Silian_now = $this->now();
+        $Silian_stmt->execute([
+            'last_triggered_at' => $Silian_now,
+            'updated_at' => $Silian_now,
+            'id' => $Silian_ruleId,
         ]);
     }
 
-    private function findTicketRow(int $ticketId): ?array
+    private function findTicketRow(int $Silian_ticketId): ?array
     {
-        $stmt = $this->db->prepare('SELECT * FROM support_tickets WHERE id = :id LIMIT 1');
-        $stmt->execute(['id' => $ticketId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        $Silian_stmt = $this->db->prepare('SELECT * FROM support_tickets WHERE id = :id LIMIT 1');
+        $Silian_stmt->execute(['id' => $Silian_ticketId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_row ?: null;
     }
 
-    private function findTagRow(int $tagId): ?array
+    private function findTagRow(int $Silian_tagId): ?array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 t.*,
                 COUNT(DISTINCT sta.ticket_id) AS ticket_count
@@ -852,14 +852,14 @@ class SupportAutomationService
             GROUP BY t.id
             LIMIT 1
         ");
-        $stmt->execute(['id' => $tagId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        $Silian_stmt->execute(['id' => $Silian_tagId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_row ?: null;
     }
 
-    private function findRuleRow(int $ruleId): ?array
+    private function findRuleRow(int $Silian_ruleId): ?array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 r.*,
                 assignee.username AS assignee_username,
@@ -869,56 +869,56 @@ class SupportAutomationService
             WHERE r.id = :id
             LIMIT 1
         ");
-        $stmt->execute(['id' => $ruleId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        $Silian_stmt->execute(['id' => $Silian_ruleId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_row ?: null;
     }
 
-    private function findRoutingSettingsRow(?int $settingsId = null): ?array
+    private function findRoutingSettingsRow(?int $Silian_settingsId = null): ?array
     {
-        $sql = 'SELECT * FROM support_routing_settings';
-        $params = [];
-        if ($settingsId !== null && $settingsId > 0) {
-            $sql .= ' WHERE id = :id';
-            $params['id'] = $settingsId;
+        $Silian_sql = 'SELECT * FROM support_routing_settings';
+        $Silian_params = [];
+        if ($Silian_settingsId !== null && $Silian_settingsId > 0) {
+            $Silian_sql .= ' WHERE id = :id';
+            $Silian_params['id'] = $Silian_settingsId;
         }
-        $sql .= ' ORDER BY id ASC LIMIT 1';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        $Silian_sql .= ' ORDER BY id ASC LIMIT 1';
+        $Silian_stmt = $this->db->prepare($Silian_sql);
+        $Silian_stmt->execute($Silian_params);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_row ?: null;
     }
 
-    private function findAssigneeProfileRow(int $userId): ?array
+    private function findAssigneeProfileRow(int $Silian_userId): ?array
     {
-        $stmt = $this->db->prepare('SELECT * FROM support_assignee_profiles WHERE user_id = :user_id LIMIT 1');
-        $stmt->execute(['user_id' => $userId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
+        $Silian_stmt = $this->db->prepare('SELECT * FROM support_assignee_profiles WHERE user_id = :user_id LIMIT 1');
+        $Silian_stmt->execute(['user_id' => $Silian_userId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC);
+        return $Silian_row ?: null;
     }
 
-    private function ruleMatchesTicket(array $rule, array $ticket): bool
+    private function ruleMatchesTicket(array $Silian_rule, array $Silian_ticket): bool
     {
-        if (!empty($rule['match_category']) && (string) $rule['match_category'] !== (string) ($ticket['category'] ?? '')) {
+        if (!empty($Silian_rule['match_category']) && (string) $Silian_rule['match_category'] !== (string) ($Silian_ticket['category'] ?? '')) {
             return false;
         }
-        if (!empty($rule['match_priority']) && (string) $rule['match_priority'] !== (string) ($ticket['priority'] ?? '')) {
-            return false;
-        }
-
-        $timezone = $this->normalizeTimezone($rule['timezone'] ?? 'Asia/Shanghai');
-        $now = new DateTimeImmutable('now', new DateTimeZone($timezone));
-        $weekday = strtolower($now->format('D'));
-        $ruleWeekdays = $this->decodeJsonList($rule['match_weekdays'] ?? null);
-        if ($ruleWeekdays !== [] && !in_array($weekday, $ruleWeekdays, true)) {
+        if (!empty($Silian_rule['match_priority']) && (string) $Silian_rule['match_priority'] !== (string) ($Silian_ticket['priority'] ?? '')) {
             return false;
         }
 
-        $timeStart = $rule['match_time_start'] ?? null;
-        $timeEnd = $rule['match_time_end'] ?? null;
-        if ($timeStart || $timeEnd) {
-            $currentTime = $now->format('H:i');
-            if (!$this->timeWindowMatches($currentTime, $timeStart, $timeEnd)) {
+        $Silian_timezone = $this->normalizeTimezone($Silian_rule['timezone'] ?? 'Asia/Shanghai');
+        $Silian_now = new DateTimeImmutable('now', new DateTimeZone($Silian_timezone));
+        $Silian_weekday = strtolower($Silian_now->format('D'));
+        $Silian_ruleWeekdays = $this->decodeJsonList($Silian_rule['match_weekdays'] ?? null);
+        if ($Silian_ruleWeekdays !== [] && !in_array($Silian_weekday, $Silian_ruleWeekdays, true)) {
+            return false;
+        }
+
+        $Silian_timeStart = $Silian_rule['match_time_start'] ?? null;
+        $Silian_timeEnd = $Silian_rule['match_time_end'] ?? null;
+        if ($Silian_timeStart || $Silian_timeEnd) {
+            $Silian_currentTime = $Silian_now->format('H:i');
+            if (!$this->timeWindowMatches($Silian_currentTime, $Silian_timeStart, $Silian_timeEnd)) {
                 return false;
             }
         }
@@ -926,100 +926,100 @@ class SupportAutomationService
         return true;
     }
 
-    private function timeWindowMatches(string $current, ?string $start, ?string $end): bool
+    private function timeWindowMatches(string $Silian_current, ?string $Silian_start, ?string $Silian_end): bool
     {
-        if (!$start || !$end) {
+        if (!$Silian_start || !$Silian_end) {
             return true;
         }
-        if ($start <= $end) {
-            return $current >= $start && $current <= $end;
+        if ($Silian_start <= $Silian_end) {
+            return $Silian_current >= $Silian_start && $Silian_current <= $Silian_end;
         }
-        return $current >= $start || $current <= $end;
+        return $Silian_current >= $Silian_start || $Silian_current <= $Silian_end;
     }
 
-    private function formatTag(array $row): array
+    private function formatTag(array $Silian_row): array
     {
         return [
-            'id' => (int) ($row['id'] ?? 0),
-            'slug' => (string) ($row['slug'] ?? ''),
-            'name' => (string) ($row['name'] ?? ''),
-            'color' => (string) ($row['color'] ?? 'emerald'),
-            'description' => $row['description'] ?? null,
-            'is_active' => !empty($row['is_active']),
-            'ticket_count' => (int) ($row['ticket_count'] ?? 0),
-            'source_type' => $row['source_type'] ?? null,
-            'rule_id' => isset($row['rule_id']) ? (int) $row['rule_id'] : null,
-            'created_at' => $row['created_at'] ?? null,
-            'updated_at' => $row['updated_at'] ?? null,
+            'id' => (int) ($Silian_row['id'] ?? 0),
+            'slug' => (string) ($Silian_row['slug'] ?? ''),
+            'name' => (string) ($Silian_row['name'] ?? ''),
+            'color' => (string) ($Silian_row['color'] ?? 'emerald'),
+            'description' => $Silian_row['description'] ?? null,
+            'is_active' => !empty($Silian_row['is_active']),
+            'ticket_count' => (int) ($Silian_row['ticket_count'] ?? 0),
+            'source_type' => $Silian_row['source_type'] ?? null,
+            'rule_id' => isset($Silian_row['rule_id']) ? (int) $Silian_row['rule_id'] : null,
+            'created_at' => $Silian_row['created_at'] ?? null,
+            'updated_at' => $Silian_row['updated_at'] ?? null,
         ];
     }
 
-    private function formatAssignableUser(array $row): array
+    private function formatAssignableUser(array $Silian_row): array
     {
-        $profileFields = $this->userProfileViewService->buildProfileFields($row);
-        $legacyDisplayFields = $this->userProfileViewService->buildLegacyDisplayFields($row, $profileFields);
-        $maxActiveTickets = max(1, (int) ($row['max_active_tickets'] ?? 10));
-        $activeCount = (int) (($row['open_count'] ?? 0) + ($row['in_progress_count'] ?? 0) + ($row['waiting_user_count'] ?? 0));
+        $Silian_profileFields = $this->userProfileViewService->buildProfileFields($Silian_row);
+        $Silian_legacyDisplayFields = $this->userProfileViewService->buildLegacyDisplayFields($Silian_row, $Silian_profileFields);
+        $Silian_maxActiveTickets = max(1, (int) ($Silian_row['max_active_tickets'] ?? 10));
+        $Silian_activeCount = (int) (($Silian_row['open_count'] ?? 0) + ($Silian_row['in_progress_count'] ?? 0) + ($Silian_row['waiting_user_count'] ?? 0));
 
         return [
-            'id' => (int) ($row['id'] ?? 0),
-            'uuid' => $row['uuid'] ?? null,
-            'username' => $row['username'] ?? null,
-            'email' => $row['email'] ?? null,
-            'role' => !empty($row['is_admin']) ? 'admin' : strtolower((string) ($row['role'] ?? 'support')),
-            'status' => $row['status'] ?? null,
-            'school_id' => $profileFields['school_id'] ?? (isset($row['school_id']) ? (int) $row['school_id'] : null),
-            'school' => $legacyDisplayFields['school'] ?? null,
-            'region_code' => $profileFields['region_code'] ?? ($row['region_code'] ?? null),
-            'location' => $legacyDisplayFields['location'] ?? null,
-            'group_id' => isset($row['group_id']) ? (int) $row['group_id'] : null,
-            'last_login_at' => $row['lastlgn'] ?? null,
-            'created_at' => $row['created_at'] ?? null,
-            'updated_at' => $row['updated_at'] ?? null,
-            'assigned_total_count' => (int) ($row['assigned_total_count'] ?? 0),
-            'open_count' => (int) ($row['open_count'] ?? 0),
-            'in_progress_count' => (int) ($row['in_progress_count'] ?? 0),
-            'waiting_user_count' => (int) ($row['waiting_user_count'] ?? 0),
-            'resolved_count' => (int) ($row['resolved_count'] ?? 0),
-            'closed_count' => (int) ($row['closed_count'] ?? 0),
-            'routing_level' => (int) ($row['routing_level'] ?? 1),
-            'skills' => $this->decodeJsonList($row['skills_json'] ?? null),
-            'languages' => $this->decodeJsonList($row['languages_json'] ?? null),
-            'max_active_tickets' => $maxActiveTickets,
-            'is_auto_assignable' => !empty($row['is_auto_assignable']),
-            'routing_status' => $row['routing_status'] ?? 'active',
-            'avg_feedback_rating' => round((float) ($row['avg_feedback_rating'] ?? 3.5), 2),
-            'rating_count' => (int) ($row['rating_count'] ?? 0),
-            'available_capacity' => max(0, $maxActiveTickets - $activeCount),
-            'weight_overrides' => $this->decodeJsonObject($row['weight_overrides_json'] ?? null) ?? [],
+            'id' => (int) ($Silian_row['id'] ?? 0),
+            'uuid' => $Silian_row['uuid'] ?? null,
+            'username' => $Silian_row['username'] ?? null,
+            'email' => $Silian_row['email'] ?? null,
+            'role' => !empty($Silian_row['is_admin']) ? 'admin' : strtolower((string) ($Silian_row['role'] ?? 'support')),
+            'status' => $Silian_row['status'] ?? null,
+            'school_id' => $Silian_profileFields['school_id'] ?? (isset($Silian_row['school_id']) ? (int) $Silian_row['school_id'] : null),
+            'school' => $Silian_legacyDisplayFields['school'] ?? null,
+            'region_code' => $Silian_profileFields['region_code'] ?? ($Silian_row['region_code'] ?? null),
+            'location' => $Silian_legacyDisplayFields['location'] ?? null,
+            'group_id' => isset($Silian_row['group_id']) ? (int) $Silian_row['group_id'] : null,
+            'last_login_at' => $Silian_row['lastlgn'] ?? null,
+            'created_at' => $Silian_row['created_at'] ?? null,
+            'updated_at' => $Silian_row['updated_at'] ?? null,
+            'assigned_total_count' => (int) ($Silian_row['assigned_total_count'] ?? 0),
+            'open_count' => (int) ($Silian_row['open_count'] ?? 0),
+            'in_progress_count' => (int) ($Silian_row['in_progress_count'] ?? 0),
+            'waiting_user_count' => (int) ($Silian_row['waiting_user_count'] ?? 0),
+            'resolved_count' => (int) ($Silian_row['resolved_count'] ?? 0),
+            'closed_count' => (int) ($Silian_row['closed_count'] ?? 0),
+            'routing_level' => (int) ($Silian_row['routing_level'] ?? 1),
+            'skills' => $this->decodeJsonList($Silian_row['skills_json'] ?? null),
+            'languages' => $this->decodeJsonList($Silian_row['languages_json'] ?? null),
+            'max_active_tickets' => $Silian_maxActiveTickets,
+            'is_auto_assignable' => !empty($Silian_row['is_auto_assignable']),
+            'routing_status' => $Silian_row['routing_status'] ?? 'active',
+            'avg_feedback_rating' => round((float) ($Silian_row['avg_feedback_rating'] ?? 3.5), 2),
+            'rating_count' => (int) ($Silian_row['rating_count'] ?? 0),
+            'available_capacity' => max(0, $Silian_maxActiveTickets - $Silian_activeCount),
+            'weight_overrides' => $this->decodeJsonObject($Silian_row['weight_overrides_json'] ?? null) ?? [],
         ];
     }
 
-    private function recentTicketsForAssignee(int $userId): array
+    private function recentTicketsForAssignee(int $Silian_userId): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT id, subject, status, priority, last_replied_at, updated_at, created_at
             FROM support_tickets
             WHERE assigned_to = :assigned_to
             ORDER BY COALESCE(last_replied_at, updated_at, created_at) DESC, id DESC
             LIMIT 10
         ");
-        $stmt->execute(['assigned_to' => $userId]);
+        $Silian_stmt->execute(['assigned_to' => $Silian_userId]);
 
-        return array_map(static fn (array $row): array => [
-            'id' => (int) ($row['id'] ?? 0),
-            'subject' => (string) ($row['subject'] ?? ''),
-            'status' => (string) ($row['status'] ?? ''),
-            'priority' => (string) ($row['priority'] ?? ''),
-            'last_replied_at' => $row['last_replied_at'] ?? null,
-            'updated_at' => $row['updated_at'] ?? null,
-            'created_at' => $row['created_at'] ?? null,
-        ], $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return array_map(static fn (array $Silian_row): array => [
+            'id' => (int) ($Silian_row['id'] ?? 0),
+            'subject' => (string) ($Silian_row['subject'] ?? ''),
+            'status' => (string) ($Silian_row['status'] ?? ''),
+            'priority' => (string) ($Silian_row['priority'] ?? ''),
+            'last_replied_at' => $Silian_row['last_replied_at'] ?? null,
+            'updated_at' => $Silian_row['updated_at'] ?? null,
+            'created_at' => $Silian_row['created_at'] ?? null,
+        ], $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
-    private function feedbackSummaryForAssignee(int $userId): array
+    private function feedbackSummaryForAssignee(int $Silian_userId): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 COUNT(*) AS rating_count,
                 AVG(rating) AS avg_rating,
@@ -1032,26 +1032,26 @@ class SupportAutomationService
             FROM support_ticket_feedback
             WHERE rated_user_id = :user_id
         ");
-        $stmt->execute(['user_id' => $userId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-        $ratingCount = (int) ($row['rating_count'] ?? 0);
+        $Silian_stmt->execute(['user_id' => $Silian_userId]);
+        $Silian_row = $Silian_stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $Silian_ratingCount = (int) ($Silian_row['rating_count'] ?? 0);
 
         return [
-            'average_rating' => $ratingCount > 0 ? round((float) ($row['avg_rating'] ?? 0), 2) : null,
-            'rating_count' => $ratingCount,
-            'last_feedback_at' => $row['last_feedback_at'] ?? null,
-            'distribution' => array_map(static function (int $rating) use ($row): array {
+            'average_rating' => $Silian_ratingCount > 0 ? round((float) ($Silian_row['avg_rating'] ?? 0), 2) : null,
+            'rating_count' => $Silian_ratingCount,
+            'last_feedback_at' => $Silian_row['last_feedback_at'] ?? null,
+            'distribution' => array_map(static function (int $Silian_rating) use ($Silian_row): array {
                 return [
-                    'rating' => $rating,
-                    'count' => (int) ($row[sprintf('rating_%d_count', $rating)] ?? 0),
+                    'rating' => $Silian_rating,
+                    'count' => (int) ($Silian_row[sprintf('rating_%d_count', $Silian_rating)] ?? 0),
                 ];
             }, [5, 4, 3, 2, 1]),
         ];
     }
 
-    private function feedbackEntriesForAssignee(int $userId, int $limit = 20): array
+    private function feedbackEntriesForAssignee(int $Silian_userId, int $Silian_limit = 20): array
     {
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT
                 f.id,
                 f.ticket_id,
@@ -1072,88 +1072,88 @@ class SupportAutomationService
             ORDER BY COALESCE(f.updated_at, f.created_at) DESC, f.id DESC
             LIMIT :limit
         ");
-        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->bindValue(':limit', max(1, $limit), PDO::PARAM_INT);
-        $stmt->execute();
+        $Silian_stmt->bindValue(':user_id', $Silian_userId, PDO::PARAM_INT);
+        $Silian_stmt->bindValue(':limit', max(1, $Silian_limit), PDO::PARAM_INT);
+        $Silian_stmt->execute();
 
-        return array_map(static function (array $row): array {
+        return array_map(static function (array $Silian_row): array {
             return [
-                'id' => (int) ($row['id'] ?? 0),
-                'ticket_id' => (int) ($row['ticket_id'] ?? 0),
-                'rating' => (int) ($row['rating'] ?? 0),
-                'comment' => $row['comment'] ?? null,
-                'created_at' => $row['created_at'] ?? null,
-                'updated_at' => $row['updated_at'] ?? null,
+                'id' => (int) ($Silian_row['id'] ?? 0),
+                'ticket_id' => (int) ($Silian_row['ticket_id'] ?? 0),
+                'rating' => (int) ($Silian_row['rating'] ?? 0),
+                'comment' => $Silian_row['comment'] ?? null,
+                'created_at' => $Silian_row['created_at'] ?? null,
+                'updated_at' => $Silian_row['updated_at'] ?? null,
                 'reviewer' => [
-                    'id' => (int) ($row['user_id'] ?? 0),
-                    'username' => $row['reviewer_username'] ?? null,
-                    'email' => $row['reviewer_email'] ?? null,
+                    'id' => (int) ($Silian_row['user_id'] ?? 0),
+                    'username' => $Silian_row['reviewer_username'] ?? null,
+                    'email' => $Silian_row['reviewer_email'] ?? null,
                 ],
                 'ticket' => [
-                    'id' => (int) ($row['ticket_id'] ?? 0),
-                    'subject' => (string) ($row['ticket_subject'] ?? ''),
-                    'status' => (string) ($row['ticket_status'] ?? ''),
-                    'priority' => (string) ($row['ticket_priority'] ?? ''),
+                    'id' => (int) ($Silian_row['ticket_id'] ?? 0),
+                    'subject' => (string) ($Silian_row['ticket_subject'] ?? ''),
+                    'status' => (string) ($Silian_row['ticket_status'] ?? ''),
+                    'priority' => (string) ($Silian_row['ticket_priority'] ?? ''),
                 ],
             ];
-        }, $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        }, $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
-    private function formatRule(array $row): array
+    private function formatRule(array $Silian_row): array
     {
-        $tagIds = array_map('intval', $this->decodeJsonList($row['add_tag_ids'] ?? null));
+        $Silian_tagIds = array_map('intval', $this->decodeJsonList($Silian_row['add_tag_ids'] ?? null));
         return [
-            'id' => (int) ($row['id'] ?? 0),
-            'name' => (string) ($row['name'] ?? ''),
-            'description' => $row['description'] ?? null,
-            'is_active' => !empty($row['is_active']),
-            'sort_order' => (int) ($row['sort_order'] ?? 0),
-            'match_category' => $row['match_category'] ?? null,
-            'match_priority' => $row['match_priority'] ?? null,
-            'match_weekdays' => $this->decodeJsonList($row['match_weekdays'] ?? null),
-            'match_time_start' => $row['match_time_start'] ?? null,
-            'match_time_end' => $row['match_time_end'] ?? null,
-            'timezone' => $row['timezone'] ?? 'Asia/Shanghai',
-            'assign_to' => isset($row['assign_to']) ? (int) $row['assign_to'] : null,
-            'assign_user' => !empty($row['assign_to']) ? [
-                'id' => (int) $row['assign_to'],
-                'username' => $row['assignee_username'] ?? null,
-                'email' => $row['assignee_email'] ?? null,
+            'id' => (int) ($Silian_row['id'] ?? 0),
+            'name' => (string) ($Silian_row['name'] ?? ''),
+            'description' => $Silian_row['description'] ?? null,
+            'is_active' => !empty($Silian_row['is_active']),
+            'sort_order' => (int) ($Silian_row['sort_order'] ?? 0),
+            'match_category' => $Silian_row['match_category'] ?? null,
+            'match_priority' => $Silian_row['match_priority'] ?? null,
+            'match_weekdays' => $this->decodeJsonList($Silian_row['match_weekdays'] ?? null),
+            'match_time_start' => $Silian_row['match_time_start'] ?? null,
+            'match_time_end' => $Silian_row['match_time_end'] ?? null,
+            'timezone' => $Silian_row['timezone'] ?? 'Asia/Shanghai',
+            'assign_to' => isset($Silian_row['assign_to']) ? (int) $Silian_row['assign_to'] : null,
+            'assign_user' => !empty($Silian_row['assign_to']) ? [
+                'id' => (int) $Silian_row['assign_to'],
+                'username' => $Silian_row['assignee_username'] ?? null,
+                'email' => $Silian_row['assignee_email'] ?? null,
             ] : null,
-            'score_boost' => round((float) ($row['score_boost'] ?? 0), 2),
-            'required_agent_level' => isset($row['required_agent_level']) && $row['required_agent_level'] !== null ? (int) $row['required_agent_level'] : null,
-            'skill_hints' => $this->decodeJsonList($row['skill_hints_json'] ?? null),
-            'tag_ids' => $tagIds,
-            'tags' => $tagIds === [] ? [] : $this->loadTagsByIds($tagIds),
-            'trigger_count' => (int) ($row['trigger_count'] ?? 0),
-            'last_triggered_at' => $row['last_triggered_at'] ?? null,
-            'created_at' => $row['created_at'] ?? null,
-            'updated_at' => $row['updated_at'] ?? null,
+            'score_boost' => round((float) ($Silian_row['score_boost'] ?? 0), 2),
+            'required_agent_level' => isset($Silian_row['required_agent_level']) && $Silian_row['required_agent_level'] !== null ? (int) $Silian_row['required_agent_level'] : null,
+            'skill_hints' => $this->decodeJsonList($Silian_row['skill_hints_json'] ?? null),
+            'tag_ids' => $Silian_tagIds,
+            'tags' => $Silian_tagIds === [] ? [] : $this->loadTagsByIds($Silian_tagIds),
+            'trigger_count' => (int) ($Silian_row['trigger_count'] ?? 0),
+            'last_triggered_at' => $Silian_row['last_triggered_at'] ?? null,
+            'created_at' => $Silian_row['created_at'] ?? null,
+            'updated_at' => $Silian_row['updated_at'] ?? null,
         ];
     }
 
-    private function loadTagsByIds(array $tagIds): array
+    private function loadTagsByIds(array $Silian_tagIds): array
     {
-        $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds), fn (int $id): bool => $id > 0)));
-        if ($tagIds === []) {
+        $Silian_tagIds = array_values(array_unique(array_filter(array_map('intval', $Silian_tagIds), fn (int $Silian_id): bool => $Silian_id > 0)));
+        if ($Silian_tagIds === []) {
             return [];
         }
 
-        $stmt = $this->db->prepare('SELECT * FROM support_ticket_tags WHERE id IN (' . implode(',', array_fill(0, count($tagIds), '?')) . ') ORDER BY name ASC');
-        $stmt->execute($tagIds);
-        return array_map(fn (array $row): array => $this->formatTag($row), $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        $Silian_stmt = $this->db->prepare('SELECT * FROM support_ticket_tags WHERE id IN (' . implode(',', array_fill(0, count($Silian_tagIds), '?')) . ') ORDER BY name ASC');
+        $Silian_stmt->execute($Silian_tagIds);
+        return array_map(fn (array $Silian_row): array => $this->formatTag($Silian_row), $Silian_stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
     }
 
-    private function normalizeAssignableUser(mixed $value): ?int
+    private function normalizeAssignableUser(mixed $Silian_value): ?int
     {
-        if ($value === null || $value === '') {
+        if ($Silian_value === null || $Silian_value === '') {
             return null;
         }
-        $userId = (int) $value;
-        if ($userId <= 0) {
+        $Silian_userId = (int) $Silian_value;
+        if ($Silian_userId <= 0) {
             return null;
         }
-        $stmt = $this->db->prepare("
+        $Silian_stmt = $this->db->prepare("
             SELECT id
             FROM users
             WHERE id = :id
@@ -1161,176 +1161,176 @@ class SupportAutomationService
               AND (is_admin = 1 OR role IN ('support', 'admin'))
             LIMIT 1
         ");
-        $stmt->execute(['id' => $userId]);
-        if (!$stmt->fetchColumn()) {
+        $Silian_stmt->execute(['id' => $Silian_userId]);
+        if (!$Silian_stmt->fetchColumn()) {
             throw new \InvalidArgumentException('Assigned user must be support or admin');
         }
-        return $userId;
+        return $Silian_userId;
     }
 
-    private function normalizeTagIds(mixed $value): array
+    private function normalizeTagIds(mixed $Silian_value): array
     {
-        $ids = [];
-        foreach ($this->decodeList($value) as $item) {
-            $tagId = (int) $item;
-            if ($tagId <= 0) {
+        $Silian_ids = [];
+        foreach ($this->decodeList($Silian_value) as $Silian_item) {
+            $Silian_tagId = (int) $Silian_item;
+            if ($Silian_tagId <= 0) {
                 continue;
             }
-            if ($this->findTagRow($tagId) === null) {
-                throw new \InvalidArgumentException('Invalid tag id: ' . $tagId);
+            if ($this->findTagRow($Silian_tagId) === null) {
+                throw new \InvalidArgumentException('Invalid tag id: ' . $Silian_tagId);
             }
-            $ids[] = $tagId;
+            $Silian_ids[] = $Silian_tagId;
         }
-        return array_values(array_unique($ids));
+        return array_values(array_unique($Silian_ids));
     }
 
-    private function normalizeWeekdays(mixed $value): array
+    private function normalizeWeekdays(mixed $Silian_value): array
     {
-        $valid = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-        $days = [];
-        foreach ($this->decodeList($value) as $item) {
-            $day = strtolower(trim((string) $item));
-            if ($day === '') {
+        $Silian_valid = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        $Silian_days = [];
+        foreach ($this->decodeList($Silian_value) as $Silian_item) {
+            $Silian_day = strtolower(trim((string) $Silian_item));
+            if ($Silian_day === '') {
                 continue;
             }
-            if (!in_array($day, $valid, true)) {
-                throw new \InvalidArgumentException('Invalid weekday: ' . $day);
+            if (!in_array($Silian_day, $Silian_valid, true)) {
+                throw new \InvalidArgumentException('Invalid weekday: ' . $Silian_day);
             }
-            $days[] = $day;
+            $Silian_days[] = $Silian_day;
         }
-        return array_values(array_unique($days));
+        return array_values(array_unique($Silian_days));
     }
 
-    private function normalizeTime(mixed $value): ?string
+    private function normalizeTime(mixed $Silian_value): ?string
     {
-        $time = $this->nullableString($value);
-        if ($time === null) {
+        $Silian_time = $this->nullableString($Silian_value);
+        if ($Silian_time === null) {
             return null;
         }
-        if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time)) {
+        if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $Silian_time)) {
             throw new \InvalidArgumentException('Invalid time value');
         }
-        return $time;
+        return $Silian_time;
     }
 
-    private function normalizeRequiredAgentLevel(mixed $value): ?int
+    private function normalizeRequiredAgentLevel(mixed $Silian_value): ?int
     {
-        if ($value === null || $value === '') {
+        if ($Silian_value === null || $Silian_value === '') {
             return null;
         }
-        $level = (int) $value;
-        if ($level < 1 || $level > 5) {
+        $Silian_level = (int) $Silian_value;
+        if ($Silian_level < 1 || $Silian_level > 5) {
             throw new \InvalidArgumentException('required_agent_level must be between 1 and 5');
         }
-        return $level;
+        return $Silian_level;
     }
 
-    private function normalizeProfileStatus(mixed $value): string
+    private function normalizeProfileStatus(mixed $Silian_value): string
     {
-        $status = strtolower($this->nullableString($value) ?? 'active');
-        if (!in_array($status, ['active', 'backup', 'offline'], true)) {
+        $Silian_status = strtolower($this->nullableString($Silian_value) ?? 'active');
+        if (!in_array($Silian_status, ['active', 'backup', 'offline'], true)) {
             throw new \InvalidArgumentException('Invalid routing profile status');
         }
-        return $status;
+        return $Silian_status;
     }
 
-    private function normalizeTimezone(mixed $value): string
+    private function normalizeTimezone(mixed $Silian_value): string
     {
-        $timezone = $this->nullableString($value) ?? 'Asia/Shanghai';
+        $Silian_timezone = $this->nullableString($Silian_value) ?? 'Asia/Shanghai';
         try {
-            new DateTimeZone($timezone);
-        } catch (\Throwable $e) {
+            new DateTimeZone($Silian_timezone);
+        } catch (\Throwable $Silian_e) {
             throw new \InvalidArgumentException('Invalid timezone');
         }
-        return $timezone;
+        return $Silian_timezone;
     }
 
-    private function normalizeColor(mixed $value): string
+    private function normalizeColor(mixed $Silian_value): string
     {
-        $color = strtolower($this->nullableString($value) ?? 'emerald');
-        if (!in_array($color, self::VALID_COLORS, true)) {
+        $Silian_color = strtolower($this->nullableString($Silian_value) ?? 'emerald');
+        if (!in_array($Silian_color, self::VALID_COLORS, true)) {
             throw new \InvalidArgumentException('Invalid tag color');
         }
-        return $color;
+        return $Silian_color;
     }
 
-    private function normalizeSlug(mixed $value): string
+    private function normalizeSlug(mixed $Silian_value): string
     {
-        $slug = strtolower(trim((string) $value));
-        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug) ?? '';
-        $slug = trim($slug, '-');
-        if ($slug === '') {
+        $Silian_slug = strtolower(trim((string) $Silian_value));
+        $Silian_slug = preg_replace('/[^a-z0-9]+/', '-', $Silian_slug) ?? '';
+        $Silian_slug = trim($Silian_slug, '-');
+        if ($Silian_slug === '') {
             throw new \InvalidArgumentException('Tag slug is required');
         }
-        return substr($slug, 0, 64);
+        return substr($Silian_slug, 0, 64);
     }
 
-    private function normalizeStringList(mixed $value): array
+    private function normalizeStringList(mixed $Silian_value): array
     {
-        $items = [];
-        foreach ($this->decodeList($value) as $item) {
-            $normalized = trim((string) $item);
-            if ($normalized === '') {
+        $Silian_items = [];
+        foreach ($this->decodeList($Silian_value) as $Silian_item) {
+            $Silian_normalized = trim((string) $Silian_item);
+            if ($Silian_normalized === '') {
                 continue;
             }
-            $items[] = $normalized;
+            $Silian_items[] = $Silian_normalized;
         }
-        return array_values(array_unique($items));
+        return array_values(array_unique($Silian_items));
     }
 
-    private function normalizeJsonObject(mixed $value): array
+    private function normalizeJsonObject(mixed $Silian_value): array
     {
-        if (is_array($value)) {
-            return $value;
+        if (is_array($Silian_value)) {
+            return $Silian_value;
         }
-        if (is_string($value) && trim($value) !== '') {
-            $decoded = json_decode($value, true);
-            if (is_array($decoded)) {
-                return $decoded;
+        if (is_string($Silian_value) && trim($Silian_value) !== '') {
+            $Silian_decoded = json_decode($Silian_value, true);
+            if (is_array($Silian_decoded)) {
+                return $Silian_decoded;
             }
         }
         return [];
     }
 
-    private function requireString(mixed $value, string $field): string
+    private function requireString(mixed $Silian_value, string $Silian_field): string
     {
-        $string = $this->nullableString($value);
-        if ($string === null) {
-            throw new \InvalidArgumentException(sprintf('%s is required', $field));
+        $Silian_string = $this->nullableString($Silian_value);
+        if ($Silian_string === null) {
+            throw new \InvalidArgumentException(sprintf('%s is required', $Silian_field));
         }
-        return $string;
+        return $Silian_string;
     }
 
-    private function nullableString(mixed $value): ?string
+    private function nullableString(mixed $Silian_value): ?string
     {
-        if ($value === null) {
+        if ($Silian_value === null) {
             return null;
         }
-        $string = trim((string) $value);
-        return $string === '' ? null : $string;
+        $Silian_string = trim((string) $Silian_value);
+        return $Silian_string === '' ? null : $Silian_string;
     }
 
-    private function decodeJsonList(?string $json): array
+    private function decodeJsonList(?string $Silian_json): array
     {
-        if (!is_string($json) || trim($json) === '') {
+        if (!is_string($Silian_json) || trim($Silian_json) === '') {
             return [];
         }
-        $decoded = json_decode($json, true);
-        return is_array($decoded) ? array_values($decoded) : [];
+        $Silian_decoded = json_decode($Silian_json, true);
+        return is_array($Silian_decoded) ? array_values($Silian_decoded) : [];
     }
 
-    private function decodeJsonObject(?string $json): ?array
+    private function decodeJsonObject(?string $Silian_json): ?array
     {
-        if (!is_string($json) || trim($json) === '') {
+        if (!is_string($Silian_json) || trim($Silian_json) === '') {
             return null;
         }
-        $decoded = json_decode($json, true);
-        return is_array($decoded) ? $decoded : null;
+        $Silian_decoded = json_decode($Silian_json, true);
+        return is_array($Silian_decoded) ? $Silian_decoded : null;
     }
 
-    private function formatRoutingSettings(array $row): array
+    private function formatRoutingSettings(array $Silian_row): array
     {
-        $defaults = [
+        $Silian_defaults = [
             'first_response_minutes' => 240,
             'resolution_minutes' => 1440,
             'routing_weight' => 1.0,
@@ -1338,7 +1338,7 @@ class SupportAutomationService
             'overdue_boost' => 1.0,
             'tier_label' => 'standard',
         ];
-        $weights = [
+        $Silian_weights = [
             'group_weight' => 15,
             'priority_weight' => 18,
             'severity_weight' => 24,
@@ -1350,35 +1350,35 @@ class SupportAutomationService
             'overdue_weight' => 18,
             'load_penalty_weight' => 22,
         ];
-        $fallback = [
+        $Silian_fallback = [
             'use_priority_as_severity' => true,
             'default_feedback_rating' => 3.5,
         ];
 
         return [
-            'id' => isset($row['id']) ? (int) $row['id'] : null,
-            'ai_enabled' => array_key_exists('ai_enabled', $row) ? !empty($row['ai_enabled']) : true,
-            'ai_timeout_ms' => (int) ($row['ai_timeout_ms'] ?? 12000),
-            'due_soon_minutes' => (int) ($row['due_soon_minutes'] ?? 30),
-            'weights' => array_replace($weights, $this->decodeJsonObject($row['weights_json'] ?? null) ?? []),
-            'fallback' => array_replace($fallback, $this->decodeJsonObject($row['fallback_json'] ?? null) ?? []),
-            'defaults' => array_replace($defaults, $this->decodeJsonObject($row['defaults_json'] ?? null) ?? []),
-            'created_at' => $row['created_at'] ?? null,
-            'updated_at' => $row['updated_at'] ?? null,
+            'id' => isset($Silian_row['id']) ? (int) $Silian_row['id'] : null,
+            'ai_enabled' => array_key_exists('ai_enabled', $Silian_row) ? !empty($Silian_row['ai_enabled']) : true,
+            'ai_timeout_ms' => (int) ($Silian_row['ai_timeout_ms'] ?? 12000),
+            'due_soon_minutes' => (int) ($Silian_row['due_soon_minutes'] ?? 30),
+            'weights' => array_replace($Silian_weights, $this->decodeJsonObject($Silian_row['weights_json'] ?? null) ?? []),
+            'fallback' => array_replace($Silian_fallback, $this->decodeJsonObject($Silian_row['fallback_json'] ?? null) ?? []),
+            'defaults' => array_replace($Silian_defaults, $this->decodeJsonObject($Silian_row['defaults_json'] ?? null) ?? []),
+            'created_at' => $Silian_row['created_at'] ?? null,
+            'updated_at' => $Silian_row['updated_at'] ?? null,
         ];
     }
 
-    private function decodeList(mixed $value): array
+    private function decodeList(mixed $Silian_value): array
     {
-        if (is_array($value)) {
-            return array_values($value);
+        if (is_array($Silian_value)) {
+            return array_values($Silian_value);
         }
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            if (is_array($decoded)) {
-                return array_values($decoded);
+        if (is_string($Silian_value)) {
+            $Silian_decoded = json_decode($Silian_value, true);
+            if (is_array($Silian_decoded)) {
+                return array_values($Silian_decoded);
             }
-            return array_values(array_filter(array_map('trim', explode(',', $value)), static fn (string $item): bool => $item !== ''));
+            return array_values(array_filter(array_map('trim', explode(',', $Silian_value)), static fn (string $Silian_item): bool => $Silian_item !== ''));
         }
         return [];
     }

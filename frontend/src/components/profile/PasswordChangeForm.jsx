@@ -1,62 +1,62 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { useTranslation } from '../../hooks/useTranslation';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { toast } from 'react-hot-toast';
-import api from '../../lib/api';
+import Silian_React from 'react';
+import { useForm as Silian_useForm } from 'react-hook-form';
+import { useTranslation as Silian_useTranslation } from '../../hooks/useTranslation';
+import { Button as Silian_Button } from '../ui/Button';
+import { Input as Silian_Input } from '../ui/Input';
+import { toast as Silian_toast } from 'react-hot-toast';
+import Silian_api from '../../lib/api';
 
 export function PasswordChangeForm() {
-  const { t } = useTranslation(['errors', 'profile', 'validation']);
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
+  const { t: Silian_t } = Silian_useTranslation(['errors', 'profile', 'validation']);
+  const { register: Silian_register, handleSubmit: Silian_handleSubmit, formState: { errors: Silian_errors }, reset: Silian_reset, watch: Silian_watch } = Silian_useForm();
 
-  const onSubmit = async (data) => {
+  const Silian_onSubmit = async (Silian_data) => {
     try {
-      await api.post('/auth/change-password', data);
-      toast.success(t('profile.passwordChangeSuccess'));
-      reset();
-    } catch (error) {
-      toast.error(t('profile.passwordChangeFailed'));
-      console.error('Password change failed:', error);
+      await Silian_api.post('/auth/change-password', Silian_data);
+      Silian_toast.success(Silian_t('profile.passwordChangeSuccess'));
+      Silian_reset();
+    } catch (Silian_error) {
+      Silian_toast.error(Silian_t('profile.passwordChangeFailed'));
+      console.error('Password change failed:', Silian_error);
     }
   };
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">{t('profile.changePassword')}</h3>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <h3 className="text-lg font-semibold">{Silian_t('profile.changePassword')}</h3>
+      <form onSubmit={Silian_handleSubmit(Silian_onSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-foreground">{t('profile.currentPassword')}</label>
-          <Input
+          <label className="block text-sm font-medium text-foreground">{Silian_t('profile.currentPassword')}</label>
+          <Silian_Input
             type="password"
-            {...register('current_password', { required: t('validation.required') })}
+            {...Silian_register('current_password', { required: Silian_t('validation.required') })}
           />
-          {errors.current_password && <p className="text-red-500 text-xs mt-1">{errors.current_password.message}</p>}
+          {Silian_errors.current_password && <p className="text-red-500 text-xs mt-1">{Silian_errors.current_password.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-foreground">{t('profile.newPassword')}</label>
-          <Input
+          <label className="block text-sm font-medium text-foreground">{Silian_t('profile.newPassword')}</label>
+          <Silian_Input
             type="password"
-            {...register('new_password', {
-              required: t('validation.required'),
-              minLength: { value: 8, message: t('validation.minLength', { min: 8 }) },
+            {...Silian_register('new_password', {
+              required: Silian_t('validation.required'),
+              minLength: { value: 8, message: Silian_t('validation.minLength', { min: 8 }) },
             })}
           />
-          {errors.new_password && <p className="text-red-500 text-xs mt-1">{errors.new_password.message}</p>}
+          {Silian_errors.new_password && <p className="text-red-500 text-xs mt-1">{Silian_errors.new_password.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-foreground">{t('profile.confirmNewPassword')}</label>
-          <Input
+          <label className="block text-sm font-medium text-foreground">{Silian_t('profile.confirmNewPassword')}</label>
+          <Silian_Input
             type="password"
-            {...register('confirm_new_password', {
-              required: t('validation.required'),
-              validate: (value) =>
-                value === watch('new_password') || t('validation.passwordMismatch'),
+            {...Silian_register('confirm_new_password', {
+              required: Silian_t('validation.required'),
+              validate: (Silian_value) =>
+                Silian_value === Silian_watch('new_password') || Silian_t('validation.passwordMismatch'),
             })}
           />
-          {errors.confirm_new_password && <p className="text-red-500 text-xs mt-1">{errors.confirm_new_password.message}</p>}
+          {Silian_errors.confirm_new_password && <p className="text-red-500 text-xs mt-1">{Silian_errors.confirm_new_password.message}</p>}
         </div>
-        <Button type="submit">{t('profile.changePassword')}</Button>
+        <Silian_Button type="submit">{Silian_t('profile.changePassword')}</Silian_Button>
       </form>
     </div>
   );

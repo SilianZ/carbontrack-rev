@@ -36,9 +36,9 @@ class UserGroup extends Model
     /**
      * Get quota config for a resource (with defaults)
      */
-    public function getQuotaConfig(string $resource): array
+    public function getQuotaConfig(string $Silian_resource): array
     {
-        $config = $this->config ?? [];
-        return $config[$resource] ?? [];
+        $Silian_config = $this->config ?? [];
+        return $Silian_config[$Silian_resource] ?? [];
     }
 }

@@ -12,7 +12,7 @@ class School extends Model
     use SoftDeletes;
 
     protected $table = 'schools';
-    
+
     protected $fillable = [
         'name',
         'location',
@@ -33,21 +33,21 @@ class School extends Model
     ];
 
     // Scope for active schools
-    public function scopeActive($query)
+    public function scopeActive($Silian_query)
     {
-        return $query->where('is_active', true);
+        return $Silian_query->where('is_active', true);
     }
 
     // Scope for inactive schools
-    public function scopeInactive($query)
+    public function scopeInactive($Silian_query)
     {
-        return $query->where('is_active', false);
+        return $Silian_query->where('is_active', false);
     }
 
     // Scope for ordering by sort_order
-    public function scopeOrdered($query)
+    public function scopeOrdered($Silian_query)
     {
-        return $query->orderBy('sort_order', 'asc');
+        return $Silian_query->orderBy('sort_order', 'asc');
     }
 
     // Get display name
@@ -75,8 +75,8 @@ class School extends Model
     }
 
     // Update sort order
-    public function updateSortOrder(int $order): void
+    public function updateSortOrder(int $Silian_order): void
     {
-        $this->update(['sort_order' => $order]);
+        $this->update(['sort_order' => $Silian_order]);
     }
 }
